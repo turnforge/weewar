@@ -1,0 +1,343 @@
+{
+  "maps": [
+    {
+      "id": 1,
+      "name": "Small World",
+      "imageURL": "./1_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Small (34)",
+      "tileCount": 34,
+      "gamesPlayed": 830,
+      "coins": {
+        "startOfGame": 100,
+        "perTurn": 100,
+        "perBase": 50
+      },
+      "tiles": {
+        "Desert": 2,
+        "Forest": 4,
+        "Grass": 12,
+        "Land Base": 4,
+        "Mountains": 4,
+        "Swamp": 2,
+        "Water (Regular)": 6
+      },
+      "initialUnits": {
+        "Soldier (Basic)": 1
+      }
+    },
+    {
+      "id": 13,
+      "name": "Aruba",
+      "imageURL": "./13_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Small (74)",
+      "tileCount": 74,
+      "gamesPlayed": 620,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 75,
+        "perBase": 100
+      },
+      "tiles": {
+        "Forest": 6,
+        "Grass": 33,
+        "Land Base": 4,
+        "Mountains": 14,
+        "Water (Regular)": 17
+      },
+      "initialUnits": {
+        "Soldier (Basic)": 3
+      }
+    },
+    {
+      "id": 14,
+      "name": "High Tide",
+      "imageURL": "./14_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Medium (113)",
+      "tileCount": 113,
+      "gamesPlayed": 68,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 325,
+        "perBase": 175
+      },
+      "tiles": {
+        "Desert": 4,
+        "Forest": 3,
+        "Mountains": 8,
+        "Naval Base": 4,
+        "Swamp": 8,
+        "Water (Deep)": 48,
+        "Water (Regular)": 24,
+        "Water (Shallow)": 14
+      },
+      "initialUnits": {
+        "Hovercraft": 2,
+        "Speedboat": 2
+      }
+    },
+    {
+      "id": 15,
+      "name": "Airport",
+      "imageURL": "./15_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Small (96)",
+      "tileCount": 96,
+      "gamesPlayed": 1,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 300,
+        "perBase": 150
+      },
+      "tiles": {
+        "Airport Base": 2,
+        "Desert": 6,
+        "Forest": 14,
+        "Grass": 52,
+        "Land Base": 4,
+        "Mountains": 10,
+        "Swamp": 8
+      },
+      "initialUnits": {
+        "Anti-aircraft (Basic)": 2,
+        "Helicopter": 2,
+        "Soldier (Advanced)": 1,
+        "Soldier (Basic)": 2
+      }
+    },
+    {
+      "id": 17,
+      "name": "Hilly Forest",
+      "imageURL": "./17_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Medium (131)",
+      "tileCount": 131,
+      "gamesPlayed": 532,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 150,
+        "perBase": 50
+      },
+      "tiles": {
+        "Desert": 4,
+        "Forest": 30,
+        "Grass": 64,
+        "Land Base": 10,
+        "Mountains": 23
+      },
+      "initialUnits": {
+        "Soldier (Basic)": 3
+      }
+    },
+    {
+      "id": 18,
+      "name": "Turtle Bay",
+      "imageURL": "./18_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Large (258)",
+      "tileCount": 258,
+      "gamesPlayed": 41,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 200,
+        "perBase": 125
+      },
+      "tiles": {
+        "Forest": 14,
+        "Grass": 120,
+        "Land Base": 10,
+        "Mountains": 16,
+        "Swamp": 10,
+        "Water (Regular)": 88
+      },
+      "initialUnits": {
+        "Hovercraft": 2,
+        "Soldier (Basic)": 4
+      }
+    },
+    {
+      "id": 19,
+      "name": "Pyramidal Peninsula",
+      "imageURL": "./19_files/map-og.png",
+      "creator": "WhiteFudge",
+      "players": 3,
+      "size": "Medium (183)",
+      "tileCount": 183,
+      "gamesPlayed": 94,
+      "coins": {
+        "startOfGame": 300,
+        "perTurn": 150,
+        "perBase": 100
+      },
+      "tiles": {
+        "Forest": 3,
+        "Grass": 57,
+        "Land Base": 12,
+        "Mountains": 3,
+        "Swamp": 6,
+        "Water (Deep)": 30,
+        "Water (Regular)": 63,
+        "Water (Shallow)": 9
+      },
+      "initialUnits": {
+        "Soldier (Basic)": 6
+      }
+    },
+    {
+      "id": 2,
+      "name": "Kitchen Sink",
+      "imageURL": "./2_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 3,
+      "size": "Medium (141)",
+      "tileCount": 141,
+      "gamesPlayed": 98,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 100,
+        "perBase": 50
+      },
+      "tiles": {
+        "Desert": 15,
+        "Forest": 3,
+        "Grass": 63,
+        "Land Base": 6,
+        "Mountains": 9,
+        "Naval Base": 3,
+        "Swamp": 12,
+        "Water (Deep)": 9,
+        "Water (Regular)": 6,
+        "Water (Shallow)": 15
+      },
+      "initialUnits": {
+        "Soldier (Basic)": 3
+      }
+    },
+    {
+      "id": 20,
+      "name": "Civil War",
+      "imageURL": "./20_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Medium (120)",
+      "tileCount": 120,
+      "gamesPlayed": 144,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 100,
+        "perBase": 50
+      },
+      "tiles": {
+        "Desert": 18,
+        "Forest": 8,
+        "Grass": 46,
+        "Hospital": 2,
+        "Land Base": 2,
+        "Mountains": 6,
+        "Swamp": 2,
+        "Water (Regular)": 18,
+        "Water (Shallow)": 18
+      },
+      "initialUnits": {
+        "Artillery (Basic)": 2,
+        "Soldier (Advanced)": 10,
+        "Soldier (Basic)": 16,
+        "Striker": 2,
+        "Tank (Basic)": 4
+      }
+    },
+    {
+      "id": 3,
+      "name": "Tug of War",
+      "imageURL": "./3_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 2,
+      "size": "Small (64)",
+      "tileCount": 64,
+      "gamesPlayed": 6,
+      "coins": {
+        "startOfGame": 0,
+        "perTurn": 100,
+        "perBase": 50
+      },
+      "tiles": {
+        "Desert": 8,
+        "Forest": 12,
+        "Grass": 24,
+        "Hospital": 2,
+        "Land Base": 2,
+        "Mountains": 4,
+        "Swamp": 6,
+        "Water (Regular)": 6
+      },
+      "initialUnits": {
+        "Soldier (Basic)": 6
+      }
+    },
+    {
+      "id": 4,
+      "name": "Clowning Around",
+      "imageURL": "./4_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 4,
+      "size": "Medium (121)",
+      "tileCount": 121,
+      "gamesPlayed": 44,
+      "coins": {
+        "startOfGame": 50,
+        "perTurn": 100,
+        "perBase": 25
+      },
+      "tiles": {
+        "Forest": 4,
+        "Grass": 58,
+        "Land Base": 42,
+        "Mountains": 7,
+        "Swamp": 10
+      },
+      "initialUnits": {
+        "Hovercraft": 4
+      }
+    },
+    {
+      "id": 5,
+      "name": "Three's a Crowd",
+      "imageURL": "./5_files/map-og.png",
+      "creator": "danielslaughter",
+      "players": 3,
+      "size": "Large (211)",
+      "tileCount": 211,
+      "gamesPlayed": 53,
+      "coins": {
+        "startOfGame": 100,
+        "perTurn": 100,
+        "perBase": 50
+      },
+      "tiles": {
+        "Desert": 18,
+        "Forest": 30,
+        "Grass": 114,
+        "Land Base": 13,
+        "Mountains": 36
+      },
+      "initialUnits": {
+        "Soldier (Advanced)": 3,
+        "Soldier (Basic)": 3,
+        "Striker": 3
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "extractedAt": "2025-01-08",
+    "totalMaps": 12
+  }
+}

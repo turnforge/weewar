@@ -88,32 +88,70 @@ class HexCellGenerator:
 
 
 def main():
-    """Test the hex generator"""
+    """Generate hex grid from command line or test with default image"""
+    import argparse
     from grid_analyzer import HexGridAnalyzer
     
-    # Load test image
-    image_path = "../data/Maps/1_files/map-og.png"
+    parser = argparse.ArgumentParser(description='Generate hex grid for WeeWar map images')
+    parser.add_argument('--image', type=str, help='Path to the map image to analyze')
+    parser.add_argument('--rows', type=int, help='Override number of rows (overrides detection)')
+    parser.add_argument('--cols', type=int, help='Override number of columns (overrides detection)')
+    parser.add_argument('--vert-spacing', type=float, help='Override vertical spacing in pixels (overrides detection)')
+    parser.add_argument('--expected-tiles', type=int, default=34, help='Expected number of tiles in the map')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode with visualization')
+    
+    args = parser.parse_args()
+    
+    # Use provided image path or default test image
+    if args.image:
+        image_path = args.image
+    else:
+        image_path = "../data/Maps/1_files/map-og.png"
+        print(f"No image specified, using default: {image_path}")
+    
+    # Load image
     image = cv2.imread(image_path)
     
     if image is None:
         print(f"Could not load image: {image_path}")
         return
     
+    print(f"Generating hex grid for: {image_path}")
+    
     # First analyze grid structure
-    analyzer = HexGridAnalyzer(debug_mode=True)
-    params = analyzer.analyze_grid_structure(image)
+    analyzer = HexGridAnalyzer(debug_mode=args.debug)
+    params = analyzer.analyze_grid_structure(image, expected_tiles=args.expected_tiles)
     
     if not params:
         print("Failed to analyze grid structure")
         return
     
+    # Apply command-line overrides if provided
+    if args.rows is not None:
+        print(f"Overriding rows: {params.rows} -> {args.rows}")
+        params.rows = args.rows
+    
+    if args.cols is not None:
+        print(f"Overriding cols: {params.cols} -> {args.cols}")
+        params.cols = args.cols
+    
+    if args.vert_spacing is not None:
+        print(f"Overriding vertical spacing: {params.spacing_y:.1f} -> {args.vert_spacing}")
+        params.spacing_y = args.vert_spacing
+    
+    print(f"Using grid parameters:")
+    print(f"  Dimensions: {params.hex_width}x{params.hex_height}")
+    print(f"  Grid size: {params.rows} rows x {params.cols} cols = {params.rows * params.cols} total")
+    print(f"  Spacing: {params.spacing_x:.1f}x{params.spacing_y:.1f}")
+    
     # Generate hex cells
-    generator = HexCellGenerator(debug_mode=True)
+    generator = HexCellGenerator(debug_mode=args.debug)
     hex_cells = generator.generate_hex_cells(image, params)
     
     print(f"Generated {len(hex_cells)} hex cells")
-    for i, cell in enumerate(hex_cells[:10]):  # Show first 10
-        print(f"  Cell {i}: row={cell.row}, col={cell.col}, pos=({cell.center_x:.1f}, {cell.center_y:.1f})")
+    if args.debug:
+        for i, cell in enumerate(hex_cells[:10]):  # Show first 10
+            print(f"  Cell {i}: row={cell.row}, col={cell.col}, pos=({cell.center_x:.1f}, {cell.center_y:.1f})")
 
 
 if __name__ == "__main__":

@@ -12,6 +12,12 @@ from typing import Optional, Dict, List
 from pathlib import Path
 from dataclasses import dataclass
 
+MAX_ROWS = 20
+DEFAULT_NUM_STARTING_COLS = 7
+DEFAULT_NUM_STARTING_ROWS = 7
+HEIGHT_FACTOR = 1
+# HEIGHT_FACTOR = 1.15
+# HEIGHT_FACTOR = math.sqrt(5) * 0.75
 
 @dataclass
 class GridParams:
@@ -105,14 +111,13 @@ class HexGridAnalyzer:
         boundaries['height'] = boundaries['bottom'] - boundaries['top']
         boundaries['width'] = boundaries['right'] - boundaries['left']
         
-        # Analyze hex tile size from the boundary edge images
-        hex_info = self._analyze_hex_dimensions(projections)
+        # Analyze hex grid using geometric constraints instead of pattern spacing
+        hex_info = self._analyze_hex_geometry(combined_boundary, boundaries, projections)
         boundaries.update(hex_info)
         
         if self.debug_mode:
             self._save_boundary_debug(edges, boundaries)
-            print(f"Pattern spacings by direction: {hex_info.get('pattern_spacings', {})}")
-            print(f"Detected hex tile side length: {hex_info.get('hex_side_length', 'unknown')}")
+            print(f"Geometric analysis results: {hex_info}")
         
         return boundaries
     
@@ -121,7 +126,7 @@ class HexGridAnalyzer:
         height, width = edges.shape
         
         projections = {}
-        edge_thickness = 2  # Thickness of edge lines for better visibility
+        edge_thickness = 5  # Thicker edges to handle jaggedness and improve segment detection
         
         # Create 4 separate edge images (same size as original)
         view_from_top = np.zeros((height, width), dtype=np.uint8)
@@ -176,46 +181,309 @@ class HexGridAnalyzer:
         
         return projections
     
-    def _analyze_hex_dimensions(self, projections: Dict[str, np.ndarray]) -> Dict:
-        """Analyze hex dimensions from pattern spacing in edge images"""
+    def _analyze_hex_geometry(self, combined_boundary: np.ndarray, boundaries: Dict, projections: Dict[str, np.ndarray]) -> Dict:
+        """Analyze hex grid using geometric constraints from boundary measurements"""
         hex_info = {}
         
-        # Convert 2D edge images to 1D profiles for pattern analysis
-        pattern_spacings = {}
+        # Measure actual span distances from the boundary
+        span_measurements = self._measure_boundary_spans(combined_boundary)
+        hex_info.update(span_measurements)
         
-        for direction, edge_img in projections.items():
-            if direction in ['view_from_top', 'view_from_bottom']:
-                # For top/bottom views, sum along vertical axis to get horizontal profile
-                profile = np.sum(edge_img, axis=0)
-            else:  # left/right views
-                # For left/right views, sum along horizontal axis to get vertical profile
-                profile = np.sum(edge_img, axis=1)
-            
-            spacing = self._find_pattern_spacing(profile)
-            pattern_spacings[direction] = spacing
-        
-        # Use horizontal projections to determine hex spacing
-        horizontal_spacings = [
-            pattern_spacings.get('view_from_top', 0), 
-            pattern_spacings.get('view_from_bottom', 0)
-        ]
-        vertical_spacings = [
-            pattern_spacings.get('view_from_left', 0), 
-            pattern_spacings.get('view_from_right', 0)
-        ]
-        
-        # Take median of detected spacings (more robust than max)
-        all_spacings = [s for s in horizontal_spacings + vertical_spacings if s > 10]
-        
-        if all_spacings:
-            hex_side_length = int(np.median(all_spacings))
-        else:
-            hex_side_length = 60  # Fallback estimate
-        
-        hex_info['hex_side_length'] = hex_side_length
-        hex_info['pattern_spacings'] = pattern_spacings
+        # Use geometric constraint solver to find best grid parameters
+        grid_solution = self._solve_hex_constraints(
+            span_measurements['max_horizontal_span'],
+            boundaries['width'],
+            boundaries['height'],
+            projections,
+            span_measurements,
+            combined_boundary
+        )
+        hex_info.update(grid_solution)
         
         return hex_info
+    
+    def _measure_boundary_spans(self, boundary_img: np.ndarray) -> Dict:
+        """Measure actual spans from boundary image to understand what distance we're measuring"""
+        height, width = boundary_img.shape
+        measurements = {}
+        
+        # Find boundary pixels
+        boundary_coords = np.where(boundary_img > 0)
+        if len(boundary_coords[0]) == 0:
+            return {'max_horizontal_span': 0, 'max_vertical_span': 0}
+        
+        # Measure horizontal spans across different rows
+        horizontal_spans = []
+        for row in range(height):
+            row_pixels = np.where(boundary_img[row, :] > 0)[0]
+            if len(row_pixels) >= 2:
+                span = np.max(row_pixels) - np.min(row_pixels)
+                horizontal_spans.append(span)
+        
+        # Measure vertical spans across different columns  
+        vertical_spans = []
+        for col in range(width):
+            col_pixels = np.where(boundary_img[:, col] > 0)[0]
+            if len(col_pixels) >= 2:
+                span = np.max(col_pixels) - np.min(col_pixels)
+                vertical_spans.append(span)
+        
+        measurements['max_horizontal_span'] = max(horizontal_spans) if horizontal_spans else 0
+        measurements['max_vertical_span'] = max(vertical_spans) if vertical_spans else 0
+        measurements['avg_horizontal_span'] = np.mean(horizontal_spans) if horizontal_spans else 0
+        measurements['avg_vertical_span'] = np.mean(vertical_spans) if vertical_spans else 0
+        measurements['all_horizontal_spans'] = horizontal_spans[:10]  # Sample for debugging
+        measurements['all_vertical_spans'] = vertical_spans[:10]     # Sample for debugging
+        
+        return measurements
+    
+    def _solve_hex_constraints(self, measured_span: int, total_width: int, total_height: int, projections: Dict[str, np.ndarray], span_measurements: Dict, combined_boundary: np.ndarray) -> Dict:
+        """Solve geometric constraints to find hex grid parameters"""
+        best_solution = None
+        best_error = float('inf')
+        
+        # Try different numbers of columns and hex sizes
+        for cols in range(5, 13):  # Reasonable range for WeeWar maps
+            for hex_width in range(40, 85):  # Reasonable hex size range
+                
+                # For hexagonal grids, horizontal center spacing is hex_width
+                center_spacing = hex_width # hex_width *is* the center spacing
+                
+                # Calculate expected span for this configuration
+                # Span from leftmost to rightmost hex centers would be (cols-1) * center_spacing
+                expected_span = (cols - 1) * center_spacing
+                
+                # Calculate expected total width
+                # Could be cols * center_spacing or cols * center_spacing + hex_width/2 (for offset)
+                expected_total_1 = cols * center_spacing
+                expected_total_2 = cols * center_spacing + hex_width/2
+                
+                # Check how well this matches our measurements
+                span_error = abs(measured_span - expected_span)
+                width_error_1 = abs(total_width - expected_total_1)
+                width_error_2 = abs(total_width - expected_total_2)
+                width_error = min(width_error_1, width_error_2)
+                
+                # Combined error metric
+                total_error = span_error + width_error
+                
+                if total_error < best_error:
+                    best_error = total_error
+                    best_solution = {
+                        'cols': cols,
+                        'hex_width': hex_width,
+                        'center_spacing': center_spacing,
+                        'expected_span': expected_span,
+                        'expected_total_width': expected_total_1 if width_error_1 < width_error_2 else expected_total_2,
+                        'span_error': span_error,
+                        'width_error': width_error,
+                        'total_error': total_error
+                    }
+        
+        # Calculate rows by counting actual vertical segments from boundary data
+        if best_solution:
+            hex_height = int(best_solution['hex_width'] * HEIGHT_FACTOR)  # Square tiles
+            
+            # Count vertical segments directly from the boundary measurements
+            rows = self._count_vertical_segments(combined_boundary, total_height)
+            
+            # Calculate vertical spacing based on detected row count
+            if rows > 1:
+                vertical_spacing = (total_height - hex_height) / (rows - 1)
+            else:
+                vertical_spacing = hex_height * 0.75  # Fallback
+            
+            if self.debug_mode:
+                print(f"Detected {rows} vertical segments")
+                print(f"Calculated vertical spacing: {vertical_spacing:.1f} pixels")
+            
+            best_solution['rows'] = rows
+            best_solution['hex_height'] = hex_height
+            best_solution['hex_side_length'] = best_solution['hex_width']  # For compatibility
+            best_solution['vertical_spacing'] = vertical_spacing
+        
+        return best_solution or {'hex_side_length': 60, 'cols': DEFAULT_NUM_STARTING_COLS, 'rows': DEFAULT_NUM_STARTING_ROWS}
+    
+    def _count_vertical_segments(self, combined_boundary: np.ndarray, total_height: int) -> int:
+        """Count vertical line segments (like "|" pipes) in the boundary data"""
+        
+        if combined_boundary.size == 0:
+            return 7  # Fallback
+        
+        height, width = combined_boundary.shape
+        
+        # Look for vertical line segments by analyzing columns
+        # A vertical segment would show as a continuous vertical line in a column
+        vertical_segments = []
+        
+        for col in range(width):
+            column_data = combined_boundary[:, col]
+            if np.any(column_data > 0):
+                # Find continuous vertical segments in this column
+                segments = self._find_continuous_segments(column_data)
+                if segments:
+                    vertical_segments.extend(segments)
+        
+        # Count distinct vertical segments
+        # Group segments that are at similar X positions (same hex boundary)
+        if len(vertical_segments) == 0:
+            return 7  # Fallback
+        
+        # Filter out very short segments (noise)
+        long_segments = [seg for seg in vertical_segments if seg['length'] > 20]
+        
+        # Group segments by their vertical position ranges
+        unique_vertical_regions = self._group_vertical_segments(long_segments, height)
+        
+        row_count = len(unique_vertical_regions)
+        
+        if self.debug_mode:
+            print(f"Vertical segment analysis:")
+            print(f"  Total segments found: {len(vertical_segments)}")
+            print(f"  Long segments (>20px): {len(long_segments)}")
+            print(f"  Unique vertical regions: {row_count}")
+        
+        # Return reasonable row count
+        if row_count > MAX_ROWS:
+            raise f"Found too many rows: {row_count}"
+        return max(5, row_count)
+    
+    def _find_continuous_segments(self, column_data: np.ndarray) -> List[Dict]:
+        """Find continuous non-zero segments in a column"""
+        segments = []
+        start = None
+        
+        for i, val in enumerate(column_data):
+            if val > 0 and start is None:
+                start = i
+            elif val == 0 and start is not None:
+                segments.append({
+                    'start': start,
+                    'end': i - 1,
+                    'length': i - start
+                })
+                start = None
+        
+        # Handle segment that extends to the end
+        if start is not None:
+            segments.append({
+                'start': start,
+                'end': len(column_data) - 1,
+                'length': len(column_data) - start
+            })
+        
+        return segments
+    
+    def _group_vertical_segments(self, segments: List[Dict], total_height: int) -> List[Dict]:
+        """Group segments that represent distinct vertical bands/levels"""
+        if not segments:
+            return []
+        
+        # Instead of grouping overlapping segments, look for distinct Y-level bands
+        # Each hex row should create segments at roughly the same Y-levels
+        
+        # Extract the center Y-position of each segment
+        segment_centers = [(s['start'] + s['end']) / 2 for s in segments]
+        
+        if not segment_centers:
+            return []
+        
+        # Sort centers and look for gaps that indicate different row levels
+        sorted_centers = sorted(segment_centers)
+        
+        # Find significant gaps between segment centers
+        gaps = []
+        for i in range(1, len(sorted_centers)):
+            gap = sorted_centers[i] - sorted_centers[i-1]
+            gaps.append(gap)
+        
+        # A significant gap indicates a new row level
+        # Use adaptive threshold based on total height
+        min_row_spacing = total_height / 15  # Expect at least this much space between rows
+        significant_gaps = [i for i, gap in enumerate(gaps) if gap > min_row_spacing]
+        
+        # Number of distinct levels = number of significant gaps + 1
+        num_levels = len(significant_gaps) + 1
+        
+        if self.debug_mode:
+            print(f"  Segment centers: {sorted_centers[:10]}...")  # Show first 10
+            print(f"  Significant gaps (>{min_row_spacing:.1f}): {len(significant_gaps)}")
+            print(f"  Calculated levels: {num_levels}")
+        
+        # Return mock groups (we just need the count)
+        return [{'level': i} for i in range(num_levels)]
+    
+    def _count_hex_rows_from_edges(self, left_edge: np.ndarray, right_edge: np.ndarray, total_height: int) -> int:
+        """Count the number of hex rows by analyzing vertical features in edge images"""
+        
+        # Create vertical profiles by summing horizontally across each edge image
+        left_profile = np.sum(left_edge, axis=1) if left_edge.size > 0 else np.array([])
+        right_profile = np.sum(right_edge, axis=1) if right_edge.size > 0 else np.array([])
+        
+        # Count peaks/features in both profiles
+        left_rows = self._count_vertical_features(left_profile)
+        right_rows = self._count_vertical_features(right_profile)
+        
+        # Use the profile that gives a more reasonable count
+        detected_rows = max(left_rows, right_rows) if left_rows > 0 and right_rows > 0 else max(left_rows, right_rows, 5)
+        
+        if self.debug_mode:
+            print(f"Row counting: left_profile detected {left_rows} rows, right_profile detected {right_rows} rows")
+            print(f"Using {detected_rows} rows")
+        
+        return max(5, min(detected_rows, 12))  # Reasonable bounds
+    
+    def _count_vertical_features(self, profile: np.ndarray) -> int:
+        """Count vertical features (step patterns) in a 1D profile representing hex row positions"""
+        if len(profile) < 10 or np.max(profile) == 0:
+            return 0
+        
+        from scipy.signal import find_peaks
+        from scipy.ndimage import gaussian_filter1d
+        
+        # For hex step patterns, look for transitions rather than peaks
+        # Light smoothing to preserve step structure
+        smoothed = gaussian_filter1d(profile.astype(float), sigma=1.5)
+        
+        # Method 1: Look for significant steps/transitions in the profile
+        diff_profile = np.diff(smoothed)
+        
+        # Find positions where the profile changes significantly (steps)
+        threshold = np.std(diff_profile) * 1.5  # Adaptive threshold
+        step_positions = np.where(np.abs(diff_profile) > threshold)[0]
+        
+        # Group nearby step positions (within ~30 pixels) as belonging to the same hex row
+        if len(step_positions) > 0:
+            grouped_steps = []
+            current_group = [step_positions[0]]
+            
+            for pos in step_positions[1:]:
+                if pos - current_group[-1] < 30:  # Same hex row
+                    current_group.append(pos)
+                else:  # New hex row
+                    grouped_steps.append(current_group)
+                    current_group = [pos]
+            
+            grouped_steps.append(current_group)
+            num_step_groups = len(grouped_steps)
+        else:
+            num_step_groups = 0
+        
+        # Method 2: Try traditional peak detection with relaxed parameters
+        max_val = np.max(smoothed)
+        peaks, _ = find_peaks(smoothed, 
+                             height=max_val * 0.1,  # Very low threshold
+                             distance=15)           # Closer spacing allowed
+        
+        num_peaks = len(peaks)
+        
+        # Use the method that gives a more reasonable result
+        detected_features = max(num_step_groups, num_peaks)
+        
+        if self.debug_mode:
+            print(f"  Step groups: {num_step_groups}, Peaks: {num_peaks}, Using: {detected_features}")
+        
+        return detected_features
     
     def _find_pattern_spacing(self, projection: np.ndarray) -> int:
         """Find the repeating pattern spacing in a projection"""
@@ -280,49 +548,22 @@ class HexGridAnalyzer:
         return max_length
     
     def _calculate_grid_from_boundaries(self, image: np.ndarray, boundaries: Dict, expected_tiles: int) -> GridParams:
-        """Calculate hex grid parameters using detected hex side length"""
+        """Calculate hex grid parameters using geometric constraint solution"""
         
         map_width = boundaries['width']
         map_height = boundaries['height']
-        hex_side_length = boundaries.get('hex_side_length', 0)
         
-        if hex_side_length <= 10:  # If detection failed, use fallback
-            print(f"Warning: hex side length detection failed ({hex_side_length}), using fallback")
-            return self._fallback_grid_calculation(boundaries, expected_tiles)
+        # Use the geometric solution from constraint solver
+        solution = boundaries
+        cols = solution.get('cols', DEFAULT_NUM_STARTING_COLS)
+        rows = solution.get('rows', DEFAULT_NUM_STARTING_ROWS)
+        hex_width = solution.get('hex_width', 60)
+        hex_height = solution.get('hex_height', int(hex_width * HEIGHT_FACTOR))
+        center_spacing = solution.get('center_spacing', hex_width)
         
-        print(f"Using detected hex side length: {hex_side_length}")
-        
-        # Calculate hex dimensions from side length
-        # For a regular hexagon: width ≈ 2 * side_length, height ≈ 1.73 * side_length
-        hex_width = int(hex_side_length * 2)
-        hex_height = int(hex_side_length * 1.73)  # sqrt(3) ≈ 1.73
-        
-        # Calculate how many hexes fit in the map
-        # Use the detected pattern spacing directly instead of calculating from hex dimensions
-        avg_horizontal_spacing = np.mean([boundaries['pattern_spacings'].get('view_from_top', hex_side_length), 
-                                         boundaries['pattern_spacings'].get('view_from_bottom', hex_side_length)])
-        avg_vertical_spacing = np.mean([boundaries['pattern_spacings'].get('view_from_left', hex_side_length), 
-                                       boundaries['pattern_spacings'].get('view_from_right', hex_side_length)])
-        
-        # Use the detected spacings directly, with fallback if detection failed
-        spacing_x = avg_horizontal_spacing if avg_horizontal_spacing > 0 else hex_side_length * 1.5
-        spacing_y = avg_vertical_spacing if avg_vertical_spacing > 0 else hex_side_length * 1.3
-        
-        cols = int(map_width / spacing_x) + 1 if spacing_x > 0 else 7
-        rows = int(map_height / spacing_y) + 1 if spacing_y > 0 else 7
-        
-        # Adjust if the grid is too large compared to expected tiles
-        total_positions = rows * cols
-        if total_positions > expected_tiles * 2:  # Too many positions
-            # Try smaller grid
-            cols = max(5, int(np.sqrt(expected_tiles * 1.5)))
-            rows = max(5, int(np.sqrt(expected_tiles * 1.5)))
-            
-            # Recalculate spacing based on desired grid size
-            spacing_x = map_width / cols
-            spacing_y = map_height / rows
-            hex_width = int(spacing_x * 1.33)  # Reverse calculation
-            hex_height = int(spacing_y * 1.15)
+        # Calculate spacing based on the geometric solution
+        spacing_x = center_spacing
+        spacing_y = solution.get('vertical_spacing', hex_height * 0.75)  # Use calculated spacing
         
         # Calculate starting positions (center of first hex)
         start_x = boundaries['left'] + hex_width // 2
@@ -331,9 +572,10 @@ class HexGridAnalyzer:
         # Row offset for hex pattern (odd rows offset by half spacing)
         row_offset = spacing_x // 2
         
-        print(f"Calculated grid: {rows}x{cols} = {rows * cols} positions")
+        print(f"Geometric solution: {cols} cols x {rows} rows = {cols * rows} positions")
         print(f"Hex dimensions: {hex_width}x{hex_height}")
-        print(f"Spacing: {spacing_x:.1f}x{spacing_y:.1f}")
+        print(f"Center spacing: {spacing_x:.1f}x{spacing_y:.1f}")
+        print(f"Solution error: {solution.get('total_error', 'unknown')}")
         
         return GridParams(
             hex_width=hex_width,
@@ -452,18 +694,35 @@ class HexGridAnalyzer:
 
 
 def main():
-    """Test the grid analyzer"""
-    # Load test image
-    image_path = "../data/Maps/1_files/map-og.png"
+    """Analyze hex grid structure from command line or test with default image"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Analyze hex grid structure in WeeWar map images')
+    parser.add_argument('--image', type=str, help='Path to the map image to analyze')
+    parser.add_argument('--expected-tiles', type=int, default=34, help='Expected number of tiles in the map')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode with visualization')
+    
+    args = parser.parse_args()
+    
+    # Use provided image path or default test image
+    if args.image:
+        image_path = args.image
+    else:
+        image_path = "../data/Maps/1_files/map-og.png"
+        print(f"No image specified, using default: {image_path}")
+    
+    # Load image
     image = cv2.imread(image_path)
     
     if image is None:
         print(f"Could not load image: {image_path}")
         return
     
+    print(f"Analyzing grid structure for: {image_path}")
+    
     # Analyze grid with expected tile count
-    analyzer = HexGridAnalyzer(debug_mode=True)
-    params = analyzer.analyze_grid_structure(image, expected_tiles=34)
+    analyzer = HexGridAnalyzer(debug_mode=args.debug)
+    params = analyzer.analyze_grid_structure(image, expected_tiles=args.expected_tiles)
     
     if params:
         print(f"Successfully analyzed grid structure:")

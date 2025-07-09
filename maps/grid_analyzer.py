@@ -123,11 +123,14 @@ class HexGridAnalyzer:
         return boundaries
     
     def _get_4_directional_projections(self, edges: np.ndarray) -> Dict[str, np.ndarray]:
-        """Get boundary edge images from 4 directions"""
+        """Get boundary edge images from 4 directions, filtering for vertical edges in left/right projections"""
         height, width = edges.shape
         
         projections = {}
         edge_thickness = 5  # Thicker edges to handle jaggedness and improve segment detection
+        
+        # Create a mask for vertical edges using gradient analysis
+        vertical_edge_mask = self._create_vertical_edge_mask(edges)
         
         # Create 4 separate edge images (same size as original)
         view_from_top = np.zeros((height, width), dtype=np.uint8)
@@ -175,19 +178,84 @@ class HexGridAnalyzer:
                     if last_edge - t >= 0:
                         view_from_right[row, last_edge - t] = 255
         
+        # Create vertical-only versions for better column detection
+        view_from_left_vertical = np.zeros((height, width), dtype=np.uint8)
+        view_from_right_vertical = np.zeros((height, width), dtype=np.uint8)
+        
+        # View from left (vertical edges only): for each row, mark the first VERTICAL edge pixel from left
+        for row in range(height):
+            row_data = edges[row, :]
+            vertical_row_data = vertical_edge_mask[row, :]
+            if np.any(row_data > 0) and np.any(vertical_row_data > 0):
+                # Find first edge pixel that is also vertical
+                edge_positions = np.where(row_data > 0)[0]
+                vertical_positions = np.where(vertical_row_data > 0)[0]
+                
+                # Find intersection of edge and vertical positions
+                vertical_edge_positions = np.intersect1d(edge_positions, vertical_positions)
+                
+                if len(vertical_edge_positions) > 0:
+                    first_edge = vertical_edge_positions[0]
+                    # Mark the edge pixel with some thickness
+                    for t in range(edge_thickness):
+                        if first_edge + t < width:
+                            view_from_left_vertical[row, first_edge + t] = 255
+        
+        # View from right (vertical edges only): for each row, mark the first VERTICAL edge pixel from right
+        for row in range(height):
+            row_data = edges[row, :]
+            vertical_row_data = vertical_edge_mask[row, :]
+            if np.any(row_data > 0) and np.any(vertical_row_data > 0):
+                # Find last edge pixel that is also vertical
+                edge_positions = np.where(row_data > 0)[0]
+                vertical_positions = np.where(vertical_row_data > 0)[0]
+                
+                # Find intersection of edge and vertical positions
+                vertical_edge_positions = np.intersect1d(edge_positions, vertical_positions)
+                
+                if len(vertical_edge_positions) > 0:
+                    last_edge = vertical_edge_positions[-1]
+                    # Mark the edge pixel with some thickness
+                    for t in range(edge_thickness):
+                        if last_edge - t >= 0:
+                            view_from_right_vertical[row, last_edge - t] = 255
+        
         projections['view_from_top'] = view_from_top
         projections['view_from_bottom'] = view_from_bottom
         projections['view_from_left'] = view_from_left
         projections['view_from_right'] = view_from_right
+        projections['view_from_left_vertical'] = view_from_left_vertical
+        projections['view_from_right_vertical'] = view_from_right_vertical
         
         return projections
+    
+    def _create_vertical_edge_mask(self, edges: np.ndarray) -> np.ndarray:
+        """Create a mask that identifies vertical line structures using morphological operations"""
+        height, width = edges.shape
+        
+        # Use morphological operations to detect vertical line structures
+        # Create a vertical kernel (tall and narrow)
+        vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 20))
+        
+        # Apply morphological opening to detect vertical lines
+        vertical_lines = cv2.morphologyEx(edges, cv2.MORPH_OPEN, vertical_kernel)
+        
+        # Dilate slightly to connect nearby vertical segments
+        dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 5))
+        vertical_mask = cv2.dilate(vertical_lines, dilate_kernel, iterations=1)
+        
+        if self.debug_mode:
+            cv2.imwrite(str(self.debug_dir / "vertical_edge_mask.png"), vertical_mask)
+            print(f"Created vertical edge mask with {np.sum(vertical_mask > 0)} vertical edge pixels")
+        
+        return vertical_mask
     
     def _analyze_hex_geometry(self, combined_boundary: np.ndarray, boundaries: Dict, projections: Dict[str, np.ndarray]) -> Dict:
         """Analyze hex grid using geometric constraints from boundary measurements"""
         hex_info = {}
         
         # Detect vertical lines to find true column boundaries
-        vertical_lines = self._detect_vertical_lines(combined_boundary)
+        vertical_lines = self._detect_vertical_lines(combined_boundary, projections, method='column_based')
         hex_info.update(vertical_lines)
         
         # Measure actual span distances from the boundary
@@ -208,13 +276,103 @@ class HexGridAnalyzer:
         
         return hex_info
     
-    def _detect_vertical_lines(self, combined_boundary: np.ndarray) -> Dict:
-        """Detect purely vertical lines using Hough Line Transform"""
+    def _detect_vertical_lines(self, combined_boundary: np.ndarray, projections: Dict = None, method: str = 'column_based') -> Dict:
+        """Detect purely vertical lines using vertical-only projections when available
+        
+        Args:
+            method: 'column_based' or 'hough_lines'
+        """
         if combined_boundary.size == 0:
             return {'vertical_line_positions': [], 'leftmost_vertical': None, 'rightmost_vertical': None}
         
+        if method == 'column_based':
+            return self._detect_vertical_lines_column_based(combined_boundary, projections)
+        else:
+            return self._detect_vertical_lines_hough(combined_boundary, projections)
+    
+    def _detect_vertical_lines_column_based(self, combined_boundary: np.ndarray, projections: Dict = None) -> Dict:
+        """Detect vertical lines by analyzing column-wise pixel presence"""
+        if not projections or 'view_from_left_vertical' not in projections or 'view_from_right_vertical' not in projections:
+            return {'vertical_line_positions': [], 'leftmost_vertical': None, 'rightmost_vertical': None}
+        
+        height, width = combined_boundary.shape
+        left_vertical = projections['view_from_left_vertical']
+        right_vertical = projections['view_from_right_vertical']
+        
+        # For each column, check if there are sufficient vertical pixels
+        vertical_x_positions = []
+        min_threshold = height * 0.1  # At least 10% of height should have vertical pixels
+        
+        for col in range(width):
+            left_pixels = np.sum(left_vertical[:, col] > 0)
+            right_pixels = np.sum(right_vertical[:, col] > 0)
+            
+            # If either left or right projection has a strong vertical presence
+            if left_pixels > min_threshold or right_pixels > min_threshold:
+                vertical_x_positions.append(col)
+        
+        # Clean up nearby positions (merge columns that are very close)
+        cleaned_positions = []
+        for pos in vertical_x_positions:
+            if not cleaned_positions or abs(pos - cleaned_positions[-1]) > 5:
+                cleaned_positions.append(pos)
+        
+        # Create helper functions for Y->X coordinate queries
+        def get_x_at_y_left(y: int) -> int:
+            """Get X coordinate of vertical line at given Y coordinate on left edge"""
+            if y < 0 or y >= height:
+                return None
+            row_pixels = np.where(left_vertical[y, :] > 0)[0]
+            return row_pixels[0] if len(row_pixels) > 0 else None
+        
+        def get_x_at_y_right(y: int) -> int:
+            """Get X coordinate of vertical line at given Y coordinate on right edge"""
+            if y < 0 or y >= height:
+                return None
+            row_pixels = np.where(right_vertical[y, :] > 0)[0]
+            return row_pixels[-1] if len(row_pixels) > 0 else None
+        
+        result = {
+            'vertical_line_positions': cleaned_positions,
+            'leftmost_vertical': cleaned_positions[0] if cleaned_positions else None,
+            'rightmost_vertical': cleaned_positions[-1] if cleaned_positions else None,
+            'num_vertical_lines': len(cleaned_positions),
+            'detection_method': 'column_based',
+            'get_x_at_y_left': get_x_at_y_left,
+            'get_x_at_y_right': get_x_at_y_right
+        }
+        
+        if self.debug_mode:
+            # Create a combined image for visualization
+            combined_vertical = cv2.bitwise_or(left_vertical, right_vertical)
+            self._save_vertical_lines_debug(combined_vertical, cleaned_positions)
+            print(f"Column-based detection: {len(cleaned_positions)} vertical lines at positions: {cleaned_positions}")
+        
+        return result
+    
+    def _detect_vertical_lines_hough(self, combined_boundary: np.ndarray, projections: Dict = None) -> Dict:
+        """Detect vertical lines using Hough Line Transform (original method)"""
+        if combined_boundary.size == 0:
+            return {'vertical_line_positions': [], 'leftmost_vertical': None, 'rightmost_vertical': None}
+        
+        # If we have vertical-only projections, use them for better detection
+        if projections and 'view_from_left_vertical' in projections and 'view_from_right_vertical' in projections:
+            # Create a combined vertical-only boundary for line detection
+            vertical_boundary = np.zeros_like(combined_boundary)
+            vertical_boundary = cv2.bitwise_or(vertical_boundary, projections['view_from_left_vertical'])
+            vertical_boundary = cv2.bitwise_or(vertical_boundary, projections['view_from_right_vertical'])
+            
+            if self.debug_mode:
+                cv2.imwrite(str(self.debug_dir / "vertical_boundary_for_detection.png"), vertical_boundary)
+                print(f"Using vertical-only boundary for Hough line detection")
+            
+            detection_image = vertical_boundary
+        else:
+            # Fallback to original combined boundary
+            detection_image = combined_boundary
+        
         # Apply Hough Line Transform to detect lines
-        lines = cv2.HoughLinesP(combined_boundary, 1, np.pi/180, threshold=50, minLineLength=30, maxLineGap=10)
+        lines = cv2.HoughLinesP(detection_image, 1, np.pi/180, threshold=30, minLineLength=50, maxLineGap=15)
         
         vertical_x_positions = []
         
@@ -228,8 +386,8 @@ class HexGridAnalyzer:
                 else:
                     angle = 90  # Perfectly vertical
                 
-                # Filter for vertical lines (±5 degrees from vertical)
-                if abs(angle - 90) <= 5 or abs(angle + 90) <= 5:
+                # Filter for vertical lines (±10 degrees from vertical for some flexibility)
+                if abs(angle - 90) <= 10 or abs(angle + 90) <= 10:
                     # Use average X position of the line
                     avg_x = (x1 + x2) / 2
                     vertical_x_positions.append(avg_x)
@@ -240,19 +398,20 @@ class HexGridAnalyzer:
         # Clean up nearby positions (merge lines that are very close)
         cleaned_positions = []
         for pos in vertical_x_positions:
-            if not cleaned_positions or abs(pos - cleaned_positions[-1]) > 10:
+            if not cleaned_positions or abs(pos - cleaned_positions[-1]) > 15:
                 cleaned_positions.append(pos)
         
         result = {
             'vertical_line_positions': cleaned_positions,
             'leftmost_vertical': cleaned_positions[0] if cleaned_positions else None,
             'rightmost_vertical': cleaned_positions[-1] if cleaned_positions else None,
-            'num_vertical_lines': len(cleaned_positions)
+            'num_vertical_lines': len(cleaned_positions),
+            'detection_method': 'hough_lines'
         }
         
         if self.debug_mode:
-            self._save_vertical_lines_debug(combined_boundary, cleaned_positions)
-            print(f"Detected {len(cleaned_positions)} vertical lines at positions: {cleaned_positions}")
+            self._save_vertical_lines_debug(detection_image, cleaned_positions)
+            print(f"Hough-based detection: {len(cleaned_positions)} vertical lines at positions: {cleaned_positions}")
         
         return result
     
@@ -800,9 +959,17 @@ class HexGridAnalyzer:
         # Also create a simple grayscale combined view (OR of all edges)
         combined_gray = np.zeros((height, width), dtype=np.uint8)
         for direction, edge_img in projections.items():
-            combined_gray = cv2.bitwise_or(combined_gray, edge_img)
+            if not direction.endswith('_vertical'):  # Only use original projections for combined view
+                combined_gray = cv2.bitwise_or(combined_gray, edge_img)
         
         cv2.imwrite(str(self.debug_dir / "4dir_edges_gray.png"), combined_gray)
+        
+        # Create separate combined view for vertical-only projections
+        if 'view_from_left_vertical' in projections and 'view_from_right_vertical' in projections:
+            combined_vertical = np.zeros((height, width), dtype=np.uint8)
+            combined_vertical = cv2.bitwise_or(combined_vertical, projections['view_from_left_vertical'])
+            combined_vertical = cv2.bitwise_or(combined_vertical, projections['view_from_right_vertical'])
+            cv2.imwrite(str(self.debug_dir / "vertical_only_edges.png"), combined_vertical)
     
     def _save_vertical_lines_debug(self, combined_boundary: np.ndarray, vertical_positions: List[int]):
         """Save debug visualization of detected vertical lines"""
@@ -875,6 +1042,7 @@ def main():
     parser.add_argument('--image', type=str, help='Path to the map image to analyze')
     parser.add_argument('--expected-tiles', type=int, default=34, help='Expected number of tiles in the map')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode with visualization')
+    parser.add_argument('--detection-method', type=str, choices=['column_based', 'hough_lines'], default='column_based', help='Method for vertical line detection')
     
     args = parser.parse_args()
     

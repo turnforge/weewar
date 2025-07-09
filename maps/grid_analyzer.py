@@ -255,8 +255,16 @@ class HexGridAnalyzer:
         hex_info = {}
         
         # Detect vertical lines to find true column boundaries
-        vertical_lines = self._detect_vertical_lines(combined_boundary, projections, method='column_based')
+        vertical_lines = self._detect_vertical_lines(combined_boundary, projections, method=getattr(self, 'detection_method', 'column_based'))
         hex_info.update(vertical_lines)
+        
+        # Extract vertical line segments for better span analysis
+        line_segments = self._extract_vertical_line_segments(projections)
+        hex_info.update(line_segments)
+        
+        # Calculate spans from line segments
+        spans = self._calculate_spans_from_line_segments(line_segments.get('left_lines', []), line_segments.get('right_lines', []))
+        hex_info['line_segment_spans'] = spans
         
         # Measure actual span distances from the boundary
         span_measurements = self._measure_boundary_spans(combined_boundary, vertical_lines)
@@ -349,6 +357,193 @@ class HexGridAnalyzer:
             print(f"Column-based detection: {len(cleaned_positions)} vertical lines at positions: {cleaned_positions}")
         
         return result
+    
+    def _extract_vertical_line_segments(self, projections: Dict, x_tolerance: int = 3, gap_tolerance: int = 5) -> Dict:
+        """Extract vertical line segments from left and right projections
+        
+        Args:
+            projections: Dictionary containing vertical projections
+            x_tolerance: Pixel tolerance for considering X positions as "same line"
+            gap_tolerance: Number of consecutive missing pixels to tolerate as gaps
+            
+        Returns:
+            Dictionary with left_lines and right_lines arrays
+        """
+        if not projections or 'view_from_left_vertical' not in projections or 'view_from_right_vertical' not in projections:
+            return {'left_lines': [], 'right_lines': []}
+        
+        height, width = projections['view_from_left_vertical'].shape
+        left_vertical = projections['view_from_left_vertical']
+        right_vertical = projections['view_from_right_vertical']
+        
+        # Extract left vertical lines
+        left_lines = self._extract_lines_from_side(left_vertical, 'left', x_tolerance, gap_tolerance)
+        
+        # Extract right vertical lines  
+        right_lines = self._extract_lines_from_side(right_vertical, 'right', x_tolerance, gap_tolerance)
+        
+        if self.debug_mode:
+            print(f"Extracted {len(left_lines)} left vertical line segments")
+            print(f"Extracted {len(right_lines)} right vertical line segments")
+            self._save_line_segments_debug(left_vertical, right_vertical, left_lines, right_lines)
+        
+        return {
+            'left_lines': left_lines,
+            'right_lines': right_lines
+        }
+    
+    def _extract_lines_from_side(self, projection: np.ndarray, side: str, x_tolerance: int, gap_tolerance: int) -> List[Dict]:
+        """Extract vertical line segments from one side projection
+        
+        Returns:
+            List of line dictionaries with keys: start_x, start_y, end_y, length
+        """
+        height, width = projection.shape
+        lines = []
+        
+        current_line = None
+        gap_count = 0
+        
+        for y in range(height):
+            # Get X coordinate for this Y position
+            row_pixels = np.where(projection[y, :] > 0)[0]
+            
+            if len(row_pixels) > 0:
+                # Choose leftmost or rightmost pixel based on side
+                if side == 'left':
+                    x_coord = row_pixels[0]  # Leftmost pixel
+                else:  # right
+                    x_coord = row_pixels[-1]  # Rightmost pixel
+                
+                if current_line is None:
+                    # Start new line
+                    current_line = {
+                        'start_x': x_coord,
+                        'start_y': y,
+                        'end_y': y,
+                        'length': 1
+                    }
+                    gap_count = 0
+                else:
+                    # Check if we're continuing the same line
+                    x_diff = abs(x_coord - current_line['start_x'])
+                    
+                    if x_diff <= x_tolerance:
+                        # Continue current line
+                        current_line['end_y'] = y
+                        current_line['length'] = current_line['end_y'] - current_line['start_y'] + 1
+                        gap_count = 0
+                    else:
+                        # X position changed significantly - finish current line and start new one
+                        if current_line['length'] >= 10:  # Only keep lines with minimum length
+                            lines.append(current_line.copy())
+                        
+                        current_line = {
+                            'start_x': x_coord,
+                            'start_y': y,
+                            'end_y': y,
+                            'length': 1
+                        }
+                        gap_count = 0
+            else:
+                # No pixel found at this Y position
+                if current_line is not None:
+                    gap_count += 1
+                    
+                    if gap_count <= gap_tolerance:
+                        # Tolerate small gaps - continue current line
+                        current_line['end_y'] = y
+                        current_line['length'] = current_line['end_y'] - current_line['start_y'] + 1
+                    else:
+                        # Gap too large - finish current line
+                        if current_line['length'] >= 10:  # Only keep lines with minimum length
+                            lines.append(current_line.copy())
+                        current_line = None
+                        gap_count = 0
+        
+        # Don't forget the last line if it exists
+        if current_line is not None and current_line['length'] >= 10:
+            lines.append(current_line)
+        
+        return lines
+    
+    def _calculate_spans_from_line_segments(self, left_lines: List[Dict], right_lines: List[Dict]) -> List[Dict]:
+        """Calculate spans by finding overlapping left and right line segments
+        
+        Returns:
+            List of span dictionaries with keys: left_x, right_x, span, start_y, end_y, overlap_length
+        """
+        spans = []
+        
+        # Sort both arrays by start_y
+        left_lines_sorted = sorted(left_lines, key=lambda x: x['start_y'])
+        right_lines_sorted = sorted(right_lines, key=lambda x: x['start_y'])
+        
+        # Find overlapping segments
+        for left_line in left_lines_sorted:
+            for right_line in right_lines_sorted:
+                # Check if there's vertical overlap
+                overlap_start = max(left_line['start_y'], right_line['start_y'])
+                overlap_end = min(left_line['end_y'], right_line['end_y'])
+                
+                if overlap_start <= overlap_end:
+                    # There's overlap - calculate span
+                    overlap_length = overlap_end - overlap_start + 1
+                    span = right_line['start_x'] - left_line['start_x']
+                    
+                    # Only consider significant overlaps
+                    if overlap_length >= 20:  # Minimum overlap length
+                        spans.append({
+                            'left_x': left_line['start_x'],
+                            'right_x': right_line['start_x'],
+                            'span': span,
+                            'start_y': overlap_start,
+                            'end_y': overlap_end,
+                            'overlap_length': overlap_length,
+                            'left_line': left_line,
+                            'right_line': right_line
+                        })
+        
+        # Sort spans by overlap length (longest first) to prioritize the most significant spans
+        spans.sort(key=lambda x: x['overlap_length'], reverse=True)
+        
+        if self.debug_mode:
+            print(f"Found {len(spans)} overlapping line segment pairs")
+            for i, span in enumerate(spans[:5]):  # Show top 5 spans
+                print(f"  Span {i+1}: {span['span']}px (Y:{span['start_y']}-{span['end_y']}, overlap:{span['overlap_length']}px)")
+        
+        return spans
+    
+    def _save_line_segments_debug(self, left_vertical: np.ndarray, right_vertical: np.ndarray, left_lines: List[Dict], right_lines: List[Dict]):
+        """Save debug visualization of extracted line segments"""
+        if not self.debug_mode:
+            return
+        
+        height, width = left_vertical.shape
+        
+        # Create RGB debug image
+        debug_img = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Show original projections in grayscale
+        debug_img[:, :, 0] = left_vertical  # Red channel for left
+        debug_img[:, :, 2] = right_vertical  # Blue channel for right
+        
+        # Draw extracted line segments
+        for i, line in enumerate(left_lines):
+            color = (0, 255, 0)  # Green for left lines
+            cv2.line(debug_img, (line['start_x'], line['start_y']), (line['start_x'], line['end_y']), color, 2)
+            # Add text label
+            cv2.putText(debug_img, f"L{i}", (line['start_x'] + 5, line['start_y'] + 15), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
+        
+        for i, line in enumerate(right_lines):
+            color = (0, 255, 255)  # Yellow for right lines  
+            cv2.line(debug_img, (line['start_x'], line['start_y']), (line['start_x'], line['end_y']), color, 2)
+            # Add text label
+            cv2.putText(debug_img, f"R{i}", (line['start_x'] - 25, line['start_y'] + 15), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
+        
+        cv2.imwrite(str(self.debug_dir / "vertical_line_segments.png"), debug_img)
     
     def _detect_vertical_lines_hough(self, combined_boundary: np.ndarray, projections: Dict = None) -> Dict:
         """Detect vertical lines using Hough Line Transform (original method)"""
@@ -1064,6 +1259,7 @@ def main():
     
     # Analyze grid with expected tile count
     analyzer = HexGridAnalyzer(debug_mode=args.debug)
+    analyzer.detection_method = args.detection_method
     params = analyzer.analyze_grid_structure(image, expected_tiles=args.expected_tiles)
     
     if params:

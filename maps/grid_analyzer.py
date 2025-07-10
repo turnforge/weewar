@@ -271,11 +271,14 @@ class HexGridAnalyzer:
         row_groups = self._get_matching_segments_in_rows(all_segments)
         
         if self.debug_mode and row_groups:
-            # Create unified vertical for debug visualization
-            height, width = projections['view_from_left_vertical'].shape
-            unified_vertical = np.zeros((height, width), dtype=np.uint8)
-            unified_vertical = cv2.bitwise_or(unified_vertical, projections['view_from_left_vertical'])
-            unified_vertical = cv2.bitwise_or(unified_vertical, projections['view_from_right_vertical'])
+            # Use the same vertical edge mask that was used for segment extraction
+            unified_vertical = projections.get('vertical_edge_mask')
+            if unified_vertical is None:
+                # Fallback to old method if vertical_edge_mask not available
+                height, width = projections['view_from_left_vertical'].shape
+                unified_vertical = np.zeros((height, width), dtype=np.uint8)
+                unified_vertical = cv2.bitwise_or(unified_vertical, projections['view_from_left_vertical'])
+                unified_vertical = cv2.bitwise_or(unified_vertical, projections['view_from_right_vertical'])
             self._save_row_groups_debug(unified_vertical, row_groups)
         
         hex_info['all_segments'] = all_segments

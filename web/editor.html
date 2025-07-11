@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeeWar Map Editor - WASM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #005c99;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        button.active {
+            background: #28a745;
+        }
+        
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .canvas-container img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status.loading {
+            background: #ffc107;
+            color: #856404;
+        }
+        
+        .status.ready {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .map-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .terrain-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .terrain-button {
+            padding: 12px 8px;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .painting-controls {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .coordinate-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .coordinate-input input {
+            width: 80px;
+        }
+        
+        .brush-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .validation-results {
+            margin-top: 10px;
+        }
+        
+        .validation-results.valid {
+            color: #28a745;
+        }
+        
+        .validation-results.invalid {
+            color: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .terrain-palette {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🗺️ WeeWar Map Editor (WASM)</h1>
+    
+    <div class="container">
+        <div class="status" id="editor-status">Loading...</div>
+        
+        <h3>Map Management</h3>
+        <div class="controls">
+            <button onclick="createNewMap(5, 5)">New 5×5 Map</button>
+            <button onclick="createNewMap(8, 8)">New 8×8 Map</button>
+            <button onclick="createNewMap(8, 12)">New 8×12 Map</button>
+            <button onclick="createNewMap(12, 16)">New 12×16 Map</button>
+            <button onclick="validateMap()">🔍 Validate Map</button>
+            <button onclick="clearOutput()">Clear Console</button>
+        </div>
+        
+        <div class="grid">
+            <div>
+                <h3>🎨 Terrain Palette</h3>
+                <div class="terrain-palette">
+                    <button class="terrain-button" onclick="setBrushTerrain(1)" data-terrain="1">🌱 Grass</button>
+                    <button class="terrain-button" onclick="setBrushTerrain(2)" data-terrain="2">🏜️ Desert</button>
+                    <button class="terrain-button" onclick="setBrushTerrain(3)" data-terrain="3">🌊 Water</button>
+                    <button class="terrain-button" onclick="setBrushTerrain(4)" data-terrain="4">⛰️ Mountain</button>
+                    <button class="terrain-button" onclick="setBrushTerrain(5)" data-terrain="5">🗿 Rock</button>
+                </div>
+                
+                <h3>🖌️ Brush Settings</h3>
+                <div class="painting-controls">
+                    <label>Brush Size: 
+                        <select id="brush-size" onchange="setBrushSize(this.value)">
+                            <option value="0">Single (1 hex)</option>
+                            <option value="1">Small (7 hexes)</option>
+                            <option value="2">Medium (19 hexes)</option>
+                            <option value="3">Large (37 hexes)</option>
+                            <option value="4">X-Large (61 hexes)</option>
+                            <option value="5">XX-Large (91 hexes)</option>
+                        </select>
+                    </label>
+                    <div class="brush-info" id="brush-info">
+                        Current: Grass, Single brush (1 hex)
+                    </div>
+                </div>
+                
+                <h3>🎯 Painting Tools</h3>
+                <div class="coordinate-input">
+                    <label>Row: <input type="number" id="paint-row" placeholder="0" min="0" value="2"></label>
+                    <label>Col: <input type="number" id="paint-col" placeholder="0" min="0" value="2"></label>
+                </div>
+                <div class="controls">
+                    <button onclick="paintTerrain()">🖌️ Paint</button>
+                    <button onclick="floodFill()">🌊 Flood Fill</button>
+                    <button onclick="removeTerrain()">🗑️ Remove</button>
+                </div>
+                
+                <h3>↶↷ History</h3>
+                <div class="controls">
+                    <button onclick="editorUndo()" id="undo-btn">↶ Undo</button>
+                    <button onclick="editorRedo()" id="redo-btn">↷ Redo</button>
+                </div>
+            </div>
+            
+            <div>
+                <h3>📊 Map Information</h3>
+                <div class="map-info" id="map-info">No map loaded</div>
+                
+                <h3>🎮 Export Options</h3>
+                <div class="controls">
+                    <button onclick="exportToGame(2)">Export 2P Game</button>
+                    <button onclick="exportToGame(3)">Export 3P Game</button>
+                    <button onclick="exportToGame(4)">Export 4P Game</button>
+                    <button onclick="downloadGameData()">💾 Download Game</button>
+                </div>
+                
+                <h3>🎨 Rendering</h3>
+                <div class="controls">
+                    <button onclick="renderEditor(400, 300)">Render Small</button>
+                    <button onclick="renderEditor(600, 450)">Render Medium</button>
+                    <button onclick="renderEditor(800, 600)">Render Large</button>
+                    <button onclick="downloadImage()">💾 Download PNG</button>
+                </div>
+            </div>
+        </div>
+        
+        <h3>Console Output</h3>
+        <div class="output" id="editor-output">Map Editor WASM loading...</div>
+        
+        <div class="canvas-container" id="editor-canvas" style="display: none;">
+            <h3>🗺️ Map Preview</h3>
+            <img id="map-image" alt="Map preview will appear here">
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3>🔧 Advanced Tools</h3>
+        <div class="controls">
+            <button onclick="fillAllGrass()">🌱 Fill All Grass</button>
+            <button onclick="createTestPattern()">🎨 Test Pattern</button>
+            <button onclick="createIslandMap()">🏝️ Island Map</button>
+            <button onclick="createMountainRidge()">⛰️ Mountain Ridge</button>
+            <button onclick="showTerrainStats()">📈 Terrain Stats</button>
+            <button onclick="randomizeTerrain()">🎲 Randomize</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3>Debug Information</h3>
+        <div id="debug-info">
+            <p><strong>WASM Status:</strong> <span id="wasm-status">Not loaded</span></p>
+            <p><strong>Current Brush:</strong> <span id="current-brush">Grass, Size 0</span></p>
+            <p><strong>Last Operation:</strong> <span id="last-operation">None</span></p>
+            <p><strong>Operations Count:</strong> <span id="operation-count">0</span></p>
+            <p><strong>Undo Available:</strong> <span id="undo-available">No</span></p>
+            <p><strong>Redo Available:</strong> <span id="redo-available">No</span></p>
+        </div>
+    </div>
+    
+    <script src="../wasm/wasm_exec.js"></script>
+    <script>
+        // Global state
+        let editorReady = false;
+        let operationCount = 0;
+        let currentBrushTerrain = 1;
+        let currentBrushSize = 0;
+        let lastGameData = null;
+        let lastImageData = null;
+        
+        const terrainNames = {
+            1: 'Grass',
+            2: 'Desert', 
+            3: 'Water',
+            4: 'Mountain',
+            5: 'Rock'
+        };
+        
+        const terrainEmojis = {
+            1: '🌱',
+            2: '🏜️',
+            3: '🌊',
+            4: '⛰️',
+            5: '🗿'
+        };
+        
+        // Utility functions
+        function log(message) {
+            const output = document.getElementById('editor-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function updateStatus(status, className = 'ready') {
+            const statusEl = document.getElementById('editor-status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+        
+        function updateDebugInfo(operation) {
+            document.getElementById('last-operation').textContent = operation || 'None';
+            document.getElementById('operation-count').textContent = ++operationCount;
+            document.getElementById('current-brush').textContent = `${terrainNames[currentBrushTerrain]}, Size ${currentBrushSize}`;
+            
+            // Update undo/redo status
+            if (editorReady) {
+                try {
+                    const undoResult = editorCanUndo();
+                    const redoResult = editorCanRedo();
+                    document.getElementById('undo-available').textContent = undoResult.data?.canUndo ? 'Yes' : 'No';
+                    document.getElementById('redo-available').textContent = redoResult.data?.canRedo ? 'Yes' : 'No';
+                    
+                    // Update button states
+                    document.getElementById('undo-btn').disabled = !undoResult.data?.canUndo;
+                    document.getElementById('redo-btn').disabled = !redoResult.data?.canRedo;
+                } catch (e) {
+                    // Ignore errors
+                }
+            }
+        }
+        
+        function clearOutput() {
+            document.getElementById('editor-output').textContent = '';
+            log('Console cleared');
+        }
+        
+        function updateBrushInfo() {
+            const hexCounts = [1, 7, 19, 37, 61, 91];
+            const hexCount = hexCounts[currentBrushSize] || 1;
+            document.getElementById('brush-info').textContent = 
+                `Current: ${terrainEmojis[currentBrushTerrain]} ${terrainNames[currentBrushTerrain]}, ` +
+                `${currentBrushSize === 0 ? 'Single' : 'Size ' + currentBrushSize} brush (${hexCount} hex${hexCount > 1 ? 'es' : ''})`;
+        }
+        
+        function updateTerrainPalette() {
+            document.querySelectorAll('.terrain-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.terrain == currentBrushTerrain) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Editor Functions
+        function createNewMap(rows = 8, cols = 12) {
+            if (!editorReady) {
+                log('❌ Editor not ready yet');
+                return;
+            }
+            
+            try {
+                log(`🗺️ Creating new ${rows}×${cols} map...`);
+                const result = editorNewMap(rows, cols);
+                updateDebugInfo(`newMap(${rows}, ${cols})`);
+                
+                if (result.success) {
+                    log(`✅ ${result.message}`);
+                    updateMapInfo();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+                console.error('createNewMap error:', e);
+            }
+        }
+        
+        function setBrushTerrain(terrainType) {
+            if (!editorReady) return;
+            
+            try {
+                const result = editorSetBrushTerrain(terrainType);
+                currentBrushTerrain = terrainType;
+                updateDebugInfo(`setBrushTerrain(${terrainType})`);
+                updateBrushInfo();
+                updateTerrainPalette();
+                log(`🎨 ${result.message}`);
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function setBrushSize(size) {
+            if (!editorReady) return;
+            
+            try {
+                const result = editorSetBrushSize(parseInt(size));
+                currentBrushSize = parseInt(size);
+                updateDebugInfo(`setBrushSize(${size})`);
+                updateBrushInfo();
+                
+                if (result.success) {
+                    log(`🖌️ ${result.message}`);
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function paintTerrain() {
+            const row = parseInt(document.getElementById('paint-row').value);
+            const col = parseInt(document.getElementById('paint-col').value);
+            
+            if (isNaN(row) || isNaN(col)) {
+                log('❌ Please enter valid row and col numbers');
+                return;
+            }
+            
+            try {
+                log(`🖌️ Painting ${terrainNames[currentBrushTerrain]} at (${row}, ${col})`);
+                const result = editorPaintTerrain(row, col);
+                updateDebugInfo(`paintTerrain(${row}, ${col})`);
+                
+                if (result.success) {
+                    log(`✅ ${result.message}`);
+                    updateMapInfo();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function floodFill() {
+            const row = parseInt(document.getElementById('paint-row').value);
+            const col = parseInt(document.getElementById('paint-col').value);
+            
+            if (isNaN(row) || isNaN(col)) {
+                log('❌ Please enter valid row and col numbers');
+                return;
+            }
+            
+            try {
+                log(`🌊 Flood filling with ${terrainNames[currentBrushTerrain]} from (${row}, ${col})`);
+                const result = editorFloodFill(row, col);
+                updateDebugInfo(`floodFill(${row}, ${col})`);
+                
+                if (result.success) {
+                    log(`✅ ${result.message}`);
+                    updateMapInfo();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function removeTerrain() {
+            const row = parseInt(document.getElementById('paint-row').value);
+            const col = parseInt(document.getElementById('paint-col').value);
+            
+            if (isNaN(row) || isNaN(col)) {
+                log('❌ Please enter valid row and col numbers');
+                return;
+            }
+            
+            try {
+                log(`🗑️ Removing terrain at (${row}, ${col})`);
+                const result = editorRemoveTerrain(row, col);
+                updateDebugInfo(`removeTerrain(${row}, ${col})`);
+                
+                if (result.success) {
+                    log(`✅ ${result.message}`);
+                    updateMapInfo();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function editorUndo() {
+            if (!editorReady) return;
+            
+            try {
+                const result = editorUndo();
+                updateDebugInfo('undo()');
+                
+                if (result.success) {
+                    log(`↶ ${result.message}`);
+                    updateMapInfo();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function editorRedo() {
+            if (!editorReady) return;
+            
+            try {
+                const result = editorRedo();
+                updateDebugInfo('redo()');
+                
+                if (result.success) {
+                    log(`↷ ${result.message}`);
+                    updateMapInfo();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function validateMap() {
+            if (!editorReady) return;
+            
+            try {
+                const result = editorValidateMap();
+                updateDebugInfo('validateMap()');
+                
+                const validationDiv = document.querySelector('.validation-results') || 
+                    document.createElement('div');
+                validationDiv.className = 'validation-results';
+                
+                if (result.data.valid) {
+                    validationDiv.className += ' valid';
+                    validationDiv.innerHTML = '✅ Map is valid!';
+                    log(`✅ ${result.message}`);
+                } else {
+                    validationDiv.className += ' invalid';
+                    validationDiv.innerHTML = `❌ ${result.message}<br>` +
+                        result.data.issues.map(issue => `• ${issue}`).join('<br>');
+                    log(`❌ ${result.message}`);
+                    result.data.issues.forEach(issue => log(`  • ${issue}`));
+                }
+                
+                if (!document.querySelector('.validation-results')) {
+                    document.getElementById('map-info').appendChild(validationDiv);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function updateMapInfo() {
+            if (!editorReady) return;
+            
+            try {
+                const result = editorGetMapInfo();
+                if (result.success) {
+                    const info = result.data;
+                    document.getElementById('map-info').innerHTML = `
+                        <strong>📏 Size:</strong> ${info.height}×${info.width}<br>
+                        <strong>🔢 Total Tiles:</strong> ${info.totalTiles}<br>
+                        <strong>💾 Modified:</strong> ${info.modified ? 'Yes ⚠️' : 'No ✅'}<br>
+                        <strong>🗺️ Terrain Distribution:</strong><br>
+                        ${Object.entries(info.terrainCounts).map(([type, count]) => 
+                            `${terrainEmojis[type] || '❓'} ${terrainNames[type] || `Type ${type}`}: ${count}`
+                        ).join('<br>')}
+                    `;
+                }
+                updateDebugInfo('getMapInfo()');
+            } catch (e) {
+                log(`❌ Error getting map info: ${e.message}`);
+            }
+        }
+        
+        function renderEditor(width = 600, height = 400) {
+            if (!editorReady) {
+                log('❌ Editor not ready yet');
+                return;
+            }
+            
+            try {
+                log(`🎨 Rendering map (${width}×${height})...`);
+                const result = editorRenderMap(width, height);
+                updateDebugInfo(`renderMap(${width}, ${height})`);
+                
+                if (result.success) {
+                    const img = document.getElementById('map-image');
+                    img.src = result.data.dataURL;
+                    lastImageData = result.data.dataURL;
+                    document.getElementById('editor-canvas').style.display = 'block';
+                    log(`✅ Map rendered successfully (${Math.round(result.data.dataURL.length/1024)}KB)`);
+                } else {
+                    log(`❌ Render failed: ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function exportToGame(playerCount) {
+            if (!editorReady) return;
+            
+            try {
+                log(`🎮 Exporting map as ${playerCount}-player game...`);
+                const result = editorExportToGame(playerCount);
+                updateDebugInfo(`exportToGame(${playerCount})`);
+                
+                if (result.success) {
+                    lastGameData = result.data.gameData;
+                    log(`✅ ${result.message} (${Math.round(result.data.size/1024)}KB)`);
+                } else {
+                    log(`❌ Export failed: ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function downloadGameData() {
+            if (!lastGameData) {
+                log('❌ No game data available. Export a game first.');
+                return;
+            }
+            
+            const blob = new Blob([lastGameData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `weewar-map-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            log('💾 Game data downloaded');
+        }
+        
+        function downloadImage() {
+            if (!lastImageData) {
+                log('❌ No image data available. Render the map first.');
+                return;
+            }
+            
+            const a = document.createElement('a');
+            a.href = lastImageData;
+            a.download = `weewar-map-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            log('💾 Map image downloaded');
+        }
+        
+        // Advanced Tools
+        function fillAllGrass() {
+            setBrushTerrain(1);
+            try {
+                const info = editorGetMapInfo();
+                if (info.success) {
+                    const {width, height} = info.data;
+                    log(`🌱 Filling entire ${height}×${width} map with grass...`);
+                    
+                    for (let row = 0; row < height; row++) {
+                        for (let col = 0; col < width; col++) {
+                            editorPaintTerrain(row, col);
+                        }
+                    }
+                    updateMapInfo();
+                    log('✅ Map filled with grass');
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function createTestPattern() {
+            try {
+                log('🎨 Creating test pattern...');
+                setBrushTerrain(1); editorPaintTerrain(1, 1);
+                setBrushTerrain(2); editorPaintTerrain(1, 2);
+                setBrushTerrain(3); editorPaintTerrain(2, 1);
+                setBrushTerrain(4); editorPaintTerrain(2, 2);
+                setBrushTerrain(5); editorPaintTerrain(3, 3);
+                updateMapInfo();
+                log('✅ Test pattern created');
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function createIslandMap() {
+            try {
+                log('🏝️ Creating island map...');
+                // Fill with water first
+                setBrushTerrain(3);
+                setBrushSize(5);
+                editorFloodFill(0, 0);
+                
+                // Create island in center
+                setBrushTerrain(1);
+                setBrushSize(2);
+                const info = editorGetMapInfo();
+                if (info.success) {
+                    const {width, height} = info.data;
+                    editorPaintTerrain(Math.floor(height/2), Math.floor(width/2));
+                }
+                
+                updateMapInfo();
+                log('✅ Island map created');
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function createMountainRidge() {
+            try {
+                log('⛰️ Creating mountain ridge...');
+                setBrushTerrain(4);
+                setBrushSize(0);
+                
+                const info = editorGetMapInfo();
+                if (info.success) {
+                    const {width, height} = info.data;
+                    const midRow = Math.floor(height / 2);
+                    for (let col = 0; col < width; col++) {
+                        editorPaintTerrain(midRow, col);
+                    }
+                }
+                
+                updateMapInfo();
+                log('✅ Mountain ridge created');
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function showTerrainStats() {
+            try {
+                const result = editorGetMapInfo();
+                if (result.success) {
+                    const info = result.data;
+                    log('📈 Terrain Statistics:');
+                    Object.entries(info.terrainCounts).forEach(([type, count]) => {
+                        const percentage = (count / info.totalTiles * 100).toFixed(1);
+                        log(`  ${terrainEmojis[type]} ${terrainNames[type]}: ${count} tiles (${percentage}%)`);
+                    });
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function randomizeTerrain() {
+            try {
+                log('🎲 Randomizing terrain...');
+                const info = editorGetMapInfo();
+                if (info.success) {
+                    const {width, height} = info.data;
+                    const terrainTypes = [1, 2, 3, 4, 5];
+                    
+                    for (let row = 0; row < height; row++) {
+                        for (let col = 0; col < width; col++) {
+                            const randomTerrain = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
+                            setBrushTerrain(randomTerrain);
+                            editorPaintTerrain(row, col);
+                        }
+                    }
+                    updateMapInfo();
+                    log('✅ Terrain randomized');
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        // Initialize WASM
+        async function initWASM() {
+            try {
+                updateStatus('Loading WASM...', 'loading');
+                document.getElementById('wasm-status').textContent = 'Loading...';
+                log('🚀 Initializing WeeWar Map Editor WASM...');
+                
+                const go = new Go();
+                const wasmModule = await WebAssembly.instantiateStreaming(
+                    fetch('../wasm/editor.wasm'), 
+                    go.importObject
+                );
+                
+                go.run(wasmModule.instance);
+                
+                // Initialize editor
+                editorCreate();
+                editorReady = true;
+                
+                updateStatus('Editor Ready ✅', 'ready');
+                document.getElementById('wasm-status').textContent = 'Ready';
+                log('✅ WeeWar Map Editor WASM loaded successfully!');
+                log('💡 Try creating a new map and painting terrain');
+                
+                // Set initial state
+                updateBrushInfo();
+                updateTerrainPalette();
+                updateDebugInfo('init');
+                
+            } catch (error) {
+                updateStatus('Load Failed ❌', 'error');
+                document.getElementById('wasm-status').textContent = 'Failed';
+                log(`💥 Failed to load WASM: ${error}`);
+                console.error('WASM load error:', error);
+            }
+        }
+        
+        // Start loading when page loads
+        window.addEventListener('load', initWASM);
+        
+        // Auto-update coordinates when clicking on rendered map
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'map-image') {
+                // Calculate approximate coordinates based on click position
+                // This is a simplified calculation
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const imgWidth = rect.width;
+                const imgHeight = rect.height;
+                
+                try {
+                    const info = editorGetMapInfo();
+                    if (info.success) {
+                        const mapRow = Math.floor(y / imgHeight * info.data.height);
+                        const mapCol = Math.floor(x / imgWidth * info.data.width);
+                        
+                        document.getElementById('paint-row').value = mapRow;
+                        document.getElementById('paint-col').value = mapCol;
+                        log(`🎯 Coordinates set to (${mapRow}, ${mapCol})`);
+                    }
+                } catch (e) {
+                    // Ignore errors
+                }
+            }
+        });
+    </script>
+</body>
+</html>

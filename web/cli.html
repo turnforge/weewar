@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeeWar CLI - WASM</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #005c99;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .canvas-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status.loading {
+            background: #ffc107;
+            color: #856404;
+        }
+        
+        .status.ready {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .command-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .command-input input {
+            flex: 1;
+        }
+        
+        .game-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-commands {
+            margin-bottom: 20px;
+        }
+        
+        .quick-commands h3 {
+            margin-top: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .command-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 WeeWar CLI (WASM)</h1>
+    
+    <div class="container">
+        <div class="status" id="cli-status">Loading...</div>
+        
+        <div class="quick-commands">
+            <h3>Quick Actions</h3>
+            <div class="controls">
+                <button onclick="createNewGame(2)">New Game (2 players)</button>
+                <button onclick="createNewGame(3)">New Game (3 players)</button>
+                <button onclick="createNewGame(4)">New Game (4 players)</button>
+                <button onclick="setVerbose(true)">Enable Verbose</button>
+                <button onclick="setVerbose(false)">Disable Verbose</button>
+                <button onclick="setDisplayMode('compact')">Compact Mode</button>
+                <button onclick="setDisplayMode('detailed')">Detailed Mode</button>
+                <button onclick="clearOutput()">Clear Output</button>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div>
+                <h3>Game Commands</h3>
+                <div class="controls">
+                    <button onclick="executeCommand('status')">Show Status</button>
+                    <button onclick="executeCommand('map')">Show Map</button>
+                    <button onclick="executeCommand('units')">Show Units</button>
+                    <button onclick="executeCommand('help')">Show Help</button>
+                    <button onclick="executeCommand('end')">End Turn</button>
+                    <button onclick="renderGame()">Render Game</button>
+                </div>
+                
+                <h4>Movement Commands</h4>
+                <div class="controls">
+                    <button onclick="executeCommand('move A1 B2')">Move A1→B2</button>
+                    <button onclick="executeCommand('move B2 C3')">Move B2→C3</button>
+                    <button onclick="executeCommand('moveoptions A1')">Move Options A1</button>
+                    <button onclick="executeCommand('moveoptions B2')">Move Options B2</button>
+                </div>
+                
+                <h4>Combat Commands</h4>
+                <div class="controls">
+                    <button onclick="executeCommand('attack A1 B2')">Attack A1→B2</button>
+                    <button onclick="executeCommand('predict A1 B2')">Predict A1→B2</button>
+                    <button onclick="executeCommand('attackoptions A1')">Attack Options A1</button>
+                    <button onclick="executeCommand('attackoptions B2')">Attack Options B2</button>
+                </div>
+            </div>
+            
+            <div>
+                <h3>Game State</h3>
+                <div class="game-info" id="game-state">No game loaded</div>
+                
+                <h3>Save/Load</h3>
+                <div class="controls">
+                    <button onclick="saveGame()">Save Game</button>
+                    <button onclick="loadSavedGame()">Load Last Save</button>
+                    <button onclick="downloadSave()">Download Save</button>
+                    <button onclick="uploadSave()">Upload Save</button>
+                </div>
+                <input type="file" id="file-input" accept=".json" style="display: none;" onchange="handleFileUpload(event)">
+            </div>
+        </div>
+        
+        <h3>Custom Command</h3>
+        <div class="command-input">
+            <input type="text" id="cli-command" placeholder="Enter command (e.g., 'move A1 B2', 'attack B2 C3')" 
+                   onkeypress="handleCommandKeypress(event)">
+            <button onclick="executeCustomCommand()">Execute</button>
+        </div>
+        
+        <h3>Output Console</h3>
+        <div class="output" id="cli-output">WeeWar CLI WASM loading...</div>
+        
+        <div class="canvas-container" id="cli-canvas" style="display: none;">
+            <h3>Game Render</h3>
+            <img id="game-image" alt="Game render will appear here">
+            <div>
+                <button onclick="renderGame(400, 300)">Render Small (400x300)</button>
+                <button onclick="renderGame(800, 600)">Render Medium (800x600)</button>
+                <button onclick="renderGame(1200, 900)">Render Large (1200x900)</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3>Debug Information</h3>
+        <div id="debug-info">
+            <p><strong>WASM Status:</strong> <span id="wasm-status">Not loaded</span></p>
+            <p><strong>Last Command:</strong> <span id="last-command">None</span></p>
+            <p><strong>Last Response:</strong> <span id="last-response">None</span></p>
+            <p><strong>Commands Executed:</strong> <span id="command-count">0</span></p>
+        </div>
+    </div>
+    
+    <script src="../wasm/wasm_exec.js"></script>
+    <script>
+        // Global state
+        let cliReady = false;
+        let lastSaveData = null;
+        let commandCount = 0;
+        
+        // Utility functions
+        function log(message) {
+            const output = document.getElementById('cli-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function updateStatus(status, className = 'ready') {
+            const statusEl = document.getElementById('cli-status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+        
+        function updateDebugInfo(command, response) {
+            document.getElementById('last-command').textContent = command || 'None';
+            document.getElementById('last-response').textContent = response ? JSON.stringify(response, null, 2) : 'None';
+            document.getElementById('command-count').textContent = ++commandCount;
+        }
+        
+        function clearOutput() {
+            document.getElementById('cli-output').textContent = '';
+            log('Output cleared');
+        }
+        
+        // CLI Functions
+        function createNewGame(players = 2) {
+            if (!cliReady) {
+                log('❌ CLI not ready yet');
+                return;
+            }
+            
+            try {
+                log(`🎮 Creating new game with ${players} players...`);
+                const result = weewarCreateGame(players);
+                updateDebugInfo(`createGame(${players})`, result);
+                
+                if (result.success) {
+                    log(`✅ ${result.message}`);
+                    updateGameState();
+                } else {
+                    log(`❌ ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+                console.error('createNewGame error:', e);
+            }
+        }
+        
+        function executeCommand(command) {
+            if (!cliReady) {
+                log('❌ CLI not ready yet');
+                return;
+            }
+            
+            try {
+                log(`> ${command}`);
+                const result = weewarExecuteCommand(command);
+                updateDebugInfo(command, result);
+                
+                if (result.success) {
+                    log(result.message);
+                    updateGameState();
+                } else {
+                    log(`❌ ${result.error || 'Command failed'}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+                console.error('executeCommand error:', e);
+            }
+        }
+        
+        function executeCustomCommand() {
+            const command = document.getElementById('cli-command').value.trim();
+            if (!command) return;
+            
+            executeCommand(command);
+            document.getElementById('cli-command').value = '';
+        }
+        
+        function handleCommandKeypress(event) {
+            if (event.key === 'Enter') {
+                executeCustomCommand();
+            }
+        }
+        
+        function updateGameState() {
+            if (!cliReady) return;
+            
+            try {
+                const result = weewarGetGameState();
+                if (result.success) {
+                    const state = result.data;
+                    document.getElementById('game-state').innerHTML = `
+                        <strong>🎯 Turn:</strong> ${state.turnNumber}<br>
+                        <strong>👤 Current Player:</strong> ${state.currentPlayer}<br>
+                        <strong>📊 Status:</strong> ${state.status}<br>
+                        <strong>🗺️ Map Size:</strong> ${state.mapSize.rows}×${state.mapSize.cols}<br>
+                        <strong>👥 Players:</strong> ${state.playerCount}<br>
+                        <strong>🔢 Units:</strong> ${Object.entries(state.players).map(([player, info]) => 
+                            `P${player.slice(-1)}: ${info.unitCount}`
+                        ).join(', ')}
+                    `;
+                }
+            } catch (e) {
+                log(`❌ Error getting game state: ${e.message}`);
+            }
+        }
+        
+        function renderGame(width = 800, height = 600) {
+            if (!cliReady) {
+                log('❌ CLI not ready yet');
+                return;
+            }
+            
+            try {
+                log(`🎨 Rendering game (${width}×${height})...`);
+                const result = weewarRenderGame(width, height);
+                updateDebugInfo(`renderGame(${width}, ${height})`, {success: result.success, dataSize: result.data?.dataURL?.length || 0});
+                
+                if (result.success) {
+                    const img = document.getElementById('game-image');
+                    img.src = result.data.dataURL;
+                    document.getElementById('cli-canvas').style.display = 'block';
+                    log(`✅ Game rendered successfully (${Math.round(result.data.dataURL.length/1024)}KB)`);
+                } else {
+                    log(`❌ Render failed: ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+                console.error('renderGame error:', e);
+            }
+        }
+        
+        function setVerbose(enabled) {
+            if (!cliReady) return;
+            
+            try {
+                const result = weewarSetVerbose(enabled);
+                updateDebugInfo(`setVerbose(${enabled})`, result);
+                log(`🔧 ${result.message}`);
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function setDisplayMode(mode) {
+            if (!cliReady) return;
+            
+            try {
+                const result = weewarSetDisplayMode(mode);
+                updateDebugInfo(`setDisplayMode(${mode})`, result);
+                log(`🔧 ${result.message}`);
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function saveGame() {
+            if (!cliReady) {
+                log('❌ CLI not ready yet');
+                return;
+            }
+            
+            try {
+                const result = weewarSaveGame();
+                updateDebugInfo('saveGame()', result);
+                
+                if (result.success) {
+                    lastSaveData = result.data.saveData;
+                    log(`💾 Game saved successfully (${Math.round(result.data.size/1024)}KB)`);
+                } else {
+                    log(`❌ Save failed: ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function loadSavedGame() {
+            if (!lastSaveData) {
+                log('❌ No save data available. Save a game first.');
+                return;
+            }
+            
+            try {
+                log('📂 Loading saved game...');
+                const result = weewarLoadGame(lastSaveData);
+                updateDebugInfo('loadGame(savedData)', result);
+                
+                if (result.success) {
+                    log(`✅ ${result.message}`);
+                    updateGameState();
+                } else {
+                    log(`❌ Load failed: ${result.error}`);
+                }
+            } catch (e) {
+                log(`💥 Error: ${e.message}`);
+            }
+        }
+        
+        function downloadSave() {
+            if (!lastSaveData) {
+                log('❌ No save data available. Save a game first.');
+                return;
+            }
+            
+            const blob = new Blob([lastSaveData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `weewar-save-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            log('💾 Save file downloaded');
+        }
+        
+        function uploadSave() {
+            document.getElementById('file-input').click();
+        }
+        
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const saveData = e.target.result;
+                    log(`📂 Loading game from file: ${file.name}`);
+                    const result = weewarLoadGame(saveData);
+                    updateDebugInfo(`loadGame(${file.name})`, result);
+                    
+                    if (result.success) {
+                        log(`✅ ${result.message}`);
+                        updateGameState();
+                    } else {
+                        log(`❌ Load failed: ${result.error}`);
+                    }
+                } catch (e) {
+                    log(`💥 Error loading file: ${e.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Initialize WASM
+        async function initWASM() {
+            try {
+                updateStatus('Loading WASM...', 'loading');
+                document.getElementById('wasm-status').textContent = 'Loading...';
+                log('🚀 Initializing WeeWar CLI WASM...');
+                
+                const go = new Go();
+                const wasmModule = await WebAssembly.instantiateStreaming(
+                    fetch('../wasm/weewar-cli.wasm'), 
+                    go.importObject
+                );
+                
+                go.run(wasmModule.instance);
+                cliReady = true;
+                
+                updateStatus('CLI Ready ✅', 'ready');
+                document.getElementById('wasm-status').textContent = 'Ready';
+                log('✅ WeeWar CLI WASM loaded successfully!');
+                log('💡 Try creating a new game or executing commands');
+                
+            } catch (error) {
+                updateStatus('Load Failed ❌', 'error');
+                document.getElementById('wasm-status').textContent = 'Failed';
+                log(`💥 Failed to load WASM: ${error}`);
+                console.error('WASM load error:', error);
+            }
+        }
+        
+        // Start loading when page loads
+        window.addEventListener('load', initWASM);
+        
+        // Focus command input on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('cli-command').focus();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

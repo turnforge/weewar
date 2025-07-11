@@ -196,9 +196,14 @@ turnengine/
 │   ├── board.go            # Abstract board system
 │   └── ...
 ├── games/weewar/           # WeeWar implementation (20% specific)
-│   ├── core.go             # Core game API (NEW)
-│   ├── buffer.go           # Rendering system (NEW)
-│   ├── game.go             # Main game logic
+│   ├── game_interface.go   # Core game interface contracts (NEW)
+│   ├── ai.go               # AI interface and types (NEW)
+│   ├── ui.go               # UI interface and types (NEW)
+│   ├── cli.go              # CLI interface and types (NEW)
+│   ├── events.go           # Event system (NEW)
+│   ├── game.go             # Unified game implementation (NEW)
+│   ├── buffer.go           # Rendering system
+│   ├── core.go             # Legacy core API (to be refactored)
 │   ├── board.go            # Hex board implementation
 │   ├── components.go       # WeeWar components
 │   ├── combat.go           # Combat system
@@ -207,7 +212,8 @@ turnengine/
 │   └── data/               # Game data
 └── cmd/                    # Main applications
     ├── server/             # Server application
-    └── wasm/               # WebAssembly application
+    ├── wasm/               # WebAssembly application
+    └── weewar-cli/         # CLI application (NEW)
 ```
 
 ### New Development Architecture (v2.0)
@@ -218,6 +224,12 @@ turnengine/
 - **Headless Gameplay**: Easy testing and AI development
 - **Deterministic Games**: Seeded RNG for reproducible gameplay
 
+#### Interface-Driven Architecture
+- **Clean Interface Contracts**: Well-defined interfaces for each layer
+- **Separation of Concerns**: Core game logic separated from AI, UI, and CLI
+- **Modular Design**: Independent development of different game aspects
+- **Testable Components**: Each interface can be tested independently
+
 #### Buffer-Based Rendering
 - **Composable Layers**: Separate terrain, units, and UI rendering
 - **Scaling Support**: Professional image scaling with bilinear interpolation
@@ -226,13 +238,46 @@ turnengine/
 - **Vector Path Drawing**: Professional-grade path filling and stroking with tdewolff/canvas
 - **WebAssembly Ready**: Zero-dependency rendering optimized for browser deployment
 
+#### Interface Architecture
+
+The new architecture is built around clean interface contracts:
+
+**Core Game Interface** (`game_interface.go`):
+- `GameController`: Game lifecycle, turns, state management
+- `MapInterface`: Map queries, pathfinding, coordinate conversion
+- `UnitInterface`: Unit management, movement, combat actions
+- Core types: `GameStatus`, `Position`, `CombatResult`
+
+**AI Interface** (`ai.go`):
+- `AIInterface`: Decision-making, strategic analysis
+- `AIPlayer`: AI player instances with personalities
+- AI types: `AIAction`, `Threat`, `Opportunity`, `AIDifficulty`
+
+**UI Interface** (`ui.go`):
+- `UIInterface`: Browser interaction, rendering, input handling
+- `AnimationInterface`: Animation system
+- `ThemeInterface`: Visual theming
+- UI types: `ClickResult`, `HoverResult`, `UIState`, `RenderOptions`
+
+**CLI Interface** (`cli.go`):
+- `CLIInterface`: Command-line interaction
+- `CLIFormatter`: Text formatting and display
+- CLI types: `CLICommand`, `CLIResponse`, `CLIGameState`
+
+**Event System** (`events.go`):
+- `EventInterface`: Observer pattern for game events
+- `EventManager`: Thread-safe event subscription and emission
+- Event types: Game state changes, unit actions, turn progression
+
 ### Development Principles
 
-1. **Clean Architecture**: Separate concerns clearly (static vs runtime, rendering vs logic)
-2. **Programmatic API**: Easy to test and extend programmatically
-3. **Composable Systems**: Modular design with clear interfaces
-4. **Test-First Development**: Write tests before implementing features
-5. **Visual Debugging**: Use Buffer system for debugging and visualization
+1. **Interface-Driven Design**: Define contracts before implementation
+2. **Separation of Concerns**: Core game logic independent of AI/UI/CLI
+3. **Clean Architecture**: Static vs runtime, rendering vs logic separation
+4. **Programmatic API**: Easy to test and extend programmatically
+5. **Composable Systems**: Modular design with clear interfaces
+6. **Test-First Development**: Write tests before implementing features
+7. **Visual Debugging**: Use Buffer system for debugging and visualization
 
 ### Adding New Features
 

@@ -5,9 +5,12 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	_ "image/png" // For PNG decoding
 	"os"
 	
 	xdraw "golang.org/x/image/draw"
+	"github.com/tdewolff/canvas"
+	"github.com/tdewolff/canvas/renderers"
 )
 
 // Buffer represents a drawable canvas with compositing capabilities
@@ -15,6 +18,25 @@ type Buffer struct {
 	img    *image.RGBA
 	width  int
 	height int
+}
+
+// Point represents a 2D point
+type Point struct {
+	X, Y float64
+}
+
+// Color represents a color with alpha channel
+type Color struct {
+	R, G, B, A uint8
+}
+
+// StrokeProperties defines stroke rendering properties
+type StrokeProperties struct {
+	Width       float64
+	LineCap     string    // "butt", "round", "square"
+	LineJoin    string    // "miter", "round", "bevel"
+	DashPattern []float64
+	DashOffset  float64
 }
 
 // NewBuffer creates a new buffer with the specified dimensions
@@ -80,4 +102,131 @@ func (b *Buffer) Save(path string) error {
 	defer file.Close()
 	
 	return png.Encode(file, b.img)
+}
+
+// FillPath fills a given path with the given color (with alpha channel compositing)
+func (b *Buffer) FillPath(points []Point, fillColor Color) {
+	if len(points) < 2 {
+		return // Need at least 2 points to create a path
+	}
+	
+	// Create canvas with buffer dimensions (in mm, so scale down)
+	c := canvas.New(float64(b.width)/3.78, float64(b.height)/3.78) // ~96 DPI conversion
+	ctx := canvas.NewContext(c)
+	
+	// Set fill color
+	rgba := color.RGBA{R: fillColor.R, G: fillColor.G, B: fillColor.B, A: fillColor.A}
+	ctx.SetFillColor(rgba)
+	
+	// Build path (scale coordinates to mm)
+	ctx.MoveTo(points[0].X/3.78, points[0].Y/3.78)
+	for i := 1; i < len(points); i++ {
+		ctx.LineTo(points[i].X/3.78, points[i].Y/3.78)
+	}
+	ctx.Close()
+	
+	// Fill the path
+	ctx.Fill()
+	
+	// Render canvas to a temporary file and then load it
+	tempFile := "/tmp/temp_fill.png"
+	err := renderers.Write(tempFile, c, canvas.DPMM(3.78))
+	if err != nil {
+		return // Skip if rendering fails
+	}
+	
+	// Load the temporary image
+	file, err := os.Open(tempFile)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	defer os.Remove(tempFile)
+	
+	tempImg, _, err := image.Decode(file)
+	if err != nil {
+		return
+	}
+	
+	// Composite the temporary image onto the buffer
+	draw.Draw(b.img, b.img.Bounds(), tempImg, image.Point{}, draw.Over)
+}
+
+// StrokePath strokes a given path with a given color and stroke properties
+func (b *Buffer) StrokePath(points []Point, strokeColor Color, strokeProperties StrokeProperties) {
+	if len(points) < 2 {
+		return // Need at least 2 points to create a path
+	}
+	
+	// Create canvas with buffer dimensions (in mm, so scale down)
+	c := canvas.New(float64(b.width)/3.78, float64(b.height)/3.78) // ~96 DPI conversion
+	ctx := canvas.NewContext(c)
+	
+	// Set stroke color
+	rgba := color.RGBA{R: strokeColor.R, G: strokeColor.G, B: strokeColor.B, A: strokeColor.A}
+	ctx.SetStrokeColor(rgba)
+	
+	// Set stroke width (scale to mm)
+	ctx.SetStrokeWidth(strokeProperties.Width/3.78)
+	
+	// Set line cap
+	switch strokeProperties.LineCap {
+	case "round":
+		ctx.SetStrokeCapper(canvas.RoundCapper{})
+	case "square":
+		ctx.SetStrokeCapper(canvas.SquareCapper{})
+	default: // "butt" or unspecified
+		ctx.SetStrokeCapper(canvas.ButtCapper{})
+	}
+	
+	// Set line join
+	switch strokeProperties.LineJoin {
+	case "round":
+		ctx.SetStrokeJoiner(canvas.RoundJoiner{})
+	case "bevel":
+		ctx.SetStrokeJoiner(canvas.BevelJoiner{})
+	default: // "miter" or unspecified
+		ctx.SetStrokeJoiner(canvas.MiterJoiner{})
+	}
+	
+	// Set dash pattern if specified (scale to mm)
+	if len(strokeProperties.DashPattern) > 0 {
+		scaledDashes := make([]float64, len(strokeProperties.DashPattern))
+		for i, dash := range strokeProperties.DashPattern {
+			scaledDashes[i] = dash / 3.78
+		}
+		ctx.SetDashes(strokeProperties.DashOffset/3.78, scaledDashes...)
+	}
+	
+	// Build path (scale coordinates to mm)
+	ctx.MoveTo(points[0].X/3.78, points[0].Y/3.78)
+	for i := 1; i < len(points); i++ {
+		ctx.LineTo(points[i].X/3.78, points[i].Y/3.78)
+	}
+	
+	// Stroke the path
+	ctx.Stroke()
+	
+	// Render canvas to a temporary file and then load it
+	tempFile := "/tmp/temp_stroke.png"
+	err := renderers.Write(tempFile, c, canvas.DPMM(3.78))
+	if err != nil {
+		return // Skip if rendering fails
+	}
+	
+	// Load the temporary image
+	file, err := os.Open(tempFile)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	defer os.Remove(tempFile)
+	
+	tempImg, _, err := image.Decode(file)
+	if err != nil {
+		return
+	}
+	
+	// Composite the temporary image onto the buffer
+	draw.Draw(b.img, b.img.Bounds(), tempImg, image.Point{}, draw.Over)
 }

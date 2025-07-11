@@ -80,92 +80,158 @@ type Tile struct {
 	Unit *Unit `json:"unit"`
 }
 
+// TileWithCoord represents a tile with its cube coordinate for JSON serialization
+type TileWithCoord struct {
+	Coord CubeCoord `json:"coord"`
+	Tile  *Tile    `json:"tile"`
+}
+
 // Map represents the game map with hex grid topology
 type Map struct {
-	NumRows int
-	NumCols int
+	// Display bounds (for UI rendering only)
+	NumRows int `json:"numRows"`
+	NumCols int `json:"numCols"`
 
-	// Tile storage - sparse representation
-	Tiles map[int]map[int]*Tile // Tiles[row][col] = *Tile
+	// Cube coordinate storage - primary data structure
+	Tiles map[CubeCoord]*Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
 	
-	// Private: intended hex offset pattern (for when tiles haven't been placed yet)
-	intendedEvenRowsOffset bool
+	// JSON-friendly representation
+	TileList []*TileWithCoord `json:"tiles"`
 }
 
 // NewMap creates a new empty map with the specified dimensions
+// evenRowsOffset parameter is deprecated and ignored (cube coordinates are universal)
 func NewMap(numRows, numCols int, evenRowsOffset bool) *Map {
+	_ = evenRowsOffset // Deprecated: cube coordinates eliminate offset confusion
 	return &Map{
-		NumRows:                numRows,
-		NumCols:                numCols,
-		Tiles:                  make(map[int]map[int]*Tile),
-		intendedEvenRowsOffset: evenRowsOffset,
+		NumRows:  numRows,
+		NumCols:  numCols,
+		Tiles:    make(map[CubeCoord]*Tile),
+		TileList: make([]*TileWithCoord, 0),
 	}
 }
 
-// EvenRowsOffset determines the hex offset pattern based on map structure
-// This replaces the stored boolean property with a computed method
-func (m *Map) EvenRowsOffset() bool {
-	// Strategy 1: Infer from existing tile layout if we have enough tiles
-	if len(m.Tiles) > 1 {
-		inferred := m.inferOffsetFromLayout()
-		// If inference is confident, use it; otherwise fall back to intended
-		if inferred != m.intendedEvenRowsOffset {
-			// Could log a warning here if desired
-		}
-		return inferred
-	}
+// =============================================================================
+// JSON Serialization Methods
+// =============================================================================
+
+// MarshalJSON implements custom JSON marshaling for Map
+func (m *Map) MarshalJSON() ([]byte, error) {
+	// Convert cube map to tile list for JSON
+	m.syncTileListFromMap()
 	
-	// Strategy 2: Use intended offset for empty or sparse maps
-	return m.intendedEvenRowsOffset
+	// Create a temporary struct with the same fields
+	type mapJSON Map
+	return json.Marshal((*mapJSON)(m))
 }
 
-// inferOffsetFromLayout analyzes existing tiles to determine offset pattern
-func (m *Map) inferOffsetFromLayout() bool {
-	// Look at the relative positions of tiles in adjacent rows
-	// This is a heuristic - in practice you might store this as metadata
-	
-	// Find first tile in row 0 and row 1
-	var row0Col, row1Col int = -1, -1
-	
-	if row0Tiles, exists := m.Tiles[0]; exists {
-		for col := range row0Tiles {
-			row0Col = col
-			break
-		}
+// UnmarshalJSON implements custom JSON unmarshaling for Map
+func (m *Map) UnmarshalJSON(data []byte) error {
+	// Create a temporary struct with the same fields
+	type mapJSON Map
+	if err := json.Unmarshal(data, (*mapJSON)(m)); err != nil {
+		return err
 	}
 	
-	if row1Tiles, exists := m.Tiles[1]; exists {
-		for col := range row1Tiles {
-			row1Col = col
-			break
-		}
+	// Initialize the cube map if it's nil
+	if m.Tiles == nil {
+		m.Tiles = make(map[CubeCoord]*Tile)
 	}
 	
-	// If we have tiles in both rows, compare their alignment
-	if row0Col >= 0 && row1Col >= 0 {
-		// If row 1 starts further right than row 0, then odd rows are offset
-		// If row 0 starts further right than row 1, then even rows are offset
-		return row0Col > row1Col
-	}
-	
-	// Default to false if we can't determine
-	return false
-}
-
-// TileAt returns the tile at the specified position, or nil if none exists
-func (m *Map) TileAt(row, col int) *Tile {
-	if rowMap, exists := m.Tiles[row]; exists {
-		return rowMap[col]
-	}
+	// Convert tile list back to cube map
+	m.syncMapFromTileList()
 	return nil
 }
 
-// AddTile adds a tile to the map at its specified row/column position
-func (m *Map) AddTile(t *Tile) {
-	if m.Tiles[t.Row] == nil {
-		m.Tiles[t.Row] = make(map[int]*Tile)
+// syncTileListFromMap converts the cube map to tile list for JSON serialization
+func (m *Map) syncTileListFromMap() {
+	m.TileList = make([]*TileWithCoord, 0, len(m.Tiles))
+	for coord, tile := range m.Tiles {
+		m.TileList = append(m.TileList, &TileWithCoord{
+			Coord: coord,
+			Tile:  tile,
+		})
 	}
-	m.Tiles[t.Row][t.Col] = t
+}
+
+// syncMapFromTileList converts the tile list back to cube map after JSON deserialization
+func (m *Map) syncMapFromTileList() {
+	for _, tileWithCoord := range m.TileList {
+		m.Tiles[tileWithCoord.Coord] = tileWithCoord.Tile
+	}
+}
+
+// =============================================================================
+// Primary Cube-Based Storage Methods
+// =============================================================================
+
+// TileAtCube returns the tile at the specified cube coordinate (primary method)
+func (m *Map) TileAtCube(coord CubeCoord) *Tile {
+	return m.Tiles[coord]
+}
+
+// AddTileCube adds a tile at the specified cube coordinate (primary method)
+func (m *Map) AddTileCube(coord CubeCoord, tile *Tile) {
+	// Update tile's position to match cube coordinate
+	tile.Row, tile.Col = m.HexToDisplay(coord)
+	m.Tiles[coord] = tile
+}
+
+// DeleteTileCube removes the tile at the specified cube coordinate
+func (m *Map) DeleteTileCube(coord CubeCoord) {
+	delete(m.Tiles, coord)
+}
+
+// GetAllTiles returns all tiles as a map from cube coordinates to tiles
+func (m *Map) GetAllTiles() map[CubeCoord]*Tile {
+	// Return a copy to prevent external modification
+	result := make(map[CubeCoord]*Tile)
+	for coord, tile := range m.Tiles {
+		result[coord] = tile
+	}
+	return result
+}
+
+// =============================================================================
+// Display Coordinate Conversion Methods
+// =============================================================================
+
+// HexToDisplay converts cube coordinates to display coordinates (row, col)
+// Uses a standard hex-to-array conversion (odd-row offset style)
+func (m *Map) HexToDisplay(coord CubeCoord) (row, col int) {
+	row = coord.R
+	col = coord.Q + (coord.R + (coord.R & 1)) / 2
+	return row, col
+}
+
+// DisplayToHex converts display coordinates (row, col) to cube coordinates
+// Uses a standard array-to-hex conversion (odd-row offset style)
+func (m *Map) DisplayToHex(row, col int) CubeCoord {
+	q := col - (row + (row & 1)) / 2
+	return NewCubeCoord(q, row)
+}
+
+// =============================================================================
+// Legacy Display-Based Methods (for backward compatibility)
+// =============================================================================
+
+// EvenRowsOffset returns the offset configuration (deprecated - cube coordinates are universal)
+func (m *Map) EvenRowsOffset() bool {
+	// Deprecated: cube coordinates eliminate the need for offset configuration
+	// This method exists only for backward compatibility and always returns false
+	return false
+}
+
+// TileAt returns the tile at the specified display position (legacy method)
+func (m *Map) TileAt(row, col int) *Tile {
+	coord := m.DisplayToHex(row, col)
+	return m.TileAtCube(coord)
+}
+
+// AddTile adds a tile to the map at its specified row/column position (legacy method)
+func (m *Map) AddTile(t *Tile) {
+	coord := m.DisplayToHex(t.Row, t.Col)
+	m.AddTileCube(coord, t)
 }
 
 // GetHexNeighborCoords returns the coordinates of the 6 hex neighbors
@@ -257,22 +323,21 @@ func (m *Map) getMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, min
 	maxX = math.Inf(-1)
 	maxY = math.Inf(-1)
 
-	for row := range m.Tiles {
-		for col := range m.Tiles[row] {
-			x, y := m.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
+	for _, tile := range m.Tiles {
+		row, col := tile.Row, tile.Col
+		x, y := m.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
 
-			if x < minX {
-				minX = x
-			}
-			if y < minY {
-				minY = y
-			}
-			if x+tileWidth > maxX {
-				maxX = x + tileWidth
-			}
-			if y+tileHeight > maxY {
-				maxY = y + tileHeight
-			}
+		if x < minX {
+			minX = x
+		}
+		if y < minY {
+			minY = y
+		}
+		if x+tileWidth > maxX {
+			maxX = x + tileWidth
+		}
+		if y+tileHeight > maxY {
+			maxY = y + tileHeight
 		}
 	}
 
@@ -280,15 +345,10 @@ func (m *Map) getMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, min
 }
 
 
-// DeleteTile removes the tile at the specified position
+// DeleteTile removes the tile at the specified position (legacy method)
 func (m *Map) DeleteTile(row, col int) {
-	if rowMap, exists := m.Tiles[row]; exists {
-		delete(rowMap, col)
-		// Clean up empty row maps
-		if len(rowMap) == 0 {
-			delete(m.Tiles, row)
-		}
-	}
+	coord := m.DisplayToHex(row, col)
+	m.DeleteTileCube(coord)
 }
 
 // NewTile creates a new tile at the specified position
@@ -1150,12 +1210,10 @@ func (g *Game) RenderTerrain(buffer *Buffer, tileWidth, tileHeight, yIncrement f
 	}
 
 	// Render terrain tiles
-	for row := range g.Map.Tiles {
-		for col := range g.Map.Tiles[row] {
-			tile := g.Map.Tiles[row][col]
-			if tile != nil {
-				// Calculate tile position
-				x, y := g.Map.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
+	for _, tile := range g.Map.Tiles {
+		if tile != nil {
+			// Calculate tile position
+			x, y := g.Map.XYForTile(tile.Row, tile.Col, tileWidth, tileHeight, yIncrement)
 
 				// Try to load real tile asset first
 				if g.assetManager != nil && g.assetManager.HasTileAsset(tile.TileType) {
@@ -1178,7 +1236,6 @@ func (g *Game) RenderTerrain(buffer *Buffer, tileWidth, tileHeight, yIncrement f
 			}
 		}
 	}
-}
 
 // RenderUnits renders the units to a buffer
 func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {

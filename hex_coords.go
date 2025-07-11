@@ -10,19 +10,26 @@ import "fmt"
 // and EvenRowsOffset configurations.
 
 // CubeCoord represents a position in hex cube coordinate space
-// Constraint: Q + R + S = 0 (always satisfied by construction)
+// Constraint: Q + R + S = 0 (S is calculated as -Q-R)
 type CubeCoord struct {
-	Q, R, S int
+	Q int `json:"q"`
+	R int `json:"r"`
+	// S is not stored since S = -Q-R always
 }
 
-// NewCubeCoord creates a new cube coordinate (S is calculated automatically)
+// NewCubeCoord creates a new cube coordinate
 func NewCubeCoord(q, r int) CubeCoord {
-	return CubeCoord{Q: q, R: r, S: -q - r}
+	return CubeCoord{Q: q, R: r}
 }
 
-// IsValid checks if the cube coordinate satisfies the constraint Q + R + S = 0
+// S returns the S coordinate (calculated as -Q-R)
+func (c CubeCoord) S() int {
+	return -c.Q - c.R
+}
+
+// IsValid checks if the cube coordinate is valid (always true by construction)
 func (c CubeCoord) IsValid() bool {
-	return c.Q+c.R+c.S == 0
+	return true // Always valid since S is calculated
 }
 
 // =============================================================================
@@ -32,12 +39,12 @@ func (c CubeCoord) IsValid() bool {
 // HexDirections defines the 6 direction vectors in cube coordinates
 // Order must match NeighborDirection enum: LEFT, TOP_LEFT, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
 var HexDirections = [6]CubeCoord{
-	{-1, 0, 1},  // LEFT
-	{0, -1, 1},  // TOP_LEFT
-	{1, -1, 0},  // TOP_RIGHT
-	{1, 0, -1},  // RIGHT
-	{0, 1, -1},  // BOTTOM_RIGHT
-	{-1, 1, 0},  // BOTTOM_LEFT
+	{Q: -1, R: 0},  // LEFT
+	{Q: 0, R: -1},  // TOP_LEFT
+	{Q: 1, R: -1},  // TOP_RIGHT
+	{Q: 1, R: 0},   // RIGHT
+	{Q: 0, R: 1},   // BOTTOM_RIGHT
+	{Q: -1, R: 1},  // BOTTOM_LEFT
 }
 
 // Neighbor returns the neighboring cube coordinate in the specified direction
@@ -46,7 +53,6 @@ func (c CubeCoord) Neighbor(direction NeighborDirection) CubeCoord {
 	return CubeCoord{
 		Q: c.Q + dir.Q,
 		R: c.R + dir.R,
-		S: c.S + dir.S,
 	}
 }
 
@@ -65,7 +71,7 @@ func (c CubeCoord) Neighbors() [6]CubeCoord {
 
 // Distance calculates the hex distance between two cube coordinates
 func (c CubeCoord) Distance(other CubeCoord) int {
-	return (abs(c.Q-other.Q) + abs(c.R-other.R) + abs(c.S-other.S)) / 2
+	return (abs(c.Q-other.Q) + abs(c.R-other.R) + abs(c.S()-other.S())) / 2
 }
 
 // Range returns all cube coordinates within the specified radius
@@ -75,8 +81,8 @@ func (c CubeCoord) Range(radius int) []CubeCoord {
 		r1 := max(-radius, -q-radius)
 		r2 := min(radius, -q+radius)
 		for r := r1; r <= r2; r++ {
-			s := -q - r
-			coord := CubeCoord{c.Q + q, c.R + r, c.S + s}
+			// s := -q - r (not needed since S is calculated)
+			coord := CubeCoord{Q: c.Q + q, R: c.R + r}
 			results = append(results, coord)
 		}
 	}
@@ -151,11 +157,7 @@ func (m *Map) HexToArray(coord CubeCoord) (row, col int) {
 // Map Integration Methods
 // =============================================================================
 
-// TileAtCube returns the tile at the specified cube coordinate
-func (m *Map) TileAtCube(coord CubeCoord) *Tile {
-	row, col := m.HexToArray(coord)
-	return m.TileAt(row, col)
-}
+// Note: TileAtCube moved to game.go to use direct cube storage
 
 // TileAtCubeQR returns the tile at the specified cube coordinate (Q, R)
 func (m *Map) TileAtCubeQR(q, r int) *Tile {
@@ -188,7 +190,7 @@ func (m *Map) GetTileNeighborsCube(coord CubeCoord) []*Tile {
 
 // String returns a string representation of the cube coordinate
 func (c CubeCoord) String() string {
-	return fmt.Sprintf("(%d,%d,%d)", c.Q, c.R, c.S)
+	return fmt.Sprintf("(%d,%d,%d)", c.Q, c.R, c.S())
 }
 
 // ToArrayString returns the equivalent array coordinates as a string (for debugging)

@@ -7,7 +7,7 @@ import (
 func TestCubeCoordinates(t *testing.T) {
 	// Test cube coordinate creation and validation
 	coord := NewCubeCoord(1, 2)
-	if coord.Q != 1 || coord.R != 2 || coord.S != -3 {
+	if coord.Q != 1 || coord.R != 2 || coord.S() != -3 {
 		t.Errorf("NewCubeCoord(1, 2) = %+v, expected Q=1, R=2, S=-3", coord)
 	}
 	
@@ -15,11 +15,8 @@ func TestCubeCoordinates(t *testing.T) {
 		t.Error("Coordinate should be valid")
 	}
 	
-	// Test invalid coordinate
-	invalid := CubeCoord{Q: 1, R: 2, S: 3}
-	if invalid.IsValid() {
-		t.Error("Invalid coordinate should not pass validation")
-	}
+	// Note: With S() as method, all coordinates are valid by construction
+	// This test is no longer needed since invalid coordinates can't be created
 }
 
 func TestCubeNeighbors(t *testing.T) {
@@ -27,13 +24,13 @@ func TestCubeNeighbors(t *testing.T) {
 	
 	// Test individual neighbor directions
 	right := center.Neighbor(RIGHT)
-	expected := CubeCoord{Q: 1, R: 0, S: -1}
+	expected := CubeCoord{Q: 1, R: 0}
 	if right != expected {
 		t.Errorf("RIGHT neighbor = %+v, expected %+v", right, expected)
 	}
 	
 	left := center.Neighbor(LEFT)
-	expected = CubeCoord{Q: -1, R: 0, S: 1}
+	expected = CubeCoord{Q: -1, R: 0}
 	if left != expected {
 		t.Errorf("LEFT neighbor = %+v, expected %+v", left, expected)
 	}

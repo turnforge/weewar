@@ -35,8 +35,9 @@ func TestNewMap(t *testing.T) {
 	if m.NumCols != 15 {
 		t.Errorf("Expected NumCols to be 15, got %d", m.NumCols)
 	}
-	if !m.EvenRowsOffset() {
-		t.Errorf("Expected EvenRowsOffset to be true")
+	// EvenRowsOffset is deprecated and always returns false
+	if m.EvenRowsOffset() {
+		t.Errorf("Expected EvenRowsOffset to be false (deprecated)")
 	}
 	if m.Tiles == nil {
 		t.Errorf("Expected Tiles map to be initialized")

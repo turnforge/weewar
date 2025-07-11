@@ -1,393 +1,1396 @@
 package weewar
 
 import (
+	"encoding/json"
 	"fmt"
-
-	"github.com/panyam/turnengine/internal/turnengine"
+	"math"
+	"math/rand"
+	"time"
 )
 
-type WeeWarGame struct {
-	gameState     *turnengine.GameState
-	gameEngine    *turnengine.GameEngine
-	combatSystem  *WeeWarCombatSystem
-	movementSystem *WeeWarMovementSystem
-	board         *HexBoard
-	unitData      map[string]UnitData
-	terrainData   map[string]TerrainData
+// =============================================================================
+// Core Types (from core.go)
+// =============================================================================
+
+// TerrainData represents terrain type information
+type TerrainData struct {
+	ID           int
+	Name         string
+	MoveCost     int
+	DefenseBonus int
 }
 
-type WeeWarConfig struct {
-	BoardWidth    int                 `json:"boardWidth"`
-	BoardHeight   int                 `json:"boardHeight"`
-	Players       []WeeWarPlayer      `json:"players"`
-	StartingUnits map[string][]string `json:"startingUnits"`
-	TerrainMap    [][]string          `json:"terrainMap"`
-	MapData       *MapData            `json:"mapData,omitempty"`
+// Basic terrain data
+var terrainData = []TerrainData{
+	{0, "Unknown", 1, 0},
+	{1, "Grass", 1, 0},
+	{2, "Desert", 1, 0},
+	{3, "Water", 2, 0},
+	{4, "Mountain", 2, 10},
+	{5, "Rock", 3, 20},
 }
 
-type WeeWarPlayer struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Team  int    `json:"team"`
+// GetTerrainData returns terrain data for the given type
+func GetTerrainData(terrainType int) *TerrainData {
+	for i := range terrainData {
+		if terrainData[i].ID == terrainType {
+			return &terrainData[i]
+		}
+	}
+	return &terrainData[0] // Default to unknown
 }
 
-func NewWeeWarGame(config WeeWarConfig) (*WeeWarGame, error) {
-	// Load WeeWar data
-	data, err := loadWeeWarData()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load WeeWar data: %w", err)
+// Unit represents a runtime unit instance in the game
+type Unit struct {
+	UnitType int // Reference to UnitData by ID
+
+	// Runtime state
+	DistanceLeft    int // Movement points remaining this turn
+	AvailableHealth int // Current health points
+	TurnCounter     int // Which turn this unit was created/last acted
+
+	// Position on the map
+	Row int
+	Col int
+
+	// Player ownership
+	PlayerID int
+}
+
+// Tile represents a single hex tile on the map
+type Tile struct {
+	Row int `json:"row"`
+	Col int `json:"col"`
+
+	// Hex neighbors - clockwise from LEFT
+	// [0] = LEFT, [1] = TOP_LEFT, [2] = TOP_RIGHT, [3] = RIGHT, [4] = BOTTOM_RIGHT, [5] = BOTTOM_LEFT
+	Neighbours [6]*Tile `json:"-"` // Exclude from JSON to avoid circular references
+
+	TileType int `json:"tileType"` // Reference to TerrainData by ID
+
+	// Optional: Unit occupying this tile
+	Unit *Unit `json:"unit"`
+}
+
+// Map represents the game map with hex grid topology
+type Map struct {
+	NumRows int
+	NumCols int
+
+	// Hex offset configuration
+	EvenRowsOffset bool // If true, even rows start at x = hex_width/2, odd rows at x = 0
+
+	// Tile storage - sparse representation
+	Tiles map[int]map[int]*Tile // Tiles[row][col] = *Tile
+}
+
+// NewMap creates a new empty map with the specified dimensions
+func NewMap(numRows, numCols int, evenRowsOffset bool) *Map {
+	return &Map{
+		NumRows:        numRows,
+		NumCols:        numCols,
+		EvenRowsOffset: evenRowsOffset,
+		Tiles:          make(map[int]map[int]*Tile),
 	}
+}
 
-	// Create game systems
-	combatSystem, err := NewWeeWarCombatSystem()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create combat system: %w", err)
+// TileAt returns the tile at the specified position, or nil if none exists
+func (m *Map) TileAt(row, col int) *Tile {
+	if rowMap, exists := m.Tiles[row]; exists {
+		return rowMap[col]
 	}
+	return nil
+}
 
-	movementSystem, err := NewWeeWarMovementSystem()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create movement system: %w", err)
+// AddTile adds a tile to the map at its specified row/column position
+func (m *Map) AddTile(t *Tile) {
+	if m.Tiles[t.Row] == nil {
+		m.Tiles[t.Row] = make(map[int]*Tile)
 	}
+	m.Tiles[t.Row][t.Col] = t
+}
 
-	// Create hex board
-	board := NewHexBoard(config.BoardWidth, config.BoardHeight)
+// GetHexNeighborCoords returns the coordinates of the 6 hex neighbors
+func (m *Map) GetHexNeighborCoords(row, col int) [6][2]int {
+	var neighbors [6][2]int
 
-	// Create game engine
-	gameEngine := turnengine.NewGameEngine()
+	// Hex grid neighbor calculation depends on whether we're in even or odd row
+	isEvenRow := (row % 2) == 0
 
-	// Register command handlers
-	registerCommandHandlers(gameEngine, combatSystem, movementSystem)
-
-	// Create players
-	players := make([]turnengine.Player, len(config.Players))
-	for i, p := range config.Players {
-		players[i] = turnengine.Player{
-			ID:        p.ID,
-			Name:      p.Name,
-			Team:      p.Team,
-			Status:    "active",
-			Resources: map[string]interface{}{
-				"funds": 10000,
-			},
-			Metadata: make(map[string]interface{}),
+	if m.EvenRowsOffset {
+		// Even rows are offset to the right
+		if isEvenRow {
+			// Even row neighbors
+			neighbors[0] = [2]int{row, col - 1}     // LEFT
+			neighbors[1] = [2]int{row - 1, col}     // TOP_LEFT
+			neighbors[2] = [2]int{row - 1, col + 1} // TOP_RIGHT
+			neighbors[3] = [2]int{row, col + 1}     // RIGHT
+			neighbors[4] = [2]int{row + 1, col + 1} // BOTTOM_RIGHT
+			neighbors[5] = [2]int{row + 1, col}     // BOTTOM_LEFT
+		} else {
+			// Odd row neighbors
+			neighbors[0] = [2]int{row, col - 1}     // LEFT
+			neighbors[1] = [2]int{row - 1, col - 1} // TOP_LEFT
+			neighbors[2] = [2]int{row - 1, col}     // TOP_RIGHT
+			neighbors[3] = [2]int{row, col + 1}     // RIGHT
+			neighbors[4] = [2]int{row + 1, col}     // BOTTOM_RIGHT
+			neighbors[5] = [2]int{row + 1, col - 1} // BOTTOM_LEFT
+		}
+	} else {
+		// Odd rows are offset to the right
+		if isEvenRow {
+			// Even row neighbors
+			neighbors[0] = [2]int{row, col - 1}     // LEFT
+			neighbors[1] = [2]int{row - 1, col - 1} // TOP_LEFT
+			neighbors[2] = [2]int{row - 1, col}     // TOP_RIGHT
+			neighbors[3] = [2]int{row, col + 1}     // RIGHT
+			neighbors[4] = [2]int{row + 1, col}     // BOTTOM_RIGHT
+			neighbors[5] = [2]int{row + 1, col - 1} // BOTTOM_LEFT
+		} else {
+			// Odd row neighbors
+			neighbors[0] = [2]int{row, col - 1}     // LEFT
+			neighbors[1] = [2]int{row - 1, col}     // TOP_LEFT
+			neighbors[2] = [2]int{row - 1, col + 1} // TOP_RIGHT
+			neighbors[3] = [2]int{row, col + 1}     // RIGHT
+			neighbors[4] = [2]int{row + 1, col + 1} // BOTTOM_RIGHT
+			neighbors[5] = [2]int{row + 1, col}     // BOTTOM_LEFT
 		}
 	}
 
-	// Create game state
-	gameState := turnengine.NewGameState("weewar", players, data)
+	return neighbors
+}
 
-	// Initialize world with components and systems
-	world := gameState.World
-	registerWeeWarComponents(world)
-	world.RegisterSystem(combatSystem)
-	world.RegisterSystem(movementSystem)
+// XYForTile converts tile row/col coordinates to pixel x,y coordinates for rendering
+func (m *Map) XYForTile(row, col int, tileWidth, tileHeight, yIncrement float64) (x, y float64) {
+	// Calculate base x position
+	x = float64(col) * tileWidth
 
-	game := &WeeWarGame{
-		gameState:      gameState,
-		gameEngine:     gameEngine,
-		combatSystem:   combatSystem,
-		movementSystem: movementSystem,
-		board:          board,
-		unitData:       make(map[string]UnitData),
-		terrainData:    make(map[string]TerrainData),
+	// Apply offset for alternating rows (hex grid staggering)
+	isEvenRow := (row % 2) == 0
+	if m.EvenRowsOffset {
+		// Even rows are offset to the right
+		if isEvenRow {
+			x += tileWidth / 2
+		}
+	} else {
+		// Odd rows are offset to the right
+		if !isEvenRow {
+			x += tileWidth / 2
+		}
 	}
 
-	// Index unit and terrain data
-	for _, unit := range data.Units {
-		game.unitData[unit.Name] = unit
-	}
-	for _, terrain := range data.Terrains {
-		game.terrainData[terrain.Name] = terrain
+	// Calculate y position
+	y = float64(row) * yIncrement
+
+	return x, y
+}
+
+// getMapBounds calculates the pixel bounds of the entire map
+func (m *Map) getMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, minY, maxX, maxY float64) {
+	minX = math.Inf(1)
+	minY = math.Inf(1)
+	maxX = math.Inf(-1)
+	maxY = math.Inf(-1)
+
+	for row := range m.Tiles {
+		for col := range m.Tiles[row] {
+			x, y := m.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
+
+			if x < minX {
+				minX = x
+			}
+			if y < minY {
+				minY = y
+			}
+			if x+tileWidth > maxX {
+				maxX = x + tileWidth
+			}
+			if y+tileHeight > maxY {
+				maxY = y + tileHeight
+			}
+		}
 	}
 
-	// Initialize board terrain
-	if err := game.initializeTerrain(config.TerrainMap); err != nil {
-		return nil, fmt.Errorf("failed to initialize terrain: %w", err)
+	return minX, minY, maxX, maxY
+}
+
+// ConnectHexNeighbors automatically connects all tiles in the map as hex neighbors
+func (m *Map) ConnectHexNeighbors() {
+	for row := range m.Tiles {
+		for col := range m.Tiles[row] {
+			tile := m.Tiles[row][col]
+			if tile != nil {
+				neighborCoords := m.GetHexNeighborCoords(row, col)
+
+				for i, coord := range neighborCoords {
+					neighborTile := m.TileAt(coord[0], coord[1])
+					tile.Neighbours[i] = neighborTile
+				}
+			}
+		}
+	}
+}
+
+// DeleteTile removes the tile at the specified position
+func (m *Map) DeleteTile(row, col int) {
+	if rowMap, exists := m.Tiles[row]; exists {
+		delete(rowMap, col)
+		// Clean up empty row maps
+		if len(rowMap) == 0 {
+			delete(m.Tiles, row)
+		}
+	}
+}
+
+// NewTile creates a new tile at the specified position
+func NewTile(row, col, tileType int) *Tile {
+	return &Tile{
+		Row:      row,
+		Col:      col,
+		TileType: tileType,
+	}
+}
+
+// NewUnit creates a new unit instance
+func NewUnit(unitType, playerID int) *Unit {
+	return &Unit{
+		UnitType:        unitType,
+		PlayerID:        playerID,
+		DistanceLeft:    0, // Will be set based on UnitData
+		AvailableHealth: 0, // Will be set based on UnitData
+		TurnCounter:     0,
+	}
+}
+
+// =============================================================================
+// Unified Game Implementation
+// =============================================================================
+// This file implements the unified Game struct that combines the best parts
+// of the existing core.go with the new interface architecture. It provides
+// a single, coherent implementation of all core game interfaces.
+
+// Game represents the unified game state and implements GameInterface
+type Game struct {
+	// Core game state (from core.go)
+	Map           *Map       `json:"map"`
+	Units         [][]*Unit  `json:"units"`         // Units[playerID][unitIndex]
+	CurrentPlayer int        `json:"currentPlayer"` // 0-based player index
+	TurnCounter   int        `json:"turnCounter"`   // 1-based turn number
+	Status        GameStatus `json:"status"`        // Game status
+
+	// Game configuration
+	PlayerCount int   `json:"playerCount"` // Number of players
+	Seed        int64 `json:"seed"`        // Random seed for deterministic gameplay
+
+	// Random number generator
+	rng *rand.Rand `json:"-"` // RNG for deterministic gameplay
+
+	// Event system
+	eventManager *EventManager `json:"-"` // Event manager for observer pattern
+
+	// Game metadata
+	CreatedAt    time.Time `json:"createdAt"`    // When game was created
+	LastActionAt time.Time `json:"lastActionAt"` // When last action was taken
+
+	// Internal state
+	winner    int  `json:"winner"`    // Winner player ID (-1 if no winner)
+	hasWinner bool `json:"hasWinner"` // Whether game has ended with winner
+}
+
+// =============================================================================
+// Game Creation and Initialization
+// =============================================================================
+
+// NewGame creates a new game instance with the specified parameters
+func NewGame(playerCount int, gameMap *Map, seed int64) (*Game, error) {
+	// Validate parameters
+	if playerCount < 2 || playerCount > 6 {
+		return nil, fmt.Errorf("invalid player count: %d (must be 2-6)", playerCount)
 	}
 
-	// Initialize starting units
-	if err := game.initializeStartingUnits(config.StartingUnits); err != nil {
+	if gameMap == nil {
+		return nil, fmt.Errorf("map cannot be nil")
+	}
+
+	// Create the game struct
+	game := &Game{
+		Map:           gameMap,
+		PlayerCount:   playerCount,
+		Seed:          seed,
+		CurrentPlayer: 0,
+		TurnCounter:   1,
+		Status:        GameStatusPlaying,
+		winner:        -1,
+		hasWinner:     false,
+		CreatedAt:     time.Now(),
+		LastActionAt:  time.Now(),
+		rng:           rand.New(rand.NewSource(seed)),
+		eventManager:  NewEventManager(),
+	}
+
+	// Initialize units slice
+	game.Units = make([][]*Unit, playerCount)
+	for i := range game.Units {
+		game.Units[i] = make([]*Unit, 0)
+	}
+
+	// Map is already assigned in the struct initialization above
+
+	// Initialize starting units (simplified for now)
+	// TODO: Replace with actual unit placement from map data
+	if err := game.initializeStartingUnits(); err != nil {
 		return nil, fmt.Errorf("failed to initialize starting units: %w", err)
 	}
+
+	// Emit game created event
+	game.eventManager.EmitGameStateChanged(GameStateChangeGameStarted, game)
 
 	return game, nil
 }
 
-func (wg *WeeWarGame) GetGameState() *turnengine.GameState {
-	return wg.gameState
+// LoadGame restores a game from saved JSON data
+func LoadGame(saveData []byte) (*Game, error) {
+	var game Game
+	if err := json.Unmarshal(saveData, &game); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal game data: %w", err)
+	}
+
+	// Restore transient state
+	game.rng = rand.New(rand.NewSource(game.Seed))
+	game.eventManager = NewEventManager()
+
+	// Restore hex neighbor connections (lost during JSON serialization)
+	if game.Map != nil {
+		game.Map.ConnectHexNeighbors()
+	}
+
+	// Validate loaded game state
+	if err := game.validateGameState(); err != nil {
+		return nil, fmt.Errorf("invalid saved game state: %w", err)
+	}
+
+	return &game, nil
 }
 
-func (wg *WeeWarGame) GetBoard() *HexBoard {
-	return wg.board
+// =============================================================================
+// GameController Interface Implementation
+// =============================================================================
+
+// LoadGame restores game from saved state (interface method)
+func (g *Game) LoadGame(saveData []byte) (*Game, error) {
+	return LoadGame(saveData)
 }
 
-func (wg *WeeWarGame) ProcessCommand(command *turnengine.Command) error {
-	return wg.gameState.ProcessCommand(wg.gameEngine, command)
+// SaveGame serializes current game state
+func (g *Game) SaveGame() ([]byte, error) {
+	// Update last action time
+	g.LastActionAt = time.Now()
+
+	// Serialize to JSON
+	data, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize game state: %w", err)
+	}
+
+	return data, nil
 }
 
-func (wg *WeeWarGame) GetUnitAt(pos *HexPosition) *turnengine.Entity {
-	entityID, exists := wg.board.GetEntityAt(pos)
-	if !exists {
+// GetCurrentPlayer returns active player ID
+func (g *Game) GetCurrentPlayer() int {
+	return g.CurrentPlayer
+}
+
+// GetTurnNumber returns current turn count
+func (g *Game) GetTurnNumber() int {
+	return g.TurnCounter
+}
+
+// GetGameStatus returns current game state
+func (g *Game) GetGameStatus() GameStatus {
+	return g.Status
+}
+
+// GetWinner returns winning player if game ended
+func (g *Game) GetWinner() (int, bool) {
+	return g.winner, g.hasWinner
+}
+
+// NextTurn advances to next player's turn
+func (g *Game) NextTurn() error {
+	if g.Status != GameStatusPlaying {
+		return fmt.Errorf("cannot advance turn: game is not in playing state")
+	}
+
+	// Reset unit movement for current player
+	if err := g.resetPlayerUnits(g.CurrentPlayer); err != nil {
+		return fmt.Errorf("failed to reset player units: %w", err)
+	}
+
+	// Advance to next player
+	g.CurrentPlayer = (g.CurrentPlayer + 1) % g.PlayerCount
+
+	// If we've cycled back to player 0, increment turn counter
+	if g.CurrentPlayer == 0 {
+		g.TurnCounter++
+	}
+
+	// Check for victory conditions
+	if winner, hasWinner := g.checkVictoryConditions(); hasWinner {
+		g.winner = winner
+		g.hasWinner = true
+		g.Status = GameStatusEnded
+		g.eventManager.EmitGameEnded(winner)
+		g.eventManager.EmitGameStateChanged(GameStateChangeGameEnded, winner)
+	}
+
+	// Update timestamp
+	g.LastActionAt = time.Now()
+
+	// Emit turn changed event
+	g.eventManager.EmitTurnChanged(g.CurrentPlayer, g.TurnCounter)
+	g.eventManager.EmitGameStateChanged(GameStateChangeTurnChanged, map[string]interface{}{
+		"newPlayer":  g.CurrentPlayer,
+		"turnNumber": g.TurnCounter,
+	})
+
+	return nil
+}
+
+// EndTurn completes current player's turn
+func (g *Game) EndTurn() error {
+	if g.Status != GameStatusPlaying {
+		return fmt.Errorf("cannot end turn: game is not in playing state")
+	}
+
+	// For now, EndTurn is the same as NextTurn
+	// In a full implementation, this might involve different logic
+	// (e.g., checking if player has mandatory actions to complete)
+	return g.NextTurn()
+}
+
+// CanEndTurn checks if current player can end their turn
+func (g *Game) CanEndTurn() bool {
+	if g.Status != GameStatusPlaying {
+		return false
+	}
+
+	// For now, player can always end turn
+	// In a full implementation, this might check:
+	// - Whether player has units that must move
+	// - Whether player has mandatory actions to complete
+	// - Whether player has captured a base this turn
+	return true
+}
+
+// =============================================================================
+// MapInterface Interface Implementation
+// =============================================================================
+
+// GetMapSize returns map dimensions
+func (g *Game) GetMapSize() (rows, cols int) {
+	if g.Map == nil {
+		return 0, 0
+	}
+	return g.Map.NumRows, g.Map.NumCols
+}
+
+// GetMapName returns loaded map name
+func (g *Game) GetMapName() string {
+	return "DefaultMap" // For now, since we're using map instances directly
+}
+
+// GetMapBounds returns pixel boundaries for rendering
+func (g *Game) GetMapBounds() (minX, minY, maxX, maxY float64) {
+	if g.Map == nil {
+		return 0, 0, 0, 0
+	}
+
+	// Use standard tile dimensions for bounds calculation
+	tileWidth := 60.0
+	tileHeight := 52.0
+	yIncrement := 39.0
+
+	return g.Map.getMapBounds(tileWidth, tileHeight, yIncrement)
+}
+
+// GetTileAt returns tile at specific position
+func (g *Game) GetTileAt(row, col int) *Tile {
+	if g.Map == nil {
+		return nil
+	}
+	return g.Map.TileAt(row, col)
+}
+
+// GetTileType returns terrain type at position
+func (g *Game) GetTileType(row, col int) int {
+	tile := g.GetTileAt(row, col)
+	if tile == nil {
+		return 0 // Default/unknown terrain
+	}
+	return tile.TileType
+}
+
+// GetTileNeighbors returns adjacent tiles (hex grid)
+func (g *Game) GetTileNeighbors(row, col int) []*Tile {
+	if g.Map == nil {
+		return make([]*Tile, 6)
+	}
+
+	neighborCoords := g.Map.GetHexNeighborCoords(row, col)
+	neighbors := make([]*Tile, 6)
+
+	for i, coord := range neighborCoords {
+		neighbors[i] = g.Map.TileAt(coord[0], coord[1])
+	}
+
+	return neighbors
+}
+
+// RowColToPixel converts grid coordinates to screen coordinates
+func (g *Game) RowColToPixel(row, col int) (x, y float64) {
+	if g.Map == nil {
+		return 0, 0
+	}
+
+	// Use standard tile dimensions
+	tileWidth := 60.0
+	tileHeight := 52.0
+	yIncrement := 39.0
+
+	return g.Map.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
+}
+
+// PixelToRowCol converts screen coordinates to grid coordinates
+func (g *Game) PixelToRowCol(x, y float64) (row, col int, valid bool) {
+	if g.Map == nil {
+		return 0, 0, false
+	}
+
+	// Use standard tile dimensions
+	tileWidth := 60.0
+	yIncrement := 39.0
+
+	// Calculate approximate row and column
+	row = int(y / yIncrement)
+
+	// Calculate column accounting for hex offset
+	isEvenRow := (row % 2) == 0
+	baseX := x
+	if g.Map.EvenRowsOffset {
+		if isEvenRow {
+			baseX -= tileWidth / 2
+		}
+	} else {
+		if !isEvenRow {
+			baseX -= tileWidth / 2
+		}
+	}
+	col = int(baseX / tileWidth)
+
+	// Validate that the calculated position exists on the map
+	if tile := g.GetTileAt(row, col); tile != nil {
+		return row, col, true
+	}
+
+	return 0, 0, false
+}
+
+// FindPath calculates movement path between positions
+func (g *Game) FindPath(fromRow, fromCol, toRow, toCol int) ([]Tile, error) {
+	if g.Map == nil {
+		return nil, fmt.Errorf("no map loaded")
+	}
+
+	// Check if start and end positions are valid
+	startTile := g.GetTileAt(fromRow, fromCol)
+	endTile := g.GetTileAt(toRow, toCol)
+
+	if startTile == nil {
+		return nil, fmt.Errorf("invalid start position: (%d, %d)", fromRow, fromCol)
+	}
+	if endTile == nil {
+		return nil, fmt.Errorf("invalid end position: (%d, %d)", toRow, toCol)
+	}
+
+	// For now, return a simple direct path
+	// TODO: Implement proper A* pathfinding
+	path := []Tile{*startTile, *endTile}
+	return path, nil
+}
+
+// IsValidMove checks if movement is legal
+func (g *Game) IsValidMove(fromRow, fromCol, toRow, toCol int) bool {
+	// Check if both positions are valid
+	startTile := g.GetTileAt(fromRow, fromCol)
+	endTile := g.GetTileAt(toRow, toCol)
+
+	if startTile == nil || endTile == nil {
+		return false
+	}
+
+	// Check if there's a unit at the start position
+	if startTile.Unit == nil {
+		return false
+	}
+
+	// Check if the unit belongs to the current player
+	if startTile.Unit.PlayerID != g.CurrentPlayer {
+		return false
+	}
+
+	// Check if destination is empty
+	if endTile.Unit != nil {
+		return false
+	}
+
+	// Check if unit has movement left
+	if startTile.Unit.DistanceLeft <= 0 {
+		return false
+	}
+
+	// For now, allow movement to any adjacent tile
+	// TODO: Implement proper movement range and pathfinding validation
+	return true
+}
+
+// GetMovementCost calculates movement points required
+func (g *Game) GetMovementCost(fromRow, fromCol, toRow, toCol int) int {
+	// For now, return a simple cost based on distance
+	// TODO: Implement proper terrain-based movement costs
+	if fromRow == toRow && fromCol == toCol {
+		return 0
+	}
+
+	// Calculate hex distance (simplified)
+	dRow := abs(toRow - fromRow)
+	dCol := abs(toCol - fromCol)
+
+	if dRow <= 1 && dCol <= 1 {
+		return 1 // Adjacent tiles cost 1 movement point
+	}
+
+	return dRow + dCol // Simplified distance calculation
+}
+
+// =============================================================================
+// UnitInterface Interface Implementation
+// =============================================================================
+
+// GetUnitAt returns unit at specific position
+func (g *Game) GetUnitAt(row, col int) *Unit {
+	tile := g.GetTileAt(row, col)
+	if tile == nil {
+		return nil
+	}
+	return tile.Unit
+}
+
+// GetUnitsForPlayer returns all units owned by player
+func (g *Game) GetUnitsForPlayer(playerID int) []*Unit {
+	if playerID < 0 || playerID >= len(g.Units) {
 		return nil
 	}
 
-	entity, exists := wg.gameState.World.GetEntity(entityID)
-	if !exists {
-		return nil
-	}
-
-	return entity
+	// Return a copy to prevent external modification
+	units := make([]*Unit, len(g.Units[playerID]))
+	copy(units, g.Units[playerID])
+	return units
 }
 
-func (wg *WeeWarGame) GetVisibleUnits(playerID string) []*turnengine.Entity {
-	var visibleUnits []*turnengine.Entity
+// GetAllUnits returns every unit on the map
+func (g *Game) GetAllUnits() []*Unit {
+	var allUnits []*Unit
 
-	// Get all entities belonging to this player
-	playerEntities := wg.gameState.World.QueryEntities("team", "position")
-	
-	for _, entity := range playerEntities {
-		team, exists := entity.GetComponent("team")
-		if !exists {
-			continue
+	for _, playerUnits := range g.Units {
+		allUnits = append(allUnits, playerUnits...)
+	}
+
+	return allUnits
+}
+
+// GetUnitType returns unit type identifier
+func (g *Game) GetUnitType(unit *Unit) int {
+	if unit == nil {
+		return 0
+	}
+	return unit.UnitType
+}
+
+// GetUnitHealth returns current health points
+func (g *Game) GetUnitHealth(unit *Unit) int {
+	if unit == nil {
+		return 0
+	}
+	return unit.AvailableHealth
+}
+
+// GetUnitMovementLeft returns remaining movement points
+func (g *Game) GetUnitMovementLeft(unit *Unit) int {
+	if unit == nil {
+		return 0
+	}
+	return unit.DistanceLeft
+}
+
+// GetUnitAttackRange returns attack range in tiles
+func (g *Game) GetUnitAttackRange(unit *Unit) int {
+	if unit == nil {
+		return 0
+	}
+
+	// For now, return a simple range based on unit type
+	// TODO: Get from unit data
+	switch unit.UnitType {
+	case 1: // Infantry
+		return 1
+	case 2: // Artillery
+		return 3
+	case 3: // Tank
+		return 1
+	default:
+		return 1
+	}
+}
+
+// MoveUnit executes unit movement
+func (g *Game) MoveUnit(unit *Unit, toRow, toCol int) error {
+	if unit == nil {
+		return fmt.Errorf("unit is nil")
+	}
+
+	// Check if it's the correct player's turn
+	if unit.PlayerID != g.CurrentPlayer {
+		return fmt.Errorf("not player %d's turn", unit.PlayerID)
+	}
+
+	// Check if move is valid
+	if !g.IsValidMove(unit.Row, unit.Col, toRow, toCol) {
+		return fmt.Errorf("invalid move from (%d,%d) to (%d,%d)", unit.Row, unit.Col, toRow, toCol)
+	}
+
+	// Get movement cost
+	cost := g.GetMovementCost(unit.Row, unit.Col, toRow, toCol)
+	if cost > unit.DistanceLeft {
+		return fmt.Errorf("insufficient movement points: need %d, have %d", cost, unit.DistanceLeft)
+	}
+
+	// Store original position for event
+	fromPos := Position{Row: unit.Row, Col: unit.Col}
+	toPos := Position{Row: toRow, Col: toCol}
+
+	// Remove unit from current tile
+	currentTile := g.GetTileAt(unit.Row, unit.Col)
+	if currentTile != nil {
+		currentTile.Unit = nil
+	}
+
+	// Move unit to new position
+	unit.Row = toRow
+	unit.Col = toCol
+	unit.DistanceLeft -= cost
+
+	// Place unit on new tile
+	newTile := g.GetTileAt(toRow, toCol)
+	if newTile != nil {
+		newTile.Unit = unit
+	}
+
+	// Update timestamp
+	g.LastActionAt = time.Now()
+
+	// Emit events
+	g.eventManager.EmitUnitMoved(unit, fromPos, toPos)
+	g.eventManager.EmitGameStateChanged(GameStateChangeUnitMoved, map[string]interface{}{
+		"unit": unit,
+		"from": fromPos,
+		"to":   toPos,
+	})
+
+	return nil
+}
+
+// AttackUnit executes combat between units
+func (g *Game) AttackUnit(attacker, defender *Unit) (*CombatResult, error) {
+	if attacker == nil || defender == nil {
+		return nil, fmt.Errorf("attacker or defender is nil")
+	}
+
+	// Check if it's the correct player's turn
+	if attacker.PlayerID != g.CurrentPlayer {
+		return nil, fmt.Errorf("not player %d's turn", attacker.PlayerID)
+	}
+
+	// Check if units can attack each other
+	if !g.CanAttackUnit(attacker, defender) {
+		return nil, fmt.Errorf("attacker cannot attack defender")
+	}
+
+	// Calculate damage (simplified combat)
+	attackerDamage := 0
+	defenderDamage := g.calculateDamage(attacker, defender)
+
+	// Apply damage
+	defender.AvailableHealth -= defenderDamage
+	if defender.AvailableHealth < 0 {
+		defender.AvailableHealth = 0
+	}
+
+	// Check if defender was killed
+	defenderKilled := defender.AvailableHealth <= 0
+
+	// Remove defender if killed
+	if defenderKilled {
+		g.RemoveUnit(defender)
+	}
+
+	// Create combat result
+	result := &CombatResult{
+		AttackerDamage: attackerDamage,
+		DefenderDamage: defenderDamage,
+		AttackerKilled: false,
+		DefenderKilled: defenderKilled,
+		AttackerHealth: attacker.AvailableHealth,
+		DefenderHealth: defender.AvailableHealth,
+	}
+
+	// Update timestamp
+	g.LastActionAt = time.Now()
+
+	// Emit events
+	g.eventManager.EmitUnitAttacked(attacker, defender, result)
+	g.eventManager.EmitGameStateChanged(GameStateChangeUnitAttacked, map[string]interface{}{
+		"attacker": attacker,
+		"defender": defender,
+		"result":   result,
+	})
+
+	return result, nil
+}
+
+// CanMoveUnit validates potential movement
+func (g *Game) CanMoveUnit(unit *Unit, toRow, toCol int) bool {
+	if unit == nil {
+		return false
+	}
+
+	// Check if it's the correct player's turn
+	if unit.PlayerID != g.CurrentPlayer {
+		return false
+	}
+
+	// Check if move is valid
+	return g.IsValidMove(unit.Row, unit.Col, toRow, toCol)
+}
+
+// CanAttackUnit validates potential attack
+func (g *Game) CanAttackUnit(attacker, defender *Unit) bool {
+	if attacker == nil || defender == nil {
+		return false
+	}
+
+	// Check if it's the correct player's turn
+	if attacker.PlayerID != g.CurrentPlayer {
+		return false
+	}
+
+	// Check if units are enemies
+	if attacker.PlayerID == defender.PlayerID {
+		return false
+	}
+
+	// Check if attacker is in range
+	distance := g.calculateDistance(attacker.Row, attacker.Col, defender.Row, defender.Col)
+	attackRange := g.GetUnitAttackRange(attacker)
+
+	return distance <= attackRange
+}
+
+// CreateUnit spawns new unit
+func (g *Game) CreateUnit(unitType, playerID, row, col int) (*Unit, error) {
+	// Validate parameters
+	if playerID < 0 || playerID >= g.PlayerCount {
+		return nil, fmt.Errorf("invalid player ID: %d", playerID)
+	}
+
+	// Check if position is valid and empty
+	tile := g.GetTileAt(row, col)
+	if tile == nil {
+		return nil, fmt.Errorf("invalid position: (%d, %d)", row, col)
+	}
+
+	if tile.Unit != nil {
+		return nil, fmt.Errorf("position (%d, %d) is occupied", row, col)
+	}
+
+	// Create the unit
+	unit := NewUnit(unitType, playerID)
+	unit.Row = row
+	unit.Col = col
+	unit.AvailableHealth = 100 // TODO: Get from unit data
+	unit.DistanceLeft = 3      // TODO: Get from unit data
+
+	// Add to game
+	g.AddUnit(unit, playerID)
+
+	// Emit events
+	g.eventManager.EmitUnitCreated(unit)
+	g.eventManager.EmitGameStateChanged(GameStateChangeUnitCreated, unit)
+
+	return unit, nil
+}
+
+// RemoveUnit removes unit from game
+func (g *Game) RemoveUnit(unit *Unit) error {
+	if unit == nil {
+		return fmt.Errorf("unit is nil")
+	}
+
+	// Remove from tile
+	tile := g.GetTileAt(unit.Row, unit.Col)
+	if tile != nil && tile.Unit == unit {
+		tile.Unit = nil
+	}
+
+	// Remove from player's unit list
+	if unit.PlayerID >= 0 && unit.PlayerID < len(g.Units) {
+		playerUnits := g.Units[unit.PlayerID]
+		for i, u := range playerUnits {
+			if u == unit {
+				// Remove from slice
+				g.Units[unit.PlayerID] = append(playerUnits[:i], playerUnits[i+1:]...)
+				break
+			}
 		}
+	}
 
-		teamID, ok := team["teamId"].(float64)
-		if !ok {
-			continue
+	// Emit events
+	g.eventManager.EmitUnitDestroyed(unit)
+	g.eventManager.EmitGameStateChanged(GameStateChangeUnitDestroyed, unit)
+
+	return nil
+}
+
+// AddUnit adds a unit to the game for the specified player
+func (g *Game) AddUnit(unit *Unit, playerID int) error {
+	if unit == nil {
+		return fmt.Errorf("unit is nil")
+	}
+
+	if playerID < 0 || playerID >= len(g.Units) {
+		return fmt.Errorf("invalid player ID: %d", playerID)
+	}
+
+	// Set unit's player ID
+	unit.PlayerID = playerID
+
+	// Add to player's unit list
+	g.Units[playerID] = append(g.Units[playerID], unit)
+
+	// Place unit on the map if it has a valid position
+	if tile := g.Map.TileAt(unit.Row, unit.Col); tile != nil {
+		tile.Unit = unit
+	}
+
+	return nil
+}
+
+// calculateDamage calculates damage dealt in combat (simplified)
+func (g *Game) calculateDamage(attacker, defender *Unit) int {
+	// Simplified damage calculation
+	// TODO: Implement proper damage calculation based on unit types, terrain, etc.
+
+	baseDamage := 30
+
+	// Add some randomness
+	variation := g.rng.Intn(20) - 10 // -10 to +10
+	damage := baseDamage + variation
+
+	if damage < 10 {
+		damage = 10 // Minimum damage
+	}
+
+	return damage
+}
+
+// calculateDistance calculates distance between two positions
+func (g *Game) calculateDistance(row1, col1, row2, col2 int) int {
+	// Simplified hex distance calculation
+	// TODO: Implement proper hex distance calculation
+	dRow := abs(row2 - row1)
+	dCol := abs(col2 - col1)
+
+	return max(dRow, dCol)
+}
+
+// =============================================================================
+// Rendering Integration
+// =============================================================================
+
+// RenderToBuffer renders the complete game state to a buffer
+func (g *Game) RenderToBuffer(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) error {
+	if buffer == nil {
+		return fmt.Errorf("buffer is nil")
+	}
+
+	if g.Map == nil {
+		return fmt.Errorf("no map loaded")
+	}
+
+	// Clear buffer first
+	buffer.Clear()
+
+	// Render terrain layer
+	g.RenderTerrain(buffer, tileWidth, tileHeight, yIncrement)
+
+	// Render units layer
+	g.RenderUnits(buffer, tileWidth, tileHeight, yIncrement)
+
+	// Render UI layer
+	g.RenderUI(buffer, tileWidth, tileHeight, yIncrement)
+
+	return nil
+}
+
+// RenderTerrain renders the terrain tiles to a buffer
+func (g *Game) RenderTerrain(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+	if g.Map == nil {
+		return
+	}
+
+	// Use the existing terrain rendering logic
+	for row := range g.Map.Tiles {
+		for col := range g.Map.Tiles[row] {
+			tile := g.Map.Tiles[row][col]
+			if tile != nil {
+				// Calculate tile position
+				x, y := g.Map.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
+
+				// Create hexagon path for this tile
+				hexPath := g.createHexagonPath(x, y, tileWidth, tileHeight, yIncrement)
+
+				// Get tile color based on terrain type
+				tileColor := g.getTerrainColor(tile.TileType)
+
+				// Fill the hexagon with terrain color
+				buffer.FillPath(hexPath, tileColor)
+
+				// Add border
+				borderColor := Color{R: 100, G: 100, B: 100, A: 100}
+				strokeProps := StrokeProperties{Width: 1.0, LineCap: "round", LineJoin: "round"}
+				buffer.StrokePath(hexPath, borderColor, strokeProps)
+			}
 		}
+	}
+}
 
-		// Find player by team ID
-		player, exists := wg.gameState.GetPlayer(playerID)
-		if !exists || player.Team != int(teamID) {
-			continue
-		}
+// RenderUnits renders the units to a buffer
+func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+	if g.Map == nil {
+		return
+	}
 
-		// Get unit position
-		pos, err := wg.getEntityPosition(entity)
-		if err != nil {
-			continue
-		}
+	// Define colors for different players
+	playerColors := []Color{
+		{R: 255, G: 0, B: 0, A: 255},   // Player 0 - red
+		{R: 0, G: 0, B: 255, A: 255},   // Player 1 - blue
+		{R: 0, G: 255, B: 0, A: 255},   // Player 2 - green
+		{R: 255, G: 255, B: 0, A: 255}, // Player 3 - yellow
+		{R: 255, G: 0, B: 255, A: 255}, // Player 4 - magenta
+		{R: 0, G: 255, B: 255, A: 255}, // Player 5 - cyan
+	}
 
-		// Calculate visible positions for this unit
-		sightRange := wg.getUnitSightRange(entity)
-		visiblePositions := wg.board.GetVisiblePositions(pos, sightRange)
+	// Render units for each player
+	for playerID, units := range g.Units {
+		for _, unit := range units {
+			if unit != nil {
+				// Calculate unit position (same as tile position)
+				x, y := g.Map.XYForTile(unit.Row, unit.Col, tileWidth, tileHeight, yIncrement)
 
-		// Check for enemy units in visible positions
-		for _, visiblePos := range visiblePositions {
-			if enemyUnit := wg.GetUnitAt(visiblePos.(*HexPosition)); enemyUnit != nil {
-				enemyTeam, exists := enemyUnit.GetComponent("team")
-				if !exists {
-					continue
+				// Get player color
+				var unitColor Color
+				if playerID < len(playerColors) {
+					unitColor = playerColors[playerID]
+				} else {
+					unitColor = Color{R: 128, G: 128, B: 128, A: 255} // Default gray
 				}
 
-				enemyTeamID, ok := enemyTeam["teamId"].(float64)
-				if !ok || int(enemyTeamID) == player.Team {
-					continue
+				// Create unit representation (circle)
+				unitPath := g.createUnitCircle(x, y, tileWidth, tileHeight)
+
+				// Fill unit with player color
+				buffer.FillPath(unitPath, unitColor)
+
+				// Add unit border
+				borderColor := Color{R: 0, G: 0, B: 0, A: 255}
+				strokeProps := StrokeProperties{Width: 2.0, LineCap: "round", LineJoin: "round"}
+				buffer.StrokePath(unitPath, borderColor, strokeProps)
+
+				// Add health indicator if unit is damaged
+				if unit.AvailableHealth < 100 {
+					g.renderHealthBar(buffer, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
 				}
-
-				// Add enemy unit to visible units
-				visibleUnits = append(visibleUnits, enemyUnit)
 			}
 		}
 	}
-
-	return visibleUnits
 }
 
-func (wg *WeeWarGame) initializeTerrain(terrainMap [][]string) error {
-	for y, row := range terrainMap {
-		for x, terrainType := range row {
-			pos := &HexPosition{Q: x, R: y}
-			if err := wg.board.SetTerrain(pos, terrainType); err != nil {
-				return fmt.Errorf("failed to set terrain at (%d,%d): %w", x, y, err)
+// RenderUI renders UI elements to a buffer
+func (g *Game) RenderUI(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+	// Create a simple indicator for current player
+	indicatorSize := 20.0
+
+	// Get current player color
+	playerColors := []Color{
+		{R: 255, G: 0, B: 0, A: 200},   // Player 0 - red
+		{R: 0, G: 0, B: 255, A: 200},   // Player 1 - blue
+		{R: 0, G: 255, B: 0, A: 200},   // Player 2 - green
+		{R: 255, G: 255, B: 0, A: 200}, // Player 3 - yellow
+		{R: 255, G: 0, B: 255, A: 200}, // Player 4 - magenta
+		{R: 0, G: 255, B: 255, A: 200}, // Player 5 - cyan
+	}
+
+	var currentPlayerColor Color
+	if g.CurrentPlayer < len(playerColors) {
+		currentPlayerColor = playerColors[g.CurrentPlayer]
+	} else {
+		currentPlayerColor = Color{R: 255, G: 255, B: 255, A: 200} // Default white
+	}
+
+	// Create indicator rectangle in top-left corner
+	indicatorPath := []Point{
+		{X: 5, Y: 5},
+		{X: 5 + indicatorSize, Y: 5},
+		{X: 5 + indicatorSize, Y: 5 + indicatorSize},
+		{X: 5, Y: 5 + indicatorSize},
+	}
+
+	// Fill indicator with current player color
+	buffer.FillPath(indicatorPath, currentPlayerColor)
+
+	// Add border
+	borderColor := Color{R: 0, G: 0, B: 0, A: 255}
+	strokeProps := StrokeProperties{Width: 2.0, LineCap: "round", LineJoin: "round"}
+	buffer.StrokePath(indicatorPath, borderColor, strokeProps)
+}
+
+// createHexagonPath creates a hexagon path for a tile
+func (g *Game) createHexagonPath(x, y, tileWidth, tileHeight, yIncrement float64) []Point {
+	return []Point{
+		{X: x + tileWidth/2, Y: y},                         // Top
+		{X: x + tileWidth, Y: y + tileHeight - yIncrement}, // Top-right
+		{X: x + tileWidth, Y: y + yIncrement},              // Bottom-right
+		{X: x + tileWidth/2, Y: y + tileHeight},            // Bottom
+		{X: x, Y: y + yIncrement},                          // Bottom-left
+		{X: x, Y: y + tileHeight - yIncrement},             // Top-left
+	}
+}
+
+// createUnitCircle creates a circular path for a unit
+func (g *Game) createUnitCircle(x, y, tileWidth, tileHeight float64) []Point {
+	// Create a circular approximation using polygon
+	centerX := x + tileWidth/2
+	centerY := y + tileHeight/2
+	radius := minFloat(tileWidth, tileHeight) * 0.3 // Unit size relative to tile
+
+	segments := 12
+	points := make([]Point, segments)
+
+	for i := 0; i < segments; i++ {
+		angle := 2 * 3.14159 * float64(i) / float64(segments)
+		unitX := centerX + radius*approximateCos(angle)
+		unitY := centerY + radius*approximateSin(angle)
+		points[i] = Point{X: unitX, Y: unitY}
+	}
+
+	return points
+}
+
+// renderHealthBar renders a health bar for a unit
+func (g *Game) renderHealthBar(buffer *Buffer, x, y, tileWidth, tileHeight float64, currentHealth, maxHealth int) {
+	if currentHealth >= maxHealth {
+		return // Don't render health bar for full health
+	}
+
+	// Calculate health bar dimensions
+	barWidth := tileWidth * 0.8
+	barHeight := 6.0
+	barX := x + (tileWidth-barWidth)/2
+	barY := y + tileHeight - barHeight - 2
+
+	// Background bar (red)
+	backgroundBar := []Point{
+		{X: barX, Y: barY},
+		{X: barX + barWidth, Y: barY},
+		{X: barX + barWidth, Y: barY + barHeight},
+		{X: barX, Y: barY + barHeight},
+	}
+	buffer.FillPath(backgroundBar, Color{R: 255, G: 0, B: 0, A: 200})
+
+	// Health bar (green)
+	healthPercent := float64(currentHealth) / float64(maxHealth)
+	healthBarWidth := barWidth * healthPercent
+
+	if healthBarWidth > 0 {
+		healthBar := []Point{
+			{X: barX, Y: barY},
+			{X: barX + healthBarWidth, Y: barY},
+			{X: barX + healthBarWidth, Y: barY + barHeight},
+			{X: barX, Y: barY + barHeight},
+		}
+		buffer.FillPath(healthBar, Color{R: 0, G: 255, B: 0, A: 200})
+	}
+}
+
+// getTerrainColor returns color for terrain type
+func (g *Game) getTerrainColor(terrainType int) Color {
+	switch terrainType {
+	case 1: // Grass
+		return Color{R: 50, G: 150, B: 50, A: 255}
+	case 2: // Desert
+		return Color{R: 200, G: 180, B: 100, A: 255}
+	case 3: // Water
+		return Color{R: 50, G: 50, B: 200, A: 255}
+	case 4: // Mountain
+		return Color{R: 150, G: 100, B: 50, A: 255}
+	case 5: // Rock
+		return Color{R: 150, G: 150, B: 150, A: 255}
+	default: // Unknown
+		return Color{R: 200, G: 200, B: 200, A: 255}
+	}
+}
+
+// Helper math functions
+func minFloat(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func approximateCos(angle float64) float64 {
+	// Simple approximation - in a real implementation, use math.Cos
+	return 1.0 - angle*angle/2.0 + angle*angle*angle*angle/24.0
+}
+
+func approximateSin(angle float64) float64 {
+	// Simple approximation - in a real implementation, use math.Sin
+	return angle - angle*angle*angle/6.0 + angle*angle*angle*angle*angle/120.0
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+// createTestMap creates a simple test map for development
+func createTestMap(mapName string) (*Map, error) {
+	// Create a small test map
+	gameMap := NewMap(8, 12, false) // 8 rows, 12 columns, odd rows offset
+
+	// Add some test tiles
+	for row := 0; row < 8; row++ {
+		for col := 0; col < 12; col++ {
+			// Create varied terrain
+			tileType := 1 // Default to grass
+			if (row+col)%4 == 0 {
+				tileType = 2 // Some desert
+			} else if (row+col)%7 == 0 {
+				tileType = 3 // Some water
 			}
+
+			tile := NewTile(row, col, tileType)
+			gameMap.AddTile(tile)
 		}
 	}
-	return nil
+
+	// Connect hex neighbors
+	gameMap.ConnectHexNeighbors()
+
+	return gameMap, nil
 }
 
-func (wg *WeeWarGame) initializeStartingUnits(startingUnits map[string][]string) error {
-	for playerID, units := range startingUnits {
-		// Find player
-		player, exists := wg.gameState.GetPlayer(playerID)
-		if !exists {
-			return fmt.Errorf("player not found: %s", playerID)
+// initializeStartingUnits adds initial units to the game
+func (g *Game) initializeStartingUnits() error {
+	// Add some basic starting units for each player
+	startingPositions := [][]Position{
+		{{Row: 1, Col: 1}, {Row: 1, Col: 2}},  // Player 0
+		{{Row: 6, Col: 9}, {Row: 6, Col: 10}}, // Player 1
+	}
+
+	for playerID := 0; playerID < g.PlayerCount && playerID < len(startingPositions); playerID++ {
+		positions := startingPositions[playerID]
+
+		for _, pos := range positions {
+			// Create a basic infantry unit
+			unit := NewUnit(1, playerID) // Unit type 1 = Infantry
+			unit.Row = pos.Row
+			unit.Col = pos.Col
+			unit.AvailableHealth = 100
+			unit.DistanceLeft = 3
+
+			// Add unit to game
+			g.AddUnit(unit, playerID)
 		}
+	}
 
-		// Create starting units for this player
-		for i, unitType := range units {
-			entity := wg.gameState.World.CreateEntity("")
-			
-			// Add components
-			if err := wg.addUnitComponents(entity, unitType, player.Team); err != nil {
-				return fmt.Errorf("failed to add components for unit %s: %w", unitType, err)
-			}
+	return nil
+}
 
-			// Place unit on board (simple placement for now)
-			startPos := &HexPosition{Q: i, R: player.Team}
-			if err := wg.placeUnitOnBoard(entity, startPos); err != nil {
-				return fmt.Errorf("failed to place unit on board: %w", err)
-			}
+// resetPlayerUnits resets movement and actions for a player's units
+func (g *Game) resetPlayerUnits(playerID int) error {
+	if playerID < 0 || playerID >= len(g.Units) {
+		return fmt.Errorf("invalid player ID: %d", playerID)
+	}
+
+	for _, unit := range g.Units[playerID] {
+		// Reset movement points (simplified)
+		unit.DistanceLeft = 3 // TODO: Get from unit data
+		unit.TurnCounter = g.TurnCounter
+	}
+
+	return nil
+}
+
+// checkVictoryConditions checks if any player has won
+func (g *Game) checkVictoryConditions() (winner int, hasWinner bool) {
+	// Simple victory condition: last player with units wins
+	playersWithUnits := 0
+	lastPlayerWithUnits := -1
+
+	for playerID := 0; playerID < g.PlayerCount; playerID++ {
+		if len(g.Units[playerID]) > 0 {
+			playersWithUnits++
+			lastPlayerWithUnits = playerID
 		}
 	}
-	return nil
-}
 
-func (wg *WeeWarGame) addUnitComponents(entity *turnengine.Entity, unitType string, teamID int) error {
-	unitData, exists := wg.unitData[unitType]
-	if !exists {
-		return fmt.Errorf("unknown unit type: %s", unitType)
+	if playersWithUnits == 1 {
+		return lastPlayerWithUnits, true
 	}
 
-	// Add position component (will be set when placed on board)
-	entity.AddComponent(&PositionComponent{X: 0, Y: 0, Z: 0})
-
-	// Add health component
-	entity.AddComponent(&HealthComponent{Current: 100, Max: 100})
-
-	// Add movement component
-	entity.AddComponent(&MovementComponent{
-		Range:     unitData.BaseStats.Movement,
-		MovesLeft: unitData.BaseStats.Movement,
-	})
-
-	// Add combat component
-	entity.AddComponent(&CombatComponent{
-		Attack:  unitData.BaseStats.Attack,
-		Defense: unitData.BaseStats.Defense,
-	})
-
-	// Add unit type component
-	entity.AddComponent(&UnitTypeComponent{
-		UnitType: unitType,
-		Cost:     unitData.BaseStats.Cost,
-	})
-
-	// Add team component
-	entity.AddComponent(&TeamComponent{TeamID: teamID})
-
-	return nil
+	return -1, false
 }
 
-func (wg *WeeWarGame) placeUnitOnBoard(entity *turnengine.Entity, pos *HexPosition) error {
-	// Update entity position
-	position, exists := entity.GetComponent("position")
-	if !exists {
-		return fmt.Errorf("entity has no position component")
+// validateGameState validates the current game state
+func (g *Game) validateGameState() error {
+	if g.Map == nil {
+		return fmt.Errorf("game has no map")
 	}
 
-	position["x"] = float64(pos.Q)
-	position["y"] = float64(pos.R)
-	position["z"] = 0.0
-	entity.Components["position"] = position
-
-	// Update board tracking
-	return wg.board.SetEntityAt(pos, entity.ID)
-}
-
-func (wg *WeeWarGame) getEntityPosition(entity *turnengine.Entity) (*HexPosition, error) {
-	position, exists := entity.GetComponent("position")
-	if !exists {
-		return nil, fmt.Errorf("entity has no position component")
+	if g.PlayerCount < 2 || g.PlayerCount > 6 {
+		return fmt.Errorf("invalid player count: %d", g.PlayerCount)
 	}
 
-	x, xOk := position["x"].(float64)
-	y, yOk := position["y"].(float64)
-	if !xOk || !yOk {
-		return nil, fmt.Errorf("invalid position component")
+	if g.CurrentPlayer < 0 || g.CurrentPlayer >= g.PlayerCount {
+		return fmt.Errorf("invalid current player: %d", g.CurrentPlayer)
 	}
 
-	return &HexPosition{Q: int(x), R: int(y)}, nil
-}
-
-func (wg *WeeWarGame) getUnitSightRange(entity *turnengine.Entity) int {
-	// Get unit type
-	unitType, exists := entity.GetComponent("unitType")
-	if !exists {
-		return 2 // Default sight range
+	if g.TurnCounter < 1 {
+		return fmt.Errorf("invalid turn counter: %d", g.TurnCounter)
 	}
 
-	unitTypeName, ok := unitType["unitType"].(string)
-	if !ok {
-		return 2
+	if len(g.Units) != g.PlayerCount {
+		return fmt.Errorf("units array length (%d) doesn't match player count (%d)", len(g.Units), g.PlayerCount)
 	}
 
-	// Get sight range from unit data
-	unitData, exists := wg.unitData[unitTypeName]
-	if !exists {
-		return 2
-	}
-
-	if unitData.BaseStats.SightRange > 0 {
-		return unitData.BaseStats.SightRange
-	}
-
-	return 2 // Default sight range
-}
-
-func registerWeeWarComponents(world *turnengine.World) {
-	RegisterWeeWarComponents(world.ComponentRegistry)
-}
-
-func registerCommandHandlers(engine *turnengine.GameEngine, combatSystem *WeeWarCombatSystem, movementSystem *WeeWarMovementSystem) {
-	// Register move command
-	moveValidator := &MoveCommandValidator{movementSystem: movementSystem}
-	moveProcessor := &MoveCommandProcessor{movementSystem: movementSystem}
-	engine.RegisterCommandHandler("move", moveValidator, moveProcessor)
-
-	// Register attack command
-	attackValidator := &AttackCommandValidator{combatSystem: combatSystem}
-	attackProcessor := &AttackCommandProcessor{combatSystem: combatSystem}
-	engine.RegisterCommandHandler("attack", attackValidator, attackProcessor)
-}
-
-// Command validators and processors
-type MoveCommandValidator struct {
-	movementSystem *WeeWarMovementSystem
-}
-
-func (mcv *MoveCommandValidator) ValidateCommand(gameState *turnengine.GameState, command *turnengine.Command) error {
-	// Validate move command
-	unitID, ok := command.Data["unitId"].(string)
-	if !ok {
-		return fmt.Errorf("missing unitId in move command")
-	}
-
-	_, exists := gameState.World.GetEntity(unitID)
-	if !exists {
-		return fmt.Errorf("unit not found: %s", unitID)
-	}
-
-	// More validation logic here...
-	return nil
-}
-
-type MoveCommandProcessor struct {
-	movementSystem *WeeWarMovementSystem
-}
-
-func (mcp *MoveCommandProcessor) ProcessCommand(gameState *turnengine.GameState, command *turnengine.Command) error {
-	// Process move command
-	// Implementation details...
-	return nil
-}
-
-type AttackCommandValidator struct {
-	combatSystem *WeeWarCombatSystem
-}
-
-func (acv *AttackCommandValidator) ValidateCommand(gameState *turnengine.GameState, command *turnengine.Command) error {
-	// Validate attack command
-	// Implementation details...
-	return nil
-}
-
-type AttackCommandProcessor struct {
-	combatSystem *WeeWarCombatSystem
-}
-
-func (acp *AttackCommandProcessor) ProcessCommand(gameState *turnengine.GameState, command *turnengine.Command) error {
-	// Process attack command
-	// Implementation details...
 	return nil
 }

@@ -56,11 +56,6 @@ type CombatResult struct {
 // GameController manages game lifecycle and core state
 type GameController interface {
 	// Game Lifecycle
-	// NewGame creates a new game instance
-	// Called by: CLI main(), Browser game setup, Test suite
-	// Returns: Game instance for all subsequent operations
-	NewGame(mapName string, playerCount int, seed int64) (*Game, error)
-	
 	// LoadGame restores game from saved state
 	// Called by: CLI load command, Browser load button, Test fixtures
 	// Returns: Restored game instance

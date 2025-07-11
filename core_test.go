@@ -106,7 +106,7 @@ func TestGameRenderToBuffer(t *testing.T) {
 	m.ConnectHexNeighbors()
 
 	// Create a game
-	game := NewGame(2, m, 12345)
+	game, _ := NewGame(2, m, 12345)
 
 	// Add some units
 	unit1 := NewUnit(1, 0)
@@ -245,7 +245,7 @@ func TestMultiLayerRendering(t *testing.T) {
 		m.AddTile(tile)
 	}
 
-	game := NewGame(2, m, 12345)
+	game, _ := NewGame(2, m, 12345)
 
 	// Add units
 	unit1 := NewUnit(1, 0)

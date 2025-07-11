@@ -162,8 +162,8 @@ func (m *Map) GetHexNeighborCoords(row, col int) [6][2]int {
 
 // XYForTile converts tile row/col coordinates to pixel x,y coordinates for rendering
 func (m *Map) XYForTile(row, col int, tileWidth, tileHeight, yIncrement float64) (x, y float64) {
-	// Calculate base x position
-	x = float64(col) * tileWidth
+	// Calculate base x position with margin to ensure tiles are fully within bounds
+	x = float64(col)*tileWidth + tileWidth/2
 
 	// Apply offset for alternating rows (hex grid staggering)
 	isEvenRow := (row % 2) == 0
@@ -179,8 +179,8 @@ func (m *Map) XYForTile(row, col int, tileWidth, tileHeight, yIncrement float64)
 		}
 	}
 
-	// Calculate y position
-	y = float64(row) * yIncrement
+	// Calculate y position with margin to ensure tiles are fully within bounds
+	y = float64(row)*yIncrement + tileHeight/2
 
 	return x, y
 }
@@ -1113,7 +1113,7 @@ func (g *Game) RenderTerrain(buffer *Buffer, tileWidth, tileHeight, yIncrement f
 				// Try to load real tile asset first
 				if g.assetManager != nil && g.assetManager.HasTileAsset(tile.TileType) {
 					if tileImg, err := g.assetManager.GetTileImage(tile.TileType); err == nil {
-						// Render real tile image
+						// Render real tile image (XYForTile already returns centered coordinates)
 						buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, tileImg)
 						continue
 					}
@@ -1159,7 +1159,7 @@ func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement flo
 				// Try to load real unit sprite first
 				if g.assetManager != nil && g.assetManager.HasUnitAsset(unit.UnitType, playerID) {
 					if unitImg, err := g.assetManager.GetUnitImage(unit.UnitType, playerID); err == nil {
-						// Render real unit sprite
+						// Render real unit sprite (XYForTile already returns centered coordinates)
 						buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
 						
 						// Add health indicator if unit is damaged

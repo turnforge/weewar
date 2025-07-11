@@ -300,6 +300,98 @@ func TestRenderToBuffer(t *testing.T) {
 	}
 }
 
+// TestSparseMapRendering tests rendering with a non-rectangular tile pattern
+func TestSparseMapRendering(t *testing.T) {
+	// Create a 10x10 map with tiles only in specific pattern
+	testMap := NewMap(10, 10, false)
+	
+	// Add tiles only in a sparse pattern (e.g., checkerboard or every even cell)
+	for row := 0; row < 10; row++ {
+		for col := 0; col < 10; col++ {
+			// Only add tiles where both row and col are even, or in a specific pattern
+			if (row%2 == 0 && col%2 == 0) || (row == 5 && col == 5) {
+				tile := &Tile{
+					Row:      row,
+					Col:      col,
+					TileType: 1, // Grass
+					Unit:     nil,
+				}
+				testMap.AddTile(tile)
+			}
+		}
+	}
+	
+	// Connect hex neighbors
+	testMap.ConnectHexNeighbors()
+	
+	// Create a game with this sparse map
+	game, err := NewGame(2, testMap, 12345)
+	if err != nil {
+		t.Fatalf("Failed to create game: %v", err)
+	}
+	
+	// Clear default starting units and place units on our sparse tiles
+	game.Units[0] = []*Unit{}
+	game.Units[1] = []*Unit{}
+	
+	// Create units at the sparse tile positions
+	unit1, _ := game.CreateUnit(1, 0, 0, 0)  // Player 0 unit at (0,0)
+	unit2, _ := game.CreateUnit(1, 0, 0, 2)  // Player 0 unit at (0,2)
+	unit3, _ := game.CreateUnit(1, 1, 2, 0)  // Player 1 unit at (2,0)
+	unit4, _ := game.CreateUnit(1, 1, 2, 2)  // Player 1 unit at (2,2)
+	
+	// Place units on tiles
+	testMap.TileAt(0, 0).Unit = unit1
+	testMap.TileAt(0, 2).Unit = unit2
+	testMap.TileAt(2, 0).Unit = unit3
+	testMap.TileAt(2, 2).Unit = unit4
+	
+	// Create a buffer for rendering
+	buffer := NewBuffer(800, 600)
+	
+	// Debug: Print coordinates for some tiles to see the pattern
+	t.Logf("Tile coordinate debugging:")
+	for row := 0; row < 3; row++ {
+		for col := 0; col < 3; col++ {
+			if testMap.TileAt(row, col) != nil {
+				x, y := testMap.XYForTile(row, col, 64, 64, 51)
+				t.Logf("Tile (%d,%d) -> pixel (%.1f, %.1f)", row, col, x, y)
+			}
+		}
+	}
+	
+	// Debug: Print unit positions
+	t.Logf("Unit coordinate debugging:")
+	for _, unit := range game.GetAllUnits() {
+		x, y := testMap.XYForTile(unit.Row, unit.Col, 64, 64, 51)
+		t.Logf("Unit at (%d,%d) -> pixel (%.1f, %.1f)", unit.Row, unit.Col, x, y)
+	}
+	
+	// Test rendering
+	err = game.RenderToBuffer(buffer, 64, 64, 51)
+	if err != nil {
+		t.Errorf("Failed to render to buffer: %v", err)
+	}
+	
+	// Save rendered image to file for visual verification
+	timestamp := time.Now().Format("20060102_150405")
+	testDir := filepath.Join("/tmp/turnengine", "TestSparseMapRendering", timestamp)
+	os.MkdirAll(testDir, 0755)
+	
+	imagePath := filepath.Join(testDir, "sparse_map_render.png")
+	err = buffer.Save(imagePath)
+	if err != nil {
+		t.Errorf("Failed to save rendered image: %v", err)
+	}
+	
+	// Verify file exists
+	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
+		t.Error("Rendered image file was not created")
+	} else {
+		t.Logf("Sparse map rendered image saved to: %s", imagePath)
+	}
+}
+
 // =============================================================================
 // Unit Movement Tests
 // =============================================================================

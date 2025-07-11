@@ -1065,11 +1065,11 @@ func (cli *WeeWarCLI) PrintMap() {
 				continue
 			}
 			
-			// Show unit info centered with unit type
+			// Show unit info centered with unit type (same 6-char width as terrain)
 			if tile.Unit != nil {
-				fmt.Printf("P%dU%d", tile.Unit.PlayerID, tile.Unit.UnitType)
+				fmt.Printf("P%dU%d ", tile.Unit.PlayerID, tile.Unit.UnitType)
 			} else {
-				fmt.Print(" -- ")
+				fmt.Print(" --  ")
 			}
 		}
 		fmt.Println()

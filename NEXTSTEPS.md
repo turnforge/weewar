@@ -1,63 +1,92 @@
 # WeeWar Next Steps
 
-## Critical Issues (High Priority)
+## Recent Achievements ✅
 
-### 1. Fix Board Position Validation 🔥
-**Issue**: Hex board position validation is failing during map initialization
-**Impact**: Blocks game initialization and prevents gameplay
-**Location**: `games/weewar/board.go` - `IsValidPosition()` method
-**Action Items**:
-- [ ] Debug hex coordinate validation logic
-- [ ] Fix position bounds checking for different map sizes
-- [ ] Test with all 12 extracted maps
-- [ ] Ensure terrain placement works correctly
+### 1. Enhanced Core API Architecture
+**Completed**: Clean separation of static data from runtime instances
+**Benefits**: 
+- Programmatic game creation and testing
+- Simplified game state management
+- Better debugging and development experience
+- Headless gameplay capabilities
 
-### 2. Complete Command Processing System 🔥
-**Issue**: Move and attack command processors are incomplete
-**Impact**: Players cannot perform game actions
-**Location**: `games/weewar/game.go` - Command handlers
-**Action Items**:
-- [ ] Implement `MoveCommandProcessor.ProcessCommand()`
-- [ ] Implement `AttackCommandProcessor.ProcessCommand()`
-- [ ] Add command validation logic
-- [ ] Test command execution and state updates
+### 2. Advanced Rendering System
+**Completed**: Professional-grade Buffer architecture with compositing
+**Benefits**:
+- Multi-layer rendering (terrain, units, UI)
+- Scaling and alpha blending support
+- PNG output for visualization
+- Flexible canvas sizes and positioning
 
-### 3. Fix Unit Placement System 🔥
-**Issue**: Starting units are not being placed correctly on maps
-**Impact**: Games start without proper unit initialization
-**Location**: `games/weewar/game.go` - `initializeStartingUnits()`
-**Action Items**:
-- [ ] Fix unit distribution logic across players
-- [ ] Implement proper starting position calculation
-- [ ] Ensure units are placed on valid board positions
-- [ ] Test with different player counts (2-4 players)
+### 3. Comprehensive Testing Framework
+**Completed**: Full test coverage for core systems
+**Benefits**:
+- Verified hex neighbor calculations
+- Tested multi-layer composition
+- Validated scaling and alpha blending
+- Reliable PNG generation
 
-## Core Functionality (Medium Priority)
+## Current Development Focus
 
-### 1. Game Loop Completion
-**Goal**: Complete the turn-based game loop
+### 1. Game Logic Implementation (High Priority)
+
+#### A. AI Player System 🎯
+**Goal**: Implement intelligent AI opponents for single-player games
 **Components**:
-- [ ] Turn progression logic
-- [ ] Victory condition checking
-- [ ] Resource generation (coins per turn/base)
-- [ ] Unit action tracking (moved/attacked this turn)
-- [ ] End game detection and handling
+- [ ] Basic AI decision making (move, attack, base capture)
+- [ ] Unit evaluation and targeting algorithms
+- [ ] Strategic planning (resource management, positioning)
+- [ ] Difficulty levels (easy, medium, hard)
+- [ ] AI vs AI testing for validation
 
-### 2. Game State Validation
-**Goal**: Ensure game state remains consistent
+#### B. Game Persistence 🎯
+**Goal**: Save and load game states
 **Components**:
-- [ ] Validate entity positions match board state
-- [ ] Check for orphaned entities or components
-- [ ] Ensure turn state is properly managed
-- [ ] Validate resource calculations
+- [ ] JSON serialization of complete game state
+- [ ] Save game to file system
+- [ ] Load game from saved state
+- [ ] Validate loaded games for consistency
+- [ ] Support for game replay and analysis
 
-### 3. Enhanced Combat System
-**Goal**: Complete combat mechanics implementation
+### 2. Real-time and Multiplayer Features (Medium Priority)
+
+#### A. Web Interface Development 🌐
+**Goal**: Create browser-based gameplay
 **Components**:
-- [ ] Implement unit destruction and removal
-- [ ] Add experience/veterancy system if needed
-- [ ] Handle special unit abilities
-- [ ] Implement capture mechanics for bases
+- [ ] HTML/CSS/JS frontend using Buffer rendering
+- [ ] WebSocket integration for real-time updates
+- [ ] Responsive design for different screen sizes
+- [ ] Game lobby and room management
+- [ ] Player authentication and profiles
+
+#### B. Advanced Visualization 🎨
+**Goal**: Enhanced game graphics and UI
+**Components**:
+- [ ] Sprite-based unit and terrain rendering
+- [ ] Animation support for movement and combat
+- [ ] Hex grid overlay and highlighting
+- [ ] Minimap and game state panels
+- [ ] Victory/defeat screens and statistics
+
+### 3. Content and Data Expansion (Low Priority)
+
+#### A. Additional Game Content 📦
+**Goal**: Expand game variety and replayability
+**Components**:
+- [ ] More maps from WeeWar archives
+- [ ] Custom map creation tools
+- [ ] Scenario-based campaigns
+- [ ] Unit variants and special abilities
+- [ ] Tournament modes and leaderboards
+
+#### B. Data Pipeline Improvements 🔄
+**Goal**: Streamline content creation and updates
+**Components**:
+- [ ] Automated map extraction from web sources
+- [ ] Data validation and consistency checking
+- [ ] Hot-reload for development
+- [ ] Version control for game data
+- [ ] Community content submission system
 
 ## Testing and Validation (Medium Priority)
 

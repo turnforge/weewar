@@ -280,7 +280,8 @@ func (b *Buffer) DrawTextWithStyle(x, y float64, text string, fontSize float64, 
 		// Add padding around text
 		padding := 2.0
 		bgX := canvasX - padding
-		bgY := canvasY - textHeight - padding
+		// bgY := (canvasY - padding) //  - (textHeight * 2)
+		bgY := canvasY + 1
 		bgWidth := textWidth + (padding * 2)
 		bgHeight := (textHeight + (padding * 2)) / 2
 

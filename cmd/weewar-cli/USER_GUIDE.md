@@ -86,6 +86,14 @@ weewar[T1:P0]> actions
 | `attack <from> <to>` | Attack unit | `attack A1 B2` |
 | `end` | End current turn | `end` |
 
+### Prediction Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `predict <from> <to>` | Show damage prediction | `predict A1 B2` |
+| `attackoptions <unit>` | Show attack targets | `attackoptions A1` |
+| `moveoptions <unit>` | Show movement options | `moveoptions A1` |
+
 ### Information Commands
 
 | Command | Description | Example |
@@ -279,6 +287,45 @@ Player 0: 2 units
 Player 1: 2 units
   1. C4 - Type:1 Health:75 Movement:3
   2. K7 - Type:1 Health:100 Movement:3
+```
+
+### Prediction and Planning Examples
+
+```bash
+# Show movement options for a unit
+weewar[T1:P0]> moveoptions B2
+=== Movement Options for Soldier (Basic) at B2 ===
+Movement Points: 3
+Available positions (4):
+  1. A2 - Grass (Move Cost: 1)
+  2. B1 - Grass (Move Cost: 1)
+  3. B3 - Grass (Move Cost: 1)
+  4. C2 - Grass (Move Cost: 1)
+
+Use 'move <unit> <destination>' to move the unit.
+
+# Show attack options for a unit
+weewar[T1:P0]> attackoptions B3
+=== Attack Options for Soldier (Basic) at B3 ===
+Available targets (1):
+  1. C4 - Soldier (Basic) (Player 1, Health: 100)
+
+Use 'predict <unit> <target>' to see damage prediction.
+
+# Predict damage before attacking
+weewar[T1:P0]> predict B3 C4
+=== Damage Prediction: B3 attacking C4 ===
+Attacker: Soldier (Basic) at B3 (Player 0, Health: 100)
+Target: Soldier (Basic) at C4 (Player 1, Health: 100)
+
+Damage Range: 20-30 damage
+Expected Damage: 25.0
+Damage Probabilities:
+  20 damage: 33.3%
+  25 damage: 33.3%
+  30 damage: 33.3%
+
+Predicted Target Health: 75
 ```
 
 ## Advanced Features

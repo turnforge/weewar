@@ -276,7 +276,7 @@ func TestRenderToBuffer(t *testing.T) {
 	buffer := NewBuffer(800, 600)
 
 	// Test rendering
-	err = game.RenderToBuffer(buffer, 60, 52, 39)
+	err = game.RenderToBuffer(buffer, 64, 64, 51)
 	if err != nil {
 		t.Errorf("Failed to render to buffer: %v", err)
 	}

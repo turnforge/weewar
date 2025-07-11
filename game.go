@@ -288,6 +288,9 @@ type Game struct {
 	// Event system
 	eventManager *EventManager `json:"-"` // Event manager for observer pattern
 
+	// Asset management
+	assetManager *AssetManager `json:"-"` // Asset manager for tiles and units
+
 	// Game metadata
 	CreatedAt    time.Time `json:"createdAt"`    // When game was created
 	LastActionAt time.Time `json:"lastActionAt"` // When last action was taken
@@ -326,6 +329,7 @@ func NewGame(playerCount int, gameMap *Map, seed int64) (*Game, error) {
 		LastActionAt:  time.Now(),
 		rng:           rand.New(rand.NewSource(seed)),
 		eventManager:  NewEventManager(),
+		assetManager:  NewAssetManager("data"),
 	}
 
 	// Initialize units slice
@@ -358,6 +362,7 @@ func LoadGame(saveData []byte) (*Game, error) {
 	// Restore transient state
 	game.rng = rand.New(rand.NewSource(game.Seed))
 	game.eventManager = NewEventManager()
+	game.assetManager = NewAssetManager("data")
 
 	// Restore hex neighbor connections (lost during JSON serialization)
 	if game.Map != nil {
@@ -716,6 +721,21 @@ func (g *Game) GetUnitType(unit *Unit) int {
 	return unit.UnitType
 }
 
+// GetUnitTypeName returns the display name for a unit type
+func (g *Game) GetUnitTypeName(unitType int) string {
+	if g.assetManager != nil {
+		// Try to get unit data from JSON if asset manager is loaded
+		if err := g.assetManager.LoadGameData(); err == nil {
+			if unitData, err := g.assetManager.GetUnitData(unitType); err == nil {
+				return unitData.Name
+			}
+		}
+	}
+	
+	// Fallback to generic name
+	return fmt.Sprintf("Unit Type %d", unitType)
+}
+
 // GetUnitHealth returns current health points
 func (g *Game) GetUnitHealth(unit *Unit) int {
 	if unit == nil {
@@ -905,6 +925,31 @@ func (g *Game) CanAttackUnit(attacker, defender *Unit) bool {
 	return distance <= attackRange
 }
 
+// CanAttack validates potential attack using position coordinates
+func (g *Game) CanAttack(fromRow, fromCol, toRow, toCol int) (bool, error) {
+	attacker := g.GetUnitAt(fromRow, fromCol)
+	if attacker == nil {
+		return false, fmt.Errorf("no unit at attacker position (%d, %d)", fromRow, fromCol)
+	}
+
+	defender := g.GetUnitAt(toRow, toCol)
+	if defender == nil {
+		return false, fmt.Errorf("no unit at target position (%d, %d)", toRow, toCol)
+	}
+
+	return g.CanAttackUnit(attacker, defender), nil
+}
+
+// CanMove validates potential movement using position coordinates
+func (g *Game) CanMove(fromRow, fromCol, toRow, toCol int) (bool, error) {
+	unit := g.GetUnitAt(fromRow, fromCol)
+	if unit == nil {
+		return false, fmt.Errorf("no unit at position (%d, %d)", fromRow, fromCol)
+	}
+
+	return g.CanMoveUnit(unit, toRow, toCol), nil
+}
+
 // CreateUnit spawns new unit
 func (g *Game) CreateUnit(unitType, playerID, row, col int) (*Unit, error) {
 	// Validate parameters
@@ -1057,7 +1102,7 @@ func (g *Game) RenderTerrain(buffer *Buffer, tileWidth, tileHeight, yIncrement f
 		return
 	}
 
-	// Use the existing terrain rendering logic
+	// Render terrain tiles
 	for row := range g.Map.Tiles {
 		for col := range g.Map.Tiles[row] {
 			tile := g.Map.Tiles[row][col]
@@ -1065,13 +1110,18 @@ func (g *Game) RenderTerrain(buffer *Buffer, tileWidth, tileHeight, yIncrement f
 				// Calculate tile position
 				x, y := g.Map.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
 
-				// Create hexagon path for this tile
+				// Try to load real tile asset first
+				if g.assetManager != nil && g.assetManager.HasTileAsset(tile.TileType) {
+					if tileImg, err := g.assetManager.GetTileImage(tile.TileType); err == nil {
+						// Render real tile image
+						buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, tileImg)
+						continue
+					}
+				}
+
+				// Fallback to colored hexagon if asset not available
 				hexPath := g.createHexagonPath(x, y, tileWidth, tileHeight, yIncrement)
-
-				// Get tile color based on terrain type
 				tileColor := g.getTerrainColor(tile.TileType)
-
-				// Fill the hexagon with terrain color
 				buffer.FillPath(hexPath, tileColor)
 
 				// Add border
@@ -1106,7 +1156,21 @@ func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement flo
 				// Calculate unit position (same as tile position)
 				x, y := g.Map.XYForTile(unit.Row, unit.Col, tileWidth, tileHeight, yIncrement)
 
-				// Get player color
+				// Try to load real unit sprite first
+				if g.assetManager != nil && g.assetManager.HasUnitAsset(unit.UnitType, playerID) {
+					if unitImg, err := g.assetManager.GetUnitImage(unit.UnitType, playerID); err == nil {
+						// Render real unit sprite
+						buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
+						
+						// Add health indicator if unit is damaged
+						if unit.AvailableHealth < 100 {
+							g.renderHealthBar(buffer, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
+						}
+						continue
+					}
+				}
+
+				// Fallback to colored circle if asset not available
 				var unitColor Color
 				if playerID < len(playerColors) {
 					unitColor = playerColors[playerID]

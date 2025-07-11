@@ -61,7 +61,9 @@ Unified Game Implementation
 ├── Comprehensive state management
 ├── Integrated hex pathfinding
 ├── Real WeeWar data integration
-└── PNG rendering capabilities
+├── PNG rendering capabilities
+├── Asset management system
+└── Combat prediction system
      ↓
 Multiple Frontend Interfaces
 ├── CLI (REPL with chess notation)
@@ -92,6 +94,9 @@ type GameInterface interface {
 # Dynamic prompts showing game state
 weewar[T1:P0]> actions        # Show available actions
 weewar[T1:P0]> move B2 B3     # Move unit using chess notation
+weewar[T1:P0]> predict B3 C4  # Predict combat damage
+weewar[T1:P0]> attackoptions B3 # Show attack targets
+weewar[T1:P0]> moveoptions B3 # Show movement options
 weewar[T1:P0]> s              # Quick status (shortcut)
 weewar[T1:P0]> map            # Display game map
 weewar[T1:P0]> end            # End turn
@@ -236,6 +241,9 @@ go test -v -run TestPNG           # PNG rendering tests
 - [x] Implement session recording and replay capabilities
 - [x] Add rich text formatting with colors and tables
 - [x] Create complete documentation and architecture guides
+- [x] Implement asset management system for PNG rendering
+- [x] Add combat prediction system with damage analysis
+- [x] Create attack and movement option commands
 
 ### Current Status
 - **Architecture**: Production-ready with comprehensive interface design

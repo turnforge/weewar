@@ -47,7 +47,9 @@ Unified Game Implementation
 ├── Comprehensive state management
 ├── Integrated hex pathfinding
 ├── Real WeeWar data integration
-└── PNG rendering capabilities
+├── PNG rendering capabilities
+├── Asset management system
+└── Combat prediction system
      ↓
 Multiple Interfaces
 ├── CLI (REPL with chess notation)
@@ -134,6 +136,8 @@ games/weewar/
 ├── game.go                     # Unified game implementation
 ├── map.go, tile.go            # Hex map system
 ├── unit.go, combat.go         # Unit management and combat
+├── assets.go                  # Asset management system
+├── predict.go                 # Combat prediction system
 ├── rendering.go, buffer.go    # PNG generation
 ├── cli_impl.go                # CLI interface implementation
 ├── cli_formatter.go           # CLI text formatting
@@ -182,6 +186,9 @@ weewar[T2:P1]> quit           # Exit game
 | `map` | Display map | `map` |
 | `units` | Show units | `units` |
 | `turn` | Turn information | `turn` |
+| `predict <from> <to>` | Damage prediction | `predict A1 B2` |
+| `attackoptions <unit>` | Show attack targets | `attackoptions A1` |
+| `moveoptions <unit>` | Show movement options | `moveoptions A1` |
 | `end` | End turn | `end` |
 | `save <file>` | Save game | `save game.json` |
 | `render <file>` | Render PNG | `render game.png` |

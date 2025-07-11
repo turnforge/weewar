@@ -154,6 +154,12 @@ func (cli *WeeWarCLI) executeCommand(cmd *CLICommand) *CLIResponse {
 		return cli.handleCompact(cmd)
 	case "autorender":
 		return cli.handleAutoRender(cmd)
+	case "predict":
+		return cli.handlePredict(cmd)
+	case "attackoptions":
+		return cli.handleAttackOptions(cmd)
+	case "moveoptions":
+		return cli.handleMoveOptions(cmd)
 	default:
 		return &CLIResponse{
 			Success: false,
@@ -168,7 +174,8 @@ func (cli *WeeWarCLI) GetAvailableCommands() []string {
 	commands := []string{
 		CmdMove, CmdAttack, CmdStatus, CmdMap, CmdUnits, CmdPlayer,
 		CmdHelp, CmdSave, CmdLoad, CmdRender, CmdEnd, CmdQuit,
-		CmdNew, CmdVerbose, CmdCompact, "autorender",
+		CmdNew, CmdVerbose, CmdCompact, "autorender", "predict",
+		"attackoptions", "moveoptions",
 	}
 	
 	// Add REPL-specific commands if in interactive mode
@@ -223,6 +230,12 @@ func (cli *WeeWarCLI) GetCommandHelp(command string) string {
 		return "turn - Show detailed turn information including available actions"
 	case "actions":
 		return "actions - Show all available actions for current player"
+	case "predict":
+		return "predict <attacker> <target> - Show damage prediction for combat (e.g., 'predict A1 B2')"
+	case "attackoptions":
+		return "attackoptions <unit> - Show all possible attack targets for a unit (e.g., 'attackoptions A1')"
+	case "moveoptions":
+		return "moveoptions <unit> - Show all possible movement positions for a unit (e.g., 'moveoptions A1')"
 	default:
 		return "Unknown command. Use 'help' to see all available commands."
 	}
@@ -231,7 +244,7 @@ func (cli *WeeWarCLI) GetCommandHelp(command string) string {
 // ValidateCommand checks if command is valid in current context
 func (cli *WeeWarCLI) ValidateCommand(cmd *CLICommand) (bool, string) {
 	// Check if game exists for game-specific commands
-	gameCommands := []string{CmdMove, CmdAttack, CmdStatus, CmdMap, CmdUnits, CmdPlayer, CmdEnd, CmdSave, CmdRender}
+	gameCommands := []string{CmdMove, CmdAttack, CmdStatus, CmdMap, CmdUnits, CmdPlayer, CmdEnd, CmdSave, CmdRender, "predict", "attackoptions", "moveoptions"}
 	for _, gameCmd := range gameCommands {
 		if cmd.Command == gameCmd && cli.game == nil {
 			return false, "No game is currently loaded. Use 'new' to start a new game or 'load' to load a saved game."
@@ -645,6 +658,273 @@ func (cli *WeeWarCLI) handleAutoRender(cmd *CLICommand) *CLIResponse {
 	}
 }
 
+// handlePredict shows damage prediction for combat
+func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
+	if len(cmd.Arguments) < 2 {
+		return &CLIResponse{
+			Success: false,
+			Message: "Predict command requires two positions (e.g., 'predict A1 B2')",
+			Error:   "Missing arguments",
+		}
+	}
+	
+	fromPos := cmd.Arguments[0]
+	toPos := cmd.Arguments[1]
+	
+	// Parse positions
+	fromRow, fromCol, valid := ParsePositionFromString(fromPos)
+	if !valid {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid from position: %s", fromPos),
+			Error:   "Use format like A1, B2, etc.",
+		}
+	}
+	
+	toRow, toCol, valid := ParsePositionFromString(toPos)
+	if !valid {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid to position: %s", toPos),
+			Error:   "Use format like A1, B2, etc.",
+		}
+	}
+	
+	// Find attacker unit
+	attacker := cli.game.GetUnitAt(fromRow, fromCol)
+	if attacker == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("No unit found at position %s", fromPos),
+			Error:   "Cannot predict attack from empty position",
+		}
+	}
+	
+	// Find target unit
+	target := cli.game.GetUnitAt(toRow, toCol)
+	if target == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("No unit found at position %s", toPos),
+			Error:   "Cannot predict attack on empty position",
+		}
+	}
+	
+	// Check if attack is valid
+	canAttack, err := cli.game.CanAttack(fromRow, fromCol, toRow, toCol)
+	if err != nil || !canAttack {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Unit at %s cannot attack unit at %s", fromPos, toPos),
+			Error:   "Invalid attack",
+		}
+	}
+	
+	// Create predictor and get damage prediction
+	predictor := NewGamePredictor(cli.game.assetManager)
+	damagePrediction, err := predictor.GetCombatPredictor().PredictDamage(cli.game, fromRow, fromCol, toRow, toCol)
+	if err != nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to predict damage: %v", err),
+			Error:   "Prediction calculation failed",
+		}
+	}
+	
+	// Format prediction output
+	message := fmt.Sprintf("=== Attack Prediction ===\n")
+	message += fmt.Sprintf("Attacker: %s at %s (Health: %d)\n", 
+		cli.game.GetUnitTypeName(attacker.UnitType), fromPos, attacker.AvailableHealth)
+	message += fmt.Sprintf("Target: %s at %s (Health: %d)\n", 
+		cli.game.GetUnitTypeName(target.UnitType), toPos, target.AvailableHealth)
+	message += fmt.Sprintf("\nDamage Range: %d - %d\n", 
+		damagePrediction.MinDamage, damagePrediction.MaxDamage)
+	message += fmt.Sprintf("Expected Damage: %.1f\n", damagePrediction.ExpectedDamage)
+	
+	// Show damage probabilities
+	message += "\nDamage Probabilities:\n"
+	for damage := damagePrediction.MinDamage; damage <= damagePrediction.MaxDamage; damage++ {
+		if prob, exists := damagePrediction.Probabilities[damage]; exists && prob > 0 {
+			message += fmt.Sprintf("  %d damage: %.1f%%\n", damage, prob*100)
+		}
+	}
+	
+	// Show outcome predictions
+	remainingHealth := target.AvailableHealth - int(damagePrediction.ExpectedDamage)
+	if remainingHealth <= 0 {
+		message += fmt.Sprintf("\nPredicted Outcome: Target will likely be destroyed")
+	} else {
+		message += fmt.Sprintf("\nPredicted Target Health: %d", remainingHealth)
+	}
+	
+	fmt.Print(message)
+	return &CLIResponse{
+		Success: true,
+		Message: "Damage prediction displayed",
+	}
+}
+
+// handleAttackOptions shows all possible attack targets for a unit
+func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
+	if len(cmd.Arguments) < 1 {
+		return &CLIResponse{
+			Success: false,
+			Message: "Attack options command requires a unit position (e.g., 'attackoptions A1')",
+			Error:   "Missing unit position argument",
+		}
+	}
+
+	// Parse unit position
+	fromRow, fromCol, valid := cli.formatter.ParsePosition(cmd.Arguments[0])
+	if !valid {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid position format: %s", cmd.Arguments[0]),
+			Error:   "Use format like A1, B2, etc.",
+		}
+	}
+
+	// Check if unit exists at position
+	unit := cli.game.GetUnitAt(fromRow, fromCol)
+	if unit == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("No unit at position %s", cmd.Arguments[0]),
+			Error:   "Cannot show attack options for empty position",
+		}
+	}
+
+	// Check if it's the current player's unit
+	if unit.PlayerID != cli.game.GetCurrentPlayer() {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Unit at %s belongs to player %d, not current player %d", 
+				cmd.Arguments[0], unit.PlayerID, cli.game.GetCurrentPlayer()),
+			Error:   "Cannot show attack options for opponent's unit",
+		}
+	}
+
+	// Get attack options using predictor
+	predictor := NewGamePredictor(cli.game.assetManager)
+	attackOptions, err := predictor.GetCombatPredictor().GetAttackOptions(cli.game, fromRow, fromCol)
+	if err != nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get attack options: %v", err),
+			Error:   "Attack options calculation failed",
+		}
+	}
+
+	// Format output
+	unitName := cli.game.GetUnitTypeName(unit.UnitType)
+	message := fmt.Sprintf("=== Attack Options for %s at %s ===\n", unitName, cmd.Arguments[0])
+	
+	if len(attackOptions) == 0 {
+		message += "No valid attack targets available.\n"
+	} else {
+		message += fmt.Sprintf("Available targets (%d):\n", len(attackOptions))
+		for i, pos := range attackOptions {
+			posStr := cli.formatter.FormatPosition(pos.Row, pos.Col)
+			target := cli.game.GetUnitAt(pos.Row, pos.Col)
+			if target != nil {
+				targetName := cli.game.GetUnitTypeName(target.UnitType)
+				message += fmt.Sprintf("  %d. %s - %s (Player %d, Health: %d)\n", 
+					i+1, posStr, targetName, target.PlayerID, target.AvailableHealth)
+			} else {
+				message += fmt.Sprintf("  %d. %s - No unit\n", i+1, posStr)
+			}
+		}
+		message += "\nUse 'predict <unit> <target>' to see damage prediction.\n"
+	}
+
+	fmt.Print(message)
+	return &CLIResponse{
+		Success: true,
+		Message: "Attack options displayed",
+	}
+}
+
+// handleMoveOptions shows all possible movement positions for a unit
+func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
+	if len(cmd.Arguments) < 1 {
+		return &CLIResponse{
+			Success: false,
+			Message: "Move options command requires a unit position (e.g., 'moveoptions A1')",
+			Error:   "Missing unit position argument",
+		}
+	}
+
+	// Parse unit position
+	fromRow, fromCol, valid := cli.formatter.ParsePosition(cmd.Arguments[0])
+	if !valid {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid position format: %s", cmd.Arguments[0]),
+			Error:   "Use format like A1, B2, etc.",
+		}
+	}
+
+	// Check if unit exists at position
+	unit := cli.game.GetUnitAt(fromRow, fromCol)
+	if unit == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("No unit at position %s", cmd.Arguments[0]),
+			Error:   "Cannot show move options for empty position",
+		}
+	}
+
+	// Check if it's the current player's unit
+	if unit.PlayerID != cli.game.GetCurrentPlayer() {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Unit at %s belongs to player %d, not current player %d", 
+				cmd.Arguments[0], unit.PlayerID, cli.game.GetCurrentPlayer()),
+			Error:   "Cannot show move options for opponent's unit",
+		}
+	}
+
+	// Get movement options using predictor
+	predictor := NewGamePredictor(cli.game.assetManager)
+	moveOptions, err := predictor.GetMovementPredictor().GetMovementOptions(cli.game, fromRow, fromCol)
+	if err != nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Failed to get movement options: %v", err),
+			Error:   "Movement options calculation failed",
+		}
+	}
+
+	// Format output
+	unitName := cli.game.GetUnitTypeName(unit.UnitType)
+	message := fmt.Sprintf("=== Movement Options for %s at %s ===\n", unitName, cmd.Arguments[0])
+	message += fmt.Sprintf("Movement Points: %d\n", unit.DistanceLeft)
+	
+	if len(moveOptions) == 0 {
+		message += "No valid movement positions available.\n"
+	} else {
+		message += fmt.Sprintf("Available positions (%d):\n", len(moveOptions))
+		for i, pos := range moveOptions {
+			posStr := cli.formatter.FormatPosition(pos.Row, pos.Col)
+			tile := cli.game.GetTileAt(pos.Row, pos.Col)
+			if tile != nil {
+				terrainData := GetTerrainData(tile.TileType)
+				message += fmt.Sprintf("  %d. %s - %s (Move Cost: %d)\n", 
+					i+1, posStr, terrainData.Name, terrainData.MoveCost)
+			} else {
+				message += fmt.Sprintf("  %d. %s - Unknown terrain\n", i+1, posStr)
+			}
+		}
+		message += "\nUse 'move <unit> <destination>' to move the unit.\n"
+	}
+
+	fmt.Print(message)
+	return &CLIResponse{
+		Success: true,
+		Message: "Movement options displayed",
+	}
+}
+
 // =============================================================================
 // Display Functions
 // =============================================================================
@@ -785,11 +1065,11 @@ func (cli *WeeWarCLI) PrintMap() {
 				continue
 			}
 			
-			// Show unit info centered
+			// Show unit info centered with unit type
 			if tile.Unit != nil {
-				fmt.Printf(" P%d  ", tile.Unit.PlayerID)
+				fmt.Printf("P%dU%d", tile.Unit.PlayerID, tile.Unit.UnitType)
 			} else {
-				fmt.Print("  --  ")
+				fmt.Print(" -- ")
 			}
 		}
 		fmt.Println()
@@ -802,7 +1082,7 @@ func (cli *WeeWarCLI) PrintMap() {
 	fmt.Println("⛏️=Mines  🏙️=City  🛣️=Road  🗼=Tower  ❄️=Snow  🏰=Land Base")
 	fmt.Println("🏛️=Naval Base  ✈️=Airport  ❓=Unknown")
 	fmt.Println()
-	fmt.Println("Units: P0, P1, etc. (Player number), -- = No unit")
+	fmt.Println("Units: P{Player}U{UnitType} (e.g., P0U1 = Player 0, Unit Type 1), -- = No unit")
 	fmt.Println("Hex Layout: Offset rows based on EvenRowsOffset flag")
 }
 
@@ -820,8 +1100,9 @@ func (cli *WeeWarCLI) PrintUnits() {
 		
 		for i, unit := range units {
 			pos := FormatPositionToString(unit.Row, unit.Col)
-			fmt.Printf("  %d. %s - Type:%d Health:%d Movement:%d\n", 
-				i+1, pos, unit.UnitType, unit.AvailableHealth, unit.DistanceLeft)
+			unitName := cli.game.GetUnitTypeName(unit.UnitType)
+			fmt.Printf("  %d. %s - %s (Type:%d) Health:%d Movement:%d\n", 
+				i+1, pos, unitName, unit.UnitType, unit.AvailableHealth, unit.DistanceLeft)
 		}
 	}
 }

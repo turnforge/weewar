@@ -175,23 +175,68 @@ weewar[T1:P0]> end            # End turn
 weewar[T2:P1]> quit           # Exit game
 ```
 
+### Unit ID and Health Display System
+
+The WeeWar CLI features an intuitive unit identification system that makes referring to units much easier:
+
+#### Unit ID Format
+- **Player A units**: A1, A2, A3, ... (first player)
+- **Player B units**: B1, B2, B3, ... (second player)
+- **Player C units**: C1, C2, C3, ... (third player, etc.)
+
+#### CLI Map Display
+```
+=== Game Map ===
+ 2    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱  
+     --  A1¹⁰⁰ A2¹⁰⁰  --   --   --   --   --   --   --   --   --  
+
+ 7    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱    🌱  
+     --   --   --   --   --   --   --   --   --  B1¹⁰⁰ B2¹⁰⁰  --  
+```
+
+- **Unit IDs**: A1, A2, B1, B2 (easy to remember)
+- **Health Display**: Unicode superscript (¹⁰⁰ = 100 health)
+- **Terrain**: Emoji representation for visual clarity
+
+#### PNG Rendering
+- **Bold text overlays** with semi-transparent backgrounds
+- **Unit IDs** in white text below each unit
+- **Health numbers** in yellow text above/right of each unit
+- **High contrast** for excellent readability
+
+#### Command Usage
+All commands accept both unit IDs and chess notation:
+
+```bash
+# Using unit IDs (recommended)
+move A1 B3          # Move player A's first unit
+attack A2 B1        # A2 attacks B1
+predict A1 B2       # Predict damage from A1 to B2
+attackoptions A1    # Show what A1 can attack
+moveoptions B2      # Show where B2 can move
+
+# Using chess notation (backward compatible)
+move B2 C3          # Move unit at B2 to C3
+attack C2 D3        # Unit at C2 attacks unit at D3
+```
+
 ### REPL Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
 | `actions` | Show available actions | `actions` |
-| `move <from> <to>` | Move unit | `move A1 B2` |
-| `attack <from> <to>` | Attack unit | `attack A1 B2` |
+| `move <from> <to>` | Move unit (ID or position) | `move A1 B3` or `move B2 C3` |
+| `attack <from> <to>` | Attack unit (ID or position) | `attack A2 B1` or `attack A1 B2` |
 | `s` / `state` | Quick status | `s` |
-| `map` | Display map | `map` |
-| `units` | Show units | `units` |
+| `map` | Display map with unit IDs | `map` |
+| `units` | Show units with positions | `units` |
 | `turn` | Turn information | `turn` |
 | `predict <from> <to>` | Damage prediction | `predict A1 B2` |
 | `attackoptions <unit>` | Show attack targets | `attackoptions A1` |
 | `moveoptions <unit>` | Show movement options | `moveoptions A1` |
 | `end` | End turn | `end` |
 | `save <file>` | Save game | `save game.json` |
-| `render <file>` | Render PNG | `render game.png` |
+| `render <file>` | Render PNG with text overlays | `render game.png` |
 | `help` | Show help | `help move` |
 | `quit` | Exit | `quit` |
 
@@ -209,6 +254,112 @@ weewar[T2:P1]> quit           # Exit game
 
 # Save and render
 /tmp/weewar-cli -new -save game.json -render game.png
+```
+
+## PNG Rendering System
+
+### Architecture Overview
+
+The PNG rendering system uses a sophisticated layered approach:
+
+```
+PNG Rendering Pipeline
+├── Buffer (image.RGBA canvas)
+├── Terrain Layer (hex tiles with authentic assets)
+├── Unit Layer (sprites with player colors)
+└── Text Overlay (unit IDs and health with backgrounds)
+```
+
+### Key Components
+
+#### 1. Buffer System (`buffer.go`)
+- **Canvas Integration**: Uses `tdewolff/canvas` for vector graphics
+- **DPI Conversion**: `3.78 = 96 DPI ÷ 25.4 mm/inch` for pixel-to-mm conversion
+- **Text Rendering**: Supports bold fonts with background rectangles
+- **Coordinate Transformation**: Handles canvas (bottom-left) to buffer (top-left) origin conversion
+
+#### 2. Asset Management (`assets.go`)
+- **Real WeeWar Assets**: Loads authentic tile and unit sprites
+- **Player Color Mapping**: `./data/Units/{UnitId}_files/{Color}.png`
+- **Fallback Graphics**: Colored shapes when assets unavailable
+- **Caching System**: Thread-safe asset loading with `sync.RWMutex`
+
+#### 3. Text Overlay System
+- **Bold Font Rendering**: Uses `canvas.FontBold` for prominence
+- **Background Rectangles**: Semi-transparent backgrounds for readability
+- **Coordinate Mapping**: Proper positioning relative to hex centers
+- **High Contrast Colors**: White/yellow text on dark backgrounds
+
+### DPI Conversion Details
+
+The `3.78` magic number throughout the codebase represents DPI conversion:
+
+```go
+// 3.78 = 96 DPI ÷ 25.4 mm/inch
+// Converts pixels to millimeters at 96 DPI
+
+// Canvas creation
+c := canvas.New(float64(b.width)/3.78, float64(b.height)/3.78)
+
+// Coordinate conversion
+ctx.MoveTo(points[0].X/3.78, points[0].Y/3.78)
+
+// Font size scaling
+face := fontFamily.Face(fontSize/3.78, rgba, fontWeight, canvas.FontNormal)
+
+// Rendering at correct DPI
+renderers.Write(tempFile, c, canvas.DPMM(3.78))
+```
+
+**Why 96 DPI?**
+- Standard web/screen resolution
+- Windows default DPI setting
+- Ensures consistent physical sizing across displays
+
+### Rendering Process
+
+```go
+// 1. Clear buffer
+buffer.Clear()
+
+// 2. Render terrain layer (tiles with assets)
+game.RenderTerrain(buffer, tileWidth, tileHeight, yIncrement)
+
+// 3. Render unit layer (sprites with player colors)
+game.RenderUnits(buffer, tileWidth, tileHeight, yIncrement)
+
+// 4. Render UI layer (text overlays)
+game.RenderUI(buffer, tileWidth, tileHeight, yIncrement)
+
+// 5. Save to PNG
+buffer.Save("game.png")
+```
+
+### Text Rendering Implementation
+
+```go
+// Bold text with background
+buffer.DrawTextWithStyle(x, y, text, fontSize, textColor, true, backgroundColor)
+
+// Features:
+// - Bold font support (canvas.FontBold)
+// - Background rectangles with padding
+// - Coordinate system conversion (flip Y axis)
+// - High contrast color schemes
+// - Semi-transparent backgrounds (180 alpha)
+```
+
+### Asset Integration
+
+```go
+// Load real WeeWar assets
+if unitImg, err := assetManager.GetUnitImage(unitType, playerID); err == nil {
+    // Render authentic sprite
+    buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
+    
+    // Add text overlay
+    game.renderUnitText(buffer, unit, x, y, tileWidth, tileHeight)
+}
 ```
 
 ## Common Tasks
@@ -424,5 +575,5 @@ games/weewar/
 ---
 
 **Last Updated**: 2025-01-11  
-**Version**: 3.0.0  
-**Status**: Production-ready with comprehensive CLI REPL interface
+**Version**: 4.0.0  
+**Status**: Production-ready with Unit ID system, health display, and professional PNG rendering

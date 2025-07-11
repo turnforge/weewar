@@ -287,22 +287,22 @@ func (cli *WeeWarCLI) handleMove(cmd *CLICommand) *CLIResponse {
 	fromPos := cmd.Arguments[0]
 	toPos := cmd.Arguments[1]
 
-	// Parse positions
-	fromRow, fromCol, valid := ParsePositionFromString(fromPos)
+	// Parse positions (supports both chess notation and unit IDs)
+	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, fromPos)
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid from position: %s", fromPos),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 
-	toRow, toCol, valid := ParsePositionFromString(toPos)
+	toRow, toCol, valid := ParsePositionOrUnitID(cli.game, toPos)
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid to position: %s", toPos),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 
@@ -346,22 +346,22 @@ func (cli *WeeWarCLI) handleAttack(cmd *CLICommand) *CLIResponse {
 	attackerPos := cmd.Arguments[0]
 	targetPos := cmd.Arguments[1]
 
-	// Parse positions
-	attackerRow, attackerCol, valid := ParsePositionFromString(attackerPos)
+	// Parse positions (supports both chess notation and unit IDs)
+	attackerRow, attackerCol, valid := ParsePositionOrUnitID(cli.game, attackerPos)
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid attacker position: %s", attackerPos),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 
-	targetRow, targetCol, valid := ParsePositionFromString(targetPos)
+	targetRow, targetCol, valid := ParsePositionOrUnitID(cli.game, targetPos)
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid target position: %s", targetPos),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 
@@ -671,22 +671,22 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 	fromPos := cmd.Arguments[0]
 	toPos := cmd.Arguments[1]
 	
-	// Parse positions
-	fromRow, fromCol, valid := ParsePositionFromString(fromPos)
+	// Parse positions (supports both chess notation and unit IDs)
+	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, fromPos)
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid from position: %s", fromPos),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 	
-	toRow, toCol, valid := ParsePositionFromString(toPos)
+	toRow, toCol, valid := ParsePositionOrUnitID(cli.game, toPos)
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid to position: %s", toPos),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 	
@@ -774,13 +774,13 @@ func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	// Parse unit position
-	fromRow, fromCol, valid := cli.formatter.ParsePosition(cmd.Arguments[0])
+	// Parse unit position (supports both chess notation and unit IDs)
+	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, cmd.Arguments[0])
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid position format: %s", cmd.Arguments[0]),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 
@@ -854,13 +854,13 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	// Parse unit position
-	fromRow, fromCol, valid := cli.formatter.ParsePosition(cmd.Arguments[0])
+	// Parse unit position (supports both chess notation and unit IDs)
+	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, cmd.Arguments[0])
 	if !valid {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Invalid position format: %s", cmd.Arguments[0]),
-			Error:   "Use format like A1, B2, etc.",
+			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
 
@@ -1065,9 +1065,11 @@ func (cli *WeeWarCLI) PrintMap() {
 				continue
 			}
 			
-			// Show unit info centered with unit type (same 6-char width as terrain)
+			// Show unit info with ID and health superscript (same 6-char width as terrain)
 			if tile.Unit != nil {
-				fmt.Printf("P%dU%d ", tile.Unit.PlayerID, tile.Unit.UnitType)
+				unitID := cli.game.GetUnitID(tile.Unit)
+				healthSuperscript := cli.numberToSuperscript(tile.Unit.AvailableHealth)
+				fmt.Printf("%s%s ", unitID, healthSuperscript)
 			} else {
 				fmt.Print(" --  ")
 			}
@@ -1750,4 +1752,27 @@ func (cli *WeeWarCLI) cleanupOldRenders() {
 			}
 		}
 	}
+}
+
+// numberToSuperscript converts a number to Unicode superscript characters
+func (cli *WeeWarCLI) numberToSuperscript(num int) string {
+	if num < 0 {
+		return "⁻" + cli.numberToSuperscript(-num)
+	}
+	
+	// Unicode superscript characters for digits 0-9
+	superscriptDigits := []string{"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"}
+	
+	if num == 0 {
+		return superscriptDigits[0]
+	}
+	
+	result := ""
+	for num > 0 {
+		digit := num % 10
+		result = superscriptDigits[digit] + result
+		num /= 10
+	}
+	
+	return result
 }

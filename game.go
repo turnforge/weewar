@@ -731,7 +731,7 @@ func (g *Game) GetUnitTypeName(unitType int) string {
 			}
 		}
 	}
-	
+
 	// Fallback to generic name
 	return fmt.Sprintf("Unit Type %d", unitType)
 }
@@ -1161,11 +1161,14 @@ func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement flo
 					if unitImg, err := g.assetManager.GetUnitImage(unit.UnitType, playerID); err == nil {
 						// Render real unit sprite (XYForTile already returns centered coordinates)
 						buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
-						
+
 						// Add health indicator if unit is damaged
 						if unit.AvailableHealth < 100 {
 							g.renderHealthBar(buffer, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
 						}
+
+						// Add unit ID and health text overlay
+						g.renderUnitText(buffer, unit, x, y, tileWidth, tileHeight)
 						continue
 					}
 				}
@@ -1193,6 +1196,9 @@ func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement flo
 				if unit.AvailableHealth < 100 {
 					g.renderHealthBar(buffer, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
 				}
+
+				// Add unit ID and health text overlay
+				g.renderUnitText(buffer, unit, x, y, tileWidth, tileHeight)
 			}
 		}
 	}
@@ -1303,6 +1309,29 @@ func (g *Game) renderHealthBar(buffer *Buffer, x, y, tileWidth, tileHeight float
 		}
 		buffer.FillPath(healthBar, Color{R: 0, G: 255, B: 0, A: 200})
 	}
+}
+
+// renderUnitText renders unit ID and health text overlay on PNG output
+func (g *Game) renderUnitText(buffer *Buffer, unit *Unit, x, y, tileWidth, tileHeight float64) {
+	// Get unit ID
+	unitID := g.GetUnitID(unit)
+
+	// Render unit ID below the unit with bold font and dark background
+	idTextColor := Color{R: 255, G: 255, B: 255, A: 255}    // White text for visibility
+	idBackgroundColor := Color{R: 0, G: 0, B: 0, A: 180}    // Semi-transparent black background
+	idFontSize := 28.0                                       // Large font size for readability
+	idX := x - 15                                            // Slightly left of center
+	idY := y + (tileHeight * 0.4)                            // Below the unit
+	buffer.DrawTextWithStyle(idX, idY, unitID, idFontSize, idTextColor, true, idBackgroundColor)
+
+	// Render health with bold font and dark background (upper right)
+	healthText := fmt.Sprintf("%d", unit.AvailableHealth)
+	healthTextColor := Color{R: 255, G: 255, B: 0, A: 255}     // Yellow text for better visibility
+	healthBackgroundColor := Color{R: 0, G: 0, B: 0, A: 180}   // Semi-transparent black background
+	healthFontSize := 22.0                                      // Large font for health
+	healthX := x + 15                                           // Upper right area
+	healthY := y - (tileHeight * 0.3)                           // Above center
+	buffer.DrawTextWithStyle(healthX, healthY, healthText, healthFontSize, healthTextColor, true, healthBackgroundColor)
 }
 
 // getTerrainColor returns color for terrain type
@@ -1457,4 +1486,32 @@ func (g *Game) validateGameState() error {
 	}
 
 	return nil
+}
+
+// GetUnitID generates a unique identifier for a unit in the format PN
+// where P is the player letter (A-Z) and N is the unit number for that player
+func (g *Game) GetUnitID(unit *Unit) string {
+	if unit == nil {
+		return ""
+	}
+
+	// Convert player ID to letter (0=A, 1=B, etc.)
+	playerLetter := string(rune('A' + unit.PlayerID))
+
+	// Count units for this player to determine unit number
+	unitNumber := 0
+	for _, playerUnits := range g.Units {
+		for _, playerUnit := range playerUnits {
+			if playerUnit.PlayerID == unit.PlayerID {
+				unitNumber++
+				if playerUnit == unit {
+					// Found our unit, return the ID
+					return fmt.Sprintf("%s%d", playerLetter, unitNumber)
+				}
+			}
+		}
+	}
+
+	// Fallback - shouldn't happen but handle gracefully
+	return fmt.Sprintf("%s?", playerLetter)
 }

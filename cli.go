@@ -348,6 +348,27 @@ func ParsePositionFromString(pos string) (row, col int, valid bool) {
 	return row, col, true
 }
 
+// ParsePositionOrUnitID converts chess notation or unit ID to row/col coordinates
+// First tries to match as unit ID, then falls back to chess notation
+func ParsePositionOrUnitID(game *Game, input string) (row, col int, valid bool) {
+	input = strings.TrimSpace(input)
+	if input == "" || game == nil {
+		return 0, 0, false
+	}
+	
+	// First try to find unit by ID
+	for _, playerUnits := range game.Units {
+		for _, unit := range playerUnits {
+			if unit != nil && game.GetUnitID(unit) == strings.ToUpper(input) {
+				return unit.Row, unit.Col, true
+			}
+		}
+	}
+	
+	// Fall back to chess notation parsing
+	return ParsePositionFromString(input)
+}
+
 // FormatPositionToString converts row/col coordinates to chess notation
 func FormatPositionToString(row, col int) string {
 	if row < 0 || col < 0 || col > 25 {

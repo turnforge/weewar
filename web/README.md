@@ -5,14 +5,14 @@ This directory contains the web interface for WeeWar's WASM modules, providing a
 ## Files Overview
 
 ### HTML Pages
-- **`index.html`** - Main landing page with navigation and combined demo
-- **`cli.html`** - Dedicated Game CLI interface with full debugging capabilities  
-- **`editor.html`** - Dedicated Map Editor interface with advanced tools
+- **`index.html`** - Main landing page with navigation and combined demo interface
+- **`cli.html`** - Dedicated Game CLI interface with comprehensive debugging and game management
+- **`editor.html`** - Professional Map Editor interface with advanced terrain tools and export options
 
 ### WASM Modules (built by `scripts/build-wasm.sh`)
-- **`../wasm/weewar-cli.wasm`** - Main game CLI (14MB)
-- **`../wasm/editor.wasm`** - Map editor (14MB)  
-- **`../wasm/wasm_exec.js`** - Go WASM runtime (20KB)
+- **`../wasm/weewar-cli.wasm`** - Complete game CLI with full command set (14MB)
+- **`../wasm/editor.wasm`** - Professional map editor with painting and validation (14MB)  
+- **`../wasm/wasm_exec.js`** - Go WASM runtime for browser execution (20KB)
 
 ## Features
 
@@ -109,10 +109,11 @@ Install the "Live Server" extension and right-click any HTML file → "Open with
 - **Console Output**: Real-time operation logging with timestamps
 
 ### Performance Notes
-- **Initial Load**: ~28MB total (both WASM modules)
-- **Runtime**: Pure client-side execution, no server required
+- **Initial Load**: ~28MB total (both WASM modules with full Go stdlib)
+- **Runtime**: Pure client-side execution, no server or backend required
 - **Memory**: Go garbage collector manages WASM memory automatically
-- **Rendering**: Base64 PNG generation for cross-browser compatibility
+- **Rendering**: High-quality Base64 PNG generation for universal browser compatibility
+- **Responsiveness**: Real-time command execution and state updates
 
 ## Browser Compatibility
 

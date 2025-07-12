@@ -5,6 +5,9 @@ A comprehensive guide for developing, testing, and running the WeeWar turn-based
 ## Table of Contents
 - [Quick Start](#quick-start)
 - [Architecture Overview](#architecture-overview)
+- [Cube Coordinate System](#cube-coordinate-system)
+- [Map Editor](#map-editor)
+- [WASM & Web Interface](#wasm--web-interface)
 - [Testing Strategy](#testing-strategy)
 - [Development Workflow](#development-workflow)
 - [CLI Interface](#cli-interface)
@@ -29,41 +32,197 @@ go build -o /tmp/weewar-cli ./cmd/weewar-cli
 
 # Start interactive game
 /tmp/weewar-cli -new -interactive
+
+# Build WASM modules for web
+./scripts/build-wasm.sh
+
+# Open web interface
+open web/index.html
 ```
 
 ## Architecture Overview
 
-### Current Architecture (2024)
+### Current Architecture (2025)
 
-The WeeWar implementation has evolved into a unified, interface-driven architecture:
+WeeWar has evolved into a comprehensive game platform with revolutionary coordinate system and multiple deployment options:
 
 ```
-Core Game System (GameInterface)
-├── GameController (lifecycle, turns, save/load)
-├── MapInterface (hex grid, pathfinding, coordinates)  
-└── UnitInterface (units, combat, actions)
+🧮 Cube Coordinate Foundation
+├── Pure hex mathematics (Q, R coordinates)
+├── No EvenRowsOffset confusion (universal coordinates)
+├── Direct map storage (map[CubeCoord]*Tile)
+└── Efficient neighbor/distance calculations
      ↓
-Unified Game Implementation
-├── Comprehensive state management
-├── Integrated hex pathfinding
-├── Real WeeWar data integration
-├── PNG rendering capabilities
-├── Asset management system
-└── Combat prediction system
+🎮 Core Game Engine
+├── Unified Game Implementation (interface-driven)
+├── Complete combat system with prediction
+├── PNG rendering with multi-layer composition
+├── Asset management (tiles, units, terrain)
+└── Save/Load with JSON serialization
      ↓
-Multiple Interfaces
-├── CLI (REPL with chess notation)
-├── PNG Renderer (hex graphics)
-└── Web Interface (future)
+🛠️ Development Tools
+├── Map Editor (terrain painting, undo/redo, validation)
+├── CLI Interface (chess notation, REPL mode)
+├── Testing Suite (47+ passing tests)
+└── Build System (native + WASM compilation)
+     ↓
+🌐 Deployment Options
+├── Native CLI Executables
+├── WASM Modules (14MB each, full Go stdlib)
+├── Web Interface (browser-based, no server)
+└── Library Integration (Go packages)
 ```
 
 ### Key Design Principles
 
-1. **Interface-Driven Design**: Clean contracts for all operations
-2. **Unified State Management**: Single source of truth in Game struct
-3. **Data-Driven Authenticity**: Real WeeWar data integration
-4. **Comprehensive Testing**: All major functionality tested
-5. **Multiple Interface Support**: CLI, PNG, Web (future)
+1. **Cube Coordinate Purity**: Universal hex math eliminates coordinate confusion
+2. **Interface-Driven Design**: Clean contracts for all operations  
+3. **Unified State Management**: Single source of truth in Game struct
+4. **Web-First Architecture**: WASM enables browser deployment
+5. **Comprehensive Testing**: 47+ tests with 100% core coverage
+6. **Multiple Deployment Options**: Native, Web, Library integration
+
+## Cube Coordinate System
+
+### Revolutionary Architecture Change
+
+The most significant architectural improvement is the migration to pure cube coordinates:
+
+```go
+// OLD: Array-based storage with EvenRowsOffset confusion
+type Map struct {
+    Tiles map[int]map[int]*Tile // Nested maps
+    EvenRowsOffset bool         // Source of confusion
+}
+
+// NEW: Pure cube coordinate storage
+type Map struct {
+    NumRows, NumCols int              // Display bounds only
+    Tiles map[CubeCoord]*Tile         // Direct coordinate lookup
+}
+
+type CubeCoord struct {
+    Q int `json:"q"`  // Primary coordinate
+    R int `json:"r"`  // Primary coordinate  
+    // S calculated as -Q-R (not stored)
+}
+```
+
+### Benefits Achieved
+
+1. **No Coordinate Confusion**: Same logical hex always has same Q,R coordinates
+2. **Mathematical Consistency**: All hex operations use proper cube math
+3. **Performance Improvement**: Direct coordinate lookup vs nested array traversal
+4. **Memory Efficiency**: No stored S values, no linked neighbor lists
+5. **Future-Proof**: Clean foundation for advanced pathfinding and AI
+
+### Key Methods
+
+```go
+// Primary storage methods
+map.TileAtCube(coord CubeCoord) *Tile
+map.AddTileCube(coord CubeCoord, tile *Tile)
+map.DeleteTileCube(coord CubeCoord)
+
+// Display conversion (backward compatibility)
+map.DisplayToHex(row, col int) CubeCoord
+map.HexToDisplay(coord CubeCoord) (row, col int)
+
+// Cube coordinate operations
+coord.Neighbors() []CubeCoord
+coord.Distance(other CubeCoord) int
+coord.Range(radius int) []CubeCoord
+```
+
+## Map Editor
+
+### Comprehensive Editing System
+
+The Map Editor provides professional-grade map creation tools:
+
+```go
+editor := weewar.NewMapEditor()
+editor.NewMap(8, 12)
+
+// Terrain painting with brush system
+editor.SetBrushTerrain(3)  // Water
+editor.SetBrushSize(2)     // 19 hex area
+editor.PaintTerrain(4, 6)  // Paint at position
+
+// Advanced tools
+editor.FloodFill(0, 0)     // Fill connected regions
+editor.Undo() / editor.Redo()  // 50-step history
+
+// Validation and export
+issues := editor.ValidateMap()
+game, _ := editor.ExportToGame(4)  // 4-player game
+```
+
+### Features
+
+- **Multi-size brushes**: 1 to 91 hex areas
+- **Flood fill**: Efficient region filling with BFS
+- **Undo/Redo**: 50-step history with full map snapshots
+- **Validation**: Real-time issue detection
+- **Export**: Generate playable games (2-6 players)
+- **Rendering**: PNG export with customizable dimensions
+
+## WASM & Web Interface
+
+### Browser Deployment
+
+WeeWar runs completely in browsers via WebAssembly:
+
+```bash
+# Build WASM modules
+./scripts/build-wasm.sh
+
+# Creates:
+# wasm/weewar-cli.wasm (14MB)
+# wasm/editor.wasm (14MB)  
+# wasm/wasm_exec.js (20KB)
+```
+
+### Web Interface Features
+
+#### Game CLI (`web/cli.html`)
+- Complete game management (create, save, load)
+- Full command execution with debugging
+- Real-time PNG rendering (multiple sizes)
+- Save/load with file download/upload
+- Mobile responsive design
+
+#### Map Editor (`web/editor.html`)  
+- Visual terrain palette with emoji indicators
+- Click-to-paint functionality on rendered maps
+- Advanced tools (island generator, randomization)
+- Undo/redo with visual feedback
+- Export pipeline to downloadable games
+
+### JavaScript API
+
+```javascript
+// CLI Functions
+weewarCreateGame(playerCount)
+weewarExecuteCommand(command)
+weewarRenderGame(width, height)
+weewarSaveGame()
+
+// Editor Functions
+editorNewMap(rows, cols)
+editorPaintTerrain(row, col)
+editorSetBrushTerrain(type)
+editorFloodFill(row, col)
+editorUndo() / editorRedo()
+editorRenderMap(width, height)
+```
+
+### Deployment Options
+
+- **Static Hosting**: GitHub Pages, Netlify, Vercel
+- **No Server Required**: Pure client-side execution
+- **Cross-platform**: Works on any modern browser
+- **Offline Capable**: Can work without internet after initial load
 
 ## Testing Strategy
 
@@ -576,4 +735,4 @@ games/weewar/
 
 **Last Updated**: 2025-01-11  
 **Version**: 4.0.0  
-**Status**: Production-ready with Unit ID system, health display, and professional PNG rendering
+**Status**: Production-ready with cube coordinates, map editor, WASM deployment, and comprehensive web interfaces

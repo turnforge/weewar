@@ -19,9 +19,9 @@ import (
 // CanvasBuffer represents a drawable canvas that renders directly to HTML canvas
 // Implements the Drawable interface to be a drop-in replacement for Buffer
 type CanvasBuffer struct {
-	canvasElement js.Value        // HTML canvas element
+	canvasElement js.Value               // HTML canvas element
 	renderer      *htmlcanvas.HTMLCanvas // HTML canvas renderer
-	context       *canvas.Context // canvas drawing context
+	context       *canvas.Context        // canvas drawing context
 	width         int
 	height        int
 	canvasID      string
@@ -241,36 +241,13 @@ func (cb *CanvasBuffer) DrawImage(x, y, width, height float64, img image.Image) 
 	if img == nil {
 		return
 	}
-	
+
 	// Convert buffer coordinates to canvas coordinates
 	canvasX, canvasY := cb.bufferToCanvasXY(x, y)
-	
-	// Convert image to canvas-compatible format
-	// For now, extract image data and draw as a filled rectangle with average color
-	// This is a simplified implementation - in production we'd convert to ImageData
-	bounds := img.Bounds()
-	if bounds.Empty() {
-		return
-	}
-	
-	// Sample the center pixel to get a representative color
-	centerX := bounds.Min.X + bounds.Dx()/2
-	centerY := bounds.Min.Y + bounds.Dy()/2
-	colorSample := img.At(centerX, centerY)
-	r, g, b, a := colorSample.RGBA()
-	
-	// Convert from 16-bit to 8-bit color values
-	avgColor := color.RGBA{
-		R: uint8(r >> 8),
-		G: uint8(g >> 8), 
-		B: uint8(b >> 8),
-		A: uint8(a >> 8),
-	}
-	
-	// Draw as a filled rectangle with the sampled color
-	cb.context.SetFillColor(avgColor)
-	cb.context.DrawPath(canvasX, canvasY, canvas.Rectangle(width, height))
-	cb.context.Fill()
+
+	// Draw the actual image using the canvas context
+	// Note: tdewolff/canvas DrawImage uses image's natural size, scaling handled by resolution
+	cb.context.DrawImage(canvasX, canvasY, img, canvas.Resolution(PixelsPerMM))
 }
 
 // RenderToCanvasBuffer creates a canvas buffer-compatible version of RenderToBuffer
@@ -285,21 +262,21 @@ func (g *Game) renderMapToCanvas(canvasBuffer *CanvasBuffer, tileWidth, tileHeig
 
 	// Convert pixel measurements to mm for canvas coordinates
 	hexRadius := (tileWidth * 0.4) / PixelsPerMM
-	
+
 	// Render each tile
 	for row := 0; row < g.Map.NumRows; row++ {
 		for col := 0; col < g.Map.NumCols; col++ {
 			// Calculate hex center position
 			x := float64(col) * (tileWidth / PixelsPerMM)
 			y := float64(row) * (yIncrement / PixelsPerMM)
-			
+
 			// Offset even rows for hex grid
 			if row%2 == 0 {
 				x += (tileWidth * 0.5) / PixelsPerMM
 			}
-			
-			centerX := x + (tileWidth * 0.5) / PixelsPerMM
-			centerY := y + (tileHeight * 0.5) / PixelsPerMM
+
+			centerX := x + (tileWidth*0.5)/PixelsPerMM
+			centerY := y + (tileHeight*0.5)/PixelsPerMM
 
 			// Get tile at this position
 			coord := g.Map.DisplayToHex(row, col)
@@ -328,7 +305,7 @@ func (g *Game) renderMapToCanvas(canvasBuffer *CanvasBuffer, tileWidth, tileHeig
 
 			// Create hexagon path
 			hexPath := createHexagonPath(centerX, centerY, hexRadius)
-			
+
 			// Fill the hexagon
 			ctx.DrawPath(0, 0, hexPath)
 			ctx.Fill()
@@ -342,71 +319,4 @@ func (g *Game) renderMapToCanvas(canvasBuffer *CanvasBuffer, tileWidth, tileHeig
 	}
 
 	return nil
-}
-
-// createHexagonPath creates a hexagon path centered at (cx, cy) with given radius
-func createHexagonPath(cx, cy, radius float64) *canvas.Path {
-	path := &canvas.Path{}
-	
-	// Create hexagon with 6 sides
-	for i := 0; i < 6; i++ {
-		// Angle for each vertex (60 degrees apart)
-		angle := float64(i) * 60.0 * 3.14159 / 180.0
-		x := cx + radius*cos(angle)
-		y := cy + radius*sin(angle)
-		
-		if i == 0 {
-			path.MoveTo(x, y)
-		} else {
-			path.LineTo(x, y)
-		}
-	}
-	path.Close()
-	
-	return path
-}
-
-// createHexPoints creates points for a hexagon centered at (cx, cy) with given radius
-func createHexPoints(cx, cy, radius float64) []Point {
-	points := make([]Point, 6)
-	for i := 0; i < 6; i++ {
-		angle := float64(i) * 60.0 * 3.14159 / 180.0 // Convert to radians
-		x := cx + radius*cos(angle)
-		y := cy + radius*sin(angle)
-		points[i] = Point{X: x, Y: y}
-	}
-	return points
-}
-
-// createCirclePoints creates points for a circle approximation
-func createCirclePoints(cx, cy, radius float64, segments int) []Point {
-	points := make([]Point, segments)
-	for i := 0; i < segments; i++ {
-		angle := float64(i) * 360.0 / float64(segments) * 3.14159 / 180.0
-		x := cx + radius*cos(angle)
-		y := cy + radius*sin(angle)
-		points[i] = Point{X: x, Y: y}
-	}
-	return points
-}
-
-// Simple math helpers (since we can't import math in WASM easily)
-func cos(angle float64) float64 {
-	// Simple cosine approximation using Taylor series
-	// cos(x) ≈ 1 - x²/2! + x⁴/4! - x⁶/6!
-	x := angle
-	for x > 3.14159*2 {
-		x -= 3.14159 * 2
-	}
-	for x < 0 {
-		x += 3.14159 * 2
-	}
-
-	x2 := x * x
-	return 1 - x2/2 + x2*x2/24 - x2*x2*x2/720
-}
-
-func sin(angle float64) float64 {
-	// sin(x) = cos(x - π/2)
-	return cos(angle - 3.14159/2)
 }

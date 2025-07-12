@@ -726,7 +726,7 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 	}
 	
 	// Create predictor and get damage prediction
-	predictor := NewGamePredictor(cli.game.assetManager)
+	predictor := NewGamePredictor(cli.game.GetAssetManager())
 	damagePrediction, err := predictor.GetCombatPredictor().PredictDamage(cli.game, fromRow, fromCol, toRow, toCol)
 	if err != nil {
 		return &CLIResponse{
@@ -810,7 +810,7 @@ func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Get attack options using predictor
-	predictor := NewGamePredictor(cli.game.assetManager)
+	predictor := NewGamePredictor(cli.game.GetAssetManager())
 	attackOptions, err := predictor.GetCombatPredictor().GetAttackOptions(cli.game, fromRow, fromCol)
 	if err != nil {
 		return &CLIResponse{
@@ -890,7 +890,7 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Get movement options using predictor
-	predictor := NewGamePredictor(cli.game.assetManager)
+	predictor := NewGamePredictor(cli.game.GetAssetManager())
 	moveOptions, err := predictor.GetMovementPredictor().GetMovementOptions(cli.game, fromRow, fromCol)
 	if err != nil {
 		return &CLIResponse{

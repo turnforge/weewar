@@ -91,9 +91,9 @@ func (cr *CanvasRenderer) RenderUnitsWithAssets(world *World, viewState *ViewSta
 		x, y := game.Map.XYForTile(unit.Row, unit.Col, options.TileWidth, options.TileHeight, options.YIncrement)
 		
 		// Try to load real unit asset first (like the original Game.RenderUnits method)
-		assetManager := game.GetAssetManager()
-		if assetManager != nil && assetManager.HasUnitAsset(unit.UnitType, unit.PlayerID) {
-			if unitImg, err := assetManager.GetUnitImage(unit.UnitType, unit.PlayerID); err == nil {
+		assetProvider := game.GetAssetProvider()
+		if assetProvider != nil && assetProvider.HasUnitAsset(unit.UnitType, unit.PlayerID) {
+			if unitImg, err := assetProvider.GetUnitImage(unit.UnitType, unit.PlayerID); err == nil {
 				// Render real unit sprite (XYForTile already returns centered coordinates)
 				drawable.DrawImage(x-options.TileWidth/2, y-options.TileHeight/2, options.TileWidth, options.TileHeight, unitImg)
 				

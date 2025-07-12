@@ -3,7 +3,6 @@ package weewar
 import (
 	"image"
 	"image/color"
-	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -319,16 +318,4 @@ func TestBufferPathEdgeCases(t *testing.T) {
 	if cleanupBufferTestFiles {
 		os.Remove(imagePath)
 	}
-}
-
-// Helper function to create circle points
-func createCirclePoints(centerX, centerY, radius float64, segments int) []Point {
-	points := make([]Point, segments)
-	for i := 0; i < segments; i++ {
-		angle := 2 * math.Pi * float64(i) / float64(segments)
-		x := centerX + radius*math.Cos(angle)
-		y := centerY + radius*math.Sin(angle)
-		points[i] = Point{X: x, Y: y}
-	}
-	return points
 }

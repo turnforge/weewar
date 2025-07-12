@@ -398,7 +398,7 @@ type Game struct {
 	eventManager *EventManager `json:"-"` // Event manager for observer pattern
 
 	// Asset management
-	assetManager *AssetManager `json:"-"` // Asset manager for tiles and units
+	assetProvider AssetProvider `json:"-"` // Asset provider for tiles and units (interface for platform flexibility)
 
 	// Game metadata
 	CreatedAt    time.Time `json:"createdAt"`    // When game was created
@@ -438,7 +438,7 @@ func NewGame(playerCount int, gameMap *Map, seed int64) (*Game, error) {
 		LastActionAt:  time.Now(),
 		rng:           rand.New(rand.NewSource(seed)),
 		eventManager:  NewEventManager(),
-		assetManager:  NewAssetManager("data"),
+		assetProvider: NewAssetManager("data"),
 	}
 
 	// Initialize units slice
@@ -471,7 +471,7 @@ func LoadGame(saveData []byte) (*Game, error) {
 	// Restore transient state
 	game.rng = rand.New(rand.NewSource(game.Seed))
 	game.eventManager = NewEventManager()
-	game.assetManager = NewAssetManager("data")
+	game.assetProvider = NewAssetManager("data")
 
 	// Note: Neighbor connections are no longer stored, calculated on-demand
 
@@ -830,11 +830,13 @@ func (g *Game) GetUnitType(unit *Unit) int {
 
 // GetUnitTypeName returns the display name for a unit type
 func (g *Game) GetUnitTypeName(unitType int) string {
-	if g.assetManager != nil {
-		// Try to get unit data from JSON if asset manager is loaded
-		if err := g.assetManager.LoadGameData(); err == nil {
-			if unitData, err := g.assetManager.GetUnitData(unitType); err == nil {
-				return unitData.Name
+	if g.assetProvider != nil {
+		// Try to get unit data from JSON if asset provider is loaded
+		if am, ok := g.assetProvider.(*AssetManager); ok {
+			if err := am.LoadGameData(); err == nil {
+				if unitData, err := am.GetUnitData(unitType); err == nil {
+					return unitData.Name
+				}
 			}
 		}
 	}
@@ -1260,8 +1262,8 @@ func (g *Game) RenderTerrainTo(drawable Drawable, tileWidth, tileHeight, yIncrem
 			x, y := g.Map.XYForTile(tile.Row, tile.Col, tileWidth, tileHeight, yIncrement)
 
 				// Try to load real tile asset first
-				if g.assetManager != nil && g.assetManager.HasTileAsset(tile.TileType) {
-					if tileImg, err := g.assetManager.GetTileImage(tile.TileType); err == nil {
+				if g.assetProvider != nil && g.assetProvider.HasTileAsset(tile.TileType) {
+					if tileImg, err := g.assetProvider.GetTileImage(tile.TileType); err == nil {
 						// Render real tile image (XYForTile already returns centered coordinates)
 						drawable.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, tileImg)
 						continue
@@ -1305,8 +1307,8 @@ func (g *Game) RenderUnitsTo(drawable Drawable, tileWidth, tileHeight, yIncremen
 				x, y := g.Map.XYForTile(unit.Row, unit.Col, tileWidth, tileHeight, yIncrement)
 
 				// Try to load real unit sprite first
-				if g.assetManager != nil && g.assetManager.HasUnitAsset(unit.UnitType, playerID) {
-					if unitImg, err := g.assetManager.GetUnitImage(unit.UnitType, playerID); err == nil {
+				if g.assetProvider != nil && g.assetProvider.HasUnitAsset(unit.UnitType, playerID) {
+					if unitImg, err := g.assetProvider.GetUnitImage(unit.UnitType, playerID); err == nil {
 						// Render real unit sprite (XYForTile already returns centered coordinates)
 						drawable.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
 
@@ -1716,12 +1718,26 @@ func (g *Game) GetUnitID(unit *Unit) string {
 	return fmt.Sprintf("%s?", playerLetter)
 }
 
-// GetAssetManager returns the current AssetManager instance
+// GetAssetManager returns the current AssetManager instance (legacy compatibility)
 func (g *Game) GetAssetManager() *AssetManager {
-	return g.assetManager
+	// Try to cast the AssetProvider to *AssetManager for backward compatibility
+	if am, ok := g.assetProvider.(*AssetManager); ok {
+		return am
+	}
+	return nil
 }
 
-// SetAssetManager sets the AssetManager instance for tile and unit rendering
+// SetAssetManager sets the AssetManager instance for tile and unit rendering (legacy compatibility)
 func (g *Game) SetAssetManager(assetManager *AssetManager) {
-	g.assetManager = assetManager
+	g.assetProvider = assetManager
+}
+
+// GetAssetProvider returns the current AssetProvider instance
+func (g *Game) GetAssetProvider() AssetProvider {
+	return g.assetProvider
+}
+
+// SetAssetProvider sets the AssetProvider instance for tile and unit rendering
+func (g *Game) SetAssetProvider(provider AssetProvider) {
+	g.assetProvider = provider
 }

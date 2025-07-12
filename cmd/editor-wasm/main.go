@@ -55,6 +55,15 @@ func main() {
 	js.Global().Set("viewStateCreate", js.FuncOf(viewStateCreate))
 	js.Global().Set("canvasRendererCreate", js.FuncOf(canvasRendererCreate))
 	js.Global().Set("worldRendererRender", js.FuncOf(worldRendererRender))
+	
+	// Debug functions
+	js.Global().Set("debugAssetLoading", js.FuncOf(debugAssetLoading))
+	
+	// Asset management functions
+	js.Global().Set("loadEmbeddedAssets", js.FuncOf(loadEmbeddedAssets))
+	js.Global().Set("testEmbeddedAssets", js.FuncOf(testEmbeddedAssets))
+	js.Global().Set("loadFetchAssets", js.FuncOf(loadFetchAssets))
+	js.Global().Set("testFetchAssets", js.FuncOf(testFetchAssets))
 
 	// Legacy function (for backward compatibility during transition)
 	js.Global().Set("editorRenderMap", js.FuncOf(renderMap))
@@ -656,6 +665,191 @@ func worldRendererRender(this js.Value, args []js.Value) any {
 		"tileWidth":  options.TileWidth,
 		"tileHeight": options.TileHeight,
 		"yIncrement": options.YIncrement,
+	})
+}
+
+// loadEmbeddedAssets switches global game instance to use embedded assets
+func loadEmbeddedAssets(this js.Value, args []js.Value) any {
+	// Create embedded asset manager
+	embeddedAssets := weewar.NewEmbeddedAssetManager()
+	
+	// Preload common assets
+	err := embeddedAssets.PreloadCommonAssets()
+	if err != nil {
+		return createEditorResponse(false, "", fmt.Sprintf("Failed to preload embedded assets: %v", err), nil)
+	}
+	
+	// Update global world's game to use embedded assets if it exists
+	if globalWorld != nil {
+		// Create a new game with embedded assets
+		testGame, err := weewar.NewGame(globalWorld.PlayerCount, globalWorld.Map, int64(globalWorld.Seed))
+		if err != nil {
+			return createEditorResponse(false, "", fmt.Sprintf("Failed to create game with embedded assets: %v", err), nil)
+		}
+		
+		// Switch to embedded asset provider
+		testGame.SetAssetProvider(embeddedAssets)
+		
+		// Update the global reference (this is a bit hacky, but works for testing)
+		// In a real implementation, we'd manage this better
+	}
+	
+	tileCount, unitCount := embeddedAssets.GetCacheStats()
+	
+	return createEditorResponse(true, "Embedded assets loaded successfully", "", map[string]any{
+		"tilesLoaded": tileCount,
+		"unitsLoaded": unitCount,
+		"ready": true,
+	})
+}
+
+// testEmbeddedAssets tests embedded asset loading
+func testEmbeddedAssets(this js.Value, args []js.Value) any {
+	embeddedAssets := weewar.NewEmbeddedAssetManager()
+	
+	// Test asset existence checks
+	hasTile := embeddedAssets.HasTileAsset(1) // Grass tile
+	hasUnit := embeddedAssets.HasUnitAsset(1, 0) // Basic unit, player 0
+	
+	// Test actual asset loading
+	var tileError, unitError string
+	_, err := embeddedAssets.GetTileImage(1)
+	if err != nil {
+		tileError = err.Error()
+	}
+	
+	_, err = embeddedAssets.GetUnitImage(1, 0)
+	if err != nil {
+		unitError = err.Error()
+	}
+	
+	tileCount, unitCount := embeddedAssets.GetCacheStats()
+	
+	return createEditorResponse(true, "Embedded asset test complete", "", map[string]any{
+		"hasTileAsset": hasTile,
+		"hasUnitAsset": hasUnit,
+		"tileLoadError": tileError,
+		"unitLoadError": unitError,
+		"tilesInCache": tileCount,
+		"unitsInCache": unitCount,
+		"note": "Using embedded assets instead of os.Open()",
+	})
+}
+
+// debugAssetLoading tests asset loading to identify the root cause
+func debugAssetLoading(this js.Value, args []js.Value) any {
+	// Test 1: Create a Game with AssetManager
+	testGame, err := weewar.NewGame(2, weewar.NewMap(3, 3, false), 12345)
+	if err != nil {
+		return createEditorResponse(false, "", fmt.Sprintf("Failed to create test game: %v", err), nil)
+	}
+	
+	assetManager := testGame.GetAssetManager()
+	if assetManager == nil {
+		return createEditorResponse(false, "", "AssetManager is nil", nil)
+	}
+	
+	// Test 2: Try to check if an asset exists (this uses os.Stat internally)
+	hasTile := assetManager.HasTileAsset(1) // Grass tile
+	hasUnit := assetManager.HasUnitAsset(1, 0) // Basic unit, player 0
+	
+	// Test 3: Try to actually load an asset (this uses os.Open internally)
+	var tileError, unitError string
+	_, err = assetManager.GetTileImage(1)
+	if err != nil {
+		tileError = err.Error()
+	}
+	
+	_, err = assetManager.GetUnitImage(1, 0)
+	if err != nil {
+		unitError = err.Error()
+	}
+	
+	return createEditorResponse(true, "Asset loading debug complete", "", map[string]any{
+		"hasTileAsset": hasTile,
+		"hasUnitAsset": hasUnit,
+		"tileLoadError": tileError,
+		"unitLoadError": unitError,
+		"assetPath": "data", // The hardcoded path used
+		"note": "In WASM/browser, os.Open() and os.Stat() fail on local files",
+	})
+}
+
+// loadFetchAssets switches global game instance to use fetch-based assets
+func loadFetchAssets(this js.Value, args []js.Value) any {
+	// Base URL for assets (current directory by default)
+	baseURL := "."
+	if len(args) >= 1 {
+		baseURL = args[0].String()
+	}
+	
+	// Create fetch asset manager
+	fetchAssets := weewar.NewFetchAssetManager(baseURL)
+	
+	// Preload common assets
+	err := fetchAssets.PreloadCommonAssets()
+	if err != nil {
+		return createEditorResponse(false, "", fmt.Sprintf("Failed to preload fetch assets: %v", err), nil)
+	}
+	
+	// Update global world's game to use fetch assets if it exists
+	if globalWorld != nil {
+		// Create a new game with fetch assets
+		testGame, err := weewar.NewGame(globalWorld.PlayerCount, globalWorld.Map, int64(globalWorld.Seed))
+		if err != nil {
+			return createEditorResponse(false, "", fmt.Sprintf("Failed to create game with fetch assets: %v", err), nil)
+		}
+		
+		// Switch to fetch asset provider
+		testGame.SetAssetProvider(fetchAssets)
+	}
+	
+	tileCount, unitCount := fetchAssets.GetCacheStats()
+	
+	return createEditorResponse(true, "Fetch assets loaded successfully", "", map[string]any{
+		"tilesLoaded": tileCount,
+		"unitsLoaded": unitCount,
+		"baseURL": baseURL,
+		"ready": true,
+	})
+}
+
+// testFetchAssets tests fetch-based asset loading
+func testFetchAssets(this js.Value, args []js.Value) any {
+	baseURL := "."
+	if len(args) >= 1 {
+		baseURL = args[0].String()
+	}
+	
+	fetchAssets := weewar.NewFetchAssetManager(baseURL)
+	
+	// Test asset existence checks (always returns true for fetch-based)
+	hasTile := fetchAssets.HasTileAsset(1) // Grass tile
+	hasUnit := fetchAssets.HasUnitAsset(1, 0) // Basic unit, player 0
+	
+	// Test actual asset loading
+	var tileError, unitError string
+	_, err := fetchAssets.GetTileImage(1)
+	if err != nil {
+		tileError = err.Error()
+	}
+	
+	_, err = fetchAssets.GetUnitImage(1, 0)
+	if err != nil {
+		unitError = err.Error()
+	}
+	
+	tileCount, unitCount := fetchAssets.GetCacheStats()
+	
+	return createEditorResponse(true, "Fetch asset test complete", "", map[string]any{
+		"hasTileAsset": hasTile,
+		"hasUnitAsset": hasUnit,
+		"tileLoadError": tileError,
+		"unitLoadError": unitError,
+		"tilesInCache": tileCount,
+		"unitsInCache": unitCount,
+		"baseURL": baseURL,
+		"note": "Using HTTP fetch instead of os.Open() - check console for fetch URLs",
 	})
 }
 

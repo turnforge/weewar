@@ -1281,8 +1281,8 @@ func (g *Game) RenderTerrainTo(drawable Drawable, tileWidth, tileHeight, yIncrem
 		}
 	}
 
-// RenderUnits renders the units to a buffer
-func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+// RenderUnitsTo renders units to any drawable surface using AssetManager
+func (g *Game) RenderUnitsTo(drawable Drawable, tileWidth, tileHeight, yIncrement float64) {
 	if g.Map == nil {
 		return
 	}
@@ -1308,15 +1308,12 @@ func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement flo
 				if g.assetManager != nil && g.assetManager.HasUnitAsset(unit.UnitType, playerID) {
 					if unitImg, err := g.assetManager.GetUnitImage(unit.UnitType, playerID); err == nil {
 						// Render real unit sprite (XYForTile already returns centered coordinates)
-						buffer.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
+						drawable.DrawImage(x-tileWidth/2, y-tileHeight/2, tileWidth, tileHeight, unitImg)
 
 						// Add health indicator if unit is damaged
 						if unit.AvailableHealth < 100 {
-							g.renderHealthBar(buffer, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
+							g.renderHealthBarTo(drawable, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
 						}
-
-						// Add unit ID and health text overlay
-						g.renderUnitText(buffer, unit, x, y, tileWidth, tileHeight)
 						continue
 					}
 				}
@@ -1329,31 +1326,42 @@ func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement flo
 					unitColor = Color{R: 128, G: 128, B: 128, A: 255} // Default gray
 				}
 
-				// Create unit representation (circle)
-				unitPath := g.createUnitCircle(x, y, tileWidth, tileHeight)
+				// Make unit hex slightly smaller than terrain hex
+				unitHexPath := g.createHexagonPath(x, y, tileWidth*0.8, tileHeight*0.8, yIncrement*0.8)
 
-				// Fill unit with player color
-				buffer.FillPath(unitPath, unitColor)
+				// Fill unit hex
+				drawable.FillPath(unitHexPath, unitColor)
 
-				// Add unit border
-				borderColor := Color{R: 0, G: 0, B: 0, A: 255}
+				// Draw unit border
+				borderColor := Color{R: 255, G: 255, B: 255, A: 255} // White border for contrast
 				strokeProps := StrokeProperties{Width: 2.0, LineCap: "round", LineJoin: "round"}
-				buffer.StrokePath(unitPath, borderColor, strokeProps)
+				drawable.StrokePath(unitHexPath, borderColor, strokeProps)
+
+				// Add unit type text overlay (since no UnitID field exists)
+				unitIDText := fmt.Sprintf("U%d", unit.UnitType)
+				textColor := Color{R: 255, G: 255, B: 255, A: 255}
+				fontSize := tileWidth / 6
+				if fontSize < 8 {
+					fontSize = 8
+				}
+				drawable.DrawTextWithStyle(x-10, y, unitIDText, fontSize, textColor, true, Color{R: 0, G: 0, B: 0, A: 128})
 
 				// Add health indicator if unit is damaged
 				if unit.AvailableHealth < 100 {
-					g.renderHealthBar(buffer, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
+					g.renderHealthBarTo(drawable, x, y, tileWidth, tileHeight, unit.AvailableHealth, 100)
 				}
-
-				// Add unit ID and health text overlay
-				g.renderUnitText(buffer, unit, x, y, tileWidth, tileHeight)
 			}
 		}
 	}
 }
 
-// RenderUI renders UI elements to a buffer
-func (g *Game) RenderUI(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+// RenderUnits renders the units to a buffer (delegates to RenderUnitsTo)
+func (g *Game) RenderUnits(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+	g.RenderUnitsTo(buffer, tileWidth, tileHeight, yIncrement)
+}
+
+// RenderUITo renders UI elements to any drawable surface
+func (g *Game) RenderUITo(drawable Drawable, tileWidth, tileHeight, yIncrement float64) {
 	// Create a simple indicator for current player
 	indicatorSize := 20.0
 
@@ -1383,12 +1391,57 @@ func (g *Game) RenderUI(buffer *Buffer, tileWidth, tileHeight, yIncrement float6
 	}
 
 	// Fill indicator with current player color
-	buffer.FillPath(indicatorPath, currentPlayerColor)
+	drawable.FillPath(indicatorPath, currentPlayerColor)
 
 	// Add border
 	borderColor := Color{R: 0, G: 0, B: 0, A: 255}
 	strokeProps := StrokeProperties{Width: 2.0, LineCap: "round", LineJoin: "round"}
-	buffer.StrokePath(indicatorPath, borderColor, strokeProps)
+	drawable.StrokePath(indicatorPath, borderColor, strokeProps)
+}
+
+// RenderUI renders UI elements to a buffer (delegates to RenderUITo)
+func (g *Game) RenderUI(buffer *Buffer, tileWidth, tileHeight, yIncrement float64) {
+	g.RenderUITo(buffer, tileWidth, tileHeight, yIncrement)
+}
+
+// renderHealthBarTo renders a health bar for any drawable (generic version)
+func (g *Game) renderHealthBarTo(drawable Drawable, x, y, tileWidth, tileHeight float64, currentHealth, maxHealth int) {
+	if currentHealth >= maxHealth {
+		return // Don't render health bar for full health
+	}
+	
+	// Calculate health bar dimensions
+	barWidth := tileWidth * 0.8
+	barHeight := 6.0
+	barX := x - barWidth/2
+	barY := y + tileHeight/2 - barHeight - 2
+	
+	// Background bar (red)
+	backgroundBar := []Point{
+		{X: barX, Y: barY},
+		{X: barX + barWidth, Y: barY},
+		{X: barX + barWidth, Y: barY + barHeight},
+		{X: barX, Y: barY + barHeight},
+	}
+	redColor := Color{R: 255, G: 0, B: 0, A: 255}
+	drawable.FillPath(backgroundBar, redColor)
+	
+	// Health bar (green, proportional to health)
+	healthRatio := float64(currentHealth) / float64(maxHealth)
+	healthWidth := barWidth * healthRatio
+	healthBar := []Point{
+		{X: barX, Y: barY},
+		{X: barX + healthWidth, Y: barY},
+		{X: barX + healthWidth, Y: barY + barHeight},
+		{X: barX, Y: barY + barHeight},
+	}
+	greenColor := Color{R: 0, G: 255, B: 0, A: 255}
+	drawable.FillPath(healthBar, greenColor)
+	
+	// Health bar border
+	borderColor := Color{R: 0, G: 0, B: 0, A: 255}
+	strokeProps := StrokeProperties{Width: 1.0, LineCap: "round", LineJoin: "round"}
+	drawable.StrokePath(backgroundBar, borderColor, strokeProps)
 }
 
 // createHexagonPath creates a hexagon path for a tile

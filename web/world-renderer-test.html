@@ -120,12 +120,12 @@
                 }
                 
                 // Create world with the map
-                const worldResult = worldCreate(2, mapResult.map, 12345);
+                const worldResult = worldCreate(2, mapResult.data.map, 12345);
                 if (worldResult.success) {
-                    world = worldResult.world;
+                    world = worldResult.data.world;
                     log('✅ World created successfully with Map + Units');
-                    log(`   Map size: ${world.mapRows}x${world.mapCols}`);
-                    log(`   Players: ${world.playerCount}, Seed: ${world.seed}`);
+                    log(`   Map size: ${worldResult.data.mapRows}x${worldResult.data.mapCols}`);
+                    log(`   Players: ${worldResult.data.playerCount}, Seed: ${worldResult.data.seed}`);
                 } else {
                     log(`❌ World creation failed: ${worldResult.error}`);
                 }
@@ -143,10 +143,9 @@
             try {
                 const result = viewStateCreate();
                 if (result.success) {
-                    viewState = result.viewState;
+                    viewState = result.data.viewState;
                     log('✅ ViewState created successfully');
-                    log(`   ShowGrid: ${viewState.showGrid}, ZoomLevel: ${viewState.zoomLevel}`);
-                    log(`   BrushTerrain: ${viewState.brushTerrain}, BrushSize: ${viewState.brushSize}`);
+                    log('   Ready for UI interactions and highlighting');
                 } else {
                     log(`❌ ViewState creation failed: ${result.error}`);
                 }
@@ -164,7 +163,7 @@
             try {
                 const result = canvasRendererCreate();
                 if (result.success) {
-                    canvasRenderer = result.renderer;
+                    canvasRenderer = result.data.renderer;
                     log('✅ CanvasRenderer created successfully');
                     log('   Ready for proper hex coordinate rendering!');
                 } else {
@@ -187,7 +186,7 @@
             }
             
             try {
-                const result = worldRendererRender(world, viewState, 'map-canvas', 800, 600);
+                const result = worldRendererRender('map-canvas', 800, 600);
                 if (result.success) {
                     log('✅ World rendered with new CanvasRenderer!');
                     log('   Should show PROPER HEXAGONS (not rectangles)');

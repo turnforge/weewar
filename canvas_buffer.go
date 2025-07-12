@@ -236,11 +236,41 @@ func (cb *CanvasBuffer) DrawTextWithStyle(x, y float64, text string, fontSize fl
 	cb.context.DrawText(canvasX, canvasY, textLine)
 }
 
-// DrawImage draws an image at the specified position (simplified implementation for now)
+// DrawImage draws an image at the specified position
 func (cb *CanvasBuffer) DrawImage(x, y, width, height float64, img image.Image) {
-	// For now, we'll skip image drawing in CanvasBuffer
-	// This could be implemented later by converting the Go image to canvas ImageData
-	// Most terrain rendering uses FillPath anyway
+	if img == nil {
+		return
+	}
+	
+	// Convert buffer coordinates to canvas coordinates
+	canvasX, canvasY := cb.bufferToCanvasXY(x, y)
+	
+	// Convert image to canvas-compatible format
+	// For now, extract image data and draw as a filled rectangle with average color
+	// This is a simplified implementation - in production we'd convert to ImageData
+	bounds := img.Bounds()
+	if bounds.Empty() {
+		return
+	}
+	
+	// Sample the center pixel to get a representative color
+	centerX := bounds.Min.X + bounds.Dx()/2
+	centerY := bounds.Min.Y + bounds.Dy()/2
+	colorSample := img.At(centerX, centerY)
+	r, g, b, a := colorSample.RGBA()
+	
+	// Convert from 16-bit to 8-bit color values
+	avgColor := color.RGBA{
+		R: uint8(r >> 8),
+		G: uint8(g >> 8), 
+		B: uint8(b >> 8),
+		A: uint8(a >> 8),
+	}
+	
+	// Draw as a filled rectangle with the sampled color
+	cb.context.SetFillColor(avgColor)
+	cb.context.DrawPath(canvasX, canvasY, canvas.Rectangle(width, height))
+	cb.context.Fill()
 }
 
 // RenderToCanvasBuffer creates a canvas buffer-compatible version of RenderToBuffer

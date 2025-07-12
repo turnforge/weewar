@@ -208,19 +208,10 @@ func (br *BufferRenderer) RenderWorldWithAssets(world *World, viewState *ViewSta
 		br.RenderHighlights(world, viewState, drawable, options)
 	}
 
-	// For units and UI, we need to check if drawable is a Buffer to use the Game methods
-	if buffer, ok := drawable.(*Buffer); ok {
-		// Use Game's proven methods for Buffer
-		game.RenderUnits(buffer, options.TileWidth, options.TileHeight, options.YIncrement)
-		if options.ShowUI {
-			game.RenderUI(buffer, options.TileWidth, options.TileHeight, options.YIncrement)
-		}
-	} else {
-		// For non-Buffer drawables, delegate to our individual methods with asset support
-		br.RenderUnitsWithAssets(world, viewState, drawable, options, originalGame)
-		if options.ShowUI {
-			br.RenderUI(world, viewState, drawable, options)
-		}
+	// Use Game's generic methods that work with any Drawable (SAME for all platforms)
+	game.RenderUnitsTo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
+	if options.ShowUI {
+		game.RenderUITo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
 	}
 }
 

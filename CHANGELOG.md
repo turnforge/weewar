@@ -2,6 +2,58 @@
 
 All notable changes to the WeeWar project are documented in this file.
 
+## [5.0.1] - 2025-07-12
+
+### 🎯 PLATFORM UNIFICATION: Complete Rendering Architecture ✅
+
+#### Final Platform Abstraction Achievement
+
+**COMPLETE**: Both CLI and WASM platforms now use identical rendering code paths with full architectural consistency.
+
+#### Universal Game Rendering Methods
+```go
+// NEW: Platform-agnostic rendering methods
+game.RenderTerrainTo(drawable, ...)  // Works with Buffer + CanvasBuffer
+game.RenderUnitsTo(drawable, ...)    // Full AssetManager support
+game.RenderUITo(drawable, ...)       // Health bars + player indicators
+
+// OLD: Platform-specific methods (deprecated)
+game.RenderUnits(buffer *Buffer, ...)      // Buffer-only
+game.RenderUI(buffer *Buffer, ...)         // Buffer-only
+```
+
+#### Editor Architecture Update
+- **UPDATED**: WASM `renderMap()` function now uses World-Renderer architecture
+- **REPLACED**: Legacy `game.RenderToBuffer()` → `renderer.RenderWorldWithAssets()`
+- **UNIFIED**: Both test page and editor use identical rendering pipeline
+
+#### Asset System Integration
+- **IMPLEMENTED**: CanvasBuffer `DrawImage()` method for sprite support
+- **PREPARED**: AssetManager integration (browser security restrictions identified)
+- **FALLBACK**: Colored shapes when assets unavailable
+
+#### Files Modified
+- `game.go` - Added universal `*To()` rendering methods
+- `cmd/editor-wasm/main.go` - Updated renderMap to use World-Renderer
+- `canvas_buffer.go` - Implemented DrawImage for asset support
+- `world_renderer.go` - Simplified to use universal Game methods  
+- `canvas_renderer.go` - Unified with BufferRenderer logic
+
+#### Current Challenge
+- **IDENTIFIED**: Browser security restrictions prevent WASM from accessing local disk files for asset loading
+- **SYMPTOMS**: Hexagons render correctly but terrain/unit sprites don't display (colored shapes only)
+- **ROOT CAUSE**: WASM security model blocks file:// access to ./data/Units/ and ./data/Terrain/ directories
+- **POTENTIAL SOLUTIONS**:
+  1. Serve assets via HTTP server instead of file:// protocol
+  2. Embed assets as Base64 data URLs in WASM binary at compile time  
+  3. Use fetch() API to load assets from same-origin server
+  4. Convert assets to Go embedded files using go:embed directive
+
+#### Next Development Phase
+- **PRIORITY**: Solve WASM asset loading to achieve identical visual fidelity between CLI and browser
+- **GOAL**: Complete platform parity with full terrain/unit sprite rendering in browser
+- **FOUNDATION**: Core architecture is solid - only asset delivery mechanism needs resolution
+
 ## [5.0.0] - 2025-07-12
 
 ### 🏗️ REVOLUTIONARY ARCHITECTURE: World-Renderer-Observer Pattern

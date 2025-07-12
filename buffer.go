@@ -9,9 +9,11 @@ import (
 	"image/png"
 	_ "image/png" // For PNG decoding
 	"os"
+	"syscall/js"
 
 	"github.com/tdewolff/canvas"
 	"github.com/tdewolff/canvas/renderers"
+	"github.com/tdewolff/canvas/renderers/htmlcanvas"
 	xdraw "golang.org/x/image/draw"
 )
 

@@ -19,7 +19,7 @@ rules:
           - "go.mod"
           - "go.sum"
     commands:
-      - "echo '🔧 Building APPTEMPLATE Binary...'"
+      - "echo '🔧 Building WeeWar Binary...'"
       - "make binlocal"
       # - "go test -short ./..."
       - "echo '✅ Backend build and tests complete'"
@@ -50,7 +50,7 @@ rules:
           - "tsconfig.json"
     commands:
       - "echo '⚡ Building frontend...'"
-      - "npm run build:only"
+      - "npm run build"
       - "echo '🧪 Running frontend tests...'"
       # - "npm run test:unit"
       - "echo '✅ Frontend build complete and tests disabled'"

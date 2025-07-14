@@ -292,7 +292,11 @@ type Map struct {
 	// A possible image url
 	ImageUrl string `protobuf:"bytes,8,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
 	// Difficulty - example attribute
-	Difficulty    string `protobuf:"bytes,9,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	Difficulty string `protobuf:"bytes,9,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	// JSON-fied tile data about what units and terrains are at each location
+	Tiles map[string]*MapTile `protobuf:"bytes,11,rep,name=tiles,proto3" json:"tiles,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// All units on the map and who they belong to
+	MapUnits      []*MapUnit `protobuf:"bytes,12,rep,name=map_units,json=mapUnits,proto3" json:"map_units,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -390,6 +394,159 @@ func (x *Map) GetDifficulty() string {
 	return ""
 }
 
+func (x *Map) GetTiles() map[string]*MapTile {
+	if x != nil {
+		return x.Tiles
+	}
+	return nil
+}
+
+func (x *Map) GetMapUnits() []*MapUnit {
+	if x != nil {
+		return x.MapUnits
+	}
+	return nil
+}
+
+type MapTile struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Q and R in Cubed coordinates
+	Q        int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
+	R        int32 `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
+	TileType int32 `protobuf:"varint,3,opt,name=tile_type,json=tileType,proto3" json:"tile_type,omitempty"` // Tile type
+	// Whether the tile itself belongs to a player
+	Player        int32 `protobuf:"varint,4,opt,name=player,proto3" json:"player,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapTile) Reset() {
+	*x = MapTile{}
+	mi := &file_weewar_v1_models_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapTile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapTile) ProtoMessage() {}
+
+func (x *MapTile) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapTile.ProtoReflect.Descriptor instead.
+func (*MapTile) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *MapTile) GetQ() int32 {
+	if x != nil {
+		return x.Q
+	}
+	return 0
+}
+
+func (x *MapTile) GetR() int32 {
+	if x != nil {
+		return x.R
+	}
+	return 0
+}
+
+func (x *MapTile) GetTileType() int32 {
+	if x != nil {
+		return x.TileType
+	}
+	return 0
+}
+
+func (x *MapTile) GetPlayer() int32 {
+	if x != nil {
+		return x.Player
+	}
+	return 0
+}
+
+type MapUnit struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Q and R in Cubed coordinates
+	Q             int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
+	R             int32 `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
+	Player        int32 `protobuf:"varint,3,opt,name=player,proto3" json:"player,omitempty"`
+	UnitType      int32 `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapUnit) Reset() {
+	*x = MapUnit{}
+	mi := &file_weewar_v1_models_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapUnit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapUnit) ProtoMessage() {}
+
+func (x *MapUnit) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapUnit.ProtoReflect.Descriptor instead.
+func (*MapUnit) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *MapUnit) GetQ() int32 {
+	if x != nil {
+		return x.Q
+	}
+	return 0
+}
+
+func (x *MapUnit) GetR() int32 {
+	if x != nil {
+		return x.R
+	}
+	return 0
+}
+
+func (x *MapUnit) GetPlayer() int32 {
+	if x != nil {
+		return x.Player
+	}
+	return 0
+}
+
+func (x *MapUnit) GetUnitType() int32 {
+	if x != nil {
+		return x.UnitType
+	}
+	return 0
+}
+
 type User struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -412,7 +569,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_weewar_v1_models_proto_msgTypes[4]
+	mi := &file_weewar_v1_models_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -424,7 +581,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[4]
+	mi := &file_weewar_v1_models_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,7 +594,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{4}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *User) GetCreatedAt() *timestamppb.Timestamp {
@@ -524,7 +681,7 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1e\n" +
 	"\n" +
 	"difficulty\x18\b \x01(\tR\n" +
-	"difficulty\"\xb1\x02\n" +
+	"difficulty\"\xe1\x03\n" +
 	"\x03Map\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -539,7 +696,23 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\timage_url\x18\b \x01(\tR\bimageUrl\x12\x1e\n" +
 	"\n" +
 	"difficulty\x18\t \x01(\tR\n" +
-	"difficulty\"\x93\x02\n" +
+	"difficulty\x12/\n" +
+	"\x05tiles\x18\v \x03(\v2\x19.weewar.v1.Map.TilesEntryR\x05tiles\x12/\n" +
+	"\tmap_units\x18\f \x03(\v2\x12.weewar.v1.MapUnitR\bmapUnits\x1aL\n" +
+	"\n" +
+	"TilesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12(\n" +
+	"\x05value\x18\x02 \x01(\v2\x12.weewar.v1.MapTileR\x05value:\x028\x01\"Z\n" +
+	"\aMapTile\x12\f\n" +
+	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
+	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
+	"\ttile_type\x18\x03 \x01(\x05R\btileType\x12\x16\n" +
+	"\x06player\x18\x04 \x01(\x05R\x06player\"Z\n" +
+	"\aMapUnit\x12\f\n" +
+	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
+	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n" +
+	"\x06player\x18\x03 \x01(\x05R\x06player\x12\x1b\n" +
+	"\tunit_type\x18\x04 \x01(\x05R\bunitType\"\x93\x02\n" +
 	"\x04User\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -568,27 +741,33 @@ func file_weewar_v1_models_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_models_proto_rawDescData
 }
 
-var file_weewar_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_weewar_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_weewar_v1_models_proto_goTypes = []any{
 	(*Pagination)(nil),            // 0: weewar.v1.Pagination
 	(*PaginationResponse)(nil),    // 1: weewar.v1.PaginationResponse
 	(*Game)(nil),                  // 2: weewar.v1.Game
 	(*Map)(nil),                   // 3: weewar.v1.Map
-	(*User)(nil),                  // 4: weewar.v1.User
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*MapTile)(nil),               // 4: weewar.v1.MapTile
+	(*MapUnit)(nil),               // 5: weewar.v1.MapUnit
+	(*User)(nil),                  // 6: weewar.v1.User
+	nil,                           // 7: weewar.v1.Map.TilesEntry
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_weewar_v1_models_proto_depIdxs = []int32{
-	5, // 0: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
-	5, // 1: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
-	5, // 2: weewar.v1.Map.created_at:type_name -> google.protobuf.Timestamp
-	5, // 3: weewar.v1.Map.updated_at:type_name -> google.protobuf.Timestamp
-	5, // 4: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	5, // 5: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	8, // 0: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
+	8, // 1: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
+	8, // 2: weewar.v1.Map.created_at:type_name -> google.protobuf.Timestamp
+	8, // 3: weewar.v1.Map.updated_at:type_name -> google.protobuf.Timestamp
+	7, // 4: weewar.v1.Map.tiles:type_name -> weewar.v1.Map.TilesEntry
+	5, // 5: weewar.v1.Map.map_units:type_name -> weewar.v1.MapUnit
+	8, // 6: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	8, // 7: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	4, // 8: weewar.v1.Map.TilesEntry.value:type_name -> weewar.v1.MapTile
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_models_proto_init() }
@@ -602,7 +781,7 @@ func file_weewar_v1_models_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_models_proto_rawDesc), len(file_weewar_v1_models_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

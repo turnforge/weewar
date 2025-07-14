@@ -22,5 +22,5 @@ func (m *MapListingPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 }
 
 func (m *MapListingPage) Copy() View {
-	return &MapDetailPage{}
+	return &MapListingPage{}
 }

@@ -1,0 +1,30 @@
+{
+  "tiles": {
+    "0,0": {
+      "q": 0,
+      "r": 0,
+      "tile_type": 1,
+      "player": 0
+    },
+    "1,0": {
+      "q": 1,
+      "r": 0,
+      "tile_type": 3,
+      "player": 0
+    },
+    "0,1": {
+      "q": 0,
+      "r": 1,
+      "tile_type": 1,
+      "player": 0
+    }
+  },
+  "map_units": [
+    {
+      "q": 0,
+      "r": 0,
+      "player": 1,
+      "unit_type": 1
+    }
+  ]
+}

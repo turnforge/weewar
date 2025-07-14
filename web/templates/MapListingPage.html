@@ -1,0 +1,24 @@
+<!-- templates/MapListingPage.html -->
+{{# include "BasePage.html" #}}
+{{# include "MapList.html" #}}
+
+{{ define "BodySection" }}
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Maps</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">Browse and manage your game maps</p>
+    </div>
+    
+    <!-- Maps List -->
+    {{ template "MapList" .MapListView }}
+</main>
+{{ end }}
+
+{{ define "PostBodySection" }}
+<!-- Include generated JS if we have any -->
+{{# include "gen/MapListingPage.html" #}}
+{{ end }}
+
+{{ define "MapListingPage" }}
+{{ template "BasePage" . }}
+{{ end }}

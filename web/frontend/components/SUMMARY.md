@@ -20,7 +20,7 @@ This folder contains the core client-side TypeScript logic for LeetCoach interac
     *   `DrawingSectionEdit.ts`: Initializes Excalidraw (via `ExcalidrawWrapper.tsx`). Handles Save (generates JSON/SVGs, calls `ContentApi` multiple times). Signals container. Handles theme changes.
     *   `SystemDescriptionEdit.ts`: Uses `<textarea>` for DSL. Handles Save (calls `ContentApi`), Cancel. Validate button calls `SystemModelApi`.
 *   **Managers & Handlers:** (`SectionManager.ts`, `LlmInteractionHandler.ts`, `ThemeManager.ts`, `Modal.ts`, `ToastManager.ts`, `TableOfContents.ts`, `DocumentTitle.ts`, `FullscreenHandler.ts`) - Core logic largely the same, but `SectionManager` now manages `BaseSection` (container) instances.
-*   **Page Entry Points:** (`DesignEditorPage.ts`, `HomePage.ts`, `LoginPage.ts`) - `DesignEditorPage` simplified as containers manage their own content loading.
+*   **Page Entry Points:** (`DesignEditorPage.ts`, `HomePage.ts`, `LoginPage.ts`, `MapDetailsPage.ts`) - `DesignEditorPage` simplified as containers manage their own content loading. `MapDetailsPage.ts` provides foundation for maps functionality.
 *   **Utilities:** (`Api.ts`, `TemplateLoader.ts`, `types.ts`, `converters.ts`, `ExcalidrawWrapper.tsx`).
 
 **Key Concepts/Responsibilities:**

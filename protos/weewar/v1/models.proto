@@ -95,6 +95,30 @@ message Map {
 
   // Difficulty - example attribute
   string difficulty = 9;
+
+  // JSON-fied tile data about what units and terrains are at each location
+  map<string, MapTile> tiles = 11;
+
+  // All units on the map and who they belong to
+  repeated MapUnit map_units = 12;
+}
+
+message MapTile {
+  // Q and R in Cubed coordinates
+  int32 q = 1;
+  int32 r = 2;
+  int32 tile_type = 3; // Tile type
+
+  // Whether the tile itself belongs to a player
+  int32 player = 4;
+}
+
+message MapUnit {
+  // Q and R in Cubed coordinates
+  int32 q = 1;
+  int32 r = 2;
+  int32 player = 3;
+  int32 unit_type = 4;
 }
 
 message User {

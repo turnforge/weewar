@@ -524,6 +524,21 @@
                     "difficulty": {
                       "type": "string",
                       "title": "Difficulty - example attribute"
+                    },
+                    "tiles": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/definitions/v1MapTile"
+                      },
+                      "title": "JSON-fied tile data about what units and terrains are at each location"
+                    },
+                    "mapUnits": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/v1MapUnit"
+                      },
+                      "title": "All units on the map and who they belong to"
                     }
                   },
                   "title": "*\nMap being updated"
@@ -1163,6 +1178,67 @@
         "difficulty": {
           "type": "string",
           "title": "Difficulty - example attribute"
+        },
+        "tiles": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1MapTile"
+          },
+          "title": "JSON-fied tile data about what units and terrains are at each location"
+        },
+        "mapUnits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1MapUnit"
+          },
+          "title": "All units on the map and who they belong to"
+        }
+      }
+    },
+    "v1MapTile": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Q and R in Cubed coordinates"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tileType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Tile type"
+        },
+        "player": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Whether the tile itself belongs to a player"
+        }
+      }
+    },
+    "v1MapUnit": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Q and R in Cubed coordinates"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "player": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unitType": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

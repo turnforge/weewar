@@ -289,13 +289,46 @@ The evolution from a complex ECS framework to a unified implementation with mult
 
 The architecture successfully supports authentic WeeWar gameplay with real data integration, sophisticated hex-based pathfinding, and professional-quality interfaces. The foundation is solid for future enhancements including AI players, web interfaces, and advanced features.
 
-**Current Status**: Production-ready with comprehensive CLI interface and full game functionality  
-**Architecture**: Mature, well-tested, and ready for extensions  
+**Current Status**: Production-ready CLI interface with comprehensive web layer implementation  
+**Architecture**: Mature, well-tested, with complete web template and file-based storage  
 **Quality**: High test coverage, professional interfaces, authentic gameplay  
-**Future**: Solid foundation for AI, web, and advanced features
+**Future**: Solid foundation for AI, web editor, and advanced features
+
+## Recent Web Layer Implementation (2025-01-14)
+
+### Maps Management System ✅
+- **Complete file-based storage** - `./storage/maps/<mapId>/` structure with `metadata.json` and `data.json`
+- **Full CRUD operations** - Create, Read, Update, Delete maps via gRPC service
+- **Hex coordinate support** - Native support for hex tiles (q,r coordinates) and map units
+- **Web interface foundation** - Professional maps listing page with grid layout
+
+### Backend Architecture ✅
+- **MapsService implementation** - Complete gRPC service with file storage backend
+- **Enhanced data models** - Support for MapTile and MapUnit with hex coordinates
+- **Storage separation** - Metadata and map data cleanly separated for performance
+- **Preview system** - Infrastructure for map thumbnails and previews
+
+### Frontend Foundation ✅
+- **View architecture** - MapListingPage, MapEditorPage, MapDetailPage following established patterns
+- **Template system** - Professional templates with Tailwind CSS styling
+- **Route handling** - Clean routing via setupMapsMux() with proper path handling
+- **Navigation flow** - List → Create/Edit → View workflow established
+
+### Current Capabilities
+1. **Maps listing** at `/maps` - Grid view with search, sort, create button
+2. **Map creation** route `/maps/new` - Ready for editor implementation  
+3. **Map editing** route `/maps/{id}/edit` - Ready for editor implementation
+4. **Map viewing** route `/maps/{id}/view` - Map details and metadata display
+5. **File persistence** - All maps stored in JSON format with full data
+
+### Next Phase: Map Editor
+- WASM-based editor implementation using existing `oldweb/editor.html` as foundation
+- Real-time map painting with terrain types and hex grid
+- Integration with backend storage for save/load operations
+- Preview generation for map thumbnails
 
 ---
 
-**Last Updated**: 2025-01-11  
-**Version**: 3.0.0  
-**Status**: Production-ready with comprehensive CLI REPL interface
+**Last Updated**: 2025-01-14  
+**Version**: 3.1.0  
+**Status**: Production-ready CLI with comprehensive web foundation for maps management

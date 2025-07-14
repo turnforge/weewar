@@ -17,10 +17,11 @@ This folder contains all the Go HTML template files (`*.html`) used for server-s
 *   `HomePage.html`, `DesignEditorPage.html`, `LoginPage.html`: Top-level page templates that include `BasePage.html` and compose other smaller templates (like `DesignList.html`, `TableOfContents.html`, `DocumentTitle.html`).
 *   `MapListingPage.html`, `MapDetailsPage.html`, `MapEditorPage.html`: Complete maps management templates for listing, viewing, and editing maps.
 *   `MapList.html`: Reusable component for displaying maps in a grid layout with search, sort, and action controls.
-*   `MapEditorPage.html`: **Professional map editor interface** with 3-panel layout:
-    *   Left sidebar: Map management, terrain palette (5 types), brush settings, painting tools, history controls
-    *   Center: Map canvas container and console output for real-time feedback
-    *   Right sidebar: Rendering options, export options, advanced tools
+*   `MapEditorPage.html`: **Interactive canvas-based map editor** with streamlined 2-panel layout:
+    *   Left sidebar: Map management, grid-based terrain palette (6 types), brush settings, painting tools, history controls
+    *   Center: Real-time updating HTML5 canvas with hex grid visualization and map resize controls
+    *   Right sidebar: Advanced tools only (rendering/export panels removed)
+    *   Interactive canvas with click-to-paint terrain and Add/Remove buttons for map resizing
     *   WASM integration ready with clean data-attribute event handling
 *   `DesignList.html`, `TableOfContents.html`, `DocumentTitle.html`, `SectionsList.html`: Templates for major reusable UI components rendered server-side initially (and potentially updated client-side later).
 *   `gen/`: Subfolder containing bundled JavaScript output referenced by page templates (e.g., `{{# include "gen/DesignEditorPage.html" #}}`).

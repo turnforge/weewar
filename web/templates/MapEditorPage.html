@@ -161,18 +161,56 @@
 
             <!-- Main Editor Area -->
             <div class="flex-1 flex flex-col">
-                <!-- Map Canvas Container -->
-                <div class="flex-1 bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
-                    <div id="editor-canvas" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-                        <div class="p-4 text-center">
-                            <div class="text-gray-500 dark:text-gray-400 mb-4">
-                                <svg class="h-16 w-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
-                                </svg>
-                                <h3 class="text-lg font-medium">Map Preview</h3>
-                                <p class="text-sm">Map preview will appear here when rendered</p>
-                            </div>
-                            <img id="map-image" alt="Map preview" class="max-w-full border border-gray-300 dark:border-gray-600 rounded hidden">
+                <!-- Map Canvas Container with Resize Controls -->
+                <div class="flex-1 bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-8">
+                    <div class="relative">
+                        <!-- Top Add/Remove Controls -->
+                        <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 flex items-center space-x-2">
+                            <button data-action="remove-row" data-side="top" class="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors" title="Remove top row">
+                                ▲ Remove
+                            </button>
+                            <button data-action="add-row" data-side="top" class="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors" title="Add row at top">
+                                ▲ Add
+                            </button>
+                        </div>
+
+                        <!-- Left Add/Remove Controls -->
+                        <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-16 flex flex-col items-center space-y-2">
+                            <button data-action="remove-col" data-side="left" class="px-2 py-3 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors writing-mode-vertical" title="Remove left column">
+                                ◀ Remove
+                            </button>
+                            <button data-action="add-col" data-side="left" class="px-2 py-3 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors writing-mode-vertical" title="Add column on left">
+                                ◀ Add
+                            </button>
+                        </div>
+
+                        <!-- Right Add/Remove Controls -->
+                        <div class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-16 flex flex-col items-center space-y-2">
+                            <button data-action="remove-col" data-side="right" class="px-2 py-3 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors writing-mode-vertical" title="Remove right column">
+                                Remove ▶
+                            </button>
+                            <button data-action="add-col" data-side="right" class="px-2 py-3 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors writing-mode-vertical" title="Add column on right">
+                                Add ▶
+                            </button>
+                        </div>
+
+                        <!-- Bottom Add/Remove Controls -->
+                        <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex items-center space-x-2">
+                            <button data-action="remove-row" data-side="bottom" class="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors" title="Remove bottom row">
+                                Remove ▼
+                            </button>
+                            <button data-action="add-row" data-side="bottom" class="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors" title="Add row at bottom">
+                                Add ▼
+                            </button>
+                        </div>
+
+                        <!-- Map Canvas -->
+                        <div id="editor-canvas-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-300 dark:border-gray-600">
+                            <canvas id="map-canvas" 
+                                    width="600" 
+                                    height="400"
+                                    class="block rounded-lg cursor-crosshair">
+                            </canvas>
                         </div>
                     </div>
                 </div>

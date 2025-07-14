@@ -75,9 +75,12 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [x] Toast notifications and modal dialog support ready
 
 ### Current Status ✅
-- Editor interface fully implemented with professional 3-panel layout
-- All editor functions stubbed and ready for WASM connection
-- Clean event delegation using data attributes instead of inline handlers
+- Interactive canvas-based editor with real-time hex grid visualization
+- Canvas terrain painting with click-to-paint functionality and coordinate tracking
+- Map resizing controls with Add/Remove buttons on all 4 sides of canvas
+- Grid-based terrain palette showing all 6 terrain types with visual icons
+- Streamlined 2-panel layout (removed rendering/export panels, kept Advanced Tools)
+- Clean event delegation using data attributes with proper TypeScript types
 - Ready for WASM build and backend API integration
 
 ## 📋 Phase 4: Games Management System (Planned)

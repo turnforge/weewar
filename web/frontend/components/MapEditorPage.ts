@@ -15,14 +15,21 @@ class MapEditorPage {
 
     private currentMapId: string | null = null;
     private isNewMap: boolean = false;
-    private mapData: any = null;
+    private mapData: {
+        name: string;
+        width: number;
+        height: number;
+        tiles: { [key: string]: { tileType: number } };
+        map_units: any[];
+    } | null = null;
     
     // Editor state
     private currentTerrain: number = 1; // Default to grass
     private brushSize: number = 0; // Default to single hex
     private editorCanvas: HTMLElement | null = null;
+    private mapCanvas: HTMLCanvasElement | null = null;
+    private canvasContext: CanvasRenderingContext2D | null = null;
     private editorOutput: HTMLElement | null = null;
-    private mapImage: HTMLImageElement | null = null;
 
     // WASM interface
     private wasmModule: any = null;
@@ -48,9 +55,15 @@ class MapEditorPage {
 
         this.themeToggleButton = document.getElementById('theme-toggle-button') as HTMLButtonElement;
         this.themeToggleIcon = document.getElementById('theme-toggle-icon');
-        this.editorCanvas = document.getElementById('editor-canvas');
+        this.editorCanvas = document.getElementById('editor-canvas-container');
+        this.mapCanvas = document.getElementById('map-canvas') as HTMLCanvasElement;
         this.editorOutput = document.getElementById('editor-output');
-        this.mapImage = document.getElementById('map-image') as HTMLImageElement;
+        
+        // Initialize canvas context
+        if (this.mapCanvas) {
+            this.canvasContext = this.mapCanvas.getContext('2d');
+            this.initializeCanvas();
+        }
 
         if (!this.themeToggleButton || !this.themeToggleIcon) {
             console.warn("Theme toggle button or icon element not found in Header.");
@@ -178,6 +191,38 @@ class MapEditorPage {
         document.querySelector('[data-action="download-game-data"]')?.addEventListener('click', () => {
             this.downloadGameData();
         });
+
+        // Map resize controls
+        document.querySelectorAll('[data-action="add-row"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const side = (e.target as HTMLElement).dataset.side || 'bottom';
+                this.addRow(side);
+            });
+        });
+        document.querySelectorAll('[data-action="remove-row"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const side = (e.target as HTMLElement).dataset.side || 'bottom';
+                this.removeRow(side);
+            });
+        });
+        document.querySelectorAll('[data-action="add-col"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const side = (e.target as HTMLElement).dataset.side || 'right';
+                this.addColumn(side);
+            });
+        });
+        document.querySelectorAll('[data-action="remove-col"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const side = (e.target as HTMLElement).dataset.side || 'right';
+                this.removeColumn(side);
+            });
+        });
+
+        // Canvas interactions
+        if (this.mapCanvas) {
+            this.mapCanvas.addEventListener('click', this.handleCanvasClick.bind(this));
+            this.mapCanvas.addEventListener('mousemove', this.handleCanvasMouseMove.bind(this));
+        }
     }
 
     private loadInitialState(): void {
@@ -263,11 +308,12 @@ class MapEditorPage {
         };
         this.updateEditorStatus('Ready');
         this.logToConsole('New map created');
+        this.renderMapCanvas();
     }
 
     public setBrushTerrain(terrain: number): void {
         this.currentTerrain = terrain;
-        const terrainNames = ['', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
+        const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
         this.logToConsole(`Brush terrain set to: ${terrainNames[terrain]}`);
         this.updateBrushInfo();
         this.updateTerrainButtonSelection(terrain);
@@ -330,18 +376,8 @@ class MapEditorPage {
         this.logToConsole(`Rendering map at ${width}×${height}...`);
         // TODO: Implement WASM rendering
         
-        // Placeholder: show the map image element
-        if (this.mapImage) {
-            this.mapImage.style.display = 'block';
-            this.mapImage.src = 'data:image/svg+xml;base64,' + btoa(`
-                <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="${width}" height="${height}" fill="#90EE90"/>
-                    <text x="${width/2}" y="${height/2}" text-anchor="middle" dy=".3em" font-family="Arial" font-size="14">
-                        Map Preview (${width}×${height})
-                    </text>
-                </svg>
-            `);
-        }
+        // For now, just re-render the canvas
+        this.renderMapCanvas();
     }
 
     public downloadImage(): void {
@@ -396,6 +432,243 @@ class MapEditorPage {
     public randomizeTerrain(): void {
         this.logToConsole('Randomizing terrain...');
         // TODO: Implement terrain randomization
+    }
+
+    // Canvas management methods
+    private initializeCanvas(): void {
+        if (!this.mapCanvas || !this.canvasContext) return;
+        
+        // Set up initial canvas state
+        this.renderMapCanvas();
+        this.logToConsole('Canvas initialized');
+    }
+
+    private renderMapCanvas(): void {
+        if (!this.mapCanvas || !this.canvasContext || !this.mapData) return;
+
+        const ctx = this.canvasContext;
+        const canvas = this.mapCanvas;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Set background
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Calculate hex grid parameters
+        const hexSize = 20;
+        const hexWidth = hexSize * 2;
+        const hexHeight = Math.sqrt(3) * hexSize;
+        const rowHeight = hexHeight * 0.75;
+
+        // Draw grid
+        for (let row = 0; row < this.mapData.height; row++) {
+            for (let col = 0; col < this.mapData.width; col++) {
+                const x = col * hexWidth + (row % 2) * hexSize + hexSize + 20;
+                const y = row * rowHeight + hexSize + 20;
+                
+                this.drawHex(ctx, x, y, hexSize, this.getTerrainColor(row, col));
+            }
+        }
+    }
+
+    private drawHex(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, fillColor: string): void {
+        const angle = Math.PI / 3;
+        
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle_deg = 60 * i;
+            const angle_rad = Math.PI / 180 * angle_deg;
+            const xPos = x + size * Math.cos(angle_rad);
+            const yPos = y + size * Math.sin(angle_rad);
+            
+            if (i === 0) {
+                ctx.moveTo(xPos, yPos);
+            } else {
+                ctx.lineTo(xPos, yPos);
+            }
+        }
+        ctx.closePath();
+        
+        // Fill
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        
+        // Stroke
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    private getTerrainColor(row: number, col: number): string {
+        // Get terrain type from map data, default to grass
+        const terrainType = this.mapData?.tiles[`${row},${col}`]?.tileType || 1;
+        
+        const colors: { [key: number]: string } = {
+            0: '#808080', // Unknown - gray
+            1: '#90EE90', // Grass - light green
+            2: '#F4A460', // Desert - sandy brown
+            3: '#4169E1', // Water - blue
+            4: '#8B4513', // Mountain - brown
+            5: '#696969'  // Rock - dark gray
+        };
+        
+        return colors[terrainType] || colors[1];
+    }
+
+    private handleCanvasClick(event: MouseEvent): void {
+        if (!this.mapCanvas || !this.mapData) return;
+
+        const rect = this.mapCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const coords = this.pixelToHex(x, y);
+        if (coords && coords.row >= 0 && coords.row < this.mapData.height && 
+            coords.col >= 0 && coords.col < this.mapData.width) {
+            
+            this.logToConsole(`Clicked hex (${coords.row}, ${coords.col})`);
+            this.paintHexAtCoords(coords.row, coords.col);
+        }
+    }
+
+    private handleCanvasMouseMove(event: MouseEvent): void {
+        if (!this.mapCanvas) return;
+
+        const rect = this.mapCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const coords = this.pixelToHex(x, y);
+        if (coords) {
+            // Update coordinate inputs
+            const rowInput = document.getElementById('paint-row') as HTMLInputElement;
+            const colInput = document.getElementById('paint-col') as HTMLInputElement;
+            
+            if (rowInput) rowInput.value = coords.row.toString();
+            if (colInput) colInput.value = coords.col.toString();
+        }
+    }
+
+    private pixelToHex(x: number, y: number): {row: number, col: number} | null {
+        // Convert pixel coordinates to hex grid coordinates
+        const hexSize = 20;
+        const hexWidth = hexSize * 2;
+        const rowHeight = Math.sqrt(3) * hexSize * 0.75;
+        
+        // Approximate row and column
+        const row = Math.floor((y - hexSize - 20) / rowHeight);
+        const col = Math.floor((x - hexSize - 20 - (row % 2) * hexSize) / hexWidth);
+        
+        return { row, col };
+    }
+
+    private paintHexAtCoords(row: number, col: number): void {
+        if (!this.mapData) return;
+        
+        // Update map data
+        const key = `${row},${col}`;
+        this.mapData.tiles[key] = { tileType: this.currentTerrain };
+        
+        // Re-render canvas
+        this.renderMapCanvas();
+        
+        const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
+        this.logToConsole(`Painted ${terrainNames[this.currentTerrain]} at (${row}, ${col})`);
+    }
+
+    // Map resize methods
+    public addRow(side: string): void {
+        if (!this.mapData) return;
+        
+        this.logToConsole(`Adding row to ${side}`);
+        if (side === 'top') {
+            // Shift all existing tiles down by 1 row
+            const newTiles: { [key: string]: { tileType: number } } = {};
+            for (const [key, tile] of Object.entries(this.mapData.tiles)) {
+                const [row, col] = key.split(',').map(Number);
+                newTiles[`${row + 1},${col}`] = tile;
+            }
+            this.mapData.tiles = newTiles;
+        }
+        this.mapData.height += 1;
+        this.renderMapCanvas();
+    }
+
+    public removeRow(side: string): void {
+        if (!this.mapData || this.mapData.height <= 1) return;
+        
+        this.logToConsole(`Removing row from ${side}`);
+        const newTiles: { [key: string]: { tileType: number } } = {};
+        
+        if (side === 'top') {
+            // Remove top row and shift everything up
+            for (const [key, tile] of Object.entries(this.mapData.tiles)) {
+                const [row, col] = key.split(',').map(Number);
+                if (row > 0) {
+                    newTiles[`${row - 1},${col}`] = tile;
+                }
+            }
+        } else {
+            // Remove bottom row
+            for (const [key, tile] of Object.entries(this.mapData.tiles)) {
+                const [row, col] = key.split(',').map(Number);
+                if (row < this.mapData.height - 1) {
+                    newTiles[key] = tile;
+                }
+            }
+        }
+        
+        this.mapData.tiles = newTiles;
+        this.mapData.height -= 1;
+        this.renderMapCanvas();
+    }
+
+    public addColumn(side: string): void {
+        if (!this.mapData) return;
+        
+        this.logToConsole(`Adding column to ${side}`);
+        if (side === 'left') {
+            // Shift all existing tiles right by 1 column
+            const newTiles: { [key: string]: { tileType: number } } = {};
+            for (const [key, tile] of Object.entries(this.mapData.tiles)) {
+                const [row, col] = key.split(',').map(Number);
+                newTiles[`${row},${col + 1}`] = tile;
+            }
+            this.mapData.tiles = newTiles;
+        }
+        this.mapData.width += 1;
+        this.renderMapCanvas();
+    }
+
+    public removeColumn(side: string): void {
+        if (!this.mapData || this.mapData.width <= 1) return;
+        
+        this.logToConsole(`Removing column from ${side}`);
+        const newTiles: { [key: string]: { tileType: number } } = {};
+        
+        if (side === 'left') {
+            // Remove left column and shift everything left
+            for (const [key, tile] of Object.entries(this.mapData.tiles)) {
+                const [row, col] = key.split(',').map(Number);
+                if (col > 0) {
+                    newTiles[`${row},${col - 1}`] = tile;
+                }
+            }
+        } else {
+            // Remove right column
+            for (const [key, tile] of Object.entries(this.mapData.tiles)) {
+                const [row, col] = key.split(',').map(Number);
+                if (col < this.mapData.width - 1) {
+                    newTiles[key] = tile;
+                }
+            }
+        }
+        
+        this.mapData.tiles = newTiles;
+        this.mapData.width -= 1;
+        this.renderMapCanvas();
     }
 
     private async saveMap(): Promise<void> {
@@ -491,7 +764,7 @@ class MapEditorPage {
     private updateBrushInfo(): void {
         const brushInfo = document.getElementById('brush-info');
         if (brushInfo) {
-            const terrainNames = ['', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
+            const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
             const sizeNames = ['Single (1 hex)', 'Small (7 hexes)', 'Medium (19 hexes)', 'Large (37 hexes)', 'X-Large (61 hexes)', 'XX-Large (91 hexes)'];
             brushInfo.textContent = `Current: ${terrainNames[this.currentTerrain]}, ${sizeNames[this.brushSize]}`;
         }

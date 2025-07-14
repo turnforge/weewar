@@ -71,6 +71,9 @@ func main() {
 
 	// Legacy function (for backward compatibility during transition)
 	js.Global().Set("editorRenderMap", js.FuncOf(renderMap))
+	
+	// Canvas rendering function
+	js.Global().Set("editorRenderToCanvas", js.FuncOf(renderEditorToCanvasJS))
 
 	fmt.Println("WeeWar Map Editor WASM loaded")
 	<-c
@@ -84,27 +87,32 @@ func createEditor(this js.Value, args []js.Value) any {
 
 	canvasID := args[0].String()
 	
-	// Default canvas size
-	width, height := 600, 450
-	if len(args) >= 3 {
-		width = args[1].Int()
-		height = args[2].Int()
-	}
+	// Start with default 8x8 map for initial canvas size
+	defaultRows, defaultCols := 8, 8
+	width, height := calculateCanvasSize(defaultRows, defaultCols)
 
 	globalEditor = weewar.NewMapEditor()
 	
-	// Bind the editor to the canvas immediately
+	// Bind the editor to the canvas with auto-calculated size
 	err := globalEditor.SetCanvas(canvasID, width, height)
 	if err != nil {
 		return createEditorResponse(false, "", fmt.Sprintf("Failed to bind canvas: %v", err), nil)
 	}
 
+	// Create the initial default map
+	err = globalEditor.NewMap(defaultRows, defaultCols)
+	if err != nil {
+		return createEditorResponse(false, "", fmt.Sprintf("Failed to create initial map: %v", err), nil)
+	}
+
 	return createEditorResponse(true, fmt.Sprintf("Map editor created and bound to canvas '%s' (%dx%d)", canvasID, width, height), "", map[string]any{
-		"version":  "1.0.0",
-		"ready":    true,
-		"canvasID": canvasID,
-		"width":    width,
-		"height":   height,
+		"version":      "1.0.0",
+		"ready":        true,
+		"canvasID":     canvasID,
+		"canvasWidth":  width,
+		"canvasHeight": height,
+		"mapWidth":     defaultCols,
+		"mapHeight":    defaultRows,
 	})
 }
 
@@ -194,6 +202,27 @@ func paintTerrain(this js.Value, args []js.Value) any {
 }
 
 // setMapSize sets the map size and immediately renders to the bound canvas
+// calculateCanvasSize calculates the optimal canvas size for a given map size
+// Returns width and height in pixels for 1:1 tile ratio
+func calculateCanvasSize(rows, cols int) (width, height int) {
+	const tileSize = 40 // pixels per hex tile
+	const hexSpacing = 0.75 // vertical spacing factor for hex grid
+	
+	// Calculate canvas dimensions based on hex grid layout
+	width = cols * tileSize + tileSize // extra space for hex offset
+	height = int(float64(rows) * float64(tileSize) * hexSpacing) + tileSize // extra space for hex height
+	
+	// Ensure minimum size for usability
+	if width < 200 {
+		width = 200
+	}
+	if height < 200 {
+		height = 200
+	}
+	
+	return width, height
+}
+
 func setMapSize(this js.Value, args []js.Value) any {
 	if globalEditor == nil {
 		return createEditorResponse(false, "", "Editor not initialized", nil)
@@ -206,8 +235,17 @@ func setMapSize(this js.Value, args []js.Value) any {
 	rows := args[0].Int()
 	cols := args[1].Int()
 
+	// Calculate optimal canvas size for the map dimensions
+	canvasWidth, canvasHeight := calculateCanvasSize(rows, cols)
+	
+	// Resize the canvas to match the map size
+	err := globalEditor.SetCanvasSize(canvasWidth, canvasHeight)
+	if err != nil {
+		return createEditorResponse(false, "", fmt.Sprintf("Failed to resize canvas: %v", err), nil)
+	}
+
 	// Create a new map with the new dimensions
-	err := globalEditor.NewMap(rows, cols)
+	err = globalEditor.NewMap(rows, cols)
 	if err != nil {
 		return createEditorResponse(false, "", fmt.Sprintf("Failed to set map size: %v", err), nil)
 	}
@@ -219,9 +257,20 @@ func setMapSize(this js.Value, args []js.Value) any {
 	}
 
 	return createEditorResponse(true, fmt.Sprintf("Map size set to %dx%d", rows, cols), "", map[string]any{
-		"width":  cols,
-		"height": rows,
+		"mapWidth":     cols,
+		"mapHeight":    rows,
+		"canvasWidth":  canvasWidth,
+		"canvasHeight": canvasHeight,
 	})
+}
+
+// renderEditorToCanvasJS is the JavaScript wrapper for renderEditorToCanvas
+func renderEditorToCanvasJS(this js.Value, args []js.Value) any {
+	err := renderEditorToCanvas()
+	if err != nil {
+		return createEditorResponse(false, "", fmt.Sprintf("Failed to render: %v", err), nil)
+	}
+	return createEditorResponse(true, "Map rendered successfully", "", nil)
 }
 
 // renderEditorToCanvas renders the current editor state to the bound canvas
@@ -249,8 +298,8 @@ func renderEditorToCanvas() error {
 		game.SetAssetProvider(globalEmbeddedAssetManager)
 	}
 	
-	// Get canvas dimensions from the editor (it should know its bound canvas)
-	canvasWidth, canvasHeight := 600, 450  // TODO: Get actual canvas dimensions from editor
+	// Get canvas dimensions from the editor
+	canvasWidth, canvasHeight := globalEditor.GetCanvasSize()
 	
 	// Render using BufferRenderer
 	bufferRenderer := weewar.NewBufferRenderer()

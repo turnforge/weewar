@@ -117,6 +117,11 @@ func (e *MapEditor) GetFilename() string {
 	return e.filename
 }
 
+// GetCanvasSize returns the current canvas dimensions
+func (e *MapEditor) GetCanvasSize() (width, height int) {
+	return e.canvasWidth, e.canvasHeight
+}
+
 // =============================================================================
 // Terrain Editing
 // =============================================================================
@@ -555,10 +560,9 @@ func (e *MapEditor) SetCanvasSize(width, height int) error {
 		return fmt.Errorf("failed to resize canvas buffer")
 	}
 	
-	// Re-render current map
-	if e.currentMap != nil {
-		e.renderFullMap()
-	}
+	// Re-render current map - let the WASM layer handle this with proper rendering
+	// The renderFullMap() uses simplified hexagon rendering, but we want proper terrain images
+	// This will be handled by the WASM renderEditorToCanvas() function
 	
 	return nil
 }

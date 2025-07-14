@@ -258,13 +258,25 @@ class MapEditorPage {
                 }
             }
             
-            // Initialize WASM editor with canvas binding
+            // Initialize WASM editor with canvas binding (auto-sized)
             this.logToConsole('Initializing WASM editor...');
-            const editorResult = (window as any).editorCreate('map-canvas', 600, 450);
+            const editorResult = (window as any).editorCreate('map-canvas');
             if (!editorResult.success) {
                 throw new Error(editorResult.error);
             }
             this.logToConsole(`Editor bound to canvas: ${editorResult.data.canvasID}`);
+            
+            // Apply initial canvas size from WASM
+            this.resizeCanvas(editorResult.data.canvasWidth, editorResult.data.canvasHeight);
+            
+            // Update local map data with initial size
+            this.mapData = {
+                name: "New Map",
+                width: editorResult.data.mapWidth,
+                height: editorResult.data.mapHeight,
+                tiles: {},
+                map_units: []
+            };
             
             // Create World-Renderer components
             this.logToConsole('Creating World-Renderer components...');
@@ -397,6 +409,11 @@ class MapEditorPage {
                 if (result.success) {
                     this.logToConsole(`${result.message}`);
                     
+                    // Resize canvas to match new map dimensions
+                    if (result.data.canvasWidth && result.data.canvasHeight) {
+                        this.resizeCanvas(result.data.canvasWidth, result.data.canvasHeight);
+                    }
+                    
                     // Update local map data to stay in sync
                     this.mapData = {
                         name: `New ${width}×${height} Map`,
@@ -508,8 +525,8 @@ class MapEditorPage {
         this.logToConsole(`Rendering map at ${width}×${height}...`);
         // TODO: Implement WASM rendering
         
-        // For now, just re-render the canvas
-        this.renderMapCanvas();
+        // WASM now handles rendering automatically when map changes
+        this.logToConsole('Map rendering handled by WASM');
     }
 
     public downloadImage(): void {
@@ -572,6 +589,45 @@ class MapEditorPage {
         
         // Canvas is now bound to WASM editor and will be rendered automatically
         this.logToConsole('Canvas initialized');
+    }
+
+    // resizeCanvas updates the canvas size in the DOM to match WASM-calculated dimensions
+    private resizeCanvas(width: number, height: number): void {
+        if (!this.mapCanvas) return;
+        
+        this.logToConsole(`Resizing canvas DOM to ${width}x${height}`);
+        
+        // Update canvas DOM element size (this clears the canvas content)
+        this.mapCanvas.width = width;
+        this.mapCanvas.height = height;
+        
+        // Update canvas CSS size for proper display
+        this.mapCanvas.style.width = `${width}px`;
+        this.mapCanvas.style.height = `${height}px`;
+        
+        // Tell WASM to update its canvas buffer size to match DOM
+        if (this.wasmInitialized) {
+            try {
+                const result = (window as any).editorSetCanvasSize(width, height);
+                if (result.success) {
+                    this.logToConsole(`WASM canvas buffer updated to ${width}x${height}`);
+                    
+                    // Force a re-render with proper game rendering (not simplified hexagons)
+                    const renderResult = (window as any).editorRenderToCanvas();
+                    if (renderResult.success) {
+                        this.logToConsole(`Map re-rendered with proper terrain images`);
+                    } else {
+                        this.logToConsole(`Re-render failed: ${renderResult.error}`);
+                    }
+                } else {
+                    this.logToConsole(`Failed to update WASM canvas buffer: ${result.error}`);
+                }
+            } catch (error) {
+                this.logToConsole(`Error updating WASM canvas buffer: ${error}`);
+            }
+        }
+        
+        this.logToConsole(`Canvas resized to ${width}x${height}`);
     }
 
     // renderMapCanvas() method removed - WASM now pushes updates directly to canvas
@@ -664,6 +720,11 @@ class MapEditorPage {
             if (result.success) {
                 this.mapData.height = newHeight;
                 this.logToConsole(`${result.message}`);
+                
+                // Resize canvas to match new dimensions
+                if (result.data.canvasWidth && result.data.canvasHeight) {
+                    this.resizeCanvas(result.data.canvasWidth, result.data.canvasHeight);
+                }
             } else {
                 this.logToConsole(`Failed to add row: ${result.error}`);
             }
@@ -683,6 +744,11 @@ class MapEditorPage {
             if (result.success) {
                 this.mapData.height = newHeight;
                 this.logToConsole(`${result.message}`);
+                
+                // Resize canvas to match new dimensions
+                if (result.data.canvasWidth && result.data.canvasHeight) {
+                    this.resizeCanvas(result.data.canvasWidth, result.data.canvasHeight);
+                }
             } else {
                 this.logToConsole(`Failed to remove row: ${result.error}`);
             }
@@ -702,6 +768,11 @@ class MapEditorPage {
             if (result.success) {
                 this.mapData.width = newWidth;
                 this.logToConsole(`${result.message}`);
+                
+                // Resize canvas to match new dimensions
+                if (result.data.canvasWidth && result.data.canvasHeight) {
+                    this.resizeCanvas(result.data.canvasWidth, result.data.canvasHeight);
+                }
             } else {
                 this.logToConsole(`Failed to add column: ${result.error}`);
             }
@@ -721,6 +792,11 @@ class MapEditorPage {
             if (result.success) {
                 this.mapData.width = newWidth;
                 this.logToConsole(`${result.message}`);
+                
+                // Resize canvas to match new dimensions
+                if (result.data.canvasWidth && result.data.canvasHeight) {
+                    this.resizeCanvas(result.data.canvasWidth, result.data.canvasHeight);
+                }
             } else {
                 this.logToConsole(`Failed to remove column: ${result.error}`);
             }

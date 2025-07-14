@@ -742,28 +742,40 @@ class MapEditorPage {
         }
     }
 
-    private pixelToHex(x: number, y: number): {row: number, col: number} | null {
+    private pixelToHex(x: number, y: number): {row: number, col: number, cubeQ?: number, cubeR?: number} | null {
         if (!this.mapCanvas || !this.mapData) return null;
         
-        // Calculate hex size based on canvas and map dimensions
-        const canvasWidth = this.mapCanvas.width;
-        const canvasHeight = this.mapCanvas.height;
-        const mapWidth = this.mapData.width;
-        const mapHeight = this.mapData.height;
+        // Use WASM coordinate conversion for maximum accuracy
+        if (this.wasmInitialized && (window as any).editorPixelToCoords) {
+            try {
+                const result = (window as any).editorPixelToCoords(x, y);
+                if (result && result.success && result.data) {
+                    const { row, col, cubeQ, cubeR } = result.data;
+                    
+                    // Validate coordinates are within map bounds
+                    if (row >= 0 && row < this.mapData.height && col >= 0 && col < this.mapData.width) {
+                        this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) Q=${cubeQ} R=${cubeR} [WASM conversion]`);
+                        return { row, col, cubeQ, cubeR };
+                    }
+                    
+                    this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) [map: ${this.mapData.width}x${this.mapData.height}]`);
+                    return null;
+                }
+            } catch (error) {
+                console.warn('WASM coordinate conversion failed, falling back to browser calculation:', error);
+            }
+        }
         
-        // Calculate hex size from canvas dimensions
-        // Assuming some padding and the hex layout used by WASM
-        const hexSize = Math.min(
-            (canvasWidth - 40) / (mapWidth * 1.5 + 0.5),  // Account for hex overlap
-            (canvasHeight - 40) / (mapHeight * Math.sqrt(3) * 0.75 + Math.sqrt(3) * 0.25)
-        );
+        // Fallback to browser-side calculation (legacy approach)
+        const TILE_WIDTH = 60;    // TileWidth from WASM
+        const TILE_HEIGHT = 52;   // TileHeight from WASM  
+        const Y_INCREMENT = 39;   // YIncrement from WASM (vertical spacing between rows)
         
-        // Hex grid calculations
-        const hexWidth = hexSize * Math.sqrt(3);
-        const hexHeight = hexSize * 2;
-        const rowHeight = hexHeight * 0.75;
+        // Calculate hex layout parameters
+        const hexWidth = TILE_WIDTH;
+        const rowHeight = Y_INCREMENT;
         
-        // Account for padding/margins (adjust based on actual canvas layout)
+        // Account for padding/margins (WASM may add some padding)
         const offsetX = 20;
         const offsetY = 20;
         
@@ -775,16 +787,17 @@ class MapEditorPage {
         const row = Math.floor(adjustedY / rowHeight);
         
         // Calculate column, accounting for hex offset on odd rows
+        // In odd-r layout, odd rows are shifted right by half a tile width
         const oddRowOffset = (row % 2) * (hexWidth / 2);
         const col = Math.floor((adjustedX - oddRowOffset) / hexWidth);
         
         // Validate coordinates are within map bounds
-        if (row >= 0 && row < mapHeight && col >= 0 && col < mapWidth) {
-            this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) [canvas: ${canvasWidth}x${canvasHeight}, map: ${mapWidth}x${mapHeight}, hexSize: ${hexSize.toFixed(1)}]`);
+        if (row >= 0 && row < this.mapData.height && col >= 0 && col < this.mapData.width) {
+            this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) [Browser fallback]`);
             return { row, col };
         }
         
-        this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) [map: ${mapWidth}x${mapHeight}]`);
+        this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) [map: ${this.mapData.width}x${this.mapData.height}]`);
         return null;
     }
 

@@ -21,7 +21,8 @@ type MapEditor struct {
 	brushSize    int  // Brush radius (0 = single hex, 1 = 7 hexes, etc.)
 	
 	// Canvas rendering
-	canvasBuffer *CanvasBuffer // Direct HTML canvas rendering
+	canvasBuffer *CanvasBuffer // Direct HTML canvas rendering (deprecated)
+	layeredRenderer *LayeredRenderer // Fast layered rendering system
 	canvasWidth  int
 	canvasHeight int
 	
@@ -73,12 +74,45 @@ func (e *MapEditor) NewMap(rows, cols int) error {
 		}
 	}
 	
+	// Add some random units for testing the unit layer
+	numUnits := 3 // Add 3 random units
+	for i := 0; i < numUnits; i++ {
+		// Pick random position
+		row := i * 2        // Spread units out
+		col := i * 2 + 1
+		if row < rows && col < cols {
+			coord := e.currentMap.DisplayToHex(row, col)
+			if tile := e.currentMap.TileAtCube(coord); tile != nil {
+				// Create a basic unit (type 1, player 0)
+				unit := &Unit{
+					UnitType:        1,  // Basic unit type
+					DistanceLeft:    3,  // Movement points
+					AvailableHealth: 10, // Health
+					TurnCounter:     0,  // Turn created
+					Row:             row,
+					Col:             col,
+					PlayerID:        i % 2, // Alternate between player 0 and 1
+				}
+				tile.Unit = unit
+				fmt.Printf("Created unit type %d for player %d at (%d, %d)\n", unit.UnitType, unit.PlayerID, row, col)
+				
+				// Mark unit layer as dirty
+				if e.layeredRenderer != nil {
+					e.layeredRenderer.MarkUnitDirty(coord)
+					fmt.Printf("Marked unit layer dirty at coord %v\n", coord)
+				}
+			}
+		}
+	}
+	
 	// Clear history but defer initial snapshot for performance
 	// The snapshot will be taken on the first edit operation
 	e.clearHistory()
 	
-	// Don't auto-render here - let the world-renderer handle it for performance
-	// The WASM layer will call the proper rendering after map creation
+	// Update layered renderer with new map
+	if e.layeredRenderer != nil {
+		e.layeredRenderer.SetMap(e.currentMap)
+	}
 	
 	return nil
 }
@@ -122,6 +156,18 @@ func (e *MapEditor) GetFilename() string {
 // GetCanvasSize returns the current canvas dimensions
 func (e *MapEditor) GetCanvasSize() (width, height int) {
 	return e.canvasWidth, e.canvasHeight
+}
+
+// GetLayeredRenderer returns the layered renderer for direct access
+func (e *MapEditor) GetLayeredRenderer() *LayeredRenderer {
+	return e.layeredRenderer
+}
+
+// SetAssetProvider updates the asset provider for terrain/unit sprites
+func (e *MapEditor) SetAssetProvider(provider AssetProvider) {
+	if e.layeredRenderer != nil {
+		e.layeredRenderer.SetAssetProvider(provider)
+	}
 }
 
 // =============================================================================
@@ -181,8 +227,12 @@ func (e *MapEditor) PaintTerrain(row, col int) error {
 	e.takeSnapshot()
 	e.modified = true
 	
-	// Auto-render affected tiles
-	e.renderTiles(positions)
+	// Mark affected tiles as dirty for efficient rendering
+	if e.layeredRenderer != nil {
+		for _, coord := range positions {
+			e.layeredRenderer.MarkTerrainDirty(coord)
+		}
+	}
 	
 	return nil
 }
@@ -199,8 +249,10 @@ func (e *MapEditor) RemoveTerrain(row, col int) error {
 	e.takeSnapshot()
 	e.modified = true
 	
-	// Auto-render affected tile
-	e.renderTiles([]CubeCoord{coord})
+	// Mark affected tile as dirty for efficient rendering
+	if e.layeredRenderer != nil {
+		e.layeredRenderer.MarkTerrainDirty(coord)
+	}
 	
 	return nil
 }
@@ -261,8 +313,10 @@ func (e *MapEditor) FloodFill(row, col int) error {
 	e.takeSnapshot()
 	e.modified = true
 	
-	// Auto-render entire map (flood fill can affect large areas)
-	e.renderFullMap()
+	// Mark entire terrain as dirty since flood fill can affect large areas
+	if e.layeredRenderer != nil {
+		e.layeredRenderer.MarkAllTerrainDirty()
+	}
 	
 	return nil
 }
@@ -281,8 +335,10 @@ func (e *MapEditor) Undo() error {
 	e.currentMap = e.copyMap(e.history[e.historyPos])
 	e.modified = true
 	
-	// Auto-render entire map (undo can affect entire state)
-	e.renderFullMap()
+	// Mark entire terrain as dirty since undo can affect entire state
+	if e.layeredRenderer != nil {
+		e.layeredRenderer.MarkAllTerrainDirty()
+	}
 	
 	return nil
 }
@@ -297,8 +353,10 @@ func (e *MapEditor) Redo() error {
 	e.currentMap = e.copyMap(e.history[e.historyPos])
 	e.modified = true
 	
-	// Auto-render entire map (redo can affect entire state)
-	e.renderFullMap()
+	// Mark entire terrain as dirty since redo can affect entire state
+	if e.layeredRenderer != nil {
+		e.layeredRenderer.MarkAllTerrainDirty()
+	}
 	
 	return nil
 }
@@ -529,40 +587,38 @@ func (e *MapEditor) RenderToFile(filename string, width, height int) error {
 
 // SetCanvas initializes the canvas for real-time rendering
 func (e *MapEditor) SetCanvas(canvasID string, width, height int) error {
-	// Create new canvas buffer
-	e.canvasBuffer = NewCanvasBuffer(canvasID, width, height)
-	if e.canvasBuffer == nil {
-		return fmt.Errorf("failed to create canvas buffer for '%s'", canvasID)
+	// Create new layered renderer for fast prototyping
+	var err error
+	e.layeredRenderer, err = NewLayeredRenderer(canvasID, width, height)
+	if err != nil {
+		return fmt.Errorf("failed to create layered renderer for '%s': %v", canvasID, err)
 	}
 	
 	e.canvasWidth = width
 	e.canvasHeight = height
 	
-	// Don't auto-render here - let the world-renderer handle it for performance
-	// The WASM layer will call the proper rendering when needed
+	// If we have a current map, mark all terrain as dirty for initial render
+	if e.currentMap != nil {
+		e.layeredRenderer.MarkAllTerrainDirty()
+	}
 	
 	return nil
 }
 
 // SetCanvasSize resizes the canvas
 func (e *MapEditor) SetCanvasSize(width, height int) error {
-	if e.canvasBuffer == nil {
-		return fmt.Errorf("no canvas initialized")
+	if e.layeredRenderer == nil {
+		return fmt.Errorf("no layered renderer initialized")
 	}
 	
 	e.canvasWidth = width
 	e.canvasHeight = height
 	
-	// Recreate canvas buffer with new size
-	canvasID := e.canvasBuffer.canvasID
-	e.canvasBuffer = NewCanvasBuffer(canvasID, width, height)
-	if e.canvasBuffer == nil {
-		return fmt.Errorf("failed to resize canvas buffer")
+	// Resize the layered renderer (this will mark everything as dirty)
+	err := e.layeredRenderer.Resize(width, height)
+	if err != nil {
+		return fmt.Errorf("failed to resize layered renderer: %v", err)
 	}
-	
-	// Re-render current map - let the WASM layer handle this with proper rendering
-	// The renderFullMap() uses simplified hexagon rendering, but we want proper terrain images
-	// This will be handled by the WASM renderEditorToCanvas() function
 	
 	return nil
 }

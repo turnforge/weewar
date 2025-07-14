@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"syscall/js"
 
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"github.com/panyam/turnengine/games/weewar/assets"
+	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
 // Global editor instance for WASM
@@ -56,7 +56,7 @@ func main() {
 	js.Global().Set("viewStateCreate", js.FuncOf(viewStateCreate))
 	js.Global().Set("canvasRendererCreate", js.FuncOf(canvasRendererCreate))
 	js.Global().Set("worldRendererRender", js.FuncOf(worldRendererRender))
-	
+
 	// Map dimension functions
 	js.Global().Set("editorSetMapSize", js.FuncOf(setMapSize))
 
@@ -71,7 +71,7 @@ func main() {
 
 	// Legacy function (for backward compatibility during transition)
 	js.Global().Set("editorRenderMap", js.FuncOf(renderMap))
-	
+
 	// Canvas rendering function
 	js.Global().Set("editorRenderToCanvas", js.FuncOf(renderEditorToCanvasJS))
 
@@ -86,13 +86,13 @@ func createEditor(this js.Value, args []js.Value) any {
 	}
 
 	canvasID := args[0].String()
-	
+
 	// Start with default 8x8 map for initial canvas size
 	defaultRows, defaultCols := 8, 8
 	width, height := calculateCanvasSize(defaultRows, defaultCols)
 
 	globalEditor = weewar.NewMapEditor()
-	
+
 	// Bind the editor to the canvas with auto-calculated size
 	err := globalEditor.SetCanvas(canvasID, width, height)
 	if err != nil {
@@ -205,13 +205,13 @@ func paintTerrain(this js.Value, args []js.Value) any {
 // calculateCanvasSize calculates the optimal canvas size for a given map size
 // Returns width and height in pixels for 1:1 tile ratio
 func calculateCanvasSize(rows, cols int) (width, height int) {
-	const tileSize = 40 // pixels per hex tile
+	const tileSize = 40     // pixels per hex tile
 	const hexSpacing = 0.75 // vertical spacing factor for hex grid
-	
+
 	// Calculate canvas dimensions based on hex grid layout
-	width = cols * tileSize + tileSize // extra space for hex offset
-	height = int(float64(rows) * float64(tileSize) * hexSpacing) + tileSize // extra space for hex height
-	
+	width = cols*tileSize + tileSize                                    // extra space for hex offset
+	height = int(float64(rows)*float64(tileSize)*hexSpacing) + tileSize // extra space for hex height
+
 	// Ensure minimum size for usability
 	if width < 200 {
 		width = 200
@@ -219,7 +219,7 @@ func calculateCanvasSize(rows, cols int) (width, height int) {
 	if height < 200 {
 		height = 200
 	}
-	
+
 	return width, height
 }
 
@@ -237,7 +237,7 @@ func setMapSize(this js.Value, args []js.Value) any {
 
 	// Calculate optimal canvas size for the map dimensions
 	canvasWidth, canvasHeight := calculateCanvasSize(rows, cols)
-	
+
 	// Resize the canvas to match the map size
 	err := globalEditor.SetCanvasSize(canvasWidth, canvasHeight)
 	if err != nil {
@@ -279,6 +279,63 @@ func renderEditorToCanvas() error {
 		return fmt.Errorf("editor not initialized")
 	}
 
+	// Use the layered renderer for fast prototyping rendering
+	layeredRenderer := globalEditor.GetLayeredRenderer()
+	if layeredRenderer != nil {
+		fmt.Println("Using layered renderer for rendering")
+
+		// Force render to update all layers with error handling
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("PANIC in layered renderer: %v\n", r)
+			}
+		}()
+
+		// Ensure units are marked as dirty before render (batching system issue)
+		layeredRenderer.MarkAllUnitsDirty()
+		layeredRenderer.ForceRender()
+
+		// Blit each layer to canvas sequentially with alpha blending
+		canvasID := "map-canvas"
+
+		// Blit all layers: terrain, units, and UI
+		terrainBuffer := layeredRenderer.GetTerrainBuffer()
+		if terrainBuffer != nil {
+			fmt.Println("Blitting terrain buffer to canvas")
+			err := blitBufferToCanvas(terrainBuffer, canvasID)
+			if err != nil {
+				return fmt.Errorf("failed to blit terrain to canvas: %v", err)
+			}
+		}
+
+		unitBuffer := layeredRenderer.GetUnitBuffer()
+		if unitBuffer != nil {
+			fmt.Println("Blitting unit buffer to canvas")
+			err := blitBufferToCanvas(unitBuffer, canvasID)
+			if err != nil {
+				return fmt.Errorf("failed to blit units to canvas: %v", err)
+			}
+		}
+
+		uiBuffer := layeredRenderer.GetUIBuffer()
+		if uiBuffer != nil {
+			fmt.Println("Blitting UI buffer to canvas")
+			err := blitBufferToCanvas(uiBuffer, canvasID)
+			if err != nil {
+				return fmt.Errorf("failed to blit UI to canvas: %v", err)
+			}
+		}
+
+		return nil
+	}
+
+	// Fallback to old rendering if layered renderer not available
+	fmt.Println("Layered renderer not available, using fallback")
+	return renderEditorToCanvasFallback()
+}
+
+// renderEditorToCanvasFallback provides old rendering method as fallback
+func renderEditorToCanvasFallback() error {
 	// Export the current editor state to a game for rendering
 	game, err := globalEditor.ExportToGame(2)
 	if err != nil {
@@ -287,35 +344,35 @@ func renderEditorToCanvas() error {
 
 	// Create/update the world with the new map
 	globalWorld = weewar.NewWorld(2, game.Map, int(game.Seed))
-	
+
 	// Ensure we have a view state
 	if globalViewState == nil {
 		globalViewState = weewar.NewViewState()
 	}
-	
+
 	// Set up the game with embedded assets
 	if globalEmbeddedAssetManager != nil {
 		game.SetAssetProvider(globalEmbeddedAssetManager)
 	}
-	
+
 	// Get canvas dimensions from the editor
 	canvasWidth, canvasHeight := globalEditor.GetCanvasSize()
-	
+
 	// Render using BufferRenderer
 	bufferRenderer := weewar.NewBufferRenderer()
 	buffer := weewar.NewBuffer(canvasWidth, canvasHeight)
-	
+
 	baseRenderer := &weewar.BaseRenderer{}
 	options := baseRenderer.CalculateRenderOptions(canvasWidth, canvasHeight, globalWorld)
-	
+
 	bufferRenderer.RenderWorldWithAssets(globalWorld, globalViewState, buffer, options, game)
-	
+
 	// Push the buffer directly to the bound canvas
-	err = blitBufferToCanvas(buffer, "map-canvas")  // TODO: Get actual canvas ID from editor
+	err = blitBufferToCanvas(buffer, "map-canvas")
 	if err != nil {
 		return fmt.Errorf("failed to push buffer to canvas: %v", err)
 	}
-	
+
 	return nil
 }
 
@@ -735,7 +792,7 @@ func worldCreate(this js.Value, args []js.Value) any {
 		// Export the current editor map to use for rendering
 		mapInfo := globalEditor.GetMapInfo()
 		testMap = weewar.NewMap(mapInfo.Height, mapInfo.Width, false)
-		
+
 		// Fill with current terrain data from the editor
 		for row := 0; row < mapInfo.Height; row++ {
 			for col := 0; col < mapInfo.Width; col++ {
@@ -754,7 +811,7 @@ func worldCreate(this js.Value, args []js.Value) any {
 	} else {
 		// Create a default 5x8 map if no editor map is available
 		testMap = weewar.NewMap(5, 8, false)
-		
+
 		// Fill with variety of terrains for testing
 		for row := 0; row < 5; row++ {
 			for col := 0; col < 8; col++ {
@@ -814,7 +871,7 @@ func worldRendererRender(this js.Value, args []js.Value) any {
 			fmt.Printf("Panic in worldRendererRender: %v\n", r)
 		}
 	}()
-	
+
 	if globalWorld == nil {
 		return createEditorResponse(false, "", "globalWorld is nil - run worldCreate first", nil)
 	}
@@ -849,7 +906,7 @@ func worldRendererRender(this js.Value, args []js.Value) any {
 	// Use BufferRenderer (same as CLI) to avoid canvas deadlock issues
 	bufferRenderer := weewar.NewBufferRenderer()
 	buffer := weewar.NewBuffer(width, height)
-	
+
 	// Calculate render options based on world and canvas size
 	baseRenderer := &weewar.BaseRenderer{}
 	options := baseRenderer.CalculateRenderOptions(width, height, globalWorld)
@@ -888,7 +945,7 @@ func loadEmbeddedAssets(this js.Value, args []js.Value) any {
 			fmt.Printf("Panic in loadEmbeddedAssets: %v\n", r)
 		}
 	}()
-	
+
 	// Create embedded asset manager
 	embeddedAssets := assets.NewEmbeddedAssetManager()
 	if embeddedAssets == nil {
@@ -903,6 +960,11 @@ func loadEmbeddedAssets(this js.Value, args []js.Value) any {
 
 	// Store globally for use in rendering
 	globalEmbeddedAssetManager = embeddedAssets
+
+	// Update editor to use the loaded assets for terrain sprites
+	if globalEditor != nil {
+		globalEditor.SetAssetProvider(embeddedAssets)
+	}
 
 	tileCount, unitCount := embeddedAssets.GetCacheStats()
 
@@ -1097,12 +1159,37 @@ func blitBufferToCanvas(buffer *weewar.Buffer, canvasID string) error {
 	// Convert Go image.RGBA to JavaScript Uint8ClampedArray efficiently
 	// The buffer is in RGBA format, and ImageData expects RGBA format
 	pixels := imageData.Pix
-	
+
+	// Debug: Check if buffer contains any non-transparent pixels
+	nonTransparentPixels := 0
+	for i := 3; i < len(pixels); i += 4 { // Check alpha channel (every 4th byte)
+		if pixels[i] > 0 {
+			nonTransparentPixels++
+		}
+	}
+	fmt.Printf("BlitBufferToCanvas: canvas='%s', size=%dx%d, pixels=%d, non-transparent=%d\n",
+		canvasID, width, height, len(pixels)/4, nonTransparentPixels)
+
 	// Use js.CopyBytesToJS for efficient bulk transfer instead of pixel-by-pixel
 	js.CopyBytesToJS(dataArray, pixels)
 
-	// Put the ImageData to the canvas
-	ctx.Call("putImageData", imageDataJS, 0, 0)
+	// Use drawImage with globalCompositeOperation for proper alpha blending
+	// First create a temporary canvas with the ImageData
+	tempCanvas := js.Global().Get("document").Call("createElement", "canvas")
+	tempCanvas.Set("width", width)
+	tempCanvas.Set("height", height)
+	tempCtx := tempCanvas.Call("getContext", "2d")
+	tempCtx.Call("putImageData", imageDataJS, 0, 0)
+
+	// Then draw the temporary canvas onto the main canvas with alpha blending
+	ctx.Set("globalCompositeOperation", "source-over") // This respects alpha
+	ctx.Call("drawImage", tempCanvas, 0, 0)
+
+	// Debug: Check canvas size
+	canvasWidth := canvas.Get("width").Int()
+	canvasHeight := canvas.Get("height").Int()
+	fmt.Printf("Canvas '%s' size: %dx%d, ImageData size: %dx%d\n",
+		canvasID, canvasWidth, canvasHeight, width, height)
 
 	return nil
 }

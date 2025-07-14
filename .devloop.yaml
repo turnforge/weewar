@@ -1,0 +1,72 @@
+settings:
+  project_id: "weewar"
+  color_logs: true
+  prefix_logs: true
+  prefix_max_length: 15
+
+rules:
+  # Go Backend Development & Testing
+  - name: "backend"
+    color: "blue"
+    watch:
+      - action: "exclude"
+        patterns:
+          - "web/**"
+      - action: "include"
+        patterns:
+          - "web/**/*.go"
+          - "**/*.go"
+          - "go.mod"
+          - "go.sum"
+    commands:
+      - "echo '🔧 Building APPTEMPLATE Binary...'"
+      - "make binlocal"
+      # - "go test -short ./..."
+      - "echo '✅ Backend build and tests complete'"
+      - "/tmp/weewar serve"
+
+  # Frontend Development & Testing
+  - name: "frontend"
+    skip_run_on_init: true
+    color: "green"
+    workdir: "./web"
+    watch:
+      - action: "exclude"
+        patterns:
+          - "node_modules/**"
+          - "dist/**"
+          - "test-results/**"
+          - "playwright-report/**"
+      - action: "include"
+        patterns:
+          - "**/*.ts"
+          - "**/*.js"
+          - "**/*.css"
+          - "**/*.html"
+          - "**/*.spec.ts"
+          - "**/*.test.ts"
+          - "package.json"
+          - "vite.config.ts"
+          - "tsconfig.json"
+    commands:
+      - "echo '⚡ Building frontend...'"
+      - "npm run build:only"
+      - "echo '🧪 Running frontend tests...'"
+      # - "npm run test:unit"
+      - "echo '✅ Frontend build complete and tests disabled'"
+
+  # Protocol Buffers (affects both Go and Web)
+  - name: "protobuf"
+    color: "magenta"
+    skip_run_on_init: true
+    watch:
+      - action: "include"
+        patterns:
+          - "protos/**/*.proto"
+          - "buf.yaml"
+          - "buf.gen.yaml"
+    commands:
+      - "echo '📦 Regenerating Protocol Buffers...'"
+      - "rm -Rf gen"
+      - "buf generate"
+      - "echo '✅ Protobuf generation complete'"

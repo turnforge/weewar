@@ -48,7 +48,6 @@ message PaginationResponse {
 }
 
 
-
 message Game {
   google.protobuf.Timestamp created_at = 1;
   google.protobuf.Timestamp updated_at = 2;
@@ -83,29 +82,6 @@ message Map {
   string name = 4;
 
   // Description if map has a description
-  string description = 5;
-
-  // Some tags
-  repeated string tags = 6;
-
-  // A possible image url
-  string image_url = 7;
-
-  // Difficulty - example attribute
-  string difficulty = 8;
-}
-
-message GameInstance {
-  google.protobuf.Timestamp created_at = 1;
-  google.protobuf.Timestamp updated_at = 2;
-
-  // Unique ID for the gameinstance
-  string id = 3;
-
-  // Name if items have names
-  string name = 4;
-
-  // Description if gameinstance has a description
   string description = 5;
 
   // Some tags

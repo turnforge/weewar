@@ -6,9 +6,6 @@
   },
   "tags": [
     {
-      "name": "GameInstancesService"
-    },
-    {
       "name": "GamesService"
     },
     {
@@ -25,282 +22,6 @@
     "application/json"
   ],
   "paths": {
-    "/v1/gameinstances": {
-      "get": {
-        "summary": "ListGameInstances returns all available gameinstances",
-        "operationId": "GameInstancesService_ListGameInstances",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1ListGameInstancesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "pagination.pageKey",
-            "description": "*\nInstead of an offset an abstract  \"page\" key is provided that offers\nan opaque \"pointer\" into some offset in a result set.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "pagination.pageOffset",
-            "description": "*\nIf a pagekey is not supported we can also support a direct integer offset\nfor cases where it makes sense.",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "pagination.pageSize",
-            "description": "*\nNumber of results to return.",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "ownerId",
-            "description": "May be filter by owner id",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "GameInstancesService"
-        ]
-      },
-      "post": {
-        "summary": "*\nCreate a new gameinstance",
-        "operationId": "GameInstancesService_CreateGameInstance",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1CreateGameInstanceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1CreateGameInstanceRequest"
-            }
-          }
-        ],
-        "tags": [
-          "GameInstancesService"
-        ]
-      }
-    },
-    "/v1/gameinstances/{gameinstance.id}": {
-      "patch": {
-        "summary": "GetGameInstance returns a specific gameinstance with metadata",
-        "operationId": "GameInstancesService_UpdateGameInstance",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateGameInstanceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "gameinstance.id",
-            "description": "Unique ID for the gameinstance",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "pattern": "[^/]+"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "gameinstance": {
-                  "type": "object",
-                  "properties": {
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "name": {
-                      "type": "string",
-                      "title": "Name if items have names"
-                    },
-                    "description": {
-                      "type": "string",
-                      "title": "Description if gameinstance has a description"
-                    },
-                    "tags": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "title": "Some tags"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "title": "A possible image url"
-                    },
-                    "difficulty": {
-                      "type": "string",
-                      "title": "Difficulty - example attribute"
-                    }
-                  },
-                  "title": "*\nGameInstance being updated"
-                },
-                "updateMask": {
-                  "type": "string",
-                  "description": "*\nMask of fields being updated in this GameInstance to make partial changes."
-                }
-              },
-              "title": "UpdateGameInstanceRequest"
-            }
-          }
-        ],
-        "tags": [
-          "GameInstancesService"
-        ]
-      }
-    },
-    "/v1/gameinstances/{id}": {
-      "get": {
-        "summary": "GetGameInstance returns a specific gameinstance with metadata",
-        "operationId": "GameInstancesService_GetGameInstance",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetGameInstanceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "version",
-            "description": "Optional, defaults to default_version",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "GameInstancesService"
-        ]
-      },
-      "delete": {
-        "summary": "*\nDelete a particular gameinstance",
-        "operationId": "GameInstancesService_DeleteGameInstance",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1DeleteGameInstanceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "*\nID of the gameinstance to be deleted.",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "pattern": "[^/]+"
-          }
-        ],
-        "tags": [
-          "GameInstancesService"
-        ]
-      }
-    },
-    "/v1/gameinstances:batchGet": {
-      "get": {
-        "summary": "*\nBatch get multiple gameinstances by ID",
-        "operationId": "GameInstancesService_GetGameInstances",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetGameInstancesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "ids",
-            "description": "*\nIDs of the gameinstance to be fetched",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          }
-        ],
-        "tags": [
-          "GameInstancesService"
-        ]
-      }
-    },
     "/v1/games": {
       "get": {
         "summary": "ListGames returns all available games",
@@ -1159,33 +880,6 @@
         }
       }
     },
-    "v1CreateGameInstanceRequest": {
-      "type": "object",
-      "properties": {
-        "gameinstance": {
-          "$ref": "#/definitions/v1GameInstance",
-          "title": "*\nGameInstance being updated"
-        }
-      },
-      "title": "*\nGameInstance creation request object"
-    },
-    "v1CreateGameInstanceResponse": {
-      "type": "object",
-      "properties": {
-        "gameinstance": {
-          "$ref": "#/definitions/v1GameInstance",
-          "title": "*\nGameInstance being created"
-        },
-        "fieldErrors": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "*\nError specific to a field if there are any errors."
-        }
-      },
-      "description": "*\nResponse of an gameinstance creation."
-    },
     "v1CreateGameRequest": {
       "type": "object",
       "properties": {
@@ -1267,10 +961,6 @@
       },
       "description": "*\nResponse of an user creation."
     },
-    "v1DeleteGameInstanceResponse": {
-      "type": "object",
-      "title": "*\nGameInstance deletion response"
-    },
     "v1DeleteGameResponse": {
       "type": "object",
       "title": "*\nGame deletion response"
@@ -1322,66 +1012,6 @@
           "title": "Difficulty - example attribute"
         }
       }
-    },
-    "v1GameInstance": {
-      "type": "object",
-      "properties": {
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "id": {
-          "type": "string",
-          "title": "Unique ID for the gameinstance"
-        },
-        "name": {
-          "type": "string",
-          "title": "Name if items have names"
-        },
-        "description": {
-          "type": "string",
-          "title": "Description if gameinstance has a description"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "title": "Some tags"
-        },
-        "imageUrl": {
-          "type": "string",
-          "title": "A possible image url"
-        },
-        "difficulty": {
-          "type": "string",
-          "title": "Difficulty - example attribute"
-        }
-      }
-    },
-    "v1GetGameInstanceResponse": {
-      "type": "object",
-      "properties": {
-        "gameinstance": {
-          "$ref": "#/definitions/v1GameInstance"
-        }
-      }
-    },
-    "v1GetGameInstancesResponse": {
-      "type": "object",
-      "properties": {
-        "gameinstances": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/v1GameInstance"
-          }
-        }
-      },
-      "title": "*\nGameInstance batch-get response"
     },
     "v1GetGameResponse": {
       "type": "object",
@@ -1442,21 +1072,6 @@
         }
       },
       "title": "*\nUser batch-get response"
-    },
-    "v1ListGameInstancesResponse": {
-      "type": "object",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1GameInstance"
-          }
-        },
-        "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
-        }
-      }
     },
     "v1ListGamesResponse": {
       "type": "object",
@@ -1584,17 +1199,6 @@
           "description": "*\nTotal number of results."
         }
       }
-    },
-    "v1UpdateGameInstanceResponse": {
-      "type": "object",
-      "properties": {
-        "gameinstance": {
-          "$ref": "#/definitions/v1GameInstance",
-          "title": "*\nGameInstance being updated"
-        }
-      },
-      "description": "*\nThe request for (partially) updating an GameInstance.",
-      "title": "UpdateGameInstanceResponse"
     },
     "v1UpdateGameResponse": {
       "type": "object",

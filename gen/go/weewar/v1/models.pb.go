@@ -381,112 +381,6 @@ func (x *Map) GetDifficulty() string {
 	return ""
 }
 
-type GameInstance struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	// Unique ID for the gameinstance
-	Id string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
-	// Name if items have names
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// Description if gameinstance has a description
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// Some tags
-	Tags []string `protobuf:"bytes,6,rep,name=tags,proto3" json:"tags,omitempty"`
-	// A possible image url
-	ImageUrl string `protobuf:"bytes,7,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
-	// Difficulty - example attribute
-	Difficulty    string `protobuf:"bytes,8,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GameInstance) Reset() {
-	*x = GameInstance{}
-	mi := &file_weewar_v1_models_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GameInstance) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GameInstance) ProtoMessage() {}
-
-func (x *GameInstance) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GameInstance.ProtoReflect.Descriptor instead.
-func (*GameInstance) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GameInstance) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *GameInstance) GetUpdatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return nil
-}
-
-func (x *GameInstance) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *GameInstance) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *GameInstance) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *GameInstance) GetTags() []string {
-	if x != nil {
-		return x.Tags
-	}
-	return nil
-}
-
-func (x *GameInstance) GetImageUrl() string {
-	if x != nil {
-		return x.ImageUrl
-	}
-	return ""
-}
-
-func (x *GameInstance) GetDifficulty() string {
-	if x != nil {
-		return x.Difficulty
-	}
-	return ""
-}
-
 type User struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -509,7 +403,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_weewar_v1_models_proto_msgTypes[5]
+	mi := &file_weewar_v1_models_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -521,7 +415,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[5]
+	mi := &file_weewar_v1_models_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -534,7 +428,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{5}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *User) GetCreatedAt() *timestamppb.Timestamp {
@@ -634,19 +528,6 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1e\n" +
 	"\n" +
 	"difficulty\x18\b \x01(\tR\n" +
-	"difficulty\"\x9b\x02\n" +
-	"\fGameInstance\x129\n" +
-	"\n" +
-	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n" +
-	"\x02id\x18\x03 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04tags\x18\x06 \x03(\tR\x04tags\x12\x1b\n" +
-	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1e\n" +
-	"\n" +
-	"difficulty\x18\b \x01(\tR\n" +
 	"difficulty\"\x93\x02\n" +
 	"\x04User\x129\n" +
 	"\n" +
@@ -676,30 +557,27 @@ func file_weewar_v1_models_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_models_proto_rawDescData
 }
 
-var file_weewar_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_weewar_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_weewar_v1_models_proto_goTypes = []any{
 	(*Pagination)(nil),            // 0: weewar.v1.Pagination
 	(*PaginationResponse)(nil),    // 1: weewar.v1.PaginationResponse
 	(*Game)(nil),                  // 2: weewar.v1.Game
 	(*Map)(nil),                   // 3: weewar.v1.Map
-	(*GameInstance)(nil),          // 4: weewar.v1.GameInstance
-	(*User)(nil),                  // 5: weewar.v1.User
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*User)(nil),                  // 4: weewar.v1.User
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_weewar_v1_models_proto_depIdxs = []int32{
-	6, // 0: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
-	6, // 1: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
-	6, // 2: weewar.v1.Map.created_at:type_name -> google.protobuf.Timestamp
-	6, // 3: weewar.v1.Map.updated_at:type_name -> google.protobuf.Timestamp
-	6, // 4: weewar.v1.GameInstance.created_at:type_name -> google.protobuf.Timestamp
-	6, // 5: weewar.v1.GameInstance.updated_at:type_name -> google.protobuf.Timestamp
-	6, // 6: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	6, // 7: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	5, // 0: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
+	5, // 1: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
+	5, // 2: weewar.v1.Map.created_at:type_name -> google.protobuf.Timestamp
+	5, // 3: weewar.v1.Map.updated_at:type_name -> google.protobuf.Timestamp
+	5, // 4: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	5, // 5: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_models_proto_init() }
@@ -713,7 +591,7 @@ func file_weewar_v1_models_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_models_proto_rawDesc), len(file_weewar_v1_models_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

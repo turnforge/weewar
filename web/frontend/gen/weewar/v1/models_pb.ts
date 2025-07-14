@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/models.proto.
  */
 export const file_weewar_v1_models: GenFile = /*@__PURE__*/
-  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiRgoKUGFnaW5hdGlvbhIQCghwYWdlX2tleRgBIAEoCRITCgtwYWdlX29mZnNldBgCIAEoBRIRCglwYWdlX3NpemUYAyABKAUibgoSUGFnaW5hdGlvblJlc3BvbnNlEhUKDW5leHRfcGFnZV9rZXkYAiABKAkSGAoQbmV4dF9wYWdlX29mZnNldBgDIAEoBRIQCghoYXNfbW9yZRgEIAEoCBIVCg10b3RhbF9yZXN1bHRzGAUgASgFIsoBCgRHYW1lEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLJAQoDTWFwEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLSAQoMR2FtZUluc3RhbmNlEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLKAQoEVXNlchIuCgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIKCgJpZBgDIAEoCRIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJaW1hZ2VfdXJsGAcgASgJEhIKCmRpZmZpY3VsdHkYCCABKAlCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiRgoKUGFnaW5hdGlvbhIQCghwYWdlX2tleRgBIAEoCRITCgtwYWdlX29mZnNldBgCIAEoBRIRCglwYWdlX3NpemUYAyABKAUibgoSUGFnaW5hdGlvblJlc3BvbnNlEhUKDW5leHRfcGFnZV9rZXkYAiABKAkSGAoQbmV4dF9wYWdlX29mZnNldBgDIAEoBRIQCghoYXNfbW9yZRgEIAEoCBIVCg10b3RhbF9yZXN1bHRzGAUgASgFIsoBCgRHYW1lEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLJAQoDTWFwEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLKAQoEVXNlchIuCgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIKCgJpZBgDIAEoCRIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJaW1hZ2VfdXJsGAcgASgJEhIKCmRpZmZpY3VsdHkYCCABKAlCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message weewar.v1.Pagination
@@ -228,70 +228,6 @@ export const MapSchema: GenMessage<Map> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 3);
 
 /**
- * @generated from message weewar.v1.GameInstance
- */
-export type GameInstance = Message<"weewar.v1.GameInstance"> & {
-  /**
-   * @generated from field: google.protobuf.Timestamp created_at = 1;
-   */
-  createdAt?: Timestamp;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp updated_at = 2;
-   */
-  updatedAt?: Timestamp;
-
-  /**
-   * Unique ID for the gameinstance
-   *
-   * @generated from field: string id = 3;
-   */
-  id: string;
-
-  /**
-   * Name if items have names
-   *
-   * @generated from field: string name = 4;
-   */
-  name: string;
-
-  /**
-   * Description if gameinstance has a description
-   *
-   * @generated from field: string description = 5;
-   */
-  description: string;
-
-  /**
-   * Some tags
-   *
-   * @generated from field: repeated string tags = 6;
-   */
-  tags: string[];
-
-  /**
-   * A possible image url
-   *
-   * @generated from field: string image_url = 7;
-   */
-  imageUrl: string;
-
-  /**
-   * Difficulty - example attribute
-   *
-   * @generated from field: string difficulty = 8;
-   */
-  difficulty: string;
-};
-
-/**
- * Describes the message weewar.v1.GameInstance.
- * Use `create(GameInstanceSchema)` to create a new message.
- */
-export const GameInstanceSchema: GenMessage<GameInstance> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 4);
-
-/**
  * @generated from message weewar.v1.User
  */
 export type User = Message<"weewar.v1.User"> & {
@@ -353,5 +289,5 @@ export type User = Message<"weewar.v1.User"> & {
  * Use `create(UserSchema)` to create a new message.
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 5);
+  messageDesc(file_weewar_v1_models, 4);
 

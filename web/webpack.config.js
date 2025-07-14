@@ -15,7 +15,6 @@ const components = [
   ["HomePage", 0, "ts"],
   ["LoginPage", 0, "ts"],
   // ["AppItemListingPage", 0, "ts"],
-  ["GameInstanceDetailsPage", 0, "ts"],
   ["GameDetailsPage", 0, "ts"],
   ["MapDetailsPage", 0, "ts"],
 ];

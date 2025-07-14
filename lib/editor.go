@@ -77,8 +77,8 @@ func (e *MapEditor) NewMap(rows, cols int) error {
 	// The snapshot will be taken on the first edit operation
 	e.clearHistory()
 	
-	// Auto-render the new map
-	e.renderFullMap()
+	// Don't auto-render here - let the world-renderer handle it for performance
+	// The WASM layer will call the proper rendering after map creation
 	
 	return nil
 }
@@ -538,10 +538,8 @@ func (e *MapEditor) SetCanvas(canvasID string, width, height int) error {
 	e.canvasWidth = width
 	e.canvasHeight = height
 	
-	// Render current map if available
-	if e.currentMap != nil {
-		e.renderFullMap()
-	}
+	// Don't auto-render here - let the world-renderer handle it for performance
+	// The WASM layer will call the proper rendering when needed
 	
 	return nil
 }

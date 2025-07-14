@@ -68,26 +68,36 @@
                     <!-- Terrain Palette -->
                     <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🎨 Terrain Palette</h3>
-                        <div class="grid grid-cols-1 gap-2">
-                            <button class="terrain-button px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700" 
-                                    data-terrain="1">
-                                🌱 Grass
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                                    data-terrain="0" title="Unknown">
+                                <div class="text-lg">❓</div>
+                                <div class="text-xs">Unknown</div>
                             </button>
-                            <button class="terrain-button px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700" 
-                                    data-terrain="2">
-                                🏜️ Desert
+                            <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                                    data-terrain="1" title="Grass">
+                                <div class="text-lg">🌱</div>
+                                <div class="text-xs">Grass</div>
                             </button>
-                            <button class="terrain-button px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700" 
-                                    data-terrain="3">
-                                🌊 Water
+                            <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                                    data-terrain="2" title="Desert">
+                                <div class="text-lg">🏜️</div>
+                                <div class="text-xs">Desert</div>
                             </button>
-                            <button class="terrain-button px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700" 
-                                    data-terrain="4">
-                                ⛰️ Mountain
+                            <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                                    data-terrain="3" title="Water">
+                                <div class="text-lg">🌊</div>
+                                <div class="text-xs">Water</div>
                             </button>
-                            <button class="terrain-button px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700" 
-                                    data-terrain="5">
-                                🗿 Rock
+                            <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                                    data-terrain="4" title="Mountain">
+                                <div class="text-lg">⛰️</div>
+                                <div class="text-xs">Mountain</div>
+                            </button>
+                            <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                                    data-terrain="5" title="Rock">
+                                <div class="text-lg">🗿</div>
+                                <div class="text-xs">Rock</div>
                             </button>
                         </div>
                     </div>
@@ -180,29 +190,7 @@
 
             <!-- Right Sidebar: Advanced Tools -->
             <div class="w-64 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
-                <div class="p-4 space-y-6">
-                    <!-- Rendering Options -->
-                    <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🎨 Rendering</h3>
-                        <div class="space-y-2">
-                            <button data-action="render-map" data-width="400" data-height="300" class="w-full px-3 py-2 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">Render Small</button>
-                            <button data-action="render-map" data-width="600" data-height="450" class="w-full px-3 py-2 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">Render Medium</button>
-                            <button data-action="render-map" data-width="800" data-height="600" class="w-full px-3 py-2 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700">Render Large</button>
-                            <button data-action="download-image" class="w-full px-3 py-2 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">💾 Download PNG</button>
-                        </div>
-                    </div>
-
-                    <!-- Export Options -->
-                    <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🎮 Export Options</h3>
-                        <div class="space-y-2">
-                            <button data-action="export-game" data-players="2" class="w-full px-3 py-2 text-xs bg-orange-600 text-white rounded hover:bg-orange-700">Export 2P Game</button>
-                            <button data-action="export-game" data-players="3" class="w-full px-3 py-2 text-xs bg-orange-600 text-white rounded hover:bg-orange-700">Export 3P Game</button>
-                            <button data-action="export-game" data-players="4" class="w-full px-3 py-2 text-xs bg-orange-600 text-white rounded hover:bg-orange-700">Export 4P Game</button>
-                            <button data-action="download-game-data" class="w-full px-3 py-2 text-xs bg-gray-600 text-white rounded hover:bg-gray-700">💾 Download Game</button>
-                        </div>
-                    </div>
-
+                <div class="p-4">
                     <!-- Advanced Tools -->
                     <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                         <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🔧 Advanced Tools</h3>

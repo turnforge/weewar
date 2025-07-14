@@ -30,9 +30,10 @@ type LayeredRenderer struct {
 	batchInterval time.Duration
 	renderPending bool
 
-	// Tile rendering cache
-	tileSize  float64
-	hexRadius float64
+	// Tile rendering parameters (should match game.go rendering)
+	tileWidth  float64
+	tileHeight float64
+	yIncrement float64
 
 	// Asset cache (terrain and unit images)
 	terrainSprites map[int]image.Image    // Cached terrain images
@@ -45,8 +46,13 @@ type LayeredRenderer struct {
 	assetProvider AssetProvider
 }
 
-// NewLayeredRenderer creates a new layered renderer for the given canvas
+// NewLayeredRenderer creates a new layered renderer with default tile dimensions
 func NewLayeredRenderer(canvasID string, width, height int) (*LayeredRenderer, error) {
+	return NewLayeredRendererWithTileSize(canvasID, width, height, 60.0, 52.0, 39.0)
+}
+
+// NewLayeredRendererWithTileSize creates a new layered renderer with specified tile dimensions
+func NewLayeredRendererWithTileSize(canvasID string, width, height int, tileWidth, tileHeight, yIncrement float64) (*LayeredRenderer, error) {
 	// Create WASM buffers for each layer instead of DOM canvases
 	terrainBuffer := NewBuffer(width, height)
 	unitBuffer := NewBuffer(width, height)
@@ -71,11 +77,10 @@ func NewLayeredRenderer(canvasID string, width, height int) (*LayeredRenderer, e
 		renderPending:  false,
 		terrainSprites: make(map[int]image.Image),
 		unitSprites:    make(map[string]image.Image),
+		tileWidth:      tileWidth,
+		tileHeight:     tileHeight,
+		yIncrement:     yIncrement,
 	}
-
-	// Calculate tile size based on canvas dimensions
-	renderer.tileSize = 40.0 // Fixed tile size for prototyping
-	renderer.hexRadius = renderer.tileSize * 0.4
 
 	return renderer, nil
 }
@@ -102,12 +107,14 @@ func (r *LayeredRenderer) SetAssetProvider(provider AssetProvider) {
 	r.MarkAllUnitsDirty()
 }
 
-// SetTileSize updates the tile rendering size
-func (r *LayeredRenderer) SetTileSize(size float64) {
-	r.tileSize = size
-	r.hexRadius = size * 0.4
-	// Mark all terrain as dirty since size changed
+// SetTileDimensions updates the tile rendering dimensions
+func (r *LayeredRenderer) SetTileDimensions(tileWidth, tileHeight, yIncrement float64) {
+	r.tileWidth = tileWidth
+	r.tileHeight = tileHeight
+	r.yIncrement = yIncrement
+	// Mark all terrain as dirty since dimensions changed
 	r.MarkAllTerrainDirty()
+	r.MarkAllUnitsDirty()
 }
 
 // MarkTerrainDirty marks a specific tile as needing terrain update
@@ -322,7 +329,7 @@ func (r *LayeredRenderer) renderTerrainSprite(coord CubeCoord, tileType int, x, 
 			fmt.Printf("PANIC in drawImageToBuffer: %v\n", r)
 		}
 	}()
-	r.drawImageToBuffer(r.terrainBuffer, cachedSprite, x, y, r.tileSize)
+	r.drawImageToBuffer(r.terrainBuffer, cachedSprite, x, y, r.tileWidth, r.tileHeight)
 }
 
 // getTerrainColor returns the color for a terrain type
@@ -405,32 +412,32 @@ func (r *LayeredRenderer) blendBuffers(dst, src *Buffer) {
 }
 
 // drawImageToBuffer draws an image to a buffer with proper alpha blending
-func (r *LayeredRenderer) drawImageToBuffer(buffer *Buffer, img image.Image, x, y, size float64) {
+func (r *LayeredRenderer) drawImageToBuffer(buffer *Buffer, img image.Image, x, y, width, height float64) {
 	// Get the buffer's underlying image
 	bufferImg := buffer.GetImageData()
 
-	// Calculate destination rectangle
+	// Calculate destination rectangle (centered on x,y)
 	destRect := image.Rect(
-		int(x-size/2),
-		int(y-size/2),
-		int(x+size/2),
-		int(y+size/2),
+		int(x-width/2),
+		int(y-height/2),
+		int(x+width/2),
+		int(y+height/2),
 	)
 
-	// fmt.Printf("DrawImageToBuffer: Drawing image at (%f,%f) size %f, destRect %v, img bounds %v\n", x, y, size, destRect, img.Bounds())
+	// fmt.Printf("DrawImageToBuffer: Drawing image at (%f,%f) size %fx%f, destRect %v, img bounds %v\n", x, y, width, height, destRect, img.Bounds())
 
 	// Resize source image to match destination size if needed
 	srcBounds := img.Bounds()
-	if srcBounds.Dx() != int(size) || srcBounds.Dy() != int(size) {
-		// fmt.Printf("Resizing image from %dx%d to %dx%d\n", srcBounds.Dx(), srcBounds.Dy(), int(size), int(size))
+	if srcBounds.Dx() != int(width) || srcBounds.Dy() != int(height) {
+		// fmt.Printf("Resizing image from %dx%d to %dx%d\n", srcBounds.Dx(), srcBounds.Dy(), int(width), int(height))
 		// Create a resized version
-		resized := image.NewRGBA(image.Rect(0, 0, int(size), int(size)))
+		resized := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
 		// Simple nearest-neighbor scaling for now
-		if int(size) > 0 && srcBounds.Dx() > 0 && srcBounds.Dy() > 0 {
-			for dy := 0; dy < int(size); dy++ {
-				for dx := 0; dx < int(size); dx++ {
-					srcX := dx * srcBounds.Dx() / int(size)
-					srcY := dy * srcBounds.Dy() / int(size)
+		if int(width) > 0 && int(height) > 0 && srcBounds.Dx() > 0 && srcBounds.Dy() > 0 {
+			for dy := 0; dy < int(height); dy++ {
+				for dx := 0; dx < int(width); dx++ {
+					srcX := dx * srcBounds.Dx() / int(width)
+					srcY := dy * srcBounds.Dy() / int(height)
 					resized.Set(dx, dy, img.At(srcBounds.Min.X+srcX, srcBounds.Min.Y+srcY))
 				}
 			}
@@ -452,17 +459,19 @@ func (r *LayeredRenderer) drawSimpleHexToBuffer(buffer *Buffer, x, y float64, co
 	// Get the buffer's underlying image
 	bufferImg := buffer.GetImageData()
 
-	// Draw a simple filled circle as a placeholder for hexagon
-	// (For proper hexagon, we'd need to implement polygon fill)
-	radius := int(r.hexRadius)
+	// Draw a simple filled ellipse as a placeholder for hexagon
+	// Use tile dimensions to determine the shape
+	radiusX := int(r.tileWidth / 2)
+	radiusY := int(r.tileHeight / 2)
 	centerX, centerY := int(x), int(y)
 
-	fmt.Printf("Drawing simple hex at (%d, %d) with radius %d, color %s (%d,%d,%d,%d)\n",
-		centerX, centerY, radius, colorStr, hexColor.R, hexColor.G, hexColor.B, hexColor.A)
+	fmt.Printf("Drawing simple hex at (%d, %d) with radii %dx%d, color %s (%d,%d,%d,%d)\n",
+		centerX, centerY, radiusX, radiusY, colorStr, hexColor.R, hexColor.G, hexColor.B, hexColor.A)
 
-	for dy := -radius; dy <= radius; dy++ {
-		for dx := -radius; dx <= radius; dx++ {
-			if dx*dx+dy*dy <= radius*radius {
+	for dy := -radiusY; dy <= radiusY; dy++ {
+		for dx := -radiusX; dx <= radiusX; dx++ {
+			// Ellipse equation: (x/a)² + (y/b)² <= 1
+			if float64(dx*dx)/float64(radiusX*radiusX) + float64(dy*dy)/float64(radiusY*radiusY) <= 1.0 {
 				px, py := centerX+dx, centerY+dy
 				if px >= 0 && py >= 0 && px < r.width && py < r.height {
 					// Convert our Color to color.RGBA
@@ -495,25 +504,23 @@ func (r *LayeredRenderer) parseHexColor(hexColor string) Color {
 	return Color{R: red, G: green, B: blue, A: 255}
 }
 
-// hexToPixel converts hex coordinates to pixel coordinates
+// hexToPixel converts hex coordinates to pixel coordinates using the same logic as game.go
 func (r *LayeredRenderer) hexToPixel(coord CubeCoord) (float64, float64) {
-	// Use the same conversion as the original system
+	// Use the same conversion as game.go XYForTile - convert to display coordinates first
 	row := coord.R
 	col := coord.Q + (coord.R+(coord.R&1))/2
 
-	// Calculate pixel position for hex grid - match original renderer
-	x := float64(col) * r.tileSize
-	y := float64(row) * r.tileSize * 0.75 // 3/4 vertical spacing for hex overlap
-
-	// Offset even rows for proper hex layout (matching original)
-	if row%2 == 0 {
-		x += r.tileSize * 0.5
+	// Use the exact same calculation as game.go XYForTile
+	x := float64(col)*r.tileWidth + r.tileWidth/2
+	
+	// Apply offset for alternating rows (hex grid staggering)
+	isEvenRow := (row % 2) == 0
+	// Assuming odd rows are offset (EvenRowsOffset() returns false)
+	if !isEvenRow {
+		x += r.tileWidth / 2
 	}
-
-	// Add padding to prevent clipping at edges
-	padding := r.tileSize * 0.5
-	x += padding
-	y += padding
+	
+	y := float64(row)*r.yIncrement + r.tileHeight/2
 
 	return x, y
 }
@@ -526,15 +533,17 @@ func (r *LayeredRenderer) clearHexArea(buffer *Buffer, coord CubeCoord) {
 	// Get the buffer's underlying image
 	bufferImg := buffer.GetImageData()
 
-	// Clear a circular area (approximate hex area)
-	radius := int(r.hexRadius)
+	// Clear an elliptical area (approximate hex area using tile dimensions)
+	radiusX := int(r.tileWidth / 2)
+	radiusY := int(r.tileHeight / 2)
 	centerX, centerY := int(x), int(y)
 
 	transparentColor := color.RGBA{R: 0, G: 0, B: 0, A: 0}
 
-	for dy := -radius; dy <= radius; dy++ {
-		for dx := -radius; dx <= radius; dx++ {
-			if dx*dx+dy*dy <= radius*radius {
+	for dy := -radiusY; dy <= radiusY; dy++ {
+		for dx := -radiusX; dx <= radiusX; dx++ {
+			// Ellipse equation: (x/a)² + (y/b)² <= 1
+			if float64(dx*dx)/float64(radiusX*radiusX) + float64(dy*dy)/float64(radiusY*radiusY) <= 1.0 {
 				px, py := centerX+dx, centerY+dy
 				if px >= 0 && py >= 0 && px < r.width && py < r.height {
 					bufferImg.Set(px, py, transparentColor)
@@ -570,9 +579,9 @@ func (r *LayeredRenderer) renderUnitSprite(coord CubeCoord, unit *Unit) {
 		}
 
 		// Draw the sprite to the unit buffer
-		fmt.Printf("Drawing unit sprite at position (%f, %f) with tileSize %f, sprite bounds: %v\n",
-			x, y, r.tileSize, cachedSprite.Bounds())
-		r.drawImageToBuffer(r.unitBuffer, cachedSprite, x, y, r.tileSize)
+		fmt.Printf("Drawing unit sprite at position (%f, %f) with tileDimensions %fx%f, sprite bounds: %v\n",
+			x, y, r.tileWidth, r.tileHeight, cachedSprite.Bounds())
+		r.drawImageToBuffer(r.unitBuffer, cachedSprite, x, y, r.tileWidth, r.tileHeight)
 	} else {
 		// Fallback to simple colored circle
 		fmt.Printf("Asset provider doesn't have unit asset, falling back to simple circle\n")
@@ -580,7 +589,7 @@ func (r *LayeredRenderer) renderUnitSprite(coord CubeCoord, unit *Unit) {
 	}
 }
 
-// drawSimpleUnitToBuffer draws a simple colored circle to represent a unit
+// drawSimpleUnitToBuffer draws a simple colored ellipse to represent a unit
 func (r *LayeredRenderer) drawSimpleUnitToBuffer(buffer *Buffer, x, y float64, playerID int) {
 	// Get player color
 	var unitColor Color
@@ -596,16 +605,18 @@ func (r *LayeredRenderer) drawSimpleUnitToBuffer(buffer *Buffer, x, y float64, p
 	// Get the buffer's underlying image
 	bufferImg := buffer.GetImageData()
 
-	// Draw a smaller circle for units (half the hex radius)
-	radius := int(r.hexRadius * 0.6)
+	// Draw a smaller ellipse for units (60% of tile dimensions)
+	radiusX := int(r.tileWidth * 0.3)  // 60% of half-width = 30% of full width
+	radiusY := int(r.tileHeight * 0.3) // 60% of half-height = 30% of full height
 	centerX, centerY := int(x), int(y)
 
-	fmt.Printf("Drawing simple unit circle at (%d, %d) with radius %d, player %d color (%d,%d,%d)\n",
-		centerX, centerY, radius, playerID, unitColor.R, unitColor.G, unitColor.B)
+	fmt.Printf("Drawing simple unit ellipse at (%d, %d) with radii %dx%d, player %d color (%d,%d,%d)\n",
+		centerX, centerY, radiusX, radiusY, playerID, unitColor.R, unitColor.G, unitColor.B)
 
-	for dy := -radius; dy <= radius; dy++ {
-		for dx := -radius; dx <= radius; dx++ {
-			if dx*dx+dy*dy <= radius*radius {
+	for dy := -radiusY; dy <= radiusY; dy++ {
+		for dx := -radiusX; dx <= radiusX; dx++ {
+			// Ellipse equation: (x/a)² + (y/b)² <= 1
+			if float64(dx*dx)/float64(radiusX*radiusX) + float64(dy*dy)/float64(radiusY*radiusY) <= 1.0 {
 				px, py := centerX+dx, centerY+dy
 				if px >= 0 && py >= 0 && px < r.width && py < r.height {
 					rgba := color.RGBA{R: unitColor.R, G: unitColor.G, B: unitColor.B, A: unitColor.A}

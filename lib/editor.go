@@ -63,17 +63,19 @@ func (e *MapEditor) NewMap(rows, cols int) error {
 	e.filename = ""
 	e.modified = false
 	
-	// Fill with default terrain (grass)
+	// Fill with default terrain (grass) - optimized for large maps
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
 			tile := NewTile(row, col, 1) // Grass terrain
-			e.currentMap.AddTile(tile)
+			// Use direct cube coordinate insertion for performance
+			coord := e.currentMap.DisplayToHex(row, col)
+			e.currentMap.Tiles[coord] = tile
 		}
 	}
 	
-	// Clear history and take snapshot
+	// Clear history but defer initial snapshot for performance
+	// The snapshot will be taken on the first edit operation
 	e.clearHistory()
-	e.takeSnapshot()
 	
 	// Auto-render the new map
 	e.renderFullMap()

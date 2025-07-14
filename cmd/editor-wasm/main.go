@@ -1094,12 +1094,12 @@ func blitBufferToCanvas(buffer *weewar.Buffer, canvasID string) error {
 		return fmt.Errorf("failed to get data array from ImageData")
 	}
 
-	// Convert Go image.RGBA to JavaScript Uint8ClampedArray
+	// Convert Go image.RGBA to JavaScript Uint8ClampedArray efficiently
 	// The buffer is in RGBA format, and ImageData expects RGBA format
 	pixels := imageData.Pix
-	for i := 0; i < len(pixels); i++ {
-		dataArray.SetIndex(i, pixels[i])
-	}
+	
+	// Use js.CopyBytesToJS for efficient bulk transfer instead of pixel-by-pixel
+	js.CopyBytesToJS(dataArray, pixels)
 
 	// Put the ImageData to the canvas
 	ctx.Call("putImageData", imageDataJS, 0, 0)

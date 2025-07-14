@@ -52,12 +52,11 @@
         <!-- Scrollable Canvas Container -->
         <div id="canvas-viewport" class="w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-300 dark:border-gray-600 overflow-auto">
             <!-- Map Canvas (Auto-sized by WASM) -->
-            <div id="editor-canvas-container" class="p-4 inline-block">
+            <div id="editor-canvas-container" class="min-w-full min-h-full p-4 flex items-center">
                 <canvas id="map-canvas" 
                         width="320" 
                         height="240"
-                        class="block cursor-crosshair bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600"
-                        style="margin: 20px">
+                        class="block cursor-crosshair bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 mx-auto">
                 </canvas>
             </div>
         </div>

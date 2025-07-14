@@ -498,6 +498,10 @@
                       "type": "string",
                       "format": "date-time"
                     },
+                    "creatorId": {
+                      "type": "string",
+                      "title": "User that created the map"
+                    },
                     "name": {
                       "type": "string",
                       "title": "Name if items have names"
@@ -1132,6 +1136,10 @@
         "id": {
           "type": "string",
           "title": "Unique ID for the map"
+        },
+        "creatorId": {
+          "type": "string",
+          "title": "User that created the map"
         },
         "name": {
           "type": "string",

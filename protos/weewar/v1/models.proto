@@ -78,20 +78,23 @@ message Map {
   // Unique ID for the map
   string id = 3;
 
+  // User that created the map
+  string creator_id = 4;
+
   // Name if items have names
-  string name = 4;
+  string name = 5;
 
   // Description if map has a description
-  string description = 5;
+  string description = 6;
 
   // Some tags
-  repeated string tags = 6;
+  repeated string tags = 7;
 
   // A possible image url
-  string image_url = 7;
+  string image_url = 8;
 
   // Difficulty - example attribute
-  string difficulty = 8;
+  string difficulty = 9;
 }
 
 message User {

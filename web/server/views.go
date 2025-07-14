@@ -47,9 +47,6 @@ type View interface {
 type RootViewsHandler struct {
 	mux     *http.ServeMux
 	Context *ViewContext
-
-	GamesHandler *GamesHandler
-	MapsHandler  *MapsHandler
 }
 
 func NewRootViewsHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *RootViewsHandler {
@@ -96,9 +93,6 @@ func NewRootViewsHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *Roo
 		ClientMgr:      clients,
 		Templates:      templates,
 	}
-
-	out.GamesHandler = NewGamesHandler(out.Context)
-	out.MapsHandler = NewMapsHandler(out.Context)
 
 	// setup routes
 	out.setupRoutes()
@@ -168,8 +162,8 @@ func (n *RootViewsHandler) setupRoutes() {
 	n.mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir(STATIC_FOLDER))))
 
 	// Then seutp your "resource" specific endpoints
-	n.mux.Handle("/games/", http.StripPrefix("/games", n.GamesHandler.Handler()))
-	n.mux.Handle("/maps/", http.StripPrefix("/maps", n.MapsHandler.Handler()))
+	n.mux.Handle("/games/", http.StripPrefix("/games", n.setupGamesMux()))
+	n.mux.Handle("/maps/", http.StripPrefix("/maps", n.setupMapsMux()))
 
 	n.mux.HandleFunc("/about", n.ViewRenderer(Copier(&GenericPage{}), "AboutPage"))
 	n.mux.HandleFunc("/contact", n.ViewRenderer(Copier(&GenericPage{}), "ContactUsPage"))

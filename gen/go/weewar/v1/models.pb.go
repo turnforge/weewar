@@ -281,16 +281,18 @@ type Map struct {
 	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	// Unique ID for the map
 	Id string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
+	// User that created the map
+	CreatorId string `protobuf:"bytes,4,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
 	// Name if items have names
-	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
 	// Description if map has a description
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	// Some tags
-	Tags []string `protobuf:"bytes,6,rep,name=tags,proto3" json:"tags,omitempty"`
+	Tags []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
 	// A possible image url
-	ImageUrl string `protobuf:"bytes,7,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	ImageUrl string `protobuf:"bytes,8,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
 	// Difficulty - example attribute
-	Difficulty    string `protobuf:"bytes,8,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	Difficulty    string `protobuf:"bytes,9,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -342,6 +344,13 @@ func (x *Map) GetUpdatedAt() *timestamppb.Timestamp {
 func (x *Map) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *Map) GetCreatorId() string {
+	if x != nil {
+		return x.CreatorId
 	}
 	return ""
 }
@@ -515,19 +524,21 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1e\n" +
 	"\n" +
 	"difficulty\x18\b \x01(\tR\n" +
-	"difficulty\"\x92\x02\n" +
+	"difficulty\"\xb1\x02\n" +
 	"\x03Map\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n" +
-	"\x02id\x18\x03 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04tags\x18\x06 \x03(\tR\x04tags\x12\x1b\n" +
-	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1e\n" +
+	"\x02id\x18\x03 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
-	"difficulty\x18\b \x01(\tR\n" +
+	"creator_id\x18\x04 \x01(\tR\tcreatorId\x12\x12\n" +
+	"\x04name\x18\x05 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04tags\x18\a \x03(\tR\x04tags\x12\x1b\n" +
+	"\timage_url\x18\b \x01(\tR\bimageUrl\x12\x1e\n" +
+	"\n" +
+	"difficulty\x18\t \x01(\tR\n" +
 	"difficulty\"\x93\x02\n" +
 	"\x04User\x129\n" +
 	"\n" +

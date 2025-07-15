@@ -455,6 +455,70 @@ func (m *Map) RemoveTopRows(n int) error {
 	return nil
 }
 
+// AddRightCols adds n columns to the right of the map, adjusting bounds
+func (m *Map) AddRightCols(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Increase maxQ to expand rightward
+	m.maxQ += n
+	
+	// Origin position remains unchanged when adding to the right
+	return nil
+}
+
+// RemoveRightCols removes n columns from the right of the map, adjusting bounds
+func (m *Map) RemoveRightCols(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Check if we have enough columns to remove
+	currentCols := m.maxQ - m.minQ + 1
+	if n >= currentCols {
+		return fmt.Errorf("cannot remove %d columns from map with only %d columns", n, currentCols)
+	}
+	
+	// Decrease maxQ to shrink from right
+	m.maxQ -= n
+	
+	// Origin position remains unchanged when removing from the right
+	return nil
+}
+
+// AddBottomRows adds n rows to the bottom of the map, adjusting bounds
+func (m *Map) AddBottomRows(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Increase maxR to expand downward
+	m.maxR += n
+	
+	// Origin position remains unchanged when adding to the bottom
+	return nil
+}
+
+// RemoveBottomRows removes n rows from the bottom of the map, adjusting bounds
+func (m *Map) RemoveBottomRows(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Check if we have enough rows to remove
+	currentRows := m.maxR - m.minR + 1
+	if n >= currentRows {
+		return fmt.Errorf("cannot remove %d rows from map with only %d rows", n, currentRows)
+	}
+	
+	// Decrease maxR to shrink from bottom
+	m.maxR -= n
+	
+	// Origin position remains unchanged when removing from the bottom
+	return nil
+}
+
 // =============================================================================
 // Unified Game Implementation
 // =============================================================================

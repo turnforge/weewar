@@ -74,12 +74,12 @@ func (br *BaseRenderer) GetPlayerColor(playerID int) Color {
 // GetTerrainColor returns the color for a given terrain type
 func (br *BaseRenderer) GetTerrainColor(terrainType int) Color {
 	terrainColors := []Color{
-		{R: 64, G: 64, B: 64, A: 255},     // 0 - Unknown (dark gray)
-		{R: 34, G: 139, B: 34, A: 255},    // 1 - Grass (forest green)
-		{R: 238, G: 203, B: 173, A: 255},  // 2 - Desert (sandy brown)
-		{R: 65, G: 105, B: 225, A: 255},   // 3 - Water (royal blue)
-		{R: 139, G: 69, B: 19, A: 255},    // 4 - Mountain (saddle brown)
-		{R: 105, G: 105, B: 105, A: 255},  // 5 - Rock (dim gray)
+		{R: 64, G: 64, B: 64, A: 255},    // 0 - Unknown (dark gray)
+		{R: 34, G: 139, B: 34, A: 255},   // 1 - Grass (forest green)
+		{R: 238, G: 203, B: 173, A: 255}, // 2 - Desert (sandy brown)
+		{R: 65, G: 105, B: 225, A: 255},  // 3 - Water (royal blue)
+		{R: 139, G: 69, B: 19, A: 255},   // 4 - Mountain (saddle brown)
+		{R: 105, G: 105, B: 105, A: 255}, // 5 - Rock (dim gray)
 	}
 
 	if terrainType >= 0 && terrainType < len(terrainColors) {
@@ -96,15 +96,15 @@ func (br *BaseRenderer) createHexagonPath(centerX, centerY, tileWidth, tileHeigh
 	// For pointy-topped hexagons, use tileWidth as the radius
 	radius := tileWidth / 2.0
 	points := make([]Point, 6)
-	
+
 	// Generate 6 points for a pointy-topped hexagon
 	for i := 0; i < 6; i++ {
 		angle := float64(i) * 60.0 * 3.14159 / 180.0 // 60 degrees in radians
-		x := centerX + radius * cosApprox(angle)
-		y := centerY + radius * sinApprox(angle)
+		x := centerX + radius*cosApprox(angle)
+		y := centerY + radius*sinApprox(angle)
 		points[i] = Point{X: x, Y: y}
 	}
-	
+
 	return points
 }
 
@@ -194,7 +194,7 @@ func (br *BufferRenderer) RenderWorld(world *World, viewState *ViewState, drawab
 
 	// Render all layers directly using World data
 	br.RenderTerrain(world, viewState, drawable, options)
-	
+
 	// Render highlights if viewState is provided
 	if viewState != nil {
 		br.RenderHighlights(world, viewState, drawable, options)
@@ -220,16 +220,16 @@ func (br *BufferRenderer) RenderTerrain(world *World, viewState *ViewState, draw
 
 		// Use Map's CenterXYForTile method (Map handles origin internally)
 		x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
-		
+
 		// Get terrain color based on tile type
 		terrainColor := br.GetTerrainColor(tile.TileType)
-		
+
 		// Create hex shape for the tile
 		hexPath := br.createHexagonPath(x, y, options.TileWidth, options.TileHeight)
-		
+
 		// Fill the hex with terrain color
 		drawable.FillPath(hexPath, terrainColor)
-		
+
 		// Add border if grid is enabled
 		if options.ShowGrid {
 			borderColor := Color{R: 64, G: 64, B: 64, A: 255} // Dark gray border
@@ -258,7 +258,7 @@ func (br *BufferRenderer) RenderUnitsWithAssets(world *World, viewState *ViewSta
 			}
 
 			// Use Map's CenterXYForTile method with the Map's origin
-			x, y := world.Map.CenterXYForTile(unit.Coord, options.TileWidth, options.TileHeight, options.YIncrement, world.Map.OriginX, world.Map.OriginY)
+			x, y := world.Map.CenterXYForTile(unit.Coord, options.TileWidth, options.TileHeight, options.YIncrement)
 
 			// Try to load real unit asset first if AssetProvider is available
 			if assetProvider != nil && assetProvider.HasUnitAsset(unit.UnitType, unit.PlayerID) {
@@ -343,7 +343,7 @@ func (br *BufferRenderer) RenderUI(world *World, viewState *ViewState, drawable 
 			}
 
 			// Use Map's CenterXYForTile method with the Map's origin
-			x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement, world.Map.OriginX, world.Map.OriginY)
+			x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
 
 			// Draw coordinate text
 			coordText := formatCoordinate(coord)

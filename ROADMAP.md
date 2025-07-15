@@ -119,6 +119,14 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [ ] Update all test files to use cube coordinate APIs
 - [ ] Add World state change notifications
 
+### Latest Progress ✅
+- [x] Implemented complete dynamic map resizing API with normalized coordinates
+- [x] Added AddLeftCols(n)/RemoveLeftCols(n) methods with proper origin adjustment
+- [x] Added AddTopRows(n)/RemoveTopRows(n) methods with hex geometry spacing
+- [x] Added AddRightCols(n)/RemoveRightCols(n) and AddBottomRows(n)/RemoveBottomRows(n) methods
+- [x] Origin coordinates now use normalized tile width units for consistency
+- [x] Comprehensive bounds validation for all removal operations
+
 ### Canvas Rendering Completed ✅
 - [x] Updated CanvasRenderer to work directly with World data using cube coordinates
 - [x] Eliminated CreateGameForRendering approach in WASM canvas rendering

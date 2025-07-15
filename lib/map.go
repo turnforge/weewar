@@ -2,6 +2,7 @@ package weewar
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 )
 
@@ -45,14 +46,16 @@ type Map struct {
 	minR int `json:"minR"` // Minimum R coordinate (inclusive)
 	maxR int `json:"maxR"` // Maximum R coordinate (inclusive)
 
-	// Where X/Y of the Origin tile (Q = R = 0) are.
+	// Where X/Y of the Origin tile (Q = R = 0) are, in normalized tile units.
+	// OriginX = 5 means the origin tile is 5 tile widths to the right
+	// OriginY = 3 means the origin tile is 3 tile heights down
 	// Initially it would be 0,0 (top left of the screen)
 	// But as we add/remove rows and columns from the 4 sides we could extend
 	// the map "viewport" in each of the directions.  Which means the origin
 	// tile's X/Y would change.  By tracking this we can find the coord location
 	// of all other tiles.
-	OriginX float64
-	OriginY float64
+	OriginX float64 // In tile width units
+	OriginY float64 // In tile height units
 
 	// Cube coordinate storage - primary data structure
 	Tiles map[CubeCoord]*Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
@@ -258,7 +261,7 @@ func (m *Map) GetHexNeighborCoords(row, col int) [6][2]int {
 */
 
 // CenterXYForTile converts cube coordinates directly to pixel center x,y coordinates for rendering
-// originX, originY is the center point of the tile at Q=0, R=0
+// Uses normalized OriginX/OriginY (in tile units) which are then scaled by tile dimensions
 // Uses odd-r layout (odd rows offset) as our fixed, consistent layout
 // Based on formulas from redblobgames.com for pointy-topped hexagons
 func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement float64) (x, y float64) {
@@ -271,20 +274,28 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 	// y = size * 3/2 * r
 	// where size = tileWidth (center-to-center distance)
 
-	x = m.OriginX + tileWidth*1.732050808*(q+r/2.0) // 1.732050808 ≈ sqrt(3)
-	y = m.OriginY + tileWidth*3.0/2.0*r
+	// Convert normalized origin to pixel coordinates
+	originPixelX := m.OriginX * tileWidth
+	originPixelY := m.OriginY * tileHeight
+
+	x = originPixelX + tileWidth*1.732050808*(q+r/2.0) // 1.732050808 ≈ sqrt(3)
+	y = originPixelY + tileWidth*3.0/2.0*r
 
 	return x, y
 }
 
 // XYToQR converts screen coordinates to cube coordinates for the map
 // Given x,y screen coordinates and tile size properties, returns the CubeCoord
-// Uses the Map's OriginX/OriginY for proper coordinate translation
+// Uses the Map's normalized OriginX/OriginY for proper coordinate translation
 // Based on formulas from redblobgames.com for pointy-topped hexagons with odd-r layout
 func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord {
+	// Convert normalized origin to pixel coordinates
+	originPixelX := m.OriginX * tileWidth
+	originPixelY := m.OriginY * tileHeight
+	
 	// Translate screen coordinates to hex coordinate space by removing origin offset
-	hexX := x - m.OriginX
-	hexY := y - m.OriginY
+	hexX := x - originPixelX
+	hexY := y - originPixelY
 
 	// For pointy-topped hexagons, convert pixel coordinates to fractional hex coordinates
 	// Using inverse of the hex-to-pixel conversion formulas:
@@ -360,6 +371,46 @@ func (m *Map) getMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, min
 	}
 
 	return minX, minY, maxX, maxY
+}
+
+// AddLeftCols adds n columns to the left of the map, adjusting bounds and origin
+func (m *Map) AddLeftCols(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Decrease minQ to expand leftward
+	m.minQ -= n
+	
+	// Adjust OriginX to maintain existing tile positions
+	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
+	// Since OriginX is in normalized tile units, we add n directly
+	m.OriginX += float64(n)
+	
+	return nil
+}
+
+// RemoveLeftCols removes n columns from the left of the map, adjusting bounds and origin
+func (m *Map) RemoveLeftCols(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Check if we have enough columns to remove
+	currentCols := m.maxQ - m.minQ + 1
+	if n >= currentCols {
+		return fmt.Errorf("cannot remove %d columns from map with only %d columns", n, currentCols)
+	}
+	
+	// Increase minQ to shrink from left
+	m.minQ += n
+	
+	// Adjust OriginX to maintain existing tile positions
+	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
+	// Since OriginX is in normalized tile units, we subtract n directly
+	m.OriginX -= float64(n)
+	
+	return nil
 }
 
 // =============================================================================

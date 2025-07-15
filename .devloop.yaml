@@ -20,6 +20,7 @@ rules:
           - "go.sum"
     commands:
       - "echo '🔧 Building WeeWar Binary...'"
+      - "make wasm"
       - "make binlocal"
       # - "go test -short ./..."
       - "echo '✅ Backend build and tests complete'"

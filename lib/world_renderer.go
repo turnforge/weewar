@@ -48,46 +48,9 @@ type WorldRenderOptions struct {
 // BaseRenderer - Common Hex Grid Logic
 // =============================================================================
 
-// BaseRenderer provides common rendering utilities that delegate to proven Game methods.
-// This ensures we use the existing working hex coordinate logic from Game class.
+// BaseRenderer provides common rendering utilities that work directly with World data.
+// This ensures proper separation of concerns between Game (flow control) and World (pure state).
 type BaseRenderer struct{}
-
-// CreateGameForRendering creates a temporary Game instance to access proven rendering methods
-// If an original game is provided, it preserves the AssetManager for proper asset-based rendering
-func (br *BaseRenderer) CreateGameForRendering(world *World) *Game {
-	return br.CreateGameForRenderingWithAssets(world, nil)
-}
-
-// CreateGameForRenderingWithAssets creates a Game instance and preserves AssetManager from original
-func (br *BaseRenderer) CreateGameForRenderingWithAssets(world *World, originalGame *Game) *Game {
-	// Create a temporary Game with the World's data for rendering purposes
-	game := &Game{
-		Map:           world.Map,
-		PlayerCount:   world.PlayerCount,
-		CurrentPlayer: world.CurrentPlayer,
-		TurnCounter:   world.TurnNumber,
-		Seed:          int64(world.Seed),
-	}
-
-	// Preserve AssetProvider from original game if available
-	if originalGame != nil {
-		game.SetAssetProvider(originalGame.GetAssetProvider())
-	}
-
-	// Convert World units back to Game format (2D array)
-	game.Units = make([][]*Unit, world.PlayerCount)
-	for i := 0; i < world.PlayerCount; i++ {
-		game.Units[i] = make([]*Unit, 0)
-	}
-
-	for _, unit := range world.Units {
-		if unit.PlayerID >= 0 && unit.PlayerID < world.PlayerCount {
-			game.Units[unit.PlayerID] = append(game.Units[unit.PlayerID], unit)
-		}
-	}
-
-	return game
-}
 
 // GetPlayerColor returns the color for a given player ID
 func (br *BaseRenderer) GetPlayerColor(playerID int) Color {
@@ -106,6 +69,43 @@ func (br *BaseRenderer) GetPlayerColor(playerID int) Color {
 
 	// Default color for invalid player IDs
 	return Color{R: 128, G: 128, B: 128, A: 255}
+}
+
+// GetTerrainColor returns the color for a given terrain type
+func (br *BaseRenderer) GetTerrainColor(terrainType int) Color {
+	terrainColors := []Color{
+		{R: 64, G: 64, B: 64, A: 255},     // 0 - Unknown (dark gray)
+		{R: 34, G: 139, B: 34, A: 255},    // 1 - Grass (forest green)
+		{R: 238, G: 203, B: 173, A: 255},  // 2 - Desert (sandy brown)
+		{R: 65, G: 105, B: 225, A: 255},   // 3 - Water (royal blue)
+		{R: 139, G: 69, B: 19, A: 255},    // 4 - Mountain (saddle brown)
+		{R: 105, G: 105, B: 105, A: 255},  // 5 - Rock (dim gray)
+	}
+
+	if terrainType >= 0 && terrainType < len(terrainColors) {
+		return terrainColors[terrainType]
+	}
+
+	// Default to unknown terrain color
+	return terrainColors[0]
+}
+
+// createHexagonPath creates a hexagon path for rendering
+func (br *BaseRenderer) createHexagonPath(centerX, centerY, tileWidth, tileHeight float64) []Point {
+	// Create a hexagon using the tile dimensions
+	// For pointy-topped hexagons, use tileWidth as the radius
+	radius := tileWidth / 2.0
+	points := make([]Point, 6)
+	
+	// Generate 6 points for a pointy-topped hexagon
+	for i := 0; i < 6; i++ {
+		angle := float64(i) * 60.0 * 3.14159 / 180.0 // 60 degrees in radians
+		x := centerX + radius * cosApprox(angle)
+		y := centerY + radius * sinApprox(angle)
+		points[i] = Point{X: x, Y: y}
+	}
+	
+	return points
 }
 
 // CalculateRenderOptions creates appropriate render options based on canvas size and map dimensions
@@ -187,150 +187,150 @@ func NewBufferRenderer() *BufferRenderer {
 	return &BufferRenderer{}
 }
 
-// RenderWorld renders the complete world state to a Buffer using proven Game rendering methods
+// RenderWorld renders the complete world state to a drawable surface
 func (br *BufferRenderer) RenderWorld(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions) {
-	br.RenderWorldWithAssets(world, viewState, drawable, options, nil)
-}
-
-// RenderWorldWithAssets renders the complete world state with AssetManager support
-func (br *BufferRenderer) RenderWorldWithAssets(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions, originalGame *Game) {
 	// Clear the drawable surface
 	drawable.Clear()
 
-	// Create temporary Game instance to access proven rendering methods with AssetManager
-	game := br.CreateGameForRenderingWithAssets(world, originalGame)
-
-	// Use the Game's proven rendering methods directly!
-	game.RenderTerrainTo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
-
+	// Render all layers directly using World data
+	br.RenderTerrain(world, viewState, drawable, options)
+	
 	// Render highlights if viewState is provided
 	if viewState != nil {
 		br.RenderHighlights(world, viewState, drawable, options)
 	}
 
-	// Use Game's generic methods that work with any Drawable (SAME for all platforms)
-	game.RenderUnitsTo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
+	br.RenderUnits(world, viewState, drawable, options)
 	if options.ShowUI {
-		game.RenderUITo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
+		br.RenderUI(world, viewState, drawable, options)
 	}
 }
 
-// RenderTerrain renders the terrain layer using Game's proven methods with asset support
+// RenderTerrain renders the terrain layer directly using World data
 func (br *BufferRenderer) RenderTerrain(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions) {
 	if world == nil || world.Map == nil {
 		return
 	}
 
-	// Create temporary Game instance and use its proven terrain rendering
-	game := br.CreateGameForRendering(world)
-	game.RenderTerrainTo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
-}
+	// Render each terrain tile directly using Map's coordinate system
+	for coord, tile := range world.Map.Tiles {
+		if tile == nil {
+			continue
+		}
 
-// RenderTerrainWithAssets renders terrain using AssetManager when available
-func (br *BufferRenderer) RenderTerrainWithAssets(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions, originalGame *Game) {
-	if world == nil || world.Map == nil {
-		return
+		// Use Map's CenterXYForTile method (Map handles origin internally)
+		x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
+		
+		// Get terrain color based on tile type
+		terrainColor := br.GetTerrainColor(tile.TileType)
+		
+		// Create hex shape for the tile
+		hexPath := br.createHexagonPath(x, y, options.TileWidth, options.TileHeight)
+		
+		// Fill the hex with terrain color
+		drawable.FillPath(hexPath, terrainColor)
+		
+		// Add border if grid is enabled
+		if options.ShowGrid {
+			borderColor := Color{R: 64, G: 64, B: 64, A: 255} // Dark gray border
+			strokeProps := StrokeProperties{Width: 1.0, LineCap: "round", LineJoin: "round"}
+			drawable.StrokePath(hexPath, borderColor, strokeProps)
+		}
 	}
-
-	// Create temporary Game instance with preserved AssetManager
-	game := br.CreateGameForRenderingWithAssets(world, originalGame)
-	game.RenderTerrainTo(drawable, options.TileWidth, options.TileHeight, options.YIncrement)
 }
 
-// RenderUnits renders the units layer using Game's proven coordinate methods with asset support
+// RenderUnits renders the units layer directly using World data with asset support
 func (br *BufferRenderer) RenderUnits(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions) {
 	br.RenderUnitsWithAssets(world, viewState, drawable, options, nil)
 }
 
 // RenderUnitsWithAssets renders units using AssetManager when available, falling back to simple shapes
-func (br *BufferRenderer) RenderUnitsWithAssets(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions, originalGame *Game) {
+func (br *BufferRenderer) RenderUnitsWithAssets(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions, assetProvider AssetProvider) {
 	if world == nil {
 		return
 	}
 
-	// Create temporary Game instance to access proven coordinate methods and AssetManager
-	game := br.CreateGameForRenderingWithAssets(world, originalGame)
-
-	for _, unit := range world.Units {
-		if unit == nil {
-			continue
-		}
-
-		// Use Game's proven XYForTile method for coordinate calculation
-		x, y := game.Map.XYForTile(unit.Row, unit.Col, options.TileWidth, options.TileHeight, options.YIncrement)
-
-		// Try to load real unit asset first (like the original Game.RenderUnits method)
-		assetProvider := game.GetAssetProvider()
-		if assetProvider != nil && assetProvider.HasUnitAsset(unit.UnitType, unit.PlayerID) {
-			if unitImg, err := assetProvider.GetUnitImage(unit.UnitType, unit.PlayerID); err == nil {
-				// Render real unit sprite (XYForTile already returns centered coordinates)
-				drawable.DrawImage(x-options.TileWidth/2, y-options.TileHeight/2, options.TileWidth, options.TileHeight, unitImg)
-
-				// Add health indicator if unit is damaged
-				if unit.AvailableHealth < 100 {
-					br.renderHealthBar(drawable, x, y, options.TileWidth, options.TileHeight, unit.AvailableHealth, 100)
-				}
+	// Render units for each player
+	for _, playerUnits := range world.UnitsByPlayer {
+		for _, unit := range playerUnits {
+			if unit == nil {
 				continue
 			}
+
+			// Use Map's CenterXYForTile method with the Map's origin
+			x, y := world.Map.CenterXYForTile(unit.Coord, options.TileWidth, options.TileHeight, options.YIncrement, world.Map.OriginX, world.Map.OriginY)
+
+			// Try to load real unit asset first if AssetProvider is available
+			if assetProvider != nil && assetProvider.HasUnitAsset(unit.UnitType, unit.PlayerID) {
+				if unitImg, err := assetProvider.GetUnitImage(unit.UnitType, unit.PlayerID); err == nil {
+					// Render real unit sprite (CenterXYForTile already returns centered coordinates)
+					drawable.DrawImage(x-options.TileWidth/2, y-options.TileHeight/2, options.TileWidth, options.TileHeight, unitImg)
+
+					// Add health indicator if unit is damaged
+					if unit.AvailableHealth < 100 {
+						br.renderHealthBar(drawable, x, y, options.TileWidth, options.TileHeight, unit.AvailableHealth, 100)
+					}
+					continue
+				}
+			}
+
+			// Fallback to simple colored circle if no asset available
+			unitColor := br.GetPlayerColor(unit.PlayerID)
+
+			// Draw unit as a circle centered at the tile position
+			radius := (options.TileWidth + options.TileHeight) / 8 // Smaller than hex
+			circlePoints := br.createCirclePoints(x, y, radius, 12)
+
+			// Fill unit circle
+			drawable.FillPath(circlePoints, unitColor)
+
+			// Draw unit border
+			borderColor := Color{R: 0, G: 0, B: 0, A: 255}
+			strokeProps := StrokeProperties{Width: 2.0, LineCap: "round", LineJoin: "round"}
+			drawable.StrokePath(circlePoints, borderColor, strokeProps)
+
+			// Add health indicator if unit is damaged
+			if unit.AvailableHealth < 100 {
+				br.renderHealthBar(drawable, x, y, options.TileWidth, options.TileHeight, unit.AvailableHealth, 100)
+			}
 		}
-
-		// Fallback to simple colored circle if no asset available
-		unitColor := br.GetPlayerColor(unit.PlayerID)
-
-		// Draw unit as a circle centered at the tile position
-		radius := (options.TileWidth + options.TileHeight) / 8 // Smaller than hex
-		circlePoints := br.createCirclePoints(x, y, radius, 12)
-
-		// Fill unit circle
-		drawable.FillPath(circlePoints, unitColor)
-
-		// Draw unit border
-		borderColor := Color{R: 0, G: 0, B: 0, A: 255}
-		strokeProps := StrokeProperties{Width: 2.0, LineCap: "round", LineJoin: "round"}
-		drawable.StrokePath(circlePoints, borderColor, strokeProps)
 	}
 }
 
-// RenderHighlights renders selection highlights and movement indicators using Game's proven hex methods
+// RenderHighlights renders selection highlights and movement indicators directly using World data
 func (br *BufferRenderer) RenderHighlights(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions) {
 	if viewState == nil || world == nil || world.Map == nil {
 		return
 	}
 
-	// Create temporary Game instance to access proven coordinate and hex methods
-	game := br.CreateGameForRendering(world)
-
 	// Highlight movable tiles (green overlay)
-	for _, pos := range viewState.MovableTiles {
-		// Use Game's proven XYForTile method for coordinate calculation
-		x, y := game.Map.XYForTile(pos.Row, pos.Col, options.TileWidth, options.TileHeight, options.YIncrement)
+	for _, coord := range viewState.MovableTiles {
+		// Use Map's CenterXYForTile method (Map handles origin internally)
+		x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
 
-		// Use Game's proven createHexagonPath method
-		hexPath := game.createHexagonPath(x, y, options.TileWidth, options.TileHeight, options.YIncrement)
+		// Create hex shape for highlighting
+		hexPath := br.createHexagonPath(x, y, options.TileWidth, options.TileHeight)
 		highlightColor := Color{R: 0, G: 255, B: 0, A: 64} // Transparent green
 		drawable.FillPath(hexPath, highlightColor)
 	}
 
 	// Highlight attackable tiles (red overlay)
-	for _, pos := range viewState.AttackableTiles {
-		// Use Game's proven XYForTile method for coordinate calculation
-		x, y := game.Map.XYForTile(pos.Row, pos.Col, options.TileWidth, options.TileHeight, options.YIncrement)
+	for _, coord := range viewState.AttackableTiles {
+		// Use Map's CenterXYForTile method (Map handles origin internally)
+		x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
 
-		// Use Game's proven createHexagonPath method
-		hexPath := game.createHexagonPath(x, y, options.TileWidth, options.TileHeight, options.YIncrement)
+		// Create hex shape for highlighting
+		hexPath := br.createHexagonPath(x, y, options.TileWidth, options.TileHeight)
 		highlightColor := Color{R: 255, G: 0, B: 0, A: 64} // Transparent red
 		drawable.FillPath(hexPath, highlightColor)
 	}
 }
 
-// RenderUI renders text overlays and UI elements using Game's proven coordinate methods
+// RenderUI renders text overlays and UI elements directly using World data
 func (br *BufferRenderer) RenderUI(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions) {
 	if world == nil {
 		return
 	}
-
-	// Create temporary Game instance to access proven coordinate methods
-	game := br.CreateGameForRendering(world)
 
 	// Render coordinate labels if enabled
 	if options.ShowCoordinates && world.Map != nil {
@@ -342,9 +342,8 @@ func (br *BufferRenderer) RenderUI(world *World, viewState *ViewState, drawable 
 				continue
 			}
 
-			displayRow, displayCol := world.Map.HexToDisplay(coord)
-			// Use Game's proven XYForTile method for coordinate calculation
-			x, y := game.Map.XYForTile(displayRow, displayCol, options.TileWidth, options.TileHeight, options.YIncrement)
+			// Use Map's CenterXYForTile method with the Map's origin
+			x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement, world.Map.OriginX, world.Map.OriginY)
 
 			// Draw coordinate text
 			coordText := formatCoordinate(coord)

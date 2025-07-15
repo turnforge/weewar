@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/panyam/turnengine/games/weewar"
+	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
 // Version information
@@ -154,7 +154,7 @@ func main() {
 func createNewGame(playerCount int) (*weewar.Game, error) {
 	// Create test map
 	testMap := weewar.NewMap(8, 12, false)
-	
+
 	// Add varied terrain
 	for row := 0; row < 8; row++ {
 		for col := 0; col < 12; col++ {
@@ -166,14 +166,14 @@ func createNewGame(playerCount int) (*weewar.Game, error) {
 			} else if (row+col)%11 == 0 {
 				tileType = 4 // Some mountains
 			}
-			
+
 			tile := weewar.NewTile(row, col, tileType)
 			testMap.AddTile(tile)
 		}
 	}
-	
+
 	// Note: Neighbor connections calculated on-demand
-	
+
 	// Create game
 	seed := time.Now().UnixNano()
 	return weewar.NewGame(playerCount, testMap, seed)
@@ -185,12 +185,12 @@ func loadGameFromFile(filename string, game **weewar.Game) error {
 	if err != nil {
 		return fmt.Errorf("failed to read save file: %w", err)
 	}
-	
+
 	loadedGame, err := weewar.LoadGame(saveData)
 	if err != nil {
 		return fmt.Errorf("failed to load game: %w", err)
 	}
-	
+
 	*game = loadedGame
 	return nil
 }
@@ -198,11 +198,11 @@ func loadGameFromFile(filename string, game **weewar.Game) error {
 // showHelp displays help information
 func showHelp() {
 	fmt.Printf("WeeWar CLI v%s - Command Line Interface for WeeWar Games\n\n", Version)
-	
+
 	fmt.Println("USAGE:")
 	fmt.Println("  weewar-cli [options] [commands...]")
 	fmt.Println()
-	
+
 	fmt.Println("OPTIONS:")
 	fmt.Println("  -interactive         Start in interactive mode")
 	fmt.Println("  -new                 Create a new game")
@@ -222,7 +222,7 @@ func showHelp() {
 	fmt.Println("  -version             Show version information")
 	fmt.Println("  -help                Show this help")
 	fmt.Println()
-	
+
 	fmt.Println("GAME COMMANDS:")
 	fmt.Println("  move A1 B2           Move unit from A1 to B2")
 	fmt.Println("  attack A1 B2         Attack unit at B2 with unit at A1")
@@ -234,7 +234,7 @@ func showHelp() {
 	fmt.Println("  help [command]       Show help for specific command")
 	fmt.Println("  quit                 Exit the game")
 	fmt.Println()
-	
+
 	fmt.Println("EXAMPLES:")
 	fmt.Println("  # Start new interactive game")
 	fmt.Println("  weewar-cli -new -interactive")
@@ -251,7 +251,7 @@ func showHelp() {
 	fmt.Println("  # Execute batch commands")
 	fmt.Println("  weewar-cli -new -batch commands.txt")
 	fmt.Println()
-	
+
 	fmt.Println("BATCH FILE FORMAT:")
 	fmt.Println("  # Comments start with #")
 	fmt.Println("  move A1 B2")
@@ -260,11 +260,11 @@ func showHelp() {
 	fmt.Println("  # Another comment")
 	fmt.Println("  status")
 	fmt.Println()
-	
+
 	fmt.Println("POSITION FORMAT:")
 	fmt.Println("  Positions use chess notation: A1, B2, C3, etc.")
 	fmt.Println("  Columns are A-Z, rows are 1-99")
 	fmt.Println()
-	
+
 	fmt.Println("For more information, visit: https://github.com/panyam/turnengine")
 }

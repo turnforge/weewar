@@ -1,17 +1,33 @@
-A minimal template app for go backends that require:
+# WeeWar - Turn-Based Strategy Game
 
-## Rationale:
+A modern turn-based strategy game built with Go, featuring hexagonal grid combat, web-based map editor, and CLI gameplay.
 
-In most project the hardest part for me has been the scaffolding.  Structuring the protos, structuring the web pages, setting up the binaries.  Id have fun building the core components and id be forced to look at the web aspect and it is a huge sync - from design, to layouts, to tool selection etc.  This repo just gives a couple of blueprints I can use for 95% of my app idea use cases.  Just global search and replace a few variables and you have a working app.  You just have to start adding files in the respective places to "grow" the functionality instead of scrambling to figure out web conventions etc.  One of the biggest advantages is with vibecoding.  We can now just have a running up that can direct the agent to to query etc instead having to figure out how to even create a web seutp which each time comes up with a different result!
+## Current Status
 
-## Global Search and Replace:
+🚧 **Active Development** - Major coordinate system refactoring in progress
 
-weewar -> Your backend name, eg "MyFancyGame"
-weewar -> module name for your backend, age "myfancygame"
-AppItem -> This is one of the entities in our proto, you can add more or replace this with the name of your key entity.  Feel free to add more entities that make sense for your system
-appitem -> "Variable" names for the AppItem type in the code
+We are currently migrating from a legacy row/col coordinate system to proper cube coordinates for hexagonal grids. This provides better mathematical foundations and eliminates coordinate conversion bugs.
 
-./services/appitems_service.go - Definition of your service for appitems.  You can one one file for each entity type
+**Progress**: ~80% complete - Core systems migrated, CLI translation layer in progress
+
+See [COORD_MIGRATION.md](COORD_MIGRATION.md) for detailed progress and technical details.
+
+## Architecture Overview
+
+WeeWar is built with a clean separation of concerns:
+
+- **Core Game Logic** (`lib/`) - Pure Go game engine with hexagonal grid math
+- **Web Editor** (`web/`) - Browser-based map editor with real-time rendering
+- **CLI Interface** (`cmd/weewar-cli/`) - Command-line game client with chess notation
+- **WASM Integration** (`cmd/editor-wasm/`) - WebAssembly bindings for browser
+
+## Key Features
+
+- **Hexagonal Grid Combat** - Proper hex math with cube coordinates
+- **Interactive Map Editor** - Visual terrain editing with live preview
+- **Chess Notation CLI** - User-friendly A1, B2 position references
+- **Multi-format Rendering** - PNG export, canvas rendering, layered composition
+- **Asset Management** - Embedded and fetch-based sprite loading
 
 ## Key technologies and Stack components:
 

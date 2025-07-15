@@ -1,346 +1,190 @@
-# WeeWar Game Architecture
+# WeeWar Architecture Overview
 
-## Overview
+## Current Architecture (Post-Refactoring)
 
-The WeeWar game demonstrates a sophisticated, layered architecture that has evolved through multiple iterations. Starting with a TurnEngine framework approach, it has evolved into a unified game implementation with comprehensive interface definitions, extensive testing, and multiple frontend interfaces (CLI, PNG rendering, web). This architecture showcases modern game development patterns with strong separation of concerns, comprehensive testing, and data-driven design.
+### Core Components
 
-## Current Architecture (2024)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   WeeWar Core Game System                   │
-├─────────────────────────────────────────────────────────────┤
-│ ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐│
-│ │  Game Interface │  │  Map Interface  │  │  Unit Interface ││
-│ │                 │  │                 │  │                 ││
-│ │• GameController │  │• MapInterface   │  │• UnitInterface  ││
-│ │• Turn Management│  │• Coordinate Ops │  │• Unit Actions   ││
-│ │• Save/Load      │  │• Pathfinding    │  │• Combat System  ││
-│ │• Game State     │  │• Hex Navigation │  │• Unit Queries   ││
-│ └─────────────────┘  └─────────────────┘  └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Unified Game Struct                      │
-├─────────────────────────────────────────────────────────────┤
-│ • Implements all interfaces (GameInterface)                 │
-│ • Comprehensive state management                            │
-│ • Integrated combat, movement, and map systems             │
-│ • Real WeeWar data integration                             │
-│ • PNG rendering with sophisticated graphics                │
-│ • JSON save/load with full state persistence              │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Multiple Interfaces                      │
-├─────────────────────────────────────────────────────────────┤
-│ ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐│
-│ │  CLI Interface  │  │  PNG Renderer   │  │  Web Interface  ││
-│ │                 │  │                 │  │                 ││
-│ │• REPL Loop      │  │• Hex Rendering  │  │• HTTP Server    ││
-│ │• Chess Notation │  │• Unit Graphics  │  │• JSON API       ││
-│ │• Interactive    │  │• Map Rendering  │  │• Browser UI     ││
-│ │• Batch Mode     │  │• Auto-render    │  │• Real-time      ││
-│ └─────────────────┘  └─────────────────┘  └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Core Architecture Components
-
-### 1. Game Interface System
-**Location**: `game_interface.go`
-- **Purpose**: Defines comprehensive contracts for all game operations
-- **Design**: Interface segregation with focused responsibilities
-- **Reusability**: 100% - Clean contracts enable multiple implementations
-
-```go
-// Core interface combining all game operations
-type GameInterface interface {
-    GameController  // Game lifecycle, turns, state
-    MapInterface    // Map queries, pathfinding, coordinates
-    UnitInterface   // Unit actions, queries, management
-}
-```
-
-**Key Design Decisions:**
-- **Interface Segregation**: Separate interfaces for different concerns
-- **Comprehensive Coverage**: All game operations have defined contracts
-- **Implementation Flexibility**: Interfaces enable multiple implementations
-- **Testing Support**: Interfaces enable easy mocking and testing
-
-### 2. Unified Game Implementation
-**Location**: `game.go`
-- **Purpose**: Single struct implementing all game interfaces
-- **Design**: Comprehensive state management with integrated systems
-- **Evolution**: Replaced fragmented ECS approach with unified design
+#### 1. Game Object (`lib/game.go`)
+**Purpose**: Flow control and game logic management
+- Manages game state transitions (turns, player actions)
+- Handles game rules and validation
+- Contains random number generation with deterministic seeding
+- Manages event system for state changes
+- **Pure flow control** - no rendering or UI concerns
 
 ```go
 type Game struct {
-    // Core game state
-    PlayerCount   int
-    CurrentPlayer int
-    TurnNumber    int
-    GameStatus    GameStatus
+    World *World `json:"world"` // Contains pure state
+    
+    // Game flow control
+    CurrentPlayer int        `json:"currentPlayer"`
+    TurnCounter   int        `json:"turnCounter"`
+    Status        GameStatus `json:"status"`
     
     // Game systems
-    gameMap     *Map
-    units       []*Unit
-    
-    // Integrated systems
-    rng         *rand.Rand
-    pathfinder  *HexPathfinder
+    Seed int64 `json:"seed"`
+    rng *rand.Rand `json:"-"`
+    eventManager *EventManager `json:"-"`
+    assetProvider AssetProvider `json:"-"`
 }
 ```
 
-**Key Design Decisions:**
-- **Single Source of Truth**: All game state in one place
-- **Integrated Systems**: Combat, movement, pathfinding built-in
-- **Performance**: Direct access without ECS overhead
-- **Simplicity**: Easier to understand and maintain
+#### 2. World Object (`lib/world.go`)
+**Purpose**: Pure game state container
+- Contains all game entities (Map, Units by player)
+- Implements WorldSubject for observer pattern
+- **Pure state** - no game logic or rendering
 
-### 3. Hexagonal Map System
-**Location**: `map.go`, `tile.go`
-- **Purpose**: Sophisticated hex-based map with pathfinding
-- **Design**: Hex coordinate system with neighbor connectivity
-- **Data Integration**: Real WeeWar terrain and movement costs
+```go
+type World struct {
+    Map           *Map      `json:"map"`
+    UnitsByPlayer [][]*Unit `json:"units"` // Units organized by player
+    
+    WorldSubject `json:"-"` // Observer pattern
+    PlayerCount int `json:"playerCount"`
+}
+```
+
+#### 3. Map Object (`lib/map.go`)
+**Purpose**: Hex grid management with cube coordinates
+- Cube coordinate system (Q/R) with bounds (MinQ/MaxQ/MinR/MaxR)
+- Origin management (OriginX/OriginY for coordinate system)
+- Direct hex-to-pixel conversion using Red Blob Games formulas
+- Efficient tile storage via `map[CubeCoord]*Tile`
 
 ```go
 type Map struct {
-    Width, Height int
-    IsHex         bool
-    tiles         [][]*Tile
+    // Coordinate bounds
+    MinQ, MaxQ, MinR, MaxR int
     
-    // Hex-specific pathfinding
-    pathfinder *HexPathfinder
-}
-
-type Tile struct {
-    Row, Col     int
-    TileType     int
-    Unit         *Unit
-    Neighbors    [6]*Tile  // Hex neighbors
+    // Origin for coordinate system
+    OriginX, OriginY float64
+    
+    // Cube coordinate storage
+    Tiles map[CubeCoord]*Tile
 }
 ```
 
-**Key Design Decisions:**
-- **Hex-First Design**: Built specifically for hexagonal grids
-- **Neighbor Connectivity**: Pre-computed neighbors for efficiency
-- **Integrated Pathfinding**: A* pathfinding built into map system
-- **Real Data**: Terrain types match original WeeWar
-
-### 4. Unit and Combat System
-**Location**: `unit.go`, `combat.go`
-- **Purpose**: Comprehensive unit management and combat resolution
-- **Design**: Data-driven combat with real WeeWar mechanics
-- **Data Source**: Extracted from original WeeWar game
+#### 4. WorldRenderer (`lib/world_renderer.go`)
+**Purpose**: Platform-agnostic rendering of World state
+- Works directly with World data (no Game object creation)
+- Supports asset rendering with fallback to simple shapes
+- Uses cube coordinates throughout
+- Efficient rendering with direct Map.Tiles access
 
 ```go
-type Unit struct {
-    Row, Col          int
-    PlayerID          int
-    UnitType          int
-    AvailableHealth   int
-    DistanceLeft      int
-    HasAttacked       bool
-}
-
-type CombatResult struct {
-    AttackerDamage, DefenderDamage int
-    AttackerKilled, DefenderKilled bool
-    AttackerHealth, DefenderHealth int
+type WorldRenderer interface {
+    RenderWorld(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+    RenderTerrain(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+    RenderUnits(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+    RenderHighlights(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
 }
 ```
 
-**Key Design Decisions:**
-- **Data-Driven Combat**: Real damage matrices from WeeWar
-- **Comprehensive State**: All unit state tracked precisely
-- **Combat Results**: Detailed result information for interfaces
-- **Movement Integration**: Movement and combat state linked
+#### 5. Observer Pattern (`lib/world_observer.go`)
+**Purpose**: Reactive updates for state changes
+- WorldSubject embedded in World for notifications
+- WorldObserver interface for components requiring updates
+- Event batching for performance optimization
 
-### 5. Multiple Interface Support
+### Key Design Principles
 
-#### CLI Interface (`cli_impl.go`, `cli_formatter.go`)
-- **REPL Loop**: Interactive command-line gameplay
-- **Chess Notation**: A1, B2, C3 position system
-- **Rich Formatting**: Colors, tables, status displays
-- **Multiple Modes**: Interactive, batch, single commands
+#### 1. Separation of Concerns
+- **Game**: Flow control, rules, validation
+- **World**: Pure state storage
+- **WorldRenderer**: Rendering and visualization
+- **CLI**: Translation layer (chess notation ↔ cube coordinates)
 
-```go
-type WeeWarCLI struct {
-    game         *Game
-    displayMode  CLIDisplayMode
-    formatter    CLIFormatter
-    interactive  bool
-}
+#### 2. Cube Coordinate System
+- Primary coordinate system throughout codebase
+- Proper hex mathematics using Red Blob Games formulas
+- CLI preserves chess notation for user experience
+- Efficient coordinate conversion and validation
+
+#### 3. Clean Architecture
+- No circular dependencies
+- Interface-driven design
+- Dependency injection for testability
+- Clear data flow: CLI → Game → World → WorldRenderer
+
+#### 4. Performance Optimizations
+- Direct Map.Tiles access (no copying)
+- Efficient cube coordinate storage
+- Event batching for multiple state changes
+- Asset caching and fallback rendering
+
+### Data Flow
+
+```
+User Input (CLI) → Game (validation/logic) → World (state update) → WorldObserver (notifications) → WorldRenderer (display)
 ```
 
-#### PNG Renderer (`rendering.go`, `buffer.go`)
-- **Hex Rendering**: Sophisticated hexagonal grid rendering
-- **Visual Elements**: Terrain, units, health bars, borders
-- **Auto-Scaling**: Responsive to different map sizes
-- **High Quality**: Anti-aliased graphics with rich visuals
+### Coordinate System
 
-```go
-type Buffer struct {
-    Width, Height int
-    img           *image.RGBA
-    gc            *draw2dimg.GraphicContext
-}
-```
+#### Cube Coordinates (Internal)
+- Primary system: `CubeCoord{Q, R}` with `S = -Q - R`
+- Bounds: `MinQ/MaxQ/MinR/MaxR`
+- Origin: `OriginX/OriginY` for pixel conversion
 
-#### Web Interface (Future)
-- **HTTP Server**: RESTful API for game operations
-- **JSON Protocol**: Structured data exchange
-- **Real-time Updates**: WebSocket support for live games
-- **Browser UI**: Modern web interface
+#### Display Coordinates (User Interface)
+- CLI: Chess notation (A1, B2, C3...)
+- Internal conversion: Chess → Row/Col → Cube
+- Preserved user experience with mathematical correctness
 
-### 6. Data Integration System
-**Location**: `weewar_data.go`, `cmd/extract-data/`
-- **Purpose**: Integration with real WeeWar game data
-- **Design**: Extracted and parsed from HTML source
-- **Authenticity**: Ensures accurate game mechanics
+#### Pixel Coordinates (Rendering)
+- Direct conversion: Cube → Pixel using `CenterXYForTile()`
+- Pointy-topped hexagons with odd-r layout
+- Formula: `x = originX + tileWidth * sqrt(3) * (q + r/2)`
 
-```go
-type WeeWarData struct {
-    Units    map[string]UnitData
-    Terrain  map[string]TerrainData
-    Combat   map[string]map[string]DamageDistribution
-}
-```
+### Testing Strategy
 
-**Key Design Decisions:**
-- **Real Data**: Extracted from tinyattack.com HTML
-- **Comprehensive**: All unit stats, terrain, combat data
-- **Validation**: Ensures calculations match original game
-- **Extensibility**: Easy to add new units and mechanics
+#### Unit Tests
+- Coordinate conversion accuracy
+- Game logic validation
+- Observer pattern functionality
+- Rendering output verification
 
-## Testing Architecture
+#### Integration Tests
+- CLI command compatibility
+- Save/load functionality
+- Cross-component communication
+- Performance benchmarks
 
-### 1. Comprehensive Test Suite
-**Location**: `*_test.go` files
-- **Unit Tests**: Individual component testing
-- **Integration Tests**: Full game scenario testing
-- **Interface Tests**: Contract compliance testing
-- **Performance Tests**: Load and stress testing
+### Migration Benefits
 
-```go
-// Test categories
-func TestGameBasicOperations(t *testing.T)     // Core game functions
-func TestCombatSystem(t *testing.T)            // Combat mechanics
-func TestMapNavigation(t *testing.T)           // Map and pathfinding
-func TestCLIInterface(t *testing.T)            // CLI functionality
-func TestPNGRendering(t *testing.T)            // Visual rendering
-func TestSaveLoad(t *testing.T)                // Persistence
-```
+#### 1. Mathematical Correctness
+- Proper hex distance calculations
+- Accurate coordinate conversions
+- Support for arbitrary map regions
 
-### 2. Test Data Management
-- **Deterministic**: Fixed seeds for reproducible tests
-- **Comprehensive**: Tests cover all game scenarios
-- **Validation**: Tests verify against known correct results
-- **Coverage**: High test coverage across all systems
+#### 2. Code Quality
+- Single source of truth for coordinates
+- Eliminated hardcoded values
+- Clear separation of concerns
+- Improved maintainability
 
-## Key Design Principles
+#### 3. User Experience
+- Preserved CLI chess notation
+- Consistent coordinate behavior
+- Support for negative coordinates
+- Efficient rendering
 
-### 1. Interface-Driven Design
-- **Clean Contracts**: Well-defined interfaces for all operations
-- **Implementation Flexibility**: Multiple implementations possible
-- **Testing Support**: Interfaces enable comprehensive testing
-- **Future Evolution**: Easy to add new interfaces and implementations
+#### 4. Extensibility
+- Clean architecture for new features
+- Platform-agnostic rendering
+- Observer pattern for UI updates
+- Interface-driven design
 
-### 2. Unified State Management
-- **Single Source of Truth**: All game state in Game struct
-- **Consistency**: No state synchronization issues
-- **Performance**: Direct access without indirection
-- **Simplicity**: Easy to understand and debug
+### Next Steps
 
-### 3. Data-Driven Authenticity
-- **Real Data**: Extracted from original WeeWar game
-- **Accuracy**: Calculations match original game exactly
-- **Validation**: Comprehensive testing against known results
-- **Extensibility**: Easy to add new data and mechanics
+1. **Complete Migration**: Update remaining components (canvas_buffer.go, editor.go)
+2. **Testing**: Update test suite for cube coordinates
+3. **Documentation**: API documentation and user guides
+4. **Performance**: Benchmark and optimize where needed
+5. **Features**: Build on clean architecture foundation
 
-### 4. Multiple Interface Support
-- **CLI**: Interactive command-line interface
-- **PNG**: Visual rendering for analysis and debugging
-- **Web**: HTTP API for browser-based gameplay
-- **Batch**: Automated testing and AI development
+---
 
-### 5. Comprehensive Testing
-- **Unit Tests**: Individual component validation
-- **Integration Tests**: Full game scenario testing
-- **Interface Tests**: Contract compliance verification
-- **Performance Tests**: Load and stress testing
-
-## Evolution and Learnings
-
-### 1. Architecture Evolution
-- **Started**: Complex ECS framework approach
-- **Evolved**: Unified game implementation
-- **Learned**: Simplicity often beats complexity
-- **Result**: Cleaner, faster, more maintainable code
-
-### 2. Interface Design
-- **Started**: Monolithic interfaces
-- **Evolved**: Segregated, focused interfaces
-- **Learned**: Interface segregation principle crucial
-- **Result**: Clean contracts enabling multiple implementations
-
-### 3. Testing Strategy
-- **Started**: Basic unit tests
-- **Evolved**: Comprehensive test suite
-- **Learned**: Testing game logic requires careful design
-- **Result**: High confidence in game correctness
-
-### 4. Data Integration
-- **Started**: Hardcoded game data
-- **Evolved**: Real data extraction and integration
-- **Learned**: Authenticity requires real data
-- **Result**: Accurate WeeWar game mechanics
-
-## Performance Characteristics
-
-### 1. Game Operations
-- **Turn Processing**: O(1) - Direct state access
-- **Pathfinding**: O(V log V) - A* with efficient heuristics
-- **Combat Resolution**: O(1) - Direct lookup in damage matrices
-- **State Persistence**: O(n) - Linear in game state size
-
-### 2. Rendering Performance
-- **PNG Generation**: O(n) - Linear in map size
-- **Memory Usage**: Efficient buffer management
-- **Image Quality**: High-quality anti-aliased graphics
-- **Scalability**: Responsive to different map sizes
-
-### 3. CLI Performance
-- **Command Processing**: O(1) - Direct command dispatch
-- **Display Updates**: O(n) - Linear in visible elements
-- **Interactive Response**: Sub-millisecond command processing
-- **Memory Usage**: Minimal overhead for CLI operations
-
-## Future Directions
-
-### 1. Planned Enhancements
-- **AI Integration**: Support for AI players
-- **Multiplayer**: Network multiplayer support
-- **Map Editor**: Visual map creation tools
-- **Statistics**: Comprehensive game statistics
-
-### 2. Architecture Improvements
-- **Plugin System**: Support for game modifications
-- **Event System**: Decoupled event handling
-- **Scripting**: Lua or similar for game customization
-- **Optimization**: Further performance improvements
-
-### 3. Interface Expansion
-- **Mobile**: Native mobile app interfaces
-- **VR**: Virtual reality game experience
-- **API**: Comprehensive REST API
-- **Streaming**: Game streaming and spectator modes
-
-## Summary
-
-The WeeWar implementation demonstrates a mature, well-architected game system that balances complexity and simplicity. The interface-driven design enables multiple implementations while maintaining clean separation of concerns. The unified game implementation provides performance and simplicity while the comprehensive testing ensures correctness and reliability. The data-driven approach ensures authenticity to the original game while enabling future extensions and improvements.
-
-The architecture successfully supports multiple interfaces (CLI, PNG, web) while maintaining a single source of truth for game state. The evolution from a complex ECS framework to a unified implementation demonstrates the value of simplicity and pragmatism in software design.
+**Last Updated**: 2025-01-15  
+**Architecture Version**: 2.0 (Post-Refactoring)  
+**Status**: Production-ready foundation

@@ -83,7 +83,53 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - Clean event delegation using data attributes with proper TypeScript types
 - Ready for WASM build and backend API integration
 
-## 📋 Phase 4: Games Management System (Planned)
+## ✅ Phase 4: Coordinate System Migration (Completed)
+**Status**: 95% Complete  
+**Timeline**: January 2025
+
+### Core System Refactoring ✅
+- [x] Migrated from row/col to cube coordinates (Q/R/S system)
+- [x] Implemented proper hex-to-pixel conversion using Red Blob Games formulas
+- [x] Fixed odd-r layout as standard (eliminates configuration complexity)
+- [x] Added proper hex distance calculations with `CubeDistance()`
+- [x] Updated core data structures (Unit, Tile) to use cube coordinates
+
+### API Migration ✅
+- [x] `TileAt()` now uses cube coordinates as primary method
+- [x] `IsValidMove()` and `GetMovementCost()` use cube coordinates
+- [x] `MoveUnit()` and `CanMoveUnit()` use cube coordinates
+- [x] Removed wrapper methods to enforce cube coordinate usage
+
+### Architecture Improvements ✅
+- [x] Implemented proper Game-World-Observer architecture separation
+- [x] Game object focuses on flow control and game logic
+- [x] World object contains pure state (Map, Units organized by player)
+- [x] Removed all rendering methods from Game object
+- [x] Updated WorldRenderer to work directly with World data using cube coordinates
+- [x] Map includes OriginX/OriginY for coordinate system origin management
+
+### CLI Translation Layer ✅
+- [x] CLI preserves chess notation (A1, B2) for user experience
+- [x] Internal conversion: Chess notation → cube coordinates
+- [x] Centralized validation logic in Game object
+- [x] CLI acts as thin translation layer
+
+### Remaining Work 🚧
+- [ ] Update canvas_buffer.go to use cube coordinates
+- [ ] Update editor.go to use cube coordinates
+- [ ] Update all test files to use cube coordinate APIs
+- [ ] Add World state change notifications
+
+### Benefits Achieved ✅
+- **Mathematical correctness**: Proper hex distance calculations
+- **Code simplification**: Eliminated hardcoded tile dimensions
+- **User experience**: CLI chess notation preserved (A1, B2)
+- **Maintainability**: Single source of truth for coordinates
+- **Clean architecture**: Proper separation of concerns between Game, World, and Rendering
+
+See [COORD_MIGRATION.md](COORD_MIGRATION.md) for detailed technical progress.
+
+## 📋 Phase 5: Games Management System (Planned)
 **Status**: Planned  
 **Timeline**: February 2025
 

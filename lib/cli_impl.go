@@ -292,7 +292,7 @@ func (cli *WeeWarCLI) handleMove(cmd *CLICommand) *CLIResponse {
 	fromPos := cmd.Arguments[0]
 	toPos := cmd.Arguments[1]
 
-	// Parse positions (supports both chess notation and unit IDs)
+	// Parse positions (supports both chess notation and unit IDs) 
 	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, fromPos)
 	if !valid {
 		return &CLIResponse{
@@ -311,28 +311,12 @@ func (cli *WeeWarCLI) handleMove(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	// Find unit at from position
-	unit := cli.game.GetUnitAt(fromRow, fromCol)
-	if unit == nil {
-		return &CLIResponse{
-			Success: false,
-			Message: fmt.Sprintf("No unit found at position %s", fromPos),
-			Error:   "Cannot move non-existent unit",
-		}
-	}
+	// Convert to cube coordinates for game API calls
+	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
+	toCoord := cli.game.Map.DisplayToHex(toRow, toCol)
 
-	// Check if it's the correct player's turn
-	if unit.PlayerID != cli.game.GetCurrentPlayer() {
-		return &CLIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Unit at %s belongs to player %d, but it's player %d's turn", 
-				fromPos, unit.PlayerID, cli.game.GetCurrentPlayer()),
-			Error:   "Can only move your own units",
-		}
-	}
-
-	// Execute move
-	if err := cli.game.MoveUnit(unit, toRow, toCol); err != nil {
+	// Let the game handle all validation and execute the move
+	if err := cli.game.MoveUnitAt(fromCoord, toCoord); err != nil {
 		return &CLIResponse{
 			Success: false,
 			Message: fmt.Sprintf("Failed to move unit: %v", err),
@@ -370,37 +354,12 @@ func (cli *WeeWarCLI) handleAttack(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	// Find units
-	attacker := cli.game.GetUnitAt(attackerRow, attackerCol)
-	if attacker == nil {
-		return &CLIResponse{
-			Success: false,
-			Message: fmt.Sprintf("No unit found at attacker position %s", attackerPos),
-			Error:   "Cannot attack with non-existent unit",
-		}
-	}
-
-	target := cli.game.GetUnitAt(targetRow, targetCol)
-	if target == nil {
-		return &CLIResponse{
-			Success: false,
-			Message: fmt.Sprintf("No unit found at target position %s", targetPos),
-			Error:   "Cannot attack non-existent unit",
-		}
-	}
-
-	// Check if it's the correct player's turn
-	if attacker.PlayerID != cli.game.GetCurrentPlayer() {
-		return &CLIResponse{
-			Success: false,
-			Message: fmt.Sprintf("Unit at %s belongs to player %d, but it's player %d's turn", 
-				attackerPos, attacker.PlayerID, cli.game.GetCurrentPlayer()),
-			Error:   "Can only attack with your own units",
-		}
-	}
-
-	// Execute attack
-	result, err := cli.game.AttackUnit(attacker, target)
+	// Convert to cube coordinates for game API calls
+	attackerCoord := cli.game.Map.DisplayToHex(attackerRow, attackerCol)
+	targetCoord := cli.game.Map.DisplayToHex(targetRow, targetCol)
+	
+	// Let the game handle all validation and execute the attack
+	result, err := cli.game.AttackUnitAt(attackerCoord, targetCoord)
 	if err != nil {
 		return &CLIResponse{
 			Success: false,
@@ -695,8 +654,20 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 		}
 	}
 	
-	// Find attacker unit
-	attacker := cli.game.GetUnitAt(fromRow, fromCol)
+	// Convert to cube coordinates for game API calls
+	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
+	toCoord := cli.game.Map.DisplayToHex(toRow, toCol)
+	
+	// Find attacker unit using cube coordinates
+	fromTile := cli.game.Map.TileAt(fromCoord)
+	if fromTile == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid from position: %s", fromPos),
+			Error:   "Position out of bounds",
+		}
+	}
+	attacker := fromTile.Unit
 	if attacker == nil {
 		return &CLIResponse{
 			Success: false,
@@ -705,8 +676,16 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 		}
 	}
 	
-	// Find target unit
-	target := cli.game.GetUnitAt(toRow, toCol)
+	// Find target unit using cube coordinates
+	toTile := cli.game.Map.TileAt(toCoord)
+	if toTile == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid to position: %s", toPos),
+			Error:   "Position out of bounds",
+		}
+	}
+	target := toTile.Unit
 	if target == nil {
 		return &CLIResponse{
 			Success: false,
@@ -789,8 +768,19 @@ func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	// Check if unit exists at position
-	unit := cli.game.GetUnitAt(fromRow, fromCol)
+	// Convert to cube coordinates for game API calls
+	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
+	
+	// Check if unit exists at position using cube coordinates
+	fromTile := cli.game.Map.TileAt(fromCoord)
+	if fromTile == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid position: %s", cmd.Arguments[0]),
+			Error:   "Position out of bounds",
+		}
+	}
+	unit := fromTile.Unit
 	if unit == nil {
 		return &CLIResponse{
 			Success: false,
@@ -869,8 +859,19 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	// Check if unit exists at position
-	unit := cli.game.GetUnitAt(fromRow, fromCol)
+	// Convert to cube coordinates for game API calls
+	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
+	
+	// Check if unit exists at position using cube coordinates
+	fromTile := cli.game.Map.TileAt(fromCoord)
+	if fromTile == nil {
+		return &CLIResponse{
+			Success: false,
+			Message: fmt.Sprintf("Invalid position: %s", cmd.Arguments[0]),
+			Error:   "Position out of bounds",
+		}
+	}
+	unit := fromTile.Unit
 	if unit == nil {
 		return &CLIResponse{
 			Success: false,

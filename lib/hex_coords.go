@@ -74,6 +74,11 @@ func (c CubeCoord) Distance(other CubeCoord) int {
 	return (abs(c.Q-other.Q) + abs(c.R-other.R) + abs(c.S()-other.S())) / 2
 }
 
+// CubeDistance calculates the hex distance between two cube coordinates (standalone function)
+func CubeDistance(coord1, coord2 CubeCoord) int {
+	return coord1.Distance(coord2)
+}
+
 // Range returns all cube coordinates within the specified radius
 func (c CubeCoord) Range(radius int) []CubeCoord {
 	var results []CubeCoord

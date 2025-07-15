@@ -207,7 +207,7 @@ func (w *World) Clone() *World {
 	// Clone map
 	var clonedMap *Map
 	if w.Map != nil {
-		clonedMap = NewMap(w.Map.NumRows(), w.Map.NumCols(), false)
+		clonedMap = NewMapRect(w.Map.NumRows(), w.Map.NumCols())
 		for _, tile := range w.Map.Tiles {
 			if tile != nil {
 				newTile := tile.Clone()

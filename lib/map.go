@@ -201,65 +201,6 @@ func (m *Map) CopyAllTiles() map[CubeCoord]*Tile {
 // Legacy Display-Based Methods (for backward compatibility)
 // =============================================================================
 
-func (m *Map) GetNeighbors(coord CubeCoord, out [6]CubeCoord) {
-	// Implement this and update out with the neighbor coords
-	// out[i] is coord of ith NeighborDirection
-	return
-}
-
-// GetHexNeighborCoords returns the coordinates of the 6 hex neighbors
-// This is no longer required.  We should get Neighbors using cubed coords
-/*
-func (m *Map) GetHexNeighborCoords(row, col int) [6][2]int {
-	var neighbors [6][2]int
-
-	// Hex grid neighbor calculation depends on whether we're in even or odd row
-	isEvenRow := (row % 2) == 0
-
-	if m.EvenRowsOffset() {
-		// Even rows are offset to the right
-		if isEvenRow {
-			// Even row neighbors
-			neighbors[0] = [2]int{row, col - 1}     // LEFT
-			neighbors[1] = [2]int{row - 1, col}     // TOP_LEFT
-			neighbors[2] = [2]int{row - 1, col + 1} // TOP_RIGHT
-			neighbors[3] = [2]int{row, col + 1}     // RIGHT
-			neighbors[4] = [2]int{row + 1, col + 1} // BOTTOM_RIGHT
-			neighbors[5] = [2]int{row + 1, col}     // BOTTOM_LEFT
-		} else {
-			// Odd row neighbors
-			neighbors[0] = [2]int{row, col - 1}     // LEFT
-			neighbors[1] = [2]int{row - 1, col - 1} // TOP_LEFT
-			neighbors[2] = [2]int{row - 1, col}     // TOP_RIGHT
-			neighbors[3] = [2]int{row, col + 1}     // RIGHT
-			neighbors[4] = [2]int{row + 1, col}     // BOTTOM_RIGHT
-			neighbors[5] = [2]int{row + 1, col - 1} // BOTTOM_LEFT
-		}
-	} else {
-		// Odd rows are offset to the right
-		if isEvenRow {
-			// Even row neighbors
-			neighbors[0] = [2]int{row, col - 1}     // LEFT
-			neighbors[1] = [2]int{row - 1, col - 1} // TOP_LEFT
-			neighbors[2] = [2]int{row - 1, col}     // TOP_RIGHT
-			neighbors[3] = [2]int{row, col + 1}     // RIGHT
-			neighbors[4] = [2]int{row + 1, col}     // BOTTOM_RIGHT
-			neighbors[5] = [2]int{row + 1, col - 1} // BOTTOM_LEFT
-		} else {
-			// Odd row neighbors
-			neighbors[0] = [2]int{row, col - 1}     // LEFT
-			neighbors[1] = [2]int{row - 1, col}     // TOP_LEFT
-			neighbors[2] = [2]int{row - 1, col + 1} // TOP_RIGHT
-			neighbors[3] = [2]int{row, col + 1}     // RIGHT
-			neighbors[4] = [2]int{row + 1, col + 1} // BOTTOM_RIGHT
-			neighbors[5] = [2]int{row + 1, col}     // BOTTOM_LEFT
-		}
-	}
-
-	return neighbors
-}
-*/
-
 // CenterXYForTile converts cube coordinates directly to pixel center x,y coordinates for rendering
 // Uses normalized OriginX/OriginY (in tile units) which are then scaled by tile dimensions
 // Uses odd-r layout (odd rows offset) as our fixed, consistent layout
@@ -294,7 +235,7 @@ func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord 
 	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
 	originPixelX := m.OriginX * tileWidth
 	originPixelY := m.OriginY * tileWidth
-	
+
 	// Translate screen coordinates to hex coordinate space by removing origin offset
 	hexX := x - originPixelX
 	hexY := y - originPixelY
@@ -380,15 +321,16 @@ func (m *Map) AddLeftCols(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Decrease minQ to expand leftward
 	m.minQ -= n
-	
+	m.minR += n
+
 	// Adjust OriginX to maintain existing tile positions
 	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
 	// Since OriginX is in normalized tile units, we add n directly
 	m.OriginX += float64(n)
-	
+
 	return nil
 }
 
@@ -397,21 +339,22 @@ func (m *Map) RemoveLeftCols(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Check if we have enough columns to remove
 	currentCols := m.maxQ - m.minQ + 1
 	if n >= currentCols {
 		return fmt.Errorf("cannot remove %d columns from map with only %d columns", n, currentCols)
 	}
-	
+
 	// Increase minQ to shrink from left
 	m.minQ += n
-	
+	m.minR -= n
+
 	// Adjust OriginX to maintain existing tile positions
 	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
 	// Since OriginX is in normalized tile units, we subtract n directly
 	m.OriginX -= float64(n)
-	
+
 	return nil
 }
 
@@ -420,15 +363,16 @@ func (m *Map) AddTopRows(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Decrease minR to expand upward
+	// When we add Rows - R does not change.  But Q
 	m.minR -= n
-	
+
 	// Adjust OriginY to maintain existing tile positions
 	// In odd-r layout, vertical distance between adjacent rows is 1.5 tile widths
 	// Since OriginY is in normalized tile width units, we add n * 1.5
 	m.OriginY += float64(n) * 1.5
-	
+
 	return nil
 }
 
@@ -437,21 +381,21 @@ func (m *Map) RemoveTopRows(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Check if we have enough rows to remove
 	currentRows := m.maxR - m.minR + 1
 	if n >= currentRows {
 		return fmt.Errorf("cannot remove %d rows from map with only %d rows", n, currentRows)
 	}
-	
+
 	// Increase minR to shrink from top
 	m.minR += n
-	
+
 	// Adjust OriginY to maintain existing tile positions
 	// In odd-r layout, vertical distance between adjacent rows is 1.5 tile widths
 	// Since OriginY is in normalized tile width units, we subtract n * 1.5
 	m.OriginY -= float64(n) * 1.5
-	
+
 	return nil
 }
 
@@ -460,10 +404,11 @@ func (m *Map) AddRightCols(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Increase maxQ to expand rightward
 	m.maxQ += n
-	
+	m.maxR -= n
+
 	// Origin position remains unchanged when adding to the right
 	return nil
 }
@@ -473,16 +418,17 @@ func (m *Map) RemoveRightCols(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Check if we have enough columns to remove
 	currentCols := m.maxQ - m.minQ + 1
 	if n >= currentCols {
 		return fmt.Errorf("cannot remove %d columns from map with only %d columns", n, currentCols)
 	}
-	
+
 	// Decrease maxQ to shrink from right
 	m.maxQ -= n
-	
+	m.maxR += n
+
 	// Origin position remains unchanged when removing from the right
 	return nil
 }
@@ -492,10 +438,10 @@ func (m *Map) AddBottomRows(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Increase maxR to expand downward
 	m.maxR += n
-	
+
 	// Origin position remains unchanged when adding to the bottom
 	return nil
 }
@@ -505,16 +451,16 @@ func (m *Map) RemoveBottomRows(n int) error {
 	if n <= 0 {
 		return fmt.Errorf("n must be positive, got %d", n)
 	}
-	
+
 	// Check if we have enough rows to remove
 	currentRows := m.maxR - m.minR + 1
 	if n >= currentRows {
 		return fmt.Errorf("cannot remove %d rows from map with only %d rows", n, currentRows)
 	}
-	
+
 	// Decrease maxR to shrink from bottom
 	m.maxR -= n
-	
+
 	// Origin position remains unchanged when removing from the bottom
 	return nil
 }

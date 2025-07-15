@@ -8,19 +8,22 @@ package weewar
 // This interface abstracts away the differences between Buffer (PNG) and CanvasBuffer (HTML Canvas).
 type WorldRenderer interface {
 	// RenderWorld renders the complete world state to the given drawable surface
-	RenderWorld(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+	RenderWorld(world *World, options WorldRenderOptions)
 
-	// RenderTerrain renders only the terrain layer
-	RenderTerrain(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+	/*
+		RenderWorld(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+		   // RenderTerrain renders only the terrain layer
+		   RenderTerrain(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
 
-	// RenderUnits renders only the units layer
-	RenderUnits(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+		   // RenderUnits renders only the units layer
+		   RenderUnits(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
 
-	// RenderHighlights renders selection highlights and movement indicators
-	RenderHighlights(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+		   // RenderHighlights renders selection highlights and movement indicators
+		   RenderHighlights(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
 
-	// RenderUI renders text overlays and UI elements
-	RenderUI(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+		   // RenderUI renders text overlays and UI elements
+		   RenderUI(world *World, viewState *ViewState, drawable Drawable, options WorldRenderOptions)
+	*/
 }
 
 // WorldRenderOptions contains all rendering configuration parameters for the World-Renderer architecture

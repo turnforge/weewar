@@ -55,11 +55,11 @@ func (g *Game) Map() *Map {
 }
 
 // Units returns all units in the world
-func (g *Game) Units() []*Unit {
+func (g *Game) UnitsByPlayer() [][]*Unit {
 	if g.World == nil {
 		return nil
 	}
-	return g.World.Units
+	return g.World.UnitsByPlayer
 }
 
 // PlayerCount returns the number of players
@@ -102,11 +102,11 @@ func (g *Game) initializeStartingUnits() error {
 
 // resetPlayerUnits resets movement and actions for a player's units
 func (g *Game) resetPlayerUnits(playerID int) error {
-	if playerID < 0 || playerID >= len(g.World.Units) {
+	if playerID < 0 || playerID >= len(g.World.UnitsByPlayer) {
 		return fmt.Errorf("invalid player ID: %d", playerID)
 	}
 
-	for _, unit := range g.World.Units[playerID] {
+	for _, unit := range g.World.UnitsByPlayer[playerID] {
 		// Reset movement points (simplified)
 		unit.DistanceLeft = 3 // TODO: Get from unit data
 		unit.TurnCounter = g.TurnCounter
@@ -122,7 +122,7 @@ func (g *Game) checkVictoryConditions() (winner int, hasWinner bool) {
 	lastPlayerWithUnits := -1
 
 	for playerID := 0; playerID < g.World.PlayerCount; playerID++ {
-		if len(g.World.Units[playerID]) > 0 {
+		if len(g.World.UnitsByPlayer[playerID]) > 0 {
 			playersWithUnits++
 			lastPlayerWithUnits = playerID
 		}
@@ -153,8 +153,8 @@ func (g *Game) validateGameState() error {
 		return fmt.Errorf("invalid turn counter: %d", g.TurnCounter)
 	}
 
-	if len(g.World.Units) != g.World.PlayerCount {
-		return fmt.Errorf("units array length (%d) doesn't match player count (%d)", len(g.World.Units), g.World.PlayerCount)
+	if len(g.World.UnitsByPlayer) != g.World.PlayerCount {
+		return fmt.Errorf("units array length (%d) doesn't match player count (%d)", len(g.World.UnitsByPlayer), g.World.PlayerCount)
 	}
 
 	return nil
@@ -172,7 +172,7 @@ func (g *Game) GetUnitID(unit *Unit) string {
 
 	// Count units for this player to determine unit number
 	unitNumber := 0
-	for _, playerUnits := range g.World.Units {
+	for _, playerUnits := range g.World.UnitsByPlayer {
 		for _, playerUnit := range playerUnits {
 			if playerUnit.PlayerID == unit.PlayerID {
 				unitNumber++
@@ -354,56 +354,6 @@ func (g *Game) GetTileType(coord CubeCoord) int {
 	return tile.TileType
 }
 
-// RowColToPixel converts grid coordinates to screen coordinates
-func (g *Game) RowColToPixel(row, col int) (x, y float64) {
-	if g.World.Map == nil {
-		return 0, 0
-	}
-
-	// Use standard tile dimensions
-	tileWidth := DefaultTileHeight
-	tileHeight := DefaultTileWidth
-	yIncrement := DefaultYIncrement
-
-	return g.World.Map.XYForTile(row, col, tileWidth, tileHeight, yIncrement)
-}
-
-// PixelToRowCol converts screen coordinates to grid coordinates
-func (g *Game) PixelToRowCol(x, y float64) (row, col int, valid bool) {
-	if g.World.Map == nil {
-		return 0, 0, false
-	}
-
-	// Use standard tile dimensions
-	tileWidth := DefaultTileWidth
-	yIncrement := DefaultYIncrement
-
-	// Calculate approximate row and column
-	row = int(y / yIncrement)
-
-	// Calculate column accounting for hex offset
-	isEvenRow := (row % 2) == 0
-	baseX := x
-	if g.World.Map.EvenRowsOffset() {
-		if isEvenRow {
-			baseX -= tileWidth / 2
-		}
-	} else {
-		if !isEvenRow {
-			baseX -= tileWidth / 2
-		}
-	}
-	col = int(baseX / tileWidth)
-
-	// Validate that the calculated position exists on the map
-	coord := g.World.Map.DisplayToHex(row, col)
-	if tile := g.World.Map.TileAt(coord); tile != nil {
-		return row, col, true
-	}
-
-	return 0, 0, false
-}
-
 // =============================================================================
 // UnitInterface Interface Implementation
 // =============================================================================
@@ -419,13 +369,13 @@ func (g *Game) GetUnitAt(coord CubeCoord) *Unit {
 
 // GetUnitsForPlayer returns all units owned by player
 func (g *Game) GetUnitsForPlayer(playerID int) []*Unit {
-	if playerID < 0 || playerID >= len(g.World.Units) {
+	if playerID < 0 || playerID >= len(g.World.UnitsByPlayer) {
 		return nil
 	}
 
 	// Return a copy to prevent external modification
-	units := make([]*Unit, len(g.World.Units[playerID]))
-	copy(units, g.World.Units[playerID])
+	units := make([]*Unit, len(g.World.UnitsByPlayer[playerID]))
+	copy(units, g.World.UnitsByPlayer[playerID])
 	return units
 }
 
@@ -433,7 +383,7 @@ func (g *Game) GetUnitsForPlayer(playerID int) []*Unit {
 func (g *Game) GetAllUnits() []*Unit {
 	var allUnits []*Unit
 
-	for _, playerUnits := range g.World.Units {
+	for _, playerUnits := range g.World.UnitsByPlayer {
 		allUnits = append(allUnits, playerUnits...)
 	}
 
@@ -519,12 +469,12 @@ func (g *Game) RemoveUnit(unit *Unit) error {
 	}
 
 	// Remove from player's unit list
-	if unit.PlayerID >= 0 && unit.PlayerID < len(g.World.Units) {
-		playerUnits := g.World.Units[unit.PlayerID]
+	if unit.PlayerID >= 0 && unit.PlayerID < len(g.World.UnitsByPlayer) {
+		playerUnits := g.World.UnitsByPlayer[unit.PlayerID]
 		for i, u := range playerUnits {
 			if u == unit {
 				// Remove from slice
-				g.World.Units[unit.PlayerID] = append(playerUnits[:i], playerUnits[i+1:]...)
+				g.World.UnitsByPlayer[unit.PlayerID] = append(playerUnits[:i], playerUnits[i+1:]...)
 				break
 			}
 		}
@@ -543,7 +493,7 @@ func (g *Game) AddUnit(unit *Unit, playerID int) error {
 		return fmt.Errorf("unit is nil")
 	}
 
-	if playerID < 0 || playerID >= len(g.World.Units) {
+	if playerID < 0 || playerID >= len(g.World.UnitsByPlayer) {
 		return fmt.Errorf("invalid player ID: %d", playerID)
 	}
 
@@ -551,7 +501,7 @@ func (g *Game) AddUnit(unit *Unit, playerID int) error {
 	unit.PlayerID = playerID
 
 	// Add to player's unit list
-	g.World.Units[playerID] = append(g.World.Units[playerID], unit)
+	g.World.UnitsByPlayer[playerID] = append(g.World.UnitsByPlayer[playerID], unit)
 
 	// Place unit on the map if it has a valid position
 	if tile := g.World.Map.TileAt(unit.Coord); tile != nil {

@@ -10,26 +10,23 @@ import (
 
 // DamagePrediction represents combat damage prediction
 type DamagePrediction struct {
-	MinDamage      int                `json:"minDamage"`
-	MaxDamage      int                `json:"maxDamage"`
-	ExpectedDamage float64            `json:"expectedDamage"`
-	Probabilities  map[int]float64    `json:"probabilities"`
+	MinDamage      int             `json:"minDamage"`
+	MaxDamage      int             `json:"maxDamage"`
+	ExpectedDamage float64         `json:"expectedDamage"`
+	Probabilities  map[int]float64 `json:"probabilities"`
 }
 
 // MovePrediction represents movement prediction and analysis
 type MovePrediction struct {
-	CanMove        bool                    `json:"canMove"`
-	MovementCost   int                     `json:"movementCost"`
-	RemainingMoves int                     `json:"remainingMoves"`
-	Path           []PredictionPosition    `json:"path"`
-	TerrainEffects []string                `json:"terrainEffects"`
+	CanMove        bool                 `json:"canMove"`
+	MovementCost   int                  `json:"movementCost"`
+	RemainingMoves int                  `json:"remainingMoves"`
+	Path           []PredictionPosition `json:"path"`
+	TerrainEffects []string             `json:"terrainEffects"`
 }
 
 // PredictionPosition represents a map position for predictions
-type PredictionPosition struct {
-	Row int `json:"row"`
-	Col int `json:"col"`
-}
+type PredictionPosition = CubeCoord
 
 // CombatPredictor provides combat analysis capabilities
 type CombatPredictor struct {
@@ -44,46 +41,46 @@ func NewCombatPredictor(assetManager *AssetManager) *CombatPredictor {
 }
 
 // PredictDamage calculates damage prediction for an attack
-func (cp *CombatPredictor) PredictDamage(game *Game, fromRow, fromCol, toRow, toCol int) (*DamagePrediction, error) {
+func (cp *CombatPredictor) PredictDamage(game *Game, from, to CubeCoord) (*DamagePrediction, error) {
 	// Get attacker and target units
-	attacker := game.GetUnitAt(fromRow, fromCol)
-	target := game.GetUnitAt(toRow, toCol)
-	
+	attacker := game.GetUnitAt(from)
+	target := game.GetUnitAt(to)
+
 	if attacker == nil {
 		return nil, fmt.Errorf("no attacker unit at position")
 	}
 	if target == nil {
 		return nil, fmt.Errorf("no target unit at position")
 	}
-	
+
 	// Get unit data for both units
 	attackerData, err := cp.assetManager.GetUnitData(attacker.UnitType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get attacker data: %w", err)
 	}
-	
+
 	targetData, err := cp.assetManager.GetUnitData(target.UnitType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get target data: %w", err)
 	}
-	
+
 	// Get damage distribution from attack matrix
 	damageDistribution, exists := attackerData.AttackMatrix[targetData.Name]
 	if !exists {
 		return nil, fmt.Errorf("no attack data available for %s vs %s", attackerData.Name, targetData.Name)
 	}
-	
+
 	// Calculate expected damage
 	expectedDamage := 0.0
 	probabilities := make(map[int]float64)
-	
+
 	for damageStr, probability := range damageDistribution.Probabilities {
 		damage := 0
 		fmt.Sscanf(damageStr, "%d", &damage)
 		expectedDamage += float64(damage) * probability
 		probabilities[damage] = probability
 	}
-	
+
 	return &DamagePrediction{
 		MinDamage:      damageDistribution.MinDamage,
 		MaxDamage:      damageDistribution.MaxDamage,
@@ -93,38 +90,37 @@ func (cp *CombatPredictor) PredictDamage(game *Game, fromRow, fromCol, toRow, to
 }
 
 // CanAttackPosition checks if an attack is valid and possible
-func (cp *CombatPredictor) CanAttackPosition(game *Game, fromRow, fromCol, toRow, toCol int) (bool, error) {
-	return game.CanAttack(fromRow, fromCol, toRow, toCol)
+func (cp *CombatPredictor) CanAttackPosition(game *Game, from, to CubeCoord) (bool, error) {
+	return game.CanAttack(from, to)
 }
 
 // GetAttackOptions returns all positions a unit can attack from its current position
-func (cp *CombatPredictor) GetAttackOptions(game *Game, unitRow, unitCol int) ([]PredictionPosition, error) {
-	unit := game.GetUnitAt(unitRow, unitCol)
+func (cp *CombatPredictor) GetAttackOptions(game *Game, unitPos Position) ([]PredictionPosition, error) {
+	unit := game.GetUnitAt(unitPos)
 	if unit == nil {
-		return nil, fmt.Errorf("no unit at position (%d, %d)", unitRow, unitCol)
+		return nil, fmt.Errorf("no unit at position %s", unitPos)
 	}
-	
+
 	var attackPositions []PredictionPosition
-	
+
 	// Check all possible positions within attack range
 	// For now, assume attack range is 1 (adjacent tiles)
 	// TODO: Get actual attack range from unit data
-	for dRow := -1; dRow <= 1; dRow++ {
-		for dCol := -1; dCol <= 1; dCol++ {
-			if dRow == 0 && dCol == 0 {
+	for dQ := -1; dQ <= 1; dQ++ {
+		for dR := -1; dR <= 1; dR++ {
+			if dQ == 0 && dR == 0 {
 				continue // Skip self
 			}
-			
-			targetRow := unitRow + dRow
-			targetCol := unitCol + dCol
-			
+
+			target := unitPos.Plus(dQ, dR)
+
 			// Check if attack is valid
-			if canAttack, err := game.CanAttack(unitRow, unitCol, targetRow, targetCol); err == nil && canAttack {
-				attackPositions = append(attackPositions, PredictionPosition{Row: targetRow, Col: targetCol})
+			if canAttack, err := game.CanAttack(unitPos, target); err == nil && canAttack {
+				attackPositions = append(attackPositions, target)
 			}
 		}
 	}
-	
+
 	return attackPositions, nil
 }
 
@@ -141,18 +137,18 @@ func NewMovementPredictor(assetManager *AssetManager) *MovementPredictor {
 }
 
 // PredictMovement analyzes a potential movement
-func (mp *MovementPredictor) PredictMovement(game *Game, fromRow, fromCol, toRow, toCol int) (*MovePrediction, error) {
-	unit := game.GetUnitAt(fromRow, fromCol)
+func (mp *MovementPredictor) PredictMovement(game *Game, from, to Position) (*MovePrediction, error) {
+	unit := game.GetUnitAt(from)
 	if unit == nil {
-		return nil, fmt.Errorf("no unit at position (%d, %d)", fromRow, fromCol)
+		return nil, fmt.Errorf("no unit at position %s", from)
 	}
-	
+
 	// Check if movement is valid
-	canMove, err := game.CanMove(fromRow, fromCol, toRow, toCol)
+	canMove, err := game.CanMove(from, to)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check movement: %w", err)
 	}
-	
+
 	prediction := &MovePrediction{
 		CanMove:        canMove,
 		MovementCost:   0,
@@ -160,63 +156,62 @@ func (mp *MovementPredictor) PredictMovement(game *Game, fromRow, fromCol, toRow
 		Path:           []PredictionPosition{},
 		TerrainEffects: []string{},
 	}
-	
+
 	if !canMove {
 		return prediction, nil
 	}
-	
+
 	// Calculate movement cost and path
 	// TODO: Implement pathfinding to get actual path and cost
 	// For now, use simple distance calculation
 	prediction.MovementCost = 1 // Simplified
 	prediction.RemainingMoves = unit.DistanceLeft - prediction.MovementCost
-	
+
 	// Add start and end positions to path
-	prediction.Path = append(prediction.Path, PredictionPosition{Row: fromRow, Col: fromCol})
-	prediction.Path = append(prediction.Path, PredictionPosition{Row: toRow, Col: toCol})
-	
+	prediction.Path = append(prediction.Path, from)
+	prediction.Path = append(prediction.Path, to)
+
 	// Analyze terrain effects
-	targetTile := game.GetTileAt(toRow, toCol)
+	targetTile := game.World.Map.TileAt(to)
 	if targetTile != nil {
 		terrainData, err := mp.assetManager.GetTerrainDataAsset(targetTile.TileType)
 		if err == nil {
-			prediction.TerrainEffects = append(prediction.TerrainEffects, 
+			prediction.TerrainEffects = append(prediction.TerrainEffects,
 				fmt.Sprintf("Terrain: %s", terrainData.Name))
 		}
 	}
-	
+
 	return prediction, nil
 }
 
 // GetMovementOptions returns all positions a unit can move to
-func (mp *MovementPredictor) GetMovementOptions(game *Game, unitRow, unitCol int) ([]PredictionPosition, error) {
-	unit := game.GetUnitAt(unitRow, unitCol)
+func (mp *MovementPredictor) GetMovementOptions(game *Game, unitPos Position) ([]PredictionPosition, error) {
+	unit := game.GetUnitAt(unitPos)
 	if unit == nil {
-		return nil, fmt.Errorf("no unit at position (%d, %d)", unitRow, unitCol)
+		return nil, fmt.Errorf("no unit at position %s", unitPos)
 	}
-	
+
 	var movePositions []PredictionPosition
-	
+
 	// Simple implementation: check positions within movement range
 	// TODO: Use proper pathfinding with movement costs
 	maxRange := unit.DistanceLeft
-	
-	for dRow := -maxRange; dRow <= maxRange; dRow++ {
-		for dCol := -maxRange; dCol <= maxRange; dCol++ {
-			if dRow == 0 && dCol == 0 {
+
+	for dQ := -maxRange; dQ <= maxRange; dQ++ {
+		for dR := -maxRange; dR <= maxRange; dR++ {
+			if dQ == 0 && dR == 0 {
 				continue // Skip self
 			}
-			
-			targetRow := unitRow + dRow
-			targetCol := unitCol + dCol
-			
+
+			target := unitPos.Plus(dQ, dR)
+
 			// Check if movement is valid
-			if canMove, err := game.CanMove(unitRow, unitCol, targetRow, targetCol); err == nil && canMove {
-				movePositions = append(movePositions, PredictionPosition{Row: targetRow, Col: targetCol})
+			if canMove, err := game.CanMove(unitPos, target); err == nil && canMove {
+				movePositions = append(movePositions, target)
 			}
 		}
 	}
-	
+
 	return movePositions, nil
 }
 

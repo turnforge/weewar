@@ -5,7 +5,7 @@ import "fmt"
 // =============================================================================
 // Hex Cube Coordinate System
 // =============================================================================
-// This file implements cube coordinates for hexagonal grids, providing a 
+// This file implements cube coordinates for hexagonal grids, providing a
 // mathematically clean coordinate system that is independent of array storage
 // and EvenRowsOffset configurations.
 
@@ -39,12 +39,12 @@ func (c CubeCoord) IsValid() bool {
 // HexDirections defines the 6 direction vectors in cube coordinates
 // Order must match NeighborDirection enum: LEFT, TOP_LEFT, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
 var HexDirections = [6]CubeCoord{
-	{Q: -1, R: 0},  // LEFT
-	{Q: 0, R: -1},  // TOP_LEFT
-	{Q: 1, R: -1},  // TOP_RIGHT
-	{Q: 1, R: 0},   // RIGHT
-	{Q: 0, R: 1},   // BOTTOM_RIGHT
-	{Q: -1, R: 1},  // BOTTOM_LEFT
+	{Q: -1, R: 0}, // LEFT
+	{Q: 0, R: -1}, // TOP_LEFT
+	{Q: 1, R: -1}, // TOP_RIGHT
+	{Q: 1, R: 0},  // RIGHT
+	{Q: 0, R: 1},  // BOTTOM_RIGHT
+	{Q: -1, R: 1}, // BOTTOM_LEFT
 }
 
 // Neighbor returns the neighboring cube coordinate in the specified direction
@@ -57,12 +57,10 @@ func (c CubeCoord) Neighbor(direction NeighborDirection) CubeCoord {
 }
 
 // Neighbors returns all 6 neighboring cube coordinates
-func (c CubeCoord) Neighbors() [6]CubeCoord {
-	var neighbors [6]CubeCoord
+func (c CubeCoord) Neighbors(out *[6]CubeCoord) {
 	for i := 0; i < 6; i++ {
-		neighbors[i] = c.Neighbor(NeighborDirection(i))
+		out[i] = c.Neighbor(NeighborDirection(i))
 	}
-	return neighbors
 }
 
 // =============================================================================
@@ -99,16 +97,16 @@ func (c CubeCoord) Ring(radius int) []CubeCoord {
 	if radius == 0 {
 		return []CubeCoord{c}
 	}
-	
+
 	var results []CubeCoord
 	// Start at one direction and walk around the ring
 	coord := c
-	
+
 	// Move to the starting point of the ring (go LEFT radius times)
 	for i := 0; i < radius; i++ {
 		coord = coord.Neighbor(LEFT)
 	}
-	
+
 	// Walk around the ring in all 6 directions
 	directions := []NeighborDirection{TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT, LEFT, TOP_LEFT}
 	for _, direction := range directions {
@@ -117,7 +115,7 @@ func (c CubeCoord) Ring(radius int) []CubeCoord {
 			coord = coord.Neighbor(direction)
 		}
 	}
-	
+
 	return results
 }
 
@@ -125,81 +123,16 @@ func (c CubeCoord) Ring(radius int) []CubeCoord {
 // Array Coordinate Conversion
 // =============================================================================
 
-// ArrayToHex converts array coordinates (row, col) to cube coordinates
-// Takes into account the map's EvenRowsOffset configuration
-func (m *Map) ArrayToHex(row, col int) CubeCoord {
-	var q, r int
-	r = row
-	
-	if m.EvenRowsOffset() {
-		// Even rows are offset to the right (flat-top hexes)
-		q = col - (row - (row&1)) / 2
-	} else {
-		// Odd rows are offset to the right (flat-top hexes)
-		q = col - (row + (row&1)) / 2
-	}
-	
-	return NewCubeCoord(q, r)
-}
-
-// HexToArray converts cube coordinates to array coordinates (row, col)
-// Takes into account the map's EvenRowsOffset configuration
-func (m *Map) HexToArray(coord CubeCoord) (row, col int) {
-	row = coord.R
-	
-	if m.EvenRowsOffset() {
-		// Even rows are offset to the right (flat-top hexes)
-		col = coord.Q + (coord.R - (coord.R&1)) / 2
-	} else {
-		// Odd rows are offset to the right (flat-top hexes)
-		col = coord.Q + (coord.R + (coord.R&1)) / 2
-	}
-	
-	return row, col
-}
-
-// =============================================================================
-// Map Integration Methods
-// =============================================================================
-
-// Note: TileAtCube moved to game.go to use direct cube storage
-
-// TileAtCubeQR returns the tile at the specified cube coordinate (Q, R)
-func (m *Map) TileAtCubeQR(q, r int) *Tile {
-	return m.TileAtCube(NewCubeCoord(q, r))
-}
-
-// GetNeighborCube returns the neighboring tile in the specified direction using cube coordinates
-func (m *Map) GetNeighborCube(coord CubeCoord, direction NeighborDirection) *Tile {
-	neighborCoord := coord.Neighbor(direction)
-	return m.TileAtCube(neighborCoord)
-}
-
-// GetTileNeighborsCube returns all 6 neighboring tiles using cube coordinates
-func (m *Map) GetTileNeighborsCube(coord CubeCoord) []*Tile {
-	neighborCoords := coord.Neighbors()
-	neighbors := make([]*Tile, 6)
-	
-	for i, neighborCoord := range neighborCoords {
-		neighbors[i] = m.TileAtCube(neighborCoord)
-	}
-	
-	return neighbors
-}
-
-// Note: Utility functions abs, max, min are defined in board.go
-
 // =============================================================================
 // Debugging and Display Helpers
 // =============================================================================
 
 // String returns a string representation of the cube coordinate
 func (c CubeCoord) String() string {
-	return fmt.Sprintf("(%d,%d,%d)", c.Q, c.R, c.S())
+	return fmt.Sprintf("(%d,%d)", c.Q, c.R)
+	// return fmt.Sprintf("(%d,%d,%d)", c.Q, c.R, c.S())
 }
 
-// ToArrayString returns the equivalent array coordinates as a string (for debugging)
-func (c CubeCoord) ToArrayString(m *Map) string {
-	row, col := m.HexToArray(c)
-	return fmt.Sprintf("[%d,%d]", row, col)
+func (c CubeCoord) Plus(dQ, dR int) CubeCoord {
+	return CubeCoord{c.Q + dQ, c.R + dR}
 }

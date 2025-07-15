@@ -17,7 +17,7 @@ func (g *Game) NextTurn() error {
 	}
 
 	// Advance to next player
-	g.CurrentPlayer = (g.CurrentPlayer + 1) % g.PlayerCount
+	g.CurrentPlayer = (g.CurrentPlayer + 1) % g.PlayerCount()
 
 	// If we've cycled back to player 0, increment turn counter
 	if g.CurrentPlayer == 0 {
@@ -73,20 +73,20 @@ func (g *Game) CanEndTurn() bool {
 }
 
 // FindPath calculates movement path between positions
-func (g *Game) FindPath(fromRow, fromCol, toRow, toCol int) ([]Tile, error) {
-	if g.Map == nil {
+func (g *Game) FindPath(from, to Position) ([]Tile, error) {
+	if g.World.Map == nil {
 		return nil, fmt.Errorf("no map loaded")
 	}
 
 	// Check if start and end positions are valid
-	startTile := g.GetTileAt(fromRow, fromCol)
-	endTile := g.GetTileAt(toRow, toCol)
+	startTile := g.World.Map.TileAt(from)
+	endTile := g.World.Map.TileAt(to)
 
 	if startTile == nil {
-		return nil, fmt.Errorf("invalid start position: (%d, %d)", fromRow, fromCol)
+		return nil, fmt.Errorf("invalid start position: %s", from)
 	}
 	if endTile == nil {
-		return nil, fmt.Errorf("invalid end position: (%d, %d)", toRow, toCol)
+		return nil, fmt.Errorf("invalid end position: %s", to)
 	}
 
 	// For now, return a simple direct path
@@ -98,8 +98,8 @@ func (g *Game) FindPath(fromRow, fromCol, toRow, toCol int) ([]Tile, error) {
 // IsValidMove checks if movement is legal using cube coordinates
 func (g *Game) IsValidMove(from, to CubeCoord) bool {
 	// Check if both positions are valid
-	startTile := g.Map.TileAt(from)
-	endTile := g.Map.TileAt(to)
+	startTile := g.World.Map.TileAt(from)
+	endTile := g.World.Map.TileAt(to)
 
 	if startTile == nil || endTile == nil {
 		return false
@@ -203,7 +203,7 @@ func (g *Game) MoveUnit(unit *Unit, to CubeCoord) error {
 	toPos := to
 
 	// Remove unit from current tile
-	currentTile := g.Map.TileAt(unit.Coord)
+	currentTile := g.World.Map.TileAt(unit.Coord)
 	if currentTile != nil {
 		currentTile.Unit = nil
 	}
@@ -213,7 +213,7 @@ func (g *Game) MoveUnit(unit *Unit, to CubeCoord) error {
 	unit.DistanceLeft -= cost
 
 	// Place unit on new tile
-	newTile := g.Map.TileAt(to)
+	newTile := g.World.Map.TileAt(to)
 	if newTile != nil {
 		newTile.Unit = unit
 	}
@@ -322,7 +322,7 @@ func (g *Game) CanAttackUnit(attacker, defender *Unit) bool {
 	}
 
 	// Check if attacker is in range
-	distance := g.calculateDistance(attacker.Row, attacker.Col, defender.Row, defender.Col)
+	distance := g.calculateDistance(attacker.Coord, defender.Coord)
 	attackRange := g.GetUnitAttackRange(attacker)
 
 	return distance <= attackRange
@@ -331,7 +331,7 @@ func (g *Game) CanAttackUnit(attacker, defender *Unit) bool {
 // MoveUnitAt executes unit movement from one coordinate to another
 func (g *Game) MoveUnitAt(from, to CubeCoord) error {
 	// Find unit at from position
-	fromTile := g.Map.TileAt(from)
+	fromTile := g.World.Map.TileAt(from)
 	if fromTile == nil {
 		return fmt.Errorf("invalid from position: %v", from)
 	}
@@ -346,7 +346,7 @@ func (g *Game) MoveUnitAt(from, to CubeCoord) error {
 // AttackUnitAt executes combat between units at the given coordinates
 func (g *Game) AttackUnitAt(attackerPos, targetPos CubeCoord) (*CombatResult, error) {
 	// Find attacker unit
-	attackerTile := g.Map.TileAt(attackerPos)
+	attackerTile := g.World.Map.TileAt(attackerPos)
 	if attackerTile == nil {
 		return nil, fmt.Errorf("invalid attacker position: %v", attackerPos)
 	}
@@ -356,7 +356,7 @@ func (g *Game) AttackUnitAt(attackerPos, targetPos CubeCoord) (*CombatResult, er
 	}
 
 	// Find target unit
-	targetTile := g.Map.TileAt(targetPos)
+	targetTile := g.World.Map.TileAt(targetPos)
 	if targetTile == nil {
 		return nil, fmt.Errorf("invalid target position: %v", targetPos)
 	}
@@ -370,28 +370,28 @@ func (g *Game) AttackUnitAt(attackerPos, targetPos CubeCoord) (*CombatResult, er
 }
 
 // CanAttack validates potential attack using position coordinates
-func (g *Game) CanAttack(fromRow, fromCol, toRow, toCol int) (bool, error) {
-	attacker := g.GetUnitAt(fromRow, fromCol)
+func (g *Game) CanAttack(from, to CubeCoord) (bool, error) {
+	attacker := g.GetUnitAt(from)
 	if attacker == nil {
-		return false, fmt.Errorf("no unit at attacker position (%d, %d)", fromRow, fromCol)
+		return false, fmt.Errorf("no unit at attacker position (%d, %d)", from.Q, from.R)
 	}
 
-	defender := g.GetUnitAt(toRow, toCol)
+	defender := g.GetUnitAt(to)
 	if defender == nil {
-		return false, fmt.Errorf("no unit at target position (%d, %d)", toRow, toCol)
+		return false, fmt.Errorf("no unit at target position (%d, %d)", to.Q, to.R)
 	}
 
 	return g.CanAttackUnit(attacker, defender), nil
 }
 
 // CanMove validates potential movement using position coordinates
-func (g *Game) CanMove(fromRow, fromCol, toRow, toCol int) (bool, error) {
-	unit := g.GetUnitAt(fromRow, fromCol)
+func (g *Game) CanMove(from, to Position) (bool, error) {
+	unit := g.GetUnitAt(from)
 	if unit == nil {
-		return false, fmt.Errorf("no unit at position (%d, %d)", fromRow, fromCol)
+		return false, fmt.Errorf("no unit at position (%d, %d)", from.Q, from.R)
 	}
 
-	return g.CanMoveUnit(unit, toRow, toCol), nil
+	return g.CanMoveUnit(unit, to), nil
 }
 
 // calculateDamage calculates damage dealt in combat (simplified)
@@ -413,11 +413,8 @@ func (g *Game) calculateDamage(attacker, defender *Unit) int {
 }
 
 // calculateDistance calculates distance between two positions
-func (g *Game) calculateDistance(row1, col1, row2, col2 int) int {
+// Source: https://www.redblobgames.com/grids/hexagons-v1/#distances
+func (g *Game) calculateDistance(a, b CubeCoord) int {
 	// Simplified hex distance calculation
-	// TODO: Implement proper hex distance calculation
-	dRow := abs(row2 - row1)
-	dCol := abs(col2 - col1)
-
-	return max(dRow, dCol)
+	return (abs(a.Q-b.Q) + abs(a.Q+a.R-b.Q-b.R) + abs(a.R-b.R)) / 2
 }

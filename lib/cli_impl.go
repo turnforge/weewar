@@ -32,15 +32,15 @@ type WeeWarCLI struct {
 // NewWeeWarCLI creates a new CLI instance
 func NewWeeWarCLI(game *Game) *WeeWarCLI {
 	return &WeeWarCLI{
-		game:        game,
-		displayMode: DisplayDetailed,
-		verbose:     false,
-		formatter:   NewDefaultFormatter(),
-		recording:   false,
-		interactive: false,
-		autoRender:  false,
-		renderDir:   "/tmp/turnengine/autorenders",
-		maxRenders:  0, // Will be set by command line flags
+		game:         game,
+		displayMode:  DisplayDetailed,
+		verbose:      false,
+		formatter:    NewDefaultFormatter(),
+		recording:    false,
+		interactive:  false,
+		autoRender:   false,
+		renderDir:    "/tmp/turnengine/autorenders",
+		maxRenders:   0, // Will be set by command line flags
 		commandCount: 0,
 	}
 }
@@ -182,12 +182,12 @@ func (cli *WeeWarCLI) GetAvailableCommands() []string {
 		CmdNew, CmdVerbose, CmdCompact, "autorender", "predict",
 		"attackoptions", "moveoptions",
 	}
-	
+
 	// Add REPL-specific commands if in interactive mode
 	if cli.interactive {
 		commands = append(commands, "state", "refresh", "turn", "actions")
 	}
-	
+
 	return commands
 }
 
@@ -201,7 +201,7 @@ func (cli *WeeWarCLI) GetCommandHelp(command string) string {
 	case CmdStatus:
 		return "status - Show current game status and player information"
 	case CmdMap:
-		return "map - Display the current game map"
+		return "map - RowCol the current game map"
 	case CmdUnits:
 		return "units [player] - Show units for current player or specified player"
 	case CmdPlayer:
@@ -292,7 +292,7 @@ func (cli *WeeWarCLI) handleMove(cmd *CLICommand) *CLIResponse {
 	fromPos := cmd.Arguments[0]
 	toPos := cmd.Arguments[1]
 
-	// Parse positions (supports both chess notation and unit IDs) 
+	// Parse positions (supports both chess notation and unit IDs)
 	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, fromPos)
 	if !valid {
 		return &CLIResponse{
@@ -312,8 +312,8 @@ func (cli *WeeWarCLI) handleMove(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Convert to cube coordinates for game API calls
-	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
-	toCoord := cli.game.Map.DisplayToHex(toRow, toCol)
+	fromCoord := cli.game.World.Map.RowColToHex(fromRow, fromCol)
+	toCoord := cli.game.World.Map.RowColToHex(toRow, toCol)
 
 	// Let the game handle all validation and execute the move
 	if err := cli.game.MoveUnitAt(fromCoord, toCoord); err != nil {
@@ -355,9 +355,9 @@ func (cli *WeeWarCLI) handleAttack(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Convert to cube coordinates for game API calls
-	attackerCoord := cli.game.Map.DisplayToHex(attackerRow, attackerCol)
-	targetCoord := cli.game.Map.DisplayToHex(targetRow, targetCol)
-	
+	attackerCoord := cli.game.World.Map.RowColToHex(attackerRow, attackerCol)
+	targetCoord := cli.game.World.Map.RowColToHex(targetRow, targetCol)
+
 	// Let the game handle all validation and execute the attack
 	result, err := cli.game.AttackUnitAt(attackerCoord, targetCoord)
 	if err != nil {
@@ -368,7 +368,7 @@ func (cli *WeeWarCLI) handleAttack(cmd *CLICommand) *CLIResponse {
 		}
 	}
 
-	message := fmt.Sprintf("Attack from %s to %s: %d damage dealt", 
+	message := fmt.Sprintf("Attack from %s to %s: %d damage dealt",
 		attackerPos, targetPos, result.DefenderDamage)
 	if result.DefenderKilled {
 		message += " (target destroyed)"
@@ -415,7 +415,7 @@ func (cli *WeeWarCLI) handlePlayer(cmd *CLICommand) *CLIResponse {
 			playerID = id
 		}
 	}
-	
+
 	cli.PrintPlayerInfo(playerID)
 	return &CLIResponse{
 		Success: true,
@@ -446,7 +446,7 @@ func (cli *WeeWarCLI) handleSave(cmd *CLICommand) *CLIResponse {
 			Error:   "Save operation failed",
 		}
 	}
-	
+
 	return &CLIResponse{
 		Success: true,
 		Message: fmt.Sprintf("Game saved to %s", filename),
@@ -463,7 +463,7 @@ func (cli *WeeWarCLI) handleLoad(cmd *CLICommand) *CLIResponse {
 			Error:   "Load operation failed",
 		}
 	}
-	
+
 	return &CLIResponse{
 		Success: true,
 		Message: fmt.Sprintf("Game loaded from %s", filename),
@@ -475,19 +475,19 @@ func (cli *WeeWarCLI) handleRender(cmd *CLICommand) *CLIResponse {
 	filename := cmd.Arguments[0]
 	width := 800
 	height := 600
-	
+
 	if len(cmd.Arguments) > 1 {
 		if w, err := strconv.Atoi(cmd.Arguments[1]); err == nil {
 			width = w
 		}
 	}
-	
+
 	if len(cmd.Arguments) > 2 {
 		if h, err := strconv.Atoi(cmd.Arguments[2]); err == nil {
 			height = h
 		}
 	}
-	
+
 	if err := cli.RenderToFile(filename, width, height); err != nil {
 		return &CLIResponse{
 			Success: false,
@@ -495,7 +495,7 @@ func (cli *WeeWarCLI) handleRender(cmd *CLICommand) *CLIResponse {
 			Error:   "Render operation failed",
 		}
 	}
-	
+
 	return &CLIResponse{
 		Success: true,
 		Message: fmt.Sprintf("Game rendered to %s (%dx%d)", filename, width, height),
@@ -511,10 +511,10 @@ func (cli *WeeWarCLI) handleEndTurn(cmd *CLICommand) *CLIResponse {
 			Error:   "End turn operation failed",
 		}
 	}
-	
+
 	return &CLIResponse{
 		Success: true,
-		Message: fmt.Sprintf("Turn ended. Now player %d's turn (Turn %d)", 
+		Message: fmt.Sprintf("Turn ended. Now player %d's turn (Turn %d)",
 			cli.game.GetCurrentPlayer(), cli.game.GetTurnNumber()),
 	}
 }
@@ -536,21 +536,11 @@ func (cli *WeeWarCLI) handleNew(cmd *CLICommand) *CLIResponse {
 			playerCount = pc
 		}
 	}
-	
+
 	// Create test map
-	testMap := NewMap(8, 12, false)
-	for row := 0; row < 8; row++ {
-		for col := 0; col < 12; col++ {
-			tileType := 1 // Default to grass
-			if (row+col)%4 == 0 {
-				tileType = 2 // Some desert
-			}
-			tile := NewTile(row, col, tileType)
-			testMap.AddTile(tile)
-		}
-	}
+	testMap := weewar.CreateTestMap(8, 12, false)
 	// Note: Neighbor connections calculated on-demand
-	
+
 	// Create new game
 	newGame, err := NewGame(playerCount, testMap, time.Now().UnixNano())
 	if err != nil {
@@ -560,9 +550,9 @@ func (cli *WeeWarCLI) handleNew(cmd *CLICommand) *CLIResponse {
 			Error:   "Game creation failed",
 		}
 	}
-	
+
 	cli.game = newGame
-	
+
 	return &CLIResponse{
 		Success: true,
 		Message: fmt.Sprintf("New game created with %d players", playerCount),
@@ -576,7 +566,7 @@ func (cli *WeeWarCLI) handleVerbose(cmd *CLICommand) *CLIResponse {
 	if cli.verbose {
 		status = "enabled"
 	}
-	
+
 	return &CLIResponse{
 		Success: true,
 		Message: fmt.Sprintf("Verbose mode %s", status),
@@ -585,10 +575,10 @@ func (cli *WeeWarCLI) handleVerbose(cmd *CLICommand) *CLIResponse {
 
 // handleCompact sets compact display mode
 func (cli *WeeWarCLI) handleCompact(cmd *CLICommand) *CLIResponse {
-	cli.displayMode = DisplayCompact
+	cli.displayMode = RowColCompact
 	return &CLIResponse{
 		Success: true,
-		Message: "Display mode set to compact",
+		Message: "RowCol mode set to compact",
 	}
 }
 
@@ -610,12 +600,12 @@ func (cli *WeeWarCLI) handleAutoRender(cmd *CLICommand) *CLIResponse {
 		cli.autoRender = false
 		status = "disabled (maxRenders is 0)"
 	}
-	
+
 	message := fmt.Sprintf("Auto-rendering %s", status)
 	if cli.autoRender && cli.maxRenders > 0 {
 		message += fmt.Sprintf(" (max %d files in %s)", cli.maxRenders, cli.renderDir)
 	}
-	
+
 	return &CLIResponse{
 		Success: true,
 		Message: message,
@@ -631,10 +621,10 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Missing arguments",
 		}
 	}
-	
+
 	fromPos := cmd.Arguments[0]
 	toPos := cmd.Arguments[1]
-	
+
 	// Parse positions (supports both chess notation and unit IDs)
 	fromRow, fromCol, valid := ParsePositionOrUnitID(cli.game, fromPos)
 	if !valid {
@@ -644,7 +634,7 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
-	
+
 	toRow, toCol, valid := ParsePositionOrUnitID(cli.game, toPos)
 	if !valid {
 		return &CLIResponse{
@@ -653,13 +643,13 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Use format like A1, B2, etc. or unit ID like A1, B2",
 		}
 	}
-	
+
 	// Convert to cube coordinates for game API calls
-	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
-	toCoord := cli.game.Map.DisplayToHex(toRow, toCol)
-	
+	fromCoord := cli.game.World.Map.RowColToHex(fromRow, fromCol)
+	toCoord := cli.game.World.Map.RowColToHex(toRow, toCol)
+
 	// Find attacker unit using cube coordinates
-	fromTile := cli.game.Map.TileAt(fromCoord)
+	fromTile := cli.game.World.Map.TileAt(fromCoord)
 	if fromTile == nil {
 		return &CLIResponse{
 			Success: false,
@@ -675,9 +665,9 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Cannot predict attack from empty position",
 		}
 	}
-	
+
 	// Find target unit using cube coordinates
-	toTile := cli.game.Map.TileAt(toCoord)
+	toTile := cli.game.World.Map.TileAt(toCoord)
 	if toTile == nil {
 		return &CLIResponse{
 			Success: false,
@@ -693,7 +683,7 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Cannot predict attack on empty position",
 		}
 	}
-	
+
 	// Check if attack is valid
 	canAttack, err := cli.game.CanAttack(fromRow, fromCol, toRow, toCol)
 	if err != nil || !canAttack {
@@ -703,7 +693,7 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Invalid attack",
 		}
 	}
-	
+
 	// Create predictor and get damage prediction
 	predictor := NewGamePredictor(cli.game.GetAssetManager())
 	damagePrediction, err := predictor.GetCombatPredictor().PredictDamage(cli.game, fromRow, fromCol, toRow, toCol)
@@ -714,17 +704,17 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			Error:   "Prediction calculation failed",
 		}
 	}
-	
+
 	// Format prediction output
 	message := fmt.Sprintf("=== Attack Prediction ===\n")
-	message += fmt.Sprintf("Attacker: %s at %s (Health: %d)\n", 
+	message += fmt.Sprintf("Attacker: %s at %s (Health: %d)\n",
 		cli.game.GetUnitTypeName(attacker.UnitType), fromPos, attacker.AvailableHealth)
-	message += fmt.Sprintf("Target: %s at %s (Health: %d)\n", 
+	message += fmt.Sprintf("Target: %s at %s (Health: %d)\n",
 		cli.game.GetUnitTypeName(target.UnitType), toPos, target.AvailableHealth)
-	message += fmt.Sprintf("\nDamage Range: %d - %d\n", 
+	message += fmt.Sprintf("\nDamage Range: %d - %d\n",
 		damagePrediction.MinDamage, damagePrediction.MaxDamage)
 	message += fmt.Sprintf("Expected Damage: %.1f\n", damagePrediction.ExpectedDamage)
-	
+
 	// Show damage probabilities
 	message += "\nDamage Probabilities:\n"
 	for damage := damagePrediction.MinDamage; damage <= damagePrediction.MaxDamage; damage++ {
@@ -732,7 +722,7 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 			message += fmt.Sprintf("  %d damage: %.1f%%\n", damage, prob*100)
 		}
 	}
-	
+
 	// Show outcome predictions
 	remainingHealth := target.AvailableHealth - int(damagePrediction.ExpectedDamage)
 	if remainingHealth <= 0 {
@@ -740,7 +730,7 @@ func (cli *WeeWarCLI) handlePredict(cmd *CLICommand) *CLIResponse {
 	} else {
 		message += fmt.Sprintf("\nPredicted Target Health: %d", remainingHealth)
 	}
-	
+
 	fmt.Print(message)
 	return &CLIResponse{
 		Success: true,
@@ -769,10 +759,10 @@ func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Convert to cube coordinates for game API calls
-	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
-	
+	fromCoord := cli.game.World.Map.RowColToHex(fromRow, fromCol)
+
 	// Check if unit exists at position using cube coordinates
-	fromTile := cli.game.Map.TileAt(fromCoord)
+	fromTile := cli.game.World.Map.TileAt(fromCoord)
 	if fromTile == nil {
 		return &CLIResponse{
 			Success: false,
@@ -793,9 +783,9 @@ func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
 	if unit.PlayerID != cli.game.GetCurrentPlayer() {
 		return &CLIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Unit at %s belongs to player %d, not current player %d", 
+			Message: fmt.Sprintf("Unit at %s belongs to player %d, not current player %d",
 				cmd.Arguments[0], unit.PlayerID, cli.game.GetCurrentPlayer()),
-			Error:   "Cannot show attack options for opponent's unit",
+			Error: "Cannot show attack options for opponent's unit",
 		}
 	}
 
@@ -813,17 +803,17 @@ func (cli *WeeWarCLI) handleAttackOptions(cmd *CLICommand) *CLIResponse {
 	// Format output
 	unitName := cli.game.GetUnitTypeName(unit.UnitType)
 	message := fmt.Sprintf("=== Attack Options for %s at %s ===\n", unitName, cmd.Arguments[0])
-	
+
 	if len(attackOptions) == 0 {
 		message += "No valid attack targets available.\n"
 	} else {
 		message += fmt.Sprintf("Available targets (%d):\n", len(attackOptions))
 		for i, pos := range attackOptions {
 			posStr := cli.formatter.FormatPosition(pos.Row, pos.Col)
-			target := cli.game.GetUnitAt(pos.Row, pos.Col)
+			target := cli.game.GetUnitAt(pos.Coord)
 			if target != nil {
 				targetName := cli.game.GetUnitTypeName(target.UnitType)
-				message += fmt.Sprintf("  %d. %s - %s (Player %d, Health: %d)\n", 
+				message += fmt.Sprintf("  %d. %s - %s (Player %d, Health: %d)\n",
 					i+1, posStr, targetName, target.PlayerID, target.AvailableHealth)
 			} else {
 				message += fmt.Sprintf("  %d. %s - No unit\n", i+1, posStr)
@@ -860,10 +850,10 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Convert to cube coordinates for game API calls
-	fromCoord := cli.game.Map.DisplayToHex(fromRow, fromCol)
-	
+	fromCoord := cli.game.World.Map.RowColToHex(fromRow, fromCol)
+
 	// Check if unit exists at position using cube coordinates
-	fromTile := cli.game.Map.TileAt(fromCoord)
+	fromTile := cli.game.World.Map.TileAt(fromCoord)
 	if fromTile == nil {
 		return &CLIResponse{
 			Success: false,
@@ -884,9 +874,9 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 	if unit.PlayerID != cli.game.GetCurrentPlayer() {
 		return &CLIResponse{
 			Success: false,
-			Message: fmt.Sprintf("Unit at %s belongs to player %d, not current player %d", 
+			Message: fmt.Sprintf("Unit at %s belongs to player %d, not current player %d",
 				cmd.Arguments[0], unit.PlayerID, cli.game.GetCurrentPlayer()),
-			Error:   "Cannot show move options for opponent's unit",
+			Error: "Cannot show move options for opponent's unit",
 		}
 	}
 
@@ -905,7 +895,7 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 	unitName := cli.game.GetUnitTypeName(unit.UnitType)
 	message := fmt.Sprintf("=== Movement Options for %s at %s ===\n", unitName, cmd.Arguments[0])
 	message += fmt.Sprintf("Movement Points: %d\n", unit.DistanceLeft)
-	
+
 	if len(moveOptions) == 0 {
 		message += "No valid movement positions available.\n"
 	} else {
@@ -915,7 +905,7 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 			tile := cli.game.GetTileAt(pos.Row, pos.Col)
 			if tile != nil {
 				terrainData := GetTerrainData(tile.TileType)
-				message += fmt.Sprintf("  %d. %s - %s (Move Cost: %d)\n", 
+				message += fmt.Sprintf("  %d. %s - %s (Move Cost: %d)\n",
 					i+1, posStr, terrainData.Name, terrainData.MoveCost)
 			} else {
 				message += fmt.Sprintf("  %d. %s - Unknown terrain\n", i+1, posStr)
@@ -932,7 +922,7 @@ func (cli *WeeWarCLI) handleMoveOptions(cmd *CLICommand) *CLIResponse {
 }
 
 // =============================================================================
-// Display Functions
+// RowCol Functions
 // =============================================================================
 
 // PrintGameState outputs current game state to console
@@ -947,13 +937,13 @@ func (cli *WeeWarCLI) PrintGameState() {
 	fmt.Printf("Current Player: %d\n", cli.game.GetCurrentPlayer())
 	fmt.Printf("Game Status: %s\n", cli.game.GetGameStatus())
 	fmt.Printf("Map: %s\n", cli.game.GetMapName())
-	
+
 	if winner, hasWinner := cli.game.GetWinner(); hasWinner {
 		fmt.Printf("Winner: Player %d\n", winner)
 	}
-	
-	fmt.Printf("Players: %d\n", cli.game.PlayerCount)
-	for i := 0; i < cli.game.PlayerCount; i++ {
+
+	fmt.Printf("Players: %d\n", cli.game.World.PlayerCount)
+	for i := 0; i < cli.game.World.PlayerCount; i++ {
 		units := cli.game.GetUnitsForPlayer(i)
 		fmt.Printf("  Player %d: %d units\n", i, len(units))
 	}
@@ -1025,52 +1015,52 @@ func (cli *WeeWarCLI) PrintMap() {
 	fmt.Printf("=== Game Map ===\n")
 	rows, cols := cli.game.GetMapSize()
 	fmt.Printf("Size: %dx%d\n", rows, cols)
-	
+
 	// Print column headers with hex offset consideration
 	fmt.Print("       ") // Extra space for hex offset and row numbers
 	for col := 0; col < cols; col++ {
 		fmt.Printf("  %c   ", 'A'+col)
 	}
 	fmt.Println()
-	
+
 	// Print map rows with hex offset (2 lines per row)
 	for row := 0; row < rows; row++ {
 		// Apply hex offset based on EvenRowsOffset flag
 		isEvenRow := (row % 2) == 0
-		needsOffset := (cli.game.Map.EvenRowsOffset() && isEvenRow) || (!cli.game.Map.EvenRowsOffset() && !isEvenRow)
-		
+		needsOffset := (cli.game.World.Map.EvenRowsOffset() && isEvenRow) || (!cli.game.World.Map.EvenRowsOffset() && !isEvenRow)
+
 		// First line: terrain emojis
 		fmt.Printf("%2d ", row+1)
 		if needsOffset {
 			fmt.Print("   ") // Offset by 3 spaces for hex layout
 		}
-		
+
 		for col := 0; col < cols; col++ {
 			tile := cli.game.GetTileAt(row, col)
 			if tile == nil {
 				fmt.Print("      ") // 6 spaces for empty tiles
 				continue
 			}
-			
+
 			// Show terrain emoji centered
 			emoji := cli.getTileEmoji(tile.TileType)
 			fmt.Printf("  %s  ", emoji)
 		}
 		fmt.Println()
-		
+
 		// Second line: unit information
 		fmt.Print("   ") // Space for row number
 		if needsOffset {
 			fmt.Print("   ") // Offset by 3 spaces for hex layout
 		}
-		
+
 		for col := 0; col < cols; col++ {
 			tile := cli.game.GetTileAt(row, col)
 			if tile == nil {
 				fmt.Print("      ") // 6 spaces for empty tiles
 				continue
 			}
-			
+
 			// Show unit info with ID and health superscript (same 6-char width as terrain)
 			if tile.Unit != nil {
 				unitID := cli.game.GetUnitID(tile.Unit)
@@ -1083,7 +1073,7 @@ func (cli *WeeWarCLI) PrintMap() {
 		fmt.Println()
 		fmt.Println() // Extra line between rows for clarity
 	}
-	
+
 	fmt.Println("Terrain Key:")
 	fmt.Println("🌱=Grass  🏜️=Desert  🌊=Water  ⛰️=Mountains  🗿=Rock  🏥=Hospital")
 	fmt.Println("🌾=Swamp  🌲=Forest  🌋=Lava  💧=Shallow  🚀=Missile  🌉=Bridge")
@@ -1102,14 +1092,14 @@ func (cli *WeeWarCLI) PrintUnits() {
 	}
 
 	fmt.Printf("=== Units ===\n")
-	for playerID := 0; playerID < cli.game.PlayerCount; playerID++ {
+	for playerID := 0; playerID < cli.game.World.PlayerCount; playerID++ {
 		units := cli.game.GetUnitsForPlayer(playerID)
 		fmt.Printf("Player %d: %d units\n", playerID, len(units))
-		
+
 		for i, unit := range units {
 			pos := FormatPositionToString(unit.Row, unit.Col)
 			unitName := cli.game.GetUnitTypeName(unit.UnitType)
-			fmt.Printf("  %d. %s - %s (Type:%d) Health:%d Movement:%d\n", 
+			fmt.Printf("  %d. %s - %s (Type:%d) Health:%d Movement:%d\n",
 				i+1, pos, unitName, unit.UnitType, unit.AvailableHealth, unit.DistanceLeft)
 		}
 	}
@@ -1122,7 +1112,7 @@ func (cli *WeeWarCLI) PrintPlayerInfo(playerID int) {
 		return
 	}
 
-	if playerID < 0 || playerID >= cli.game.PlayerCount {
+	if playerID < 0 || playerID >= cli.game.World.PlayerCount {
 		fmt.Printf("Invalid player ID: %d\n", playerID)
 		return
 	}
@@ -1130,13 +1120,13 @@ func (cli *WeeWarCLI) PrintPlayerInfo(playerID int) {
 	fmt.Printf("=== Player %d ===\n", playerID)
 	units := cli.game.GetUnitsForPlayer(playerID)
 	fmt.Printf("Units: %d\n", len(units))
-	
+
 	if playerID == cli.game.GetCurrentPlayer() {
 		fmt.Println("Status: Current player")
 	} else {
 		fmt.Println("Status: Waiting")
 	}
-	
+
 	// Calculate total health
 	totalHealth := 0
 	for _, unit := range units {
@@ -1161,16 +1151,16 @@ func (cli *WeeWarCLI) PrintHelp(topic string) {
 }
 
 // =============================================================================
-// Display Configuration
+// RowCol Configuration
 // =============================================================================
 
-// SetDisplayMode changes output format
-func (cli *WeeWarCLI) SetDisplayMode(mode CLIDisplayMode) {
+// SetRowColMode changes output format
+func (cli *WeeWarCLI) SetRowColMode(mode CLIDisplayMode) {
 	cli.displayMode = mode
 }
 
-// GetDisplayMode returns current display mode
-func (cli *WeeWarCLI) GetDisplayMode() CLIDisplayMode {
+// GetRowColMode returns current display mode
+func (cli *WeeWarCLI) GetRowColMode() CLIDisplayMode {
 	return cli.displayMode
 }
 
@@ -1220,33 +1210,33 @@ func (cli *WeeWarCLI) GetMaxRenders() int {
 func (cli *WeeWarCLI) StartInteractiveMode() {
 	cli.interactive = true
 	scanner := bufio.NewScanner(os.Stdin)
-	
+
 	fmt.Println("=== WeeWar Interactive REPL ===")
 	fmt.Println("Type 'help' for available commands or 'quit' to exit")
-	
+
 	// Show initial game state if game is loaded
 	if cli.game != nil {
 		cli.showGameState()
 	}
-	
+
 	for {
 		// Show current player prompt
 		prompt := cli.getREPLPrompt()
 		fmt.Print(prompt)
-		
+
 		if !scanner.Scan() {
 			break
 		}
-		
+
 		command := scanner.Text()
 		if command == "" {
 			continue
 		}
-		
+
 		// Execute command and handle REPL-specific logic
 		response := cli.executeREPLCommand(command)
-		
-		// Display response
+
+		// RowCol response
 		if response.Success {
 			fmt.Printf("✓ %s\n", response.Message)
 		} else {
@@ -1255,16 +1245,16 @@ func (cli *WeeWarCLI) StartInteractiveMode() {
 				fmt.Printf("  Error: %s\n", response.Error)
 			}
 		}
-		
+
 		// Check for quit
 		if response.Data == "quit" {
 			break
 		}
-		
+
 		// Show updated game state after successful game actions
 		if response.Success && cli.isGameAction(command) {
 			cli.showREPLGameState()
-			
+
 			// Auto-render game state if enabled
 			if cli.autoRender && cli.maxRenders > 0 {
 				cli.autoRenderGameState(command)
@@ -1279,34 +1269,34 @@ func (cli *WeeWarCLI) ProcessTurn(playerID int) {
 		fmt.Println("No game loaded")
 		return
 	}
-	
+
 	if playerID != cli.game.GetCurrentPlayer() {
 		fmt.Printf("Not player %d's turn\n", playerID)
 		return
 	}
-	
+
 	fmt.Printf("=== Player %d's Turn ===\n", playerID)
 	cli.PrintPlayerInfo(playerID)
-	
+
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Turn> ")
 		if !scanner.Scan() {
 			break
 		}
-		
+
 		command := scanner.Text()
 		if command == "" {
 			continue
 		}
-		
+
 		response := cli.ExecuteCommand(command)
 		fmt.Println(response.Message)
-		
+
 		if response.Error != "" {
 			fmt.Printf("Error: %s\n", response.Error)
 		}
-		
+
 		if command == "end" || response.Data == "quit" {
 			break
 		}
@@ -1321,12 +1311,12 @@ func (cli *WeeWarCLI) PromptForInput(prompt string, validator func(string) bool)
 		if !scanner.Scan() {
 			return ""
 		}
-		
+
 		input := scanner.Text()
 		if validator == nil || validator(input) {
 			return input
 		}
-		
+
 		fmt.Println("Invalid input, please try again")
 	}
 }
@@ -1346,12 +1336,12 @@ func (cli *WeeWarCLI) SaveGameToFile(filename string) error {
 	if cli.game == nil {
 		return fmt.Errorf("no game loaded")
 	}
-	
+
 	saveData, err := cli.game.SaveGame()
 	if err != nil {
 		return fmt.Errorf("failed to serialize game: %w", err)
 	}
-	
+
 	return os.WriteFile(filename, saveData, 0644)
 }
 
@@ -1361,12 +1351,12 @@ func (cli *WeeWarCLI) LoadGameFromFile(filename string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read save file: %w", err)
 	}
-	
+
 	game, err := LoadGame(saveData)
 	if err != nil {
 		return fmt.Errorf("failed to load game: %w", err)
 	}
-	
+
 	cli.game = game
 	return nil
 }
@@ -1376,10 +1366,10 @@ func (cli *WeeWarCLI) RenderToFile(filename string, width, height int) error {
 	if cli.game == nil {
 		return fmt.Errorf("no game loaded")
 	}
-	
+
 	// Create World from current Game state
-	world := NewWorld(cli.game.PlayerCount, cli.game.Map, int(cli.game.Seed))
-	
+	world := NewWorld(cli.game.World.PlayerCount, cli.game.World.Map, int(cli.game.Seed))
+
 	// Copy units from game to world (flatten 2D units array)
 	for playerID, playerUnits := range cli.game.Units {
 		if playerUnits != nil {
@@ -1392,26 +1382,26 @@ func (cli *WeeWarCLI) RenderToFile(filename string, width, height int) error {
 			}
 		}
 	}
-	
+
 	// Copy game state
 	world.CurrentPlayer = cli.game.CurrentPlayer
 	world.TurnNumber = cli.game.TurnCounter
-	
+
 	// Create ViewState with default settings
 	viewState := NewViewState()
-	
+
 	// Create BufferRenderer for PNG output
 	renderer := NewBufferRenderer()
-	
+
 	// Create Buffer for rendering
 	buffer := NewBuffer(width, height)
-	
+
 	// Calculate render options based on world and canvas size
 	options := renderer.CalculateRenderOptions(width, height, world)
-	
+
 	// Render using new World-Renderer architecture with AssetManager support!
 	renderer.RenderWorldWithAssets(world, viewState, buffer, options, cli.game)
-	
+
 	// Save to file
 	return buffer.Save(filename)
 }
@@ -1427,29 +1417,29 @@ func (cli *WeeWarCLI) ExecuteBatchCommands(filename string) error {
 		return fmt.Errorf("failed to open batch file: %w", err)
 	}
 	defer file.Close()
-	
+
 	scanner := bufio.NewScanner(file)
 	lineNum := 0
-	
+
 	for scanner.Scan() {
 		lineNum++
 		line := strings.TrimSpace(scanner.Text())
-		
+
 		// Skip empty lines and comments
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		
+
 		fmt.Printf("Executing: %s\n", line)
 		response := cli.ExecuteCommand(line)
-		
+
 		if !response.Success {
 			return fmt.Errorf("batch command failed at line %d: %s", lineNum, response.Error)
 		}
-		
+
 		fmt.Printf("Result: %s\n", response.Message)
 	}
-	
+
 	return scanner.Err()
 }
 
@@ -1459,15 +1449,15 @@ func (cli *WeeWarCLI) RecordSession(filename string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create recording file: %w", err)
 	}
-	
+
 	cli.recordFile = file
 	cli.recording = true
-	
+
 	// Write header
 	fmt.Fprintf(file, "# WeeWar CLI Session Recording\n")
 	fmt.Fprintf(file, "# Started: %s\n", time.Now().Format(time.RFC3339))
 	fmt.Fprintf(file, "\n")
-	
+
 	return nil
 }
 
@@ -1490,11 +1480,11 @@ func (cli *WeeWarCLI) getREPLPrompt() string {
 	if cli.game == nil {
 		return "weewar> "
 	}
-	
+
 	currentPlayer := cli.game.GetCurrentPlayer()
 	turnNumber := cli.game.GetTurnNumber()
 	gameStatus := cli.game.GetGameStatus()
-	
+
 	// Check if game ended
 	if gameStatus == GameStatusEnded {
 		if winner, hasWinner := cli.game.GetWinner(); hasWinner {
@@ -1502,7 +1492,7 @@ func (cli *WeeWarCLI) getREPLPrompt() string {
 		}
 		return "weewar[GAME ENDED]> "
 	}
-	
+
 	// Show turn and player info
 	return fmt.Sprintf("weewar[T%d:P%d]> ", turnNumber, currentPlayer)
 }
@@ -1517,7 +1507,7 @@ func (cli *WeeWarCLI) executeREPLCommand(command string) *CLIResponse {
 	case "refresh", "r":
 		// Refresh display
 		cli.showREPLGameState()
-		return &CLIResponse{Success: true, Message: "Display refreshed"}
+		return &CLIResponse{Success: true, Message: "RowCol refreshed"}
 	case "turn":
 		// Show detailed turn info
 		return cli.handleTurnInfo()
@@ -1525,7 +1515,7 @@ func (cli *WeeWarCLI) executeREPLCommand(command string) *CLIResponse {
 		// Show available actions
 		return cli.handleAvailableActions()
 	}
-	
+
 	// Execute normal command
 	return cli.ExecuteCommand(command)
 }
@@ -1534,7 +1524,7 @@ func (cli *WeeWarCLI) executeREPLCommand(command string) *CLIResponse {
 func (cli *WeeWarCLI) isGameAction(command string) bool {
 	cmd := strings.ToLower(strings.TrimSpace(strings.Fields(command)[0]))
 	gameActions := []string{"move", "attack", "end", "new", "load"}
-	
+
 	for _, action := range gameActions {
 		if cmd == action {
 			return true
@@ -1549,7 +1539,7 @@ func (cli *WeeWarCLI) showGameState() {
 		fmt.Println("No game loaded. Use 'new' to create a game or 'load' to load one.")
 		return
 	}
-	
+
 	fmt.Println("\n" + strings.Repeat("=", 60))
 	cli.PrintGameState()
 	fmt.Println(strings.Repeat("=", 60))
@@ -1560,28 +1550,28 @@ func (cli *WeeWarCLI) showREPLGameState() {
 	if cli.game == nil {
 		return
 	}
-	
+
 	// Show brief status
 	currentPlayer := cli.game.GetCurrentPlayer()
 	turnNumber := cli.game.GetTurnNumber()
 	gameStatus := cli.game.GetGameStatus()
-	
-	fmt.Printf("\n--- Turn %d | Player %d | Status: %s ---\n", 
+
+	fmt.Printf("\n--- Turn %d | Player %d | Status: %s ---\n",
 		turnNumber, currentPlayer, gameStatus)
-	
+
 	// Show current player's units
 	units := cli.game.GetUnitsForPlayer(currentPlayer)
 	fmt.Printf("Your units: %d | ", len(units))
-	
+
 	// Show opponent units
-	for i := 0; i < cli.game.PlayerCount; i++ {
+	for i := 0; i < cli.game.World.PlayerCount; i++ {
 		if i != currentPlayer {
 			opponentUnits := cli.game.GetUnitsForPlayer(i)
 			fmt.Printf("Player %d: %d units | ", i, len(opponentUnits))
 		}
 	}
 	fmt.Println()
-	
+
 	// Check for victory conditions
 	if gameStatus == GameStatusEnded {
 		if winner, hasWinner := cli.game.GetWinner(); hasWinner {
@@ -1590,7 +1580,7 @@ func (cli *WeeWarCLI) showREPLGameState() {
 			fmt.Println("🎮 GAME OVER: Draw!")
 		}
 	}
-	
+
 	fmt.Println()
 }
 
@@ -1603,25 +1593,25 @@ func (cli *WeeWarCLI) handleTurnInfo() *CLIResponse {
 			Error:   "Use 'new' to create a game or 'load' to load one",
 		}
 	}
-	
+
 	currentPlayer := cli.game.GetCurrentPlayer()
 	turnNumber := cli.game.GetTurnNumber()
 	gameStatus := cli.game.GetGameStatus()
-	
+
 	var message strings.Builder
 	message.WriteString(fmt.Sprintf("=== Turn Information ===\n"))
 	message.WriteString(fmt.Sprintf("Turn Number: %d\n", turnNumber))
 	message.WriteString(fmt.Sprintf("Current Player: %d\n", currentPlayer))
 	message.WriteString(fmt.Sprintf("Game Status: %s\n", gameStatus))
-	
+
 	// Show turn capabilities
 	canEndTurn := cli.game.CanEndTurn()
 	message.WriteString(fmt.Sprintf("Can End Turn: %v\n", canEndTurn))
-	
+
 	// Show player stats
 	units := cli.game.GetUnitsForPlayer(currentPlayer)
 	message.WriteString(fmt.Sprintf("Your Units: %d\n", len(units)))
-	
+
 	// Show unit movement status
 	unitsWithMovement := 0
 	for _, unit := range units {
@@ -1630,7 +1620,7 @@ func (cli *WeeWarCLI) handleTurnInfo() *CLIResponse {
 		}
 	}
 	message.WriteString(fmt.Sprintf("Units with Movement: %d\n", unitsWithMovement))
-	
+
 	fmt.Print(message.String())
 	return &CLIResponse{
 		Success: true,
@@ -1647,27 +1637,28 @@ func (cli *WeeWarCLI) handleAvailableActions() *CLIResponse {
 			Error:   "Use 'new' to create a game or 'load' to load one",
 		}
 	}
-	
+
 	currentPlayer := cli.game.GetCurrentPlayer()
 	units := cli.game.GetUnitsForPlayer(currentPlayer)
-	
+
 	var message strings.Builder
 	message.WriteString(fmt.Sprintf("=== Available Actions (Player %d) ===\n", currentPlayer))
-	
+
 	// Show units that can move
 	unitsCanMove := 0
 	for _, unit := range units {
 		if unit.DistanceLeft > 0 {
 			unitsCanMove++
-			pos := FormatPositionToString(unit.Row, unit.Col)
+			row, col := cli.game.World.Map.HexToRowCol(unit.Coord)
+			pos := FormatPositionToString(row, col)
 			message.WriteString(fmt.Sprintf("  Move unit at %s (movement: %d)\n", pos, unit.DistanceLeft))
 		}
 	}
-	
+
 	if unitsCanMove == 0 {
 		message.WriteString("  No units can move\n")
 	}
-	
+
 	// Show units that can attack
 	unitsCanAttack := 0
 	for _, unit := range units {
@@ -1675,29 +1666,31 @@ func (cli *WeeWarCLI) handleAvailableActions() *CLIResponse {
 		for _, enemy := range cli.game.GetAllUnits() {
 			if enemy.PlayerID != currentPlayer && cli.game.CanAttackUnit(unit, enemy) {
 				unitsCanAttack++
-				pos := FormatPositionToString(unit.Row, unit.Col)
-				enemyPos := FormatPositionToString(enemy.Row, enemy.Col)
+				row, col := cli.game.World.Map.HexToRowCol(unit.Coord)
+				pos := FormatPositionToString(row, col)
+				enemyRow, enemyCol := cli.game.World.Map.HexToRowCol(enemy.Coord)
+				enemyPos := FormatPositionToString(enemyRow, enemyCol)
 				message.WriteString(fmt.Sprintf("  Attack with unit at %s -> enemy at %s\n", pos, enemyPos))
 				break // Only show first available target per unit
 			}
 		}
 	}
-	
+
 	if unitsCanAttack == 0 {
 		message.WriteString("  No attack opportunities\n")
 	}
-	
+
 	// Show turn management
 	if cli.game.CanEndTurn() {
 		message.WriteString("  End turn (use 'end' command)\n")
 	}
-	
+
 	// Show utility actions
 	message.WriteString("  View map (use 'map' command)\n")
 	message.WriteString("  View units (use 'units' command)\n")
 	message.WriteString("  Save game (use 'save <filename>' command)\n")
 	message.WriteString("  Render game (use 'render <filename>' command)\n")
-	
+
 	fmt.Print(message.String())
 	return &CLIResponse{
 		Success: true,
@@ -1710,10 +1703,10 @@ func (cli *WeeWarCLI) autoRenderGameState(command string) {
 	if cli.game == nil || cli.maxRenders == 0 {
 		return
 	}
-	
+
 	// Increment command counter
 	cli.commandCount++
-	
+
 	// Create render directory if it doesn't exist
 	if err := os.MkdirAll(cli.renderDir, 0755); err != nil {
 		if cli.verbose {
@@ -1721,14 +1714,14 @@ func (cli *WeeWarCLI) autoRenderGameState(command string) {
 		}
 		return
 	}
-	
+
 	// Generate filename with sequential numbering
 	turnInfo := fmt.Sprintf("T%d_P%d", cli.game.GetTurnNumber(), cli.game.GetCurrentPlayer())
 	commandName := strings.Fields(command)[0] // Get first word of command
-	
-	filename := fmt.Sprintf("%s/game_%03d_%s_%s.png", 
+
+	filename := fmt.Sprintf("%s/game_%03d_%s_%s.png",
 		cli.renderDir, cli.commandCount, turnInfo, commandName)
-	
+
 	// Render game state
 	if err := cli.RenderToFile(filename, 800, 600); err != nil {
 		if cli.verbose {
@@ -1736,11 +1729,11 @@ func (cli *WeeWarCLI) autoRenderGameState(command string) {
 		}
 		return
 	}
-	
+
 	if cli.verbose {
 		fmt.Printf("Auto-rendered game state to: %s\n", filename)
 	}
-	
+
 	// Clean up old files if we exceed maxRenders
 	cli.cleanupOldRenders()
 }
@@ -1750,7 +1743,7 @@ func (cli *WeeWarCLI) cleanupOldRenders() {
 	if cli.maxRenders <= 0 {
 		return
 	}
-	
+
 	// List all PNG files in render directory
 	files, err := os.ReadDir(cli.renderDir)
 	if err != nil {
@@ -1759,7 +1752,7 @@ func (cli *WeeWarCLI) cleanupOldRenders() {
 		}
 		return
 	}
-	
+
 	// Filter for PNG files matching our pattern
 	var renderFiles []string
 	for _, file := range files {
@@ -1767,10 +1760,10 @@ func (cli *WeeWarCLI) cleanupOldRenders() {
 			renderFiles = append(renderFiles, file.Name())
 		}
 	}
-	
+
 	// Sort files by name (which includes the sequential number)
 	sort.Strings(renderFiles)
-	
+
 	// Remove oldest files if we exceed maxRenders
 	if len(renderFiles) > cli.maxRenders {
 		filesToRemove := len(renderFiles) - cli.maxRenders
@@ -1792,20 +1785,20 @@ func (cli *WeeWarCLI) numberToSuperscript(num int) string {
 	if num < 0 {
 		return "⁻" + cli.numberToSuperscript(-num)
 	}
-	
+
 	// Unicode superscript characters for digits 0-9
 	superscriptDigits := []string{"⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"}
-	
+
 	if num == 0 {
 		return superscriptDigits[0]
 	}
-	
+
 	result := ""
 	for num > 0 {
 		digit := num % 10
 		result = superscriptDigits[digit] + result
 		num /= 10
 	}
-	
+
 	return result
 }

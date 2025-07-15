@@ -22,17 +22,17 @@ func (m *Map) NumCols() int {
 	return m.MaxQ - m.MinQ + 1
 }
 
-// HexToDisplay converts cube coordinates to display coordinates (row, col)
+// HexToRowCol converts cube coordinates to display coordinates (row, col)
 // Uses a standard hex-to-array conversion (odd-row offset style)
-func (m *Map) HexToDisplay(coord CubeCoord) (row, col int) {
+func (m *Map) HexToRowCol(coord CubeCoord) (row, col int) {
 	row = coord.R
 	col = coord.Q + (coord.R+(coord.R&1))/2
 	return row, col
 }
 
-// DisplayToHex converts display coordinates (row, col) to cube coordinates
+// RowColToHex converts display coordinates (row, col) to cube coordinates
 // Uses a standard array-to-hex conversion (odd-row offset style)
-func (m *Map) DisplayToHex(row, col int) CubeCoord {
+func (m *Map) RowColToHex(row, col int) CubeCoord {
 	q := col - (row+(row&1))/2
 	return NewCubeCoord(q, row)
 }

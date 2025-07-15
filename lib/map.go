@@ -83,16 +83,8 @@ func (m *Map) SetBounds(minQ, maxQ, minR, maxR int) {
 
 // NewMap creates a new empty map with the specified dimensions
 // evenRowsOffset parameter is deprecated and ignored (cube coordinates are universal)
-func NewMap(numRows, numCols int, evenRowsOffset bool) *Map {
-	_ = evenRowsOffset // Deprecated: cube coordinates eliminate offset confusion
-	return &Map{
-		MinQ:     0,
-		MaxQ:     numCols - 1,
-		MinR:     0,
-		MaxR:     numRows - 1,
-		Tiles:    make(map[CubeCoord]*Tile),
-		TileList: make([]*Tile, 0),
-	}
+func NewMapRect(numRows, numCols int) *Map {
+	return NewMapWithBounds(0, numRows, 0, numCols)
 }
 
 // NewMapWithBounds creates a new empty map with the specified coordinate bounds
@@ -335,13 +327,13 @@ func approximateSin(angle float64) float64 {
 }
 
 // createTestMap creates a simple test map for development
-func createTestMap(mapName string) (*Map, error) {
+func CreateTestMap(rows, cols int) (*Map, error) {
 	// Create a small test map
-	gameMap := NewMap(8, 12, false) // 8 rows, 12 columns, odd rows offset
+	gameMap := NewMapRect(rows, cols)
 
 	// Add some test tiles
-	for q := 0; q < 8; q++ {
-		for r := 0; r < 12; r++ {
+	for q := 0; q < rows; q++ {
+		for r := 0; r < cols; r++ {
 			// Create varied terrain
 			tileType := 1 // Default to grass
 			if (q+r)%4 == 0 {

@@ -115,10 +115,15 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [x] CLI acts as thin translation layer
 
 ### Remaining Work 🚧
-- [ ] Update canvas_buffer.go to use cube coordinates
 - [ ] Update editor.go to use cube coordinates
 - [ ] Update all test files to use cube coordinate APIs
 - [ ] Add World state change notifications
+
+### Canvas Rendering Completed ✅
+- [x] Updated CanvasRenderer to work directly with World data using cube coordinates
+- [x] Eliminated CreateGameForRendering approach in WASM canvas rendering
+- [x] Canvas rendering now follows identical patterns to BufferRenderer
+- [x] Both PNG and Canvas rendering systems unified under clean architecture
 
 ### Benefits Achieved ✅
 - **Mathematical correctness**: Proper hex distance calculations

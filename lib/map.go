@@ -39,11 +39,11 @@ const (
 
 // Map represents the game map with hex grid topology
 type Map struct {
-	// Coordinate bounds - defines the valid region of the hex grid
-	MinQ int `json:"minQ"` // Minimum Q coordinate (inclusive)
-	MaxQ int `json:"maxQ"` // Maximum Q coordinate (inclusive)
-	MinR int `json:"minR"` // Minimum R coordinate (inclusive)
-	MaxR int `json:"maxR"` // Maximum R coordinate (inclusive)
+	// Coordinate bounds - These can be evaluated.
+	minQ int `json:"minQ"` // Minimum Q coordinate (inclusive)
+	maxQ int `json:"maxQ"` // Maximum Q coordinate (inclusive)
+	minR int `json:"minR"` // Minimum R coordinate (inclusive)
+	maxR int `json:"maxR"` // Maximum R coordinate (inclusive)
 
 	// Where X/Y of the Origin tile (Q = R = 0) are.
 	// Initially it would be 0,0 (top left of the screen)
@@ -63,7 +63,7 @@ type Map struct {
 
 // IsWithinBounds checks if the given cube coordinates are within the map bounds
 func (m *Map) IsWithinBounds(q, r int) bool {
-	return q >= m.MinQ && q <= m.MaxQ && r >= m.MinR && r <= m.MaxR
+	return q >= m.minQ && q <= m.maxQ && r >= m.minR && r <= m.maxR
 }
 
 // IsWithinBoundsCube checks if the given cube coordinate is within the map bounds
@@ -73,12 +73,12 @@ func (m *Map) IsWithinBoundsCube(coord CubeCoord) bool {
 
 // GetBounds returns the current map bounds
 func (m *Map) GetBounds() (minQ, maxQ, minR, maxR int) {
-	return m.MinQ, m.MaxQ, m.MinR, m.MaxR
+	return m.minQ, m.maxQ, m.minR, m.maxR
 }
 
 // SetBounds updates the map bounds (use carefully - may invalidate existing tiles)
 func (m *Map) SetBounds(minQ, maxQ, minR, maxR int) {
-	m.MinQ, m.MaxQ, m.MinR, m.MaxR = minQ, maxQ, minR, maxR
+	m.minQ, m.maxQ, m.minR, m.maxR = minQ, maxQ, minR, maxR
 }
 
 // NewMap creates a new empty map with the specified dimensions
@@ -90,10 +90,10 @@ func NewMapRect(numRows, numCols int) *Map {
 // NewMapWithBounds creates a new empty map with the specified coordinate bounds
 func NewMapWithBounds(minQ, maxQ, minR, maxR int) *Map {
 	return &Map{
-		MinQ:     minQ,
-		MaxQ:     maxQ,
-		MinR:     minR,
-		MaxR:     maxR,
+		minQ:     minQ,
+		maxQ:     maxQ,
+		minR:     minR,
+		maxR:     maxR,
 		Tiles:    make(map[CubeCoord]*Tile),
 		TileList: make([]*Tile, 0),
 	}
@@ -123,7 +123,7 @@ func (m *Map) UnmarshalJSON(data []byte) error {
 
 	// Handle backward compatibility: if bounds are not set but we have old numRows/numCols,
 	// check if the JSON contains the old fields and convert them
-	if m.MinQ == 0 && m.MaxQ == 0 && m.MinR == 0 && m.MaxR == 0 {
+	if m.minQ == 0 && m.maxQ == 0 && m.minR == 0 && m.maxR == 0 {
 		// Try to parse old format
 		var legacy struct {
 			NumRows int `json:"numRows"`
@@ -132,10 +132,10 @@ func (m *Map) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(data, &legacy); err == nil {
 			if legacy.NumRows > 0 && legacy.NumCols > 0 {
 				// Convert old format to new bounds (assuming 0,0 origin)
-				m.MinQ = 0
-				m.MaxQ = legacy.NumCols - 1
-				m.MinR = 0
-				m.MaxR = legacy.NumRows - 1
+				m.minQ = 0
+				m.maxQ = legacy.NumCols - 1
+				m.minR = 0
+				m.maxR = legacy.NumRows - 1
 			}
 		}
 	}
@@ -275,6 +275,63 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 	y = m.OriginY + tileWidth*3.0/2.0*r
 
 	return x, y
+}
+
+// XYToQR converts screen coordinates to cube coordinates for the map
+// Given x,y screen coordinates and tile size properties, returns the CubeCoord
+// Uses the Map's OriginX/OriginY for proper coordinate translation
+// Based on formulas from redblobgames.com for pointy-topped hexagons with odd-r layout
+func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord {
+	// Translate screen coordinates to hex coordinate space by removing origin offset
+	hexX := x - m.OriginX
+	hexY := y - m.OriginY
+
+	// For pointy-topped hexagons, convert pixel coordinates to fractional hex coordinates
+	// Using inverse of the hex-to-pixel conversion formulas:
+	// x = size * sqrt(3) * (q + r/2)  =>  q = (sqrt(3) * x) / (y * 3)
+	// y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
+
+	sqrt3 := 1.732050808 // sqrt(3)
+
+	// Calculate fractional q coordinate
+	fractionalQ := (hexX * tileWidth * sqrt3) / (y * tileHeight * 3.0)
+
+	// Calculate fractional r coordinate
+	fractionalR := (hexY * tileHeight * 2.0) / 3.0
+
+	// Round to nearest integer coordinates using cube coordinate rounding
+	// This ensures we get the correct hex tile even for coordinates near boundaries
+	return roundCubeCoord(fractionalQ, fractionalR)
+}
+
+// roundCubeCoord rounds fractional cube coordinates to the nearest integer cube coordinate
+// Uses the cube coordinate constraint (q + r + s = 0) to ensure valid hex coordinates
+// Reference: https://www.redblobgames.com/grids/hexagons-v1/#rounding
+func roundCubeCoord(fractionalQ, fractionalR float64) CubeCoord {
+	// Calculate s from the cube coordinate constraint: s = -q - r
+	fractionalS := -fractionalQ - fractionalR
+
+	// Round each coordinate to nearest integer
+	roundedQ := int(fractionalQ + 0.5)
+	roundedR := int(fractionalR + 0.5)
+	roundedS := int(fractionalS + 0.5)
+
+	// Calculate rounding deltas
+	deltaQ := math.Abs(float64(roundedQ) - fractionalQ)
+	deltaR := math.Abs(float64(roundedR) - fractionalR)
+	deltaS := math.Abs(float64(roundedS) - fractionalS)
+
+	// Fix the coordinate with the largest rounding error to maintain constraint
+	if deltaQ > deltaR && deltaQ > deltaS {
+		roundedQ = -roundedR - roundedS
+	} else if deltaR > deltaS {
+		roundedR = -roundedQ - roundedS
+	} else {
+		roundedS = -roundedQ - roundedR
+	}
+
+	// Return the rounded cube coordinate (s is implicit)
+	return CubeCoord{Q: roundedQ, R: roundedR}
 }
 
 // getMapBounds calculates the pixel bounds of the entire map

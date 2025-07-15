@@ -8,18 +8,18 @@ package weewar
 
 // NumRows returns the number of rows in the map (calculated from bounds)
 func (m *Map) NumRows() int {
-	if m.MinR > m.MaxR {
+	if m.minR > m.maxR {
 		return 0 // Empty map
 	}
-	return m.MaxR - m.MinR + 1
+	return m.maxR - m.minR + 1
 }
 
 // NumCols returns the number of columns in the map (calculated from bounds)
 func (m *Map) NumCols() int {
-	if m.MinQ > m.MaxQ {
+	if m.minQ > m.maxQ {
 		return 0 // Empty map
 	}
-	return m.MaxQ - m.MinQ + 1
+	return m.maxQ - m.minQ + 1
 }
 
 // HexToRowCol converts cube coordinates to display coordinates (row, col)

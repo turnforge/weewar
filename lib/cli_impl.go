@@ -538,11 +538,19 @@ func (cli *WeeWarCLI) handleNew(cmd *CLICommand) *CLIResponse {
 	}
 
 	// Create test map
-	testMap := weewar.CreateTestMap(8, 12, false)
+	testMap, err := CreateTestMap(8, 12)
+	if err != nil {
+		panic(err)
+	}
 	// Note: Neighbor connections calculated on-demand
 
 	// Create new game
-	newGame, err := NewGame(playerCount, testMap, time.Now().UnixNano())
+	testWorld, err := NewWorld(playerCount, testMap)
+	if err != nil {
+		panic(err)
+	}
+
+	newGame, err := NewGame(testWorld, time.Now().UnixNano())
 	if err != nil {
 		return &CLIResponse{
 			Success: false,
@@ -575,7 +583,7 @@ func (cli *WeeWarCLI) handleVerbose(cmd *CLICommand) *CLIResponse {
 
 // handleCompact sets compact display mode
 func (cli *WeeWarCLI) handleCompact(cmd *CLICommand) *CLIResponse {
-	cli.displayMode = RowColCompact
+	cli.displayMode = DisplayCompact
 	return &CLIResponse{
 		Success: true,
 		Message: "RowCol mode set to compact",

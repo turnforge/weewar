@@ -50,7 +50,7 @@ type ViewState struct {
 // =============================================================================
 
 // NewWorld creates a new game world with the specified parameters
-func NewWorld(playerCount int, gameMap *Map, seed int) (*World, error) {
+func NewWorld(playerCount int, gameMap *Map) (*World, error) {
 	if playerCount < 2 || playerCount > MaxUnits {
 		return nil, fmt.Errorf("invalid player count: %d (must be 2-%d)", playerCount, MaxUnits)
 	}

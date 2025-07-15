@@ -48,14 +48,14 @@ type Map struct {
 
 	// Where X/Y of the Origin tile (Q = R = 0) are, in normalized tile units.
 	// OriginX = 5 means the origin tile is 5 tile widths to the right
-	// OriginY = 3 means the origin tile is 3 tile heights down
+	// OriginY = 3 means the origin tile is 3 * 1.5 tile widths down (hex row spacing)
 	// Initially it would be 0,0 (top left of the screen)
 	// But as we add/remove rows and columns from the 4 sides we could extend
 	// the map "viewport" in each of the directions.  Which means the origin
 	// tile's X/Y would change.  By tracking this we can find the coord location
 	// of all other tiles.
-	OriginX float64 // In tile width units
-	OriginY float64 // In tile height units
+	OriginX float64 // In tile width units (horizontal spacing = 1 tile width)
+	OriginY float64 // In tile width units (vertical spacing = 1.5 tile widths)
 
 	// Cube coordinate storage - primary data structure
 	Tiles map[CubeCoord]*Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
@@ -275,8 +275,9 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 	// where size = tileWidth (center-to-center distance)
 
 	// Convert normalized origin to pixel coordinates
+	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
 	originPixelX := m.OriginX * tileWidth
-	originPixelY := m.OriginY * tileHeight
+	originPixelY := m.OriginY * tileWidth
 
 	x = originPixelX + tileWidth*1.732050808*(q+r/2.0) // 1.732050808 ≈ sqrt(3)
 	y = originPixelY + tileWidth*3.0/2.0*r
@@ -290,8 +291,9 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 // Based on formulas from redblobgames.com for pointy-topped hexagons with odd-r layout
 func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord {
 	// Convert normalized origin to pixel coordinates
+	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
 	originPixelX := m.OriginX * tileWidth
-	originPixelY := m.OriginY * tileHeight
+	originPixelY := m.OriginY * tileWidth
 	
 	// Translate screen coordinates to hex coordinate space by removing origin offset
 	hexX := x - originPixelX
@@ -409,6 +411,46 @@ func (m *Map) RemoveLeftCols(n int) error {
 	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
 	// Since OriginX is in normalized tile units, we subtract n directly
 	m.OriginX -= float64(n)
+	
+	return nil
+}
+
+// AddTopRows adds n rows to the top of the map, adjusting bounds and origin
+func (m *Map) AddTopRows(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Decrease minR to expand upward
+	m.minR -= n
+	
+	// Adjust OriginY to maintain existing tile positions
+	// In odd-r layout, vertical distance between adjacent rows is 1.5 tile widths
+	// Since OriginY is in normalized tile width units, we add n * 1.5
+	m.OriginY += float64(n) * 1.5
+	
+	return nil
+}
+
+// RemoveTopRows removes n rows from the top of the map, adjusting bounds and origin
+func (m *Map) RemoveTopRows(n int) error {
+	if n <= 0 {
+		return fmt.Errorf("n must be positive, got %d", n)
+	}
+	
+	// Check if we have enough rows to remove
+	currentRows := m.maxR - m.minR + 1
+	if n >= currentRows {
+		return fmt.Errorf("cannot remove %d rows from map with only %d rows", n, currentRows)
+	}
+	
+	// Increase minR to shrink from top
+	m.minR += n
+	
+	// Adjust OriginY to maintain existing tile positions
+	// In odd-r layout, vertical distance between adjacent rows is 1.5 tile widths
+	// Since OriginY is in normalized tile width units, we subtract n * 1.5
+	m.OriginY -= float64(n) * 1.5
 	
 	return nil
 }

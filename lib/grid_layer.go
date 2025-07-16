@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"image/draw"
-	"math"
+	"log"
 )
 
 // =============================================================================
@@ -20,7 +20,6 @@ func NewGridLayer(width, height int, scheduler LayerScheduler) *GridLayer {
 
 // Render renders hex grid lines and coordinates
 func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
-	fmt.Printf("GridLayer.Render called with width=%d, height=%d\n", gl.width, gl.height)
 	if world == nil || world.Map == nil {
 		return
 	}
@@ -37,15 +36,14 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 		return
 	}
 
-	fmt.Println("point 3")
 	// Clear buffer for full redraw (grid/coordinates are view-dependent)
 	gl.buffer.Clear()
 
 	// Get optimal starting coordinate and position from map bounds
 	minX, minY, _, _, _, _, _, _, startingCoord, startingX := world.Map.GetMapBounds(options.TileWidth, options.TileHeight, options.YIncrement)
 
-	y := options.ScrollY - minY
-	startX := options.ScrollX - (minX + startingX)
+	y := options.ScrollY - minY - (options.TileWidth / 2.0)
+	startX := options.ScrollX - (minX + startingX) - (options.TileWidth / 2.0)
 	height := float64(gl.height)
 	width := float64(gl.width)
 	leftCoord := startingCoord.Neighbor(LEFT)
@@ -57,7 +55,7 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 		rowCoord := leftCoord
 		fmt.Println("Row, LeftCoord: ", i, y, leftCoord)
 		for ; currX < width; currX += options.TileWidth {
-			fmt.Println("currX, currY, Coord: ", currX, y, rowCoord, width, height)
+			fmt.Println("currX, currY, Coord: ", currX, y, rowCoord, width, height, options)
 			// Draw grid lines if enabled
 			if options.ShowGrid {
 				gl.drawHexGrid(currX, y, options)
@@ -92,8 +90,10 @@ func (gl *GridLayer) drawHexGrid(centerX, centerY float64, options LayerRenderOp
 	// Get hexagon vertices
 	vertices := gl.getHexVertices(centerX, centerY, options.TileWidth, options.TileHeight)
 
+	log.Println("centerX, centerY, Vertices: ", centerX, centerY, vertices)
+
 	// Draw lines between vertices
-	gridColor := color.RGBA{R: 64, G: 64, B: 64, A: 255} // Dark gray
+	gridColor := color.RGBA{R: 128, G: 128, B: 128, A: 255} // Dark gray
 	bufferImg := gl.buffer.GetImageData()
 
 	for i := 0; i < len(vertices); i++ {
@@ -106,28 +106,47 @@ func (gl *GridLayer) drawHexGrid(centerX, centerY float64, options LayerRenderOp
 
 // drawCoordinates draws Q,R coordinates in the center of a hex
 func (gl *GridLayer) drawCoordinates(coord CubeCoord, centerX, centerY float64, options LayerRenderOptions) {
-	// Simple text rendering - draw coordinate text
-	text := fmt.Sprintf("%d,%d", coord.Q, coord.R)
+	// Since system fonts don't work in WASM, draw a more visible marker
+	// We'll draw a colored circle with the coordinate info as a comment
 
-	// For now, draw a simple representation (can be enhanced with proper text rendering)
-	gl.drawSimpleText(text, centerX, centerY)
+	bufferImg := gl.buffer.GetImageData()
+	markerColor := color.RGBA{R: 255, G: 255, B: 0, A: 255} // Bright yellow
+
+	x, y := int(centerX), int(centerY)
+	radius := 8 // Larger radius for visibility
+
+	// Draw a filled circle to mark the coordinate
+	for dy := -radius; dy <= radius; dy++ {
+		for dx := -radius; dx <= radius; dx++ {
+			if dx*dx+dy*dy <= radius*radius {
+				px, py := x+dx, y+dy
+				if px >= 0 && py >= 0 && px < gl.width && py < gl.height {
+					bufferImg.Set(px, py, markerColor)
+				}
+			}
+		}
+	}
+
+	// Log the coordinate for debugging
+	fmt.Printf("DEBUG: Drew coordinate marker for %d,%d at (%.1f, %.1f)\n", coord.Q, coord.R, centerX, centerY)
 }
 
 // getHexVertices returns the vertices of a hexagon centered at (centerX, centerY)
 func (gl *GridLayer) getHexVertices(centerX, centerY, tileWidth, tileHeight float64) [][2]float64 {
-	// Hexagon vertices (flat-top orientation)
+	// Hexagon vertices (pointy-top orientation)
 	vertices := make([][2]float64, 6)
 
 	// Use actual tile dimensions for proper hexagon shape
 	radiusX := tileWidth / 2
 	radiusY := tileHeight / 2
+	h4 := tileHeight / 4
 
-	// Hexagon angles (flat-top)
-	for i := 0; i < 6; i++ {
-		angle := float64(i) * 60.0 * 3.14159 / 180.0 // Convert to radians
-		vertices[i][0] = centerX + radiusX*math.Cos(angle)
-		vertices[i][1] = centerY + radiusY*math.Sin(angle)
-	}
+	vertices[0][0], vertices[0][1] = centerX, centerY-radiusY
+	vertices[1][0], vertices[1][1] = centerX+radiusX, centerY-h4
+	vertices[2][0], vertices[2][1] = centerX+radiusX, centerY+h4
+	vertices[3][0], vertices[3][1] = centerX, centerY+radiusY
+	vertices[4][0], vertices[4][1] = centerX-radiusX, centerY+h4
+	vertices[5][0], vertices[5][1] = centerX-radiusX, centerY-h4
 
 	return vertices
 }

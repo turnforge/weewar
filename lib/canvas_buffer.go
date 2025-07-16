@@ -4,6 +4,7 @@
 package weewar
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"syscall/js"
@@ -246,14 +247,21 @@ func (cb *CanvasBuffer) DrawTextWithStyle(x, y float64, text string, fontSize fl
 // DrawImage draws an image at the specified position
 func (cb *CanvasBuffer) DrawImage(x, y, width, height float64, img image.Image) {
 	if img == nil {
+		fmt.Printf("DEBUG: DrawImage called with nil image\n")
 		return
 	}
 
-	// Convert buffer coordinates to canvas coordinates
-	canvasX, canvasY := cb.bufferToCanvasXY(x, y)
+	// For DrawImage, we want direct coordinate conversion without Y-axis flipping
+	// because the image data is already in the correct orientation
+	canvasX := x / PixelsPerMM
+	canvasY := y / PixelsPerMM
+
+	fmt.Printf("DEBUG: DrawImage called with buffer coords (%.2f, %.2f) -> canvas coords (%.2f, %.2f), image size: %dx%d\n",
+		x, y, canvasX, canvasY, img.Bounds().Dx(), img.Bounds().Dy())
 
 	// Draw the actual image using the canvas context
 	// Note: tdewolff/canvas DrawImage uses image's natural size, scaling handled by resolution
 	cb.context.DrawImage(canvasX, canvasY, img, canvas.Resolution(PixelsPerMM))
-}
 
+	fmt.Printf("DEBUG: DrawImage completed\n")
+}

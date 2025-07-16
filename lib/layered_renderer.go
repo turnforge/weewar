@@ -162,9 +162,35 @@ func (r *LayeredRenderer) performRender() {
 	fmt.Printf("DEBUG: performRender() completed successfully\n")
 }
 
-// composite just marks that layers need to be blitted
+// composite blends all layer buffers to the main drawable
 func (r *LayeredRenderer) composite() {
-	// No complex compositing - just signal that buffers are ready for blitting
+	// Clear the main drawable
+	r.drawable.Clear()
+
+	// Draw each layer buffer to the main drawable
+	for _, layer := range r.layers {
+		// Check if the layer has a GetBuffer method (all layers based on BaseLayer do)
+		baseLayer, ok := layer.(interface{ GetBuffer() *Buffer })
+		if ok {
+			layerBuffer := baseLayer.GetBuffer()
+			if layerBuffer != nil {
+				// DEBUG: Create data URL for this layer buffer
+				/*
+					dataURL, err := layerBuffer.ToDataURL()
+					if err != nil {
+						fmt.Printf("DEBUG: Layer '%s' buffer data URL error: %v\n", layer.GetName(), err)
+					} else {
+						fmt.Printf("DEBUG: Layer '%s' buffer data URL: %s\n", layer.GetName(), dataURL)
+					}
+				*/
+
+				// Get the buffer as an image and draw it to the main drawable
+				img := layerBuffer.GetImageData()
+				// fmt.Printf("DEBUG: Compositing layer '%s' - calling DrawImage(0, 0, %.2f, %.2f)\n", layer.GetName(), float64(r.width), float64(r.height))
+				r.drawable.DrawImage(0, 0, float64(r.width), float64(r.height), img)
+			}
+		}
+	}
 }
 
 // blendBuffers blends src buffer onto dst buffer with alpha blending

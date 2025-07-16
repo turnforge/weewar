@@ -51,12 +51,12 @@ func (c CubeCoord) IsValid() bool {
 // HexDirections defines the 6 direction vectors in cube coordinates
 // Order must match NeighborDirection enum: LEFT, TOP_LEFT, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT
 var HexDirections = [6]CubeCoord{
-	{Q: -1, R: 0}, // LEFT
-	{Q: 0, R: -1}, // TOP_LEFT
-	{Q: 1, R: -1}, // TOP_RIGHT
-	{Q: 1, R: 0},  // RIGHT
-	{Q: 0, R: 1},  // BOTTOM_RIGHT
-	{Q: -1, R: 1}, // BOTTOM_LEFT
+	{Q: 1, R: -1}, // LEFT
+	{Q: 1, R: 0},  // TOP_LEFT
+	{Q: 0, R: 1},  // TOP_RIGHT
+	{Q: -1, R: 1}, // RIGHT
+	{Q: -1, R: 0}, // BOTTOM_RIGHT
+	{Q: 0, R: -1}, // BOTTOM_LEFT
 }
 
 // Neighbor returns the neighboring cube coordinate in the specified direction

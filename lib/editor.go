@@ -434,13 +434,13 @@ func (e *WorldEditor) SetDrawable(drawable Drawable, width, height int) error {
 		return fmt.Errorf("failed to create layered renderer: %v", err)
 	}
 
+	e.gridLayer = NewGridLayer(width, height, e.layeredRenderer)
 	e.tileLayer = NewTileLayer(width, height, e.layeredRenderer)
 	e.unitLayer = NewUnitLayer(width, height, e.layeredRenderer)
-	e.gridLayer = NewGridLayer(width, height, e.layeredRenderer)
 	e.layeredRenderer.layers = []Layer{
 		e.gridLayer, // Grid layer renders first (background)
-		e.tileLayer, // Terrain tiles (middle layer)
-		e.unitLayer, // Units (top layer)
+		// e.tileLayer, // Terrain tiles (middle layer)
+		// e.unitLayer, // Units (top layer)
 	}
 
 	// Update layered renderer with new world
@@ -456,8 +456,6 @@ func (e *WorldEditor) SetViewPort(x, y, width, height int) error {
 	if e.layeredRenderer == nil {
 		return fmt.Errorf("no layered renderer initialized")
 	}
-
-	fmt.Printf("WorldEditor.SetViewPort called with: x=%d, y=%d, width=%d, height=%d\n", x, y, width, height)
 
 	e.scrollX = x
 	e.scrollY = y
@@ -481,7 +479,7 @@ func (e *WorldEditor) RenderFull() error {
 
 	// The viewport should already be set by SetViewPort calls
 	// No need to call SetViewPort here as it would override with potentially stale values
-	
+
 	return nil
 }
 

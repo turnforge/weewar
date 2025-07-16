@@ -108,44 +108,17 @@ func (e *WorldEditor) IsModified() bool {
 }
 
 // CalculateCanvasSize returns the optimal canvas size for the current map
-func (e *WorldEditor) CalculateCanvasSize(rows, cols int) (width, height int) {
-	if e.currentWorld == nil {
-		return 400, 300 // Default size for empty editor
+func (e *WorldEditor) GetMapBounds() (minX, minY, maxX, maxY float64) {
+	if e.currentWorld == nil || e.currentWorld.Map == nil {
+		return 0, 0, 400, 300 // Default size for empty editor
 	}
 
-	// Use the world renderer to calculate proper tile dimensions
-	renderer := &BaseRenderer{}
-	tempWorld := &World{Map: e.currentWorld.Map}
-
-	// Use a reasonable base canvas size for calculation
-	options := renderer.CalculateRenderOptions(800, 600, tempWorld)
-
-	mapWidth, mapHeight := e.currentWorld.Map.CanvasSize(options.TileWidth, options.TileHeight, options.YIncrement)
-
-	// Calculate canvas dimensions with minimal padding
-	width = int(mapWidth + max(e.scrollX, 0))
-	height = int(mapHeight + max(e.scrollY, 0))
-	fmt.Println("Ok here, rows, cols, w, h: ", rows, cols, width, height, options)
-
-	// Ensure minimum size for usability
-	if width < 200 {
-		width = 200
-	}
-	if height < 200 {
-		height = 200
-	}
-
-	return width, height
+	return e.currentWorld.Map.GetMapBounds(DefaultTileWidth, DefaultTileHeight, DefaultYIncrement)
 }
 
 // GetFilename returns the current filename (empty if new map)
 func (e *WorldEditor) GetFilename() string {
 	return e.filename
-}
-
-// GetCanvasSize returns the current canvas dimensions
-func (e *WorldEditor) GetCanvasSize() (width, height int) {
-	return e.canvasWidth, e.canvasHeight
 }
 
 // GetLayeredRenderer returns the layered renderer for direct access

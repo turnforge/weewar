@@ -12,448 +12,247 @@ import (
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
-// Global editor instance for WASM
-var globalEditor *weewar.MapEditor
+// =============================================================================
+// Global State (Initialized in main)
+// =============================================================================
 
-// EditorResponse represents a JavaScript-friendly response
-type EditorResponse struct {
+var globalEditor *weewar.WorldEditor
+var globalWorld *weewar.World
+var globalAssetProvider weewar.AssetProvider
+
+// =============================================================================
+// Response Types
+// =============================================================================
+
+// WASMResponse represents a standardized JavaScript-friendly response
+type WASMResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Error   string `json:"error,omitempty"`
 	Data    any    `json:"data,omitempty"`
 }
 
-func main() {
-	// Keep the program running
-	c := make(chan struct{})
+// =============================================================================
+// Generic Wrapper Infrastructure
+// =============================================================================
 
-	// Register JavaScript functions
-	js.Global().Set("editorCreate", js.FuncOf(createEditor))
-	js.Global().Set("editorNewMap", js.FuncOf(newMap))
-	js.Global().Set("editorLoadMap", js.FuncOf(loadMap))
-	js.Global().Set("editorSaveMap", js.FuncOf(saveMap))
-	js.Global().Set("editorPaintTerrain", js.FuncOf(paintTerrain))
-	js.Global().Set("editorRemoveTerrain", js.FuncOf(removeTerrain))
-	js.Global().Set("editorFloodFill", js.FuncOf(floodFill))
-	js.Global().Set("editorSetBrushTerrain", js.FuncOf(setBrushTerrain))
-	js.Global().Set("editorSetBrushSize", js.FuncOf(setBrushSize))
-	js.Global().Set("editorUndo", js.FuncOf(undo))
-	js.Global().Set("editorRedo", js.FuncOf(redo))
-	js.Global().Set("editorCanUndo", js.FuncOf(canUndo))
-	js.Global().Set("editorCanRedo", js.FuncOf(canRedo))
-	js.Global().Set("editorGetMapInfo", js.FuncOf(getMapInfo))
-	js.Global().Set("editorValidateMap", js.FuncOf(validateMap))
-	js.Global().Set("editorExportToGame", js.FuncOf(exportToGame))
-	js.Global().Set("editorGetTerrainTypes", js.FuncOf(getTerrainTypes))
+// WASMFunction represents a function that takes js.Value args and returns (data, error)
+type WASMFunction func(args []js.Value) (interface{}, error)
 
-	// Canvas initialization and management
-	js.Global().Set("editorSetCanvas", js.FuncOf(setCanvas))
-	js.Global().Set("editorSetCanvasSize", js.FuncOf(setCanvasSize))
+// createWrapper creates a generic wrapper for WASM functions with validation and error handling
+func createWrapper(minArgs, maxArgs int, fn WASMFunction) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) any {
+		// Validate argument count
+		if len(args) < minArgs {
+			return createErrorResponse(fmt.Sprintf("Expected at least %d arguments, got %d", minArgs, len(args)))
+		}
+		if maxArgs >= 0 && len(args) > maxArgs {
+			return createErrorResponse(fmt.Sprintf("Expected at most %d arguments, got %d", maxArgs, len(args)))
+		}
 
-	// New World-Renderer architecture functions
-	js.Global().Set("worldCreate", js.FuncOf(worldCreate))
-	js.Global().Set("worldCreateTestMap", js.FuncOf(worldCreateTestMap))
-	js.Global().Set("viewStateCreate", js.FuncOf(viewStateCreate))
-	js.Global().Set("canvasRendererCreate", js.FuncOf(canvasRendererCreate))
-	js.Global().Set("worldRendererRender", js.FuncOf(worldRendererRender))
+		// Call the function and handle response
+		result, err := fn(args)
+		if err != nil {
+			return createErrorResponse(err.Error())
+		}
 
-	// Map dimension functions
-	js.Global().Set("editorSetMapSize", js.FuncOf(setMapSize))
-
-	// Debug functions
-	js.Global().Set("debugAssetLoading", js.FuncOf(debugAssetLoading))
-
-	// Asset management functions
-	js.Global().Set("loadEmbeddedAssets", js.FuncOf(loadEmbeddedAssets))
-	js.Global().Set("testEmbeddedAssets", js.FuncOf(testEmbeddedAssets))
-	js.Global().Set("loadFetchAssets", js.FuncOf(loadFetchAssets))
-	js.Global().Set("testFetchAssets", js.FuncOf(testFetchAssets))
-
-	// Legacy function (for backward compatibility during transition)
-	js.Global().Set("editorRenderMap", js.FuncOf(renderMap))
-
-	// Canvas rendering function
-	js.Global().Set("editorRenderToCanvas", js.FuncOf(renderEditorToCanvasJS))
-
-	// Coordinate conversion functions
-	js.Global().Set("editorPixelToCoords", js.FuncOf(pixelToCoords))
-
-	// Canvas size calculation functions
-	js.Global().Set("editorCalculateCanvasSize", js.FuncOf(calculateCanvasSizeJS))
-
-	fmt.Println("WeeWar Map Editor WASM loaded")
-	<-c
+		return createSuccessResponse(result)
+	})
 }
 
-// createEditor creates a new map editor instance with canvas binding
-func createEditor(this js.Value, args []js.Value) any {
-	if len(args) < 1 {
-		return createEditorResponse(false, "", "Missing canvas ID argument", nil)
+// =============================================================================
+// Response Helpers
+// =============================================================================
+
+func createSuccessResponse(data interface{}) js.Value {
+	response := WASMResponse{
+		Success: true,
+		Message: "Operation completed successfully",
+		Data:    data,
+	}
+	return marshalToJS(response)
+}
+
+func createErrorResponse(error string) js.Value {
+	response := WASMResponse{
+		Success: false,
+		Error:   error,
+	}
+	return marshalToJS(response)
+}
+
+func createMessageResponse(message string, data interface{}) js.Value {
+	response := WASMResponse{
+		Success: true,
+		Message: message,
+		Data:    data,
+	}
+	return marshalToJS(response)
+}
+
+func marshalToJS(obj interface{}) js.Value {
+	bytes, _ := json.Marshal(obj)
+	return js.Global().Get("JSON").Call("parse", string(bytes))
+}
+
+// =============================================================================
+// Main Function - Initialize Everything
+// =============================================================================
+
+func main() {
+	fmt.Println("WeeWar Map Editor WASM initializing...")
+
+	// Initialize World (2 players by default)
+	globalWorld, _ = weewar.NewWorld(2, weewar.NewMapRect(5, 5))
+
+	// Initialize WorldEditor with the World
+	globalEditor = weewar.NewWorldEditor()
+	globalEditor.NewWorld() // This creates a 1x1 world internally
+
+	// Initialize and preload assets
+	globalAssetProvider = assets.NewEmbeddedAssetManager()
+	if globalAssetProvider != nil {
+		err := globalAssetProvider.PreloadCommonAssets()
+		if err != nil {
+			fmt.Printf("Warning: Failed to preload assets: %v\n", err)
+		} else {
+			fmt.Println("Assets preloaded successfully")
+		}
+		globalEditor.SetAssetProvider(globalAssetProvider)
 	}
 
-	canvasID := args[0].String()
+	// Register all editor functions with clean wrappers
+	registerEditorFunctions()
 
-	// Start with default 8x8 map for initial canvas size
-	defaultRows, defaultCols := 8, 8
-	width, height := calculateCanvasSize(defaultRows, defaultCols)
+	// Register utility functions
+	registerUtilityFunctions()
 
-	globalEditor = weewar.NewMapEditor()
+	fmt.Println("WeeWar Map Editor WASM loaded and ready")
 
-	// Bind the editor to the canvas with auto-calculated size
-	err := globalEditor.SetCanvas(canvasID, width, height)
+	// Keep the program running
+	<-make(chan struct{})
+}
+
+// =============================================================================
+// Function Registration
+// =============================================================================
+
+func registerEditorFunctions() {
+	// Map management
+	js.Global().Set("editorNewMap", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return newMap(args[0].Int(), args[1].Int())
+	}))
+	js.Global().Set("editorSetMapSize", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return setMapSize(args[0].Int(), args[1].Int())
+	}))
+
+	// Terrain editing
+	js.Global().Set("editorPaintTerrain", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return nil, paintTerrain(args[0].Int(), args[1].Int())
+	}))
+	js.Global().Set("editorRemoveTerrain", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return nil, removeTerrain(args[0].Int(), args[1].Int())
+	}))
+	js.Global().Set("editorFloodFill", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return nil, floodFill(args[0].Int(), args[1].Int())
+	}))
+
+	// Brush settings
+	js.Global().Set("editorSetBrushTerrain", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
+		return nil, setBrushTerrain(args[0].Int())
+	}))
+	js.Global().Set("editorSetBrushSize", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
+		return setBrushSize(args[0].Int())
+	}))
+
+	// Rendering
+	js.Global().Set("editorRender", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+		return nil, renderEditor()
+	}))
+	js.Global().Set("editorSetCanvas", createWrapper(3, 3, func(args []js.Value) (interface{}, error) {
+		return setCanvas(args[0].String(), args[1].Int(), args[2].Int())
+	}))
+
+	// Information
+	js.Global().Set("editorGetMapInfo", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+		return getMapInfo()
+	}))
+	js.Global().Set("editorValidateMap", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+		return validateMap()
+	}))
+	js.Global().Set("editorGetTerrainTypes", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+		return getTerrainTypes()
+	}))
+}
+
+func registerUtilityFunctions() {
+	// Coordinate conversion
+	js.Global().Set("pixelToCoords", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return pixelToCoords(args[0].Float(), args[1].Float())
+	}))
+	js.Global().Set("calculateCanvasSize", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+		return calculateCanvasSize(args[0].Int(), args[1].Int())
+	}))
+
+	// Asset testing
+	js.Global().Set("testAssets", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+		return testAssets()
+	}))
+}
+
+// =============================================================================
+// Editor Function Implementations (Clean, No Boilerplate)
+// =============================================================================
+
+func newMap(rows, cols int) (map[string]interface{}, error) {
+	// Calculate optimal canvas size for the new map
+	width, height := calculateCanvasSizeInternal(rows, cols)
+
+	// Create new map in the editor
+	err := globalEditor.NewWorld() // Creates 1x1, we'll expand it
 	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to bind canvas: %v", err), nil)
+		return nil, err
 	}
 
-	// Create the initial default map
-	err = globalEditor.NewMap(defaultRows, defaultCols)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to create initial map: %v", err), nil)
-	}
+	// TODO: Expand map to rows x cols using Add/Remove methods
+	// For now, just use the 1x1 map
 
-	return createEditorResponse(true, fmt.Sprintf("Map editor created and bound to canvas '%s' (%dx%d)", canvasID, width, height), "", map[string]any{
-		"version":      "1.0.0",
-		"ready":        true,
-		"canvasID":     canvasID,
+	return map[string]interface{}{
+		"width":        cols,
+		"height":       rows,
 		"canvasWidth":  width,
 		"canvasHeight": height,
-		"mapWidth":     defaultCols,
-		"mapHeight":    defaultRows,
-	})
+	}, nil
 }
 
-// newMap creates a new map with specified dimensions
-func newMap(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing width/height arguments", nil)
-	}
-
-	rows := args[0].Int()
-	cols := args[1].Int()
-
-	err := globalEditor.NewMap(rows, cols)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to create map: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("New map created (%dx%d)", rows, cols), "", map[string]any{
-		"width":  cols,
-		"height": rows,
-	})
+func setMapSize(rows, cols int) (map[string]interface{}, error) {
+	return newMap(rows, cols)
 }
 
-// loadMap loads a map from JSON data
-func loadMap(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 1 {
-		return createEditorResponse(false, "", "Missing map data argument", nil)
-	}
-
-	// For now, return not implemented since LoadMap is a placeholder
-	return createEditorResponse(false, "", "Map loading not yet implemented", nil)
+func paintTerrain(q, r int) error {
+	// Create cube coordinate directly from Q, R values
+	coord := weewar.CubeCoord{Q: q, R: r}
+	return globalEditor.PaintTerrain(coord)
 }
 
-// saveMap saves the current map to JSON
-func saveMap(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	filename := "map.json"
-	if len(args) >= 1 {
-		filename = args[0].String()
-	}
-
-	// For now, return not implemented since SaveMap is a placeholder
-	err := globalEditor.SaveMap(filename)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to save map: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Map saved as %s", filename), "", nil)
+func removeTerrain(q, r int) error {
+	coord := weewar.CubeCoord{Q: q, R: r}
+	return globalEditor.RemoveTerrain(coord)
 }
 
-// paintTerrain paints terrain at specified coordinates
-func paintTerrain(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing row/col arguments", nil)
-	}
-
-	row := args[0].Int()
-	col := args[1].Int()
-
-	err := globalEditor.PaintTerrain(row, col)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to paint terrain: %v", err), nil)
-	}
-
-	// Automatically render to the bound canvas
-	err = renderEditorToCanvas()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to render updated terrain: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Terrain painted at (%d, %d)", row, col), "", nil)
+func floodFill(q, r int) error {
+	coord := weewar.CubeCoord{Q: q, R: r}
+	return globalEditor.FloodFill(coord)
 }
 
-// setMapSize sets the map size and immediately renders to the bound canvas
-// calculateCanvasSize calculates the optimal canvas size using the editor's map
-// The editor should provide the map context, not the WASM layer
-func calculateCanvasSize(rows, cols int) (width, height int) {
-	if globalEditor == nil {
-		// Fallback for initialization - use minimal size
-		return max(rows*40+100, 200), max(cols*60+100, 200)
-	}
-
-	// Let the editor calculate the proper canvas size for its current map
-	width, height = globalEditor.CalculateCanvasSize(rows, cols)
-
-	fmt.Printf("CalculateCanvasSize: editor calculated %dx%d for %dx%d map\n",
-		width, height, rows, cols)
-	return width, height
+func setBrushTerrain(terrainType int) error {
+	return globalEditor.SetBrushTerrain(terrainType)
 }
 
-func setMapSize(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing rows/cols arguments", nil)
-	}
-
-	rows := args[0].Int()
-	cols := args[1].Int()
-
-	// Calculate optimal canvas size for the map dimensions
-	canvasWidth, canvasHeight := calculateCanvasSize(rows, cols)
-
-	// Resize the canvas to match the map size
-	err := globalEditor.SetCanvasSize(canvasWidth, canvasHeight)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to resize canvas: %v", err), nil)
-	}
-
-	// Create a new map with the new dimensions
-	err = globalEditor.NewMap(rows, cols)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to set map size: %v", err), nil)
-	}
-
-	// Automatically render to the bound canvas
-	err = renderEditorToCanvas()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to render map: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Map size set to %dx%d", rows, cols), "", map[string]any{
-		"mapWidth":     cols,
-		"mapHeight":    rows,
-		"canvasWidth":  canvasWidth,
-		"canvasHeight": canvasHeight,
-	})
-}
-
-// renderEditorToCanvasJS is the JavaScript wrapper for renderEditorToCanvas
-func renderEditorToCanvasJS(this js.Value, args []js.Value) any {
-	err := renderEditorToCanvas()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to render: %v", err), nil)
-	}
-	return createEditorResponse(true, "Map rendered successfully", "", nil)
-}
-
-// renderEditorToCanvas renders the current editor state to the bound canvas
-func renderEditorToCanvas() error {
-	if globalEditor == nil {
-		return fmt.Errorf("editor not initialized")
-	}
-
-	// Use the layered renderer for fast prototyping rendering
-	layeredRenderer := globalEditor.GetLayeredRenderer()
-	if layeredRenderer != nil {
-		fmt.Println("Using layered renderer for rendering")
-
-		// Force render to update all layers with error handling
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Printf("PANIC in layered renderer: %v\n", r)
-			}
-		}()
-
-		// Ensure units are marked as dirty before render (batching system issue)
-		layeredRenderer.MarkAllUnitsDirty()
-		layeredRenderer.ForceRender()
-
-		// Blit each layer to canvas sequentially with alpha blending
-		canvasID := "map-canvas"
-
-		// Blit all layers: terrain, units, and UI
-		terrainBuffer := layeredRenderer.GetTerrainBuffer()
-		if terrainBuffer != nil {
-			fmt.Println("Blitting terrain buffer to canvas")
-			err := blitBufferToCanvas(terrainBuffer, canvasID)
-			if err != nil {
-				return fmt.Errorf("failed to blit terrain to canvas: %v", err)
-			}
-		}
-
-		unitBuffer := layeredRenderer.GetUnitBuffer()
-		if unitBuffer != nil {
-			fmt.Println("Blitting unit buffer to canvas")
-			err := blitBufferToCanvas(unitBuffer, canvasID)
-			if err != nil {
-				return fmt.Errorf("failed to blit units to canvas: %v", err)
-			}
-		}
-
-		uiBuffer := layeredRenderer.GetUIBuffer()
-		if uiBuffer != nil {
-			fmt.Println("Blitting UI buffer to canvas")
-			err := blitBufferToCanvas(uiBuffer, canvasID)
-			if err != nil {
-				return fmt.Errorf("failed to blit UI to canvas: %v", err)
-			}
-		}
-
-		return nil
-	}
-
-	// Fallback to old rendering if layered renderer not available
-	fmt.Println("Layered renderer not available, using fallback")
-	return renderEditorToCanvasFallback()
-}
-
-// renderEditorToCanvasFallback provides old rendering method as fallback
-func renderEditorToCanvasFallback() error {
-	// Export the current editor state to a game for rendering
-	game, err := globalEditor.ExportToGame(2)
-	if err != nil {
-		return fmt.Errorf("failed to export editor state: %v", err)
-	}
-
-	// Create/update the world with the new map
-	globalWorld = weewar.NewWorld(2, game.Map, int(game.Seed))
-
-	// Ensure we have a view state
-	if globalViewState == nil {
-		globalViewState = weewar.NewViewState()
-	}
-
-	// Set up the game with embedded assets
-	if globalEmbeddedAssetManager != nil {
-		game.SetAssetProvider(globalEmbeddedAssetManager)
-	}
-
-	// Get canvas dimensions from the editor
-	canvasWidth, canvasHeight := globalEditor.GetCanvasSize()
-
-	// Render using BufferRenderer
-	bufferRenderer := weewar.NewBufferRenderer()
-	buffer := weewar.NewBuffer(canvasWidth, canvasHeight)
-
-	baseRenderer := &weewar.BaseRenderer{}
-	options := baseRenderer.CalculateRenderOptions(canvasWidth, canvasHeight, globalWorld)
-
-	bufferRenderer.RenderWorldWithAssets(globalWorld, globalViewState, buffer, options, game)
-
-	// Push the buffer directly to the bound canvas
-	err = blitBufferToCanvas(buffer, "map-canvas")
-	if err != nil {
-		return fmt.Errorf("failed to push buffer to canvas: %v", err)
-	}
-
-	return nil
-}
-
-// removeTerrain removes terrain at specified coordinates
-func removeTerrain(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing row/col arguments", nil)
-	}
-
-	row := args[0].Int()
-	col := args[1].Int()
-
-	err := globalEditor.RemoveTerrain(row, col)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to remove terrain: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Terrain removed at (%d, %d)", row, col), "", nil)
-}
-
-// floodFill performs flood fill at specified coordinates
-func floodFill(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing row/col arguments", nil)
-	}
-
-	row := args[0].Int()
-	col := args[1].Int()
-
-	err := globalEditor.FloodFill(row, col)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to flood fill: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Flood fill applied at (%d, %d)", row, col), "", nil)
-}
-
-// setBrushTerrain sets the current brush terrain type
-func setBrushTerrain(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 1 {
-		return createEditorResponse(false, "", "Missing terrain type argument", nil)
-	}
-
-	terrainType := args[0].Int()
-
-	err := globalEditor.SetBrushTerrain(terrainType)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to set brush terrain: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Brush terrain set to type %d", terrainType), "", nil)
-}
-
-// setBrushSize sets the current brush size
-func setBrushSize(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 1 {
-		return createEditorResponse(false, "", "Missing brush size argument", nil)
-	}
-
-	size := args[0].Int()
-
+func setBrushSize(size int) (map[string]interface{}, error) {
 	err := globalEditor.SetBrushSize(size)
 	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to set brush size: %v", err), nil)
+		return nil, err
 	}
 
 	hexCount := 1
@@ -461,203 +260,59 @@ func setBrushSize(this js.Value, args []js.Value) any {
 		hexCount = 1 + 6*size*(size+1)/2 // Formula for hex area
 	}
 
-	return createEditorResponse(true, fmt.Sprintf("Brush size set to %d (affects %d hexes)", size, hexCount), "", map[string]any{
+	return map[string]interface{}{
 		"size":     size,
 		"hexCount": hexCount,
-	})
+	}, nil
 }
 
-// undo undoes the last operation
-func undo(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
+func renderEditor() error {
+	return globalEditor.RenderFull()
+}
 
-	err := globalEditor.Undo()
+func setCanvas(canvasID string, width, height int) (map[string]interface{}, error) {
+	// Create canvas drawable for the editor
+	canvasDrawable := weewar.NewCanvasBuffer(canvasID, width, height)
+	err := globalEditor.SetDrawable(canvasDrawable, width, height)
 	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Cannot undo: %v", err), nil)
+		return nil, err
 	}
 
-	return createEditorResponse(true, "Undo successful", "", map[string]any{
-		"canUndo": globalEditor.CanUndo(),
-		"canRedo": globalEditor.CanRedo(),
-	})
+	return map[string]interface{}{
+		"canvasID": canvasID,
+		"width":    width,
+		"height":   height,
+	}, nil
 }
 
-// redo redoes the last undone operation
-func redo(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	err := globalEditor.Redo()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Cannot redo: %v", err), nil)
-	}
-
-	return createEditorResponse(true, "Redo successful", "", map[string]any{
-		"canUndo": globalEditor.CanUndo(),
-		"canRedo": globalEditor.CanRedo(),
-	})
-}
-
-// canUndo checks if undo is available
-func canUndo(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	return createEditorResponse(true, "", "", map[string]any{
-		"canUndo": globalEditor.CanUndo(),
-	})
-}
-
-// canRedo checks if redo is available
-func canRedo(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	return createEditorResponse(true, "", "", map[string]any{
-		"canRedo": globalEditor.CanRedo(),
-	})
-}
-
-// getMapInfo returns information about the current map
-func getMapInfo(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
+func getMapInfo() (map[string]interface{}, error) {
 	info := globalEditor.GetMapInfo()
 	if info == nil {
-		return createEditorResponse(false, "", "No map loaded", nil)
+		return nil, fmt.Errorf("no map loaded")
 	}
 
-	return createEditorResponse(true, "Map info retrieved", "", map[string]any{
+	return map[string]interface{}{
 		"filename":      info.Filename,
 		"width":         info.Width,
 		"height":        info.Height,
 		"totalTiles":    info.TotalTiles,
 		"terrainCounts": info.TerrainCounts,
 		"modified":      info.Modified,
-	})
+	}, nil
 }
 
-// validateMap validates the current map
-func validateMap(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
+func validateMap() (map[string]interface{}, error) {
 	issues := globalEditor.ValidateMap()
-
 	isValid := len(issues) == 0
-	message := "Map is valid"
-	if !isValid {
-		message = fmt.Sprintf("Map has %d issue(s)", len(issues))
-	}
 
-	return createEditorResponse(true, message, "", map[string]any{
+	return map[string]interface{}{
 		"valid":  isValid,
 		"issues": issues,
-	})
+	}, nil
 }
 
-// renderMap renders the current map to a data URL
-func renderMap(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	// Default dimensions
-	width, height := 800, 600
-
-	// Parse optional dimensions
-	if len(args) >= 2 {
-		width = args[0].Int()
-		height = args[1].Int()
-	}
-
-	// Create a temporary game for rendering using new World-Renderer architecture
-	game, err := globalEditor.ExportToGame(2)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to export for rendering: %v", err), nil)
-	}
-
-	// Convert Game to World for new architecture
-	world := weewar.NewWorld(2, game.Map, int(game.Seed))
-	// Copy units from game to world
-	for _, playerUnits := range game.Units {
-		for _, unit := range playerUnits {
-			if unit != nil {
-				world.AddUnit(unit)
-			}
-		}
-	}
-	world.CurrentPlayer = game.CurrentPlayer
-	// TurnNumber doesn't exist on Game, use a default
-	world.TurnNumber = 1
-
-	// Create ViewState for rendering
-	viewState := weewar.NewViewState()
-
-	// Create BufferRenderer and render using new architecture
-	renderer := weewar.NewBufferRenderer()
-	buffer := weewar.NewBuffer(width, height)
-
-	// Calculate proper render options
-	options := renderer.CalculateRenderOptions(width, height, world)
-
-	// Render using new World-Renderer architecture with AssetManager support
-	renderer.RenderWorldWithAssets(world, viewState, buffer, options, game)
-
-	// Convert buffer to base64 data URL
-	dataURL, err := buffer.ToDataURL()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to create data URL: %v", err), nil)
-	}
-
-	return createEditorResponse(true, "Map rendered successfully", "", map[string]any{
-		"dataURL": dataURL,
-		"width":   width,
-		"height":  height,
-	})
-}
-
-// exportToGame exports the current map as a playable game
-func exportToGame(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	playerCount := 2
-	if len(args) >= 1 {
-		playerCount = args[0].Int()
-	}
-
-	game, err := globalEditor.ExportToGame(playerCount)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to export to game: %v", err), nil)
-	}
-
-	// Save the game data
-	saveData, err := game.SaveGame()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to serialize game: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Map exported as %d-player game", playerCount), "", map[string]any{
-		"gameData":    string(saveData),
-		"playerCount": playerCount,
-		"size":        len(saveData),
-	})
-}
-
-// getTerrainTypes returns available terrain types
-func getTerrainTypes(this js.Value, args []js.Value) any {
-	// Get terrain data from the weewar package
-	terrainTypes := []map[string]any{
+func getTerrainTypes() (map[string]interface{}, error) {
+	terrainTypes := []map[string]interface{}{
 		{"id": 0, "name": "Unknown", "moveCost": 1, "defenseBonus": 0},
 		{"id": 1, "name": "Grass", "moveCost": 1, "defenseBonus": 0},
 		{"id": 2, "name": "Desert", "moveCost": 1, "defenseBonus": 0},
@@ -666,655 +321,87 @@ func getTerrainTypes(this js.Value, args []js.Value) any {
 		{"id": 5, "name": "Rock", "moveCost": 3, "defenseBonus": 20},
 	}
 
-	return createEditorResponse(true, "Terrain types retrieved", "", map[string]any{
+	return map[string]interface{}{
 		"terrainTypes": terrainTypes,
-	})
+	}, nil
 }
 
 // =============================================================================
-// Canvas Management Functions
+// Utility Function Implementations
 // =============================================================================
 
-// setCanvas initializes the canvas for rendering
-func setCanvas(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
+func pixelToCoords(x, y float64) (map[string]interface{}, error) {
+	coord := globalWorld.Map.XYToQR(x, y, weewar.DefaultTileWidth, weewar.DefaultTileHeight, weewar.DefaultYIncrement)
 
-	if len(args) < 1 {
-		return createEditorResponse(false, "", "Missing canvas ID argument", nil)
-	}
+	// Convert cube coordinates to row/col using proper conversion
+	row, col := globalWorld.Map.HexToRowCol(coord)
 
-	canvasID := args[0].String()
+	isWithinBounds := globalWorld.Map.IsWithinBoundsCube(coord)
 
-	// Default canvas size
-	width, height := 800, 600
-	if len(args) >= 3 {
-		width = args[1].Int()
-		height = args[2].Int()
-	}
-
-	err := globalEditor.SetCanvas(canvasID, width, height)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to set canvas: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Canvas '%s' initialized (%dx%d)", canvasID, width, height), "", map[string]any{
-		"canvasID": canvasID,
-		"width":    width,
-		"height":   height,
-	})
-}
-
-// setCanvasSize resizes the canvas
-func setCanvasSize(this js.Value, args []js.Value) any {
-	if globalEditor == nil {
-		return createEditorResponse(false, "", "Editor not initialized", nil)
-	}
-
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing width/height arguments", nil)
-	}
-
-	width := args[0].Int()
-	height := args[1].Int()
-
-	err := globalEditor.SetCanvasSize(width, height)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to resize canvas: %v", err), nil)
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Canvas resized to %dx%d", width, height), "", map[string]any{
-		"width":  width,
-		"height": height,
-	})
-}
-
-// =============================================================================
-// World-Renderer Architecture Functions
-// =============================================================================
-
-// Global instances for testing the new architecture
-var globalWorld *weewar.World
-var globalViewState *weewar.ViewState
-var globalCanvasRenderer *weewar.CanvasRenderer
-var globalEmbeddedAssetManager *assets.EmbeddedAssetManager
-
-// worldCreateTestMap creates a test map for World creation
-func worldCreateTestMap(this js.Value, args []js.Value) any {
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing rows/cols arguments", nil)
-	}
-
-	rows := args[0].Int()
-	cols := args[1].Int()
-
-	// Create test map
-	testMap := weewar.NewMap(rows, cols, false)
-
-	// Fill with default terrain (grass) and add some variety
-	for row := 0; row < rows; row++ {
-		for col := 0; col < cols; col++ {
-			terrainType := 1 // Default to grass
-
-			// Add some variety for testing
-			if row == 1 && col == 1 {
-				terrainType = 3 // Water
-			} else if row == 2 && col == 2 {
-				terrainType = 4 // Mountain
-			} else if row == 1 && col == 2 {
-				terrainType = 3 // Water
-			}
-
-			tile := weewar.NewTile(row, col, terrainType)
-			testMap.AddTile(tile)
-		}
-	}
-
-	return createEditorResponse(true, fmt.Sprintf("Test map created (%dx%d)", rows, cols), "", map[string]any{
-		"map":  testMap,
-		"rows": rows,
-		"cols": cols,
-	})
-}
-
-// worldCreate creates a new World with the given parameters
-func worldCreate(this js.Value, args []js.Value) any {
-	if len(args) < 3 {
-		return createEditorResponse(false, "", "Missing playerCount/map/seed arguments", nil)
-	}
-
-	playerCount := args[0].Int()
-	seed := args[2].Int()
-
-	// Use the globalEditor's current map if available, otherwise create a default map
-	var testMap *weewar.Map
-	if globalEditor != nil && globalEditor.GetMapInfo() != nil {
-		// Export the current editor map to use for rendering
-		mapInfo := globalEditor.GetMapInfo()
-		testMap = weewar.NewMap(mapInfo.Height, mapInfo.Width, false)
-
-		// Fill with current terrain data from the editor
-		for row := 0; row < mapInfo.Height; row++ {
-			for col := 0; col < mapInfo.Width; col++ {
-				terrainType := 1 // Default grass
-				// In a full implementation, we'd get the actual terrain from the editor
-				// For now, just use grass with some variety
-				if row == 1 && (col == 1 || col == 2) {
-					terrainType = 3 // Water
-				} else if row == 2 && col == 3 {
-					terrainType = 4 // Mountain
-				}
-				tile := weewar.NewTile(row, col, terrainType)
-				testMap.AddTile(tile)
-			}
-		}
-	} else {
-		// Create a default 5x8 map if no editor map is available
-		testMap = weewar.NewMap(5, 8, false)
-
-		// Fill with variety of terrains for testing
-		for row := 0; row < 5; row++ {
-			for col := 0; col < 8; col++ {
-				terrainType := 1 // Default grass
-				if row == 1 && (col == 1 || col == 2) {
-					terrainType = 3 // Water
-				} else if row == 2 && col == 3 {
-					terrainType = 4 // Mountain
-				}
-				tile := weewar.NewTile(row, col, terrainType)
-				testMap.AddTile(tile)
-			}
-		}
-	}
-
-	// Create the world
-	world := weewar.NewWorld(playerCount, testMap, seed)
-	globalWorld = world
-
-	return createEditorResponse(true, "World created successfully", "", map[string]any{
-		"world":       world,
-		"playerCount": playerCount,
-		"seed":        seed,
-		"mapRows":     testMap.NumRows(),
-		"mapCols":     testMap.NumCols(),
-	})
-}
-
-// viewStateCreate creates a new ViewState
-func viewStateCreate(this js.Value, args []js.Value) any {
-	viewState := weewar.NewViewState()
-	globalViewState = viewState
-
-	return createEditorResponse(true, "ViewState created successfully", "", map[string]any{
-		"viewState":    viewState,
-		"showGrid":     viewState.ShowGrid,
-		"zoomLevel":    viewState.ZoomLevel,
-		"brushTerrain": viewState.BrushTerrain,
-		"brushSize":    viewState.BrushSize,
-	})
-}
-
-// canvasRendererCreate creates a new CanvasRenderer
-func canvasRendererCreate(this js.Value, args []js.Value) any {
-	renderer := weewar.NewCanvasRenderer()
-	globalCanvasRenderer = renderer
-
-	return createEditorResponse(true, "CanvasRenderer created successfully", "", map[string]any{
-		"renderer": "CanvasRenderer instance created",
-	})
-}
-
-// worldRendererRender renders a World using BufferRenderer and blits to canvas
-func worldRendererRender(this js.Value, args []js.Value) any {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Panic in worldRendererRender: %v\n", r)
-		}
-	}()
-
-	if globalWorld == nil {
-		return createEditorResponse(false, "", "globalWorld is nil - run worldCreate first", nil)
-	}
-	if globalViewState == nil {
-		return createEditorResponse(false, "", "globalViewState is nil - run viewStateCreate first", nil)
-	}
-	fmt.Printf("DEBUG: Global objects are non-nil\n")
-
-	if len(args) < 3 {
-		return createEditorResponse(false, "", "Missing canvasID/width/height arguments", nil)
-	}
-
-	canvasID := args[0].String()
-	width := args[1].Int()
-	height := args[2].Int()
-
-	// Create a Game instance with embedded assets (same as CLI)
-	testGame, err := weewar.NewGame(2, globalWorld.Map, int64(globalWorld.Seed))
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to create game for rendering: %v", err), nil)
-	}
-	fmt.Printf("DEBUG: testGame created successfully\n")
-
-	// Use embedded assets if available
-	if globalEmbeddedAssetManager != nil {
-		testGame.SetAssetProvider(globalEmbeddedAssetManager)
-		fmt.Printf("DEBUG: embedded asset manager set on testGame\n")
-	} else {
-		fmt.Printf("DEBUG: globalEmbeddedAssetManager is nil\n")
-	}
-
-	// Use BufferRenderer (same as CLI) to avoid canvas deadlock issues
-	bufferRenderer := weewar.NewBufferRenderer()
-	buffer := weewar.NewBuffer(width, height)
-
-	// Calculate render options based on world and canvas size
-	baseRenderer := &weewar.BaseRenderer{}
-	options := baseRenderer.CalculateRenderOptions(width, height, globalWorld)
-	fmt.Printf("DEBUG: render options calculated - tileWidth=%d, tileHeight=%d\n", options.TileWidth, options.TileHeight)
-
-	// Render using BufferRenderer with embedded assets (same as CLI)
-	func() {
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Printf("Panic in BufferRenderer: %v\n", r)
-			}
-		}()
-		bufferRenderer.RenderWorldWithAssets(globalWorld, globalViewState, buffer, options, testGame)
-	}()
-
-	// Convert buffer to canvas ImageData and blit to HTML canvas
-	err = blitBufferToCanvas(buffer, canvasID)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to blit buffer to canvas: %v", err), nil)
-	}
-
-	return createEditorResponse(true, "World rendered with BufferRenderer", "", map[string]any{
-		"canvasID":   canvasID,
-		"width":      width,
-		"height":     height,
-		"tileWidth":  options.TileWidth,
-		"tileHeight": options.TileHeight,
-		"yIncrement": options.YIncrement,
-	})
-}
-
-// loadEmbeddedAssets switches global game instance to use embedded assets
-func loadEmbeddedAssets(this js.Value, args []js.Value) any {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Panic in loadEmbeddedAssets: %v\n", r)
-		}
-	}()
-
-	// Create embedded asset manager
-	embeddedAssets := assets.NewEmbeddedAssetManager()
-	if embeddedAssets == nil {
-		return createEditorResponse(false, "", "Failed to create embedded asset manager", nil)
-	}
-
-	// Preload common assets
-	err := embeddedAssets.PreloadCommonAssets()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to preload embedded assets: %v", err), nil)
-	}
-
-	// Store globally for use in rendering
-	globalEmbeddedAssetManager = embeddedAssets
-
-	// Update editor to use the loaded assets for terrain sprites
-	if globalEditor != nil {
-		globalEditor.SetAssetProvider(embeddedAssets)
-	}
-
-	tileCount, unitCount := embeddedAssets.GetCacheStats()
-
-	return createEditorResponse(true, "Embedded assets loaded successfully", "", map[string]any{
-		"tilesLoaded": tileCount,
-		"unitsLoaded": unitCount,
-		"ready":       true,
-	})
-}
-
-// testEmbeddedAssets tests embedded asset loading
-func testEmbeddedAssets(this js.Value, args []js.Value) any {
-	embeddedAssets := assets.NewEmbeddedAssetManager()
-
-	// Test asset existence checks
-	hasTile := embeddedAssets.HasTileAsset(1)    // Grass tile
-	hasUnit := embeddedAssets.HasUnitAsset(1, 0) // Basic unit, player 0
-
-	// Test actual asset loading
-	var tileError, unitError string
-	_, err := embeddedAssets.GetTileImage(1)
-	if err != nil {
-		tileError = err.Error()
-	}
-
-	_, err = embeddedAssets.GetUnitImage(1, 0)
-	if err != nil {
-		unitError = err.Error()
-	}
-
-	tileCount, unitCount := embeddedAssets.GetCacheStats()
-
-	return createEditorResponse(true, "Embedded asset test complete", "", map[string]any{
-		"hasTileAsset":  hasTile,
-		"hasUnitAsset":  hasUnit,
-		"tileLoadError": tileError,
-		"unitLoadError": unitError,
-		"tilesInCache":  tileCount,
-		"unitsInCache":  unitCount,
-		"note":          "Using embedded assets instead of os.Open()",
-	})
-}
-
-// debugAssetLoading tests asset loading to identify the root cause
-func debugAssetLoading(this js.Value, args []js.Value) any {
-	// Test 1: Create a Game with AssetManager
-	testGame, err := weewar.NewGame(2, weewar.NewMap(3, 3, false), 12345)
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to create test game: %v", err), nil)
-	}
-
-	assetManager := testGame.GetAssetManager()
-	if assetManager == nil {
-		return createEditorResponse(false, "", "AssetManager is nil", nil)
-	}
-
-	// Test 2: Try to check if an asset exists (this uses os.Stat internally)
-	hasTile := assetManager.HasTileAsset(1)    // Grass tile
-	hasUnit := assetManager.HasUnitAsset(1, 0) // Basic unit, player 0
-
-	// Test 3: Try to actually load an asset (this uses os.Open internally)
-	var tileError, unitError string
-	_, err = assetManager.GetTileImage(1)
-	if err != nil {
-		tileError = err.Error()
-	}
-
-	_, err = assetManager.GetUnitImage(1, 0)
-	if err != nil {
-		unitError = err.Error()
-	}
-
-	return createEditorResponse(true, "Asset loading debug complete", "", map[string]any{
-		"hasTileAsset":  hasTile,
-		"hasUnitAsset":  hasUnit,
-		"tileLoadError": tileError,
-		"unitLoadError": unitError,
-		"assetPath":     "data", // The hardcoded path used
-		"note":          "In WASM/browser, os.Open() and os.Stat() fail on local files",
-	})
-}
-
-// loadFetchAssets switches global game instance to use fetch-based assets
-func loadFetchAssets(this js.Value, args []js.Value) any {
-	// Base URL for assets (current directory by default)
-	baseURL := "."
-	if len(args) >= 1 {
-		baseURL = args[0].String()
-	}
-
-	// Create fetch asset manager
-	fetchAssets := weewar.NewFetchAssetManager(baseURL)
-
-	// Preload common assets
-	err := fetchAssets.PreloadCommonAssets()
-	if err != nil {
-		return createEditorResponse(false, "", fmt.Sprintf("Failed to preload fetch assets: %v", err), nil)
-	}
-
-	// Update global world's game to use fetch assets if it exists
-	if globalWorld != nil {
-		// Create a new game with fetch assets
-		testGame, err := weewar.NewGame(globalWorld.PlayerCount, globalWorld.Map, int64(globalWorld.Seed))
-		if err != nil {
-			return createEditorResponse(false, "", fmt.Sprintf("Failed to create game with fetch assets: %v", err), nil)
-		}
-
-		// Switch to fetch asset provider
-		testGame.SetAssetProvider(fetchAssets)
-	}
-
-	tileCount, unitCount := fetchAssets.GetCacheStats()
-
-	return createEditorResponse(true, "Fetch assets loaded successfully", "", map[string]any{
-		"tilesLoaded": tileCount,
-		"unitsLoaded": unitCount,
-		"baseURL":     baseURL,
-		"ready":       true,
-	})
-}
-
-// testFetchAssets tests fetch-based asset loading
-func testFetchAssets(this js.Value, args []js.Value) any {
-	baseURL := "."
-	if len(args) >= 1 {
-		baseURL = args[0].String()
-	}
-
-	fetchAssets := weewar.NewFetchAssetManager(baseURL)
-
-	// Test asset existence checks (always returns true for fetch-based)
-	hasTile := fetchAssets.HasTileAsset(1)    // Grass tile
-	hasUnit := fetchAssets.HasUnitAsset(1, 0) // Basic unit, player 0
-
-	// Test actual asset loading
-	var tileError, unitError string
-	_, err := fetchAssets.GetTileImage(1)
-	if err != nil {
-		tileError = err.Error()
-	}
-
-	_, err = fetchAssets.GetUnitImage(1, 0)
-	if err != nil {
-		unitError = err.Error()
-	}
-
-	tileCount, unitCount := fetchAssets.GetCacheStats()
-
-	return createEditorResponse(true, "Fetch asset test complete", "", map[string]any{
-		"hasTileAsset":  hasTile,
-		"hasUnitAsset":  hasUnit,
-		"tileLoadError": tileError,
-		"unitLoadError": unitError,
-		"tilesInCache":  tileCount,
-		"unitsInCache":  unitCount,
-		"baseURL":       baseURL,
-		"note":          "Using HTTP fetch instead of os.Open() - check console for fetch URLs",
-	})
-}
-
-// blitBufferToCanvas converts a BufferRenderer output to HTML canvas ImageData and blits it
-func blitBufferToCanvas(buffer *weewar.Buffer, canvasID string) error {
-	// Get buffer image data
-	imageData := buffer.GetImageData()
-	width := buffer.GetWidth()
-	height := buffer.GetHeight()
-
-	// Get canvas element from DOM
-	canvas := js.Global().Get("document").Call("getElementById", canvasID)
-	if canvas.IsUndefined() {
-		return fmt.Errorf("canvas element '%s' not found", canvasID)
-	}
-
-	// Get 2D context
-	ctx := canvas.Call("getContext", "2d")
-	if ctx.IsUndefined() {
-		return fmt.Errorf("failed to get 2D context for canvas '%s'", canvasID)
-	}
-
-	// Create ImageData object
-	imageDataJS := ctx.Call("createImageData", width, height)
-	if imageDataJS.IsUndefined() {
-		return fmt.Errorf("failed to create ImageData object")
-	}
-
-	// Get the data array from ImageData
-	dataArray := imageDataJS.Get("data")
-	if dataArray.IsUndefined() {
-		return fmt.Errorf("failed to get data array from ImageData")
-	}
-
-	// Convert Go image.RGBA to JavaScript Uint8ClampedArray efficiently
-	// The buffer is in RGBA format, and ImageData expects RGBA format
-	pixels := imageData.Pix
-
-	// Debug: Check if buffer contains any non-transparent pixels
-	nonTransparentPixels := 0
-	for i := 3; i < len(pixels); i += 4 { // Check alpha channel (every 4th byte)
-		if pixels[i] > 0 {
-			nonTransparentPixels++
-		}
-	}
-	fmt.Printf("BlitBufferToCanvas: canvas='%s', size=%dx%d, pixels=%d, non-transparent=%d\n",
-		canvasID, width, height, len(pixels)/4, nonTransparentPixels)
-
-	// Use js.CopyBytesToJS for efficient bulk transfer instead of pixel-by-pixel
-	js.CopyBytesToJS(dataArray, pixels)
-
-	// Use drawImage with globalCompositeOperation for proper alpha blending
-	// First create a temporary canvas with the ImageData
-	tempCanvas := js.Global().Get("document").Call("createElement", "canvas")
-	tempCanvas.Set("width", width)
-	tempCanvas.Set("height", height)
-	tempCtx := tempCanvas.Call("getContext", "2d")
-	tempCtx.Call("putImageData", imageDataJS, 0, 0)
-
-	// Then draw the temporary canvas onto the main canvas with alpha blending
-	ctx.Set("globalCompositeOperation", "source-over") // This respects alpha
-	ctx.Call("drawImage", tempCanvas, 0, 0)
-
-	// Debug: Check canvas size
-	canvasWidth := canvas.Get("width").Int()
-	canvasHeight := canvas.Get("height").Int()
-	fmt.Printf("Canvas '%s' size: %dx%d, ImageData size: %dx%d\n",
-		canvasID, canvasWidth, canvasHeight, width, height)
-
-	return nil
-}
-
-// pixelToCoords converts pixel coordinates to hex tile coordinates
-// Takes pixel x,y and returns the corresponding row,col and cube coordinates
-func pixelToCoords(this js.Value, args []js.Value) any {
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing x/y pixel arguments", nil)
-	}
-
-	pixelX := args[0].Float()
-	pixelY := args[1].Float()
-
-	// Get tile dimensions from the library's renderer (no hardcoded values)
-	var TILE_WIDTH, TILE_HEIGHT, Y_INCREMENT float64
-	if globalWorld != nil && globalWorld.Map != nil {
-		// Use the library's renderer to get proper tile dimensions
-		renderer := &weewar.BaseRenderer{}
-		options := renderer.CalculateRenderOptions(800, 600, globalWorld)
-		TILE_WIDTH = options.TileWidth
-		TILE_HEIGHT = options.TileHeight
-		Y_INCREMENT = options.YIncrement
-	} else {
-		// Fallback to default values from library (should match CalculateRenderOptions defaults)
-		renderer := &weewar.BaseRenderer{}
-		options := renderer.CalculateRenderOptions(800, 600, nil) // nil world gives defaults
-		TILE_WIDTH = options.TileWidth
-		TILE_HEIGHT = options.TileHeight
-		Y_INCREMENT = options.YIncrement
-	}
-
-	// Get the current map if available for proper coordinate conversion
-	var evenRowsOffset bool = false // Default: odd rows offset (EvenRowsOffset() returns false)
-	if globalWorld != nil && globalWorld.Map != nil {
-		evenRowsOffset = globalWorld.Map.EvenRowsOffset()
-	}
-
-	// Convert pixel Y to row (this is straightforward)
-	row := int((pixelY - TILE_HEIGHT/2) / Y_INCREMENT)
-
-	// Convert pixel X to col (this requires handling the hex offset)
-	var col int
-	isEvenRow := (row % 2) == 0
-
-	if evenRowsOffset {
-		// Even rows are offset to the right
-		if isEvenRow {
-			// Even row: x = col * tileWidth + tileWidth/2 + tileWidth/2
-			col = int((pixelX - TILE_WIDTH) / TILE_WIDTH)
-		} else {
-			// Odd row: x = col * tileWidth + tileWidth/2
-			col = int((pixelX - TILE_WIDTH/2) / TILE_WIDTH)
-		}
-	} else {
-		// Odd rows are offset to the right (default behavior)
-		if !isEvenRow {
-			// Odd row: x = col * tileWidth + tileWidth/2 + tileWidth/2
-			col = int((pixelX - TILE_WIDTH) / TILE_WIDTH)
-		} else {
-			// Even row: x = col * tileWidth + tileWidth/2
-			col = int((pixelX - TILE_WIDTH/2) / TILE_WIDTH)
-		}
-	}
-
-	// Calculate cube coordinates if we have a map
-	var cubeQ, cubeR int
-	var isWithinBounds bool = false
-
-	if globalWorld != nil && globalWorld.Map != nil {
-		cubeCoord := globalWorld.Map.ArrayToHex(row, col)
-		cubeQ = cubeCoord.Q
-		cubeR = cubeCoord.R
-
-		// Use proper Q/R bounds validation instead of row/col bounds
-		isWithinBounds = globalWorld.Map.IsWithinBounds(cubeQ, cubeR)
-	} else {
-		// Fallback calculation for cube coordinates (assuming odd-row offset)
-		cubeR = row
-		cubeQ = col - (row+(row&1))/2
-		// Cannot validate bounds without map, assume valid
-		isWithinBounds = true
-	}
-
-	return createEditorResponse(true, "Pixel to coordinates conversion successful", "", map[string]any{
-		"pixelX":       pixelX,
-		"pixelY":       pixelY,
+	return map[string]interface{}{
+		"pixelX":       x,
+		"pixelY":       y,
 		"row":          row,
 		"col":          col,
-		"cubeQ":        cubeQ,
-		"cubeR":        cubeR,
+		"cubeQ":        coord.Q,
+		"cubeR":        coord.R,
 		"withinBounds": isWithinBounds,
-	})
+	}, nil
 }
 
-// calculateCanvasSizeJS exposes canvas size calculation to JavaScript
-func calculateCanvasSizeJS(this js.Value, args []js.Value) any {
-	if len(args) < 2 {
-		return createEditorResponse(false, "", "Missing rows/cols arguments", nil)
-	}
+func calculateCanvasSize(rows, cols int) (map[string]interface{}, error) {
+	width, height := calculateCanvasSizeInternal(rows, cols)
 
-	rows := args[0].Int()
-	cols := args[1].Int()
-
-	width, height := calculateCanvasSize(rows, cols)
-
-	return createEditorResponse(true, "Canvas size calculated", "", map[string]any{
+	return map[string]interface{}{
 		"width":  width,
 		"height": height,
 		"rows":   rows,
 		"cols":   cols,
-	})
+	}, nil
 }
 
-// createEditorResponse creates a JavaScript-compatible response object
-func createEditorResponse(success bool, message, error string, data any) js.Value {
-	response := EditorResponse{
-		Success: success,
-		Message: message,
-		Error:   error,
-		Data:    data,
+func calculateCanvasSizeInternal(rows, cols int) (width, height int) {
+	// Get map bounds and add padding for hover effects and potential expansion
+	minX, minY, maxX, maxY := globalEditor.GetMapBounds()
+
+	// Add padding around the map bounds so we can show hexes being hovered
+	// and allow for potential map expansion
+	padding := 150.0
+	width = int(maxX - minX + 2*padding)
+	height = int(maxY - minY + 2*padding)
+
+	// Ensure minimum canvas size
+	width = weewar.Max(width, 400)
+	height = weewar.Max(height, 300)
+
+	return width, height
+}
+
+func testAssets() (map[string]interface{}, error) {
+	if globalAssetProvider == nil {
+		return nil, fmt.Errorf("no asset provider loaded")
 	}
 
-	// Convert to JS object
-	responseBytes, _ := json.Marshal(response)
-	return js.Global().Get("JSON").Call("parse", string(responseBytes))
+	// Test terrain and unit asset availability
+	hasTile := globalAssetProvider.HasTileAsset(1)    // Grass
+	hasUnit := globalAssetProvider.HasUnitAsset(1, 0) // Basic unit, player 0
+
+	// Test actual loading
+	var tileError, unitError string
+	_, err := globalAssetProvider.GetTileImage(1)
+	if err != nil {
+		tileError = err.Error()
+	}
+
+	_, err = globalAssetProvider.GetUnitImage(1, 0)
+	if err != nil {
+		unitError = err.Error()
+	}
+
+	return map[string]interface{}{
+		"hasTileAsset":  hasTile,
+		"hasUnitAsset":  hasUnit,
+		"tileLoadError": tileError,
+		"unitLoadError": unitError,
+	}, nil
 }

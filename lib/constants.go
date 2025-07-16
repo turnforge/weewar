@@ -6,3 +6,5 @@ const (
 	DefaultYIncrement = 48.0
 	MaxUnits          = 20
 )
+
+const SQRT3 = 1.732050808 // sqrt(3)

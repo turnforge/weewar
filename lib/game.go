@@ -331,20 +331,6 @@ func (g *Game) GetMapName() string {
 	return "DefaultMap" // For now, since we're using map instances directly
 }
 
-// GetMapBounds returns pixel boundaries for rendering
-func (g *Game) GetMapBounds() (minX, minY, maxX, maxY float64) {
-	if g.World.Map == nil {
-		return 0, 0, 0, 0
-	}
-
-	// Use standard tile dimensions for bounds calculation
-	tileWidth := DefaultTileWidth
-	tileHeight := DefaultTileHeight
-	yIncrement := DefaultYIncrement
-
-	return g.World.Map.getMapBounds(tileWidth, tileHeight, yIncrement)
-}
-
 // GetTileType returns terrain type at position using cube coordinates
 func (g *Game) GetTileType(coord CubeCoord) int {
 	tile := g.World.Map.TileAt(coord)

@@ -27,6 +27,13 @@ type CanvasBuffer struct {
 	canvasID      string
 }
 
+// NewCanvasDrawable creates a Drawable that renders to the specified HTML canvas
+func NewCanvasDrawable(canvasID string) func(width, height int) Drawable {
+	return func(width, height int) Drawable {
+		return NewCanvasBuffer(canvasID, width, height)
+	}
+}
+
 // NewCanvasBuffer creates a new canvas buffer that renders to the specified HTML canvas
 func NewCanvasBuffer(canvasID string, width, height int) *CanvasBuffer {
 	// Get canvas element from DOM

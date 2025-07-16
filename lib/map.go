@@ -2,7 +2,6 @@ package weewar
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 )
 
@@ -41,10 +40,10 @@ const (
 // Map represents the game map with hex grid topology
 type Map struct {
 	// Coordinate bounds - These can be evaluated.
-	minQ int `json:"minQ"` // Minimum Q coordinate (inclusive)
-	maxQ int `json:"maxQ"` // Maximum Q coordinate (inclusive)
-	minR int `json:"minR"` // Minimum R coordinate (inclusive)
-	maxR int `json:"maxR"` // Maximum R coordinate (inclusive)
+	minQ int `json:"-"` // Minimum Q coordinate (inclusive)
+	maxQ int `json:"-"` // Maximum Q coordinate (inclusive)
+	minR int `json:"-"` // Minimum R coordinate (inclusive)
+	maxR int `json:"-"` // Maximum R coordinate (inclusive)
 
 	// Where X/Y of the Origin tile (Q = R = 0) are, in normalized tile units.
 	// OriginX = 5 means the origin tile is 5 tile widths to the right
@@ -54,8 +53,8 @@ type Map struct {
 	// the map "viewport" in each of the directions.  Which means the origin
 	// tile's X/Y would change.  By tracking this we can find the coord location
 	// of all other tiles.
-	OriginX float64 // In tile width units (horizontal spacing = 1 tile width)
-	OriginY float64 // In tile width units (vertical spacing = 1.5 tile widths)
+	// OriginX float64 // In tile width units (horizontal spacing = 1 tile width)
+	// OriginY float64 // In tile width units (vertical spacing = 1.5 tile widths)
 
 	// Cube coordinate storage - primary data structure
 	Tiles map[CubeCoord]*Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
@@ -217,11 +216,11 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 
 	// Convert normalized origin to pixel coordinates
 	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
-	originPixelX := m.OriginX * tileWidth
-	originPixelY := m.OriginY * tileWidth
+	originPixelX := 0.0 // m.OriginX * tileWidth
+	originPixelY := 0.0 // m.OriginY * tileHeight
 
 	x = originPixelX + tileWidth*1.732050808*(q+r/2.0) // 1.732050808 ≈ sqrt(3)
-	y = originPixelY + tileWidth*3.0/2.0*r
+	y = originPixelY + tileHeight*3.0/2.0*r
 
 	return x, y
 }
@@ -233,8 +232,8 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord {
 	// Convert normalized origin to pixel coordinates
 	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
-	originPixelX := m.OriginX * tileWidth
-	originPixelY := m.OriginY * tileWidth
+	originPixelX := 0.0 // m.OriginX * tileWidth
+	originPixelY := 0.0 // m.OriginY * tilHeight
 
 	// Translate screen coordinates to hex coordinate space by removing origin offset
 	hexX := x - originPixelX
@@ -245,10 +244,8 @@ func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord 
 	// x = size * sqrt(3) * (q + r/2)  =>  q = (sqrt(3) * x) / (y * 3)
 	// y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
 
-	sqrt3 := 1.732050808 // sqrt(3)
-
 	// Calculate fractional q coordinate
-	fractionalQ := (hexX * tileWidth * sqrt3) / (y * tileHeight * 3.0)
+	fractionalQ := (hexX * tileWidth * SQRT3) / (y * tileHeight * 3.0)
 
 	// Calculate fractional r coordinate
 	fractionalR := (hexY * tileHeight * 2.0) / 3.0
@@ -289,7 +286,7 @@ func roundCubeCoord(fractionalQ, fractionalR float64) CubeCoord {
 }
 
 // getMapBounds calculates the pixel bounds of the entire map
-func (m *Map) getMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, minY, maxX, maxY float64) {
+func (m *Map) GetMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, minY, maxX, maxY float64) {
 	minX = math.Inf(1)
 	minY = math.Inf(1)
 	maxX = math.Inf(-1)
@@ -314,155 +311,6 @@ func (m *Map) getMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, min
 	}
 
 	return minX, minY, maxX, maxY
-}
-
-// AddLeftCols adds n columns to the left of the map, adjusting bounds and origin
-func (m *Map) AddLeftCols(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Decrease minQ to expand leftward
-	m.minQ -= n
-	m.minR += n
-
-	// Adjust OriginX to maintain existing tile positions
-	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
-	// Since OriginX is in normalized tile units, we add n directly
-	m.OriginX += float64(n)
-
-	return nil
-}
-
-// RemoveLeftCols removes n columns from the left of the map, adjusting bounds and origin
-func (m *Map) RemoveLeftCols(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Check if we have enough columns to remove
-	currentCols := m.maxQ - m.minQ + 1
-	if n >= currentCols {
-		return fmt.Errorf("cannot remove %d columns from map with only %d columns", n, currentCols)
-	}
-
-	// Increase minQ to shrink from left
-	m.minQ += n
-	m.minR -= n
-
-	// Adjust OriginX to maintain existing tile positions
-	// In odd-r layout, horizontal distance between adjacent tiles is 1 tile width unit
-	// Since OriginX is in normalized tile units, we subtract n directly
-	m.OriginX -= float64(n)
-
-	return nil
-}
-
-// AddTopRows adds n rows to the top of the map, adjusting bounds and origin
-func (m *Map) AddTopRows(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Decrease minR to expand upward
-	// When we add Rows - R does not change.  But Q
-	m.minR -= n
-
-	// Adjust OriginY to maintain existing tile positions
-	// In odd-r layout, vertical distance between adjacent rows is 1.5 tile widths
-	// Since OriginY is in normalized tile width units, we add n * 1.5
-	m.OriginY += float64(n) * 1.5
-
-	return nil
-}
-
-// RemoveTopRows removes n rows from the top of the map, adjusting bounds and origin
-func (m *Map) RemoveTopRows(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Check if we have enough rows to remove
-	currentRows := m.maxR - m.minR + 1
-	if n >= currentRows {
-		return fmt.Errorf("cannot remove %d rows from map with only %d rows", n, currentRows)
-	}
-
-	// Increase minR to shrink from top
-	m.minR += n
-
-	// Adjust OriginY to maintain existing tile positions
-	// In odd-r layout, vertical distance between adjacent rows is 1.5 tile widths
-	// Since OriginY is in normalized tile width units, we subtract n * 1.5
-	m.OriginY -= float64(n) * 1.5
-
-	return nil
-}
-
-// AddRightCols adds n columns to the right of the map, adjusting bounds
-func (m *Map) AddRightCols(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Increase maxQ to expand rightward
-	m.maxQ += n
-	m.maxR -= n
-
-	// Origin position remains unchanged when adding to the right
-	return nil
-}
-
-// RemoveRightCols removes n columns from the right of the map, adjusting bounds
-func (m *Map) RemoveRightCols(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Check if we have enough columns to remove
-	currentCols := m.maxQ - m.minQ + 1
-	if n >= currentCols {
-		return fmt.Errorf("cannot remove %d columns from map with only %d columns", n, currentCols)
-	}
-
-	// Decrease maxQ to shrink from right
-	m.maxQ -= n
-	m.maxR += n
-
-	// Origin position remains unchanged when removing from the right
-	return nil
-}
-
-// AddBottomRows adds n rows to the bottom of the map, adjusting bounds
-func (m *Map) AddBottomRows(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Increase maxR to expand downward
-	m.maxR += n
-
-	// Origin position remains unchanged when adding to the bottom
-	return nil
-}
-
-// RemoveBottomRows removes n rows from the bottom of the map, adjusting bounds
-func (m *Map) RemoveBottomRows(n int) error {
-	if n <= 0 {
-		return fmt.Errorf("n must be positive, got %d", n)
-	}
-
-	// Check if we have enough rows to remove
-	currentRows := m.maxR - m.minR + 1
-	if n >= currentRows {
-		return fmt.Errorf("cannot remove %d rows from map with only %d rows", n, currentRows)
-	}
-
-	// Decrease maxR to shrink from bottom
-	m.maxR -= n
-
-	// Origin position remains unchanged when removing from the bottom
-	return nil
 }
 
 // =============================================================================

@@ -3,17 +3,17 @@
 
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"syscall/js"
-	"time"
+import "fmt"
 
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
-)
+func main() {
+	fmt.Println("This is commented out")
+	c := make(chan struct{})
+	<-c
+}
 
+/*
 // Global CLI instance for WASM
-var globalCLI *weewar.WeeWarCLI
+var globalCLI *WeeWarCLI
 
 // WebCLI wraps the CLI for web use
 type WebCLI struct {
@@ -299,3 +299,4 @@ func createJSResponse(success bool, message, error string, data any) js.Value {
 	responseBytes, _ := json.Marshal(response)
 	return js.Global().Get("JSON").Call("parse", string(responseBytes))
 }
+*/

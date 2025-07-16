@@ -765,25 +765,25 @@ class MapEditorPage {
         this.mapCanvas.style.width = `${width}px`;
         this.mapCanvas.style.height = `${height}px`;
         
-        // Tell WASM to update its canvas buffer size to match DOM
+        // Tell WASM to update its viewport to match DOM canvas size
         if (this.wasmInitialized) {
             try {
                 const result = (window as any).editorSetViewPort(this.scrollOffset.x, this.scrollOffset.y, width, height);
                 if (result.success) {
-                    this.logToConsole(`Time: ${performance.now()} WASM canvas buffer updated to ${width}x${height}`);
+                    this.logToConsole(`Time: ${performance.now()} WASM viewport updated to ${width}x${height}`);
                     
                     // Force a re-render with proper game rendering (not simplified hexagons)
-                    const renderResult = (window as any).editorRenderToCanvas();
+                    const renderResult = (window as any).editorRender();
                     if (renderResult.success) {
                         this.logToConsole(`Time: ${performance.now()} Map re-rendered with proper terrain images`);
                     } else {
                         this.logToConsole(`Re-render failed: ${renderResult.error}`);
                     }
                 } else {
-                    this.logToConsole(`Failed to update WASM canvas buffer: ${result.error}`);
+                    this.logToConsole(`Failed to update WASM viewport: ${result.error}`);
                 }
             } catch (error) {
-                this.logToConsole(`Error updating WASM canvas buffer: ${error}`);
+                this.logToConsole(`Error updating WASM viewport: ${error}`);
             }
         }
         

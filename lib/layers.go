@@ -107,6 +107,7 @@ func (bl *BaseLayer) IsDirty() bool {
 }
 
 func (bl *BaseLayer) SetViewPort(x, y, width, height int) {
+	fmt.Printf("BaseLayer.SetViewPort called on layer '%s' with: x=%d, y=%d, width=%d, height=%d\n", bl.name, x, y, width, height)
 	bl.x = x
 	bl.y = y
 	bl.width = width

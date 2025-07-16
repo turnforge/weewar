@@ -308,6 +308,7 @@ func setCanvas(canvasID string, width, height int) (map[string]interface{}, erro
 }
 
 func setViewPort(x, y, width, height int) error {
+	fmt.Printf("WASM setViewPort called with: x=%d, y=%d, width=%d, height=%d\n", x, y, width, height)
 	return globalEditor.SetViewPort(x, y, width, height)
 }
 

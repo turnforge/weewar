@@ -178,6 +178,7 @@ func (r *LayeredRenderer) blendBuffers(dst, src *Buffer) {
 
 // Resize updates the layer buffer sizes
 func (r *LayeredRenderer) SetViewPort(x, y, width, height int) error {
+	fmt.Printf("LayeredRenderer.SetViewPort called with: x=%d, y=%d, width=%d, height=%d\n", x, y, width, height)
 	r.x = x
 	r.y = y
 	r.width = width
@@ -185,6 +186,7 @@ func (r *LayeredRenderer) SetViewPort(x, y, width, height int) error {
 
 	// Recreate all layer buffers with new size
 	for _, layer := range r.layers {
+		fmt.Printf("LayeredRenderer updating layer: %s\n", layer.GetName())
 		layer.SetViewPort(x, y, width, height)
 	}
 	return nil

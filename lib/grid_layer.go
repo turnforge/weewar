@@ -20,6 +20,7 @@ func NewGridLayer(width, height int, scheduler LayerScheduler) *GridLayer {
 
 // Render renders hex grid lines and coordinates
 func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
+	fmt.Printf("GridLayer.Render called with width=%d, height=%d\n", gl.width, gl.height)
 	if world == nil || world.Map == nil {
 		return
 	}

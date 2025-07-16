@@ -457,6 +457,8 @@ func (e *WorldEditor) SetViewPort(x, y, width, height int) error {
 		return fmt.Errorf("no layered renderer initialized")
 	}
 
+	fmt.Printf("WorldEditor.SetViewPort called with: x=%d, y=%d, width=%d, height=%d\n", x, y, width, height)
+
 	e.scrollX = x
 	e.scrollY = y
 	e.canvasWidth = width
@@ -477,9 +479,9 @@ func (e *WorldEditor) RenderFull() error {
 		return nil // No renderer or map to render
 	}
 
-	// Update scroll offset in render options
-	e.layeredRenderer.SetViewPort(e.scrollX, e.scrollY, e.canvasWidth, e.canvasHeight)
-
+	// The viewport should already be set by SetViewPort calls
+	// No need to call SetViewPort here as it would override with potentially stale values
+	
 	return nil
 }
 
@@ -494,8 +496,8 @@ func (e *WorldEditor) RenderTiles(coords []CubeCoord) error {
 		e.tileLayer.MarkDirty(coord)
 	}
 
-	// Update scroll offset in render options
-	e.layeredRenderer.SetViewPort(e.scrollX, e.scrollY, e.canvasWidth, e.canvasHeight)
+	// The viewport should already be set by SetViewPort calls
+	// No need to call SetViewPort here as it would override with potentially stale values
 
 	return nil
 }

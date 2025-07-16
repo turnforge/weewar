@@ -72,8 +72,8 @@ func (ul *UnitLayer) renderUnit(world *World, unit *Unit, options LayerRenderOpt
 	x, y := world.Map.CenterXYForTile(unit.Coord, options.TileWidth, options.TileHeight, options.YIncrement)
 
 	// Apply viewport offset
-	x += options.ScrollX
-	y += options.ScrollY
+	x += float64(ul.x)
+	y += float64(ul.y)
 
 	// Try to use real unit sprite if available
 	if ul.assetProvider != nil && ul.assetProvider.HasUnitAsset(unit.UnitType, unit.PlayerID) {

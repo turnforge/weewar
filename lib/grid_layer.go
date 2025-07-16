@@ -41,8 +41,12 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 	// Get optimal starting coordinate and position from map bounds
 	minX, minY, _, _, _, _, _, _, startingCoord, startingX := world.Map.GetMapBounds(options.TileWidth, options.TileHeight, options.YIncrement)
 
-	y := options.ScrollY - minY - (options.TileWidth / 2.0)
-	startX := options.ScrollX - (minX + startingX) - (options.TileWidth / 2.0)
+	// Use viewport position as content offset
+	viewportX := float64(gl.x)
+	viewportY := float64(gl.y)
+	fmt.Println("ViewportX,Y: ", viewportX, viewportY)
+	y := viewportY - minY - (options.TileHeight * 0.25)
+	startX := viewportX - (minX + startingX) - (options.TileWidth / 2.0)
 	height := float64(gl.height)
 	width := float64(gl.width)
 	leftCoord := startingCoord.Neighbor(LEFT)

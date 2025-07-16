@@ -33,17 +33,6 @@ type Map struct {
 	minR int `json:"-"` // Minimum R coordinate (inclusive)
 	maxR int `json:"-"` // Maximum R coordinate (inclusive)
 
-	// Where X/Y of the Origin tile (Q = R = 0) are, in normalized tile units.
-	// OriginX = 5 means the origin tile is 5 tile widths to the right
-	// OriginY = 3 means the origin tile is 3 * 1.5 tile widths down (hex row spacing)
-	// Initially it would be 0,0 (top left of the screen)
-	// But as we add/remove rows and columns from the 4 sides we could extend
-	// the map "viewport" in each of the directions.  Which means the origin
-	// tile's X/Y would change.  By tracking this we can find the coord location
-	// of all other tiles.
-	// OriginX float64 // In tile width units (horizontal spacing = 1 tile width)
-	// OriginY float64 // In tile width units (vertical spacing = 1.5 tile widths)
-
 	// Cube coordinate storage - primary data structure
 	Tiles map[CubeCoord]*Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
 
@@ -189,7 +178,6 @@ func (m *Map) CopyAllTiles() map[CubeCoord]*Tile {
 // =============================================================================
 
 // CenterXYForTile converts cube coordinates directly to pixel center x,y coordinates for rendering
-// Uses normalized OriginX/OriginY (in tile units) which are then scaled by tile dimensions
 // Uses odd-r layout (odd rows offset) as our fixed, consistent layout
 // Based on formulas from redblobgames.com for pointy-topped hexagons
 func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement float64) (x, y float64) {
@@ -233,10 +221,10 @@ func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord 
 	// y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
 
 	// Calculate fractional q coordinate
-	fractionalQ := (hexX * tileWidth * SQRT3) / (y * tileHeight * 3.0)
+	fractionalQ := (hexX*SQRT3 - y) / (tileWidth * 3.0)
 
 	// Calculate fractional r coordinate
-	fractionalR := (hexY * tileHeight * 2.0) / 3.0
+	fractionalR := (hexY * 2.0) / (3.0 / tileHeight)
 
 	// Round to nearest integer coordinates using cube coordinate rounding
 	// This ensures we get the correct hex tile even for coordinates near boundaries

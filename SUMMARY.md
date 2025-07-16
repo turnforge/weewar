@@ -320,6 +320,9 @@ The architecture successfully supports authentic WeeWar gameplay with real data 
 3. **Map editing** route `/maps/{id}/edit` - Ready for editor implementation
 4. **Map viewing** route `/maps/{id}/view` - Map details and metadata display
 5. **File persistence** - All maps stored in JSON format with full data
+6. **Enhanced WASM API** - Consolidated functions for efficient map data retrieval
+7. **Better defaults** - 5x5 map size on startup instead of 1x1
+8. **Improved coordinate handling** - Client-side XYToQR implementation
 
 ### Map Editor Implementation ✅ (2025-01-14)
 - **Professional 3-panel layout** - Left sidebar (tools), center (canvas/console), right sidebar (rendering/export)
@@ -348,10 +351,13 @@ The architecture successfully supports authentic WeeWar gameplay with real data 
 ### Current Status
 - Editor UI fully implemented with professional interface
 - WASM integration ready (TypeScript stubs in place for WASM functions)
+- Consolidated editorGetMapBounds WASM function for efficient data retrieval
+- Default map size set to 5x5 on startup for better user experience
+- Enhanced client-side coordinate conversion with proper XYToQR implementation
 - Next step: Build WASM files and connect save functionality to backend APIs
 
 ---
 
-**Last Updated**: 2025-01-14  
-**Version**: 3.2.0  
-**Status**: Production-ready CLI with complete web editor interface implementation
+**Last Updated**: 2025-01-16  
+**Version**: 3.2.1  
+**Status**: Production-ready CLI with complete web editor interface and enhanced WASM integration

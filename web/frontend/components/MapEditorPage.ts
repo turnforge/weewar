@@ -22,6 +22,18 @@ class MapEditorPage {
         height: number;
         tiles: { [key: string]: { tileType: number } };
         map_units: any[];
+        // Cube coordinate bounds for proper coordinate validation
+        minQ?: number;
+        maxQ?: number;
+        minR?: number;
+        maxR?: number;
+        // Map bounds data from GetMapBounds for rendering optimization
+        startingCoord?: { q: number; r: number };
+        startingX?: number;
+        minX?: number;
+        minY?: number;
+        maxX?: number;
+        maxY?: number;
     } | null = null;
     
     // Editor state
@@ -40,8 +52,7 @@ class MapEditorPage {
     } | null = null;
     
     // Scroll and padding management
-    private scrollOffset: { x: number; y: number } = { x: 0, y: 0 };
-    private canvasPadding: number = 150; // Padding around map for extension
+    private scrollOffset: { x: number; y: number } = { x: 150, y: 150 }; // Padding around map for extension
 
     // WASM interface
     private wasmModule: any = null;
@@ -61,23 +72,41 @@ class MapEditorPage {
         this.initializeWasm();
     }
     
-    // Calculate canvas size with padding for map extension
+    // Calculate canvas size based on actual map bounds from WASM
     private calculateCanvasSize(mapWidth: number, mapHeight: number): { width: number; height: number } {
+        // Update map bounds from WASM first
+        this.updateMapBoundsFromWasm();
+        
+        // Use the updated bounds from mapData if available
+        if (this.mapData && this.mapData.minX !== undefined && this.mapData.maxX !== undefined && 
+            this.mapData.minY !== undefined && this.mapData.maxY !== undefined) {
+            
+            const mapPixelWidth = this.mapData.maxX - this.mapData.minX;
+            const mapPixelHeight = this.mapData.maxY - this.mapData.minY;
+            
+            const canvasSize = {
+                width: Math.max(mapPixelWidth + this.scrollOffset.x * 2, 400),
+                height: Math.max(mapPixelHeight + this.scrollOffset.y * 2, 300)
+            };
+            
+            this.logToConsole(`Canvas size calculated from map bounds: ${canvasSize.width}x${canvasSize.height} (map: ${mapPixelWidth}x${mapPixelHeight}, padding: ${this.scrollOffset.x}x${this.scrollOffset.y})`);
+            return canvasSize;
+        }
+        
+        // Fallback to tile-based calculation if bounds aren't available
         if (!this.tileDimensions) {
-            // Fallback calculation
             return {
-                width: Math.max(mapWidth * 40 + 2 * this.canvasPadding, 400),
-                height: Math.max(mapHeight * 35 + 2 * this.canvasPadding, 300)
+                width: Math.max(mapWidth * 40 + this.scrollOffset.x * 2, 400),
+                height: Math.max(mapHeight * 35 + this.scrollOffset.y * 2, 300)
             };
         }
         
-        // Calculate based on actual tile dimensions
         const mapPixelWidth = mapWidth * this.tileDimensions.tileWidth;
         const mapPixelHeight = mapHeight * this.tileDimensions.yIncrement;
         
         return {
-            width: Math.max(mapPixelWidth + 2 * this.canvasPadding, 400),
-            height: Math.max(mapPixelHeight + 2 * this.canvasPadding, 300)
+            width: Math.max(mapPixelWidth + this.scrollOffset.x * 2, 400),
+            height: Math.max(mapPixelHeight + this.scrollOffset.y * 2, 300)
         };
     }
     
@@ -97,19 +126,96 @@ class MapEditorPage {
         const adjustedX = x - this.scrollOffset.x;
         const adjustedY = y - this.scrollOffset.y;
         
-        // Simple hex coordinate conversion (can be optimized)
-        const col = Math.floor(adjustedX / (this.tileDimensions.tileWidth * 0.75));
-        const row = Math.floor(adjustedY / this.tileDimensions.yIncrement);
+        // Use proper XYToQR conversion
+        const cubeCoord = this.xyToQR(adjustedX, adjustedY);
         
-        // Convert to cube coordinates (simplified)
-        const q = col;
-        const r = row;
-        
-        // Check if within current map bounds
+        // Check if within current map bounds (this is for UI purposes, not coordinate conversion)
         const withinBounds = this.mapData ? 
-            (q >= 0 && q < this.mapData.width && r >= 0 && r < this.mapData.height) : false;
+            (cubeCoord.q >= 0 && cubeCoord.q < this.mapData.width && cubeCoord.r >= 0 && cubeCoord.r < this.mapData.height) : false;
         
-        return { q, r, withinBounds };
+        return { q: cubeCoord.q, r: cubeCoord.r, withinBounds };
+    }
+
+    // XYToQR converts screen coordinates to cube coordinates
+    // Based on the Go implementation in lib/map.go
+    private xyToQR(x: number, y: number): { q: number; r: number } {
+        if (!this.tileDimensions) {
+            throw new Error("Tile dimensions not available");
+        }
+
+        const SQRT3 = 1.732050808; // sqrt(3)
+        
+        // Convert normalized origin to pixel coordinates (currently 0,0)
+        const originPixelX = 0.0;
+        const originPixelY = 0.0;
+        
+        // Translate screen coordinates to hex coordinate space
+        const hexX = x - originPixelX;
+        const hexY = y - originPixelY;
+        
+        // For pointy-topped hexagons, convert pixel coordinates to fractional hex coordinates
+        // Using inverse of the hex-to-pixel conversion formulas:
+        // x = size * sqrt(3) * (q + r/2)  =>  q = (sqrt(3) * x) / (y * 3)
+        // y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
+        
+        // Calculate fractional q coordinate
+        const fractionalQ = (hexX * SQRT3) / (this.tileDimensions.tileWidth * 3.0);
+        
+        // Calculate fractional r coordinate
+        const fractionalR = (hexY * 2.0) / (this.tileDimensions.tileHeight * 3.0);
+        
+        // Round to nearest integer coordinates using cube coordinate rounding
+        return this.roundCubeCoord(fractionalQ, fractionalR);
+    }
+
+    // CenterXYForTile returns the center pixel coordinates for a given cube coordinate
+    // Based on the Go implementation in lib/map.go
+    private centerXYForTile(q: number, r: number): { x: number; y: number } {
+        if (!this.tileDimensions) {
+            throw new Error("Tile dimensions not available");
+        }
+
+        // Convert normalized origin to pixel coordinates (currently 0,0)
+        const originPixelX = 0.0;
+        const originPixelY = 0.0;
+        
+        // For pointy-topped hexagons with odd-r layout:
+        // x = size * sqrt(3) * (q + r/2)
+        // y = size * 3/2 * r
+        
+        const x = originPixelX + this.tileDimensions.tileWidth * 1.732050808 * (q + r / 2.0);
+        const y = originPixelY + this.tileDimensions.tileHeight * 3.0 / 2.0 * r;
+        
+        return { x, y };
+    }
+
+    // Round cube coordinates to nearest integer while maintaining constraint s = -q - r
+    // Based on the Go implementation in lib/map.go
+    private roundCubeCoord(fractionalQ: number, fractionalR: number): { q: number; r: number } {
+        // Calculate s from the cube coordinate constraint: s = -q - r
+        const fractionalS = -fractionalQ - fractionalR;
+        
+        // Round each coordinate to nearest integer
+        let roundedQ = Math.round(fractionalQ);
+        let roundedR = Math.round(fractionalR);
+        let roundedS = Math.round(fractionalS);
+        
+        // Calculate rounding deltas
+        const deltaQ = Math.abs(roundedQ - fractionalQ);
+        const deltaR = Math.abs(roundedR - fractionalR);
+        const deltaS = Math.abs(roundedS - fractionalS);
+        
+        // Fix the coordinate with the largest rounding error to maintain constraint
+        if (deltaQ > deltaR && deltaQ > deltaS) {
+            roundedQ = -roundedR - roundedS;
+        } else if (deltaR > deltaS) {
+            roundedR = -roundedQ - roundedS;
+        } else {
+            roundedS = -roundedQ - roundedR;
+        }
+        
+        // Return the rounded cube coordinate (s is implicit)
+        return { q: roundedQ, r: roundedR };
     }
     
     // Set scroll offset (for panning/zooming)
@@ -415,21 +521,8 @@ class MapEditorPage {
                     throw new Error('WASM module loaded but functions not available');
                 }
             }
-            
-            // Get tile dimensions for client-side calculations
-            this.logToConsole('Getting tile dimensions...');
-            const tileDimResult = (window as any).editorGetTileDimensions();
-            if (!tileDimResult.success) {
-                throw new Error(tileDimResult.error);
-            }
-            
-            // Store tile dimensions for client-side use
-            this.tileDimensions = {
-                tileWidth: tileDimResult.data.tileWidth,
-                tileHeight: tileDimResult.data.tileHeight,
-                yIncrement: tileDimResult.data.yIncrement
-            };
-            this.logToConsole(`Tile dimensions: ${JSON.stringify(this.tileDimensions)}`);
+
+            this.wasmInitialized = true;
             
             // Get initial map info from the global editor
             this.logToConsole('Getting initial map info...');
@@ -438,8 +531,20 @@ class MapEditorPage {
                 throw new Error(mapInfoResult.error);
             }
             
-            // Calculate initial canvas size with padding
-            const canvasSize = this.calculateCanvasSize(mapInfoResult.data.width, mapInfoResult.data.height);
+            // Update local map data with initial info
+            this.mapData = {
+                name: mapInfoResult.data.filename || 'Default Map',
+                width: mapInfoResult.data.width,
+                height: mapInfoResult.data.height,
+                tiles: {},
+                map_units: []
+            };
+            
+            // Get map bounds and tile dimensions from WASM
+            this.updateMapBoundsFromWasm();
+            
+            // Calculate canvas size based on actual map bounds
+            const canvasSize = this.calculateCanvasSize(this.mapData.width, this.mapData.height);
             
             // Bind WASM editor to canvas
             this.logToConsole('Binding WASM editor to canvas...');
@@ -452,22 +557,8 @@ class MapEditorPage {
             // Apply canvas size
             this.resizeCanvas(canvasSize.width, canvasSize.height);
             
-            // Update local map data with initial info
-            this.mapData = {
-                name: mapInfoResult.data.filename || 'Default Map',
-                width: mapInfoResult.data.width,
-                height: mapInfoResult.data.height,
-                tiles: {},
-                map_units: []
-            };
+            // ScrollOffset is already initialized with padding values
             
-            // Initialize scroll offsets with padding
-            this.scrollOffset = {
-                x: this.canvasPadding,
-                y: this.canvasPadding
-            };
-            
-            this.wasmInitialized = true;
             this.updateEditorStatus('Ready');
             this.logToConsole('WASM editor initialized successfully');
             
@@ -743,6 +834,49 @@ class MapEditorPage {
         // TODO: Implement terrain randomization
     }
 
+    // Update map bounds and tile dimensions from WASM
+    private updateMapBoundsFromWasm(): void {
+        if (!this.wasmInitialized || !this.mapData) {
+            return;
+        }
+        
+        try {
+            // Get map bounds and tile dimensions from WASM
+            const boundsResult = (window as any).editorGetMapBounds();
+            if (boundsResult && boundsResult.success && boundsResult.data) {
+                const bounds = boundsResult.data;
+                
+                // Update tile dimensions if available
+                if (bounds.tileWidth && bounds.tileHeight && bounds.yIncrement) {
+                    this.tileDimensions = {
+                        tileWidth: bounds.tileWidth,
+                        tileHeight: bounds.tileHeight,
+                        yIncrement: bounds.yIncrement
+                    };
+                    this.logToConsole(`Tile dimensions updated: ${JSON.stringify(this.tileDimensions)}`);
+                }
+                
+                // Update mapData with bounds information
+                this.mapData.minQ = bounds.minQ;
+                this.mapData.maxQ = bounds.maxQ;
+                this.mapData.minR = bounds.minR;
+                this.mapData.maxR = bounds.maxR;
+                this.mapData.startingCoord = { q: bounds.startingCoord.q, r: bounds.startingCoord.r };
+                this.mapData.startingX = bounds.startingX;
+                this.mapData.minX = bounds.minX;
+                this.mapData.minY = bounds.minY;
+                this.mapData.maxX = bounds.maxX;
+                this.mapData.maxY = bounds.maxY;
+                
+                this.logToConsole(`Map bounds updated: Q(${bounds.minQ}-${bounds.maxQ}) R(${bounds.minR}-${bounds.maxR}) Starting(${bounds.startingCoord.q},${bounds.startingCoord.r})`);
+            } else {
+                this.logToConsole(`Failed to get map bounds from WASM: ${boundsResult?.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            this.logToConsole(`Error getting map bounds from WASM: ${error}`);
+        }
+    }
+
     // Canvas management methods
     private initializeCanvas(): void {
         if (!this.mapCanvas) return;
@@ -814,6 +948,8 @@ class MapEditorPage {
         const rect = this.mapCanvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
+
+        console.log(`Event XY: ({event.clientX}, {event.clientY}), Rect XY: (${rect.left}, ${rect.top}), localXY: (${x}, ${y})`)
         
         // Use client-side coordinate conversion for performance
         const coords = this.clientPixelToCoords(x, y);
@@ -834,7 +970,7 @@ class MapEditorPage {
         }
     }
 
-    private pixelToHex(x: number, y: number): {row: number, col: number, cubeQ?: number, cubeR?: number} | null {
+    private pixelToHex(x: number, y: number): {row: number, col: number, cubeQ: number, cubeR: number} | null {
         if (!this.mapCanvas || !this.mapData) return null;
         
         // Use WASM coordinate conversion for maximum accuracy
@@ -858,39 +994,36 @@ class MapEditorPage {
             }
         }
         
-        // Fallback to browser-side calculation (legacy approach)
-        const TILE_WIDTH = 60;    // TileWidth from WASM
-        const TILE_HEIGHT = 52;   // TileHeight from WASM  
-        const Y_INCREMENT = 39;   // YIncrement from WASM (vertical spacing between rows)
-        
-        // Calculate hex layout parameters
-        const hexWidth = TILE_WIDTH;
-        const rowHeight = Y_INCREMENT;
-        
-        // Account for padding/margins (WASM may add some padding)
-        const offsetX = 20;
-        const offsetY = 20;
-        
-        // Convert to hex grid coordinates
-        const adjustedX = x - offsetX;
-        const adjustedY = y - offsetY;
-        
-        // Calculate row first
-        const row = Math.floor(adjustedY / rowHeight);
-        
-        // Calculate column, accounting for hex offset on odd rows
-        // In odd-r layout, odd rows are shifted right by half a tile width
-        const oddRowOffset = (row % 2) * (hexWidth / 2);
-        const col = Math.floor((adjustedX - oddRowOffset) / hexWidth);
-        
-        // Validate coordinates are within map bounds (fallback - less accurate for arbitrary coordinate regions)
-        if (row >= 0 && row < this.mapData.height && col >= 0 && col < this.mapData.width) {
-            this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) [Browser fallback - assumes 0,0 origin]`);
-            return { row, col };
+        // Fallback to browser-side calculation using proper coordinate conversion
+        if (!this.tileDimensions) {
+            this.logToConsole('Tile dimensions not available for fallback coordinate conversion');
+            return null;
         }
         
-        this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) [map: ${this.mapData.width}x${this.mapData.height}] [Browser fallback]`);
-        return null;
+        try {
+            // Use our proper coordinate conversion methods
+            const cubeCoord = this.xyToQR(x, y);
+            
+            // Convert cube coordinates to row/col for backward compatibility
+            // Note: This assumes a simple mapping where row=r and col=q
+            const row = cubeCoord.r;
+            const col = cubeCoord.q;
+            
+            // Check if within map bounds for UI purposes
+            const withinBounds = this.mapData ? 
+                (row >= 0 && row < this.mapData.height && col >= 0 && col < this.mapData.width) : false;
+            
+            if (withinBounds) {
+                this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) Q=${cubeCoord.q} R=${cubeCoord.r} [Browser fallback with proper hex math]`);
+                return { row, col, cubeQ: cubeCoord.q, cubeR: cubeCoord.r };
+            }
+            
+            this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) Q=${cubeCoord.q} R=${cubeCoord.r} [Browser fallback with proper hex math]`);
+            return null;
+        } catch (error) {
+            this.logToConsole(`Coordinate conversion failed: ${error}`);
+            return null;
+        }
     }
 
     private paintHexAtCoords(row: number, col: number): void {

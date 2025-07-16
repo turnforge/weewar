@@ -33,10 +33,6 @@ type LayerRenderOptions struct {
 	TileHeight float64
 	YIncrement float64
 
-	// Viewport parameters
-	ScrollX float64
-	ScrollY float64
-
 	// Visual options
 	ShowGrid        bool
 	ShowCoordinates bool
@@ -70,7 +66,7 @@ func NewBaseLayer(name string, width, height int, scheduler LayerScheduler) *Bas
 		name:        name,
 		width:       width,
 		height:      height,
-		buffer:      NewBuffer(width, height),
+		buffer:      NewBuffer(int(width), int(height)),
 		dirtyCoords: make(map[CubeCoord]bool),
 		allDirty:    true, // Start with everything dirty
 		scheduler:   scheduler,
@@ -145,12 +141,13 @@ func (tl *BaseLayer) drawSimpleHexToBuffer(x, y float64, hexColor Color, options
 	radiusX := int(options.TileWidth / 2)
 	radiusY := int(options.TileHeight / 2)
 	centerX, centerY := int(x), int(y)
+	width, height := int(tl.width), int(tl.height)
 
 	for dy := -radiusY; dy <= radiusY; dy++ {
 		for dx := -radiusX; dx <= radiusX; dx++ {
 			if float64(dx*dx)/float64(radiusX*radiusX)+float64(dy*dy)/float64(radiusY*radiusY) <= 1.0 {
 				px, py := centerX+dx, centerY+dy
-				if px >= 0 && py >= 0 && px < tl.width && py < tl.height {
+				if px >= 0 && py >= 0 && px < width && py < height {
 					rgba := color.RGBA{R: hexColor.R, G: hexColor.G, B: hexColor.B, A: hexColor.A}
 					bufferImg.Set(px, py, rgba)
 				}

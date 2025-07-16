@@ -7,6 +7,9 @@
 - **WASM Editor Integration**: Global editor/world architecture with client-side optimizations
 - **Visual Controls**: Added grid and coordinate display toggles
 - **Client-side Performance**: Tile dimension caching and scroll management
+- **Consolidated WASM API**: Created editorGetMapBounds function returning both tile dimensions and map bounds
+- **Default Map Size**: Set startup map size to 5x5 instead of 1x1 for better user experience
+- **Enhanced Coordinate Conversion**: Improved client-side XYToQR implementation
 
 ### Core Components
 
@@ -471,7 +474,7 @@ type Layer interface {
 ---
 
 **Last Updated**: 2025-01-16  
-**Architecture Version**: 3.0 (WASM Refactoring Complete)  
-**Status**: Core architecture complete, WASM refactoring complete with major boilerplate reduction
+**Architecture Version**: 3.0 (WASM Refactoring Complete + Enhanced API)  
+**Status**: Core architecture complete, WASM refactoring complete with major boilerplate reduction and enhanced API consolidation
 
 **Key Achievement**: Reduced WASM codebase from ~1300 lines to clean, maintainable architecture with generic wrapper infrastructure and immediate initialization pattern.

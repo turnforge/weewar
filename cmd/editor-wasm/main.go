@@ -37,7 +37,7 @@ type WASMResponse struct {
 // =============================================================================
 
 // WASMFunction represents a function that takes js.Value args and returns (data, error)
-type WASMFunction func(args []js.Value) (interface{}, error)
+type WASMFunction func(args []js.Value) (any, error)
 
 // createWrapper creates a generic wrapper for WASM functions with validation and error handling
 func createWrapper(minArgs, maxArgs int, fn WASMFunction) js.Func {
@@ -64,7 +64,7 @@ func createWrapper(minArgs, maxArgs int, fn WASMFunction) js.Func {
 // Response Helpers
 // =============================================================================
 
-func createSuccessResponse(data interface{}) js.Value {
+func createSuccessResponse(data any) js.Value {
 	response := WASMResponse{
 		Success: true,
 		Message: "Operation completed successfully",
@@ -81,7 +81,7 @@ func createErrorResponse(error string) js.Value {
 	return marshalToJS(response)
 }
 
-func createMessageResponse(message string, data interface{}) js.Value {
+func createMessageResponse(message string, data any) js.Value {
 	response := WASMResponse{
 		Success: true,
 		Message: message,
@@ -90,7 +90,7 @@ func createMessageResponse(message string, data interface{}) js.Value {
 	return marshalToJS(response)
 }
 
-func marshalToJS(obj interface{}) js.Value {
+func marshalToJS(obj any) js.Value {
 	bytes, _ := json.Marshal(obj)
 	return js.Global().Get("JSON").Call("parse", string(bytes))
 }
@@ -108,6 +108,12 @@ func main() {
 	// Initialize WorldEditor with the World
 	globalEditor = weewar.NewWorldEditor()
 	globalEditor.NewWorld() // This creates a 1x1 world internally
+	
+	// Set default map size to 5x5
+	_, err := setMapSize(5, 5)
+	if err != nil {
+		fmt.Printf("Warning: Failed to set default map size: %v\n", err)
+	}
 
 	// Initialize and preload assets
 	globalAssetProvider = assets.NewEmbeddedAssetManager()
@@ -139,77 +145,80 @@ func main() {
 
 func registerEditorFunctions() {
 	// Map management
-	js.Global().Set("editorNewMap", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorNewMap", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return newMap(args[0].Int(), args[1].Int())
 	}))
-	js.Global().Set("editorSetMapSize", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetMapSize", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return setMapSize(args[0].Int(), args[1].Int())
 	}))
 
 	// Terrain editing
-	js.Global().Set("editorPaintTerrain", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorPaintTerrain", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return nil, paintTerrain(args[0].Int(), args[1].Int())
 	}))
-	js.Global().Set("editorRemoveTerrain", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorRemoveTerrain", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return nil, removeTerrain(args[0].Int(), args[1].Int())
 	}))
-	js.Global().Set("editorFloodFill", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorFloodFill", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return nil, floodFill(args[0].Int(), args[1].Int())
 	}))
 
 	// Brush settings
-	js.Global().Set("editorSetBrushTerrain", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetBrushTerrain", createWrapper(1, 1, func(args []js.Value) (any, error) {
 		return nil, setBrushTerrain(args[0].Int())
 	}))
-	js.Global().Set("editorSetBrushSize", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetBrushSize", createWrapper(1, 1, func(args []js.Value) (any, error) {
 		return setBrushSize(args[0].Int())
 	}))
 
 	// Visual settings
-	js.Global().Set("editorSetShowGrid", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetShowGrid", createWrapper(1, 1, func(args []js.Value) (any, error) {
 		return nil, setShowGrid(args[0].Bool())
 	}))
-	js.Global().Set("editorSetShowCoordinates", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetShowCoordinates", createWrapper(1, 1, func(args []js.Value) (any, error) {
 		return nil, setShowCoordinates(args[0].Bool())
 	}))
 
 	// Rendering
-	js.Global().Set("editorRender", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorRender", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return nil, renderEditor()
 	}))
-	js.Global().Set("editorSetCanvas", createWrapper(3, 3, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetCanvas", createWrapper(3, 3, func(args []js.Value) (any, error) {
 		return setCanvas(args[0].String(), args[1].Int(), args[2].Int())
 	}))
-	js.Global().Set("editorSetViewPort", createWrapper(4, 4, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorSetViewPort", createWrapper(4, 4, func(args []js.Value) (any, error) {
 		return nil, setViewPort(args[0].Int(), args[1].Int(), args[2].Int(), args[3].Int())
 	}))
 
 	// Information
-	js.Global().Set("editorGetMapInfo", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorGetMapInfo", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return getMapInfo()
 	}))
-	js.Global().Set("editorValidateMap", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorValidateMap", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return validateMap()
 	}))
-	js.Global().Set("editorGetTerrainTypes", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorGetTerrainTypes", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return getTerrainTypes()
 	}))
-	js.Global().Set("editorGetTileDimensions", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("editorGetTileDimensions", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return getTileDimensions()
+	}))
+	js.Global().Set("editorGetMapBounds", createWrapper(0, 0, func(args []js.Value) (any, error) {
+		return getMapBounds()
 	}))
 }
 
 func registerUtilityFunctions() {
 	// Coordinate conversion
-	js.Global().Set("pixelToCoords", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("pixelToCoords", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return pixelToCoords(args[0].Float(), args[1].Float())
 	}))
-	js.Global().Set("calculateCanvasSize", createWrapper(2, 2, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("calculateCanvasSize", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return calculateCanvasSize(args[0].Int(), args[1].Int())
 	}))
 
 	// Asset testing
-	js.Global().Set("testAssets", createWrapper(0, 0, func(args []js.Value) (interface{}, error) {
+	js.Global().Set("testAssets", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return testAssets()
 	}))
 }
@@ -218,7 +227,7 @@ func registerUtilityFunctions() {
 // Editor Function Implementations (Clean, No Boilerplate)
 // =============================================================================
 
-func newMap(rows, cols int) (map[string]interface{}, error) {
+func newMap(rows, cols int) (map[string]any, error) {
 	// Calculate optimal canvas size for the new map
 	width, height := calculateCanvasSizeInternal()
 
@@ -231,7 +240,7 @@ func newMap(rows, cols int) (map[string]interface{}, error) {
 	// TODO: Expand map to rows x cols using Add/Remove methods
 	// For now, just use the 1x1 map
 
-	return map[string]interface{}{
+	return map[string]any{
 		"width":        cols,
 		"height":       rows,
 		"canvasWidth":  width,
@@ -239,7 +248,7 @@ func newMap(rows, cols int) (map[string]interface{}, error) {
 	}, nil
 }
 
-func setMapSize(rows, cols int) (map[string]interface{}, error) {
+func setMapSize(rows, cols int) (map[string]any, error) {
 	return newMap(rows, cols)
 }
 
@@ -263,7 +272,7 @@ func setBrushTerrain(terrainType int) error {
 	return globalEditor.SetBrushTerrain(terrainType)
 }
 
-func setBrushSize(size int) (map[string]interface{}, error) {
+func setBrushSize(size int) (map[string]any, error) {
 	err := globalEditor.SetBrushSize(size)
 	if err != nil {
 		return nil, err
@@ -274,7 +283,7 @@ func setBrushSize(size int) (map[string]interface{}, error) {
 		hexCount = 1 + 6*size*(size+1)/2 // Formula for hex area
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"size":     size,
 		"hexCount": hexCount,
 	}, nil
@@ -292,7 +301,7 @@ func renderEditor() error {
 	return globalEditor.RenderFull()
 }
 
-func setCanvas(canvasID string, width, height int) (map[string]interface{}, error) {
+func setCanvas(canvasID string, width, height int) (map[string]any, error) {
 	// Create canvas drawable for the editor
 	canvasDrawable := weewar.NewCanvasBuffer(canvasID, width, height)
 	err := globalEditor.SetDrawable(canvasDrawable, width, height)
@@ -300,7 +309,7 @@ func setCanvas(canvasID string, width, height int) (map[string]interface{}, erro
 		return nil, err
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"canvasID": canvasID,
 		"width":    width,
 		"height":   height,
@@ -312,13 +321,13 @@ func setViewPort(x, y, width, height int) error {
 	return globalEditor.SetViewPort(x, y, width, height)
 }
 
-func getMapInfo() (map[string]interface{}, error) {
+func getMapInfo() (map[string]any, error) {
 	info := globalEditor.GetMapInfo()
 	if info == nil {
 		return nil, fmt.Errorf("no map loaded")
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"filename":      info.Filename,
 		"width":         info.Width,
 		"height":        info.Height,
@@ -328,18 +337,18 @@ func getMapInfo() (map[string]interface{}, error) {
 	}, nil
 }
 
-func validateMap() (map[string]interface{}, error) {
+func validateMap() (map[string]any, error) {
 	issues := globalEditor.ValidateMap()
 	isValid := len(issues) == 0
 
-	return map[string]interface{}{
+	return map[string]any{
 		"valid":  isValid,
 		"issues": issues,
 	}, nil
 }
 
-func getTerrainTypes() (map[string]interface{}, error) {
-	terrainTypes := []map[string]interface{}{
+func getTerrainTypes() (map[string]any, error) {
+	terrainTypes := []map[string]any{
 		{"id": 0, "name": "Unknown", "moveCost": 1, "defenseBonus": 0},
 		{"id": 1, "name": "Grass", "moveCost": 1, "defenseBonus": 0},
 		{"id": 2, "name": "Desert", "moveCost": 1, "defenseBonus": 0},
@@ -348,16 +357,47 @@ func getTerrainTypes() (map[string]interface{}, error) {
 		{"id": 5, "name": "Rock", "moveCost": 3, "defenseBonus": 20},
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"terrainTypes": terrainTypes,
 	}, nil
 }
 
-func getTileDimensions() (map[string]interface{}, error) {
-	return map[string]interface{}{
+func getTileDimensions() (map[string]any, error) {
+	return map[string]any{
 		"tileWidth":  int(weewar.DefaultTileWidth),
 		"tileHeight": int(weewar.DefaultTileHeight),
 		"yIncrement": int(weewar.DefaultYIncrement),
+	}, nil
+}
+
+func getMapBounds() (map[string]any, error) {
+	// Get map bounds from the editor
+	minX, minY, maxX, maxY, minQ, maxQ, minR, maxR, startingCoord, startingX := globalEditor.GetMapBounds()
+
+	return map[string]any{
+		// Tile dimensions
+		"tileWidth":  int(weewar.DefaultTileWidth),
+		"tileHeight": int(weewar.DefaultTileHeight),
+		"yIncrement": int(weewar.DefaultYIncrement),
+
+		// Map bounds in pixels
+		"minX": minX,
+		"minY": minY,
+		"maxX": maxX,
+		"maxY": maxY,
+
+		// Map bounds in hex coordinates
+		"minQ": minQ,
+		"maxQ": maxQ,
+		"minR": minR,
+		"maxR": maxR,
+
+		// Starting position info
+		"startingCoord": map[string]any{
+			"q": startingCoord.Q,
+			"r": startingCoord.R,
+		},
+		"startingX": startingX,
 	}, nil
 }
 
@@ -365,7 +405,7 @@ func getTileDimensions() (map[string]interface{}, error) {
 // Utility Function Implementations
 // =============================================================================
 
-func pixelToCoords(x, y float64) (map[string]interface{}, error) {
+func pixelToCoords(x, y float64) (map[string]any, error) {
 	coord := globalWorld.Map.XYToQR(x, y, weewar.DefaultTileWidth, weewar.DefaultTileHeight, weewar.DefaultYIncrement)
 
 	// Convert cube coordinates to row/col using proper conversion
@@ -373,7 +413,7 @@ func pixelToCoords(x, y float64) (map[string]interface{}, error) {
 
 	isWithinBounds := globalWorld.Map.IsWithinBoundsCube(coord)
 
-	return map[string]interface{}{
+	return map[string]any{
 		"pixelX":       x,
 		"pixelY":       y,
 		"row":          row,
@@ -384,10 +424,10 @@ func pixelToCoords(x, y float64) (map[string]interface{}, error) {
 	}, nil
 }
 
-func calculateCanvasSize(rows, cols int) (map[string]interface{}, error) {
+func calculateCanvasSize(rows, cols int) (map[string]any, error) {
 	width, height := calculateCanvasSizeInternal()
 
-	return map[string]interface{}{
+	return map[string]any{
 		"width":  width,
 		"height": height,
 		"rows":   rows,
@@ -412,7 +452,7 @@ func calculateCanvasSizeInternal() (width, height int) {
 	return width, height
 }
 
-func testAssets() (map[string]interface{}, error) {
+func testAssets() (map[string]any, error) {
 	if globalAssetProvider == nil {
 		return nil, fmt.Errorf("no asset provider loaded")
 	}
@@ -433,7 +473,7 @@ func testAssets() (map[string]interface{}, error) {
 		unitError = err.Error()
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"hasTileAsset":  hasTile,
 		"hasUnitAsset":  hasUnit,
 		"tileLoadError": tileError,

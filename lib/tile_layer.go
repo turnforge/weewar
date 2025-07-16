@@ -60,8 +60,8 @@ func (tl *TileLayer) renderTile(world *World, coord CubeCoord, tile *Tile, optio
 	x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
 
 	// Apply viewport offset
-	x += options.ScrollX
-	y += options.ScrollY
+	x += float64(tl.x)
+	y += float64(tl.y)
 
 	// Try to use real terrain sprite if available
 	if tl.assetProvider != nil && tl.assetProvider.HasTileAsset(tile.TileType) {

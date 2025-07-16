@@ -60,8 +60,6 @@ func NewLayeredRendererWithTileSize(drawable Drawable, width, height int, tileWi
 			TileWidth:       tileWidth,
 			TileHeight:      tileHeight,
 			YIncrement:      yIncrement,
-			ScrollX:         0,
-			ScrollY:         0,
 			ShowGrid:        true,
 			ShowCoordinates: true,
 		},
@@ -98,16 +96,7 @@ func (r *LayeredRenderer) SetTileDimensions(tileWidth, tileHeight, yIncrement fl
 	}
 }
 
-// SetScroll updates the viewport scroll offset
-func (r *LayeredRenderer) SetScroll(scrollX, scrollY float64) {
-	r.renderOptions.ScrollX = scrollX
-	r.renderOptions.ScrollY = scrollY
-
-	// Mark all layers as dirty since viewport changed
-	for _, layer := range r.layers {
-		layer.MarkAllDirty()
-	}
-}
+// SetScroll is deprecated - use SetViewPort instead
 
 // ScheduleRender allows layers to request a render update
 func (r *LayeredRenderer) ScheduleRender() {

@@ -174,24 +174,14 @@ func (r *LayeredRenderer) composite() {
 		if ok {
 			layerBuffer := baseLayer.GetBuffer()
 			if layerBuffer != nil {
-				// DEBUG: Create data URL for this layer buffer
-				/*
-					dataURL, err := layerBuffer.ToDataURL()
-					if err != nil {
-						fmt.Printf("DEBUG: Layer '%s' buffer data URL error: %v\n", layer.GetName(), err)
-					} else {
-						fmt.Printf("DEBUG: Layer '%s' buffer data URL: %s\n", layer.GetName(), dataURL)
-					}
-				*/
-
 				// Get the buffer as an image and draw it to the main drawable
 				img := layerBuffer.GetImageData()
-				// fmt.Printf("DEBUG: Compositing layer '%s' - calling DrawImage(0, 0, %.2f, %.2f)\n", layer.GetName(), float64(r.width), float64(r.height))
 				r.drawable.DrawImage(0, 0, float64(r.width), float64(r.height), img)
 			}
 		}
 	}
 }
+
 
 // blendBuffers blends src buffer onto dst buffer with alpha blending
 func (r *LayeredRenderer) blendBuffers(dst, src *Buffer) {

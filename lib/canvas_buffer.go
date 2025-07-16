@@ -265,3 +265,30 @@ func (cb *CanvasBuffer) DrawImage(x, y, width, height float64, img image.Image) 
 
 	fmt.Printf("DEBUG: DrawImage completed\n")
 }
+
+// DrawTextDirect uses the HTML Canvas 2D API directly for text rendering
+// This bypasses the tdewolff/canvas font system and uses browser native text rendering
+func (cb *CanvasBuffer) DrawTextDirect(x, y float64, text string, fontSize float64, color Color) {
+	if text == "" {
+		return
+	}
+
+	// Get the 2D context from the canvas element
+	ctx := cb.canvasElement.Call("getContext", "2d")
+	if ctx.IsUndefined() {
+		return
+	}
+
+	// Set font properties
+	fontSpec := fmt.Sprintf("%.0fpx Arial", fontSize)
+	ctx.Set("font", fontSpec)
+	ctx.Set("textAlign", "center")
+	ctx.Set("textBaseline", "middle")
+	
+	// Set text color
+	colorStr := fmt.Sprintf("rgba(%d, %d, %d, %.2f)", color.R, color.G, color.B, float64(color.A)/255.0)
+	ctx.Set("fillStyle", colorStr)
+	
+	// Draw the text directly to the canvas
+	ctx.Call("fillText", text, x, y)
+}

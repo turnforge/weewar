@@ -106,29 +106,24 @@ func (gl *GridLayer) drawHexGrid(centerX, centerY float64, options LayerRenderOp
 
 // drawCoordinates draws Q,R coordinates in the center of a hex
 func (gl *GridLayer) drawCoordinates(coord CubeCoord, centerX, centerY float64, options LayerRenderOptions) {
-	// Since system fonts don't work in WASM, draw a more visible marker
-	// We'll draw a colored circle with the coordinate info as a comment
+	// Format coordinate text
+	text := "Hello World" // fmt.Sprintf("%d,%d", coord.Q, coord.R)
 
-	bufferImg := gl.buffer.GetImageData()
-	markerColor := color.RGBA{R: 255, G: 255, B: 0, A: 255} // Bright yellow
-
-	x, y := int(centerX), int(centerY)
-	radius := 8 // Larger radius for visibility
-
-	// Draw a filled circle to mark the coordinate
-	for dy := -radius; dy <= radius; dy++ {
-		for dx := -radius; dx <= radius; dx++ {
-			if dx*dx+dy*dy <= radius*radius {
-				px, py := x+dx, y+dy
-				if px >= 0 && py >= 0 && px < gl.width && py < gl.height {
-					bufferImg.Set(px, py, markerColor)
-				}
-			}
-		}
+	// Only draw text if it's within the visible area
+	if centerX < 0 || centerY < 0 || centerX > float64(gl.width) || centerY > float64(gl.height) {
+		return // Skip off-screen text
 	}
 
+	// Use the buffer's DrawText method with embedded font
+	fontSize := 32.0
+	textColor := Color{R: 0, G: 0, B: 0, A: 255}             // Black text for better visibility
+	backgroundColor := Color{R: 255, G: 255, B: 255, A: 200} // Semi-transparent white background
+
+	// Draw text at hex center with background
+	gl.buffer.DrawTextWithStyle(centerX, centerY, text, fontSize, textColor, false, backgroundColor)
+
 	// Log the coordinate for debugging
-	fmt.Printf("DEBUG: Drew coordinate marker for %d,%d at (%.1f, %.1f)\n", coord.Q, coord.R, centerX, centerY)
+	fmt.Printf("DEBUG: Drew coordinate text '%s' at (%.1f, %.1f)\n", text, centerX, centerY)
 }
 
 // getHexVertices returns the vertices of a hexagon centered at (centerX, centerY)

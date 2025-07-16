@@ -332,13 +332,8 @@ func (b *Buffer) DrawTextWithStyle(x, y float64, text string, fontSize float64, 
 	c := canvas.New(canvasWidth, canvasHeight)
 	ctx := canvas.NewContext(c)
 
-	// Load font family
-	fontFamily := canvas.NewFontFamily("Arial")
-	if err := fontFamily.LoadSystemFont("Arial", canvas.FontRegular); err != nil {
-		// Fallback to sans-serif if Arial not available
-		fontFamily = canvas.NewFontFamily("sans-serif")
-		fontFamily.LoadSystemFont("DejaVu Sans", canvas.FontRegular)
-	}
+	// Load embedded font family (works in WASM)
+	fontFamily := GetDefaultFontFamily()
 
 	// Choose font weight
 	fontWeight := canvas.FontRegular

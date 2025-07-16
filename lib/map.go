@@ -25,18 +25,6 @@ func GetTerrainData(terrainType int) *TerrainData {
 	return &terrainData[0] // Default to unknown
 }
 
-// NeighborDirection represents the 6 directions in a hex grid
-type NeighborDirection int
-
-const (
-	LEFT NeighborDirection = iota
-	TOP_LEFT
-	TOP_RIGHT
-	RIGHT
-	BOTTOM_RIGHT
-	BOTTOM_LEFT
-)
-
 // Map represents the game map with hex grid topology
 type Map struct {
 	// Coordinate bounds - These can be evaluated.
@@ -286,7 +274,8 @@ func roundCubeCoord(fractionalQ, fractionalR float64) CubeCoord {
 }
 
 // getMapBounds calculates the pixel bounds of the entire map
-func (m *Map) GetMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, minY, maxX, maxY float64) {
+// TODO - cache this and only update when bounds changed beyond min/max Q/R
+func (m *Map) GetMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, minY, maxX, maxY float64, minXCoord, minYCoord, maxXCoord, maxYCoord CubeCoord, startingCoord CubeCoord, startingX float64) {
 	minX = math.Inf(1)
 	minY = math.Inf(1)
 	maxX = math.Inf(-1)
@@ -298,19 +287,57 @@ func (m *Map) GetMapBounds(tileWidth, tileHeight, yIncrement float64) (minX, min
 
 		if x < minX {
 			minX = x
+			minXCoord = coord
 		}
 		if y < minY {
 			minY = y
+			minYCoord = coord
 		}
 		if x+tileWidth > maxX {
 			maxX = x + tileWidth
+			maxXCoord = coord
 		}
 		if y+tileHeight > maxY {
 			maxY = y + tileHeight
+			maxYCoord = coord
 		}
 	}
 
-	return minX, minY, maxX, maxY
+	// Now that we have minY and minX coords, we can findout starting by walking "left" from minYCoord and "up" from
+	// minXcoord and see where they meet
+	// NOTE - the rows "decrease" as we go up vertically
+	minYRow := minYCoord.Q + minYCoord.R // S coord is same in a row for pointy-top hexes
+	minXRow := minXCoord.Q + minXCoord.R // S coord is same in a row for pointy-top hexes
+
+	// if minx == miny or both minXCoord and minYCoord are in the same row then easy
+	startingCoord = minXCoord
+	startingX = minX
+
+	if minXCoord != minYCoord || minXRow != minYRow {
+		// The hard case
+		if minXRow < minYRow {
+			// because X should be "below" Y so it should have a higher row number than minYCoord
+			panic("minXRow cannot be less than minYRow??")
+		}
+		startingCoord = minXCoord
+		for i := minXRow; i >= minYRow; i-- {
+			if i%2 == 0 {
+				// Always take the "Right" path first so we are guaranteed
+				// to always be on a tile whose X Coordinate is >= minX
+				startingCoord = startingCoord.Neighbor(TOP_RIGHT)
+			} else {
+				startingCoord = startingCoord.Neighbor(TOP_LEFT)
+			}
+		}
+	}
+
+	// If distance was odd then we would have a half tile width shift to the right
+	if (minXRow-minYRow)%2 == 0 {
+		startingX += tileWidth / 2.0
+	}
+	// startingX, _ = m.CenterXYForTile(startingCoord, tileWidth, tileHeight, yIncrement)
+
+	return minX, minY, maxX, maxY, minXCoord, minYCoord, maxXCoord, maxYCoord, startingCoord, startingX
 }
 
 // =============================================================================

@@ -108,12 +108,8 @@ func (e *WorldEditor) IsModified() bool {
 	return e.modified
 }
 
-// CalculateCanvasSize returns the optimal canvas size for the current map
-func (e *WorldEditor) GetMapBounds() (minX, minY, maxX, maxY float64) {
-	if e.currentWorld == nil || e.currentWorld.Map == nil {
-		return 0, 0, 400, 300 // Default size for empty editor
-	}
-
+// GetMapBounds returns the optimal canvas size for the current map
+func (e *WorldEditor) GetMapBounds() (minX, minY, maxX, maxY float64, minXCoord, minYCoord, maxXCoord, maxYCoord CubeCoord, startingCoord CubeCoord, startingX float64) {
 	return e.currentWorld.Map.GetMapBounds(DefaultTileWidth, DefaultTileHeight, DefaultYIncrement)
 }
 
@@ -450,19 +446,21 @@ func (e *WorldEditor) SetDrawable(drawable Drawable, width, height int) error {
 	return nil
 }
 
-// SetCanvasSize resizes the canvas
-func (e *WorldEditor) SetCanvasSize(width, height int) error {
+// SetViewPort sets the viewport position and dimensions for rendering
+func (e *WorldEditor) SetViewPort(x, y, width, height int) error {
 	if e.layeredRenderer == nil {
 		return fmt.Errorf("no layered renderer initialized")
 	}
 
+	e.scrollX = x
+	e.scrollY = y
 	e.canvasWidth = width
 	e.canvasHeight = height
 
-	// Resize the layered renderer (this will mark everything as dirty)
-	err := e.layeredRenderer.SetViewPort(e.scrollX, e.scrollY, width, height)
+	// Update the layered renderer viewport (this will mark everything as dirty)
+	err := e.layeredRenderer.SetViewPort(x, y, width, height)
 	if err != nil {
-		return fmt.Errorf("failed to resize layered renderer: %v", err)
+		return fmt.Errorf("failed to set viewport: %v", err)
 	}
 
 	return nil

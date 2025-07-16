@@ -2,6 +2,18 @@ package weewar
 
 import "fmt"
 
+// NeighborDirection represents the 6 directions in a hex grid
+type NeighborDirection int
+
+const (
+	LEFT NeighborDirection = iota
+	TOP_LEFT
+	TOP_RIGHT
+	RIGHT
+	BOTTOM_RIGHT
+	BOTTOM_LEFT
+)
+
 // =============================================================================
 // Hex Cube Coordinate System
 // =============================================================================

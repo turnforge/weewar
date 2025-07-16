@@ -164,7 +164,7 @@ func registerEditorFunctions() {
 	js.Global().Set("editorSetBrushSize", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
 		return setBrushSize(args[0].Int())
 	}))
-	
+
 	// Visual settings
 	js.Global().Set("editorSetShowGrid", createWrapper(1, 1, func(args []js.Value) (interface{}, error) {
 		return nil, setShowGrid(args[0].Bool())
@@ -179,6 +179,9 @@ func registerEditorFunctions() {
 	}))
 	js.Global().Set("editorSetCanvas", createWrapper(3, 3, func(args []js.Value) (interface{}, error) {
 		return setCanvas(args[0].String(), args[1].Int(), args[2].Int())
+	}))
+	js.Global().Set("editorSetViewPort", createWrapper(4, 4, func(args []js.Value) (interface{}, error) {
+		return nil, setViewPort(args[0].Int(), args[1].Int(), args[2].Int(), args[3].Int())
 	}))
 
 	// Information
@@ -217,7 +220,7 @@ func registerUtilityFunctions() {
 
 func newMap(rows, cols int) (map[string]interface{}, error) {
 	// Calculate optimal canvas size for the new map
-	width, height := calculateCanvasSizeInternal(rows, cols)
+	width, height := calculateCanvasSizeInternal()
 
 	// Create new map in the editor
 	err := globalEditor.NewWorld() // Creates 1x1, we'll expand it
@@ -304,6 +307,10 @@ func setCanvas(canvasID string, width, height int) (map[string]interface{}, erro
 	}, nil
 }
 
+func setViewPort(x, y, width, height int) error {
+	return globalEditor.SetViewPort(x, y, width, height)
+}
+
 func getMapInfo() (map[string]interface{}, error) {
 	info := globalEditor.GetMapInfo()
 	if info == nil {
@@ -347,9 +354,9 @@ func getTerrainTypes() (map[string]interface{}, error) {
 
 func getTileDimensions() (map[string]interface{}, error) {
 	return map[string]interface{}{
-		"tileWidth":   int(weewar.DefaultTileWidth),
-		"tileHeight":  int(weewar.DefaultTileHeight),
-		"yIncrement":  int(weewar.DefaultYIncrement),
+		"tileWidth":  int(weewar.DefaultTileWidth),
+		"tileHeight": int(weewar.DefaultTileHeight),
+		"yIncrement": int(weewar.DefaultYIncrement),
 	}, nil
 }
 
@@ -377,7 +384,7 @@ func pixelToCoords(x, y float64) (map[string]interface{}, error) {
 }
 
 func calculateCanvasSize(rows, cols int) (map[string]interface{}, error) {
-	width, height := calculateCanvasSizeInternal(rows, cols)
+	width, height := calculateCanvasSizeInternal()
 
 	return map[string]interface{}{
 		"width":  width,
@@ -387,9 +394,9 @@ func calculateCanvasSize(rows, cols int) (map[string]interface{}, error) {
 	}, nil
 }
 
-func calculateCanvasSizeInternal(rows, cols int) (width, height int) {
+func calculateCanvasSizeInternal() (width, height int) {
 	// Get map bounds and add padding for hover effects and potential expansion
-	minX, minY, maxX, maxY := globalEditor.GetMapBounds()
+	minX, minY, maxX, maxY, _, _, _, _, _, _ := globalEditor.GetMapBounds()
 
 	// Add padding around the map bounds so we can show hexes being hovered
 	// and allow for potential map expansion

@@ -51,6 +51,7 @@ type CombatResult struct {
 // =============================================================================
 
 // GameController manages game lifecycle and core state
+/*
 type GameController interface {
 	// Game Lifecycle
 	// LoadGame restores game from saved state
@@ -100,6 +101,7 @@ type GameController interface {
 	// Returns: True if turn can be ended
 	CanEndTurn() bool
 }
+*/
 
 // =============================================================================
 // Map and Position Interface
@@ -250,7 +252,7 @@ type UnitInterface interface {
 // GameInterface combines core game interfaces into a single contract
 // This is the main interface that the unified Game struct will implement
 type GameInterface interface {
-	GameController
+	// GameController
 	MapInterface
 	UnitInterface
 }

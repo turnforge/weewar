@@ -768,7 +768,7 @@ class MapEditorPage {
         // Tell WASM to update its canvas buffer size to match DOM
         if (this.wasmInitialized) {
             try {
-                const result = (window as any).editorSetCanvasSize(width, height);
+                const result = (window as any).editorSetViewPort(this.scrollOffset.x, this.scrollOffset.y, width, height);
                 if (result.success) {
                     this.logToConsole(`Time: ${performance.now()} WASM canvas buffer updated to ${width}x${height}`);
                     

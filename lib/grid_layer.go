@@ -39,60 +39,43 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 	// Clear buffer for full redraw (grid/coordinates are view-dependent)
 	gl.buffer.Clear()
 
-	// Calculate the hex coordinates that would be visible on the canvas
-	// Start from a reference point and extend outward to cover the entire canvas
+	// Get optimal starting coordinate and position from map bounds
+	minX, minY, _, _, _, _, _, _, startingCoord, startingX := world.Map.GetMapBounds(options.TileWidth, options.TileHeight, options.YIncrement)
 
-	// Find a reference tile (prefer existing tiles, but use origin if none exist)
-	var refCoord CubeCoord
-	if len(world.Map.Tiles) > 0 {
-		// Use the first existing tile as reference
-		for coord := range world.Map.Tiles {
-			refCoord = coord
-			break
+	y := options.ScrollY - minY
+	startX := options.ScrollX - (minX + startingX)
+	height := float64(gl.height)
+	width := float64(gl.width)
+	leftCoord := startingCoord.Neighbor(LEFT)
+	for i := 0; ; i++ {
+		currX := startX
+		if i%2 == 1 {
+			currX = startX + options.TileWidth/2.0
 		}
-	} else {
-		// No tiles exist, use origin
-		refCoord = CubeCoord{Q: 0, R: 0}
-	}
-
-	// Calculate how many hex tiles we need to cover the canvas
-	hexWidth := options.TileWidth * 0.75 // Horizontal spacing between hex centers
-	hexHeight := options.YIncrement      // Vertical spacing between hex rows
-
-	// Calculate the range of coordinates needed to cover the canvas
-	tilesWide := int(math.Ceil(float64(gl.width)/hexWidth)) + 2
-	tilesHigh := int(math.Ceil(float64(gl.height)/hexHeight)) + 2
-
-	// Generate hex coordinates in a rectangular pattern around the reference point
-	for dr := -tilesHigh; dr <= tilesHigh; dr++ {
-		for dq := -tilesWide; dq <= tilesWide; dq++ {
-			coord := CubeCoord{
-				Q: refCoord.Q + dq,
-				R: refCoord.R + dr,
-			}
-
-			// Get pixel position for this coordinate
-			x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
-
-			// Apply viewport offset
-			x += options.ScrollX
-			y += options.ScrollY
-
-			// Check if hex is within visible area (with some padding)
-			if x < -options.TileWidth || x > float64(gl.width)+options.TileWidth ||
-				y < -options.TileHeight || y > float64(gl.height)+options.TileHeight {
-				continue
-			}
-
+		rowCoord := leftCoord
+		for ; currX < width; currX += options.TileWidth {
+			fmt.Printf("currX, currY, Coord: ", currX, y, rowCoord)
 			// Draw grid lines if enabled
 			if options.ShowGrid {
-				gl.drawHexGrid(x, y, options)
+				gl.drawHexGrid(currX, y, options)
 			}
 
 			// Draw coordinates if enabled
 			if options.ShowCoordinates {
-				gl.drawCoordinates(coord, x, y, options)
+				gl.drawCoordinates(rowCoord, currX, y, options)
 			}
+			rowCoord = rowCoord.Neighbor(RIGHT)
+		}
+
+		if i%2 == 0 {
+			leftCoord = leftCoord.Neighbor(BOTTOM_RIGHT)
+		} else {
+			leftCoord = leftCoord.Neighbor(BOTTOM_LEFT)
+		}
+		y += options.YIncrement
+		if y >= height {
+			// out of bounds so stop
+			break
 		}
 	}
 

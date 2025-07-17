@@ -80,8 +80,7 @@ func (v *MapEditorPage) SetupDefaults() {
 	v.CityTerrains = []TerrainType{}
 	v.PlayerCount = 4 // Default player count for map editor
 	
-	// Define which terrains are city/player terrains vs nature terrains
-	cityTerrainIDs := map[int]bool{1: true, 2: true, 3: true, 16: true, 20: true}
+	// No longer need hardcoded map - terrain type is now in TerrainData struct
 	
 	// Create asset manager to load terrain tile images
 	assetManager := weewar.NewAssetManager("./assets/v1") // Adjust path as needed
@@ -111,10 +110,10 @@ func (v *MapEditorPage) SetupDefaults() {
 				MoveCost:        terrainData.MoveCost,
 				DefenseBonus:    terrainData.DefenseBonus,
 				IconDataURL:     iconDataURL,
-				HasPlayerColors: cityTerrainIDs[i],
+				HasPlayerColors: terrainData.Type == weewar.TerrainPlayer,
 			}
 			
-			if cityTerrainIDs[i] {
+			if terrainData.Type == weewar.TerrainPlayer {
 				v.CityTerrains = append(v.CityTerrains, terrain)
 			} else {
 				v.NatureTerrains = append(v.NatureTerrains, terrain)
@@ -127,11 +126,14 @@ func (v *MapEditorPage) SetupDefaults() {
 	unitIDs := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29}
 	
 	for _, unitID := range unitIDs {
-		unitData := weewar.GetUnitData(unitID)
+		unitData, err := assetManager.GetUnitData(unitID)
+		if err != nil {
+			continue
+		}
 		if unitData != nil {
 			// Try to load the unit icon (default color 0)
 			var iconDataURL string
-			if assetManager.HasUnitAsset(unitID) {
+			if assetManager.HasUnitAsset(unitID, 0) {
 				if img, err := assetManager.GetUnitImage(unitID, 0); err == nil {
 					if dataURL, err := imageToDataURL(img); err == nil {
 						iconDataURL = dataURL

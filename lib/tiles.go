@@ -1,11 +1,20 @@
 package weewar
 
+// TerrainType represents whether terrain is nature or player-controllable
+type TerrainType int
+
+const (
+	TerrainNature TerrainType = iota // Natural terrain (grass, mountains, water, etc.)
+	TerrainPlayer                    // Player-controllable structures (bases, cities, etc.)
+)
+
 // TerrainData represents terrain type information
 type TerrainData struct {
 	ID           int
 	Name         string
 	MoveCost     int
 	DefenseBonus int
+	Type         TerrainType // Nature or Player terrain
 }
 
 // Tile represents a single hex tile on the map

@@ -6,35 +6,32 @@ import (
 	"math"
 )
 
-// Basic terrain data
+// Basic terrain data - matches weewar-data.json
 var terrainData = []TerrainData{
-	{0, "Clear", 1, 0},
-	{1, "Grass", 1, 0},
-	{2, "Desert", 1, 0},
-	{3, "Water", 2, 0},
-	{4, "Mountain", 2, 10},
-	{5, "Rock", 3, 20},
-	{6, "Forest", 1, 5},
-	{7, "Swamp", 2, 5},
-	{8, "Road", 1, -5},
-	{9, "Bridge", 1, 0},
-	{10, "River", 2, 0},
-	{11, "Beach", 1, 0},
-	{12, "Tundra", 2, 5},
-	{13, "Snow", 2, 5},
-	{14, "Ice", 3, 0},
-	{15, "Lava", 4, 0},
-	{16, "Crater", 2, 15},
-	{17, "Ruins", 1, 10},
-	{18, "Base", 1, 20},
-	{19, "City", 1, 15},
-	{20, "Port", 1, 10},
-	{21, "Airport", 1, 10},
-	{22, "Factory", 1, 15},
-	{23, "Tower", 2, 25},
-	{24, "Bunker", 3, 30},
-	{25, "Fortress", 3, 35},
-	{26, "Volcano", 4, 5},
+	{0, "Clear", 1, 0, TerrainNature},        // Default fallback
+	{1, "Land Base", 2, 20, TerrainPlayer},   // Player base
+	{2, "Naval Base", 2, 20, TerrainPlayer},  // Naval base  
+	{3, "Airport Base", 2, 20, TerrainPlayer}, // Airport base
+	{4, "Desert", 1, 0, TerrainNature},       // Desert terrain
+	{5, "Grass", 1, 0, TerrainNature},        // Grass terrain
+	{6, "Hospital", 1, 15, TerrainPlayer},    // Hospital
+	{7, "Mountains", 2, 10, TerrainNature},   // Mountain terrain
+	{8, "Swamp", 2, 5, TerrainNature},        // Swamp terrain
+	{9, "Forest", 1, 5, TerrainNature},       // Forest terrain
+	{10, "Water (Regular)", 2, 0, TerrainNature}, // Regular water
+	{12, "Lava", 4, 0, TerrainNature},        // Lava terrain
+	{14, "Water (Shallow)", 2, 0, TerrainNature}, // Shallow water
+	{15, "Water (Deep)", 2, 0, TerrainNature},    // Deep water
+	{16, "Missile Silo", 2, 15, TerrainPlayer},   // Missile silo
+	{17, "Bridge (Regular)", 1, 0, TerrainNature}, // Regular bridge
+	{18, "Bridge (Shallow)", 1, 0, TerrainNature}, // Shallow bridge
+	{19, "Bridge (Deep)", 1, 0, TerrainNature},    // Deep bridge
+	{20, "Mines", 1, 10, TerrainPlayer},           // Mines
+	{21, "City", 1, 15, TerrainPlayer},            // City
+	{22, "Road", 1, -5, TerrainNature},            // Road (movement bonus)
+	{23, "Water (Rocky)", 2, 0, TerrainNature},    // Rocky water
+	{25, "Guard Tower", 2, 25, TerrainPlayer},     // Guard tower
+	{26, "Snow", 2, 5, TerrainNature},             // Snow terrain
 }
 
 // GetTerrainData returns terrain data for the given type

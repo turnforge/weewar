@@ -26,6 +26,7 @@
     "dockview-core": "^1.0.0",
     "galore": "*",
     "golden-layout": "^2.6.0",
+    "phaser": "^3.80.1",
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

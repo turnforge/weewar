@@ -2,6 +2,7 @@ import { ThemeManager } from './ThemeManager';
 import { Modal } from './Modal';
 import { ToastManager } from './ToastManager';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
+import { PhaserMapEditor } from './phaser/PhaserMapEditor';
 
 class MapBounds {
   MinQ: number;
@@ -73,6 +74,9 @@ class MapEditorPage {
 
     // Dockview interface
     private dockview: DockviewApi | null = null;
+    
+    // Phaser editor for testing
+    private phaserEditor: PhaserMapEditor | null = null;
 
     constructor() {
         this.initializeComponents();
@@ -466,6 +470,17 @@ class MapEditorPage {
         });
         document.querySelector('[data-action="download-game-data"]')?.addEventListener('click', () => {
             this.downloadGameData();
+        });
+        
+        // Phaser test buttons
+        document.querySelector('[data-action="init-phaser"]')?.addEventListener('click', () => {
+            this.initializePhaser();
+        });
+        document.querySelector('[data-action="test-phaser-pattern"]')?.addEventListener('click', () => {
+            this.testPhaserPattern();
+        });
+        document.querySelector('[data-action="destroy-phaser"]')?.addEventListener('click', () => {
+            this.destroyPhaser();
         });
 
         // Canvas interactions
@@ -1352,6 +1367,116 @@ class MapEditorPage {
         // Dispose dockview
         if (this.dockview) {
             this.dockview.dispose();
+        }
+        
+        // Destroy Phaser editor if it exists
+        if (this.phaserEditor) {
+            this.phaserEditor.destroy();
+        }
+    }
+    
+    // Phaser test methods
+    public initializePhaser(): void {
+        try {
+            this.logToConsole('Initializing Phaser editor...');
+            
+            // Hide the existing canvas
+            if (this.mapCanvas) {
+                this.mapCanvas.style.display = 'none';
+            }
+            
+            // Create container for Phaser
+            const canvasContainer = document.getElementById('editor-canvas-container');
+            if (!canvasContainer) {
+                throw new Error('Canvas container not found');
+            }
+            
+            // Create Phaser container div
+            let phaserContainer = document.getElementById('phaser-container');
+            if (!phaserContainer) {
+                phaserContainer = document.createElement('div');
+                phaserContainer.id = 'phaser-container';
+                phaserContainer.style.width = '100%';
+                phaserContainer.style.height = '100%';
+                phaserContainer.style.minWidth = '800px';
+                phaserContainer.style.minHeight = '600px';
+                canvasContainer.appendChild(phaserContainer);
+            }
+            
+            // Initialize Phaser editor
+            this.phaserEditor = new PhaserMapEditor('phaser-container');
+            
+            // Set up event handlers
+            this.phaserEditor.onTileClick((q, r) => {
+                this.logToConsole(`Phaser tile clicked: Q=${q}, R=${r}`);
+            });
+            
+            this.phaserEditor.onMapChange(() => {
+                this.logToConsole('Phaser map changed');
+            });
+            
+            this.logToConsole('Phaser editor initialized successfully!');
+            this.toastManager?.showToast('Phaser', 'Phaser editor initialized', 'success');
+            
+        } catch (error) {
+            this.logToConsole(`Failed to initialize Phaser: ${error}`);
+            this.toastManager?.showToast('Error', 'Failed to initialize Phaser', 'error');
+        }
+    }
+    
+    public testPhaserPattern(): void {
+        if (!this.phaserEditor) {
+            this.logToConsole('Phaser editor not initialized');
+            this.toastManager?.showToast('Error', 'Initialize Phaser first', 'error');
+            return;
+        }
+        
+        try {
+            this.logToConsole('Creating test pattern with Phaser...');
+            
+            // Test negative coordinate support
+            this.phaserEditor.createTestPattern();
+            
+            // Test individual tile painting
+            this.phaserEditor.paintTile(-5, -5, 1, 0); // Grass at negative coordinates
+            this.phaserEditor.paintTile(5, 5, 2, 1);   // Desert at positive coordinates
+            this.phaserEditor.paintTile(-3, 3, 3, 2);  // Water at mixed coordinates
+            
+            // Test brush painting
+            this.phaserEditor.setBrushSize(1);
+            this.phaserEditor.paintTile(0, 0, 16, 0, 1); // Mountain with small brush
+            
+            this.logToConsole('Test pattern created successfully!');
+            this.toastManager?.showToast('Success', 'Test pattern created', 'success');
+            
+        } catch (error) {
+            this.logToConsole(`Failed to create test pattern: ${error}`);
+            this.toastManager?.showToast('Error', 'Failed to create test pattern', 'error');
+        }
+    }
+    
+    public destroyPhaser(): void {
+        if (this.phaserEditor) {
+            this.logToConsole('Destroying Phaser editor...');
+            
+            this.phaserEditor.destroy();
+            this.phaserEditor = null;
+            
+            // Remove Phaser container
+            const phaserContainer = document.getElementById('phaser-container');
+            if (phaserContainer) {
+                phaserContainer.remove();
+            }
+            
+            // Show the original canvas
+            if (this.mapCanvas) {
+                this.mapCanvas.style.display = 'block';
+            }
+            
+            this.logToConsole('Phaser editor destroyed');
+            this.toastManager?.showToast('Info', 'Phaser editor destroyed', 'info');
+        } else {
+            this.logToConsole('No Phaser editor to destroy');
         }
     }
 }

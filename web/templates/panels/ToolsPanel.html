@@ -19,7 +19,7 @@
         </button>
         {{ range .NatureTerrains }}
         <button
-          class="terrain-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors{{ if eq .ID 0 }} bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-600{{ else if eq .ID 5 }} bg-blue-100 dark:bg-blue-900 border-blue-500{{ end }}"
+          class="terrain-button p-2 text-xs text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors{{ if eq .ID 0 }} bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-600{{ else if eq .ID 5 }} bg-blue-100 dark:bg-blue-900 border-blue-500{{ end }} overflow-hidden"
           data-terrain="{{ .ID }}"
           title="{{ .Name }}{{ if ne .ID 0 }} (Move: {{ .MoveCost }}, Defense: {{ .DefenseBonus }}){{ end }}"
         >
@@ -76,7 +76,7 @@
         <div id="city-terrain-palette" class="grid grid-cols-3 gap-2">
           {{ range .CityTerrains }}
           <button
-            class="terrain-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="terrain-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors overflow-hidden"
             data-terrain="{{ .ID }}"
             data-has-colors="true"
             title="{{ .Name }} (Move: {{ .MoveCost }}, Defense: {{ .DefenseBonus }})"
@@ -135,7 +135,7 @@
         >
           {{ range .UnitTypes }}
           <button
-            class="unit-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="unit-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors overflow-hidden"
             data-unit="{{ .ID }}"
             title="{{ .Name }}"
           >

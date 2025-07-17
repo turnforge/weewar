@@ -450,9 +450,6 @@ class MapEditorPage {
         document.querySelector('[data-action="fill-all-grass"]')?.addEventListener('click', () => {
             this.fillAllGrass();
         });
-        document.querySelector('[data-action="create-test-pattern"]')?.addEventListener('click', () => {
-            this.createTestPattern();
-        });
         document.querySelector('[data-action="create-island-map"]')?.addEventListener('click', () => {
             this.createIslandMap();
         });
@@ -805,37 +802,97 @@ class MapEditorPage {
     // Advanced tool functions
     public fillAllGrass(): void {
         this.logToConsole('Filling all tiles with grass...');
-        // TODO: Implement with WASM
-    }
-
-    public createTestPattern(): void {
-        this.logToConsole('Creating test pattern...');
-        // TODO: Implement test pattern generation
+        
+        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+            this.phaserPanel.fillAllTerrain(1, 0); // Terrain type 1 = Grass
+            this.logToConsole('All tiles filled with grass using Phaser');
+        } else {
+            this.logToConsole('Phaser panel not available, cannot fill grass');
+        }
     }
 
     public createIslandMap(): void {
         this.logToConsole('Creating island map...');
-        // TODO: Implement island generation
+        
+        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+            // Create island pattern: center at (0,0) with radius 5
+            this.phaserPanel.createIslandPattern(0, 0, 5);
+            this.logToConsole('Island map created using Phaser');
+        } else {
+            this.logToConsole('Phaser panel not available, cannot create island map');
+        }
     }
 
     public createMountainRidge(): void {
         this.logToConsole('Creating mountain ridge...');
-        // TODO: Implement mountain ridge generation
+        
+        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+            // Create a horizontal mountain ridge from (-4,-2) to (4,2)
+            for (let q = -4; q <= 4; q++) {
+                for (let r = -2; r <= 2; r++) {
+                    // Create a ridge pattern - mountains in center, rocks on edges
+                    if (Math.abs(r) <= 1) {
+                        this.phaserPanel.paintTile(q, r, 4, 0); // Mountain
+                    } else {
+                        this.phaserPanel.paintTile(q, r, 5, 0); // Rock
+                    }
+                }
+            }
+            this.logToConsole('Mountain ridge created using Phaser');
+        } else {
+            this.logToConsole('Phaser panel not available, cannot create mountain ridge');
+        }
     }
 
     public showTerrainStats(): void {
-        this.logToConsole('Terrain statistics:');
-        this.logToConsole('- Grass: 0 tiles');
-        this.logToConsole('- Desert: 0 tiles');
-        this.logToConsole('- Water: 0 tiles');
-        this.logToConsole('- Mountain: 0 tiles');
-        this.logToConsole('- Rock: 0 tiles');
-        // TODO: Calculate actual stats from map data
+        this.logToConsole('Calculating terrain statistics...');
+        
+        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+            const tiles = this.phaserPanel.getTilesData();
+            const stats = {
+                grass: 0,
+                desert: 0,
+                water: 0,
+                mountain: 0,
+                rock: 0,
+                other: 0
+            };
+            
+            tiles.forEach(tile => {
+                switch (tile.terrain) {
+                    case 1: stats.grass++; break;
+                    case 2: stats.desert++; break;
+                    case 3: stats.water++; break;
+                    case 4: stats.mountain++; break;
+                    case 5: stats.rock++; break;
+                    default: stats.other++; break;
+                }
+            });
+            
+            this.logToConsole('Terrain statistics:');
+            this.logToConsole(`- Grass: ${stats.grass} tiles`);
+            this.logToConsole(`- Desert: ${stats.desert} tiles`);
+            this.logToConsole(`- Water: ${stats.water} tiles`);
+            this.logToConsole(`- Mountain: ${stats.mountain} tiles`);
+            this.logToConsole(`- Rock: ${stats.rock} tiles`);
+            if (stats.other > 0) {
+                this.logToConsole(`- Other: ${stats.other} tiles`);
+            }
+            this.logToConsole(`Total tiles: ${tiles.length}`);
+        } else {
+            this.logToConsole('Phaser panel not available, cannot calculate stats');
+        }
     }
 
     public randomizeTerrain(): void {
         this.logToConsole('Randomizing terrain...');
-        // TODO: Implement terrain randomization
+        
+        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+            this.phaserPanel.randomizeTerrain();
+            this.logToConsole('Terrain randomized using Phaser');
+        } else {
+            this.logToConsole('Phaser panel not available, cannot randomize terrain');
+        }
     }
 
     // Update map bounds and tile dimensions from WASM

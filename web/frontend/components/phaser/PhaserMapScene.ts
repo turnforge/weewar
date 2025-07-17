@@ -13,8 +13,8 @@ export class PhaserMapScene extends Phaser.Scene {
     private showGrid: boolean = false;
     private showCoordinates: boolean = false;
     
-    // Theme management
-    private isDarkTheme: boolean = false;
+    // Theme management - initialize with current theme state
+    private isDarkTheme: boolean = document.documentElement.classList.contains('dark');
     
     // Camera controls
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys | null = null;

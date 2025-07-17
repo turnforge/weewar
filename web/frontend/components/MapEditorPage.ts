@@ -83,10 +83,7 @@ class MapEditorPage {
 
         this.themeToggleButton = document.getElementById('theme-toggle-button') as HTMLButtonElement;
         this.themeToggleIcon = document.getElementById('theme-toggle-icon');
-        this.editorCanvas = document.getElementById('editor-canvas-container');
         this.editorOutput = document.getElementById('editor-output');
-        
-        // Note: Canvas context now handled by Phaser panel
 
         if (!this.themeToggleButton || !this.themeToggleIcon) {
             console.warn("Theme toggle button or icon element not found in Header.");
@@ -371,15 +368,6 @@ class MapEditorPage {
         }
 
 
-        // Rendering buttons
-        document.querySelectorAll('[data-action="render-map"]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const target = e.target as HTMLElement;
-                const width = parseInt(target.dataset.width || '600');
-                const height = parseInt(target.dataset.height || '450');
-                this.renderEditor(width, height);
-            });
-        });
 
         // Export buttons
         document.querySelectorAll('[data-action="export-game"]').forEach(button => {
@@ -417,11 +405,6 @@ class MapEditorPage {
         document.querySelector('[data-action="init-phaser"]')?.addEventListener('click', () => {
             this.initializePhaser();
         });
-        document.querySelector('[data-action="test-phaser-pattern"]')?.addEventListener('click', () => {
-            this.testPhaserPattern();
-        });
-
-        // Note: Canvas interactions now handled by Phaser panel
     }
 
     private loadInitialState(): void {
@@ -445,97 +428,6 @@ class MapEditorPage {
         }, 1000);
     }
 
-    private async initializeWasm(): Promise<void> {
-        try {
-            this.logToConsole('Loading WASM module...');
-            
-            // Check if WASM functions are available
-            if (typeof (window as any).editorSetCanvas === 'undefined') {
-                this.logToConsole('WASM functions not available - loading WASM module...');
-                await this.loadWasmModule();
-                // Check again after loading
-                if (typeof (window as any).editorSetCanvas === 'undefined') {
-                    throw new Error('WASM module loaded but functions not available');
-                }
-            }
-
-            this.wasmInitialized = true;
-            
-            // Get initial map info from the global editor
-            this.logToConsole('Getting initial map info...');
-            const mapInfoResult = (window as any).editorGetMapInfo();
-            if (!mapInfoResult.success) {
-                throw new Error(mapInfoResult.error);
-            }
-            
-            // Update local map data with initial info
-            this.mapData = {
-                name: mapInfoResult.data.filename || 'Default Map',
-                width: mapInfoResult.data.width,
-                height: mapInfoResult.data.height,
-                tiles: {},
-                map_units: []
-            };
-            
-            // Get map bounds and tile dimensions from WASM
-            this.updateMapBoundsFromWasm();
-            
-            // Calculate canvas size based on actual map bounds
-            const canvasSize = this.calculateCanvasSize(this.mapData.width, this.mapData.height);
-            
-            // Bind WASM editor to canvas
-            this.logToConsole('Binding WASM editor to canvas...');
-            const canvasResult = (window as any).editorSetCanvas('map-canvas', canvasSize.width, canvasSize.height);
-            if (!canvasResult.success) {
-                throw new Error(canvasResult.error);
-            }
-            this.logToConsole(`Editor bound to canvas: ${canvasResult.data.canvasID}`);
-            
-            // Apply canvas size
-            this.resizeCanvas(canvasSize.width, canvasSize.height);
-            
-            // ScrollOffset is already initialized with padding values
-            
-            this.updateEditorStatus('Ready');
-            this.logToConsole('WASM editor initialized successfully');
-            
-            // Populate terrain palette with all available terrain types
-            // await this.populateTerrainPalette();
-            
-            // Request initial editor refresh
-            this.editorRefresh();
-            
-        } catch (error) {
-            console.error('Failed to initialize WASM:', error);
-            this.logToConsole(`WASM initialization failed: ${error}`);
-            this.updateEditorStatus('WASM Error');
-        }
-    }
-
-    private async loadWasmModule(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.logToConsole('Loading editor.wasm...');
-            
-            // Create a new WebAssembly instance
-            const go = new (window as any).Go();
-            
-            WebAssembly.instantiateStreaming(fetch('/static/wasm/editor.wasm'), go.importObject)
-                .then((result) => {
-                    this.logToConsole('WASM module instantiated, starting...');
-                    go.run(result.instance);
-                    
-                    // Wait a bit for the module to register its functions
-                    setTimeout(() => {
-                        this.logToConsole('WASM module should be ready');
-                        resolve();
-                    }, 100);
-                })
-                .catch((error) => {
-                    this.logToConsole(`WASM loading failed: ${error}`);
-                    reject(error);
-                });
-        });
-    }
 
     private initializeNewMap(): void {
         this.mapData = {
@@ -580,18 +472,6 @@ class MapEditorPage {
     public setBrushTerrain(terrain: number): void {
         this.currentTerrain = terrain;
         
-        // Update WASM editor brush terrain
-        if (this.wasmInitialized) {
-            try {
-                const result = (window as any).editorSetBrushTerrain(terrain);
-                if (!result.success) {
-                    this.logToConsole(`WASM setBrushTerrain failed: ${result.error}`);
-                }
-            } catch (error) {
-                this.logToConsole(`WASM setBrushTerrain error: ${error}`);
-            }
-        }
-        
         const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
         this.logToConsole(`Brush terrain set to: ${terrainNames[terrain]}`);
         this.updateBrushInfo();
@@ -601,66 +481,26 @@ class MapEditorPage {
     public setBrushSize(size: number): void {
         this.brushSize = size;
         
-        // Update WASM editor brush size
-        if (this.wasmInitialized) {
-            try {
-                const result = (window as any).editorSetBrushSize(size);
-                if (!result.success) {
-                    this.logToConsole(`WASM setBrushSize failed: ${result.error}`);
-                }
-            } catch (error) {
-                this.logToConsole(`WASM setBrushSize error: ${error}`);
-            }
-        }
-        
         const sizeNames = ['Single (1 hex)', 'Small (7 hexes)', 'Medium (19 hexes)', 'Large (37 hexes)', 'X-Large (61 hexes)', 'XX-Large (91 hexes)'];
         this.logToConsole(`Brush size set to: ${sizeNames[size]}`);
         this.updateBrushInfo();
     }
     
     public setShowGrid(showGrid: boolean): void {
-        // Control Phaser panel if available
         if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
             this.phaserPanel.setShowGrid(showGrid);
-            return;
-        }
-        
-        // Fallback to WASM if Phaser not available
-        if (this.wasmInitialized) {
-            try {
-                const result = (window as any).editorSetShowGrid(showGrid);
-                if (!result.success) {
-                    this.logToConsole(`WASM setShowGrid failed: ${result.error}`);
-                } else {
-                    this.logToConsole(`Grid visibility set to: ${showGrid}`);
-                    this.editorRefresh();
-                }
-            } catch (error) {
-                this.logToConsole(`WASM setShowGrid error: ${error}`);
-            }
+            this.logToConsole(`Grid visibility set to: ${showGrid}`);
+        } else {
+            this.logToConsole('Phaser panel not available for grid toggle');
         }
     }
     
     public setShowCoordinates(showCoordinates: boolean): void {
-        // Control Phaser panel if available
         if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
             this.phaserPanel.setShowCoordinates(showCoordinates);
-            return;
-        }
-        
-        // Fallback to WASM if Phaser not available
-        if (this.wasmInitialized) {
-            try {
-                const result = (window as any).editorSetShowCoordinates(showCoordinates);
-                if (!result.success) {
-                    this.logToConsole(`WASM setShowCoordinates failed: ${result.error}`);
-                } else {
-                    this.logToConsole(`Coordinate visibility set to: ${showCoordinates}`);
-                    this.editorRefresh();
-                }
-            } catch (error) {
-                this.logToConsole(`WASM setShowCoordinates error: ${error}`);
-            }
+            this.logToConsole(`Coordinate visibility set to: ${showCoordinates}`);
+        } else {
+            this.logToConsole('Phaser panel not available for coordinates toggle');
         }
     }
 
@@ -697,31 +537,6 @@ class MapEditorPage {
             const col = parseInt(colInput.value);
             this.logToConsole(`Removing terrain at (${row}, ${col})`);
             // TODO: Implement terrain removal logic with WASM
-        }
-    }
-
-
-    public renderEditor(width: number, height: number): void {
-        this.logToConsole(`Rendering map at ${width}×${height}...`);
-        // TODO: Implement WASM rendering
-        
-        // WASM now handles rendering automatically when map changes
-        this.logToConsole('Map rendering handled by WASM');
-    }
-    
-    // Request a refresh from the WASM editor (non-blocking)
-    private editorRefresh(): void {
-        if (!this.wasmInitialized) {
-            return;
-        }
-        
-        try {
-            const result = (window as any).editorRender();
-            if (!result.success) {
-                this.logToConsole(`Editor refresh failed: ${result.error}`);
-            }
-        } catch (error) {
-            this.logToConsole(`Editor refresh error: ${error}`);
         }
     }
 
@@ -853,86 +668,12 @@ class MapEditorPage {
         }
     }
 
-    // Update map bounds and tile dimensions from WASM
-    private updateMapBoundsFromWasm(): void {
-        if (!this.wasmInitialized || !this.mapData) {
-            return;
-        }
-        
-        try {
-            // Get map bounds and tile dimensions from WASM
-            const boundsResult = (window as any).editorGetMapBounds();
-            if (boundsResult && boundsResult.success && boundsResult.data) {
-                const bounds = boundsResult.data;
-                
-                // Update tile dimensions if available
-                const tileDims = bounds.tileDimensions
-                if (tileDims.tileWidth && tileDims.tileHeight && tileDims.yIncrement) {
-                    this.tileDimensions = tileDims
-                    this.logToConsole(`Tile dimensions updated: ${JSON.stringify(this.tileDimensions)}`);
-                }
-                
-                this.setMapBounds(bounds.bounds)
-                
-                this.logToConsole(`Map bounds updated: Q(${bounds.minQ}-${bounds.maxQ}) R(${bounds.minR}-${bounds.maxR}) Starting(${bounds.startingCoord.q},${bounds.startingCoord.r})`);
-            } else {
-                this.logToConsole(`Failed to get map bounds from WASM: ${boundsResult?.error || 'Unknown error'}`);
-            }
-        } catch (error) {
-            this.logToConsole(`Error getting map bounds from WASM: ${error}`);
-        }
-    }
-
     private setMapBounds(bounds: MapBounds)  {
         // Update mapData with bounds information
         this.mapBounds = bounds
     }
 
     // Canvas management methods removed - now handled by Phaser panel
-
-    // resizeCanvas updates the canvas size in the DOM to match WASM-calculated dimensions
-    private resizeCanvas(width: number, height: number): void {
-        if (!this.mapCanvas) return;
-        
-        this.logToConsole(`Time: ${performance.now()} Resizing canvas DOM to ${width}x${height}`);
-        
-        // Update canvas DOM element size (this clears the canvas content)
-        this.mapCanvas.width = width;
-        this.mapCanvas.height = height;
-        this.canvasSize = {width, height};
-        
-        // Update canvas CSS size for proper display
-        this.mapCanvas.style.width = `${width}px`;
-        this.mapCanvas.style.height = `${height}px`;
-        
-        // Tell WASM to update its viewport to match DOM canvas size
-        if (this.wasmInitialized) {
-            try {
-                const result = (window as any).editorSetViewPort(this.scrollOffset.x, this.scrollOffset.y, width, height);
-                if (result.success) {
-                    this.logToConsole(`Time: ${performance.now()} WASM viewport updated to ${width}x${height}`);
-                    
-                    // Force a re-render with proper game rendering (not simplified hexagons)
-                    const renderResult = (window as any).editorRender();
-                    if (renderResult.success) {
-                        this.logToConsole(`Time: ${performance.now()} Map re-rendered with proper terrain images`);
-                    } else {
-                        this.logToConsole(`Re-render failed: ${renderResult.error}`);
-                    }
-                } else {
-                    this.logToConsole(`Failed to update WASM viewport: ${result.error}`);
-                }
-            } catch (error) {
-                this.logToConsole(`Error updating WASM viewport: ${error}`);
-            }
-        }
-        
-        this.logToConsole(`Time: ${performance.now()} Canvas resized to ${width}x${height}`);
-    }
-
-    // renderMapCanvas() method removed - WASM now pushes updates directly to canvas
-
-    // Old canvas interaction methods removed - now handled by Phaser panel
 
     private async saveMap(): Promise<void> {
         if (!this.mapData) {
@@ -1170,19 +911,6 @@ class MapEditorPage {
         return {
             element: container,
             init: () => {
-                // Update the canvas container reference for Phaser
-                const canvasContainer = container.querySelector('#editor-canvas-container');
-                if (canvasContainer) {
-                    this.editorCanvas = canvasContainer as HTMLElement;
-                }
-                
-                // Find the hidden canvas element for fallback
-                const canvasElement = container.querySelector('#map-canvas') as HTMLCanvasElement;
-                if (canvasElement) {
-                    this.mapCanvas = canvasElement;
-                    this.canvasContext = canvasElement.getContext('2d');
-                }
-                
                 // Phaser will handle its own initialization
                 this.logToConsole('Phaser panel ready for initialization');
             },
@@ -1372,17 +1100,6 @@ class MapEditorPage {
     private initializePhaserPanel(): void {
         try {
             this.logToConsole('Initializing Phaser panel as default editor...');
-            
-            // Hide the existing canvas
-            if (this.mapCanvas) {
-                this.mapCanvas.style.display = 'none';
-            }
-            
-            // Create container for Phaser
-            const canvasContainer = document.getElementById('editor-canvas-container');
-            if (!canvasContainer) {
-                throw new Error('Canvas container not found');
-            }
             
             // Initialize Phaser panel
             this.phaserPanel = new PhaserPanel();

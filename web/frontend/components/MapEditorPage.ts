@@ -49,28 +49,7 @@ class MapEditorPage {
     // Editor state
     private currentTerrain: number = 1; // Default to grass
     private brushSize: number = 0; // Default to single hex
-    private editorCanvas: HTMLElement | null = null;
-    private mapCanvas: HTMLCanvasElement | null = null;
-    private canvasContext: CanvasRenderingContext2D | null = null;
     private editorOutput: HTMLElement | null = null;
-    
-    // Tile dimensions for client-side calculations
-    private tileDimensions: {
-        tileWidth: number;
-        tileHeight: number;
-        yIncrement: number;
-    } | null = null;
-    
-    // Scroll and padding management
-    private scrollOffset: { x: number; y: number } = { x: 150, y: 150 }; // Padding around map for extension
-    private canvasSize : { width: number; height: number } = { width: 400, height: 400 }; // Padding around map for extension
-
-    // WASM interface
-    private wasmModule: any = null;
-    private wasmInitialized: boolean = false;
-    private wasmWorld: any = null;
-    private wasmViewState: any = null;
-    private wasmCanvasRenderer: any = null;
 
     // Dockview interface
     private dockview: DockviewApi | null = null;
@@ -78,12 +57,17 @@ class MapEditorPage {
     // Phaser panel for map editing
     private phaserPanel: PhaserPanel | null = null;
 
+    // Change tracking for unsaved changes
+    private hasUnsavedChanges: boolean = false;
+    private originalMapData: string = '';
+
     constructor() {
         this.initializeComponents();
         this.initializeDockview();
         this.bindEvents();
         this.loadInitialState();
         this.initializeWasm();
+        this.setupUnsavedChangesWarning();
     }
     
     // Calculate canvas size based on actual map bounds from WASM
@@ -356,6 +340,17 @@ class MapEditorPage {
         if (saveButton) {
             saveButton.addEventListener('click', this.saveMap.bind(this));
         }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+S or Cmd+S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (this.hasUnsavedChanges) {
+                    this.saveMap();
+                }
+            }
+        });
 
         const exportButton = document.getElementById('export-map-btn');
         if (exportButton) {
@@ -1107,6 +1102,27 @@ class MapEditorPage {
             this.logToConsole('Saving map...');
             this.updateEditorStatus('Saving...');
 
+            // Collect current map data including tiles from Phaser panel
+            const mapToSave = {
+                ...this.mapData
+            };
+
+            // Get terrain data from Phaser panel if available
+            if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+                const tilesData = this.phaserPanel.getTilesData();
+                mapToSave.tiles = {};
+                
+                tilesData.forEach(tile => {
+                    const key = `${tile.q},${tile.r}`;
+                    mapToSave.tiles[key] = {
+                        tileType: tile.terrain,
+                        playerId: tile.playerId || 0
+                    };
+                });
+                
+                this.logToConsole(`Saving ${tilesData.length} tiles`);
+            }
+
             const url = this.isNewMap ? '/api/maps' : `/api/maps/${this.currentMapId}`;
             const method = this.isNewMap ? 'POST' : 'PUT';
 
@@ -1115,7 +1131,7 @@ class MapEditorPage {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(this.mapData),
+                body: JSON.stringify(mapToSave),
             });
 
             if (response.ok) {
@@ -1124,15 +1140,20 @@ class MapEditorPage {
                 this.updateEditorStatus('Saved');
                 this.toastManager?.showToast('Success', 'Map saved successfully', 'success');
                 
+                // Mark as saved (clears unsaved changes flag)
+                this.markAsSaved();
+                
                 // If this was a new map, update the current map ID
                 if (this.isNewMap && result.id) {
                     this.currentMapId = result.id;
                     this.isNewMap = false;
                     // Update URL without reload
                     history.replaceState(null, '', `/maps/${result.id}/edit`);
+                    this.logToConsole(`Map ID updated to: ${result.id}`);
                 }
             } else {
-                throw new Error(`Save failed: ${response.statusText}`);
+                const errorText = await response.text();
+                throw new Error(`Save failed: ${response.status} ${response.statusText} - ${errorText}`);
             }
         } catch (error) {
             console.error('Save failed:', error);
@@ -1154,6 +1175,8 @@ class MapEditorPage {
             return;
         }
 
+        const oldTitle = this.mapData?.name || 'Untitled Map';
+
         // Update the local map data
         if (this.mapData) {
             this.mapData.name = newTitle;
@@ -1174,9 +1197,12 @@ class MapEditorPage {
             this.toastManager?.showToast('Error', 'Failed to update map title', 'error');
             
             // Revert the title on error
+            if (this.mapData) {
+                this.mapData.name = oldTitle;
+            }
             const mapTitleInput = document.getElementById('map-title-input') as HTMLInputElement;
-            if (mapTitleInput && this.mapData) {
-                mapTitleInput.value = this.mapData.name || 'Untitled Map';
+            if (mapTitleInput) {
+                mapTitleInput.value = oldTitle;
             }
         }
     }
@@ -1415,6 +1441,76 @@ class MapEditorPage {
         return saved ? JSON.parse(saved) : null;
     }
 
+    // Unsaved changes tracking
+    private setupUnsavedChangesWarning(): void {
+        // Store initial map state
+        this.originalMapData = JSON.stringify(this.mapData);
+        
+        // Browser beforeunload warning
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        });
+        
+        // Track changes in map data
+        this.trackMapChanges();
+        
+        // Initialize save button state
+        setTimeout(() => {
+            this.updateSaveButtonState();
+        }, 100);
+    }
+    
+    private trackMapChanges(): void {
+        // Track changes in map title
+        const mapTitleInput = document.getElementById('map-title-input') as HTMLInputElement;
+        if (mapTitleInput) {
+            mapTitleInput.addEventListener('input', () => {
+                this.markAsChanged();
+            });
+        }
+        
+        // Track changes in Phaser panel (terrain painting, etc.)
+        if (this.phaserPanel) {
+            this.phaserPanel.onMapChange(() => {
+                this.markAsChanged();
+            });
+        }
+    }
+    
+    private markAsChanged(): void {
+        if (!this.hasUnsavedChanges) {
+            this.hasUnsavedChanges = true;
+            this.updateSaveButtonState();
+            this.logToConsole('Map has unsaved changes');
+        }
+    }
+    
+    private markAsSaved(): void {
+        this.hasUnsavedChanges = false;
+        this.originalMapData = JSON.stringify(this.mapData);
+        this.updateSaveButtonState();
+        this.logToConsole('Map changes saved');
+    }
+    
+    private updateSaveButtonState(): void {
+        const saveButton = document.getElementById('save-map-btn');
+        if (saveButton) {
+            if (this.hasUnsavedChanges) {
+                saveButton.classList.remove('opacity-50');
+                saveButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                saveButton.removeAttribute('disabled');
+            } else {
+                saveButton.classList.add('opacity-50');
+                saveButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                saveButton.setAttribute('disabled', 'true');
+            }
+        }
+    }
+
     public destroy(): void {
         // Save layout before destroying
         this.saveDockviewLayout();
@@ -1461,6 +1557,7 @@ class MapEditorPage {
             
             this.phaserPanel.onMapChange(() => {
                 this.logToConsole('Phaser map changed');
+                this.markAsChanged();
             });
             
             // Initialize the panel
@@ -1524,33 +1621,6 @@ class MapEditorPage {
     public initializePhaser(): void {
         this.initializePhaserPanel();
     }
-    
-    public testPhaserPattern(): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
-            this.logToConsole('Phaser panel not initialized');
-            return;
-        }
-        
-        try {
-            this.logToConsole('Creating test pattern with Phaser...');
-            
-            // Test various features
-            this.phaserPanel.createTestPattern();
-            this.phaserPanel.paintTile(-5, -5, 1, 0); // Grass at negative coordinates
-            this.phaserPanel.paintTile(5, 5, 2, 1);   // Desert at positive coordinates
-            this.phaserPanel.paintTile(-3, 3, 3, 2);  // Water at mixed coordinates
-            
-            // Test brush painting
-            this.phaserPanel.setBrushSize(1);
-            this.phaserPanel.paintTile(0, 0, 16, 0, 1); // Mountain with small brush
-            
-            this.logToConsole('Test pattern created successfully!');
-            
-        } catch (error) {
-            this.logToConsole(`Failed to create test pattern: ${error}`);
-        }
-    }
-    
 }
 
 // Initialize the editor when DOM is ready

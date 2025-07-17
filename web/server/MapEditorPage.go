@@ -32,6 +32,12 @@ type TerrainType struct {
 	HasPlayerColors bool `json:"hasPlayerColors"`
 }
 
+type UnitType struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	IconDataURL string `json:"iconDataURL"`
+}
+
 type MapEditorPage struct {
 	BasePage
 	Header           Header
@@ -43,6 +49,7 @@ type MapEditorPage struct {
 	AllowCustomId    bool
 	NatureTerrains   []TerrainType
 	CityTerrains     []TerrainType
+	UnitTypes        []UnitType
 	PlayerCount      int
 }
 
@@ -114,6 +121,32 @@ func (v *MapEditorPage) SetupDefaults() {
 			}
 		}
 	}
+	
+	// Load unit types with icons
+	v.UnitTypes = []UnitType{}
+	unitIDs := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29}
+	
+	for _, unitID := range unitIDs {
+		unitData := weewar.GetUnitData(unitID)
+		if unitData != nil {
+			// Try to load the unit icon (default color 0)
+			var iconDataURL string
+			if assetManager.HasUnitAsset(unitID) {
+				if img, err := assetManager.GetUnitImage(unitID, 0); err == nil {
+					if dataURL, err := imageToDataURL(img); err == nil {
+						iconDataURL = dataURL
+					}
+				}
+			}
+			
+			v.UnitTypes = append(v.UnitTypes, UnitType{
+				ID:          unitData.ID,
+				Name:        unitData.Name,
+				IconDataURL: iconDataURL,
+			})
+		}
+	}
+	
 	v.Header.Styles = map[string]any{
 		"FixedHeightHeader":          true,
 		"HeaderHeightIfFixed":        "70px",

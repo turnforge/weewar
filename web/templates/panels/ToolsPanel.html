@@ -76,6 +76,47 @@
             </div>
         </div>
 
+        <!-- Units -->
+        <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🪖 Units</h3>
+            <div class="space-y-3">
+                <!-- Player Color Selection for Units -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Unit Player:</label>
+                    <select id="unit-player-color" 
+                            class="block w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <option value="1">Player 1 (Red)</option>
+                        <option value="2">Player 2 (Blue)</option>
+                        <option value="3">Player 3 (Green)</option>
+                        <option value="4">Player 4 (Yellow)</option>
+                        {{ if gt .PlayerCount 4 }}
+                        <option value="5">Player 5 (Orange)</option>
+                        <option value="6">Player 6 (Purple)</option>
+                        <option value="7">Player 7 (Pink)</option>
+                        <option value="8">Player 8 (Cyan)</option>
+                        {{ end }}
+                    </select>
+                </div>
+                
+                <!-- Unit Palette -->
+                <div id="unit-palette" class="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                    {{ range .UnitTypes }}
+                    <button class="unit-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
+                            data-unit="{{ .ID }}" title="{{ .Name }}">
+                        {{ if .IconDataURL }}
+                            <div class="flex justify-center mb-1">
+                                <img src="{{ .IconDataURL }}" alt="{{ .Name }}" class="w-6 h-6 object-contain">
+                            </div>
+                        {{ else }}
+                            <div class="text-sm">🪖</div>
+                        {{ end }}
+                        <div class="text-xs truncate">{{ .Name }}</div>
+                    </button>
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+
         <!-- Brush Settings -->
         <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
             <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🖌️ Brush Settings</h3>

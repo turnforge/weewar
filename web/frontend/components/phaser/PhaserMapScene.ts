@@ -6,6 +6,7 @@ export class PhaserMapScene extends Phaser.Scene {
     private yIncrement: number = 48; // 3/4 * tileHeight for pointy-topped hexes
     
     private tiles: Map<string, Phaser.GameObjects.Sprite> = new Map();
+    private units: Map<string, Phaser.GameObjects.Sprite> = new Map();
     private gridGraphics: Phaser.GameObjects.Graphics | null = null;
     private coordinateTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     
@@ -97,15 +98,20 @@ export class PhaserMapScene extends Phaser.Scene {
     }
     
     private loadUnitAssets() {
-        // Load some basic unit assets for testing
-        const unitTypes = [1, 2, 3, 4, 5]; // First 5 unit types
+        // Load all available unit assets with player colors
+        const unitTypes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29];
         
         unitTypes.forEach(type => {
             for (let color = 0; color <= 12; color++) {
                 const assetPath = `/static/assets/v1/Units/${type}/${color}.png`;
                 this.load.image(`unit_${type}_${color}`, assetPath);
+                if (color === 0) {
+                    this.load.image(`unit_${type}`, assetPath); // Default alias
+                }
             }
         });
+        
+        console.log(`[PhaserMapScene] Loading unit assets: ${unitTypes.join(', ')} (with colors)`);
     }
     
     private setupCameraControls() {
@@ -324,6 +330,55 @@ export class PhaserMapScene extends Phaser.Scene {
         
         this.coordinateTexts.forEach(text => text.destroy());
         this.coordinateTexts.clear();
+    }
+    
+    // Unit management methods
+    public setUnit(q: number, r: number, unitType: number, color: number = 1) {
+        const key = `${q},${r}`;
+        const position = this.hexToPixel(q, r);
+        
+        // Remove existing unit if it exists
+        if (this.units.has(key)) {
+            this.units.get(key)?.destroy();
+        }
+        
+        // Create new unit sprite
+        const textureKey = `unit_${unitType}_${color}`;
+        
+        if (this.textures.exists(textureKey)) {
+            const unitSprite = this.add.sprite(position.x, position.y, textureKey);
+            unitSprite.setOrigin(0.5, 0.5);
+            unitSprite.setDepth(10); // Units render above tiles
+            this.units.set(key, unitSprite);
+        } else {
+            console.warn(`[PhaserMapScene] Unit texture not found: ${textureKey}`);
+            
+            // Try fallback to basic unit texture without color
+            const fallbackKey = `unit_${unitType}`;
+            if (this.textures.exists(fallbackKey)) {
+                console.log(`[PhaserMapScene] Using fallback unit texture: ${fallbackKey}`);
+                const unitSprite = this.add.sprite(position.x, position.y, fallbackKey);
+                unitSprite.setOrigin(0.5, 0.5);
+                unitSprite.setDepth(10);
+                this.units.set(key, unitSprite);
+            } else {
+                console.error(`[PhaserMapScene] Fallback unit texture also not found: ${fallbackKey}`);
+            }
+        }
+    }
+    
+    public removeUnit(q: number, r: number) {
+        const key = `${q},${r}`;
+        
+        if (this.units.has(key)) {
+            this.units.get(key)?.destroy();
+            this.units.delete(key);
+        }
+    }
+    
+    public clearAllUnits() {
+        this.units.forEach(unit => unit.destroy());
+        this.units.clear();
     }
     
     public setShowGrid(show: boolean) {

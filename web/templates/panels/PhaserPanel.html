@@ -1,17 +1,59 @@
 <!-- Map Editor Phaser Panel -->
 <div id="phaser-panel" class="h-full flex flex-col">
-    <!-- Phaser Editor Container -->
+    <!-- Phaser Toolbar (Fixed North) -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 p-2 flex-shrink-0">
+        <div class="flex items-center justify-between space-x-4">
+            <!-- Left side controls -->
+            <div class="flex items-center space-x-4">
+                <!-- Brush Size -->
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Brush:</label>
+                    <select
+                        id="brush-size"
+                        class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    >
+                        <option value="0">Single (1)</option>
+                        <option value="1">Small (3)</option>
+                        <option value="3">Medium (5)</option>
+                        <option value="5">Large (9)</option>
+                        <option value="10">X-Large (15)</option>
+                        <option value="15">XX-Large (21)</option>
+                    </select>
+                </div>
+
+                <!-- View Options -->
+                <div class="flex items-center space-x-3">
+                    <label class="flex items-center space-x-1">
+                        <input type="checkbox" id="show-grid" class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400">
+                        <span class="text-xs text-gray-700 dark:text-gray-300">Grid</span>
+                    </label>
+                    <label class="flex items-center space-x-1">
+                        <input type="checkbox" id="show-coordinates" class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400">
+                        <span class="text-xs text-gray-700 dark:text-gray-300">Coords</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Right side info -->
+            <div class="flex items-center space-x-2">
+                <div
+                    id="brush-info"
+                    class="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded"
+                >
+                    Current: Grass, Single brush (1 hex)
+                </div>
+                <div class="text-xs bg-blue-500 text-white px-2 py-1 rounded">
+                    🎮 Phaser Editor
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phaser Canvas Container (Center - takes remaining space) -->
     <div class="flex-1 bg-gray-100 dark:bg-gray-900 p-2 min-h-0 relative">
         <!-- Phaser Game Container -->
         <div id="editor-canvas-container" class="w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-300 dark:border-gray-600 overflow-hidden">
             <!-- Phaser.js will render here -->
-        </div>
-        
-        <!-- Status indicator -->
-        <div class="absolute top-4 right-4 z-10">
-            <div class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">
-                🎮 Phaser Editor
-            </div>
         </div>
     </div>
 </div>

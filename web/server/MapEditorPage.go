@@ -10,6 +10,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"sort"
 
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
@@ -120,6 +121,14 @@ func (v *MapEditorPage) SetupDefaults() {
 			}
 		}
 	}
+	
+	// Sort terrain lists by ID
+	sort.Slice(v.CityTerrains, func(i, j int) bool {
+		return v.CityTerrains[i].ID < v.CityTerrains[j].ID
+	})
+	sort.Slice(v.NatureTerrains, func(i, j int) bool {
+		return v.NatureTerrains[i].ID < v.NatureTerrains[j].ID
+	})
 	
 	// Load unit types with icons
 	v.UnitTypes = []UnitType{}

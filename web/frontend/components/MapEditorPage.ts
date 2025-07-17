@@ -976,7 +976,7 @@ class MapEditorPage {
         const x = mx - this.scrollOffset.x;
         const y = my - this.scrollOffset.y;
 
-        console.log("Doing pixelToHex, x, y: ", x, y, this.mapData)
+        // console.log("Doing pixelToHex, x, y: ", x, y, this.mapData)
         
         // Use WASM coordinate conversion for maximum accuracy
         if (this.wasmInitialized && (window as any).editorPixelToCoords) {

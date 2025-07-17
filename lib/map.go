@@ -251,7 +251,7 @@ func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) (coord Cub
 		// col := int((x + tileWidth/2) / tileWidth)
 		coord = m.RowColToHex(row, col)
 		// fmt.Println("X,Y: ", x, y)
-		fmt.Println("Row, Col: ", row, col)
+		// fmt.Println("Row, Col: ", row, col)
 	}
 	// fmt.Println("Final Coord: ", coord)
 	// fmt.Println("======")

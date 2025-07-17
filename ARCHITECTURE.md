@@ -1,15 +1,15 @@
 # WeeWar Architecture Overview
 
-## Current Architecture (Post-Refactoring v3.0)
+## Current Architecture (Phaser-First v4.0)
 
-### Recent Major Updates
-- **LayeredRenderer Enhancement**: Added GridLayer for hex grid visualization
-- **WASM Editor Integration**: Global editor/world architecture with client-side optimizations
-- **Visual Controls**: Added grid and coordinate display toggles
-- **Client-side Performance**: Tile dimension caching and scroll management
-- **Consolidated WASM API**: Created editorGetMapBounds function returning both tile dimensions and map bounds
-- **Default Map Size**: Set startup map size to 5x5 instead of 1x1 for better user experience
-- **Enhanced Coordinate Conversion**: Improved client-side XYToQR implementation
+### Major Architectural Transformation (January 2025)
+- **Phaser.js Editor Integration**: Complete migration from canvas-based to Phaser.js-based map editor
+- **Clean Component Architecture**: Introduced PhaserPanel class for separation of concerns
+- **Improved Coordinate System**: Fixed coordinate conversion to match Go backend implementation exactly
+- **Dynamic Grid System**: Infinite grid that updates based on camera viewport
+- **Professional UX**: Intuitive mouse interaction with paint modes and drag behavior
+- **Legacy System Removal**: Completely eliminated old canvas system and related complexity
+- **UI Reorganization**: Moved view controls to logical locations with Phaser editor tools
 
 ### Core Components
 
@@ -457,24 +457,95 @@ type Layer interface {
 
 ### Future Extensions
 
+#### Web Frontend Architecture (v4.0 - Phaser-First)
+
+#### Frontend Component Structure
+```
+MapEditorPage.ts (Main Controller)
+├── PhaserPanel.ts (Editor Logic)
+│   ├── PhaserMapEditor.ts (Phaser Game Management)
+│   └── PhaserMapScene.ts (Scene Logic & Rendering)
+├── ToolsPanel (Terrain & Brush Controls)
+├── AdvancedToolsPanel (Phaser Controls & View Options)
+└── ConsolePanel (Logging & Debug)
+```
+
+#### Phaser.js Integration
+- **PhaserMapEditor**: High-level API for tile management and event handling
+- **PhaserMapScene**: Core Phaser scene with WebGL rendering and input handling
+- **Coordinate Accuracy**: Matches Go backend implementation (`lib/map.go`) exactly
+- **Dynamic Grid**: Infinite grid system that renders only visible hexes
+- **Interactive Controls**: Mouse wheel zoom, drag pan, modifier key painting
+
+#### Mouse Interaction System
+```javascript
+// Normal Click: Paint tile on mouse up (no accidental painting)
+click → release → paint tile
+
+// Drag without modifiers: Pan camera view
+mousedown → drag → pan camera
+
+// Paint Mode: Hold Alt/Cmd/Ctrl + drag to paint continuously
+Alt/Cmd + mousedown → immediate paint → drag → continuous painting
+```
+
+#### Component Communication
+```
+UI Controls → MapEditorPage → PhaserPanel → PhaserMapEditor → PhaserMapScene
+                ↓                                            ↓
+            Logging & State                              Phaser Rendering
+```
+
+#### Key Frontend Features
+- **Professional UX**: No accidental tile painting during camera movement
+- **Efficient Rendering**: Only renders visible grid hexes based on camera bounds
+- **Clean Architecture**: Each component has single responsibility
+- **Type Safety**: Full TypeScript integration with proper type definitions
+- **Event-Driven**: Clean callback system for tile clicks and map changes
+
+### Coordinate System Accuracy
+
+#### Fixed Implementation (v4.0)
+The coordinate conversion now exactly matches the Go backend:
+- **Backend**: `lib/map.go` CenterXYForTile() and XYToQR() functions
+- **Frontend**: PhaserMapScene with matching tileWidth=64, tileHeight=64, yIncrement=48
+- **Conversion**: Uses row/col intermediate step with odd-row offset layout
+- **Accuracy**: Pixel-perfect coordinate matching between frontend and backend
+
+#### Benefits of Accurate Coordinates
+- **No Coordinate Drift**: Frontend and backend always agree on tile positions
+- **Precise Interaction**: Click coordinates map exactly to intended hexes  
+- **Seamless Integration**: Easy integration with WASM and backend APIs
+- **Mathematical Correctness**: Proper hex geometry throughout the system
+
+### Future Extensions
+
 #### Planned Features
-1. **Advanced Editor**: Multi-tile selection, copy/paste, templates
-2. **Network Play**: World synchronization, observer pattern integration  
-3. **Mobile Support**: Touch-friendly controls via Drawable abstraction
-4. **Performance**: WebGL renderer as new Drawable implementation
+1. **Advanced Editor**: Multi-tile selection, copy/paste, templates via Phaser
+2. **Network Play**: Real-time multiplayer with WebSocket integration
+3. **Mobile Support**: Touch-friendly controls via Phaser input system
+4. **Performance**: Further Phaser optimizations (sprite batching, culling)
 5. **AI Integration**: Clean World state for AI decision making
+6. **Advanced UI**: Animation systems, visual effects, improved UX
 
 #### Architecture Benefits for Extensions
-- Clean World state enables AI development
-- Observer pattern supports real-time multiplayer
-- Drawable interface allows new rendering backends
-- Cube coordinates enable advanced spatial algorithms
-- LayeredRenderer supports new UI elements
+- **Phaser.js Foundation**: Professional game engine enables advanced features
+- **Clean Component Structure**: Easy to extend with new panels and tools
+- **Accurate Coordinates**: Reliable foundation for complex spatial features
+- **Event-Driven Design**: Simple to add new interactions and behaviors
+- **TypeScript Safety**: Prevents runtime errors and improves development experience
+
+#### Web Technology Stack
+- **Phaser.js 3.x**: WebGL-accelerated rendering engine
+- **TypeScript**: Type-safe frontend development
+- **Tailwind CSS**: Utility-first styling system
+- **DockView**: Professional panel management system
+- **Webpack**: Module bundling and hot reload development
 
 ---
 
-**Last Updated**: 2025-01-16  
-**Architecture Version**: 3.0 (WASM Refactoring Complete + Enhanced API)  
-**Status**: Core architecture complete, WASM refactoring complete with major boilerplate reduction and enhanced API consolidation
+**Last Updated**: 2025-01-17  
+**Architecture Version**: 4.0 (Phaser-First Frontend)  
+**Status**: Production-ready Phaser.js editor with accurate coordinate system
 
-**Key Achievement**: Reduced WASM codebase from ~1300 lines to clean, maintainable architecture with generic wrapper infrastructure and immediate initialization pattern.
+**Key Achievement**: Complete migration to modern web technologies with professional UX and pixel-perfect coordinate accuracy matching the Go backend implementation.

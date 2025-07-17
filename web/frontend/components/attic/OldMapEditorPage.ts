@@ -2,7 +2,6 @@ import { ThemeManager } from './ThemeManager';
 import { Modal } from './Modal';
 import { ToastManager } from './ToastManager';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
-import { PhaserPanel } from './PhaserPanel';
 
 class MapBounds {
   MinQ: number;
@@ -74,9 +73,6 @@ class MapEditorPage {
 
     // Dockview interface
     private dockview: DockviewApi | null = null;
-    
-    // Phaser panel for map editing
-    private phaserPanel: PhaserPanel | null = null;
 
     constructor() {
         this.initializeComponents();
@@ -258,9 +254,14 @@ class MapEditorPage {
         this.themeToggleButton = document.getElementById('theme-toggle-button') as HTMLButtonElement;
         this.themeToggleIcon = document.getElementById('theme-toggle-icon');
         this.editorCanvas = document.getElementById('editor-canvas-container');
+        this.mapCanvas = document.getElementById('map-canvas') as HTMLCanvasElement;
         this.editorOutput = document.getElementById('editor-output');
         
-        // Note: Canvas context now handled by Phaser panel
+        // Initialize canvas context
+        if (this.mapCanvas) {
+            this.canvasContext = this.mapCanvas.getContext('2d');
+            this.initializeCanvas();
+        }
 
         if (!this.themeToggleButton || !this.themeToggleIcon) {
             console.warn("Theme toggle button or icon element not found in Header.");
@@ -301,8 +302,8 @@ class MapEditorPage {
                 switch (options.name) {
                     case 'tools':
                         return this.createToolsComponent();
-                    case 'phaser':
-                        return this.createPhaserComponent();
+                    case 'canvas':
+                        return this.createCanvasComponent();
                     case 'console':
                         return this.createConsoleComponent();
                     case 'advancedTools':
@@ -466,16 +467,12 @@ class MapEditorPage {
         document.querySelector('[data-action="download-game-data"]')?.addEventListener('click', () => {
             this.downloadGameData();
         });
-        
-        // Phaser test buttons
-        document.querySelector('[data-action="init-phaser"]')?.addEventListener('click', () => {
-            this.initializePhaser();
-        });
-        document.querySelector('[data-action="test-phaser-pattern"]')?.addEventListener('click', () => {
-            this.testPhaserPattern();
-        });
 
-        // Note: Canvas interactions now handled by Phaser panel
+        // Canvas interactions
+        if (this.mapCanvas) {
+            this.mapCanvas.addEventListener('click', this.handleCanvasClick.bind(this));
+            this.mapCanvas.addEventListener('mousemove', this.handleCanvasMouseMove.bind(this));
+        }
     }
 
     private loadInitialState(): void {
@@ -492,11 +489,6 @@ class MapEditorPage {
             this.logToConsole('Error: No map ID provided');
             this.updateEditorStatus('Error');
         }
-        
-        // Initialize Phaser panel as the default editor
-        setTimeout(() => {
-            this.initializePhaserPanel();
-        }, 1000);
     }
 
     private async initializeWasm(): Promise<void> {
@@ -673,13 +665,6 @@ class MapEditorPage {
     }
     
     public setShowGrid(showGrid: boolean): void {
-        // Control Phaser panel if available
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            this.phaserPanel.setShowGrid(showGrid);
-            return;
-        }
-        
-        // Fallback to WASM if Phaser not available
         if (this.wasmInitialized) {
             try {
                 const result = (window as any).editorSetShowGrid(showGrid);
@@ -696,13 +681,6 @@ class MapEditorPage {
     }
     
     public setShowCoordinates(showCoordinates: boolean): void {
-        // Control Phaser panel if available
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            this.phaserPanel.setShowCoordinates(showCoordinates);
-            return;
-        }
-        
-        // Fallback to WASM if Phaser not available
         if (this.wasmInitialized) {
             try {
                 const result = (window as any).editorSetShowCoordinates(showCoordinates);
@@ -868,7 +846,13 @@ class MapEditorPage {
         this.mapBounds = bounds
     }
 
-    // Canvas management methods removed - now handled by Phaser panel
+    // Canvas management methods
+    private initializeCanvas(): void {
+        if (!this.mapCanvas) return;
+        
+        // Canvas is now bound to WASM editor and will be rendered automatically
+        this.logToConsole('Canvas initialized');
+    }
 
     // resizeCanvas updates the canvas size in the DOM to match WASM-calculated dimensions
     private resizeCanvas(width: number, height: number): void {
@@ -912,7 +896,166 @@ class MapEditorPage {
 
     // renderMapCanvas() method removed - WASM now pushes updates directly to canvas
 
-    // Old canvas interaction methods removed - now handled by Phaser panel
+    private handleCanvasClick(event: MouseEvent): void {
+        if (!this.mapCanvas || !this.mapData) return;
+
+        const rect = this.mapCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const coords = this.pixelToHex(x, y);
+        if (coords) {
+            // Paint at clicked coordinates (works both within and outside current map bounds)
+            this.paintHexAtCoords(coords);
+        }
+    }
+
+    private handleCanvasMouseMove(event: MouseEvent): void {
+        if (!this.mapCanvas) return;
+
+        const rect = this.mapCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // console.log(`Event XY: (${event.clientX}, ${event.clientY}), Rect XY: (${rect.left}, ${rect.top}), localXY: (${x}, ${y})`)
+        
+        // Use client-side coordinate conversion for performance
+        const coords = this.clientPixelToCoords(x, y);
+        
+        // Update coordinate inputs with cube coordinates
+        const rowInput = document.getElementById('paint-row') as HTMLInputElement;
+        const colInput = document.getElementById('paint-col') as HTMLInputElement;
+        
+        if (rowInput) rowInput.value = coords.r.toString();
+        if (colInput) colInput.value = coords.q.toString();
+        
+        // Show if cursor is outside map bounds (for potential extension)
+        if (!coords.withinBounds) {
+            // Visual feedback for extension area
+            this.mapCanvas.style.cursor = 'pointer';
+        } else {
+            this.mapCanvas.style.cursor = 'default';
+        }
+    }
+
+    private hexToPixel(q: number, r: number): {x: number, y: number} | null {
+        if (!this.mapCanvas || !this.mapData) return null;
+
+          const result = (window as any).editorHexToPixel(q, r);
+          if (result && result.success && result.data) {
+              const { x, y } = result.data;
+              this.logToConsole(`HexCoord (${q}, ${r}) -> XY (${x}, ${y}))`);
+              return result.data
+          }
+          return null
+    }
+
+    private pixelToHex(mx: number, my: number): {row: number, col: number, cubeQ: number, cubeR: number} | null {
+        if (!this.mapCanvas || !this.mapData) return null;
+
+        const x = mx - this.scrollOffset.x;
+        const y = my - this.scrollOffset.y;
+
+        console.log("Doing pixelToHex, x, y: ", x, y, this.mapData);
+        console.log("Mouse X/Y: ", mx, my);
+        
+        // Use WASM coordinate conversion for maximum accuracy
+        if (this.wasmInitialized && (window as any).editorPixelToCoords) {
+            try {
+                const result = (window as any).editorPixelToCoords(x, y);
+                if (result && result.success && result.data) {
+                    const { row, col, cubeQ, cubeR, withinBounds } = result.data;
+                    const rev = this.hexToPixel(cubeQ, cubeR)!
+                    this.logToConsole(`Pixel (${x}, ${y}) -> RowCal (${row}, ${col}) = QR(${cubeQ}, ${cubeR}) [WASM conversion, within bounds], Reverse: ${rev.x}, ${rev.y}`);
+                    return result.data
+                }
+            } catch (error) {
+                console.warn('WASM coordinate conversion failed, falling back to browser calculation:', error);
+            }
+        }
+        
+        // Fallback to browser-side calculation using proper coordinate conversion
+        if (!this.tileDimensions) {
+            this.logToConsole('Tile dimensions not available for fallback coordinate conversion');
+            return null;
+        }
+        
+        try {
+            // Use our proper coordinate conversion methods
+            const cubeCoord = this.xyToQR(x, y);
+            
+            // Convert cube coordinates to row/col for backward compatibility
+            // Note: This assumes a simple mapping where row=r and col=q
+            const row = cubeCoord.r;
+            const col = cubeCoord.q;
+            
+            // Check if within map bounds for UI purposes
+            const withinBounds = this.mapData ? 
+                (row >= 0 && row < this.mapData.height && col >= 0 && col < this.mapData.width) : false;
+            
+            if (withinBounds) {
+                this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) Q=${cubeCoord.q} R=${cubeCoord.r} [Browser fallback with proper hex math]`);
+                return { row, col, cubeQ: cubeCoord.q, cubeR: cubeCoord.r };
+            }
+            
+            this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) Q=${cubeCoord.q} R=${cubeCoord.r} [Browser fallback with proper hex math]`);
+            return null;
+        } catch (error) {
+            this.logToConsole(`Coordinate conversion failed: ${error}`);
+            return null;
+        }
+    }
+
+    private paintHexAtCoords(coord: {row: number, col: number, cubeQ: number, cubeR: number}): void {
+        try {
+            // Get current terrain type from selected terrain button
+            const selectedTerrainButton = document.querySelector('.terrain-button.bg-blue-100') as HTMLElement;
+            const terrainType = selectedTerrainButton ? 
+                parseInt(selectedTerrainButton.getAttribute('data-terrain') || '1') : 1;
+            
+            // Get current brush size from dropdown
+            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+            const brushSize = brushSizeSelect ? parseInt(brushSizeSelect.value) : 0;
+            
+            // Use stateless WASM editor function
+            const result = (window as any).editorSetTilesAt(coord.cubeQ, coord.cubeR, terrainType, brushSize);
+            
+            if (result.success) {
+                // Update local map data to stay in sync (only the center hex for simplicity)
+                // result.data is a list of coords on which the given terrain type was set
+                const mapData = this.mapData
+                if (mapData) {
+                    result.data.coords.forEach((coord: {q: number, r: number}) => {
+                      const key = `${coord.q},${coord.r}`;
+                      if (terrainType <= 0) {
+                        delete mapData.tiles[key]
+                      } else {
+                        mapData.tiles[key] = { tileType: terrainType };
+                      }
+                    })
+                }
+
+                this.setMapBounds(result.data.newBounds)
+
+                // Now see if bounds have changed
+                const newWidth = Math.max(this.scrollOffset.x * 2 + (result.data.newBounds.MaxX - result.data.newBounds.MinX), 400)
+                const newHeight = Math.max(this.scrollOffset.y * 2 + (result.data.newBounds.MaxY - result.data.newBounds.MinY), 300)
+
+                if (this.canvasSize.width != newWidth || this.canvasSize.height != newWidth) {
+                  this.resizeCanvas(newWidth, newHeight)
+                }
+                
+                // Log the paint action with brush info
+                const sizeNames = ['Single', 'Small', 'Medium', 'Large', 'X-Large', 'XX-Large'];
+                const sizeName = sizeNames[brushSize] || 'Unknown';
+                // this.logToConsole(`Set terrain ${terrainType} at (Q=${col}, R=${row}) with ${sizeName} brush (radius=${brushSize})`);
+            } else {
+                this.logToConsole(`Set terrain failed: ${result.error}`);
+            }
+        } catch (error) {
+            this.logToConsole(`Paint error: ${error}`);
+        }
+    }
 
     private async saveMap(): Promise<void> {
         if (!this.mapData) {
@@ -1071,10 +1214,10 @@ class MapEditorPage {
         };
     }
 
-    private createPhaserComponent() {
+    private createCanvasComponent() {
         const template = document.getElementById('canvas-panel-template');
         if (!template) {
-            console.error('Phaser panel template not found');
+            console.error('Canvas panel template not found');
             return { element: document.createElement('div'), init: () => {}, dispose: () => {} };
         }
         
@@ -1086,21 +1229,24 @@ class MapEditorPage {
         return {
             element: container,
             init: () => {
-                // Update the canvas container reference for Phaser
-                const canvasContainer = container.querySelector('#editor-canvas-container');
-                if (canvasContainer) {
-                    this.editorCanvas = canvasContainer as HTMLElement;
-                }
-                
-                // Find the hidden canvas element for fallback
+                // Find the canvas element within this cloned template and update references
                 const canvasElement = container.querySelector('#map-canvas') as HTMLCanvasElement;
                 if (canvasElement) {
                     this.mapCanvas = canvasElement;
                     this.canvasContext = canvasElement.getContext('2d');
                 }
                 
-                // Phaser will handle its own initialization
-                this.logToConsole('Phaser panel ready for initialization');
+                // Update the canvas container reference
+                const canvasContainer = container.querySelector('#editor-canvas-container');
+                if (canvasContainer) {
+                    this.editorCanvas = canvasContainer as HTMLElement;
+                }
+                
+                // Rebind canvas events
+                if (this.mapCanvas) {
+                    this.mapCanvas.addEventListener('click', this.handleCanvasClick.bind(this));
+                    this.mapCanvas.addEventListener('mousemove', this.handleCanvasMouseMove.bind(this));
+                }
             },
             dispose: () => {}
         };
@@ -1155,35 +1301,35 @@ class MapEditorPage {
     private createDefaultDockviewLayout(): void {
         if (!this.dockview) return;
 
-        // Add Phaser panel first (center)
+        // Add canvas panel first (center)
         this.dockview.addPanel({
-            id: 'phaser',
-            component: 'phaser',
-            title: '🎮 Phaser Editor'
+            id: 'canvas',
+            component: 'canvas',
+            title: '🗺️ Map Canvas'
         });
 
-        // Add tools panel to the left of Phaser
+        // Add tools panel to the left of canvas
         this.dockview.addPanel({
             id: 'tools',
             component: 'tools',
             title: '🎨 Tools & Terrain',
-            position: { direction: 'left', referencePanel: 'phaser' }
+            position: { direction: 'left', referencePanel: 'canvas' }
         });
 
-        // Add advanced tools panel to the right of Phaser
+        // Add advanced tools panel to the right of canvas
         this.dockview.addPanel({
             id: 'advancedTools',
             component: 'advancedTools',
-            title: '🔧 Advanced & View',
-            position: { direction: 'right', referencePanel: 'phaser' }
+            title: '🔧 Advanced Tools',
+            position: { direction: 'right', referencePanel: 'canvas' }
         });
 
-        // Add console panel below Phaser
+        // Add console panel below canvas
         this.dockview.addPanel({
             id: 'console',
             component: 'console',
             title: '💻 Console',
-            position: { direction: 'below', referencePanel: 'phaser' }
+            position: { direction: 'below', referencePanel: 'canvas' }
         });
     }
 
@@ -1207,130 +1353,7 @@ class MapEditorPage {
         if (this.dockview) {
             this.dockview.dispose();
         }
-        
-        // Destroy Phaser panel if it exists
-        if (this.phaserPanel) {
-            this.phaserPanel.destroy();
-        }
     }
-    
-    // Phaser panel methods
-    private initializePhaserPanel(): void {
-        try {
-            this.logToConsole('Initializing Phaser panel as default editor...');
-            
-            // Hide the existing canvas
-            if (this.mapCanvas) {
-                this.mapCanvas.style.display = 'none';
-            }
-            
-            // Create container for Phaser
-            const canvasContainer = document.getElementById('editor-canvas-container');
-            if (!canvasContainer) {
-                throw new Error('Canvas container not found');
-            }
-            
-            // Initialize Phaser panel
-            this.phaserPanel = new PhaserPanel();
-            
-            // Set up logging callback
-            this.phaserPanel.onLog((message) => {
-                this.logToConsole(message);
-            });
-            
-            // Set up event handlers
-            this.phaserPanel.onTileClick((q, r) => {
-                this.handlePhaserTileClick(q, r);
-            });
-            
-            this.phaserPanel.onMapChange(() => {
-                this.logToConsole('Phaser map changed');
-            });
-            
-            // Initialize the panel
-            const success = this.phaserPanel.initialize('editor-canvas-container');
-            
-            if (success) {
-                // Apply current UI settings to Phaser
-                const showGridCheckbox = document.getElementById('show-grid') as HTMLInputElement;
-                const showCoordinatesCheckbox = document.getElementById('show-coordinates') as HTMLInputElement;
-                
-                if (showGridCheckbox) {
-                    this.phaserPanel.setShowGrid(showGridCheckbox.checked);
-                }
-                if (showCoordinatesCheckbox) {
-                    this.phaserPanel.setShowCoordinates(showCoordinatesCheckbox.checked);
-                }
-                
-                this.updateEditorStatus('Phaser Ready');
-                this.logToConsole('Phaser panel initialized successfully as default!');
-            } else {
-                throw new Error('Failed to initialize Phaser panel');
-            }
-            
-        } catch (error) {
-            this.logToConsole(`Failed to initialize Phaser panel: ${error}`);
-            this.updateEditorStatus('Phaser Error');
-        }
-    }
-    
-    private handlePhaserTileClick(q: number, r: number): void {
-        try {
-            // Get current terrain type from selected terrain button
-            const selectedTerrainButton = document.querySelector('.terrain-button.bg-blue-100') as HTMLElement;
-            const terrainType = selectedTerrainButton ? 
-                parseInt(selectedTerrainButton.getAttribute('data-terrain') || '1') : 1;
-            
-            // Get current brush size from dropdown
-            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-            const brushSize = brushSizeSelect ? parseInt(brushSizeSelect.value) : 0;
-            
-            // Paint with current settings
-            this.phaserPanel?.paintTile(q, r, terrainType, 0, brushSize);
-            
-            // Update coordinate inputs
-            const rowInput = document.getElementById('paint-row') as HTMLInputElement;
-            const colInput = document.getElementById('paint-col') as HTMLInputElement;
-            
-            if (rowInput) rowInput.value = r.toString();
-            if (colInput) colInput.value = q.toString();
-            
-        } catch (error) {
-            this.logToConsole(`Phaser paint error: ${error}`);
-        }
-    }
-    
-    // Public methods for Phaser panel (for backward compatibility with UI)
-    public initializePhaser(): void {
-        this.initializePhaserPanel();
-    }
-    
-    public testPhaserPattern(): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
-            this.logToConsole('Phaser panel not initialized');
-            return;
-        }
-        
-        try {
-            this.logToConsole('Creating test pattern with Phaser...');
-            
-            // Test various features
-            this.phaserPanel.createTestPattern();
-            this.phaserPanel.paintTile(-5, -5, 1, 0); // Grass at negative coordinates
-            this.phaserPanel.paintTile(5, 5, 2, 1);   // Desert at positive coordinates
-            this.phaserPanel.paintTile(-3, 3, 3, 2);  // Water at mixed coordinates
-            
-            // Test brush painting
-            this.phaserPanel.setBrushSize(1);
-            this.phaserPanel.paintTile(0, 0, 16, 0, 1); // Mountain with small brush
-            
-            this.logToConsole('Test pattern created successfully!');
-            
-        } catch (error) {
-            this.logToConsole(`Failed to create test pattern: ${error}`);
-        }
-    }
-    
 }
 
 // Initialize the editor when DOM is ready

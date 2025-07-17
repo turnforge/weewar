@@ -240,7 +240,7 @@ func (m *Map) CenterXYForTile(coord AxialCoord, tileWidth, tileHeight, yIncremen
 		// fmt.Printf("HexToRow, QR: %s, RowCol: (%d, %d)\n", coord, row, col)
 		y = yIncrement * float64(row)  // + (tileHeight / 2)
 		x = tileWidth * (float64(col)) //  + 0.5)
-		if row%2 == 1 {
+		if (row & 1) == 1 {
 			x += tileWidth / 2
 		}
 
@@ -287,7 +287,7 @@ func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) (coord Axi
 		row := int((y + tileHeight/2) / yIncrement)
 
 		halfDists := int(1 + math.Abs(x*2/tileWidth))
-		if row%2 != 0 {
+		if (row & 1) != 0 {
 			halfDists = int(1 + math.Abs((x-tileWidth/2)*2/tileWidth))
 		}
 		// log.Println("Half Dists: ", halfDists)
@@ -405,7 +405,7 @@ func (m *Map) GetMapBounds(tileWidth, tileHeight, yIncrement float64) MapBounds 
 			}
 			startingCoord = minXCoord
 			for i := minXRow; i >= minYRow; i-- {
-				if i%2 == 0 {
+				if (i & 1) == 0 {
 					// Always take the "Right" path first so we are guaranteed
 					// to always be on a tile whose X Coordinate is >= minX
 					startingCoord = startingCoord.Neighbor(TOP_RIGHT)
@@ -416,7 +416,7 @@ func (m *Map) GetMapBounds(tileWidth, tileHeight, yIncrement float64) MapBounds 
 		}
 
 		// If distance was odd then we would have a half tile width shift to the right
-		if (minXRow-minYRow)%2 == 0 {
+		if ((minXRow - minYRow) & 1) == 0 {
 			startingX += tileWidth / 2.0
 		}
 		// startingX, _ = m.CenterXYForTile(startingCoord, tileWidth, tileHeight, yIncrement)

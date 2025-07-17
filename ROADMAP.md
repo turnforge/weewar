@@ -86,64 +86,52 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - Enhanced client-side coordinate conversion with proper XYToQR implementation
 - Ready for WASM build and backend API integration
 
-## ✅ Phase 4: Coordinate System Migration (Completed)
-**Status**: 95% Complete  
+## ✅ Phase 4: Phaser.js Map Editor (Completed January 2025)
+**Status**: Completed  
 **Timeline**: January 2025
 
-### Core System Refactoring ✅
-- [x] Migrated from row/col to cube coordinates (Q/R/S system)
-- [x] Implemented proper hex-to-pixel conversion using Red Blob Games formulas
-- [x] Fixed odd-r layout as standard (eliminates configuration complexity)
-- [x] Added proper hex distance calculations with `CubeDistance()`
-- [x] Updated core data structures (Unit, Tile) to use cube coordinates
+### Phaser.js Integration ✅
+- [x] Complete migration from canvas-based to Phaser.js WebGL rendering
+- [x] Professional map editor with modern game engine foundation
+- [x] Dynamic hex grid system covering entire visible camera area
+- [x] Accurate coordinate conversion matching Go backend (`lib/map.go`) exactly
+- [x] Interactive controls: mouse wheel zoom, drag pan, keyboard navigation
 
-### API Migration ✅
-- [x] `TileAt()` now uses cube coordinates as primary method
-- [x] `IsValidMove()` and `GetMovementCost()` use cube coordinates
-- [x] `MoveUnit()` and `CanMoveUnit()` use cube coordinates
-- [x] Removed wrapper methods to enforce cube coordinate usage
+### Coordinate System Accuracy ✅
+- [x] Fixed coordinate conversion to match backend implementation exactly
+- [x] `tileWidth=64, tileHeight=64, yIncrement=48` matching `lib/map.go`
+- [x] Row/col conversion using odd-row offset layout from `lib/hex_coords.go`
+- [x] Pixel-perfect click-to-hex coordinate mapping
+- [x] Eliminated coordinate drift between frontend and backend
 
-### Architecture Improvements ✅
-- [x] Implemented proper Game-World-Observer architecture separation
-- [x] Game object focuses on flow control and game logic
-- [x] World object contains pure state (Map, Units organized by player)
-- [x] Removed all rendering methods from Game object
-- [x] Updated WorldRenderer to work directly with World data using cube coordinates
-- [x] Map includes OriginX/OriginY for coordinate system origin management
+### Professional Mouse Interaction ✅
+- [x] Paint on mouse up (not down) to prevent accidental painting during camera movement
+- [x] Drag detection with threshold to distinguish between painting and panning
+- [x] Camera pan on drag without modifier keys for smooth navigation
+- [x] Paint mode with Alt/Cmd/Ctrl + drag for continuous painting
+- [x] Immediate paint on modifier key down for responsive feedback
 
-### CLI Translation Layer ✅
-- [x] CLI preserves chess notation (A1, B2) for user experience
-- [x] Internal conversion: Chess notation → cube coordinates
-- [x] Centralized validation logic in Game object
-- [x] CLI acts as thin translation layer
+### UI Architecture Improvements ✅
+- [x] PhaserPanel class for clean editor logic separation
+- [x] Grid and coordinate toggles moved from ToolsPanel to PhaserPanel
+- [x] Removed "Switch to Canvas" button (legacy canvas system eliminated)
+- [x] Event callback system for tile clicks and map changes
+- [x] Clean initialization and cleanup methods
 
-### Remaining Work 🚧
-- [ ] Update editor.go to use cube coordinates
-- [ ] Update all test files to use cube coordinate APIs
-- [ ] Add World state change notifications
-
-### Latest Progress ✅
-- [x] Implemented complete dynamic map resizing API with normalized coordinates
-- [x] Added AddLeftCols(n)/RemoveLeftCols(n) methods with proper origin adjustment
-- [x] Added AddTopRows(n)/RemoveTopRows(n) methods with hex geometry spacing
-- [x] Added AddRightCols(n)/RemoveRightCols(n) and AddBottomRows(n)/RemoveBottomRows(n) methods
-- [x] Origin coordinates now use normalized tile width units for consistency
-- [x] Comprehensive bounds validation for all removal operations
-
-### Canvas Rendering Completed ✅
-- [x] Updated CanvasRenderer to work directly with World data using cube coordinates
-- [x] Eliminated CreateGameForRendering approach in WASM canvas rendering
-- [x] Canvas rendering now follows identical patterns to BufferRenderer
-- [x] Both PNG and Canvas rendering systems unified under clean architecture
+### Dynamic Grid System ✅
+- [x] Camera viewport bounds calculation for efficient grid rendering
+- [x] Dynamic hex coordinate range based on visible area (not fixed radius)
+- [x] Efficient rendering of only visible grid hexes for performance
+- [x] Automatic grid updates when camera moves or zooms
+- [x] Performance optimization for large coordinate ranges
 
 ### Benefits Achieved ✅
-- **Mathematical correctness**: Proper hex distance calculations
-- **Code simplification**: Eliminated hardcoded tile dimensions
-- **User experience**: CLI chess notation preserved (A1, B2)
-- **Maintainability**: Single source of truth for coordinates
-- **Clean architecture**: Proper separation of concerns between Game, World, and Rendering
-
-See [COORD_MIGRATION.md](COORD_MIGRATION.md) for detailed technical progress.
+- **Modern Architecture**: WebGL-accelerated rendering with professional game engine
+- **Coordinate Accuracy**: Pixel-perfect frontend/backend coordinate matching
+- **Professional UX**: Intuitive controls preventing accidental tile painting
+- **Performance**: Dynamic rendering covering only visible area
+- **Maintainability**: Clean component separation with event-driven architecture
+- **Extensibility**: Phaser.js foundation enables advanced features (animations, effects)
 
 ## 📋 Phase 5: Games Management System (Planned)
 **Status**: Planned  
@@ -227,11 +215,13 @@ See [COORD_MIGRATION.md](COORD_MIGRATION.md) for detailed technical progress.
 - Complete map creation and editing workflow
 - Games management system implementation
 
-### Recent Session Progress (2025-01-16) ✅
-- Created consolidated editorGetMapBounds WASM function returning both tile dimensions and map bounds
-- Set default map size to 5x5 on startup instead of 1x1 for better user experience
-- Enhanced client-side coordinate conversion with proper XYToQR implementation
-- Improved map editor UI with better coordinate handling
+### Recent Session Progress (2025-01-17) ✅
+- **Phaser.js Architecture Complete**: Fully implemented WebGL-based map editor
+- **Coordinate System Fixed**: Pixel-perfect matching between frontend and backend
+- **Professional UX Implemented**: Intuitive mouse interaction preventing accidental painting  
+- **Component Architecture**: Clean PhaserPanel separation with event-driven communication
+- **Legacy System Removal**: Complete elimination of old canvas system
+- **Documentation Updated**: ARCHITECTURE.md v4.0 with comprehensive technical specifications
 
 ### Long-term Vision 🔮
 - Full-featured web-based turn-based strategy platform
@@ -241,6 +231,6 @@ See [COORD_MIGRATION.md](COORD_MIGRATION.md) for detailed technical progress.
 
 ---
 
-**Last Updated**: 2025-01-16  
-**Current Focus**: Map Editor Implementation  
-**Next Milestone**: Functional WASM-based map editor with save/load capabilities
+**Last Updated**: 2025-01-17  
+**Current Focus**: Phaser.js Map Editor (Completed)  
+**Next Milestone**: WASM integration with Phaser editor for data persistence

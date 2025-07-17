@@ -52,52 +52,95 @@
 - **Client-side Optimization**: Tile dimension caching and scroll management
 - **Interactive Grid**: Foundation for click-to-expand map functionality
 
-### 6. Phaser.js Rendering Integration (NEW) ✅
-**Completed**: Successfully replaced canvas rendering with Phaser.js game engine
-**Benefits**:
-- **Modern Rendering**: WebGL-accelerated hex tile rendering
-- **Infinite Coordinates**: Full support for negative Q/R coordinates
-- **Performance**: Significantly faster than canvas with smooth zoom/pan
-- **Developer Experience**: JavaScript console debugging and hot reloading
-- **Asset Management**: Direct PNG loading from existing game assets
-- **Interactive Controls**: Mouse drag, wheel zoom, keyboard navigation
-- **Extensible Architecture**: Ready for animations, effects, and advanced features
+### 6. Phaser.js Map Editor (v4.0) ✅ COMPLETED
+**Completed**: Complete Phaser.js architecture with professional UX and accurate coordinate system
+**Major Achievements**:
+- **Coordinate System Accuracy**: Fixed coordinate conversion to match Go backend (`lib/map.go`) exactly
+- **Dynamic Grid System**: Infinite grid covering entire visible area (not fixed radius)  
+- **Professional Mouse Interaction**: Paint-on-release, drag-to-pan, modifier key paint modes
+- **Clean Component Architecture**: PhaserPanel separation with proper event callbacks
+- **UI Reorganization**: Grid/coordinate controls moved to logical Phaser panel location
+- **Legacy System Removal**: Complete elimination of old canvas system
+- **Enhanced User Experience**: Intuitive controls preventing accidental tile painting
+
+### 7. Architecture Modernization (v4.0) ✅ COMPLETED  
+**Completed**: Major architectural transformation to Phaser-first design
+**Technical Improvements**:
+- **Fixed Coordinate Conversion**: `tileWidth=64, tileHeight=64, yIncrement=48` matching backend
+- **Row/Col Conversion**: Using odd-row offset layout from `lib/hex_coords.go`
+- **Dynamic Viewport Grid**: Grid renders only visible hexes based on camera bounds
+- **Professional Interaction**: Drag threshold detection, modifier key paint modes
+- **Component Separation**: Clean PhaserPanel API with event-driven communication
+- **Documentation Updates**: ARCHITECTURE.md updated to v4.0 with detailed technical specs
 
 ## Current Development Focus
 
-### Phase 2: Phaser.js Map Editor Enhancement (In Progress) 🚧
+### Phase 4: Phaser.js Polish and Integration ✅ COMPLETED
 
-#### A. Phaser Integration Completion
-**Goal**: Complete Phaser.js integration for production-ready map editor
+#### A. Coordinate System Accuracy ✅ COMPLETED
+**Goal**: Perfect coordinate mapping between frontend and backend  
 **Components**:
-- [x] Phaser.js game engine integration with WebGL rendering
-- [x] Hex coordinate system with full negative coordinate support
-- [x] Asset loading system for terrain and unit sprites
-- [x] Interactive controls (mouse drag, wheel zoom, keyboard navigation)
-- [x] Test integration with existing map editor UI
-- [ ] Responsive canvas sizing (100% parent container)
-- [ ] Comprehensive hex grid with Q/R and row/col coordinate display
-- [ ] Radial coordinate system centered at 0,0
+- [x] Fixed pixelToHex/hexToPixel to match Go backend exactly
+- [x] Implemented tileWidth=64, tileHeight=64, yIncrement=48 from lib/map.go
+- [x] Added hexToRowCol/rowColToHex conversion from lib/hex_coords.go
+- [x] Pixel-perfect click-to-hex coordinate mapping
+- [x] Row/col coordinate display with proper odd-row offset layout
 
-#### B. Enhanced Grid System
-**Goal**: Professional grid system with coordinate visualization
+#### B. Dynamic Grid System ✅ COMPLETED
+**Goal**: Infinite grid covering entire visible area  
 **Components**:
-- [x] Basic hex grid rendering with configurable visibility
-- [x] Click-to-paint tile functionality
-- [x] Brush size system for multi-tile painting
-- [ ] Coordinate labels on each hex (Q/R and row/col)
-- [ ] Dynamic grid that extends as user navigates
-- [ ] Visual feedback for tile hover and selection
+- [x] Camera viewport bounds calculation for grid rendering
+- [x] Dynamic hex coordinate range based on visible area
+- [x] Efficient rendering of only visible grid hexes
+- [x] Automatic grid updates when camera moves or zooms
+- [x] Performance optimization for large coordinate ranges
 
-#### C. Editor User Experience
-**Goal**: Intuitive map editing with Phaser performance
+#### C. Professional Mouse Interaction ✅ COMPLETED
+**Goal**: Intuitive editing without accidental painting
 **Components**:
-- [x] Seamless integration with existing dockview layout
-- [x] Test buttons for Phaser initialization and testing
-- [x] Console logging for debugging and feedback
-- [ ] Responsive canvas that adapts to panel resizing
-- [ ] Smooth zoom/pan with proper coordinate tracking
-- [ ] Visual grid that helps users understand coordinate system
+- [x] Paint on mouse up (not down) for normal clicks
+- [x] Drag detection with threshold to prevent accidental painting
+- [x] Camera pan on drag without modifier keys
+- [x] Paint mode with Alt/Cmd/Ctrl + drag for continuous painting
+- [x] Immediate paint on modifier key down for responsive feedback
+
+#### D. UI Architecture Improvements ✅ COMPLETED
+**Goal**: Clean component separation and logical UI organization
+**Components**:
+- [x] PhaserPanel class for editor logic separation
+- [x] Grid and coordinate toggles moved from ToolsPanel to PhaserPanel
+- [x] Removed "Switch to Canvas" button (legacy system eliminated)
+- [x] Event callback system for tile clicks and map changes
+- [x] Clean initialization and cleanup methods
+
+### Phase 5: Next Development Priorities (Upcoming) 🚧
+
+#### A. WASM Integration Enhancement
+**Goal**: Connect Phaser editor to Go backend for data persistence
+**Components**:
+- [ ] PhaserPanel integration with existing WASM functions
+- [ ] Map loading from backend into Phaser scene
+- [ ] Save functionality to persist Phaser editor changes
+- [ ] Unit placement and editing via Phaser interface
+- [ ] Export functionality for complete maps
+
+#### B. Advanced Editor Features  
+**Goal**: Professional map editing capabilities
+**Components**:
+- [ ] Multi-tile selection and area operations
+- [ ] Copy/paste functionality for map sections
+- [ ] Template system for common patterns
+- [ ] Undo/redo system with history management
+- [ ] Advanced brushes (pattern fills, gradients)
+
+#### C. Performance and Polish
+**Goal**: Production-ready editor experience
+**Components**:
+- [ ] Sprite batching for improved rendering performance
+- [ ] Memory management for large maps
+- [ ] Visual feedback for editor operations
+- [ ] Error handling and user feedback systems
+- [ ] Responsive design for different screen sizes
 
 ### Phase 3: Unified Game Implementation (Planned) 🚧
 

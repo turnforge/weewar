@@ -28,10 +28,15 @@ export class PhaserMapEditor {
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
             parent: this.containerElement!,
-            width: 800,
-            height: 600,
+            width: '100%',
+            height: '100%',
             backgroundColor: '#2c3e50',
             scene: PhaserMapScene,
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                width: '100%',
+                height: '100%'
+            },
             physics: {
                 default: 'arcade',
                 arcade: {
@@ -209,11 +214,21 @@ export class PhaserMapEditor {
     
     // Helper method for hex to pixel conversion (matches scene implementation)
     private hexToPixel(q: number, r: number): { x: number; y: number } {
-        const hexRadius = 32;
-        const SQRT3 = Math.sqrt(3);
+        const tileWidth = 64;
+        const yIncrement = 48;
         
-        const x = hexRadius * (SQRT3 * q + SQRT3 * r / 2);
-        const y = hexRadius * (3 * r / 2);
+        // Match the Go implementation from map.go CenterXYForTile
+        const x_coord = q;
+        const z_coord = r;
+        const col = x_coord + Math.floor((z_coord - (z_coord & 1)) / 2);
+        const row = z_coord;
+        
+        let y = yIncrement * row;
+        let x = tileWidth * col;
+        
+        if (row % 2 === 1) {
+            x += tileWidth / 2;
+        }
         
         return { x, y };
     }

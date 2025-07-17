@@ -209,6 +209,9 @@ func registerEditorFunctions() {
 	js.Global().Set("editorPixelToCoords", createWrapper(2, 2, func(args []js.Value) (any, error) {
 		return pixelToCoords(args[0].Float(), args[1].Float())
 	}))
+	js.Global().Set("editorSetTilesAt", createWrapper(4, 4, func(args []js.Value) (any, error) {
+		return nil, setTilesAt(args[0].Int(), args[1].Int(), args[2].Int(), args[3].Int())
+	}))
 }
 
 func registerUtilityFunctions() {
@@ -351,13 +354,19 @@ func validateMap() (map[string]any, error) {
 }
 
 func getTerrainTypes() (map[string]any, error) {
-	terrainTypes := []map[string]any{
-		{"id": 0, "name": "Unknown", "moveCost": 1, "defenseBonus": 0},
-		{"id": 1, "name": "Grass", "moveCost": 1, "defenseBonus": 0},
-		{"id": 2, "name": "Desert", "moveCost": 1, "defenseBonus": 0},
-		{"id": 3, "name": "Water", "moveCost": 2, "defenseBonus": 0},
-		{"id": 4, "name": "Mountain", "moveCost": 2, "defenseBonus": 10},
-		{"id": 5, "name": "Rock", "moveCost": 3, "defenseBonus": 20},
+	// Get all terrain types from the terrain data array (0-26)
+	terrainTypes := []map[string]any{}
+	
+	for i := 0; i <= 26; i++ {
+		terrainData := weewar.GetTerrainData(i)
+		if terrainData != nil {
+			terrainTypes = append(terrainTypes, map[string]any{
+				"id":           terrainData.ID,
+				"name":         terrainData.Name,
+				"moveCost":     terrainData.MoveCost,
+				"defenseBonus": terrainData.DefenseBonus,
+			})
+		}
 	}
 
 	return map[string]any{
@@ -454,6 +463,14 @@ func calculateCanvasSizeInternal() (width, height int) {
 	height = weewar.Max(height, 300)
 
 	return width, height
+}
+
+func setTilesAt(q, r, terrainType, radius int) error {
+	// Create cube coordinate from Q, R values
+	coord := weewar.CubeCoord{Q: q, R: r}
+	
+	// Use the stateless setTilesAt method
+	return globalEditor.SetTilesAt(coord, terrainType, radius)
 }
 
 func testAssets() (map[string]any, error) {

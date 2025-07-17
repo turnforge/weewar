@@ -8,12 +8,33 @@ import (
 
 // Basic terrain data
 var terrainData = []TerrainData{
-	{0, "Unknown", 1, 0},
+	{0, "Clear", 1, 0},
 	{1, "Grass", 1, 0},
 	{2, "Desert", 1, 0},
 	{3, "Water", 2, 0},
 	{4, "Mountain", 2, 10},
 	{5, "Rock", 3, 20},
+	{6, "Forest", 1, 5},
+	{7, "Swamp", 2, 5},
+	{8, "Road", 1, -5},
+	{9, "Bridge", 1, 0},
+	{10, "River", 2, 0},
+	{11, "Beach", 1, 0},
+	{12, "Tundra", 2, 5},
+	{13, "Snow", 2, 5},
+	{14, "Ice", 3, 0},
+	{15, "Lava", 4, 0},
+	{16, "Crater", 2, 15},
+	{17, "Ruins", 1, 10},
+	{18, "Base", 1, 20},
+	{19, "City", 1, 15},
+	{20, "Port", 1, 10},
+	{21, "Airport", 1, 10},
+	{22, "Factory", 1, 15},
+	{23, "Tower", 2, 25},
+	{24, "Bunker", 3, 30},
+	{25, "Fortress", 3, 35},
+	{26, "Volcano", 4, 5},
 }
 
 // GetTerrainData returns terrain data for the given type

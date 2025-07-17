@@ -290,6 +290,56 @@ func (e *WorldEditor) FloodFill(coord CubeCoord) error {
 // Utility Methods
 // =============================================================================
 
+// SetTilesAt sets terrain at the specified coordinate with given radius (stateless)
+func (e *WorldEditor) SetTilesAt(coord CubeCoord, terrainType, radius int) error {
+	if e.currentWorld == nil {
+		return fmt.Errorf("no world loaded")
+	}
+
+	// Get all positions to paint based on radius
+	var positions []CubeCoord
+	if radius == 0 {
+		positions = []CubeCoord{coord}
+	} else {
+		positions = coord.Range(radius)
+	}
+
+	// Paint each position
+	for _, paintCoord := range positions {
+		// Check if position is within map bounds
+		if !e.currentWorld.Map.IsWithinBoundsCube(paintCoord) {
+			continue // Skip out-of-bounds positions
+		}
+
+		if terrainType == 0 {
+			// Terrain type 0 (Clear) means delete the tile
+			e.currentWorld.Map.DeleteTile(paintCoord)
+		} else {
+			// Get existing tile or create new one
+			tile := e.currentWorld.Map.TileAt(paintCoord)
+			if tile == nil {
+				tile = &Tile{
+					Coord:    paintCoord,
+					TileType: terrainType,
+				}
+				e.currentWorld.Map.AddTile(tile)
+			} else {
+				tile.TileType = terrainType
+			}
+		}
+
+		// Mark tile layer as dirty for this coordinate
+		if e.layeredRenderer != nil {
+			for _, layer := range e.layeredRenderer.layers {
+				layer.MarkDirty(paintCoord)
+			}
+		}
+	}
+
+	e.modified = true
+	return nil
+}
+
 // getBrushPositions returns all cube coordinates affected by the current brush
 func (e *WorldEditor) getBrushPositions(center CubeCoord) []CubeCoord {
 	if e.brushSize == 0 {

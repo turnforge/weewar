@@ -1,13 +1,18 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
+	"image"
+	"image/png"
 	"log"
 	"log/slog"
 	"net/http"
 
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
+	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
 // Toolbar buttons on the editor page
@@ -16,6 +21,14 @@ type TBButton struct {
 	IconImage string
 	Label     string
 	Command   string
+}
+
+type TerrainType struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	MoveCost     int    `json:"moveCost"`
+	DefenseBonus int    `json:"defenseBonus"`
+	IconDataURL  string `json:"iconDataURL"`
 }
 
 type MapEditorPage struct {
@@ -27,9 +40,22 @@ type MapEditorPage struct {
 	Errors        map[string]string
 	TBButtons     []*TBButton
 	AllowCustomId bool
+	TerrainTypes  []TerrainType
 }
 
 func (g *MapEditorPage) Copy() View { return &MapEditorPage{} }
+
+// imageToDataURL converts an image to a data URL
+func imageToDataURL(img image.Image) (string, error) {
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		return "", err
+	}
+	
+	// Encode as base64
+	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
+	return fmt.Sprintf("data:image/png;base64,%s", encoded), nil
+}
 
 func (v *MapEditorPage) SetupDefaults() {
 	v.Header.Width = "w-full"
@@ -38,6 +64,41 @@ func (v *MapEditorPage) SetupDefaults() {
 	v.Header.ShowHomeButton = true
 	v.Header.ShowLogoutButton = false
 	v.Header.ShowComposeButton = false
+	
+	// Initialize terrain types with actual asset images
+	v.TerrainTypes = []TerrainType{}
+	
+	// Create asset manager to load terrain tile images
+	assetManager := weewar.NewAssetManager("./assets/v1") // Adjust path as needed
+	
+	for i := 0; i <= 26; i++ {
+		terrainData := weewar.GetTerrainData(i)
+		if terrainData != nil {
+			// Try to load the actual tile image
+			var iconDataURL string
+			if assetManager.HasTileAsset(i) {
+				if img, err := assetManager.GetTileImage(i); err == nil {
+					if dataURL, err := imageToDataURL(img); err == nil {
+						iconDataURL = dataURL
+					}
+				}
+			}
+			
+			// If we couldn't load the image, use a fallback or empty string
+			if iconDataURL == "" {
+				// Could add emoji fallbacks here if needed
+				iconDataURL = "" // Template can handle missing icons
+			}
+			
+			v.TerrainTypes = append(v.TerrainTypes, TerrainType{
+				ID:           terrainData.ID,
+				Name:         terrainData.Name,
+				MoveCost:     terrainData.MoveCost,
+				DefenseBonus: terrainData.DefenseBonus,
+				IconDataURL:  iconDataURL,
+			})
+		}
+	}
 	v.Header.Styles = map[string]any{
 		"FixedHeightHeader":          true,
 		"HeaderHeightIfFixed":        "70px",

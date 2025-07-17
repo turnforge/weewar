@@ -5,37 +5,20 @@
         <!-- Terrain Palette -->
         <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
             <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">🎨 Terrain Palette</h3>
-            <div class="grid grid-cols-3 gap-2">
-                <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                        data-terrain="0" title="Unknown">
-                    <div class="text-lg">❓</div>
-                    <div class="text-xs">Unknown</div>
+            <div id="terrain-palette" class="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto w-full">
+                {{ range .TerrainTypes }}
+                <button class="terrain-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors block w-full{{ if eq .ID 1 }} bg-blue-100 dark:bg-blue-900 border-blue-500{{ end }}" 
+                        data-terrain="{{ .ID }}" title="{{ .Name }} (Move: {{ .MoveCost }}, Defense: {{ .DefenseBonus }})">
+                    {{ if .IconDataURL }}
+                        <div class="flex justify-center mb-1">
+                            <img src="{{ .IconDataURL }}" alt="{{ .Name }}" class="w-6 h-6 object-contain">
+                        </div>
+                    {{ else }}
+                        <div class="text-sm">{{ if eq .ID 0 }}🗑️{{ else }}🎨{{ end }}</div>
+                    {{ end }}
+                    <div class="text-xs truncate">{{ .Name }}</div>
                 </button>
-                <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                        data-terrain="1" title="Grass">
-                    <div class="text-lg">🌱</div>
-                    <div class="text-xs">Grass</div>
-                </button>
-                <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                        data-terrain="2" title="Desert">
-                    <div class="text-lg">🏜️</div>
-                    <div class="text-xs">Desert</div>
-                </button>
-                <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                        data-terrain="3" title="Water">
-                    <div class="text-lg">🌊</div>
-                    <div class="text-xs">Water</div>
-                </button>
-                <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                        data-terrain="4" title="Mountain">
-                    <div class="text-lg">⛰️</div>
-                    <div class="text-xs">Mountain</div>
-                </button>
-                <button class="terrain-button p-3 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" 
-                        data-terrain="5" title="Rock">
-                    <div class="text-lg">🗿</div>
-                    <div class="text-xs">Rock</div>
-                </button>
+                {{ end }}
             </div>
         </div>
 
@@ -77,10 +60,10 @@
                                class="block w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 gap-2">
+                <div class="grid grid-cols-2 gap-2">
                     <button data-action="paint-terrain" class="px-3 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-700">🖌️ Paint</button>
                     <button data-action="flood-fill" class="px-3 py-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">🌊 Flood Fill</button>
-                    <button data-action="remove-terrain" class="px-3 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700">🗑️ Remove</button>
+                    <button data-action="remove-terrain" class="col-span-2 px-3 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700">🗑️ Remove</button>
                 </div>
             </div>
         </div>
@@ -100,13 +83,5 @@
             </div>
         </div>
 
-        <!-- History Controls -->
-        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">↶↷ History</h3>
-            <div class="grid grid-cols-2 gap-2">
-                <button data-action="undo" id="undo-btn" class="px-3 py-2 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">↶ Undo</button>
-                <button data-action="redo" id="redo-btn" class="px-3 py-2 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">↷ Redo</button>
-            </div>
-        </div>
     </div>
 </div>

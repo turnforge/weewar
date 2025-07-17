@@ -348,11 +348,6 @@ class MapEditorPage {
             exportButton.addEventListener('click', this.exportMap.bind(this));
         }
 
-        // Utility buttons
-        const validateButton = document.getElementById('validate-map-btn');
-        if (validateButton) {
-            validateButton.addEventListener('click', this.validateMap.bind(this));
-        }
 
         const clearConsoleButton = document.getElementById('clear-console-btn');
         if (clearConsoleButton) {
@@ -360,12 +355,23 @@ class MapEditorPage {
         }
 
 
-        // Terrain palette buttons
+        // Terrain palette buttons - radio button behavior
         document.querySelectorAll('.terrain-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const terrain = (e.target as HTMLElement).getAttribute('data-terrain');
+                const clickedButton = e.currentTarget as HTMLElement;
+                const terrain = clickedButton.getAttribute('data-terrain');
                 if (terrain) {
-                    this.setBrushTerrain(parseInt(terrain));
+                    // Remove selection from all buttons
+                    document.querySelectorAll('.terrain-button').forEach(btn => {
+                        btn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+                    });
+                    
+                    // Add selection to clicked button
+                    clickedButton.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+                    
+                    // Update current terrain (no longer needed, but keeping for compatibility)
+                    this.currentTerrain = parseInt(terrain);
+                    this.logToConsole(`Selected terrain: ${terrain}`);
                 }
             });
         });
@@ -406,13 +412,6 @@ class MapEditorPage {
             });
         }
 
-        // History buttons
-        document.querySelector('[data-action="undo"]')?.addEventListener('click', () => {
-            this.editorUndo();
-        });
-        document.querySelector('[data-action="redo"]')?.addEventListener('click', () => {
-            this.editorRedo();
-        });
 
         // Rendering buttons
         document.querySelectorAll('[data-action="render-map"]').forEach(button => {
@@ -561,6 +560,9 @@ class MapEditorPage {
             
             this.updateEditorStatus('Ready');
             this.logToConsole('WASM editor initialized successfully');
+            
+            // Populate terrain palette with all available terrain types
+            // await this.populateTerrainPalette();
             
             // Request initial editor refresh
             this.editorRefresh();
@@ -746,15 +748,6 @@ class MapEditorPage {
         }
     }
 
-    public editorUndo(): void {
-        this.logToConsole('Undo action');
-        // TODO: Implement undo functionality
-    }
-
-    public editorRedo(): void {
-        this.logToConsole('Redo action');
-        // TODO: Implement redo functionality
-    }
 
     public renderEditor(width: number, height: number): void {
         this.logToConsole(`Rendering map at ${width}×${height}...`);
@@ -934,10 +927,8 @@ class MapEditorPage {
         const y = event.clientY - rect.top;
         
         const coords = this.pixelToHex(x, y);
-        if (coords && coords.row >= 0 && coords.row < this.mapData.height && 
-            coords.col >= 0 && coords.col < this.mapData.width) {
-            
-            // this.logToConsole(`Clicked hex (${coords.row}, ${coords.col})`);
+        if (coords) {
+            // Paint at clicked coordinates (works both within and outside current map bounds)
             this.paintHexAtCoords(coords.row, coords.col);
         }
     }
@@ -1038,22 +1029,31 @@ class MapEditorPage {
         }
         
         try {
-            // Use WASM editor to paint terrain - WASM will push the update directly to canvas
-            const result = (window as any).editorPaintTerrain(row, col);
+            // Get current terrain type from selected terrain button
+            const selectedTerrainButton = document.querySelector('.terrain-button.bg-blue-100') as HTMLElement;
+            const terrainType = selectedTerrainButton ? 
+                parseInt(selectedTerrainButton.getAttribute('data-terrain') || '1') : 1;
+            
+            // Get current brush size from dropdown
+            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+            const brushSize = brushSizeSelect ? parseInt(brushSizeSelect.value) : 0;
+            
+            // Use stateless WASM editor function
+            const result = (window as any).editorSetTilesAt(col, row, terrainType, brushSize);
             
             if (result.success) {
-                // Update local map data to stay in sync
+                // Update local map data to stay in sync (only the center hex for simplicity)
                 if (this.mapData) {
                     const key = `${row},${col}`;
-                    this.mapData.tiles[key] = { tileType: this.currentTerrain };
+                    this.mapData.tiles[key] = { tileType: terrainType };
                 }
                 
-                // No need to call renderMapCanvas() - WASM pushes the update directly
-                
-                const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
-                // this.logToConsole(`Painted ${terrainNames[this.currentTerrain]} at (${row}, ${col})`);
+                // Log the paint action with brush info
+                const sizeNames = ['Single', 'Small', 'Medium', 'Large', 'X-Large', 'XX-Large'];
+                const sizeName = sizeNames[brushSize] || 'Unknown';
+                this.logToConsole(`Set terrain ${terrainType} at (Q=${col}, R=${row}) with ${sizeName} brush (radius=${brushSize})`);
             } else {
-                this.logToConsole(`Paint failed: ${result.error}`);
+                this.logToConsole(`Set terrain failed: ${result.error}`);
             }
         } catch (error) {
             this.logToConsole(`Paint error: ${error}`);
@@ -1208,11 +1208,6 @@ class MapEditorPage {
         this.toastManager?.showToast('Export', 'Export functionality not yet implemented', 'info');
     }
 
-    private validateMap(): void {
-        this.logToConsole('Validating map...');
-        // TODO: Implement map validation
-        this.logToConsole('Map validation completed - no issues found');
-    }
 
     private clearConsole(): void {
         if (this.editorOutput) {

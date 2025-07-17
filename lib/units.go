@@ -71,3 +71,43 @@ func (u *Unit) Clone() *Unit {
 		PlayerID:        u.PlayerID,
 	}
 }
+
+// Basic unit data map - matches weewar-data.json
+var unitDataMap = map[int]UnitData{
+	1:  {ID: 1, Name: "Soldier (Basic)"},
+	2:  {ID: 2, Name: "Soldier (Advanced)"},
+	3:  {ID: 3, Name: "Tank (Basic)"},
+	4:  {ID: 4, Name: "Tank (Advanced)"},
+	5:  {ID: 5, Name: "Striker"},
+	6:  {ID: 6, Name: "Anti-aircraft (Basic)"},
+	7:  {ID: 7, Name: "Hovercraft"},
+	8:  {ID: 8, Name: "Artillery (Basic)"},
+	9:  {ID: 9, Name: "Artillery (Advanced)"},
+	10: {ID: 10, Name: "Speedboat"},
+	11: {ID: 11, Name: "Capturing"},
+	12: {ID: 12, Name: "Battleship"},
+	13: {ID: 13, Name: "Destroyer"},
+	14: {ID: 14, Name: "Jetfighter"},
+	15: {ID: 15, Name: "Crop Duster"},
+	16: {ID: 16, Name: "Engineer"},
+	17: {ID: 17, Name: "Medic"},
+	18: {ID: 18, Name: "Miner"},
+	19: {ID: 19, Name: "Paratrooper"},
+	20: {ID: 20, Name: "Helicopter"},
+	21: {ID: 21, Name: "Zeppelin"},
+	22: {ID: 22, Name: "Submarine"},
+	24: {ID: 24, Name: "Anti-aircraft (Advanced)"},
+	25: {ID: 25, Name: "Artillery (Mega)"},
+	26: {ID: 26, Name: "Artillery (Quick)"},
+	27: {ID: 27, Name: "Mech"},
+	28: {ID: 28, Name: "Goliath RC"},
+	29: {ID: 29, Name: "Stratotanker"},
+}
+
+// GetUnitData returns unit data for the given type
+func GetUnitData(unitType int) *UnitData {
+	if data, exists := unitDataMap[unitType]; exists {
+		return &data
+	}
+	return nil
+}

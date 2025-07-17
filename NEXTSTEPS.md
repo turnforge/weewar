@@ -73,6 +73,16 @@
 - **Component Separation**: Clean PhaserPanel API with event-driven communication
 - **Documentation Updates**: ARCHITECTURE.md updated to v4.0 with detailed technical specs
 
+### 8. Map Editor UI Enhancement (v4.1) ✅ COMPLETED
+**Completed**: Major improvements to terrain/unit management and theme handling
+**Key Achievements**:
+- **Data Consistency**: Fixed terrain categorization to match weewar-data.json exactly
+- **UI Reorganization**: Moved brush controls to horizontal Phaser toolbar for better UX
+- **Asset Integration**: Direct static URLs for actual tile/unit graphics instead of placeholders
+- **Theme Reactivity**: Fixed canvas theme initialization to read current theme state
+- **Terrain Organization**: Proper Nature vs City categorization with alphabetical sorting
+- **Code Simplification**: Eliminated unnecessary AssetManager dependencies
+
 ## Current Development Focus
 
 ### Phase 4: Phaser.js Polish and Integration ✅ COMPLETED

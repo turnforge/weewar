@@ -83,51 +83,38 @@ func (v *MapEditorPage) SetupDefaults() {
 	
 	// No longer need hardcoded map - terrain type is now in TerrainData struct
 	
-	// Create asset manager to load terrain tile images
-	assetManager := weewar.NewAssetManager("./assets/v1") // Adjust path as needed
-	
 	for i := 0; i <= 26; i++ {
 		terrainData := weewar.GetTerrainData(i)
 		if terrainData != nil {
-			// Try to load the actual tile image
-			var iconDataURL string
-			if assetManager.HasTileAsset(i) {
-				if img, err := assetManager.GetTileImage(i); err == nil {
-					if dataURL, err := imageToDataURL(img); err == nil {
-						iconDataURL = dataURL
-					}
+			// Use web-accessible static URL path for the tile asset
+			iconDataURL := fmt.Sprintf("/static/assets/v1/Tiles/%d/0.png", i)
+			
+			// Skip Clear terrain (ID 0) as it has its own dedicated section
+			if terrainData.ID != 0 {
+				terrain := TerrainType{
+					ID:              terrainData.ID,
+					Name:            terrainData.Name,
+					MoveCost:        terrainData.MoveCost,
+					DefenseBonus:    terrainData.DefenseBonus,
+					IconDataURL:     iconDataURL,
+					HasPlayerColors: terrainData.Type == weewar.TerrainPlayer,
 				}
-			}
-			
-			// If we couldn't load the image, use a fallback or empty string
-			if iconDataURL == "" {
-				// Could add emoji fallbacks here if needed
-				iconDataURL = "" // Template can handle missing icons
-			}
-			
-			terrain := TerrainType{
-				ID:              terrainData.ID,
-				Name:            terrainData.Name,
-				MoveCost:        terrainData.MoveCost,
-				DefenseBonus:    terrainData.DefenseBonus,
-				IconDataURL:     iconDataURL,
-				HasPlayerColors: terrainData.Type == weewar.TerrainPlayer,
-			}
-			
-			if terrainData.Type == weewar.TerrainPlayer {
-				v.CityTerrains = append(v.CityTerrains, terrain)
-			} else {
-				v.NatureTerrains = append(v.NatureTerrains, terrain)
+				
+				if terrainData.Type == weewar.TerrainPlayer {
+					v.CityTerrains = append(v.CityTerrains, terrain)
+				} else {
+					v.NatureTerrains = append(v.NatureTerrains, terrain)
+				}
 			}
 		}
 	}
 	
-	// Sort terrain lists by ID
+	// Sort terrain lists by name for easier visual grouping
 	sort.Slice(v.CityTerrains, func(i, j int) bool {
-		return v.CityTerrains[i].ID < v.CityTerrains[j].ID
+		return v.CityTerrains[i].Name < v.CityTerrains[j].Name
 	})
 	sort.Slice(v.NatureTerrains, func(i, j int) bool {
-		return v.NatureTerrains[i].ID < v.NatureTerrains[j].ID
+		return v.NatureTerrains[i].Name < v.NatureTerrains[j].Name
 	})
 	
 	// Load unit types with icons
@@ -135,20 +122,10 @@ func (v *MapEditorPage) SetupDefaults() {
 	unitIDs := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29}
 	
 	for _, unitID := range unitIDs {
-		unitData, err := assetManager.GetUnitData(unitID)
-		if err != nil {
-			continue
-		}
+		unitData := weewar.GetUnitData(unitID)
 		if unitData != nil {
-			// Try to load the unit icon (default color 0)
-			var iconDataURL string
-			if assetManager.HasUnitAsset(unitID, 0) {
-				if img, err := assetManager.GetUnitImage(unitID, 0); err == nil {
-					if dataURL, err := imageToDataURL(img); err == nil {
-						iconDataURL = dataURL
-					}
-				}
-			}
+			// Use web-accessible static URL path for the unit asset
+			iconDataURL := fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
 			
 			v.UnitTypes = append(v.UnitTypes, UnitType{
 				ID:          unitData.ID,

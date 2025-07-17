@@ -1,6 +1,4 @@
-import { ThemeManager } from './ThemeManager';
-import { Modal } from './Modal';
-import { ToastManager } from './ToastManager';
+import { BasePage } from './BasePage';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { PhaserPanel } from './PhaserPanel';
 
@@ -24,14 +22,7 @@ class MapBounds {
 /**
  * Map Editor page with WASM integration for hex-based map editing
  */
-class MapEditorPage {
-    private themeManager: typeof ThemeManager | null = null;
-    private modal: Modal | null = null;
-    private toastManager: ToastManager | null = null;
-
-    private themeToggleButton: HTMLButtonElement | null = null;
-    private themeToggleIcon: HTMLElement | null = null;
-
+class MapEditorPage extends BasePage {
     private currentMapId: string | null = null;
     private isNewMap: boolean = false;
     private mapBounds: MapBounds
@@ -41,7 +32,7 @@ class MapEditorPage {
         width: number;
         height: number;
         tiles: { [key: string]: { tileType: number } };
-        map_units: any[];
+        units: { [key: string]: { tileType: number, playerId: number } };
         // Cube coordinate bounds for proper coordinate validation
         // Map bounds data from GetMapBounds for rendering optimization
     } | null = null;
@@ -62,32 +53,23 @@ class MapEditorPage {
     private originalMapData: string = '';
 
     constructor() {
-        this.initializeComponents();
+        super();
+        this.initializeSpecificComponents();
         this.initializeDockview();
-        this.bindEvents();
+        this.bindSpecificEvents();
         this.loadInitialState();
         this.setupUnsavedChangesWarning();
     }
     
 
-    private initializeComponents(): void {
+    protected initializeSpecificComponents(): void {
         const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
         const isNewMapInput = document.getElementById("isNewMap") as HTMLInputElement | null;
         
         this.currentMapId = mapIdInput?.value.trim() || null;
         this.isNewMap = isNewMapInput?.value === "true";
 
-        ThemeManager.init();
-        this.modal = Modal.init();
-        this.toastManager = ToastManager.init();
-
-        this.themeToggleButton = document.getElementById('theme-toggle-button') as HTMLButtonElement;
-        this.themeToggleIcon = document.getElementById('theme-toggle-icon');
         this.editorOutput = document.getElementById('editor-output');
-
-        if (!this.themeToggleButton || !this.themeToggleIcon) {
-            console.warn("Theme toggle button or icon element not found in Header.");
-        }
 
         this.logToConsole('Map Editor initialized');
     }
@@ -168,12 +150,7 @@ class MapEditorPage {
         this.logToConsole('Dockview initialized');
     }
 
-    private bindEvents(): void {
-        // Theme toggle
-        if (this.themeToggleButton) {
-            this.themeToggleButton.addEventListener('click', this.handleThemeToggleClick.bind(this));
-        }
-
+    protected bindSpecificEvents(): void {
         // Header buttons
         const saveButton = document.getElementById('save-map-btn');
         if (saveButton) {
@@ -408,7 +385,7 @@ class MapEditorPage {
     }
 
     private loadInitialState(): void {
-        this.updateThemeButtonState();
+        // Theme button state is handled by BasePage
         this.updateEditorStatus('Initializing...');
 
         if (this.isNewMap) {
@@ -435,7 +412,7 @@ class MapEditorPage {
             width: 8,
             height: 8,
             tiles: {},
-            map_units: []
+            units: {},
         };
         this.updateEditorStatus('New Map');
         this.logToConsole('New map initialized');
@@ -454,7 +431,7 @@ class MapEditorPage {
                     width: 8,
                     height: 8,
                     tiles: {},
-                    map_units: []
+                    units: {},
                 };
                 this.updateEditorStatus('Loaded');
                 this.logToConsole('Map data loaded');
@@ -543,19 +520,19 @@ class MapEditorPage {
     public downloadImage(): void {
         this.logToConsole('Downloading map image...');
         // TODO: Implement image download
-        this.toastManager?.showToast('Download', 'Image download not yet implemented', 'info');
+        this.showToast('Download', 'Image download not yet implemented', 'info');
     }
 
     public exportToGame(players: number): void {
         this.logToConsole(`Exporting as ${players}-player game...`);
         // TODO: Implement game export
-        this.toastManager?.showToast('Export', `${players}-player game export not yet implemented`, 'info');
+        this.showToast('Export', `${players}-player game export not yet implemented`, 'info');
     }
 
     public downloadGameData(): void {
         this.logToConsole('Downloading game data...');
         // TODO: Implement game data download
-        this.toastManager?.showToast('Download', 'Game data download not yet implemented', 'info');
+        this.showToast('Download', 'Game data download not yet implemented', 'info');
     }
 
     // Advanced tool functions
@@ -677,7 +654,7 @@ class MapEditorPage {
 
     private async saveMap(): Promise<void> {
         if (!this.mapData) {
-            this.toastManager?.showToast('Error', 'No map data to save', 'error');
+            this.showToast('Error', 'No map data to save', 'error');
             return;
         }
 
@@ -698,8 +675,7 @@ class MapEditorPage {
                 tilesData.forEach(tile => {
                     const key = `${tile.q},${tile.r}`;
                     mapToSave.tiles[key] = {
-                        tileType: tile.terrain,
-                        playerId: tile.playerId || 0
+                        tileType: tile.terrain
                     };
                 });
                 
@@ -721,7 +697,7 @@ class MapEditorPage {
                 const result = await response.json();
                 this.logToConsole('Map saved successfully');
                 this.updateEditorStatus('Saved');
-                this.toastManager?.showToast('Success', 'Map saved successfully', 'success');
+                this.showToast('Success', 'Map saved successfully', 'success');
                 
                 // Mark as saved (clears unsaved changes flag)
                 this.markAsSaved();
@@ -742,19 +718,19 @@ class MapEditorPage {
             console.error('Save failed:', error);
             this.logToConsole(`Save failed: ${error}`);
             this.updateEditorStatus('Save Error');
-            this.toastManager?.showToast('Error', 'Failed to save map', 'error');
+            this.showToast('Error', 'Failed to save map', 'error');
         }
     }
 
     private exportMap(): void {
         this.logToConsole('Exporting map...');
         // TODO: Implement map export functionality
-        this.toastManager?.showToast('Export', 'Export functionality not yet implemented', 'info');
+        this.showToast('Export', 'Export functionality not yet implemented', 'info');
     }
 
     private async saveMapTitle(newTitle: string): Promise<void> {
         if (!newTitle.trim()) {
-            this.toastManager?.showToast('Error', 'Map title cannot be empty', 'error');
+            this.showToast('Error', 'Map title cannot be empty', 'error');
             return;
         }
 
@@ -772,12 +748,12 @@ class MapEditorPage {
             await this.saveMap();
             
             this.logToConsole('Map title updated successfully');
-            this.toastManager?.showToast('Success', 'Map title updated', 'success');
+            this.showToast('Success', 'Map title updated', 'success');
             
         } catch (error) {
             console.error('Failed to save map title:', error);
             this.logToConsole(`Failed to save map title: ${error}`);
-            this.toastManager?.showToast('Error', 'Failed to update map title', 'error');
+            this.showToast('Error', 'Failed to update map title', 'error');
             
             // Revert the title on error
             if (this.mapData) {
@@ -854,25 +830,7 @@ class MapEditorPage {
         });
     }
 
-    // Theme management
-    private handleThemeToggleClick(): void {
-        const currentSetting = ThemeManager.getCurrentThemeSetting();
-        const nextSetting = ThemeManager.getNextTheme(currentSetting);
-        ThemeManager.setTheme(nextSetting);
-        this.updateThemeButtonState(nextSetting);
-    }
-
-    private updateThemeButtonState(currentTheme?: string): void {
-        if (!this.themeToggleButton || !this.themeToggleIcon) return;
-
-        const themeToDisplay = currentTheme || ThemeManager.getCurrentThemeSetting();
-        const iconSVG = ThemeManager.getIconSVG(themeToDisplay);
-        const label = `Toggle theme (currently: ${ThemeManager.getThemeLabel(themeToDisplay)})`;
-
-        this.themeToggleIcon.innerHTML = iconSVG;
-        this.themeToggleButton.setAttribute('aria-label', label);
-        this.themeToggleButton.setAttribute('title', label);
-    }
+    // Theme management is handled by BasePage
 
     // Dockview panel creation methods
     private createToolsComponent() {

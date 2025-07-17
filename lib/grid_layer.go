@@ -45,7 +45,7 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 	viewportX := float64(gl.x)
 	viewportY := float64(gl.y)
 	fmt.Println("ViewportX,Y: ", viewportX, viewportY)
-	y := viewportY - minY - (options.TileHeight * 0.25)
+	startY := viewportY - minY // + (options.TileHeight / 2.0)
 	startX := viewportX - (minX + startingX) - (options.TileWidth / 2.0)
 	height := float64(gl.height)
 	width := float64(gl.width)
@@ -56,17 +56,17 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 			currX = startX + options.TileWidth/2.0
 		}
 		rowCoord := leftCoord
-		// fmt.Println("Row, LeftCoord: ", i, y, leftCoord)
+		// fmt.Println("Row, LeftCoord: ", i, startY, leftCoord)
 		for ; currX < width; currX += options.TileWidth {
-			// fmt.Println("currX, currY, Coord: ", currX, y, rowCoord, width, height, options)
+			// fmt.Println("currX, currY, Coord: ", currX, startY, rowCoord, width, height, options)
 			// Draw grid lines if enabled
 			if options.ShowGrid {
-				gl.drawHexGrid(currX, y, options)
+				gl.drawHexGrid(currX, startY, options)
 			}
 
 			// Draw coordinates if enabled
 			if options.ShowCoordinates {
-				gl.drawCoordinates(rowCoord, currX, y, options)
+				gl.drawCoordinates(rowCoord, currX, startY, options)
 			}
 			rowCoord = rowCoord.Neighbor(RIGHT)
 		}
@@ -76,8 +76,8 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 		} else {
 			leftCoord = leftCoord.Neighbor(BOTTOM_LEFT)
 		}
-		y += options.YIncrement
-		if y >= height {
+		startY += options.YIncrement
+		if startY >= height {
 			// out of bounds so stop
 			break
 		}
@@ -133,9 +133,10 @@ func (gl *GridLayer) getHexVertices(centerX, centerY, tileWidth, tileHeight floa
 	vertices := make([][2]float64, 6)
 
 	// Use actual tile dimensions for proper hexagon shape
+	size := tileHeight // tileWidth / SQRT3
 	radiusX := tileWidth / 2
-	radiusY := tileHeight / 2
-	h4 := tileHeight / 4
+	radiusY := size / 2
+	h4 := size / 4
 
 	vertices[0][0], vertices[0][1] = centerX, centerY-radiusY
 	vertices[1][0], vertices[1][1] = centerX+radiusX, centerY-h4

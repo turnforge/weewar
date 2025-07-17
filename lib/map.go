@@ -2,6 +2,7 @@ package weewar
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 )
 
@@ -188,15 +189,16 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 	// For pointy-topped hexagons with odd-r layout:
 	// x = size * sqrt(3) * (q + r/2)
 	// y = size * 3/2 * r
-	// where size = tileWidth (center-to-center distance)
+	size := tileWidth / SQRT3
 
 	// Convert normalized origin to pixel coordinates
 	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
 	originPixelX := 0.0 // m.OriginX * tileWidth
 	originPixelY := 0.0 // m.OriginY * tileHeight
 
-	x = originPixelX + tileWidth*1.732050808*(q+r/2.0) // 1.732050808 ≈ sqrt(3)
-	y = originPixelY + tileHeight*3.0/2.0*r
+	// tileWidth = size * SQRT3
+	x = originPixelX + tileWidth*(q+r/2.0) // 1.732050808 ≈ sqrt(3)
+	y = originPixelY + size*1.5*r
 
 	return x, y
 }
@@ -205,30 +207,55 @@ func (m *Map) CenterXYForTile(coord CubeCoord, tileWidth, tileHeight, yIncrement
 // Given x,y screen coordinates and tile size properties, returns the CubeCoord
 // Uses the Map's normalized OriginX/OriginY for proper coordinate translation
 // Based on formulas from redblobgames.com for pointy-topped hexagons with odd-r layout
-func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) CubeCoord {
-	// Convert normalized origin to pixel coordinates
-	// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
-	originPixelX := 0.0 // m.OriginX * tileWidth
-	originPixelY := 0.0 // m.OriginY * tilHeight
+func (m *Map) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) (coord CubeCoord) {
+	if false {
+		// Convert normalized origin to pixel coordinates
+		// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
+		originPixelX := 0.0 // m.OriginX * tileWidth
+		originPixelY := 0.0 // m.OriginY * tilHeight
 
-	// Translate screen coordinates to hex coordinate space by removing origin offset
-	hexX := x - originPixelX
-	hexY := y - originPixelY
+		// Translate screen coordinates to hex coordinate space by removing origin offset
+		hexX := x - originPixelX
+		hexY := y - originPixelY
 
-	// For pointy-topped hexagons, convert pixel coordinates to fractional hex coordinates
-	// Using inverse of the hex-to-pixel conversion formulas:
-	// x = size * sqrt(3) * (q + r/2)  =>  q = (sqrt(3) * x) / (y * 3)
-	// y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
+		// For pointy-topped hexagons, convert pixel coordinates to fractional hex coordinates
+		// Using inverse of the hex-to-pixel conversion formulas:
+		// x = size * sqrt(3) * (q + r/2)  =>  q = (sqrt(3) * x) / (y * 3)
+		// y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
+		size := tileWidth / SQRT3
 
-	// Calculate fractional q coordinate
-	fractionalQ := (hexX*SQRT3 - y) / (tileWidth * 3.0)
+		// Calculate fractional q coordinate
+		fractionalQ := (hexX*SQRT3 - y) / (size * 3.0)
 
-	// Calculate fractional r coordinate
-	fractionalR := (hexY * 2.0) / (3.0 / tileHeight)
+		// Calculate fractional r coordinate
+		fractionalR := (hexY * 2.0) / (3.0 * size)
 
-	// Round to nearest integer coordinates using cube coordinate rounding
-	// This ensures we get the correct hex tile even for coordinates near boundaries
-	return roundCubeCoord(fractionalQ, fractionalR)
+		// Round to nearest integer coordinates using cube coordinate rounding
+		// This ensures we get the correct hex tile even for coordinates near boundaries
+		coord = roundCubeCoord(fractionalQ, fractionalR)
+
+		fmt.Println("X,Y: ", x, y)
+		fmt.Println("FQ, FR, FQ+FR: ", fractionalQ, fractionalR, fractionalQ+fractionalR)
+	} else { // given we can have non "equal" side length hexagons, easier to do this by converting to row/col first
+		row := int((y + tileHeight/2) / yIncrement)
+
+		halfDists := int(1 + math.Abs(x*2/tileWidth))
+		if row%2 != 0 {
+			halfDists = int(1 + math.Abs((x-tileWidth/2)*2/tileWidth))
+		}
+		// log.Println("Half Dists: ", halfDists)
+		col := halfDists / 2
+		if x < 0 {
+			col = -col
+		}
+		// col := int((x + tileWidth/2) / tileWidth)
+		coord = m.RowColToHex(row, col)
+		// fmt.Println("X,Y: ", x, y)
+		fmt.Println("Row, Col: ", row, col)
+	}
+	// fmt.Println("Final Coord: ", coord)
+	// fmt.Println("======")
+	return
 }
 
 // roundCubeCoord rounds fractional cube coordinates to the nearest integer cube coordinate

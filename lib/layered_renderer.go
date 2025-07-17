@@ -125,19 +125,19 @@ func (r *LayeredRenderer) scheduleRender() {
 
 // ForceRender immediately renders all dirty layers (for synchronous updates)
 func (r *LayeredRenderer) ForceRender() {
-	fmt.Printf("LayeredRenderer.ForceRender called - terrain dirty: %d, units dirty: %d, UI dirty: %v\n")
+	// fmt.Printf("LayeredRenderer.ForceRender called - terrain dirty: %d, units dirty: %d, UI dirty: %v\n")
 
 	if r.batchTimer != nil {
 		r.batchTimer.Stop()
 	}
 	r.performRender()
 	r.renderPending = false
-	fmt.Printf("DEBUG: ForceRender() completed successfully\n")
+	// fmt.Printf("DEBUG: ForceRender() completed successfully\n")
 }
 
 // performRender executes the actual rendering of dirty layers
 func (r *LayeredRenderer) performRender() {
-	fmt.Printf("LayeredRenderer.performRender called\n")
+	// fmt.Printf("LayeredRenderer.performRender called\n")
 
 	for _, layer := range r.layers {
 		if layer.IsDirty() {
@@ -146,9 +146,7 @@ func (r *LayeredRenderer) performRender() {
 	}
 
 	// Composite all layers to main canvas
-	fmt.Printf("Compositing layers to main canvas\n")
 	r.composite()
-	fmt.Printf("DEBUG: performRender() completed successfully\n")
 }
 
 // composite blends all layer buffers to the main drawable
@@ -171,7 +169,6 @@ func (r *LayeredRenderer) composite() {
 	}
 }
 
-
 // blendBuffers blends src buffer onto dst buffer with alpha blending
 func (r *LayeredRenderer) blendBuffers(dst, src *Buffer) {
 	dstImg := dst.GetImageData()
@@ -183,7 +180,7 @@ func (r *LayeredRenderer) blendBuffers(dst, src *Buffer) {
 
 // Resize updates the layer buffer sizes
 func (r *LayeredRenderer) SetViewPort(x, y, width, height int) error {
-	fmt.Printf("LayeredRenderer.SetViewPort called with: x=%d, y=%d, width=%d, height=%d\n", x, y, width, height)
+	// fmt.Printf("LayeredRenderer.SetViewPort called with: x=%d, y=%d, width=%d, height=%d\n", x, y, width, height)
 	r.x = x
 	r.y = y
 	r.width = width

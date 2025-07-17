@@ -148,3 +148,12 @@ func (c CubeCoord) String() string {
 func (c CubeCoord) Plus(dQ, dR int) CubeCoord {
 	return CubeCoord{c.Q + dQ, c.R + dR}
 }
+
+// Some functions to work with hex tiles
+
+// Using this we can evaluate a lot of things
+type HexTile struct {
+	TileWidth      float64
+	TileHeight     float64
+	LeftSideHeight float64
+}

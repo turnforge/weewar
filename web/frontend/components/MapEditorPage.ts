@@ -937,7 +937,7 @@ class MapEditorPage {
         if (coords && coords.row >= 0 && coords.row < this.mapData.height && 
             coords.col >= 0 && coords.col < this.mapData.width) {
             
-            this.logToConsole(`Clicked hex (${coords.row}, ${coords.col})`);
+            // this.logToConsole(`Clicked hex (${coords.row}, ${coords.col})`);
             this.paintHexAtCoords(coords.row, coords.col);
         }
     }
@@ -949,7 +949,7 @@ class MapEditorPage {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        console.log(`Event XY: ({event.clientX}, {event.clientY}), Rect XY: (${rect.left}, ${rect.top}), localXY: (${x}, ${y})`)
+        // console.log(`Event XY: (${event.clientX}, ${event.clientY}), Rect XY: (${rect.left}, ${rect.top}), localXY: (${x}, ${y})`)
         
         // Use client-side coordinate conversion for performance
         const coords = this.clientPixelToCoords(x, y);
@@ -970,8 +970,13 @@ class MapEditorPage {
         }
     }
 
-    private pixelToHex(x: number, y: number): {row: number, col: number, cubeQ: number, cubeR: number} | null {
+    private pixelToHex(mx: number, my: number): {row: number, col: number, cubeQ: number, cubeR: number} | null {
         if (!this.mapCanvas || !this.mapData) return null;
+
+        const x = mx - this.scrollOffset.x;
+        const y = my - this.scrollOffset.y;
+
+        console.log("Doing pixelToHex, x, y: ", x, y, this.mapData)
         
         // Use WASM coordinate conversion for maximum accuracy
         if (this.wasmInitialized && (window as any).editorPixelToCoords) {
@@ -982,11 +987,11 @@ class MapEditorPage {
                     
                     // Use WASM-provided bounds validation (supports arbitrary coordinate regions)
                     if (withinBounds) {
-                        this.logToConsole(`Pixel (${x}, ${y}) -> Hex (${row}, ${col}) Q=${cubeQ} R=${cubeR} [WASM conversion, within bounds]`);
+                        this.logToConsole(`Pixel (${x}, ${y}) -> RowCal (${row}, ${col}) = QR(${cubeQ}, ${cubeR}) [WASM conversion, within bounds]`);
                         return { row, col, cubeQ, cubeR };
                     }
                     
-                    this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds (${row}, ${col}) Q=${cubeQ} R=${cubeR} [WASM conversion]`);
+                    this.logToConsole(`Pixel (${x}, ${y}) -> Out of bounds RowCal (${row}, ${col}) = QR(${cubeQ}, ${cubeR}) [WASM conversion]`);
                     return null;
                 }
             } catch (error) {
@@ -1046,7 +1051,7 @@ class MapEditorPage {
                 // No need to call renderMapCanvas() - WASM pushes the update directly
                 
                 const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
-                this.logToConsole(`Painted ${terrainNames[this.currentTerrain]} at (${row}, ${col})`);
+                // this.logToConsole(`Painted ${terrainNames[this.currentTerrain]} at (${row}, ${col})`);
             } else {
                 this.logToConsole(`Paint failed: ${result.error}`);
             }

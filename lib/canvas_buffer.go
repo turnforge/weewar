@@ -256,14 +256,13 @@ func (cb *CanvasBuffer) DrawImage(x, y, width, height float64, img image.Image) 
 	canvasX := x / PixelsPerMM
 	canvasY := y / PixelsPerMM
 
-	fmt.Printf("DEBUG: DrawImage called with buffer coords (%.2f, %.2f) -> canvas coords (%.2f, %.2f), image size: %dx%d\n",
-		x, y, canvasX, canvasY, img.Bounds().Dx(), img.Bounds().Dy())
+	// fmt.Printf("DEBUG: DrawImage called with buffer coords (%.2f, %.2f) -> canvas coords (%.2f, %.2f), image size: %dx%d\n", x, y, canvasX, canvasY, img.Bounds().Dx(), img.Bounds().Dy())
 
 	// Draw the actual image using the canvas context
 	// Note: tdewolff/canvas DrawImage uses image's natural size, scaling handled by resolution
 	cb.context.DrawImage(canvasX, canvasY, img, canvas.Resolution(PixelsPerMM))
 
-	fmt.Printf("DEBUG: DrawImage completed\n")
+	// fmt.Printf("DEBUG: DrawImage completed\n")
 }
 
 // DrawTextDirect uses the HTML Canvas 2D API directly for text rendering
@@ -284,11 +283,11 @@ func (cb *CanvasBuffer) DrawTextDirect(x, y float64, text string, fontSize float
 	ctx.Set("font", fontSpec)
 	ctx.Set("textAlign", "center")
 	ctx.Set("textBaseline", "middle")
-	
+
 	// Set text color
 	colorStr := fmt.Sprintf("rgba(%d, %d, %d, %.2f)", color.R, color.G, color.B, float64(color.A)/255.0)
 	ctx.Set("fillStyle", colorStr)
-	
+
 	// Draw the text directly to the canvas
 	ctx.Call("fillText", text, x, y)
 }

@@ -108,7 +108,7 @@ func main() {
 	// Initialize WorldEditor with the World
 	globalEditor = weewar.NewWorldEditor()
 	globalEditor.NewWorld() // This creates a 1x1 world internally
-	
+
 	// Set default map size to 5x5
 	_, err := setMapSize(5, 5)
 	if err != nil {
@@ -205,6 +205,9 @@ func registerEditorFunctions() {
 	}))
 	js.Global().Set("editorGetMapBounds", createWrapper(0, 0, func(args []js.Value) (any, error) {
 		return getMapBounds()
+	}))
+	js.Global().Set("editorPixelToCoords", createWrapper(2, 2, func(args []js.Value) (any, error) {
+		return pixelToCoords(args[0].Float(), args[1].Float())
 	}))
 }
 
@@ -406,6 +409,7 @@ func getMapBounds() (map[string]any, error) {
 // =============================================================================
 
 func pixelToCoords(x, y float64) (map[string]any, error) {
+
 	coord := globalWorld.Map.XYToQR(x, y, weewar.DefaultTileWidth, weewar.DefaultTileHeight, weewar.DefaultYIncrement)
 
 	// Convert cube coordinates to row/col using proper conversion

@@ -25,14 +25,25 @@ func (m *Map) NumCols() int {
 // HexToRowCol converts cube coordinates to display coordinates (row, col)
 // Uses a standard hex-to-array conversion (odd-row offset style)
 func (m *Map) HexToRowCol(coord CubeCoord) (row, col int) {
-	row = coord.R
-	col = coord.Q + (coord.R+(coord.R&1))/2
-	return row, col
+	/*
+		row = coord.R
+		col = coord.Q + (coord.R+(coord.R&1))/2
+		return row, col
+	*/
+	// cube_to_oddr(cube):
+	z := -coord.Q - coord.R
+	col = coord.Q + (z-(z&1))/2
+	row = z
+	return
 }
 
 // RowColToHex converts display coordinates (row, col) to cube coordinates
 // Uses a standard array-to-hex conversion (odd-row offset style)
 func (m *Map) RowColToHex(row, col int) CubeCoord {
-	q := col - (row+(row&1))/2
-	return NewCubeCoord(q, row)
+	// q := col - (row+(row&1))/2 return NewCubeCoord(q, row)
+	// oddr_to_cube(hex):
+	x := col - (row-(row&1))/2
+	z := row
+	y := -x - z
+	return CubeCoord{y, x}
 }

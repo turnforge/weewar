@@ -1229,15 +1229,25 @@ class MapEditorPage extends BasePage {
         }
         
         
-        // Place or replace unit (only one unit per tile)
-        this.mapData.units[unitKey] = {
-            unitType: this.currentUnit,
-            playerId: this.currentPlayerId
-        };
+        // Check if there's already a unit at this location
+        const existingUnit = this.mapData.units[unitKey];
         
-        // Use brush size 1 for units
-        this.phaserPanel?.paintUnit(q, r, this.currentUnit, this.currentPlayerId);
-        this.logToConsole(`Placed unit ${this.currentUnit} (player ${this.currentPlayerId}) at Q=${q}, R=${r}`);
+        if (existingUnit && existingUnit.unitType === this.currentUnit) {
+            // Same unit type exists - toggle it off (remove it)
+            delete this.mapData.units[unitKey];
+            this.phaserPanel?.removeUnit(q, r);
+            this.logToConsole(`Removed unit ${this.currentUnit} at Q=${q}, R=${r} (toggle)`);
+        } else {
+            // Different unit or no unit - place/replace the unit
+            this.mapData.units[unitKey] = {
+                unitType: this.currentUnit,
+                playerId: this.currentPlayerId
+            };
+            
+            // Use brush size 1 for units
+            this.phaserPanel?.paintUnit(q, r, this.currentUnit, this.currentPlayerId);
+            this.logToConsole(`Placed unit ${this.currentUnit} (player ${this.currentPlayerId}) at Q=${q}, R=${r}`);
+        }
         
         this.markAsChanged();
     }

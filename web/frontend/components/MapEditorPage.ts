@@ -718,31 +718,52 @@ class MapEditorPage extends BasePage {
             this.logToConsole('Saving map...');
             this.updateEditorStatus('Saving...');
 
-            // Collect current map data including tiles from Phaser panel
-            const mapToSave = {
-                ...this.mapData
-            };
-
-            // Get terrain data from Phaser panel if available
+            // Build tiles data in the correct format for CreateMap API
+            const tiles: { [key: string]: any } = {};
             if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
                 const tilesData = this.phaserPanel.getTilesData();
-                mapToSave.tiles = {};
                 
                 tilesData.forEach(tile => {
                     const key = `${tile.q},${tile.r}`;
-                    mapToSave.tiles[key] = {
-                        tileType: tile.terrain
+                    tiles[key] = {
+                        q: tile.q,
+                        r: tile.r,
+                        tile_type: tile.terrain,
+                        player: tile.color
                     };
                 });
                 
                 this.logToConsole(`Saving ${tilesData.length} tiles`);
             }
-            
-            // Units are already stored in mapData.units, so they will be included in mapToSave
-            const unitCount = Object.keys(mapToSave.units || {}).length;
-            if (unitCount > 0) {
-                this.logToConsole(`Saving ${unitCount} units`);
+
+            // Build units data in the correct format for CreateMap API
+            const mapUnits: any[] = [];
+            if (this.mapData.units) {
+                Object.entries(this.mapData.units).forEach(([key, unit]) => {
+                    const [q, r] = key.split(',').map(Number);
+                    mapUnits.push({
+                        q: q,
+                        r: r,
+                        player: unit.playerId,
+                        unit_type: unit.unitType
+                    });
+                });
+                this.logToConsole(`Saving ${mapUnits.length} units`);
             }
+
+            // Build the CreateMapRequest structure
+            const createMapRequest = {
+                map: {
+                    id: this.currentMapId || 'new-map',
+                    name: this.mapData.name || 'Untitled Map',
+                    description: '',
+                    tags: [],
+                    difficulty: 'medium',
+                    creator_id: 'editor-user', // TODO: Get actual user ID
+                    tiles: tiles,
+                    map_units: mapUnits
+                }
+            };
 
             const url = this.isNewMap ? '/api/v1/maps' : `/api/v1/maps/${this.currentMapId}`;
             const method = this.isNewMap ? 'POST' : 'PUT';
@@ -752,12 +773,13 @@ class MapEditorPage extends BasePage {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(mapToSave),
+                body: JSON.stringify(createMapRequest),
             });
 
             if (response.ok) {
                 const result = await response.json();
                 this.logToConsole('Map saved successfully');
+                this.logToConsole(`Response: ${JSON.stringify(result)}`);
                 this.updateEditorStatus('Saved');
                 this.showToast('Success', 'Map saved successfully', 'success');
                 
@@ -765,12 +787,14 @@ class MapEditorPage extends BasePage {
                 this.markAsSaved();
                 
                 // If this was a new map, update the current map ID
-                if (this.isNewMap && result.id) {
-                    this.currentMapId = result.id;
+                const mapId = result.map?.id || result.id;
+                if (this.isNewMap && mapId) {
+                    this.currentMapId = mapId;
                     this.isNewMap = false;
                     // Update URL without reload
-                    history.replaceState(null, '', `/maps/${result.id}/edit`);
-                    this.logToConsole(`Map ID updated to: ${result.id}`);
+                    history.replaceState(null, '', `/maps/${mapId}/edit`);
+                    this.logToConsole(`Map ID updated to: ${mapId}`);
+                    this.logToConsole(`URL updated to: /maps/${mapId}/edit`);
                 }
             } else {
                 const errorText = await response.text();

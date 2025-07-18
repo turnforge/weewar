@@ -1631,8 +1631,8 @@ class MapEditorPage extends BasePage {
             return;
         }
         
-        
         // Check if there's already a unit at this location
+        this.mapData.units = this.mapData.units || {}
         const existingUnit = this.mapData.units[unitKey];
         
         if (existingUnit && existingUnit.unitType === this.currentUnit) {

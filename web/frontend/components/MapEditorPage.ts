@@ -1,6 +1,7 @@
 import { BasePage } from './BasePage';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { PhaserPanel } from './PhaserPanel';
+import { TileStatsPanel } from './TileStatsPanel';
 
 class MapBounds {
   MinQ: number;
@@ -50,6 +51,9 @@ class MapEditorPage extends BasePage {
     
     // Phaser panel for map editing
     private phaserPanel: PhaserPanel | null = null;
+    
+    // TileStats panel for displaying statistics
+    private tileStatsPanel: TileStatsPanel | null = null;
 
     // Change tracking for unsaved changes
     private hasUnsavedChanges: boolean = false;
@@ -116,6 +120,8 @@ class MapEditorPage extends BasePage {
                         return this.createToolsComponent();
                     case 'phaser':
                         return this.createPhaserComponent();
+                    case 'tilestats':
+                        return this.createTileStatsComponent();
                     case 'console':
                         return this.createConsoleComponent();
                     case 'advancedTools':
@@ -932,6 +938,28 @@ class MapEditorPage extends BasePage {
         };
     }
 
+    private createTileStatsComponent() {
+        // Create a container for the TileStats panel
+        const container = document.createElement('div');
+        container.id = 'tilestats-container';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        
+        return {
+            element: container,
+            init: () => {
+                // Initialize TileStats panel
+                this.initializeTileStatsPanel();
+            },
+            dispose: () => {
+                if (this.tileStatsPanel) {
+                    this.tileStatsPanel.destroy();
+                    this.tileStatsPanel = null;
+                }
+            }
+        };
+    }
+
     private createConsoleComponent() {
         const template = document.getElementById('console-panel-template');
         if (!template) {
@@ -981,11 +1009,11 @@ class MapEditorPage extends BasePage {
     private createDefaultDockviewLayout(): void {
         if (!this.dockview) return;
 
-        // Add Phaser panel first (center)
+        // Add main Phaser Map editor panel first (center)
         this.dockview.addPanel({
             id: 'phaser',
             component: 'phaser',
-            title: '🎮 Phaser Editor'
+            title: '🗺️ Map Editor'
         });
 
         // Add tools panel to the left of Phaser
@@ -996,12 +1024,20 @@ class MapEditorPage extends BasePage {
             position: { direction: 'left', referencePanel: 'phaser' }
         });
 
-        // Add advanced tools panel to the right of Phaser
+        // Add TileStats panel to the right of Phaser (replacing the hints panel)
+        this.dockview.addPanel({
+            id: 'tilestats',
+            component: 'tilestats',
+            title: '📊 Map Statistics',
+            position: { direction: 'right', referencePanel: 'phaser' }
+        });
+
+        // Add advanced tools panel to the right of TileStats
         this.dockview.addPanel({
             id: 'advancedTools',
             component: 'advancedTools',
             title: '🔧 Advanced & View',
-            position: { direction: 'right', referencePanel: 'phaser' }
+            position: { direction: 'right', referencePanel: 'tilestats' }
         });
 
         // Add console panel below Phaser
@@ -1071,6 +1107,9 @@ class MapEditorPage extends BasePage {
             this.updateSaveButtonState();
             this.logToConsole('Map has unsaved changes');
         }
+        
+        // Auto-refresh TileStats when map changes
+        this.refreshTileStats();
     }
     
     private markAsSaved(): void {
@@ -1107,6 +1146,11 @@ class MapEditorPage extends BasePage {
         // Destroy Phaser panel if it exists
         if (this.phaserPanel) {
             this.phaserPanel.destroy();
+        }
+        
+        // Destroy TileStats panel if it exists
+        if (this.tileStatsPanel) {
+            this.tileStatsPanel.destroy();
         }
     }
     
@@ -1286,6 +1330,53 @@ class MapEditorPage extends BasePage {
         return tilesData.some(tile => tile.q === q && tile.r === r);
     }
     
+    // TileStats panel methods
+    private initializeTileStatsPanel(): void {
+        try {
+            this.logToConsole('Initializing TileStats panel...');
+            
+            // Initialize TileStats panel
+            this.tileStatsPanel = new TileStatsPanel();
+            
+            // Initialize the panel
+            const success = this.tileStatsPanel.initialize('tilestats-container');
+            
+            if (success) {
+                // Set up refresh button handler
+                this.tileStatsPanel.onRefresh(() => {
+                    this.refreshTileStats();
+                });
+                
+                // Initial stats update
+                this.refreshTileStats();
+                
+                this.logToConsole('TileStats panel initialized successfully!');
+            } else {
+                throw new Error('Failed to initialize TileStats panel');
+            }
+            
+        } catch (error) {
+            this.logToConsole(`Failed to initialize TileStats panel: ${error}`);
+        }
+    }
+    
+    private refreshTileStats(): void {
+        if (!this.tileStatsPanel || !this.tileStatsPanel.getIsInitialized()) {
+            return;
+        }
+        
+        // Get tiles data from Phaser panel
+        const tilesData = this.phaserPanel?.getTilesData() || [];
+        
+        // Get units data from mapData
+        const unitsData = this.mapData?.units || {};
+        
+        // Update the stats panel
+        this.tileStatsPanel.updateStats(tilesData, unitsData);
+        
+        this.logToConsole(`Stats refreshed: ${tilesData.length} tiles, ${Object.keys(unitsData).length} units`);
+    }
+
     // Public methods for Phaser panel (for backward compatibility with UI)
     public initializePhaser(): void {
         this.initializePhaserPanel();

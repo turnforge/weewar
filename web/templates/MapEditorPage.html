@@ -132,6 +132,9 @@
                 {{# include "panels/AdvancedToolsPanel.html" #}}
             </div>
         </div>
+        
+        <!-- Hidden Map Data for Frontend -->
+        <pre id="map-data-json" style="display: none;">{{ if .Map }}{{ .Map | ToJson }}{{ else }}null{{ end }}</pre>
     </main>
 {{ end }}
 

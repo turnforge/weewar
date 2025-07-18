@@ -58,6 +58,7 @@ class MapEditorPage extends BasePage {
     // Change tracking for unsaved changes
     private hasUnsavedChanges: boolean = false;
     private originalMapData: string = '';
+    private hasPendingMapDataLoad: boolean = false;
 
     constructor() {
         super();
@@ -476,40 +477,154 @@ class MapEditorPage extends BasePage {
 
 
     private initializeNewMap(): void {
-        this.mapData = {
-            name: "New Map",
-            width: 8,
-            height: 8,
-            tiles: {},
-            units: {},
-        };
+        // Try to load template map data from hidden element first
+        const templateMapData = this.loadMapDataFromElement();
+        
+        if (templateMapData) {
+            this.mapData = templateMapData;
+            this.logToConsole('New map initialized with template data');
+        } else {
+            this.mapData = {
+                name: "New Map",
+                width: 8,
+                height: 8,
+                tiles: {},
+                units: {},
+            };
+            this.logToConsole('New map initialized with default data');
+        }
+        
         this.updateEditorStatus('New Map');
-        this.logToConsole('New map initialized');
     }
 
     private async loadExistingMap(mapId: string): Promise<void> {
         try {
-            // TODO: Load map data from API
             this.logToConsole(`Loading map data for ${mapId}...`);
             this.updateEditorStatus('Loading...');
             
-            // Placeholder - will be replaced with actual API call
-            setTimeout(() => {
-                this.mapData = {
-                    name: `Map ${mapId}`,
-                    width: 8,
-                    height: 8,
-                    tiles: {},
-                    units: {},
-                };
+            // Load map data from hidden element (passed from backend)
+            const mapData = this.loadMapDataFromElement();
+            
+            if (mapData) {
+                this.mapData = mapData;
                 this.updateEditorStatus('Loaded');
-                this.logToConsole('Map data loaded');
-            }, 1000);
+                this.logToConsole('Map data loaded from server');
+                
+                // Mark that we have map data to load into Phaser
+                this.hasPendingMapDataLoad = true;
+            } else {
+                throw new Error('No map data found in page');
+            }
             
         } catch (error) {
             console.error('Failed to load map:', error);
             this.logToConsole(`Failed to load map: ${error}`);
             this.updateEditorStatus('Load Error');
+        }
+    }
+    
+    /**
+     * Load map data from hidden element in the HTML
+     */
+    private loadMapDataFromElement(): any {
+        try {
+            const mapDataElement = document.getElementById('map-data-json');
+            this.logToConsole(`Map data element found: ${mapDataElement ? 'YES' : 'NO'}`);
+            
+            if (mapDataElement && mapDataElement.textContent) {
+                this.logToConsole(`Raw map data content: ${mapDataElement.textContent.substring(0, 200)}...`);
+                const mapData = JSON.parse(mapDataElement.textContent);
+                
+                if (mapData && mapData !== null) {
+                    this.logToConsole('Map data found in page element');
+                    this.logToConsole(`Map data keys: ${Object.keys(mapData).join(', ')}`);
+                    if (mapData.tiles) {
+                        this.logToConsole(`Tiles data keys: ${Object.keys(mapData.tiles).join(', ')}`);
+                    }
+                    if (mapData.map_units) {
+                        this.logToConsole(`Units data length: ${mapData.map_units.length}`);
+                    }
+                    return mapData;
+                }
+            }
+            this.logToConsole('No map data found in page element');
+            return null;
+        } catch (error) {
+            console.error('Error parsing map data from element:', error);
+            this.logToConsole(`Error parsing map data: ${error}`);
+            return null;
+        }
+    }
+    
+    /**
+     * Load map data (tiles and units) into the Phaser scene
+     */
+    private loadMapDataIntoPhaser(): void {
+        this.logToConsole('loadMapDataIntoPhaser called');
+        this.logToConsole(`Phaser panel initialized: ${this.phaserPanel ? this.phaserPanel.getIsInitialized() : 'panel is null'}`);
+        this.logToConsole(`Map data exists: ${this.mapData ? 'YES' : 'NO'}`);
+        
+        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized() || !this.mapData) {
+            this.logToConsole('Skipping Phaser data load - preconditions not met');
+            return;
+        }
+        
+        try {
+            // Load tiles using setTilesData for better performance
+            if (this.mapData.tiles) {
+                const tilesArray: Array<{ q: number; r: number; terrain: number; color: number }> = [];
+                Object.entries(this.mapData.tiles).forEach(([key, tileData]: [string, any]) => {
+                    const [q, r] = key.split(',').map(Number);
+                    if (tileData.tile_type !== undefined) {
+                        tilesArray.push({
+                            q,
+                            r,
+                            terrain: tileData.tile_type,
+                            color: tileData.player || 0
+                        });
+                    }
+                });
+                
+                if (tilesArray.length > 0) {
+                    this.logToConsole(`Attempting to load ${tilesArray.length} tiles:`, tilesArray);
+                    this.phaserPanel.setTilesData(tilesArray);
+                    this.logToConsole(`Loaded ${tilesArray.length} tiles into Phaser`);
+                }
+            }
+            
+            // Load units - check for map_units in the server data structure
+            const serverData = this.mapData as any;
+            if (serverData.map_units && Array.isArray(serverData.map_units)) {
+                serverData.map_units.forEach((unit: any) => {
+                    if (unit.q !== undefined && unit.r !== undefined && unit.unit_type !== undefined) {
+                        const playerId = unit.player || 1;
+                        
+                        // Note: For now, units will be loaded via the units data structure
+                        // The PhaserPanel doesn't have a paintUnit method yet, so we'll
+                        // let the normal unit placement logic handle this through the UI
+                        
+                        // Also store in mapData.units for consistency
+                        const key = `${unit.q},${unit.r}`;
+                        if (this.mapData && !this.mapData.units) {
+                            this.mapData.units = {};
+                        }
+                        if (this.mapData && this.mapData.units) {
+                            this.mapData.units[key] = {
+                                unitType: unit.unit_type,
+                                playerId: playerId
+                            };
+                        }
+                    }
+                });
+                this.logToConsole(`Loaded ${serverData.map_units.length} units into Phaser`);
+            }
+            
+            // Refresh tile stats after loading
+            this.refreshTileStats();
+            
+        } catch (error) {
+            console.error('Error loading map data into Phaser:', error);
+            this.logToConsole(`Error loading into Phaser: ${error}`);
         }
     }
 
@@ -1267,6 +1382,16 @@ class MapEditorPage extends BasePage {
                 
                 this.updateEditorStatus('Ready');
                 this.logToConsole('Phaser panel initialized successfully as default!');
+                
+                // Check if we have pending map data to load
+                if (this.hasPendingMapDataLoad) {
+                    this.logToConsole('Loading pending map data into Phaser...');
+                    // Add a small delay to ensure the Phaser scene is fully ready
+                    setTimeout(() => {
+                        this.loadMapDataIntoPhaser();
+                        this.hasPendingMapDataLoad = false;
+                    }, 100);
+                }
             } else {
                 throw new Error('Failed to initialize Phaser panel');
             }

@@ -1,6 +1,7 @@
 settings:
   project_id: "weewar"
   color_logs: true
+  color_scheme: "dark"
   prefix_logs: true
   prefix_max_length: 15
 

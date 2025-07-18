@@ -129,12 +129,26 @@ export class PhaserMapScene extends Phaser.Scene {
         // Add WASD keys
         this.wasdKeys = this.input.keyboard!.addKeys('W,S,A,D');
         
-        // Mouse wheel zoom
+        // Mouse wheel zoom - zoom around cursor position
         this.input.on('wheel', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[], deltaX: number, deltaY: number) => {
             const camera = this.cameras.main;
+            const oldZoom = camera.zoom;
             const zoomFactor = deltaY > 0 ? 1 - this.zoomSpeed : 1 + this.zoomSpeed;
-            const newZoom = Phaser.Math.Clamp(camera.zoom * zoomFactor, 0.1, 3);
+            const newZoom = Phaser.Math.Clamp(oldZoom * zoomFactor, 0.1, 3);
+            
+            // Calculate world coordinates under mouse cursor before zoom
+            const worldX = camera.scrollX + (pointer.x - camera.centerX) / oldZoom;
+            const worldY = camera.scrollY + (pointer.y - camera.centerY) / oldZoom;
+            
+            // Apply the zoom
             camera.setZoom(newZoom);
+            
+            // Calculate new camera position to keep world point under cursor
+            const newScrollX = worldX - (pointer.x - camera.centerX) / newZoom;
+            const newScrollY = worldY - (pointer.y - camera.centerY) / newZoom;
+            
+            camera.scrollX = newScrollX;
+            camera.scrollY = newScrollY;
         });
     }
     

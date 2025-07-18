@@ -168,6 +168,19 @@ class MapEditorPage extends BasePage {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
+            // Don't interfere with input fields
+            const target = e.target as HTMLElement;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+                // Only handle our specific shortcuts in input fields, let other keys pass through
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    if (this.hasUnsavedChanges) {
+                        this.saveMap();
+                    }
+                }
+                return;
+            }
+            
             // Ctrl+S or Cmd+S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
@@ -766,7 +779,7 @@ class MapEditorPage extends BasePage {
             };
 
             const url = this.isNewMap ? '/api/v1/maps' : `/api/v1/maps/${this.currentMapId}`;
-            const method = this.isNewMap ? 'POST' : 'PUT';
+            const method = this.isNewMap ? 'POST' : 'PATCH';
 
             const response = await fetch(url, {
                 method,

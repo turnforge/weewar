@@ -744,7 +744,7 @@ class MapEditorPage extends BasePage {
                 this.logToConsole(`Saving ${unitCount} units`);
             }
 
-            const url = this.isNewMap ? '/api/maps' : `/api/maps/${this.currentMapId}`;
+            const url = this.isNewMap ? '/api/v1/maps' : `/api/v1/maps/${this.currentMapId}`;
             const method = this.isNewMap ? 'POST' : 'PUT';
 
             const response = await fetch(url, {

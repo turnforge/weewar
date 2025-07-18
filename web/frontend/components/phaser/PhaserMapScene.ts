@@ -33,6 +33,7 @@ export class PhaserMapScene extends Phaser.Scene {
     // Asset loading
     private terrainsLoaded: boolean = false;
     private unitsLoaded: boolean = false;
+    private sceneReadyCallback: (() => void) | null = null;
     
     constructor() {
         super({ key: 'PhaserMapScene' });
@@ -67,6 +68,12 @@ export class PhaserMapScene extends Phaser.Scene {
         this.updateTheme();
         
         console.log('[PhaserMapScene] Scene created successfully');
+        
+        // Trigger scene ready callback if set
+        if (this.sceneReadyCallback) {
+            this.sceneReadyCallback();
+            this.sceneReadyCallback = null;
+        }
     }
     
     private loadTerrainAssets() {
@@ -622,6 +629,16 @@ export class PhaserMapScene extends Phaser.Scene {
             case 10: return 4;  // X-Large (15 hexes)
             case 15: return 5;  // XX-Large (21 hexes)
             default: return 0;  // Single hex
+        }
+    }
+    
+    // Scene ready callback
+    public onSceneReady(callback: () => void): void {
+        if (this.sceneReadyCallback) {
+            // Scene is already ready, call immediately
+            callback();
+        } else {
+            this.sceneReadyCallback = callback;
         }
     }
     

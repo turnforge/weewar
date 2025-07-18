@@ -186,6 +186,12 @@ export class PhaserMapEditor {
         this.onTileClickCallback = callback;
     }
     
+    public onSceneReady(callback: () => void) {
+        if (this.scene) {
+            this.scene.onSceneReady(callback);
+        }
+    }
+    
     public onMapChange(callback: () => void) {
         this.onMapChangeCallback = callback;
     }

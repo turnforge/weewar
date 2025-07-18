@@ -104,6 +104,17 @@
 - **Layout Optimization**: TileStats below Advanced Tools, maximizing map editor space
 - **Professional UI**: Clean design matching existing theme with responsive dark/light mode
 
+### 11. Map Data Persistence & Loading (v4.4) ✅ COMPLETED
+**Completed**: Full map save/load functionality with proper data formats and user experience
+**Key Achievements**:
+- **CreateMap API Integration**: Fixed data format to match backend protobuf definitions
+- **URL Management**: Automatic URL replacement after first save (new → /maps/{id}/edit)
+- **PATCH Updates**: Proper use of UpdateMap API for existing map modifications
+- **Server-side Data Loading**: Hidden template element for pre-loading map data
+- **Phaser Data Loading**: Automatic loading of tiles and units into editor on page load
+- **Loading UX**: Professional loading indicator during map data initialization
+- **Error Handling**: Comprehensive error handling and user feedback for save/load operations
+
 ## Current Development Focus
 
 ### Phase 4: Phaser.js Polish and Integration ✅ COMPLETED

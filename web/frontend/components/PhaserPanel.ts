@@ -378,6 +378,18 @@ export class PhaserPanel {
     /**
      * Check if panel is initialized
      */
+    /**
+     * Set callback for when scene is ready
+     */
+    public onSceneReady(callback: () => void): void {
+        if (!this.isInitialized || !this.phaserEditor) {
+            console.warn('[PhaserPanel] Cannot set scene ready callback - not initialized');
+            return;
+        }
+        
+        this.phaserEditor.onSceneReady(callback);
+    }
+    
     public getIsInitialized(): boolean {
         return this.isInitialized;
     }

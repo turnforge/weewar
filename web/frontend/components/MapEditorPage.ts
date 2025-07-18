@@ -586,7 +586,7 @@ class MapEditorPage extends BasePage {
                 });
                 
                 if (tilesArray.length > 0) {
-                    this.logToConsole(`Attempting to load ${tilesArray.length} tiles:`, tilesArray);
+                    this.logToConsole(`Attempting to load ${tilesArray.length} tiles: ${JSON.stringify(tilesArray)}`);
                     this.phaserPanel.setTilesData(tilesArray);
                     this.logToConsole(`Loaded ${tilesArray.length} tiles into Phaser`);
                 }
@@ -625,6 +625,37 @@ class MapEditorPage extends BasePage {
         } catch (error) {
             console.error('Error loading map data into Phaser:', error);
             this.logToConsole(`Error loading into Phaser: ${error}`);
+        }
+    }
+
+    /**
+     * Show loading indicator on map
+     */
+    private showMapLoadingIndicator(): void {
+        const mapContainer = document.getElementById('phaser-container');
+        if (mapContainer) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'map-loading-overlay';
+            loadingDiv.className = 'absolute inset-0 bg-gray-900/50 flex items-center justify-center z-50';
+            loadingDiv.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 px-4 py-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center space-x-3">
+                        <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Loading map...</span>
+                    </div>
+                </div>
+            `;
+            mapContainer.appendChild(loadingDiv);
+        }
+    }
+
+    /**
+     * Hide loading indicator
+     */
+    private hideMapLoadingIndicator(): void {
+        const loadingDiv = document.getElementById('map-loading-overlay');
+        if (loadingDiv) {
+            loadingDiv.remove();
         }
     }
 
@@ -1386,10 +1417,12 @@ class MapEditorPage extends BasePage {
                 // Check if we have pending map data to load
                 if (this.hasPendingMapDataLoad) {
                     this.logToConsole('Loading pending map data into Phaser...');
-                    // Add a small delay to ensure the Phaser scene is fully ready
+                    this.showMapLoadingIndicator();
+                    // Use setTimeout with loading indicator
                     setTimeout(() => {
                         this.loadMapDataIntoPhaser();
                         this.hasPendingMapDataLoad = false;
+                        this.hideMapLoadingIndicator();
                     }, 100);
                 }
             } else {

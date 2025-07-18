@@ -133,33 +133,53 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - **Maintainability**: Clean component separation with event-driven architecture
 - **Extensibility**: Phaser.js foundation enables advanced features (animations, effects)
 
-## ⌨️ Phase 5: Keyboard Shortcut System (Planned)
-**Status**: Planned  
-**Timeline**: January 2025
+## ⌨️ Phase 5: Keyboard Shortcut System (Completed)
+**Status**: Production-ready  
+**Timeline**: Completed January 2025
 
-### Comprehensive Keyboard Shortcuts 🚧
-- [ ] Generic KeyboardShortcutManager class for reusable architecture
-- [ ] Multi-key command system: `n12` (nature terrain), `c5` (city terrain), `u3` (unit type)
-- [ ] Smart number handling with preview feedback and auto-complete
-- [ ] Context-aware shortcuts (disable in input fields, modals)
-- [ ] Help system with `?` key overlay showing all available shortcuts
-- [ ] Toast notifications and visual feedback for all shortcut actions
+### Comprehensive Keyboard Shortcuts ✅
+- [x] Generic KeyboardShortcutManager class for reusable architecture
+- [x] Multi-key command system: `n12` (nature terrain), `c5` (city terrain), `u3` (unit type)
+- [x] Smart number handling with backspace editing and timeout management
+- [x] Context-aware shortcuts (disable in input fields, modals)
+- [x] Help system with `?` key overlay showing all available shortcuts
+- [x] Toast notifications and visual feedback for all shortcut actions
 
-### Map Editor Shortcuts 🚧
-- [ ] `n<index>` - Select nature terrain by index
-- [ ] `c<index>` - Select city terrain by index  
-- [ ] `u<index>` - Select unit type for current player
-- [ ] `p<number>` - Set current player
-- [ ] `b<size>` - Set brush size
-- [ ] `esc` - Reset all tools to defaults
-- [ ] `?` - Show comprehensive help overlay
+### Map Editor Shortcuts ✅
+- [x] `n<index>` - Select nature terrain by index (1-5: Grass, Desert, Water, Mountain, Rock)
+- [x] `c<index>` - Select city terrain by index (1-4: city variants)
+- [x] `u<index>` - Select unit type for current player (1-20: all unit types)
+- [x] `p<number>` - Set current player (1-4)
+- [x] `b<size>` - Set brush size (0-5: Single to XX-Large)
+- [x] `esc` - Reset all tools to defaults
+- [x] `?` - Show comprehensive help overlay with categorized shortcuts
 
-### Benefits Planned ⚡
+### Benefits Achieved ✅
 - **Rapid Workflow**: Significantly faster map building with keyboard-first approach
 - **One-handed Operation**: Optimized for mouse + keyboard workflow
 - **Reusable Architecture**: Framework can be used across all application pages
 - **Professional UX**: Industry-standard keyboard shortcut conventions
 - **Context Intelligence**: Smart activation based on current page and input state
+- **Clean Architecture**: Separation of concerns between input handling and UI updates
+
+### Technical Implementation ✅
+- **State Machine**: NORMAL ↔ AWAITING_ARGS with visual indicators
+- **Input Validation**: Proper bounds checking with error feedback
+- **UI Synchronization**: Updates terrain/unit buttons, dropdowns, and visual state
+- **Help Generation**: Auto-generated help content from shortcut configuration
+- **Error Handling**: Clear validation messages for invalid inputs
+
+## 🚀 Phase 5.1: Immediate Execution Enhancement (Planned)
+**Status**: Planned  
+**Timeline**: January 2025
+
+### Enhanced User Experience 🚧
+- [ ] Immediate visual feedback as user types (C3 → instant preview)
+- [ ] Dual-timeout system (preview: 300ms, commit: 3000ms)
+- [ ] Preview handlers for immediate UI updates
+- [ ] Cancel/restore functionality with Escape key
+- [ ] Configurable execution modes (current vs immediate)
+- [ ] State management for undo/restore operations
 
 ## 📋 Phase 6: Games Management System (Planned)
 **Status**: Planned  

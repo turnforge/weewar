@@ -164,32 +164,40 @@
 - [x] Event callback system for tile clicks and map changes
 - [x] Clean initialization and cleanup methods
 
-### Phase 5: Keyboard Shortcut System (v5.0) 🚧 PLANNED
+### Phase 5: Keyboard Shortcut System (v5.0) ✅ COMPLETED
 **Goal**: Implement comprehensive keyboard shortcut system for rapid map building
-**Design Decisions**:
-- **Multi-key State Machine**: Commands like `n12` (nature terrain 12), `c5` (city terrain 5), `u3` (unit 3)
-- **One-handed Operation**: Optimized for mouse + keyboard workflow (no chord shortcuts)
-- **Reusable Architecture**: Generic KeyboardShortcutManager for use across all pages
-- **Smart Number Handling**: Support single/double digits with preview feedback
-- **Context Awareness**: Disable shortcuts in input fields and modals
-- **Help System**: `?` key shows overlay with all available shortcuts
+**Status**: Production-ready keyboard shortcuts with full functionality
 
-**Core Commands**:
-- `n<index>` - Select nature terrain by index
-- `c<index>` - Select city terrain by index  
-- `u<index>` - Select unit type for current player
-- `p<number>` - Set current player
-- `b<size>` - Set brush size
+**Completed Features**:
+- **KeyboardShortcutManager**: Generic, reusable class with state machine architecture
+- **Multi-key Commands**: `n12`, `c5`, `u3`, `p2`, `b4`, `esc` with number argument support
+- **Help System**: `?` key displays categorized overlay with all available shortcuts
+- **Visual Feedback**: State indicators, toast notifications, and UI synchronization
+- **Context Awareness**: Automatically disabled in input fields and modals
+- **Clean Architecture**: Separation of concerns between input handling and UI updates
+
+**Core Commands Implemented**:
+- `n<index>` - Select nature terrain by index (1-5: Grass, Desert, Water, Mountain, Rock)
+- `c<index>` - Select city terrain by index (1-4: city variants)
+- `u<index>` - Select unit type for current player (1-20: all unit types)
+- `p<number>` - Set current player (1-4)
+- `b<size>` - Set brush size (0-5: Single to XX-Large)
 - `esc` - Reset all tools to defaults
-- `?` - Show help overlay
+- `?` - Show help overlay with categorized shortcuts
 
-**Implementation Components**:
-- Generic KeyboardShortcutManager class
-- Configuration-driven shortcut definitions
-- Visual feedback system with toast notifications
-- Help overlay with auto-generated content
-- UI synchronization with existing tool panels
-- State machine for multi-key command handling
+**Technical Implementation**:
+- **State Machine**: NORMAL ↔ AWAITING_ARGS with 3-second timeout
+- **Input Validation**: Proper bounds checking with error feedback
+- **UI Synchronization**: Updates terrain/unit buttons, dropdowns, and visual state
+- **Toast Integration**: Success/error feedback for all shortcut actions
+- **Help Generation**: Auto-generated help content from shortcut configuration
+
+**User Experience**:
+- **One-handed Operation**: Optimized for mouse + keyboard workflow
+- **Smart Number Handling**: Support for single/double digits with backspace editing
+- **Professional Feedback**: Toast notifications with descriptive messages
+- **Error Handling**: Clear validation messages for invalid inputs
+- **Responsive UI**: Immediate visual updates in tool panels
 
 ### Phase 6: Next Development Priorities (Upcoming) 🚧
 

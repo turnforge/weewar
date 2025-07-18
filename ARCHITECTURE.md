@@ -13,13 +13,13 @@
 
 ### Core Components
 
-#### 1. KeyboardShortcutManager (`web/frontend/components/KeyboardShortcutManager.ts`) 🚧 PLANNED
+#### 1. KeyboardShortcutManager (`web/frontend/components/KeyboardShortcutManager.ts`) ✅ COMPLETED
 **Purpose**: Reusable keyboard shortcut system for all pages
 - **Configuration-driven**: Define shortcuts declaratively with ShortcutConfig interface
 - **State Machine**: Handle multi-key commands (n12, c5, u3) with timeout and visual feedback
 - **Context Awareness**: Disable shortcuts in input fields, modals, and other contexts
 - **Help System**: Auto-generated help overlay from shortcut configuration
-- **Event Integration**: Toast notifications and UI synchronization
+- **Clean Architecture**: Pure input handling with no UI dependencies
 - **Framework Agnostic**: Can be used across Map Editor, Game Play, and Detail pages
 
 ```typescript
@@ -33,14 +33,45 @@ interface ShortcutConfig {
   contextFilter?: (event: KeyboardEvent) => boolean;
 }
 
+interface ShortcutManagerConfig {
+  shortcuts: ShortcutConfig[];
+  helpContainer?: string;
+  timeout?: number; // ms to return to normal state
+}
+
+enum KeyboardState {
+  NORMAL = 'normal',
+  AWAITING_ARGS = 'awaiting_args'
+}
+
 class KeyboardShortcutManager {
   private shortcuts: Map<string, ShortcutConfig>;
   private state: KeyboardState;
-  private helpOverlay: HelpOverlay;
-  // Configuration-driven initialization
-  constructor(config: ShortcutManagerConfig) { ... }
+  private currentCommand: string;
+  private currentArgs: string;
+  private helpOverlay: HTMLElement | null;
+  
+  constructor(config: ShortcutManagerConfig) {
+    // Pure input handling - no UI dependencies
+    // Registers global keydown listener
+    // Manages state machine and help overlay
+  }
+  
+  // Key methods
+  private handleKeydown(event: KeyboardEvent): void
+  private executeShortcut(shortcut: ShortcutConfig, args?: string): void
+  private showHelp(): void
+  private updateStateIndicator(): void
+  public destroy(): void
 }
 ```
+
+**Architecture Benefits**:
+- **Separation of Concerns**: Pure input handling separate from UI updates
+- **Reusability**: Generic class usable across all application pages
+- **Testability**: Pure functions with no external dependencies
+- **Maintainability**: Configuration-driven with clear interfaces
+- **Extensibility**: Easy to add new shortcuts and categories
 
 #### 2. Game Object (`lib/game.go`)
 **Purpose**: Flow control and game logic management

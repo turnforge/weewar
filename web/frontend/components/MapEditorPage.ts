@@ -2,6 +2,7 @@ import { BasePage } from './BasePage';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { PhaserPanel } from './PhaserPanel';
 import { TileStatsPanel } from './TileStatsPanel';
+import { KeyboardShortcutManager, ShortcutConfig } from './KeyboardShortcutManager';
 
 class MapBounds {
   MinQ: number;
@@ -55,6 +56,9 @@ class MapEditorPage extends BasePage {
     // TileStats panel for displaying statistics
     private tileStatsPanel: TileStatsPanel | null = null;
 
+    // Keyboard shortcut manager
+    private keyboardShortcutManager: KeyboardShortcutManager | null = null;
+
     // Change tracking for unsaved changes
     private hasUnsavedChanges: boolean = false;
     private originalMapData: string = '';
@@ -65,6 +69,7 @@ class MapEditorPage extends BasePage {
         this.initializeSpecificComponents();
         this.initializeDockview();
         this.bindSpecificEvents();
+        this.initializeKeyboardShortcuts();
         this.loadInitialState();
         this.setupUnsavedChangesWarning();
     }
@@ -452,6 +457,75 @@ class MapEditorPage extends BasePage {
         document.querySelector('[data-action="init-phaser"]')?.addEventListener('click', () => {
             this.initializePhaser();
         });
+    }
+
+    private initializeKeyboardShortcuts(): void {
+        const shortcuts: ShortcutConfig[] = [
+            // Nature terrain shortcuts (n + number)
+            {
+                key: 'n',
+                handler: (args?: string) => this.selectNatureTerrain(args),
+                description: 'Select nature terrain by index',
+                category: 'Terrain',
+                requiresArgs: true,
+                argType: 'number'
+            },
+            
+            // City terrain shortcuts (c + number)  
+            {
+                key: 'c',
+                handler: (args?: string) => this.selectCityTerrain(args),
+                description: 'Select city terrain by index',
+                category: 'Terrain',
+                requiresArgs: true,
+                argType: 'number'
+            },
+            
+            // Unit selection shortcuts (u + number)
+            {
+                key: 'u',
+                handler: (args?: string) => this.selectUnit(args),
+                description: 'Select unit type by index',
+                category: 'Units',
+                requiresArgs: true,
+                argType: 'number'
+            },
+            
+            // Player selection shortcuts (p + number)
+            {
+                key: 'p',
+                handler: (args?: string) => this.selectPlayer(args),
+                description: 'Set current player',
+                category: 'Units',
+                requiresArgs: true,
+                argType: 'number'
+            },
+            
+            // Brush size shortcuts (b + number)
+            {
+                key: 'b',
+                handler: (args?: string) => this.selectBrushSize(args),
+                description: 'Set brush size',
+                category: 'Tools',
+                requiresArgs: true,
+                argType: 'number'
+            },
+            
+            // Reset shortcuts (esc)
+            {
+                key: 'Escape',
+                handler: () => this.resetToDefaults(),
+                description: 'Reset all tools to defaults',
+                category: 'General'
+            }
+        ];
+
+        this.keyboardShortcutManager = new KeyboardShortcutManager({
+            shortcuts,
+            timeout: 3000
+        });
+        
+        this.logToConsole('Keyboard shortcuts initialized');
     }
 
     private loadInitialState(): void {
@@ -1367,6 +1441,11 @@ class MapEditorPage extends BasePage {
         if (this.tileStatsPanel) {
             this.tileStatsPanel.destroy();
         }
+        
+        // Destroy keyboard shortcut manager if it exists
+        if (this.keyboardShortcutManager) {
+            this.keyboardShortcutManager.destroy();
+        }
     }
     
     // Phaser panel methods
@@ -1602,6 +1681,152 @@ class MapEditorPage extends BasePage {
         this.tileStatsPanel.updateStats(tilesData, unitsData);
         
         this.logToConsole(`Stats refreshed: ${tilesData.length} tiles, ${Object.keys(unitsData).length} units`);
+    }
+    
+    // Keyboard shortcut handlers
+    private selectNatureTerrain(args?: string): void {
+        const index = parseInt(args || '1');
+        
+        // Map terrain numbers to nature terrain types
+        // 1 = Grass, 2 = Desert, 3 = Water, 4 = Mountain, 5 = Rock
+        const natureTerrain = [1, 2, 3, 4, 5]; // Grass, Desert, Water, Mountain, Rock
+        const terrainNames = ['Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
+        
+        if (index >= 1 && index <= natureTerrain.length) {
+            const terrainType = natureTerrain[index - 1];
+            this.setBrushTerrain(terrainType);
+            this.placementMode = 'terrain';
+            this.updateTerrainButtonSelection(terrainType);
+            
+            // Show toast notification
+            this.showToast('Terrain Selected', `${terrainNames[index - 1]} terrain selected`, 'success');
+        } else {
+            this.showToast('Invalid Selection', `Nature terrain ${index} not available`, 'error');
+        }
+    }
+    
+    private selectCityTerrain(args?: string): void {
+        const index = parseInt(args || '1');
+        
+        // Map to city terrain types (for now, reuse existing terrain)
+        // This can be expanded when city terrain types are added
+        const cityTerrain = [1, 2, 4, 5]; // Grass, Desert, Mountain, Rock (as city variants)
+        const cityNames = ['Grass', 'Desert', 'Mountain', 'Rock'];
+        
+        if (index >= 1 && index <= cityTerrain.length) {
+            const terrainType = cityTerrain[index - 1];
+            this.setBrushTerrain(terrainType);
+            this.placementMode = 'terrain';
+            this.updateTerrainButtonSelection(terrainType);
+            
+            // Show toast notification
+            this.showToast('City Terrain Selected', `${cityNames[index - 1]} city terrain selected`, 'success');
+        } else {
+            this.showToast('Invalid Selection', `City terrain ${index} not available`, 'error');
+        }
+    }
+    
+    private selectUnit(args?: string): void {
+        const index = parseInt(args || '1');
+        
+        // Map unit numbers to unit types (based on existing unit data)
+        // This should match the unit palette in the UI
+        const unitTypes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+        
+        if (index >= 1 && index <= unitTypes.length) {
+            const unitType = unitTypes[index - 1];
+            this.currentUnit = unitType;
+            this.placementMode = 'unit';
+            this.updateUnitButtonSelection(unitType);
+            
+            // Show toast notification
+            this.showToast('Unit Selected', `Unit ${unitType} selected for player ${this.currentPlayerId}`, 'success');
+        } else {
+            this.showToast('Invalid Selection', `Unit ${index} not available`, 'error');
+        }
+    }
+    
+    private selectPlayer(args?: string): void {
+        const playerId = parseInt(args || '1');
+        
+        if (playerId >= 1 && playerId <= 4) {
+            this.currentPlayerId = playerId;
+            
+            // Update player selector in UI
+            const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
+            if (unitPlayerSelect) {
+                unitPlayerSelect.value = playerId.toString();
+            }
+            
+            // Show toast notification
+            this.showToast('Player Selected', `Player ${playerId} selected`, 'success');
+        } else {
+            this.showToast('Invalid Selection', `Player ${playerId} not available`, 'error');
+        }
+    }
+    
+    private selectBrushSize(args?: string): void {
+        const size = parseInt(args || '0');
+        const sizeNames = ['Single (1 hex)', 'Small (7 hexes)', 'Medium (19 hexes)', 'Large (37 hexes)', 'X-Large (61 hexes)', 'XX-Large (91 hexes)'];
+        
+        if (size >= 0 && size <= 5) {
+            this.setBrushSize(size);
+            
+            // Update brush size selector in UI
+            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+            if (brushSizeSelect) {
+                brushSizeSelect.value = size.toString();
+            }
+            
+            // Show toast notification
+            this.showToast('Brush Size Selected', `${sizeNames[size]} brush selected`, 'success');
+        } else {
+            this.showToast('Invalid Selection', `Brush size ${size} not available`, 'error');
+        }
+    }
+    
+    private resetToDefaults(): void {
+        // Reset to default terrain (grass)
+        this.setBrushTerrain(1);
+        this.placementMode = 'terrain';
+        this.setBrushSize(0);
+        this.currentPlayerId = 1;
+        
+        // Update UI elements
+        this.updateTerrainButtonSelection(1);
+        
+        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+        if (brushSizeSelect) {
+            brushSizeSelect.value = '0';
+        }
+        
+        const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
+        if (unitPlayerSelect) {
+            unitPlayerSelect.value = '1';
+        }
+        
+        // Remove selection from unit buttons
+        document.querySelectorAll('.unit-button').forEach(btn => {
+            btn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+        });
+        
+        this.logToConsole('Reset all tools to defaults');
+        
+        // Show toast notification
+        this.showToast('Reset Complete', 'All tools reset to defaults', 'info');
+    }
+    
+    private updateUnitButtonSelection(unitType: number): void {
+        // Remove selection from all terrain and unit buttons
+        document.querySelectorAll('.terrain-button, .unit-button').forEach(btn => {
+            btn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+        });
+        
+        // Add selection to clicked unit button
+        const unitButton = document.querySelector(`[data-unit="${unitType}"]`);
+        if (unitButton) {
+            unitButton.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+        }
     }
 
     // Public methods for Phaser panel (for backward compatibility with UI)

@@ -190,7 +190,49 @@ export const EventTypes = {
     COMPONENT_ERROR: 'component-error'
 } as const;
 
+// Editor-specific event types for MapEditorPage components
+export const EditorEventTypes = {
+    // Editor state events
+    TERRAIN_SELECTED: 'terrain-selected',
+    UNIT_SELECTED: 'unit-selected',
+    BRUSH_SIZE_CHANGED: 'brush-size-changed',
+    PLACEMENT_MODE_CHANGED: 'placement-mode-changed',
+    PLAYER_CHANGED: 'player-changed',
+    
+    // Map events
+    MAP_LOADED: 'map-loaded',
+    MAP_SAVED: 'map-saved',
+    MAP_CHANGED: 'map-changed',
+    TILE_CLICKED: 'tile-clicked',
+    
+    // UI events
+    STATS_REFRESH_REQUESTED: 'stats-refresh-requested',
+    KEYBOARD_SHORTCUT_TRIGGERED: 'keyboard-shortcut-triggered',
+    
+    // Phaser events
+    PHASER_READY: 'phaser-ready',
+    PHASER_ERROR: 'phaser-error',
+    
+    // Reference image events
+    REFERENCE_SCALE_CHANGED: 'reference-scale-changed',
+    REFERENCE_POSITION_CHANGED: 'reference-position-changed',
+    REFERENCE_ALPHA_CHANGED: 'reference-alpha-changed',
+    REFERENCE_MODE_CHANGED: 'reference-mode-changed',
+    
+    // Map modification events
+    TILE_PAINTED: 'tile-painted',
+    UNIT_PLACED: 'unit-placed',
+    TILE_CLEARED: 'tile-cleared',
+    UNIT_REMOVED: 'unit-removed',
+    
+    // Tools events
+    TOOLS_UI_UPDATED: 'tools-ui-updated',
+    GRID_TOGGLE: 'grid-toggle',
+    COORDINATES_TOGGLE: 'coordinates-toggle'
+} as const;
+
 export type EventType = typeof EventTypes[keyof typeof EventTypes];
+export type EditorEventType = typeof EditorEventTypes[keyof typeof EditorEventTypes];
 
 // Event payload type definitions for type safety
 export interface MapDataLoadedPayload {
@@ -226,4 +268,96 @@ export interface ComponentErrorPayload {
     componentId: string;
     error: string;
     details?: any;
+}
+
+// Editor-specific event payload interfaces
+export interface TerrainSelectedPayload {
+    terrainType: number;
+    terrainName: string;
+}
+
+export interface UnitSelectedPayload {
+    unitType: number;
+    unitName: string;
+    playerId: number;
+}
+
+export interface BrushSizeChangedPayload {
+    brushSize: number;
+    sizeName: string;
+}
+
+export interface PlacementModeChangedPayload {
+    mode: 'terrain' | 'unit' | 'clear';
+}
+
+export interface PlayerChangedPayload {
+    playerId: number;
+}
+
+export interface TileClickedPayload {
+    q: number;
+    r: number;
+}
+
+export interface PhaserReadyPayload {
+    // Empty payload - just signals that Phaser is ready
+}
+
+export interface KeyboardShortcutPayload {
+    command: string;
+    args?: any;
+}
+
+export interface GridTogglePayload {
+    showGrid: boolean;
+}
+
+export interface CoordinatesTogglePayload {
+    showCoordinates: boolean;
+}
+
+// Reference image event payloads
+export interface ReferenceScaleChangedPayload {
+    scaleX: number;
+    scaleY: number;
+}
+
+export interface ReferencePositionChangedPayload {
+    x: number;
+    y: number;
+}
+
+export interface ReferenceAlphaChangedPayload {
+    alpha: number;
+}
+
+export interface ReferenceModeChangedPayload {
+    mode: number; // 0=hidden, 1=background, 2=overlay
+}
+
+// Map modification event payloads
+export interface TilePaintedPayload {
+    q: number;
+    r: number;
+    terrainType: number;
+    playerColor: number;
+    brushSize: number;
+}
+
+export interface UnitPlacedPayload {
+    q: number;
+    r: number;
+    unitType: number;
+    playerId: number;
+}
+
+export interface TileClearedPayload {
+    q: number;
+    r: number;
+}
+
+export interface UnitRemovedPayload {
+    q: number;
+    r: number;
 }

@@ -32,6 +32,30 @@ export class TileStatsPanel {
             return false;
         }
     }
+
+    /**
+     * Initialize the TileStats panel with a container element directly
+     */
+    public initializeWithElement(containerElement: HTMLElement): boolean {
+        try {
+            this.containerElement = containerElement;
+            if (!this.containerElement) {
+                throw new Error('Container element is null or undefined');
+            }
+            
+            // Create the stats display
+            this.createStatsDisplay();
+            
+            this.isInitialized = true;
+            console.log('[TileStatsPanel] Panel initialized successfully with element');
+            
+            return true;
+            
+        } catch (error) {
+            console.error(`[TileStatsPanel] Failed to initialize with element: ${error}`);
+            return false;
+        }
+    }
     
     /**
      * Create the HTML structure for displaying stats

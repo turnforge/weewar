@@ -176,6 +176,26 @@
 - **State → Subscribe → Create**: Strict three-phase initialization order prevents timing bugs and ensures reliable component communication
 - **Async EventBus Handlers**: EventBus stays synchronous for performance, handlers use `.then()/.catch()` for async operations without blocking
 
+### 18. MapEditor Component Integration (v4.9) ✅ COMPLETED
+**Completed**: Complete resolution of Phaser integration issues with advanced timing and container management patterns
+**Key Achievements**:
+- **Container Scope Resolution**: Fixed dockview DOM isolation by passing elements directly instead of string IDs
+- **WebGL Timing Mastery**: Implemented visibility-based initialization preventing framebuffer errors from 0x0 containers
+- **Component Reference Timing**: Solved race conditions between component assignment and event emission with async patterns
+- **Pending State Management**: Created robust state deferral system for user actions before component readiness
+- **Constructor Flexibility**: Enhanced PhaserMapEditor to accept both string IDs and direct HTMLElement references
+- **Graceful Degradation**: Added intelligent fallbacks for missing configuration instead of hard errors
+
+### 19. Advanced Component Patterns Discovery (v4.9) ✅ COMPLETED
+**Completed**: Major architectural learnings for complex component integration in layout systems
+**Critical Patterns Established**:
+- **Direct Element Passing**: Pass DOM elements directly to avoid scope issues in dockview/layout systems
+- **Visibility-Based Init**: Poll container dimensions before initializing WebGL contexts to prevent framebuffer errors
+- **Async Event Emission**: Use `setTimeout(() => emit(), 0)` when component references are being assigned during construction
+- **Pending State Pattern**: Store user actions when components aren't ready, apply when ready event fires
+- **Progressive Debug Strategy**: Add comprehensive logging → Debug systematically → Remove logs → Document learnings
+- **Container Dimension Validation**: Always check `getBoundingClientRect()` before graphics initialization
+
 ## Current Development Focus
 
 ### Phase 4: Phaser.js Polish and Integration ✅ COMPLETED

@@ -1,9 +1,11 @@
 import { BasePage } from './BasePage';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
-import { PhaserPanel } from './PhaserPanel';
+import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { TileStatsPanel } from './TileStatsPanel';
 import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from './KeyboardShortcutManager';
 import { Map } from './Map';
+import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload } from './EventBus';
+import { EditorToolsPanel } from './EditorToolsPanel';
 
 const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
 
@@ -45,11 +47,14 @@ class MapEditorPage extends BasePage {
     // Dockview interface
     private dockview: DockviewApi | null = null;
     
-    // Phaser panel for map editing
-    private phaserPanel: PhaserPanel | null = null;
+    // Phaser editor component for map editing
+    private phaserEditorComponent: PhaserEditorComponent | null = null;
     
     // TileStats panel for displaying statistics
     private tileStatsPanel: TileStatsPanel | null = null;
+    
+    // Editor tools panel for terrain/unit selection
+    private editorToolsPanel: EditorToolsPanel | null = null;
 
     // Keyboard shortcut manager
     private keyboardShortcutManager: KeyboardShortcutManager | null = null;
@@ -68,16 +73,74 @@ class MapEditorPage extends BasePage {
     private originalMapData: string = '';
     private hasPendingMapDataLoad: boolean = false;
 
+    // Pending UI state to apply when Phaser becomes ready
+    private pendingGridState: boolean | null = null;
+
     constructor() {
         super();
+        // Phase 1: State setup (must be first)
+        this.loadInitialState();
+        
+        // Phase 2: Event subscriptions (before component creation)
+        this.subscribeToEditorEvents();
+        
+        // Phase 3: Component creation and initialization
         this.initializeSpecificComponents();
         this.initializeDockview();
         this.bindSpecificEvents();
         this.initializeKeyboardShortcuts();
-        this.loadInitialState();
         this.setupUnsavedChangesWarning();
     }
     
+    /**
+     * Subscribe to editor-specific events before components are created
+     * This prevents race conditions where components emit events before subscribers are ready
+     */
+    private subscribeToEditorEvents(): void {
+        console.log('MapEditorPage: Subscribing to editor events');
+        
+        // Subscribe to terrain selection events
+        this.eventBus.subscribe<TerrainSelectedPayload>(EditorEventTypes.TERRAIN_SELECTED, (payload) => {
+            this.handleTerrainSelected(payload.data);
+        }, 'map-editor-page');
+        
+        // Subscribe to unit selection events
+        this.eventBus.subscribe<UnitSelectedPayload>(EditorEventTypes.UNIT_SELECTED, (payload) => {
+            this.handleUnitSelected(payload.data);
+        }, 'map-editor-page');
+        
+        // Subscribe to brush size changes
+        this.eventBus.subscribe<BrushSizeChangedPayload>(EditorEventTypes.BRUSH_SIZE_CHANGED, (payload) => {
+            this.handleBrushSizeChanged(payload.data);
+        }, 'map-editor-page');
+        
+        // Subscribe to placement mode changes
+        this.eventBus.subscribe<PlacementModeChangedPayload>(EditorEventTypes.PLACEMENT_MODE_CHANGED, (payload) => {
+            this.handlePlacementModeChanged(payload.data);
+        }, 'map-editor-page');
+        
+        // Subscribe to player changes
+        this.eventBus.subscribe<PlayerChangedPayload>(EditorEventTypes.PLAYER_CHANGED, (payload) => {
+            this.handlePlayerChanged(payload.data);
+        }, 'map-editor-page');
+        
+        // Subscribe to tile clicks from Phaser
+        this.eventBus.subscribe<TileClickedPayload>(EditorEventTypes.TILE_CLICKED, (payload) => {
+            this.handlePhaserTileClick(payload.data.q, payload.data.r);
+        }, 'map-editor-page');
+        
+        // Subscribe to Phaser ready event
+        this.eventBus.subscribe(EditorEventTypes.PHASER_READY, () => {
+            this.handlePhaserReady();
+        }, 'map-editor-page');
+        
+        // Subscribe to map changes
+        this.eventBus.subscribe(EditorEventTypes.MAP_CHANGED, () => {
+            this.markAsChanged();
+        }, 'map-editor-page');
+        
+        console.log('MapEditorPage: Editor event subscriptions complete');
+    }
 
     protected initializeSpecificComponents(): void {
         const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
@@ -110,8 +173,8 @@ class MapEditorPage extends BasePage {
                     container.className = isDarkMode ? 'dockview-theme-dark flex-1' : 'dockview-theme-light flex-1';
                     
                     // Update Phaser editor theme
-                    if (this.phaserPanel) {
-                        this.phaserPanel.setTheme(isDarkMode);
+                    if (this.phaserEditorComponent) {
+                        this.phaserEditorComponent.setTheme(isDarkMode);
                     }
                 }
             });
@@ -321,81 +384,8 @@ class MapEditorPage extends BasePage {
         }
 
 
-        // Terrain palette buttons - radio button behavior
-        document.querySelectorAll('.terrain-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const clickedButton = e.currentTarget as HTMLElement;
-                const terrain = clickedButton.getAttribute('data-terrain');
-                if (terrain) {
-                    // Remove selection from all terrain and unit buttons
-                    document.querySelectorAll('.terrain-button, .unit-button').forEach(btn => {
-                        btn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-                    });
-                    
-                    // Add selection to clicked button
-                    clickedButton.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-                    
-                    // Update editor state
-                    const terrainValue = parseInt(terrain);
-                    if (terrainValue === 0) {
-                        this.placementMode = 'clear';
-                        this.logToConsole('Selected clear mode');
-                    } else {
-                        this.currentTerrain = terrainValue;
-                        this.placementMode = 'terrain';
-                        this.logToConsole(`Selected terrain: ${terrain}`);
-                    }
-                }
-            });
-        });
-
-        // Unit palette buttons - radio button behavior
-        document.querySelectorAll('.unit-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const clickedButton = e.currentTarget as HTMLElement;
-                const unit = clickedButton.getAttribute('data-unit');
-                if (unit) {
-                    // Remove selection from all terrain and unit buttons
-                    document.querySelectorAll('.terrain-button, .unit-button').forEach(btn => {
-                        btn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-                    });
-                    
-                    // Add selection to clicked button
-                    clickedButton.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-                    
-                    // Update editor state
-                    this.currentUnit = parseInt(unit);
-                    this.placementMode = 'unit';
-                    
-                    // Get current player selection
-                    const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
-                    if (unitPlayerSelect) {
-                        this.currentPlayerId = parseInt(unitPlayerSelect.value);
-                    }
-                    
-                    this.logToConsole(`Selected unit: ${unit} for player ${this.currentPlayerId}`);
-                }
-            });
-        });
-
-        // Unit player color selector
-        const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
-        if (unitPlayerSelect) {
-            unitPlayerSelect.addEventListener('change', (e) => {
-                this.currentPlayerId = parseInt((e.target as HTMLSelectElement).value);
-                if (this.placementMode === 'unit') {
-                    this.logToConsole(`Unit player changed to: ${this.currentPlayerId}`);
-                }
-            });
-        }
-
-        // Brush size selector
-        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-        if (brushSizeSelect) {
-            brushSizeSelect.addEventListener('change', (e) => {
-                this.setBrushSize(parseInt((e.target as HTMLSelectElement).value));
-            });
-        }
+        // NOTE: Terrain/unit button bindings, player selection, and brush size controls 
+        // are now handled by EditorToolsPanel component via EventBus
 
         // Painting action buttons
         document.querySelector('[data-action="paint-terrain"]')?.addEventListener('click', () => {
@@ -698,20 +688,18 @@ class MapEditorPage extends BasePage {
         this.updateEditorStatus('Initializing...');
 
         if (this.isNewMap) {
-            this.logToConsole('Time: ${performance.now()} Creating new map...');
+            this.logToConsole(`Time: ${performance.now()} Creating new map...`);
             this.initializeNewMap();
         } else if (this.currentMapId) {
             this.logToConsole(`Time: ${performance.now()} Loading existing map: ${this.currentMapId}`);
             this.loadExistingMap(this.currentMapId);
         } else {
-            this.logToConsole('Error: No map ID provided');
-            this.updateEditorStatus('Error');
+            this.logToConsole('No map ID provided, defaulting to new map');
+            this.isNewMap = true;
+            this.initializeNewMap();
         }
         
-        // Initialize Phaser panel as the default editor
-        setTimeout(() => {
-            this.initializePhaserPanel();
-        }, 1000);
+        // Phaser component initialization will be handled by dockview when the component is created
     }
 
 
@@ -722,9 +710,13 @@ class MapEditorPage extends BasePage {
         if (templateMapData) {
             this.map = Map.deserialize(templateMapData);
             this.logToConsole('New map initialized with template data');
+            // Mark that we have map data to load into Phaser
+            this.hasPendingMapDataLoad = true;
         } else {
             this.map = new Map('New Map', 8, 8);
             this.logToConsole('New map initialized with default data');
+            // Even for a default new map, we want to load it into Phaser
+            this.hasPendingMapDataLoad = true;
         }
         
         this.updateEditorStatus('New Map');
@@ -794,10 +786,10 @@ class MapEditorPage extends BasePage {
      */
     private async loadMapDataIntoPhaser(): Promise<void> {
         this.logToConsole('loadMapDataIntoPhaser called');
-        this.logToConsole(`Phaser panel initialized: ${this.phaserPanel ? this.phaserPanel.getIsInitialized() : 'panel is null'}`);
+        this.logToConsole(`Phaser component initialized: ${this.phaserEditorComponent ? this.phaserEditorComponent.getIsInitialized() : 'component is null'}`);
         this.logToConsole(`Map data exists: ${this.map ? 'YES' : 'NO'}`);
         
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized() || !this.map) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized() || !this.map) {
             this.logToConsole('Skipping Phaser data load - preconditions not met');
             return;
         }
@@ -818,7 +810,7 @@ class MapEditorPage extends BasePage {
                 
                 if (tilesArray.length > 0) {
                     this.logToConsole(`Attempting to load ${tilesArray.length} tiles`);
-                    await this.phaserPanel.setTilesData(tilesArray);
+                    await this.phaserEditorComponent.setTilesData(tilesArray);
                     this.logToConsole(`Loaded ${tilesArray.length} tiles into Phaser`);
                 }
             }
@@ -834,7 +826,7 @@ class MapEditorPage extends BasePage {
                         this.logToConsole(`Loading unit ${unit.unitType} (player ${unit.playerId}) at Q=${unit.q}, R=${unit.r}`);
                         
                         // Paint unit in Phaser (units render above tiles due to depth=10)
-                        const success = this.phaserPanel!.paintUnit(unit.q, unit.r, unit.unitType, unit.playerId);
+                        const success = this.phaserEditorComponent!.paintUnit(unit.q, unit.r, unit.unitType, unit.playerId);
                         if (success) {
                             unitsLoaded++;
                         } else {
@@ -907,20 +899,22 @@ class MapEditorPage extends BasePage {
     }
     
     public setShowGrid(showGrid: boolean): void {
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            this.phaserPanel.setShowGrid(showGrid);
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
+            this.phaserEditorComponent.setShowGrid(showGrid);
             this.logToConsole(`Grid visibility set to: ${showGrid}`);
         } else {
-            this.logToConsole('Phaser panel not available for grid toggle');
+            this.logToConsole('Phaser component not ready for grid toggle, storing state for later');
+            // Store the desired grid state and apply it when Phaser becomes ready
+            this.pendingGridState = showGrid;
         }
     }
     
     public setShowCoordinates(showCoordinates: boolean): void {
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            this.phaserPanel.setShowCoordinates(showCoordinates);
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
+            this.phaserEditorComponent.setShowCoordinates(showCoordinates);
             this.logToConsole(`Coordinate visibility set to: ${showCoordinates}`);
         } else {
-            this.logToConsole('Phaser panel not available for coordinates toggle');
+            this.logToConsole('Phaser component not available for coordinates toggle');
         }
     }
 
@@ -982,36 +976,36 @@ class MapEditorPage extends BasePage {
     public fillAllGrass(): void {
         this.logToConsole('Filling all tiles with grass...');
         
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            this.phaserPanel.fillAllTerrain(1, 0); // Terrain type 1 = Grass
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
+            this.phaserEditorComponent.fillAllTerrain(1, 0); // Terrain type 1 = Grass
             this.logToConsole('All tiles filled with grass using Phaser');
         } else {
-            this.logToConsole('Phaser panel not available, cannot fill grass');
+            this.logToConsole('Phaser component not available, cannot fill grass');
         }
     }
 
     public createIslandMap(): void {
         this.logToConsole('Creating island map...');
         
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
             // Get current viewport center
-            const center = this.phaserPanel.getViewportCenter();
+            const center = this.phaserEditorComponent.getViewportCenter();
             this.logToConsole(`Creating island at viewport center: Q=${center.q}, R=${center.r}`);
             
             // Create island pattern at viewport center with radius 5
-            this.phaserPanel.createIslandPattern(center.q, center.r, 5);
+            this.phaserEditorComponent.createIslandPattern(center.q, center.r, 5);
             this.logToConsole('Island map created using Phaser');
         } else {
-            this.logToConsole('Phaser panel not available, cannot create island map');
+            this.logToConsole('Phaser component not available, cannot create island map');
         }
     }
 
     public createMountainRidge(): void {
         this.logToConsole('Creating mountain ridge...');
         
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
             // Get current viewport center
-            const center = this.phaserPanel.getViewportCenter();
+            const center = this.phaserEditorComponent.getViewportCenter();
             this.logToConsole(`Creating mountain ridge at viewport center: Q=${center.q}, R=${center.r}`);
             
             // Create a horizontal mountain ridge centered around viewport center
@@ -1025,9 +1019,9 @@ class MapEditorPage extends BasePage {
                     const relativeR = r - center.r;
                     // Create a ridge pattern - mountains in center, rocks on edges
                     if (Math.abs(relativeR) <= 1) {
-                        this.phaserPanel.paintTile(q, r, 4, 0); // Mountain
+                        this.phaserEditorComponent.paintTile(q, r, 4, 0); // Mountain
                     } else {
-                        this.phaserPanel.paintTile(q, r, 5, 0); // Rock
+                        this.phaserEditorComponent.paintTile(q, r, 5, 0); // Rock
                     }
                 }
             }
@@ -1040,8 +1034,8 @@ class MapEditorPage extends BasePage {
     public showTerrainStats(): void {
         this.logToConsole('Calculating terrain statistics...');
         
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            const tiles = this.phaserPanel.getTilesData();
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
+            const tiles = this.phaserEditorComponent.getTilesData();
             const stats = {
                 grass: 0,
                 desert: 0,
@@ -1051,7 +1045,7 @@ class MapEditorPage extends BasePage {
                 other: 0
             };
             
-            tiles.forEach(tile => {
+            tiles.forEach((tile: any) => {
                 switch (tile.terrain) {
                     case 1: stats.grass++; break;
                     case 2: stats.desert++; break;
@@ -1073,15 +1067,15 @@ class MapEditorPage extends BasePage {
             }
             this.logToConsole(`Total tiles: ${tiles.length}`);
         } else {
-            this.logToConsole('Phaser panel not available, cannot calculate stats');
+            this.logToConsole('Phaser component not available, cannot calculate stats');
         }
     }
 
     public randomizeTerrain(): void {
         this.logToConsole('Randomizing terrain...');
         
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-            this.phaserPanel.randomizeTerrain();
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
+            this.phaserEditorComponent.randomizeTerrain();
             this.logToConsole('Terrain randomized using Phaser');
         } else {
             this.logToConsole('Phaser panel not available, cannot randomize terrain');
@@ -1091,10 +1085,10 @@ class MapEditorPage extends BasePage {
     public clearMap(): void {
         this.logToConsole('Clearing entire map...');
         
-        if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
             // Clear all tiles and units from Phaser
-            this.phaserPanel.clearAllTiles();
-            this.phaserPanel.clearAllUnits();
+            this.phaserEditorComponent.clearAllTiles();
+            this.phaserEditorComponent.clearAllUnits();
             
             // Clear map data as well
             if (this.map) {
@@ -1128,10 +1122,10 @@ class MapEditorPage extends BasePage {
 
             // Build tiles data in the correct format for CreateMap API
             const tiles: { [key: string]: any } = {};
-            if (this.phaserPanel && this.phaserPanel.getIsInitialized()) {
-                const tilesData = this.phaserPanel.getTilesData();
+            if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
+                const tilesData = this.phaserEditorComponent.getTilesData();
                 
-                tilesData.forEach(tile => {
+                tilesData.forEach((tile: any) => {
                     const key = `${tile.q},${tile.r}`;
                     tiles[key] = {
                         q: tile.q,
@@ -1345,9 +1339,16 @@ class MapEditorPage extends BasePage {
         return {
             element: container,
             init: () => {
-                // Tools panel is already initialized through global event binding
+                // Initialize EditorToolsPanel component
+                this.initializeEditorToolsPanel(container);
             },
-            dispose: () => {}
+            dispose: () => {
+                // Clean up EditorToolsPanel
+                if (this.editorToolsPanel) {
+                    this.editorToolsPanel.destroy();
+                    this.editorToolsPanel = null;
+                }
+            }
         };
     }
 
@@ -1366,10 +1367,16 @@ class MapEditorPage extends BasePage {
         return {
             element: container,
             init: () => {
-                // Phaser will handle its own initialization
-                this.logToConsole('Phaser panel ready for initialization');
+                // Initialize PhaserEditorComponent
+                this.phaserEditorComponent = new PhaserEditorComponent(container, this.eventBus, true);
+                this.logToConsole('PhaserEditorComponent initialized');
             },
-            dispose: () => {}
+            dispose: () => {
+                if (this.phaserEditorComponent) {
+                    this.phaserEditorComponent.destroy();
+                    this.phaserEditorComponent = null;
+                }
+            }
         };
     }
 
@@ -1383,8 +1390,8 @@ class MapEditorPage extends BasePage {
         return {
             element: container,
             init: () => {
-                // Initialize TileStats panel
-                this.initializeTileStatsPanel();
+                // Initialize TileStats panel with the container element directly
+                this.initializeTileStatsPanel(container);
             },
             dispose: () => {
                 if (this.tileStatsPanel) {
@@ -1595,9 +1602,9 @@ class MapEditorPage extends BasePage {
             });
         }
         
-        // Track changes in Phaser panel (terrain painting, etc.)
-        if (this.phaserPanel) {
-            this.phaserPanel.onMapChange(() => {
+        // Track changes in Phaser component (terrain painting, etc.)
+        if (this.phaserEditorComponent) {
+            this.phaserEditorComponent.onMapChange(() => {
                 this.markAsChanged();
             });
         }
@@ -1645,10 +1652,8 @@ class MapEditorPage extends BasePage {
             this.dockview.dispose();
         }
         
-        // Destroy Phaser panel if it exists
-        if (this.phaserPanel) {
-            this.phaserPanel.destroy();
-        }
+        // Destroy Phaser component if it exists (will be handled by dockview component disposal)
+        // this.phaserEditorComponent cleanup is handled in createPhaserComponent dispose callback
         
         // Destroy TileStats panel if it exists
         if (this.tileStatsPanel) {
@@ -1662,99 +1667,7 @@ class MapEditorPage extends BasePage {
     }
     
     // Phaser panel methods
-    private initializePhaserPanel(): void {
-        try {
-            this.logToConsole('Initializing Phaser panel as default editor...');
-            
-            // Initialize Phaser panel
-            this.phaserPanel = new PhaserPanel();
-            
-            // Set up logging callback
-            this.phaserPanel.onLog((message) => {
-                this.logToConsole(message);
-            });
-            
-            // Set up event handlers
-            this.phaserPanel.onTileClick((q, r) => {
-                this.handlePhaserTileClick(q, r);
-            });
-            
-            this.phaserPanel.onMapChange(() => {
-                this.logToConsole('Phaser map changed');
-                this.markAsChanged();
-            });
-            
-            this.phaserPanel.onReferenceScaleChange((x: number, y: number) => {
-                this.updateReferenceScaleDisplay();
-            });
-            
-            // Initialize the panel
-            const success = this.phaserPanel.initialize('editor-canvas-container');
-            
-            if (success) {
-                // Apply current UI settings to Phaser
-                const showGridCheckbox = document.getElementById('show-grid') as HTMLInputElement;
-                const showCoordinatesCheckbox = document.getElementById('show-coordinates') as HTMLInputElement;
-                
-                if (showGridCheckbox) {
-                    this.phaserPanel.setShowGrid(showGridCheckbox.checked);
-                }
-                if (showCoordinatesCheckbox) {
-                    this.phaserPanel.setShowCoordinates(showCoordinatesCheckbox.checked);
-                }
-                
-                // Set initial theme
-                const isDarkMode = document.documentElement.classList.contains('dark');
-                this.phaserPanel.setTheme(isDarkMode);
-                
-                this.updateEditorStatus('Ready');
-                this.logToConsole('Phaser panel initialized successfully as default!');
-                
-                // Check if we have pending map data to load
-                if (this.hasPendingMapDataLoad) {
-                    this.logToConsole('Loading pending map data into Phaser...');
-                    this.showMapLoadingIndicator();
-                    // Use setTimeout with loading indicator
-                    setTimeout(async () => {
-                        await this.loadMapDataIntoPhaser();
-                        this.hasPendingMapDataLoad = false;
-                        this.hideMapLoadingIndicator();
-                    }, 100);
-                }
-            } else {
-                throw new Error('Failed to initialize Phaser panel');
-            }
-            
-        } catch (error) {
-            this.logToConsole(`Failed to initialize Phaser panel: ${error}`);
-            this.updateEditorStatus('Phaser Error');
-        }
-    }
-    
-    private handlePhaserTileClick(q: number, r: number): void {
-        try {
-            // Update coordinate inputs
-            const rowInput = document.getElementById('paint-row') as HTMLInputElement;
-            const colInput = document.getElementById('paint-col') as HTMLInputElement;
-            
-            if (rowInput) rowInput.value = r.toString();
-            if (colInput) colInput.value = q.toString();
-            
-            // Handle different placement modes
-            this.logToConsole(`Click at Q=${q}, R=${r} in ${this.placementMode} mode`);
-            
-            if (this.placementMode === 'clear') {
-                this.handleClearClick(q, r);
-            } else if (this.placementMode === 'unit') {
-                this.handleUnitPlacement(q, r);
-            } else if (this.placementMode === 'terrain') {
-                this.handleTerrainPlacement(q, r);
-            }
-            
-        } catch (error) {
-            this.logToConsole(`Phaser click error: ${error}`);
-        }
-    }
+    // OLD METHOD REMOVED: initializePhaserPanel - now handled by PhaserEditorComponent
     
     private handleClearClick(q: number, r: number): void {
         // Get current brush size from dropdown
@@ -1786,7 +1699,7 @@ class MapEditorPage extends BasePage {
             if (this.map) {
                 this.map.removeTileAt(q, r);
             }
-            this.phaserPanel?.removeTile(q, r);
+            this.phaserEditorComponent?.removeTile(q, r);
             this.logToConsole(`Removed tile at Q=${q}, R=${r}`);
         } else {
             this.logToConsole(`Nothing to clear at Q=${q}, R=${r}`);
@@ -1816,7 +1729,7 @@ class MapEditorPage extends BasePage {
                         if (this.map) {
                             this.map.removeTileAt(q, r);
                         }
-                        this.phaserPanel?.removeTile(q, r);
+                        this.phaserEditorComponent?.removeTile(q, r);
                         clearedCount++;
                     }
                 }
@@ -1875,7 +1788,7 @@ class MapEditorPage extends BasePage {
         const playerColor = this.getPlayerColorForTerrain(this.currentTerrain);
         
         // Paint terrain with current settings
-        this.phaserPanel?.paintTile(q, r, this.currentTerrain, playerColor, brushSize);
+        this.phaserEditorComponent?.paintTile(q, r, this.currentTerrain, playerColor, brushSize);
         
         // Update map tiles
         if (this.map) {
@@ -1909,11 +1822,11 @@ class MapEditorPage extends BasePage {
      * Check if a tile exists at the given coordinates
      */
     private tileExistsAt(q: number, r: number): boolean {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return false;
         }
         
-        const tilesData = this.phaserPanel.getTilesData();
+        const tilesData = this.phaserEditorComponent.getTilesData();
         return tilesData.some(tile => tile.q === q && tile.r === r);
     }
     
@@ -1921,11 +1834,11 @@ class MapEditorPage extends BasePage {
      * Check if a unit exists at the given coordinates
      */
     private unitExistsAt(q: number, r: number): boolean {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return false;
         }
         
-        const unitsData = this.phaserPanel.getUnitsData();
+        const unitsData = this.phaserEditorComponent.getUnitsData();
         return unitsData.some(unit => unit.q === q && unit.r === r);
     }
     
@@ -1933,11 +1846,11 @@ class MapEditorPage extends BasePage {
      * Get unit data at the given coordinates (returns null if no unit exists)
      */
     private getUnitAt(q: number, r: number): { unitType: number; playerId: number } | null {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return null;
         }
         
-        const unitsData = this.phaserPanel.getUnitsData();
+        const unitsData = this.phaserEditorComponent.getUnitsData();
         const unit = unitsData.find(unit => unit.q === q && unit.r === r);
         return unit ? { unitType: unit.unitType, playerId: unit.playerId } : null;
     }
@@ -1952,7 +1865,7 @@ class MapEditorPage extends BasePage {
         }
         
         // Update Phaser scene
-        this.phaserPanel?.paintUnit(q, r, unitType, playerId);
+        this.phaserEditorComponent?.paintUnit(q, r, unitType, playerId);
     }
     
     /**
@@ -1965,19 +1878,34 @@ class MapEditorPage extends BasePage {
         }
         
         // Remove from Phaser scene
-        this.phaserPanel?.removeUnit(q, r);
+        this.phaserEditorComponent?.removeUnit(q, r);
+    }
+    
+    // EditorToolsPanel methods
+    private initializeEditorToolsPanel(container: HTMLElement): void {
+        try {
+            this.logToConsole('Initializing EditorToolsPanel...');
+            
+            // Create EditorToolsPanel component
+            this.editorToolsPanel = new EditorToolsPanel(container, this.eventBus, true);
+            
+            this.logToConsole('EditorToolsPanel initialized successfully!');
+            
+        } catch (error) {
+            this.logToConsole(`Failed to initialize EditorToolsPanel: ${error}`);
+        }
     }
     
     // TileStats panel methods
-    private initializeTileStatsPanel(): void {
+    private initializeTileStatsPanel(container: HTMLElement): void {
         try {
             this.logToConsole('Initializing TileStats panel...');
             
             // Initialize TileStats panel
             this.tileStatsPanel = new TileStatsPanel();
             
-            // Initialize the panel
-            const success = this.tileStatsPanel.initialize('tilestats-container');
+            // Initialize the panel with the container element directly
+            const success = this.tileStatsPanel.initializeWithElement(container);
             
             if (success) {
                 // Set up refresh button handler
@@ -2004,12 +1932,12 @@ class MapEditorPage extends BasePage {
         }
         
         // Get tiles data from Phaser panel
-        const tilesData = this.phaserPanel?.getTilesData() || [];
+        const tilesData = this.phaserEditorComponent?.getTilesData() || [];
         
         // Get units data from map
         const allUnits = this.map?.getAllUnits() || [];
         const unitsData: { [key: string]: { unitType: number; playerId: number } } = {};
-        allUnits.forEach(unit => {
+        allUnits.forEach((unit: any) => {
             const key = `${unit.q},${unit.r}`;
             unitsData[key] = { unitType: unit.unitType, playerId: unit.playerId };
         });
@@ -2464,13 +2392,13 @@ class MapEditorPage extends BasePage {
 
     // Reference image methods
     private async loadReferenceFromClipboard(): Promise<void> {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             this.showToast('Error', 'Phaser panel not ready', 'error');
             return;
         }
         
         try {
-            const success = await this.phaserPanel.loadReferenceFromClipboard();
+            const success = await this.phaserEditorComponent.loadReferenceFromClipboard();
             if (success) {
                 this.showToast('Success', 'Reference image loaded from clipboard', 'success');
                 this.updateReferenceStatus('Image loaded');
@@ -2491,14 +2419,14 @@ class MapEditorPage extends BasePage {
     }
     
     private async loadReferenceFromFile(file: File): Promise<void> {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             this.showToast('Error', 'Phaser panel not ready', 'error');
             return;
         }
         
         try {
             this.logToConsole(`Loading reference image from file: ${file.name} (${file.size} bytes)`);
-            const success = await this.phaserPanel.loadReferenceFromFile(file);
+            const success = await this.phaserEditorComponent.loadReferenceFromFile(file);
             if (success) {
                 this.showToast('Success', `Reference image loaded: ${file.name}`, 'success');
                 this.updateReferenceStatus(`File loaded: ${file.name}`);
@@ -2519,11 +2447,11 @@ class MapEditorPage extends BasePage {
     }
     
     private setReferenceMode(mode: number): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        this.phaserPanel.setReferenceMode(mode);
+        this.phaserEditorComponent.setReferenceMode(mode);
         
         // Update UI dropdown to reflect current mode
         const modeSelect = document.getElementById('reference-mode') as HTMLSelectElement;
@@ -2548,97 +2476,97 @@ class MapEditorPage extends BasePage {
     }
     
     private setReferenceAlpha(alpha: number): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        this.phaserPanel.setReferenceAlpha(alpha);
+        this.phaserEditorComponent.setReferenceAlpha(alpha);
         this.logToConsole(`Reference alpha set to: ${Math.round(alpha * 100)}%`);
     }
     
     private resetReferencePosition(): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        this.phaserPanel.setReferencePosition(0, 0);
+        this.phaserEditorComponent.setReferencePosition(0, 0);
         this.logToConsole('Reference position reset to center');
         this.showToast('Position Reset', 'Reference image centered', 'success');
     }
     
     private resetReferenceScale(): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        this.phaserPanel.setReferenceScaleFromTopLeft(1, 1);
+        this.phaserEditorComponent.setReferenceScaleFromTopLeft(1, 1);
         this.logToConsole('Reference scale reset to 100%');
         this.showToast('Scale Reset', 'Reference image scale reset', 'success');
         this.updateReferenceScaleDisplay();
     }
     
     private adjustReferenceScaleX(delta: number): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        const state = this.phaserPanel.getReferenceState();
+        const state = this.phaserEditorComponent.getReferenceState();
         if (!state) return;
         
         const newScaleX = Math.max(0.1, Math.min(5.0, state.scale.x + delta));
-        this.phaserPanel.setReferenceScaleFromTopLeft(newScaleX, state.scale.y);
+        this.phaserEditorComponent.setReferenceScaleFromTopLeft(newScaleX, state.scale.y);
         this.updateReferenceScaleDisplay();
         this.logToConsole(`Reference X scale: ${newScaleX.toFixed(2)}`);
     }
     
     private adjustReferenceScaleY(delta: number): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        const state = this.phaserPanel.getReferenceState();
+        const state = this.phaserEditorComponent.getReferenceState();
         if (!state) return;
         
         const newScaleY = Math.max(0.1, Math.min(5.0, state.scale.y + delta));
-        this.phaserPanel.setReferenceScaleFromTopLeft(state.scale.x, newScaleY);
+        this.phaserEditorComponent.setReferenceScaleFromTopLeft(state.scale.x, newScaleY);
         this.updateReferenceScaleDisplay();
         this.logToConsole(`Reference Y scale: ${newScaleY.toFixed(2)}`);
     }
     
     private setReferenceScaleX(scaleX: number): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        const state = this.phaserPanel.getReferenceState();
+        const state = this.phaserEditorComponent.getReferenceState();
         if (!state) return;
         
         const clampedScale = Math.max(0.1, Math.min(5.0, scaleX));
-        this.phaserPanel.setReferenceScaleFromTopLeft(clampedScale, state.scale.y);
+        this.phaserEditorComponent.setReferenceScaleFromTopLeft(clampedScale, state.scale.y);
         this.updateReferenceScaleDisplay();
         this.logToConsole(`Reference X scale: ${clampedScale.toFixed(2)}`);
     }
     
     private setReferenceScaleY(scaleY: number): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        const state = this.phaserPanel.getReferenceState();
+        const state = this.phaserEditorComponent.getReferenceState();
         if (!state) return;
         
         const clampedScale = Math.max(0.1, Math.min(5.0, scaleY));
-        this.phaserPanel.setReferenceScaleFromTopLeft(state.scale.x, clampedScale);
+        this.phaserEditorComponent.setReferenceScaleFromTopLeft(state.scale.x, clampedScale);
         this.updateReferenceScaleDisplay();
         this.logToConsole(`Reference Y scale: ${clampedScale.toFixed(2)}`);
     }
     
     private updateReferenceScaleDisplay(): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        const state = this.phaserPanel.getReferenceState();
+        const state = this.phaserEditorComponent.getReferenceState();
         if (!state) return;
         
         const scaleXInput = document.getElementById('reference-scale-x-value') as HTMLInputElement;
@@ -2654,11 +2582,11 @@ class MapEditorPage extends BasePage {
     }
     
     private clearReferenceImage(): void {
-        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
             return;
         }
         
-        this.phaserPanel.clearReferenceImage();
+        this.phaserEditorComponent.clearReferenceImage();
         
         // Reset UI controls
         const modeSelect = document.getElementById('reference-mode') as HTMLSelectElement;
@@ -2693,7 +2621,82 @@ class MapEditorPage extends BasePage {
 
     // Public methods for Phaser panel (for backward compatibility with UI)
     public initializePhaser(): void {
-        this.initializePhaserPanel();
+        this.logToConsole('Phaser initialization now handled by PhaserEditorComponent in dockview');
+    }
+    
+    // Event handler methods for EventBus subscriptions
+    
+    private handleTerrainSelected(payload: TerrainSelectedPayload): void {
+        console.log('MapEditorPage: Terrain selected via EventBus:', payload);
+        this.currentTerrain = payload.terrainType;
+        this.placementMode = 'terrain';
+        this.logToConsole(`EventBus: Selected terrain ${payload.terrainType} (${payload.terrainName})`);
+    }
+    
+    private handleUnitSelected(payload: UnitSelectedPayload): void {
+        console.log('MapEditorPage: Unit selected via EventBus:', payload);
+        this.currentUnit = payload.unitType;
+        this.currentPlayerId = payload.playerId;
+        this.placementMode = 'unit';
+        this.logToConsole(`EventBus: Selected unit ${payload.unitType} (${payload.unitName}) for player ${payload.playerId}`);
+    }
+    
+    private handleBrushSizeChanged(payload: BrushSizeChangedPayload): void {
+        console.log('MapEditorPage: Brush size changed via EventBus:', payload);
+        this.brushSize = payload.brushSize;
+        this.logToConsole(`EventBus: Brush size changed to ${payload.sizeName}`);
+    }
+    
+    private handlePlacementModeChanged(payload: PlacementModeChangedPayload): void {
+        console.log('MapEditorPage: Placement mode changed via EventBus:', payload);
+        this.placementMode = payload.mode;
+        this.logToConsole(`EventBus: Placement mode changed to ${payload.mode}`);
+    }
+    
+    private handlePlayerChanged(payload: PlayerChangedPayload): void {
+        console.log('MapEditorPage: Player changed via EventBus:', payload);
+        this.currentPlayerId = payload.playerId;
+        this.logToConsole(`EventBus: Current player changed to ${payload.playerId}`);
+    }
+    
+    private handlePhaserReady(): void {
+        console.log('MapEditorPage: Phaser ready via EventBus');
+        this.logToConsole('EventBus: Phaser editor is ready');
+        // Apply pending grid state if any
+        if (this.pendingGridState !== null && this.phaserEditorComponent) {
+            this.phaserEditorComponent.setShowGrid(this.pendingGridState);
+            this.logToConsole(`Applied pending grid state: ${this.pendingGridState}`);
+            this.pendingGridState = null;
+        }
+        
+        // Load pending map data if available
+        if (this.hasPendingMapDataLoad) {
+            console.log('MapEditorPage: Loading pending map data');
+            // Give Phaser time to fully initialize webgl context and scene
+            setTimeout(() => {
+                this.loadMapDataIntoPhaser();
+            }, 10);
+        }
+    }
+    
+    private handlePhaserTileClick(q: number, r: number): void {
+        try {
+            // Update coordinate inputs
+            const rowInput = document.getElementById('paint-row') as HTMLInputElement;
+            const colInput = document.getElementById('paint-col') as HTMLInputElement;
+            
+            if (rowInput) rowInput.value = r.toString();
+            if (colInput) colInput.value = q.toString();
+            
+            // Log the click
+            this.logToConsole(`Tile clicked at Q=${q}, R=${r} in ${this.placementMode} mode`);
+            
+            // Note: Actual tile painting is now handled directly by PhaserEditorComponent
+            // This method just updates UI elements that need to react to clicks
+            
+        } catch (error) {
+            this.logToConsole(`Tile click handler error: ${error}`);
+        }
     }
 }
 

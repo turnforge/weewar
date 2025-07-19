@@ -18,11 +18,17 @@ export class PhaserMapEditor {
     private onMapChangeCallback: (() => void) | null = null;
     private onReferenceScaleChangeCallback: ((x: number, y: number) => void) | null = null;
     
-    constructor(containerId: string) {
-        this.containerElement = document.getElementById(containerId);
-        
-        if (!this.containerElement) {
-            throw new Error(`Container element with ID '${containerId}' not found`);
+    constructor(containerIdOrElement: string | HTMLElement) {
+        if (typeof containerIdOrElement === 'string') {
+            this.containerElement = document.getElementById(containerIdOrElement);
+            if (!this.containerElement) {
+                throw new Error(`Container element with ID '${containerIdOrElement}' not found`);
+            }
+        } else {
+            this.containerElement = containerIdOrElement;
+            if (!this.containerElement) {
+                throw new Error('Container element is null or undefined');
+            }
         }
         
         this.initialize();

@@ -124,6 +124,18 @@
 - **Professional Feel**: Matches behavior of modern map editors and design tools
 - **Mathematical Precision**: Calculates world coordinates before/after zoom to maintain cursor position
 
+### 13. Map Class Architecture Refactoring (v4.6) ✅ COMPLETED
+**Completed**: Major code architecture improvement with dedicated Map class and centralized data management
+**Key Achievements**:
+- **Dedicated Map Class**: Created `/web/frontend/components/Map.ts` with clean interfaces for tiles, units, and metadata
+- **Data Centralization**: Replaced scattered `mapData` object with structured Map class managing all map state
+- **Consistent API**: Implemented `tileExistsAt()`, `getTileAt()`, `setTileAt()`, `removeTileAt()` and unit equivalents
+- **Robust Serialization**: Enhanced `serialize()`/`deserialize()` supporting both client and server data formats
+- **Player Color Support**: Full support for city terrain ownership with proper player ID tracking
+- **Data Validation**: Built-in validation methods ensuring map data integrity
+- **Type Safety**: Comprehensive TypeScript interfaces with proper error handling
+- **Backwards Compatibility**: Seamless migration from old mapData format without data loss
+
 ## Current Development Focus
 
 ### Phase 4: Phaser.js Polish and Integration ✅ COMPLETED

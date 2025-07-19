@@ -389,6 +389,27 @@ The architecture successfully supports authentic WeeWar gameplay with real data 
 
 ---
 
-**Last Updated**: 2025-01-17  
-**Version**: 4.0 (Phaser-First)  
-**Status**: Production-ready Phaser.js editor with professional UX and accurate coordinate system
+### Map Class Architecture Refactoring (v4.6) ✅ COMPLETED
+**Completed**: Major code architecture improvement with dedicated Map class and centralized data management
+**Key Achievements**:
+- **Dedicated Map Class**: Created `Map.ts` with clean interfaces for tiles, units, and metadata
+- **Data Centralization**: Replaced scattered mapData object with structured Map class managing all map state
+- **Consistent API**: Implemented consistent patterns: `tileExistsAt()`, `getTileAt()`, `setTileAt()`, `removeTileAt()` and unit equivalents
+- **Robust Serialization**: Enhanced serialize/deserialize supporting both client and server data formats
+- **Player Color Support**: Full support for city terrain ownership with proper player ID tracking
+- **Data Validation**: Built-in validation methods ensuring map data integrity
+- **Type Safety**: Comprehensive TypeScript interfaces with proper error handling
+- **Backwards Compatibility**: Seamless migration from old mapData format without data loss
+
+**Technical Benefits**:
+- **Reduced Coupling**: UI components no longer directly access raw data structures
+- **Improved Maintainability**: Centralized map logic with single responsibility
+- **Better Error Handling**: Validation methods and consistent error patterns
+- **Enhanced Testing**: Isolated Map class enables focused unit testing
+- **Future-Proofing**: Clean foundation for advanced features like multiplayer synchronization
+
+---
+
+**Last Updated**: 2025-01-19  
+**Version**: 4.6 (Map Class Architecture)  
+**Status**: Production-ready Phaser.js editor with clean Map class architecture and centralized data management

@@ -86,7 +86,7 @@ func (a *App) Handler() http.Handler {
 
 	sessionHandler := a.Session.LoadAndSave(r)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("DEBUG: Session middleware handling request: %s %s", r.Method, r.URL.Path)
+		// log.Printf("DEBUG: Session middleware handling request: %s %s", r.Method, r.URL.Path)
 		sessionHandler.ServeHTTP(w, r)
 	})
 }

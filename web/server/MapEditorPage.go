@@ -100,10 +100,10 @@ func (v *MapEditorPage) SetupDefaults() {
 
 			if terrainData.Type == weewar.TerrainPlayer {
 				v.CityTerrains = append(v.CityTerrains, terrain)
-				log.Println("Appending City Terrains: ", terrain)
+				// log.Println("Appending City Terrains: ", terrain)
 			} else if terrainData.ID != 0 { // Skip Clear (ID 0) since we have a dedicated button
 				v.NatureTerrains = append(v.NatureTerrains, terrain)
-				log.Println("Appending Nature Terrains: ", terrain)
+				// log.Println("Appending Nature Terrains: ", terrain)
 			}
 		}
 	}

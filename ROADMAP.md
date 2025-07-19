@@ -133,7 +133,33 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - **Maintainability**: Clean component separation with event-driven architecture
 - **Extensibility**: Phaser.js foundation enables advanced features (animations, effects)
 
-## ⌨️ Phase 5: Keyboard Shortcut System (Completed)
+## 🎯 Phase 5: Readonly Map Viewer (Completed)
+**Status**: Production-ready  
+**Timeline**: Completed January 2025
+
+### Complete Readonly Map Display System ✅
+- [x] PhaserViewer component for readonly map display without editing capabilities
+- [x] MapDetailsPage integration with full map loading and statistics
+- [x] Proper Phaser.js initialization timing and WebGL context management
+- [x] Real-time map statistics calculation and display
+- [x] Copy map functionality for creating new maps from existing ones
+- [x] Template integration with proper JavaScript bundle loading
+
+### Critical Bug Fixes and Learnings ✅
+- [x] **DOM Corruption Prevention**: Fixed dangerous CSS selectors that could replace entire page content
+- [x] **Phaser Timing Issues**: Resolved WebGL framebuffer errors with proper initialization sequencing  
+- [x] **Container Sizing**: Implemented proper container dimension handling for Phaser canvas
+- [x] **Asset Loading**: Ensured proper asset loading sequence before map data visualization
+- [x] **Error Handling**: Added comprehensive error handling for WebGL and initialization failures
+
+### Architecture Insights ✅
+- **Critical Learning**: Broad CSS selectors like `.text-gray-900, .text-white` can match major page elements (including `<body>`)
+- **DOM Safety**: Always scope DOM queries to specific container elements to prevent accidental page-wide changes
+- **Phaser Timing**: WebGL contexts require proper container sizing before initialization to avoid framebuffer errors
+- **Race Conditions**: Map data loading must be sequenced after Phaser initialization to prevent DOM corruption
+- **Template Integration**: JavaScript bundle inclusion requires proper template structure and build system coordination
+
+## ⌨️ Phase 6: Keyboard Shortcut System (Completed)
 **Status**: Production-ready  
 **Timeline**: Completed January 2025
 
@@ -279,6 +305,6 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 
 ---
 
-**Last Updated**: 2025-01-17  
-**Current Focus**: Phaser.js Map Editor (Completed)  
-**Next Milestone**: WASM integration with Phaser editor for data persistence
+**Last Updated**: 2025-01-19  
+**Current Focus**: Readonly Map Viewer (Completed)  
+**Next Milestone**: Games Management System implementation

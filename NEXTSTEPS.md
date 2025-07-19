@@ -136,6 +136,27 @@
 - **Type Safety**: Comprehensive TypeScript interfaces with proper error handling
 - **Backwards Compatibility**: Seamless migration from old mapData format without data loss
 
+### 14. Readonly Map Viewer Implementation (v4.7) ✅ COMPLETED
+**Completed**: Professional readonly map viewer with critical debugging and architectural improvements
+**Key Achievements**:
+- **PhaserViewer Component**: Complete readonly map display using Phaser.js WebGL rendering without editing capabilities
+- **MapDetailsPage Integration**: Full integration with template system, backend data loading, and frontend statistics
+- **Critical DOM Safety**: Fixed dangerous CSS selectors that were causing entire page content replacement
+- **Phaser Timing Resolution**: Solved WebGL framebuffer errors through proper initialization sequencing and container sizing
+- **Template Integration**: Proper JavaScript bundle loading and script inclusion in template generation system
+- **Error Handling**: Comprehensive error handling for WebGL context issues and initialization failures
+- **Real-time Statistics**: Dynamic calculation and display of map statistics from actual loaded map data
+- **Copy Functionality**: Working copy map feature for creating new maps from existing ones
+
+### 15. Critical Debugging Learnings (v4.7) ✅ COMPLETED
+**Completed**: Major debugging session with critical architectural insights for future development
+**Key Learnings**:
+- **DOM Corruption Prevention**: CSS selectors like `.text-gray-900, .text-white` can match `<body>` element, causing page-wide content replacement
+- **Scope-Safe DOM Queries**: Always use container-scoped queries (`container.querySelectorAll()`) instead of global document queries
+- **Phaser WebGL Context**: Timing and container sizing are critical for WebGL framebuffer creation - requires proper element dimensions before initialization
+- **Race Condition Management**: Map data loading must be sequenced after Phaser initialization to prevent DOM corruption
+- **Template Build System**: JavaScript bundle inclusion requires careful coordination between template structure and build system output
+
 ## Current Development Focus
 
 ### Phase 4: Phaser.js Polish and Integration ✅ COMPLETED

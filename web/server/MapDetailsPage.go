@@ -11,7 +11,7 @@ import (
 type MapDetailsPage struct {
 	BasePage
 	Header Header
-	Map    *protos.Map
+	Map    *protos.Map // Use the same type as MapEditorPage for consistency
 	MapId  string
 }
 
@@ -45,14 +45,8 @@ func (p *MapDetailsPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 	}
 
 	if resp.Map != nil {
-		// Convert from MapProject to Map (assuming we need the basic info)
-		p.Map = &protos.Map{
-			Id:          resp.Map.Id,
-			Name:        resp.Map.Name,
-			Description: resp.Map.Description,
-			CreatedAt:   resp.Map.CreatedAt,
-			UpdatedAt:   resp.Map.UpdatedAt,
-		}
+		// Use the Map data for display
+		p.Map = resp.Map
 		p.Title = p.Map.Name
 	}
 

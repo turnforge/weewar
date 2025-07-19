@@ -55,18 +55,11 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">Map Preview</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Interactive map view (coming soon)</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Interactive map viewer</p>
                     </div>
-                    <div class="p-4 flex items-center justify-center min-h-96 bg-gray-50 dark:bg-gray-900">
-                        <div class="text-center">
-                            <svg class="mx-auto h-24 w-24 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Map Visualization</h3>
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                Map preview will be displayed here
-                            </p>
-                        </div>
+                    <!-- Phaser Map Viewer Container -->
+                    <div id="phaser-viewer-container" class="w-full h-full min-h-96">
+                        <!-- Phaser canvas will be inserted here -->
                     </div>
                 </div>
             </div>
@@ -156,6 +149,9 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Hidden Map Data for Frontend -->
+        <pre id="map-data-json" style="display: none;">{{ if .Map }}{{ .Map | ToJson }}{{ else }}null{{ end }}</pre>
     </main>
 {{ end }}
 
@@ -164,6 +160,7 @@
 
 {{ define "PostBodySection" }}
 <!-- Any additional scripts or content for Map detail page -->
+{{# include "gen/MapDetailsPage.html" #}}
 {{ end }}
 
 {{ define "MapDetailsPage" }}

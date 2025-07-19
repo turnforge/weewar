@@ -1805,17 +1805,14 @@ class MapEditorPage extends BasePage {
     }
     
     private clearSingleTile(q: number, r: number): void {
-        const unitKey = `${q},${r}`;
-        
         // First priority: remove unit if exists
-        if (this.mapData && this.mapData.units[unitKey]) {
-            delete this.mapData.units[unitKey];
-            this.phaserPanel?.removeUnit(q, r);
+        if (this.unitExistsAt(q, r)) {
+            this.removeUnitAt(q, r);
             this.logToConsole(`Removed unit at Q=${q}, R=${r}`);
             return;
         }
         
-        // Second priority: remove tile if exists (check Phaser scene)
+        // Second priority: remove tile if exists
         if (this.tileExistsAt(q, r)) {
             // Remove from mapData if it exists there
             if (this.mapData) {
@@ -1842,10 +1839,8 @@ class MapEditorPage extends BasePage {
                     const r = centerR + dr;
                     
                     // Clear unit first if it exists
-                    const unitKey = `${q},${r}`;
-                    if (this.mapData && this.mapData.units[unitKey]) {
-                        delete this.mapData.units[unitKey];
-                        this.phaserPanel?.removeUnit(q, r);
+                    if (this.unitExistsAt(q, r)) {
+                        this.removeUnitAt(q, r);
                         clearedCount++;
                     }
                     
@@ -1890,23 +1885,15 @@ class MapEditorPage extends BasePage {
         }
         
         // Check if there's already a unit at this location
-        this.mapData.units = this.mapData.units || {}
-        const existingUnit = this.mapData.units[unitKey];
+        const existingUnit = this.getUnitAt(q, r);
         
         if (existingUnit && existingUnit.unitType === this.currentUnit) {
             // Same unit type exists - toggle it off (remove it)
-            delete this.mapData.units[unitKey];
-            this.phaserPanel?.removeUnit(q, r);
+            this.removeUnitAt(q, r);
             this.logToConsole(`Removed unit ${this.currentUnit} at Q=${q}, R=${r} (toggle)`);
         } else {
             // Different unit or no unit - place/replace the unit
-            this.mapData.units[unitKey] = {
-                unitType: this.currentUnit,
-                playerId: this.currentPlayerId
-            };
-            
-            // Use brush size 1 for units
-            this.phaserPanel?.paintUnit(q, r, this.currentUnit, this.currentPlayerId);
+            this.setUnitAt(q, r, this.currentUnit, this.currentPlayerId);
             this.logToConsole(`Placed unit ${this.currentUnit} (player ${this.currentPlayerId}) at Q=${q}, R=${r}`);
         }
         
@@ -1965,6 +1952,60 @@ class MapEditorPage extends BasePage {
         
         const tilesData = this.phaserPanel.getTilesData();
         return tilesData.some(tile => tile.q === q && tile.r === r);
+    }
+    
+    /**
+     * Check if a unit exists at the given coordinates
+     */
+    private unitExistsAt(q: number, r: number): boolean {
+        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+            return false;
+        }
+        
+        const unitsData = this.phaserPanel.getUnitsData();
+        return unitsData.some(unit => unit.q === q && unit.r === r);
+    }
+    
+    /**
+     * Get unit data at the given coordinates (returns null if no unit exists)
+     */
+    private getUnitAt(q: number, r: number): { unitType: number; playerId: number } | null {
+        if (!this.phaserPanel || !this.phaserPanel.getIsInitialized()) {
+            return null;
+        }
+        
+        const unitsData = this.phaserPanel.getUnitsData();
+        const unit = unitsData.find(unit => unit.q === q && unit.r === r);
+        return unit ? { unitType: unit.unitType, playerId: unit.playerId } : null;
+    }
+    
+    /**
+     * Set unit at the given coordinates
+     */
+    private setUnitAt(q: number, r: number, unitType: number, playerId: number): void {
+        // Update mapData
+        if (this.mapData) {
+            this.mapData.units = this.mapData.units || {};
+            const unitKey = `${q},${r}`;
+            this.mapData.units[unitKey] = { unitType, playerId };
+        }
+        
+        // Update Phaser scene
+        this.phaserPanel?.paintUnit(q, r, unitType, playerId);
+    }
+    
+    /**
+     * Remove unit at the given coordinates
+     */
+    private removeUnitAt(q: number, r: number): void {
+        // Remove from mapData
+        if (this.mapData && this.mapData.units) {
+            const unitKey = `${q},${r}`;
+            delete this.mapData.units[unitKey];
+        }
+        
+        // Remove from Phaser scene
+        this.phaserPanel?.removeUnit(q, r);
     }
     
     // TileStats panel methods

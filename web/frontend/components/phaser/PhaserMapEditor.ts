@@ -212,6 +212,10 @@ export class PhaserMapEditor {
         return this.scene?.getTilesData() || [];
     }
     
+    public getUnitsData(): Array<{ q: number; r: number; unitType: number; playerId: number }> {
+        return this.scene?.getUnitsData() || [];
+    }
+    
     public async setTilesData(tiles: Array<{ q: number; r: number; terrain: number; color: number }>) {
         try {
             const scene = await this.waitForSceneReady();

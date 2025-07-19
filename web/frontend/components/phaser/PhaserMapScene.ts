@@ -741,4 +741,27 @@ export class PhaserMapScene extends Phaser.Scene {
         
         return tilesData;
     }
+    
+    // Get all units data (for integration with WASM)
+    public getUnitsData(): Array<{ q: number; r: number; unitType: number; playerId: number }> {
+        const unitsData: Array<{ q: number; r: number; unitType: number; playerId: number }> = [];
+        
+        this.units.forEach((unit, key) => {
+            const [q, r] = key.split(',').map(Number);
+            // Extract unitType and playerId from texture key
+            const textureKey = unit.texture.key;
+            const match = textureKey.match(/unit_(\d+)_(\d+)/);
+            
+            if (match) {
+                unitsData.push({
+                    q,
+                    r,
+                    unitType: parseInt(match[1]),
+                    playerId: parseInt(match[2])
+                });
+            }
+        });
+        
+        return unitsData;
+    }
 }

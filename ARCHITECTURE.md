@@ -588,47 +588,167 @@ The coordinate conversion now exactly matches the Go backend:
 - **Automatic Change Tracking**: Eliminates manual change marking
 - **Event Types**: TILES_CHANGED, UNITS_CHANGED, MAP_LOADED, MAP_SAVED, MAP_CLEARED, MAP_METADATA_CHANGED
 
-### Component State Management Architecture (v5.1)
+### Component Lifecycle Architecture (v6.0)
 
-#### MapEditorPageState Class Enhancement
-**Purpose**: Centralized page-level state management with proper component encapsulation
-- **State Categories**: Tool state, Visual state, Workflow state with granular change tracking
-- **Observer Pattern**: PageStateObserver interface for component synchronization
-- **State Generators**: Components that own UI controls generate state changes directly
-- **DOM Ownership**: Each component exclusively manages its own DOM elements and CSS classes
-- **Event Flow**: User interaction → Component state update → Observer notification → UI synchronization
+#### Breadth-First Component Initialization Pattern
+**Purpose**: Eliminate initialization order dependencies through synchronization barriers and multi-phase lifecycle management
+
+The new lifecycle architecture implements a breadth-first initialization pattern that prevents race conditions and timing issues common in depth-first component construction. Instead of each component immediately initializing its children, we use synchronized phases that ensure all components at each level are ready before proceeding to the next phase.
+
+#### Multi-Phase Lifecycle Design
+```typescript
+interface ComponentLifecycle {
+    // Phase 1: Basic construction and DOM binding
+    bindToDOM(): Promise<void>;
+    
+    // Phase 2: Dependency injection and configuration
+    injectDependencies(dependencies: ComponentDependencies): Promise<void>;
+    
+    // Phase 3: Full activation and event subscription
+    activate(): Promise<void>;
+    
+    // Cleanup phase
+    deactivate(): Promise<void>;
+}
+
+interface ComponentDependencies {
+    eventBus: EventBus;
+    sharedState: any;
+    parentContext: ComponentContext;
+    configurationData: any;
+}
+```
+
+#### LifecycleController for Breadth-First Orchestration
+**Purpose**: Coordinates component initialization across multiple phases to prevent race conditions
 
 ```typescript
-export class MapEditorPageState {
-    private toolState: ToolState;     // selectedTerrain, selectedUnit, brushSize, etc.
-    private visualState: VisualState; // showGrid, showCoordinates
-    private workflowState: WorkflowState; // hasPendingMapDataLoad, etc.
+export class LifecycleController {
+    private components: Map<string, ComponentLifecycle> = new Map();
+    private currentPhase: LifecyclePhase = LifecyclePhase.IDLE;
+    private phaseBarriers: Map<LifecyclePhase, Set<string>> = new Map();
     
-    // State generator methods called by UI components
-    public setSelectedTerrain(terrain: number): void
-    public setSelectedUnit(unit: number): void
-    public setBrushSize(size: number): void
-    public setSelectedPlayer(player: number): void
+    // Register component for lifecycle management
+    public registerComponent(id: string, component: ComponentLifecycle): void;
+    
+    // Execute all phases in breadth-first order
+    public async initializeAll(): Promise<void> {
+        await this.executePhase(LifecyclePhase.BIND_TO_DOM);
+        await this.executePhase(LifecyclePhase.INJECT_DEPENDENCIES);
+        await this.executePhase(LifecyclePhase.ACTIVATE);
+    }
+    
+    // Execute a single phase for all components
+    private async executePhase(phase: LifecyclePhase): Promise<void> {
+        const promises = Array.from(this.components.values()).map(async (component) => {
+            try {
+                await this.executeComponentPhase(component, phase);
+                this.markPhaseComplete(component.componentId, phase);
+            } catch (error) {
+                this.handlePhaseError(component.componentId, phase, error);
+            }
+        });
+        
+        await Promise.allSettled(promises);
+        await this.waitForPhaseBarrier(phase);
+    }
+    
+    // Synchronization barrier - wait for all components to complete phase
+    private async waitForPhaseBarrier(phase: LifecyclePhase): Promise<void>;
+}
+
+enum LifecyclePhase {
+    IDLE = 'idle',
+    BIND_TO_DOM = 'bind-to-dom',
+    INJECT_DEPENDENCIES = 'inject-dependencies', 
+    ACTIVATE = 'activate',
+    DEACTIVATING = 'deactivating'
+}
+```
+
+#### Benefits Over Depth-First Initialization
+
+**Eliminates Race Conditions**: Components don't emit events until all components are ready to receive them
+- **Traditional Problem**: Component A initializes and emits events before Component B has subscribed
+- **Breadth-First Solution**: All components bind to DOM first, then all inject dependencies and subscribe to events, then all activate
+
+**Prevents Initialization Order Dependencies**: Components can be created in any order
+- **Traditional Problem**: Component creation order determines whether dependencies are available
+- **Breadth-First Solution**: Dependencies are injected in a separate phase after all components exist
+
+**Handles Async Initialization Gracefully**: Each phase can be async without blocking other components
+- **Traditional Problem**: Async component initialization blocks dependent components indefinitely
+- **Breadth-First Solution**: Phase barriers ensure all async operations complete before proceeding
+
+**Provides Clear Error Isolation**: Failed component initialization doesn't cascade to other components
+- **Traditional Problem**: One component failure can prevent entire application initialization
+- **Breadth-First Solution**: Failed components are isolated, remaining components continue initialization
+
+#### Implementation Example
+```typescript
+export class MapEditorPage extends BasePage {
+    private lifecycleController: LifecycleController;
+    
+    protected async initializeComponents(): Promise<void> {
+        this.lifecycleController = new LifecycleController();
+        
+        // Register all components first (they only create basic structure)
+        const editorToolsPanel = new EditorToolsPanel(this.ensureElement('[data-component="editor-tools"]'));
+        const phaserEditor = new PhaserEditorComponent(this.ensureElement('[data-component="phaser-editor"]'));
+        const tileStatsPanel = new TileStatsPanel(this.ensureElement('[data-component="tile-stats"]'));
+        
+        this.lifecycleController.registerComponent('editor-tools', editorToolsPanel);
+        this.lifecycleController.registerComponent('phaser-editor', phaserEditor);
+        this.lifecycleController.registerComponent('tile-stats', tileStatsPanel);
+        
+        // Execute breadth-first initialization
+        await this.lifecycleController.initializeAll();
+        
+        // All components are now fully initialized and ready
+    }
 }
 ```
 
 #### Component Encapsulation Pattern
-**EditorToolsPanel**: State Generator and DOM Owner
-- Owns all `.terrain-button` and `.unit-button` DOM elements exclusively
-- Generates state changes when users interact with controls
-- Updates `pageState` directly via method calls (not events)
-- Manages visual selection state internally without external interference
+**Enhanced Component Base Class**: Implements ComponentLifecycle interface
+```typescript
+export abstract class BaseComponent implements Component, ComponentLifecycle {
+    // Phase 1: Create DOM structure and find/create elements
+    public async bindToDOM(): Promise<void> {
+        this.findOrCreateElements();
+        this.validateDOMStructure();
+    }
+    
+    // Phase 2: Receive dependencies and configuration
+    public async injectDependencies(deps: ComponentDependencies): Promise<void> {
+        this.eventBus = deps.eventBus;
+        this.sharedState = deps.sharedState;
+        this.configureFromData(deps.configurationData);
+    }
+    
+    // Phase 3: Subscribe to events and become fully active
+    public async activate(): Promise<void> {
+        this.subscribeToEvents();
+        this.initializeBusinessLogic();
+        this.markReady();
+    }
+    
+    // Cleanup in reverse order
+    public async deactivate(): Promise<void> {
+        this.unsubscribeFromEvents();
+        this.cleanupBusinessLogic();
+        this.clearDependencies();
+    }
+}
+```
 
-**MapEditorPage**: Orchestrator and Observer
-- Coordinates components but never manipulates their internal DOM elements
-- Observes page state changes for coordination between components
-- Passes state instances to components for dependency injection
-- Focuses on page-level concerns without violating component boundaries
-
-**Other Components**: State Observers
-- Subscribe to page state changes relevant to their functionality
-- Update their internal state/UI when page state changes
-- Never directly manipulate DOM elements belonging to other components
+#### Architectural Benefits
+- **Predictable Initialization**: All components go through same phases in same order
+- **Race Condition Prevention**: Events only flow when all components are ready to handle them
+- **Error Resilience**: Component failures are isolated and don't prevent other components from initializing
+- **Debugging Simplicity**: Clear phase boundaries make initialization issues easier to trace
+- **Async-Safe**: Properly handles async operations without blocking other components
+- **Testability**: Each phase can be tested independently with mocked dependencies
 
 ```typescript
 export interface MapObserver {
@@ -736,7 +856,7 @@ export class MapEditorPage extends BasePage implements MapObserver {
 ---
 
 **Last Updated**: 2025-01-20  
-**Architecture Version**: 5.1 (Component State Management with Encapsulation)  
-**Status**: Production-ready with proper component boundaries and state management
+**Architecture Version**: 6.0 (Breadth-First Lifecycle Architecture)  
+**Status**: Production-ready with breadth-first lifecycle architecture design and component encapsulation
 
-**Key Achievement**: Established revolutionary component architecture with proper encapsulation, DOM ownership, and state management patterns. Eliminated cross-component DOM manipulation violations while implementing clean state generation and observation patterns.
+**Key Achievement**: Designed revolutionary breadth-first component lifecycle architecture that eliminates initialization order dependencies through synchronization barriers. Established multi-phase initialization pattern (bindToDOM, injectDependencies, activate) with LifecycleController orchestration to prevent race conditions and timing issues while maintaining clean component boundaries and state management patterns.

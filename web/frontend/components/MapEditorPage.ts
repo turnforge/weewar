@@ -4,23 +4,18 @@ import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { TileStatsPanel } from './TileStatsPanel';
 import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from './KeyboardShortcutManager';
 import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
+import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType, ToolStateChangedEventData, VisualStateChangedEventData, WorkflowStateChangedEventData } from './MapEditorPageState';
 import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload } from './EventBus';
 import { EditorToolsPanel } from './EditorToolsPanel';
 
 const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
 
 /**
- * Map Editor page with unified Map architecture and Observer pattern
+ * Map Editor page with unified Map architecture and centralized page state
  */
-class MapEditorPage extends BasePage implements MapObserver {
+class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private map: Map | null = null;
-    
-    // Editor state
-    private currentTerrain: number = 1; // Default to grass
-    private currentUnit: number = 0; // Default to no unit
-    private currentPlayerId: number = 1; // Default to player 1
-    private placementMode: 'terrain' | 'unit' | 'clear' = 'terrain'; // Track what we're placing
-    private brushSize: number = 0; // Default to single hex
+    private pageState: MapEditorPageState;
     private editorOutput: HTMLElement | null = null;
 
     // Dockview interface
@@ -56,6 +51,8 @@ class MapEditorPage extends BasePage implements MapObserver {
     constructor() {
         super();
         // Phase 1: State setup (must be first)
+        this.pageState = new MapEditorPageState();
+        this.pageState.subscribe(this); // Subscribe to page state changes
         this.loadInitialState();
         
         // Phase 2: Event subscriptions (before component creation)
@@ -1189,20 +1186,7 @@ class MapEditorPage extends BasePage implements MapObserver {
         }
     }
 
-    private updateTerrainButtonSelection(terrain: number): void {
-        // Remove selection from all terrain and unit buttons
-        document.querySelectorAll('.terrain-button, .unit-button').forEach(button => {
-            button.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-        });
-        
-        // Add selection to the correct terrain button
-        document.querySelectorAll('.terrain-button').forEach(button => {
-            const buttonTerrain = button.getAttribute('data-terrain');
-            if (buttonTerrain === terrain.toString()) {
-                button.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-            }
-        });
-    }
+    // Note: Terrain button selection is now handled by EditorToolsPanel internally
 
     // Theme management is handled by BasePage
 
@@ -1706,6 +1690,10 @@ class MapEditorPage extends BasePage implements MapObserver {
             // Create EditorToolsPanel component
             this.editorToolsPanel = new EditorToolsPanel(container, this.eventBus, true);
             
+            // Inject page state so EditorToolsPanel can generate state changes
+            this.editorToolsPanel.setPageState(this.pageState);
+            
+            this.logToConsole('EditorToolsPanel initialized with page state');
             
         } catch (error) {
             this.logToConsole(`Failed to initialize EditorToolsPanel: ${error}`);
@@ -2228,18 +2216,7 @@ class MapEditorPage extends BasePage implements MapObserver {
         this.showToast('Reset Complete', 'All tools reset to defaults', 'info');
     }
     
-    private updateUnitButtonSelection(unitType: number): void {
-        // Remove selection from all terrain and unit buttons
-        document.querySelectorAll('.terrain-button, .unit-button').forEach(btn => {
-            btn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-        });
-        
-        // Add selection to clicked unit button
-        const unitButton = document.querySelector(`[data-unit="${unitType}"]`);
-        if (unitButton) {
-            unitButton.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
-        }
-    }
+    // Note: Unit button selection is now handled by EditorToolsPanel internally
 
     // Reference image methods
     private async loadReferenceFromClipboard(): Promise<void> {

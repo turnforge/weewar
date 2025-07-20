@@ -1,56 +1,42 @@
 import { BaseComponent } from './Component';
-import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload } from './EventBus';
+import { EventBus, EditorEventTypes } from './EventBus';
+import { MapEditorPageState } from './MapEditorPageState';
 
 const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
 
 /**
- * EditorToolsPanel Component - Manages terrain/unit selection, brush size, and player controls
+ * EditorToolsPanel Component - State generator and DOM owner for editor tools
  * 
  * Responsibilities:
- * - Handle terrain button clicks and emit terrain selection events
- * - Handle unit button clicks and emit unit selection events  
- * - Handle brush size changes and emit brush size events
- * - Handle player selection changes and emit player events
- * - Manage visual selection state for tools
- * - Maintain radio button behavior for terrain/unit selection
+ * - Own and manage terrain/unit button DOM elements and styling
+ * - Generate page state changes when users interact with controls
+ * - Handle brush size dropdown and player selection dropdowns
+ * - Maintain visual selection state (button highlights, etc.)
+ * - Update page state via direct method calls (not events)
  * 
- * Does NOT handle:
- * - Layout control (managed by parent/CSS)
- * - Direct state management (emits events instead)
- * - Cross-component DOM access (scoped to root element only)
+ * Architecture:
+ * - Receives MapEditorPageState instance from parent
+ * - Updates state directly when user interacts with controls
+ * - Manages its own DOM elements without external interference
+ * - Does NOT observe state changes (it's the generator, not observer)
  */
 export class EditorToolsPanel extends BaseComponent {
-    // Current selection state for UI updates
-    private currentTerrain: number = 1;
-    private currentUnit: number = 0;
-    private currentBrushSize: number = 0;
-    private currentPlayerId: number = 1;
-    private currentPlacementMode: 'terrain' | 'unit' | 'clear' = 'terrain';
+    private pageState: MapEditorPageState | null = null;
     
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('editor-tools-panel', rootElement, eventBus, debugMode);
     }
     
+    // Method to inject page state from parent
+    public setPageState(pageState: MapEditorPageState): void {
+        this.pageState = pageState;
+        // Initialize UI to match current state
+        this.syncUIWithPageState();
+    }
+    
     protected initializeComponent(): void {
-        this.log('Initializing EditorToolsPanel component');
-        
-        // Subscribe to external state changes to keep UI in sync
-        this.subscribe<TerrainSelectedPayload>(EditorEventTypes.TERRAIN_SELECTED, (payload) => {
-            this.updateTerrainSelection(payload.data.terrainType);
-        });
-        
-        this.subscribe<UnitSelectedPayload>(EditorEventTypes.UNIT_SELECTED, (payload) => {
-            this.updateUnitSelection(payload.data.unitType);
-        });
-        
-        this.subscribe<BrushSizeChangedPayload>(EditorEventTypes.BRUSH_SIZE_CHANGED, (payload) => {
-            this.updateBrushSizeSelection(payload.data.brushSize);
-        });
-        
-        this.subscribe<PlayerChangedPayload>(EditorEventTypes.PLAYER_CHANGED, (payload) => {
-            this.updatePlayerSelection(payload.data.playerId);
-        });
-        
+        this.log('Initializing EditorToolsPanel component as state generator');
+        // No event subscriptions - this component generates state, doesn't observe it
         this.log('EditorToolsPanel component initialized');
     }
     
@@ -100,24 +86,22 @@ export class EditorToolsPanel extends BaseComponent {
                     
                     if (terrainValue === 0) {
                         // Clear mode
-                        this.currentPlacementMode = 'clear';
                         this.updateButtonSelection(clickedButton);
                         
-                        this.emit<PlacementModeChangedPayload>(EditorEventTypes.PLACEMENT_MODE_CHANGED, {
-                            mode: 'clear'
-                        });
+                        // Update page state directly
+                        if (this.pageState) {
+                            this.pageState.setPlacementMode('clear');
+                        }
                         
                         this.log('Selected clear mode');
                     } else {
                         // Terrain selection
-                        this.currentTerrain = terrainValue;
-                        this.currentPlacementMode = 'terrain';
                         this.updateButtonSelection(clickedButton);
                         
-                        this.emit<TerrainSelectedPayload>(EditorEventTypes.TERRAIN_SELECTED, {
-                            terrainType: terrainValue,
-                            terrainName: terrainName
-                        });
+                        // Update page state directly
+                        if (this.pageState) {
+                            this.pageState.setSelectedTerrain(terrainValue);
+                        }
                         
                         this.log(`Selected terrain: ${terrainValue} (${terrainName})`);
                     }
@@ -143,23 +127,19 @@ export class EditorToolsPanel extends BaseComponent {
                     const unitValue = parseInt(unit);
                     const unitName = this.getUnitName(unitValue);
                     
-                    this.currentUnit = unitValue;
-                    this.currentPlacementMode = 'unit';
                     this.updateButtonSelection(clickedButton);
                     
                     // Get current player selection
                     const playerSelect = this.findElement('#unit-player-color') as HTMLSelectElement;
-                    if (playerSelect) {
-                        this.currentPlayerId = parseInt(playerSelect.value);
+                    const currentPlayer = playerSelect ? parseInt(playerSelect.value) : 1;
+                    
+                    // Update page state directly
+                    if (this.pageState) {
+                        this.pageState.setSelectedUnit(unitValue);
+                        this.pageState.setSelectedPlayer(currentPlayer);
                     }
                     
-                    this.emit<UnitSelectedPayload>(EditorEventTypes.UNIT_SELECTED, {
-                        unitType: unitValue,
-                        unitName: unitName,
-                        playerId: this.currentPlayerId
-                    });
-                    
-                    this.log(`Selected unit: ${unitValue} (${unitName}) for player ${this.currentPlayerId}`);
+                    this.log(`Selected unit: ${unitValue} (${unitName}) for player ${currentPlayer}`);
                 }
             });
         });
@@ -179,12 +159,10 @@ export class EditorToolsPanel extends BaseComponent {
                 const brushSize = parseInt(target.value);
                 const sizeName = BRUSH_SIZE_NAMES[brushSize] || `Size ${brushSize}`;
                 
-                this.currentBrushSize = brushSize;
-                
-                this.emit<BrushSizeChangedPayload>(EditorEventTypes.BRUSH_SIZE_CHANGED, {
-                    brushSize: brushSize,
-                    sizeName: sizeName
-                });
+                // Update page state directly
+                if (this.pageState) {
+                    this.pageState.setBrushSize(brushSize);
+                }
                 
                 this.log(`Brush size changed to: ${sizeName}`);
             });
@@ -206,11 +184,10 @@ export class EditorToolsPanel extends BaseComponent {
                 const target = e.target as HTMLSelectElement;
                 const playerId = parseInt(target.value);
                 
-                this.currentPlayerId = playerId;
-                
-                this.emit<PlayerChangedPayload>(EditorEventTypes.PLAYER_CHANGED, {
-                    playerId: playerId
-                });
+                // Update page state directly
+                if (this.pageState) {
+                    this.pageState.setSelectedPlayer(playerId);
+                }
                 
                 this.log(`Player changed to: ${playerId}`);
             });
@@ -219,6 +196,29 @@ export class EditorToolsPanel extends BaseComponent {
         } else {
             this.log('Player control not found');
         }
+    }
+    
+    /**
+     * Sync UI controls with current page state
+     */
+    private syncUIWithPageState(): void {
+        if (!this.pageState) return;
+        
+        const toolState = this.pageState.getToolState();
+        
+        // Update terrain button selection
+        this.updateTerrainButtonHighlight(toolState.selectedTerrain);
+        
+        // Update unit button selection 
+        this.updateUnitButtonHighlight(toolState.selectedUnit);
+        
+        // Update brush size dropdown
+        this.updateBrushSizeDropdown(toolState.brushSize);
+        
+        // Update player dropdown
+        this.updatePlayerDropdown(toolState.selectedPlayer);
+        
+        this.log('UI synced with page state');
     }
     
     /**
@@ -236,50 +236,45 @@ export class EditorToolsPanel extends BaseComponent {
     }
     
     /**
-     * Update terrain selection state (called from external events)
+     * Update terrain button highlight (internal method for UI sync)
      */
-    private updateTerrainSelection(terrainType: number): void {
+    private updateTerrainButtonHighlight(terrainType: number): void {
         const terrainButton = this.findElement(`[data-terrain="${terrainType}"]`);
         if (terrainButton) {
             this.updateButtonSelection(terrainButton as HTMLElement);
-            this.currentTerrain = terrainType;
-            this.currentPlacementMode = terrainType === 0 ? 'clear' : 'terrain';
         }
     }
     
     /**
-     * Update unit selection state (called from external events)
+     * Update unit button highlight (internal method for UI sync) 
      */
-    private updateUnitSelection(unitType: number): void {
+    private updateUnitButtonHighlight(unitType: number): void {
         const unitButton = this.findElement(`[data-unit="${unitType}"]`);
         if (unitButton) {
             this.updateButtonSelection(unitButton as HTMLElement);
-            this.currentUnit = unitType;
-            this.currentPlacementMode = 'unit';
         }
     }
     
     /**
-     * Update brush size selection state (called from external events)
+     * Update brush size dropdown (internal method for UI sync)
      */
-    private updateBrushSizeSelection(brushSize: number): void {
+    private updateBrushSizeDropdown(brushSize: number): void {
         const brushSizeSelect = this.findElement('#brush-size') as HTMLSelectElement;
         if (brushSizeSelect) {
             brushSizeSelect.value = brushSize.toString();
-            this.currentBrushSize = brushSize;
         }
     }
     
     /**
-     * Update player selection state (called from external events)
+     * Update player dropdown (internal method for UI sync)
      */
-    private updatePlayerSelection(playerId: number): void {
+    private updatePlayerDropdown(playerId: number): void {
         const playerSelect = this.findElement('#unit-player-color') as HTMLSelectElement;
         if (playerSelect) {
             playerSelect.value = playerId.toString();
-            this.currentPlayerId = playerId;
         }
     }
+    
     
     /**
      * Get human-readable terrain name

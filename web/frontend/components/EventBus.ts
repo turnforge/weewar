@@ -228,7 +228,13 @@ export const EditorEventTypes = {
     // Tools events
     TOOLS_UI_UPDATED: 'tools-ui-updated',
     GRID_TOGGLE: 'grid-toggle',
-    COORDINATES_TOGGLE: 'coordinates-toggle'
+    COORDINATES_TOGGLE: 'coordinates-toggle',
+    
+    // Page state events (centralized state management)
+    PAGE_STATE_CHANGED: 'page-state-changed',
+    TOOL_STATE_CHANGED: 'tool-state-changed',
+    VISUAL_STATE_CHANGED: 'visual-state-changed',
+    WORKFLOW_STATE_CHANGED: 'workflow-state-changed'
 } as const;
 
 export type EventType = typeof EventTypes[keyof typeof EventTypes];
@@ -360,4 +366,10 @@ export interface TileClearedPayload {
 export interface UnitRemovedPayload {
     q: number;
     r: number;
+}
+
+// Page state event payloads (import from MapEditorPageState.ts)
+export interface PageStateChangedPayload {
+    eventType: 'tool-state-changed' | 'visual-state-changed' | 'workflow-state-changed';
+    data: any; // Will be ToolStateChangedEventData | VisualStateChangedEventData | WorkflowStateChangedEventData
 }

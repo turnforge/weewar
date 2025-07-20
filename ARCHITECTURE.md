@@ -588,6 +588,48 @@ The coordinate conversion now exactly matches the Go backend:
 - **Automatic Change Tracking**: Eliminates manual change marking
 - **Event Types**: TILES_CHANGED, UNITS_CHANGED, MAP_LOADED, MAP_SAVED, MAP_CLEARED, MAP_METADATA_CHANGED
 
+### Component State Management Architecture (v5.1)
+
+#### MapEditorPageState Class Enhancement
+**Purpose**: Centralized page-level state management with proper component encapsulation
+- **State Categories**: Tool state, Visual state, Workflow state with granular change tracking
+- **Observer Pattern**: PageStateObserver interface for component synchronization
+- **State Generators**: Components that own UI controls generate state changes directly
+- **DOM Ownership**: Each component exclusively manages its own DOM elements and CSS classes
+- **Event Flow**: User interaction → Component state update → Observer notification → UI synchronization
+
+```typescript
+export class MapEditorPageState {
+    private toolState: ToolState;     // selectedTerrain, selectedUnit, brushSize, etc.
+    private visualState: VisualState; // showGrid, showCoordinates
+    private workflowState: WorkflowState; // hasPendingMapDataLoad, etc.
+    
+    // State generator methods called by UI components
+    public setSelectedTerrain(terrain: number): void
+    public setSelectedUnit(unit: number): void
+    public setBrushSize(size: number): void
+    public setSelectedPlayer(player: number): void
+}
+```
+
+#### Component Encapsulation Pattern
+**EditorToolsPanel**: State Generator and DOM Owner
+- Owns all `.terrain-button` and `.unit-button` DOM elements exclusively
+- Generates state changes when users interact with controls
+- Updates `pageState` directly via method calls (not events)
+- Manages visual selection state internally without external interference
+
+**MapEditorPage**: Orchestrator and Observer
+- Coordinates components but never manipulates their internal DOM elements
+- Observes page state changes for coordination between components
+- Passes state instances to components for dependency injection
+- Focuses on page-level concerns without violating component boundaries
+
+**Other Components**: State Observers
+- Subscribe to page state changes relevant to their functionality
+- Update their internal state/UI when page state changes
+- Never directly manipulate DOM elements belonging to other components
+
 ```typescript
 export interface MapObserver {
     onMapEvent(event: MapEvent): void;
@@ -694,7 +736,7 @@ export class MapEditorPage extends BasePage implements MapObserver {
 ---
 
 **Last Updated**: 2025-01-20  
-**Architecture Version**: 5.0 (Unified Map with Observer Pattern)  
-**Status**: Production-ready with single source of truth architecture
+**Architecture Version**: 5.1 (Component State Management with Encapsulation)  
+**Status**: Production-ready with proper component boundaries and state management
 
-**Key Achievement**: Unified Map architecture with Observer pattern providing single source of truth, event-driven component communication, and significant codebase simplification from 2700+ lines to centralized map operations.
+**Key Achievement**: Established revolutionary component architecture with proper encapsulation, DOM ownership, and state management patterns. Eliminated cross-component DOM manipulation violations while implementing clean state generation and observation patterns.

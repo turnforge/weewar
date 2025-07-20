@@ -327,12 +327,22 @@ export class EditorToolsPanel extends BaseComponent {
      * Get current tool state for external queries
      */
     public getCurrentState() {
+        if (this.pageState) {
+            const toolState = this.pageState.getToolState();
+            return {
+                terrain: toolState.selectedTerrain,
+                unit: toolState.selectedUnit,
+                brushSize: toolState.brushSize,
+                playerId: toolState.selectedPlayer,
+                placementMode: toolState.placementMode
+            };
+        }
         return {
-            terrain: this.currentTerrain,
-            unit: this.currentUnit,
-            brushSize: this.currentBrushSize,
-            playerId: this.currentPlayerId,
-            placementMode: this.currentPlacementMode
+            terrain: 1,
+            unit: 0,
+            brushSize: 0,
+            playerId: 1,
+            placementMode: 'terrain' as const
         };
     }
 }

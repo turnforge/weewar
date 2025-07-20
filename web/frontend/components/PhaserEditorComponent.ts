@@ -1,6 +1,8 @@
 import { BaseComponent } from './Component';
-import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload } from './EventBus';
+import { EventBus, EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload } from './EventBus';
 import { PhaserMapEditor } from './phaser/PhaserMapEditor';
+import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType } from './MapEditorPageState';
+import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
 
 /**
  * PhaserEditorComponent - Manages the Phaser.js-based map editor interface using BaseComponent architecture
@@ -20,46 +22,67 @@ import { PhaserMapEditor } from './phaser/PhaserMapEditor';
  * - Save/load UI (will be handled by SaveLoadComponent)
  * - Direct DOM manipulation outside of phaser-container
  */
-export class PhaserEditorComponent extends BaseComponent {
+export class PhaserEditorComponent extends BaseComponent implements PageStateObserver, MapObserver {
     private phaserEditor: PhaserMapEditor | null = null;
     private isInitialized: boolean = false;
+    private pageState: MapEditorPageState | null = null;
+    private map: Map | null = null;
     
-    // Current tool state (synced from EditorToolsPanel)
-    private currentTerrain: number = 1;
-    private currentUnit: number = 0;
-    private currentBrushSize: number = 0;
-    private currentPlayerId: number = 1;
-    private currentPlacementMode: 'terrain' | 'unit' | 'clear' = 'terrain';
-    
-    constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+    constructor(rootElement: HTMLElement, eventBus: EventBus, pageState?: MapEditorPageState | null, map?: Map | null, debugMode: boolean = false) {
         super('phaser-editor', rootElement, eventBus, debugMode);
+        
+        if (pageState) {
+            this.pageState = pageState;
+            this.pageState.subscribe(this);
+        }
+        
+        if (map) {
+            this.map = map;
+            this.map.subscribe(this);
+        }
     }
     
     protected initializeComponent(): void {
         this.log('Initializing PhaserEditorComponent');
         
-        // Subscribe to tool changes from EditorToolsPanel
-        this.subscribe<TerrainSelectedPayload>(EditorEventTypes.TERRAIN_SELECTED, (payload) => {
-            this.handleTerrainSelected(payload.data);
-        });
-        
-        this.subscribe<UnitSelectedPayload>(EditorEventTypes.UNIT_SELECTED, (payload) => {
-            this.handleUnitSelected(payload.data);
-        });
-        
-        this.subscribe<BrushSizeChangedPayload>(EditorEventTypes.BRUSH_SIZE_CHANGED, (payload) => {
-            this.handleBrushSizeChanged(payload.data);
-        });
-        
-        this.subscribe<PlacementModeChangedPayload>(EditorEventTypes.PLACEMENT_MODE_CHANGED, (payload) => {
-            this.handlePlacementModeChanged(payload.data);
-        });
-        
-        this.subscribe<PlayerChangedPayload>(EditorEventTypes.PLAYER_CHANGED, (payload) => {
-            this.handlePlayerChanged(payload.data);
-        });
+        // Tool changes now handled via PageState Observer pattern
+        // PageState will notify us when tools change
         
         this.log('PhaserEditorComponent component initialized');
+    }
+    
+    // PageStateObserver implementation
+    public onPageStateEvent(event: PageStateEvent): void {
+        switch (event.type) {
+            case PageStateEventType.TOOL_STATE_CHANGED:
+                this.handleToolStateChanged(event.data);
+                break;
+        }
+    }
+    
+    // MapObserver implementation
+    public onMapEvent(event: MapEvent): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            return;
+        }
+        
+        switch (event.type) {
+            case MapEventType.MAP_LOADED:
+                this.handleMapLoaded(event.data as MapLoadedEventData);
+                break;
+                
+            case MapEventType.TILES_CHANGED:
+                this.handleTilesChanged(event.data as TilesChangedEventData);
+                break;
+                
+            case MapEventType.UNITS_CHANGED:
+                this.handleUnitsChanged(event.data as UnitsChangedEventData);
+                break;
+                
+            case MapEventType.MAP_CLEARED:
+                this.handleMapCleared();
+                break;
+        }
     }
     
     protected bindToDOM(): void {
@@ -235,6 +258,95 @@ export class PhaserEditorComponent extends BaseComponent {
     }
     
     /**
+     * Handle tool state changes from PageState
+     */
+    private handleToolStateChanged(toolState: any): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            return;
+        }
+        
+        // Update Phaser editor settings based on tool state
+        if (toolState.selectedTerrain !== undefined) {
+            this.phaserEditor.setTerrain(toolState.selectedTerrain);
+            this.log(`Updated Phaser terrain to: ${toolState.selectedTerrain}`);
+        }
+        
+        if (toolState.brushSize !== undefined) {
+            this.phaserEditor.setBrushSize(toolState.brushSize);
+            this.log(`Updated Phaser brush size to: ${toolState.brushSize}`);
+        }
+    }
+    
+    /**
+     * Handle Map event handlers
+     */
+    private handleMapLoaded(data: MapLoadedEventData): void {
+        this.log('Map loaded, updating Phaser display');
+        
+        // Load tile data from Map into Phaser
+        if (this.map) {
+            const mapTiles = this.map.getAllTiles();
+            // Transform Map format to Phaser format
+            const phaserTilesData = mapTiles.map(tile => ({
+                q: tile.q,
+                r: tile.r,
+                terrain: tile.tileType,
+                color: tile.playerId || 0
+            }));
+            this.phaserEditor?.setTilesData(phaserTilesData);
+            
+            const unitsData = this.map.getAllUnits();
+            // Load units into Phaser (if we add this method later)
+            // this.phaserEditor?.setUnitsData(unitsData);
+        }
+    }
+    
+    private handleTilesChanged(data: TilesChangedEventData): void {
+        this.log(`Updating ${data.changes.length} tile changes in Phaser`);
+        
+        // Update individual tiles in Phaser based on Map changes
+        for (const change of data.changes) {
+            if (change.tile) {
+                this.phaserEditor?.paintTile(
+                    change.q, 
+                    change.r, 
+                    change.tile.tileType, 
+                    change.tile.playerId || 0, 
+                    0 // No brush size for individual updates
+                );
+            } else {
+                // Tile was removed
+                this.phaserEditor?.removeTile(change.q, change.r);
+            }
+        }
+    }
+    
+    private handleUnitsChanged(data: UnitsChangedEventData): void {
+        this.log(`Updating ${data.changes.length} unit changes in Phaser`);
+        
+        // Update individual units in Phaser based on Map changes
+        for (const change of data.changes) {
+            if (change.unit) {
+                this.phaserEditor?.paintUnit(
+                    change.q,
+                    change.r,
+                    change.unit.unitType,
+                    change.unit.playerId
+                );
+            } else {
+                // Unit was removed
+                this.phaserEditor?.removeUnit(change.q, change.r);
+            }
+        }
+    }
+    
+    private handleMapCleared(): void {
+        this.log('Map cleared, clearing Phaser display');
+        this.phaserEditor?.clearAllTiles();
+        this.phaserEditor?.clearAllUnits();
+    }
+    
+    /**
      * Handle tile clicks for painting
      */
     private handleTileClick(q: number, r: number): void {
@@ -243,40 +355,62 @@ export class PhaserEditorComponent extends BaseComponent {
         }
         
         try {
-            switch (this.currentPlacementMode) {
+            // Get current tool state from pageState
+            const toolState = this.pageState?.getToolState();
+            if (!toolState) {
+                this.log('No tool state available for tile click');
+                return;
+            }
+            
+            switch (toolState.placementMode) {
                 case 'terrain':
-                    this.phaserEditor.paintTile(q, r, this.currentTerrain, 0, this.currentBrushSize);
-                    this.log(`Painted terrain ${this.currentTerrain} at Q=${q}, R=${r} with brush size ${this.currentBrushSize}`);
+                    // Update Map data (single source of truth)
+                    if (this.map) {
+                        this.map.setTileAt(q, r, toolState.selectedTerrain, 0);
+                        // Map will emit TILES_CHANGED event, which will update Phaser via onMapEvent
+                    }
                     
-                    // Emit tile painted event for other components (like Map data management)
+                    this.log(`Painted terrain ${toolState.selectedTerrain} at Q=${q}, R=${r} with brush size ${toolState.brushSize}`);
+                    
+                    // Emit tile painted event for backward compatibility (for components not yet using Map events)
                     this.emit<TilePaintedPayload>(EditorEventTypes.TILE_PAINTED, {
                         q: q,
                         r: r,
-                        terrainType: this.currentTerrain,
+                        terrainType: toolState.selectedTerrain,
                         playerColor: 0,
-                        brushSize: this.currentBrushSize
+                        brushSize: toolState.brushSize
                     });
                     break;
                     
                 case 'unit':
-                    this.phaserEditor.paintUnit(q, r, this.currentUnit, this.currentPlayerId);
-                    this.log(`Painted unit ${this.currentUnit} (player ${this.currentPlayerId}) at Q=${q}, R=${r}`);
+                    // Update Map data (single source of truth)
+                    if (this.map) {
+                        this.map.setUnitAt(q, r, toolState.selectedUnit, toolState.selectedPlayer);
+                        // Map will emit UNITS_CHANGED event, which will update Phaser via onMapEvent
+                    }
                     
-                    // Emit unit placed event for other components
+                    this.log(`Painted unit ${toolState.selectedUnit} (player ${toolState.selectedPlayer}) at Q=${q}, R=${r}`);
+                    
+                    // Emit unit placed event for backward compatibility
                     this.emit<UnitPlacedPayload>(EditorEventTypes.UNIT_PLACED, {
                         q: q,
                         r: r,
-                        unitType: this.currentUnit,
-                        playerId: this.currentPlayerId
+                        unitType: toolState.selectedUnit,
+                        playerId: toolState.selectedPlayer
                     });
                     break;
                     
                 case 'clear':
-                    this.phaserEditor.removeTile(q, r);
-                    this.phaserEditor.removeUnit(q, r);
+                    // Update Map data (single source of truth)
+                    if (this.map) {
+                        this.map.removeTileAt(q, r);
+                        this.map.removeUnitAt(q, r);
+                        // Map will emit events, which will update Phaser via onMapEvent
+                    }
+                    
                     this.log(`Cleared tile and unit at Q=${q}, R=${r}`);
                     
-                    // Emit separate events for tile and unit clearing
+                    // Emit separate events for backward compatibility
                     this.emit<TileClearedPayload>(EditorEventTypes.TILE_CLEARED, { q: q, r: r });
                     this.emit<UnitRemovedPayload>(EditorEventTypes.UNIT_REMOVED, { q: q, r: r });
                     break;
@@ -286,47 +420,7 @@ export class PhaserEditorComponent extends BaseComponent {
         }
     }
     
-    /**
-     * Event handlers for tool changes from EditorToolsPanel
-     */
-    private handleTerrainSelected(data: { terrainType: number; terrainName: string }): void {
-        this.currentTerrain = data.terrainType;
-        this.currentPlacementMode = data.terrainType === 0 ? 'clear' : 'terrain';
-        
-        if (this.phaserEditor) {
-            this.phaserEditor.setTerrain(data.terrainType);
-        }
-        
-        this.log(`Terrain selection updated: ${data.terrainType} (${data.terrainName})`);
-    }
-    
-    private handleUnitSelected(data: { unitType: number; unitName: string; playerId: number }): void {
-        this.currentUnit = data.unitType;
-        this.currentPlayerId = data.playerId;
-        this.currentPlacementMode = 'unit';
-        
-        this.log(`Unit selection updated: ${data.unitType} (${data.unitName}) for player ${data.playerId}`);
-    }
-    
-    private handleBrushSizeChanged(data: { brushSize: number; sizeName: string }): void {
-        this.currentBrushSize = data.brushSize;
-        
-        if (this.phaserEditor) {
-            this.phaserEditor.setBrushSize(data.brushSize);
-        }
-        
-        this.log(`Brush size updated: ${data.sizeName}`);
-    }
-    
-    private handlePlacementModeChanged(data: { mode: 'terrain' | 'unit' | 'clear' }): void {
-        this.currentPlacementMode = data.mode;
-        this.log(`Placement mode changed to: ${data.mode}`);
-    }
-    
-    private handlePlayerChanged(data: { playerId: number }): void {
-        this.currentPlayerId = data.playerId;
-        this.log(`Player changed to: ${data.playerId}`);
-    }
+    // Old EventBus handlers removed - tool changes now handled via PageState Observer pattern
     
     // Public API methods (for external access)
     

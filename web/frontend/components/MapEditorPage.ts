@@ -4,7 +4,7 @@ import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { TileStatsPanel } from './TileStatsPanel';
 import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from './KeyboardShortcutManager';
 import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
-import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType, ToolStateChangedEventData, VisualStateChangedEventData, WorkflowStateChangedEventData } from './MapEditorPageState';
+import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType, ToolStateChangedEventData, VisualStateChangedEventData, WorkflowStateChangedEventData, ToolState } from './MapEditorPageState';
 import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload } from './EventBus';
 import { EditorToolsPanel } from './EditorToolsPanel';
 
@@ -34,19 +34,11 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private keyboardShortcutManager: KeyboardShortcutManager | null = null;
 
     // State management for undo/restore operations
-    private savedUIState: {
-        terrain: number;
-        unit: number;
-        playerId: number;
-        brushSize: number;
-        placementMode: 'terrain' | 'unit' | 'clear';
-    } | null = null;
+    // Simplified state backup for preview/cancel functionality
+    private savedToolState: ToolState | null = null;
 
     // UI state  
     private hasPendingMapDataLoad: boolean = false;
-
-    // Pending UI state to apply when Phaser becomes ready
-    private pendingGridState: boolean | null = null;
 
     constructor() {
         super();
@@ -102,6 +94,27 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }
     }
     
+    // PageStateObserver implementation
+    public onPageStateEvent(event: PageStateEvent): void {
+        switch (event.type) {
+            case PageStateEventType.TOOL_STATE_CHANGED:
+                // Tool state changes are handled by components that need them
+                // MapEditorPage mainly coordinates but doesn't need to react to tool changes
+                this.logToConsole(`Tool state changed: ${JSON.stringify(event.data)}`);
+                break;
+                
+            case PageStateEventType.VISUAL_STATE_CHANGED:
+                // Visual state changes might affect display
+                this.logToConsole(`Visual state changed: ${JSON.stringify(event.data)}`);
+                break;
+                
+            case PageStateEventType.WORKFLOW_STATE_CHANGED:
+                // Workflow state changes affect the overall page flow
+                this.logToConsole(`Workflow state changed: ${JSON.stringify(event.data)}`);
+                break;
+        }
+    }
+    
     /**
      * Subscribe to editor-specific events before components are created
      * This prevents race conditions where components emit events before subscribers are ready
@@ -109,30 +122,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private subscribeToEditorEvents(): void {
         console.log('MapEditorPage: Subscribing to editor events');
         
-        // Subscribe to terrain selection events
-        this.eventBus.subscribe<TerrainSelectedPayload>(EditorEventTypes.TERRAIN_SELECTED, (payload) => {
-            this.handleTerrainSelected(payload.data);
-        }, 'map-editor-page');
-        
-        // Subscribe to unit selection events
-        this.eventBus.subscribe<UnitSelectedPayload>(EditorEventTypes.UNIT_SELECTED, (payload) => {
-            this.handleUnitSelected(payload.data);
-        }, 'map-editor-page');
-        
-        // Subscribe to brush size changes
-        this.eventBus.subscribe<BrushSizeChangedPayload>(EditorEventTypes.BRUSH_SIZE_CHANGED, (payload) => {
-            this.handleBrushSizeChanged(payload.data);
-        }, 'map-editor-page');
-        
-        // Subscribe to placement mode changes
-        this.eventBus.subscribe<PlacementModeChangedPayload>(EditorEventTypes.PLACEMENT_MODE_CHANGED, (payload) => {
-            this.handlePlacementModeChanged(payload.data);
-        }, 'map-editor-page');
-        
-        // Subscribe to player changes
-        this.eventBus.subscribe<PlayerChangedPayload>(EditorEventTypes.PLAYER_CHANGED, (payload) => {
-            this.handlePlayerChanged(payload.data);
-        }, 'map-editor-page');
+        // Note: Tool state changes now handled via PageState Observer pattern
+        // EditorToolsPanel directly updates pageState, which notifies observers
         
         // Subscribe to tile clicks from Phaser
         this.eventBus.subscribe<TileClickedPayload>(EditorEventTypes.TILE_CLICKED, (payload) => {
@@ -390,17 +381,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
 
         // NOTE: Terrain/unit button bindings, player selection, and brush size controls 
         // are now handled by EditorToolsPanel component via EventBus
-
-        // Painting action buttons
-        document.querySelector('[data-action="paint-terrain"]')?.addEventListener('click', () => {
-            this.paintTerrain();
-        });
-        document.querySelector('[data-action="flood-fill"]')?.addEventListener('click', () => {
-            this.floodFill();
-        });
-        document.querySelector('[data-action="remove-terrain"]')?.addEventListener('click', () => {
-            this.removeTerrain();
-        });
 
         // Visual options
         const showGridCheckbox = document.getElementById('show-grid') as HTMLInputElement;
@@ -741,28 +721,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     /**
      * Load map data from hidden element in the HTML
      */
-    private loadMapDataFromElement(): any {
-        try {
-            const mapDataElement = document.getElementById('map-data-json');
-            
-            if (mapDataElement && mapDataElement.textContent) {
-                const mapData = JSON.parse(mapDataElement.textContent);
-                
-                if (mapData && mapData !== null) {
-                    if (mapData.tiles) {
-                    }
-                    if (mapData.map_units) {
-                    }
-                    return mapData;
-                }
-            }
-            return null;
-        } catch (error) {
-            console.error('Error parsing map data from element:', error);
-            this.logToConsole(`Error parsing map data: ${error}`);
-            return null;
-        }
-    }
     
     /**
      * Load map data (tiles and units) into the Phaser scene
@@ -832,46 +790,23 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     /**
      * Show loading indicator on map
      */
-    private showMapLoadingIndicator(): void {
-        const mapContainer = document.getElementById('phaser-container');
-        if (mapContainer) {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = 'map-loading-overlay';
-            loadingDiv.className = 'absolute inset-0 bg-gray-900/50 flex items-center justify-center z-50';
-            loadingDiv.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 px-4 py-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center space-x-3">
-                        <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Loading map...</span>
-                    </div>
-                </div>
-            `;
-            mapContainer.appendChild(loadingDiv);
-        }
-    }
 
-    /**
-     * Hide loading indicator
-     */
-    private hideMapLoadingIndicator(): void {
-        const loadingDiv = document.getElementById('map-loading-overlay');
-        if (loadingDiv) {
-            loadingDiv.remove();
-        }
-    }
 
     // Editor functions called by the template
 
     public setBrushTerrain(terrain: number): void {
-        this.currentTerrain = terrain;
+        if (this.pageState) {
+            this.pageState.setSelectedTerrain(terrain);
+        }
         
-        const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
         this.updateBrushInfo();
-        this.updateTerrainButtonSelection(terrain);
+        // Button selection now handled by EditorToolsPanel component
     }
 
     public setBrushSize(size: number): void {
-        this.brushSize = size;
+        if (this.pageState) {
+            this.pageState.setBrushSize(size);
+        }
         
         this.updateBrushInfo();
     }
@@ -879,9 +814,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     public setShowGrid(showGrid: boolean): void {
         if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
             this.phaserEditorComponent.setShowGrid(showGrid);
-        } else {
-            // Store the desired grid state and apply it when Phaser becomes ready
-            this.pendingGridState = showGrid;
         }
     }
     
@@ -889,39 +821,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
             this.phaserEditorComponent.setShowCoordinates(showCoordinates);
         } else {
-        }
-    }
-
-    public paintTerrain(): void {
-        const rowInput = document.getElementById('paint-row') as HTMLInputElement;
-        const colInput = document.getElementById('paint-col') as HTMLInputElement;
-        
-        if (rowInput && colInput) {
-            const row = parseInt(rowInput.value);
-            const col = parseInt(colInput.value);
-            // TODO: Implement actual painting logic with WASM
-        }
-    }
-
-    public floodFill(): void {
-        const rowInput = document.getElementById('paint-row') as HTMLInputElement;
-        const colInput = document.getElementById('paint-col') as HTMLInputElement;
-        
-        if (rowInput && colInput) {
-            const row = parseInt(rowInput.value);
-            const col = parseInt(colInput.value);
-            // TODO: Implement flood fill logic with WASM
-        }
-    }
-
-    public removeTerrain(): void {
-        const rowInput = document.getElementById('paint-row') as HTMLInputElement;
-        const colInput = document.getElementById('paint-col') as HTMLInputElement;
-        
-        if (rowInput && colInput) {
-            const row = parseInt(rowInput.value);
-            const col = parseInt(colInput.value);
-            // TODO: Implement terrain removal logic with WASM
         }
     }
 
@@ -1083,13 +982,13 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }
 
         try {
-            const tilesData = this.phaserEditorComponent.getTilesData();
-            const success = await this.saveManager.exportMap(this.map, tilesData, 'json');
+            // Map now handles its own export operations
+            const result = await this.map.save();
             
-            if (success) {
+            if (result.success) {
                 this.showToast('Success', 'Map exported successfully', 'success');
             } else {
-                this.showToast('Error', 'Failed to export map', 'error');
+                this.showToast('Error', result.error || 'Failed to export map', 'error');
             }
         } catch (error) {
             console.error('Export failed:', error);
@@ -1182,7 +1081,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         const brushInfo = document.getElementById('brush-info');
         if (brushInfo) {
             const terrainNames = ['Unknown', 'Grass', 'Desert', 'Water', 'Mountain', 'Rock'];
-            brushInfo.textContent = `Current: ${terrainNames[this.currentTerrain]}, ${BRUSH_SIZE_NAMES[this.brushSize]}`;
+            const currentTerrain = this.pageState?.getToolState().selectedTerrain || 1;
+            const currentBrushSize = this.pageState?.getToolState().brushSize || 0;
+            brushInfo.textContent = `Current: ${terrainNames[currentTerrain]}, ${BRUSH_SIZE_NAMES[currentBrushSize]}`;
         }
     }
 
@@ -1235,7 +1136,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             element: container,
             init: () => {
                 // Initialize PhaserEditorComponent
-                this.phaserEditorComponent = new PhaserEditorComponent(container, this.eventBus, true);
+                this.phaserEditorComponent = new PhaserEditorComponent(container, this.eventBus, this.pageState, this.map, true);
                 this.logToConsole('PhaserEditorComponent initialized');
             },
             dispose: () => {
@@ -1498,150 +1399,13 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     // Phaser panel methods
     // OLD METHOD REMOVED: initializePhaserPanel - now handled by PhaserEditorComponent
     
-    private handleClearClick(q: number, r: number): void {
-        // Get current brush size from dropdown
-        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-        const brushSize = brushSizeSelect ? parseInt(brushSizeSelect.value) : 0;
-        
-        if (brushSize === 0) {
-            // Single tile clear
-            this.clearSingleTile(q, r);
-        } else {
-            // Multi-tile clear with brush
-            this.clearTileArea(q, r, brushSize);
-        }
-        
-        // Map changes are automatically tracked by Map class
-    }
     
-    private clearSingleTile(q: number, r: number): void {
-        // First priority: remove unit if exists
-        if (this.unitExistsAt(q, r)) {
-            this.removeUnitAt(q, r);
-            this.logToConsole(`Removed unit at Q=${q}, R=${r}`);
-            return;
-        }
-        
-        // Second priority: remove tile if exists
-        if (this.tileExistsAt(q, r)) {
-            // Remove from map data
-            if (this.map) {
-                this.map.removeTileAt(q, r);
-            }
-            this.phaserEditorComponent?.removeTile(q, r);
-            this.logToConsole(`Removed tile at Q=${q}, R=${r}`);
-        } else {
-            this.logToConsole(`Nothing to clear at Q=${q}, R=${r}`);
-        }
-    }
     
-    private clearTileArea(centerQ: number, centerR: number, brushSize: number): void {
-        const radius = this.getBrushRadius(brushSize);
-        let clearedCount = 0;
-        
-        for (let dq = -radius; dq <= radius; dq++) {
-            for (let dr = -radius; dr <= radius; dr++) {
-                // Use cube distance to determine if tile is within brush radius
-                const distance = Math.abs(dq) + Math.abs(dr) + Math.abs(-dq - dr);
-                if (distance <= radius * 2) {
-                    const q = centerQ + dq;
-                    const r = centerR + dr;
-                    
-                    // Clear unit first if it exists
-                    if (this.unitExistsAt(q, r)) {
-                        this.removeUnitAt(q, r);
-                        clearedCount++;
-                    }
-                    
-                    // Then clear tile if it exists
-                    if (this.tileExistsAt(q, r)) {
-                        if (this.map) {
-                            this.map.removeTileAt(q, r);
-                        }
-                        this.phaserEditorComponent?.removeTile(q, r);
-                        clearedCount++;
-                    }
-                }
-            }
-        }
-        
-        this.logToConsole(`Cleared ${clearedCount} tiles/units with brush size ${brushSize} at Q=${centerQ}, R=${centerR}`);
-    }
     
-    private getBrushRadius(brushSize: number): number {
-        switch (brushSize) {
-            case 0: return 0;  // Single
-            case 1: return 1;  // Small (7 hexes)
-            case 2: return 2;  // Medium (19 hexes)
-            case 3: return 3;  // Large (37 hexes)
-            case 4: return 4;  // X-Large (61 hexes)
-            case 5: return 5;  // XX-Large (91 hexes)
-            default: return 0;
-        }
-    }
     
-    private handleTerrainPlacement(q: number, r: number): void {
-        // Get current brush size from dropdown
-        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-        const brushSize = brushSizeSelect ? parseInt(brushSizeSelect.value) : 0;
-        
-        // Determine color based on terrain type
-        const playerColor = this.getPlayerColorForTerrain(this.currentTerrain);
-        
-        // Paint terrain with current settings
-        this.phaserEditorComponent?.paintTile(q, r, this.currentTerrain, playerColor, brushSize);
-        
-        // Update map tiles
-        if (this.map) {
-            // For now, just update the clicked tile in map data
-            // The full brush area will be handled by the Phaser panel
-            this.map.setTileAt(q, r, this.currentTerrain, playerColor);
-        }
-        
-        this.logToConsole(`Painted terrain ${this.currentTerrain} (color ${playerColor}) at Q=${q}, R=${r} with brush size ${brushSize}`);
-        // Map changes are automatically tracked by Map class
-    }
     
-    /**
-     * Get the appropriate player color for a terrain type
-     */
-    private getPlayerColorForTerrain(terrainType: number): number {
-        // City terrains that support player colors
-        const cityTerrains = [1, 2, 3, 16, 20]; // Land Base, Naval Base, Airport Base, Missile Silo, Mines
-        
-        if (cityTerrains.includes(terrainType)) {
-            // For city terrains, get the selected player color
-            const playerColorSelect = document.getElementById('player-color') as HTMLSelectElement;
-            return playerColorSelect ? parseInt(playerColorSelect.value) : 0;
-        } else {
-            // For nature terrains, always use color 0 (neutral)
-            return 0;
-        }
-    }
 
-    /**
-     * Check if a tile exists at the given coordinates
-     */
-    private tileExistsAt(q: number, r: number): boolean {
-        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
-            return false;
-        }
-        
-        const tilesData = this.phaserEditorComponent.getTilesData();
-        return tilesData.some(tile => tile.q === q && tile.r === r);
-    }
     
-    /**
-     * Check if a unit exists at the given coordinates
-     */
-    private unitExistsAt(q: number, r: number): boolean {
-        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
-            return false;
-        }
-        
-        const unitsData = this.phaserEditorComponent.getUnitsData();
-        return unitsData.some(unit => unit.q === q && unit.r === r);
-    }
     
     /**
      * Get unit data at the given coordinates (returns null if no unit exists)
@@ -1669,18 +1433,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.phaserEditorComponent?.paintUnit(q, r, unitType, playerId);
     }
     
-    /**
-     * Remove unit at the given coordinates
-     */
-    private removeUnitAt(q: number, r: number): void {
-        // Remove from map data
-        if (this.map) {
-            this.map.removeUnitAt(q, r);
-        }
-        
-        // Remove from Phaser scene
-        this.phaserEditorComponent?.removeUnit(q, r);
-    }
     
     // EditorToolsPanel methods
     private initializeEditorToolsPanel(container: HTMLElement): void {
@@ -1704,8 +1456,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private initializeTileStatsPanel(container: HTMLElement): void {
         try {
             
-            // Initialize TileStats panel
-            this.tileStatsPanel = new TileStatsPanel();
+            // Initialize TileStats panel with Map instance
+            this.tileStatsPanel = new TileStatsPanel(this.map);
             
             // Initialize the panel with the container element directly
             const success = this.tileStatsPanel.initializeWithElement(container);
@@ -1733,20 +1485,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             return;
         }
         
-        // Get tiles data from Phaser panel
-        const tilesData = this.phaserEditorComponent?.getTilesData() || [];
-        
-        // Get units data from map
-        const allUnits = this.map?.getAllUnits() || [];
-        const unitsData: { [key: string]: { unitType: number; playerId: number } } = {};
-        allUnits.forEach((unit: any) => {
-            const key = `${unit.q},${unit.r}`;
-            unitsData[key] = { unitType: unit.unitType, playerId: unit.playerId };
-        });
-        
-        // Update the stats panel
-        this.tileStatsPanel.updateStats(tilesData, unitsData);
-        
+        // TileStatsPanel now reads directly from Map
+        this.tileStatsPanel.refreshStats();
     }
     
     /**
@@ -1787,38 +1527,27 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.phaserEditorComponent.centerCamera(centerQ, centerR);
     }
     
-    // State management for undo/restore operations
+    // Simplified state management for preview/cancel functionality
     private saveUIState(): void {
-        this.savedUIState = {
-            terrain: this.currentTerrain,
-            unit: this.currentUnit,
-            playerId: this.currentPlayerId,
-            brushSize: this.brushSize,
-            placementMode: this.placementMode
-        };
+        if (this.pageState) {
+            // Save current tool state as a snapshot
+            this.savedToolState = { ...this.pageState.getToolState() };
+        }
     }
     
     private restoreUIState(): void {
-        if (this.savedUIState) {
-            this.currentTerrain = this.savedUIState.terrain;
-            this.currentUnit = this.savedUIState.unit;
-            this.currentPlayerId = this.savedUIState.playerId;
-            this.brushSize = this.savedUIState.brushSize;
-            this.placementMode = this.savedUIState.placementMode;
+        if (this.savedToolState && this.pageState) {
+            // Restore tool state via pageState methods
+            this.pageState.setSelectedTerrain(this.savedToolState.selectedTerrain);
+            this.pageState.setSelectedUnit(this.savedToolState.selectedUnit);
+            this.pageState.setSelectedPlayer(this.savedToolState.selectedPlayer);
+            this.pageState.setBrushSize(this.savedToolState.brushSize);
+            // placementMode is automatically set by setSelectedTerrain/setSelectedUnit
             
-            // Update UI elements
-            this.updateTerrainButtonSelection(this.currentTerrain);
-            this.updateUnitButtonSelection(this.currentUnit);
+            // UI element updates are handled by EditorToolsPanel via pageState observers
             
-            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-            if (brushSizeSelect) {
-                brushSizeSelect.value = this.brushSize.toString();
-            }
-            
-            const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
-            if (unitPlayerSelect) {
-                unitPlayerSelect.value = this.currentPlayerId.toString();
-            }
+            // Clear saved state
+            this.savedToolState = null;
         }
     }
     
@@ -1973,8 +1702,10 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         if (index === 0) {
             // N+0 for clear mode
             this.saveUIState();
-            this.placementMode = 'clear';
-            this.updateTerrainButtonSelection(0);
+            if (this.pageState) {
+                this.pageState.setSelectedTerrain(0);
+            }
+            // Button selection handled by EditorToolsPanel
             this.showPreviewIndicator('Preview: Clear mode');
             return;
         }
@@ -1986,8 +1717,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         if (terrainId !== null) {
             this.saveUIState();
             this.setBrushTerrain(terrainId);
-            this.placementMode = 'terrain';
-            this.updateTerrainButtonSelection(terrainId);
+            // Placement mode updated via pageState.setSelectedTerrain()
+            // Button selection handled by EditorToolsPanel
             this.showPreviewIndicator(`Preview: ${terrainName} terrain`);
         }
     }
@@ -2002,8 +1733,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         if (terrainId !== null) {
             this.saveUIState();
             this.setBrushTerrain(terrainId);
-            this.placementMode = 'terrain';
-            this.updateTerrainButtonSelection(terrainId);
+            // Placement mode updated via pageState.setSelectedTerrain()
+            // Button selection handled by EditorToolsPanel
             this.showPreviewIndicator(`Preview: ${terrainName}`);
         }
     }
@@ -2017,10 +1748,12 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         if (unitId !== null) {
             this.saveUIState();
-            this.currentUnit = unitId;
-            this.placementMode = 'unit';
-            this.updateUnitButtonSelection(unitId);
-            this.showPreviewIndicator(`Preview: ${unitName} for player ${this.currentPlayerId}`);
+            if (this.pageState) {
+                this.pageState.setSelectedUnit(unitId);
+            }
+            // Button selection handled by EditorToolsPanel
+            const currentPlayer = this.pageState?.getToolState().selectedPlayer || 1;
+            this.showPreviewIndicator(`Preview: ${unitName} for player ${currentPlayer}`);
         }
     }
     
@@ -2029,7 +1762,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         if (playerId >= 1 && playerId <= 4) {
             this.saveUIState();
-            this.currentPlayerId = playerId;
+            if (this.pageState) {
+                this.pageState.setSelectedPlayer(playerId);
+            }
             
             const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
             if (unitPlayerSelect) {
@@ -2075,8 +1810,10 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         if (index === 0) {
             // N+0 for clear mode
-            this.placementMode = 'clear';
-            this.updateTerrainButtonSelection(0);
+            if (this.pageState) {
+                this.pageState.setSelectedTerrain(0);
+            }
+            // Button selection handled by EditorToolsPanel
             this.showToast('Clear Mode', 'Clear mode selected', 'success');
             return;
         }
@@ -2087,8 +1824,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         if (terrainId !== null) {
             this.setBrushTerrain(terrainId);
-            this.placementMode = 'terrain';
-            this.updateTerrainButtonSelection(terrainId);
+            // Placement mode updated via pageState.setSelectedTerrain()
+            // Button selection handled by EditorToolsPanel
             this.showToast('Terrain Selected', `${terrainName} selected`, 'success');
         } else {
             this.showToast('Invalid Selection', `Nature terrain ${index} not available`, 'error');
@@ -2107,8 +1844,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         if (terrainId !== null) {
             this.setBrushTerrain(terrainId);
-            this.placementMode = 'terrain';
-            this.updateTerrainButtonSelection(terrainId);
+            // Placement mode updated via pageState.setSelectedTerrain()
+            // Button selection handled by EditorToolsPanel
             this.showToast('City Terrain Selected', `${terrainName} selected`, 'success');
         } else {
             this.showToast('Invalid Selection', `City terrain ${index} not available`, 'error');
@@ -2126,10 +1863,12 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         const unitName = this.getUnitNameByIndex(index);
         
         if (unitId !== null) {
-            this.currentUnit = unitId;
-            this.placementMode = 'unit';
-            this.updateUnitButtonSelection(unitId);
-            this.showToast('Unit Selected', `${unitName} selected for player ${this.currentPlayerId}`, 'success');
+            if (this.pageState) {
+                this.pageState.setSelectedUnit(unitId);
+            }
+            // Button selection handled by EditorToolsPanel
+            const currentPlayer = this.pageState?.getToolState().selectedPlayer || 1;
+            this.showToast('Unit Selected', `${unitName} selected for player ${currentPlayer}`, 'success');
         } else {
             this.showToast('Invalid Selection', `Unit ${index} not available`, 'error');
         }
@@ -2141,7 +1880,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.hidePreviewIndicator(); // Hide preview indicator when committing
         
         if (playerId >= 1 && playerId <= 4) {
-            this.currentPlayerId = playerId;
+            if (this.pageState) {
+                this.pageState.setSelectedPlayer(playerId);
+            }
             
             // Update player selector in UI
             const unitPlayerSelect = document.getElementById('unit-player-color') as HTMLSelectElement;
@@ -2186,14 +1927,15 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private resetToDefaults(): void {
         this.hidePreviewIndicator(); // Hide preview indicator when committing
         
-        // Reset to default terrain (grass)
-        this.setBrushTerrain(1);
-        this.placementMode = 'terrain';
-        this.setBrushSize(0);
-        this.currentPlayerId = 1;
+        // Reset to default terrain (grass) via pageState
+        if (this.pageState) {
+            this.pageState.setSelectedTerrain(1);
+            this.pageState.setBrushSize(0);
+            this.pageState.setSelectedPlayer(1);
+        }
         
         // Update UI elements
-        this.updateTerrainButtonSelection(1);
+        this.setBrushTerrain(1);
         
         const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
         if (brushSizeSelect) {
@@ -2452,50 +2194,11 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.logToConsole('Phaser initialization now handled by PhaserEditorComponent in dockview');
     }
     
-    // Event handler methods for EventBus subscriptions
-    
-    private handleTerrainSelected(payload: TerrainSelectedPayload): void {
-        console.log('MapEditorPage: Terrain selected via EventBus:', payload);
-        this.currentTerrain = payload.terrainType;
-        this.placementMode = 'terrain';
-        this.logToConsole(`EventBus: Selected terrain ${payload.terrainType} (${payload.terrainName})`);
-    }
-    
-    private handleUnitSelected(payload: UnitSelectedPayload): void {
-        console.log('MapEditorPage: Unit selected via EventBus:', payload);
-        this.currentUnit = payload.unitType;
-        this.currentPlayerId = payload.playerId;
-        this.placementMode = 'unit';
-        this.logToConsole(`EventBus: Selected unit ${payload.unitType} (${payload.unitName}) for player ${payload.playerId}`);
-    }
-    
-    private handleBrushSizeChanged(payload: BrushSizeChangedPayload): void {
-        console.log('MapEditorPage: Brush size changed via EventBus:', payload);
-        this.brushSize = payload.brushSize;
-        this.logToConsole(`EventBus: Brush size changed to ${payload.sizeName}`);
-    }
-    
-    private handlePlacementModeChanged(payload: PlacementModeChangedPayload): void {
-        console.log('MapEditorPage: Placement mode changed via EventBus:', payload);
-        this.placementMode = payload.mode;
-        this.logToConsole(`EventBus: Placement mode changed to ${payload.mode}`);
-    }
-    
-    private handlePlayerChanged(payload: PlayerChangedPayload): void {
-        console.log('MapEditorPage: Player changed via EventBus:', payload);
-        this.currentPlayerId = payload.playerId;
-        this.logToConsole(`EventBus: Current player changed to ${payload.playerId}`);
-    }
+    // Old EventBus handlers removed - components now use pageState directly
     
     private handlePhaserReady(): void {
         console.log('MapEditorPage: Phaser ready via EventBus');
         this.logToConsole('EventBus: Phaser editor is ready');
-        // Apply pending grid state if any
-        if (this.pendingGridState !== null && this.phaserEditorComponent) {
-            this.phaserEditorComponent.setShowGrid(this.pendingGridState);
-            this.logToConsole(`Applied pending grid state: ${this.pendingGridState}`);
-            this.pendingGridState = null;
-        }
         
         // Load pending map data if available
         if (this.hasPendingMapDataLoad) {
@@ -2517,7 +2220,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             if (colInput) colInput.value = q.toString();
             
             // Log the click
-            this.logToConsole(`Tile clicked at Q=${q}, R=${r} in ${this.placementMode} mode`);
+            const currentMode = this.pageState?.getToolState().placementMode || 'terrain';
+            this.logToConsole(`Tile clicked at Q=${q}, R=${r} in ${currentMode} mode`);
             
             // Note: Actual tile painting is now handled directly by PhaserEditorComponent
             // This method just updates UI elements that need to react to clicks

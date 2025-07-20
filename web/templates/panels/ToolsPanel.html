@@ -1,23 +1,38 @@
 <!-- Map Editor Tools Panel -->
-<div id="tools-panel" class="h-full overflow-y-auto">
-  <div class="p-4 space-y-6">
-    <!-- Nature Terrains -->
-    <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-        🌿 Nature Terrains
-      </h3>
+<div id="tools-panel" class="h-full flex flex-col">
+  <!-- Tab Navigation -->
+  <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+    <button
+      id="nature-tab"
+      class="tab-button flex-1 px-4 py-3 text-sm font-medium text-center transition-colors border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 active-tab"
+      data-tab="nature"
+    >
+      🌿 Nature (N)
+    </button>
+    <button
+      id="city-tab"
+      class="tab-button flex-1 px-4 py-3 text-sm font-medium text-center transition-colors border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300"
+      data-tab="city"
+    >
+      🏙️ City (C)
+    </button>
+    <button
+      id="unit-tab"
+      class="tab-button flex-1 px-4 py-3 text-sm font-medium text-center transition-colors border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300"
+      data-tab="unit"
+    >
+      🪖 Units (U)
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="flex-1 overflow-y-auto">
+    <!-- Nature Tab Content -->
+    <div id="nature-tab-content" class="tab-content p-4">
       <div
         id="nature-terrain-palette"
-        class="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto w-full"
+        class="grid grid-cols-3 gap-2 max-h-full overflow-y-auto w-full"
       >
-        <button
-          class="terrain-button p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-600"
-          data-terrain="0"
-          data-nature-index="0"
-          title="Clear"
-        >
-          <div class="text-sm">🗑️</div>
-        </button>
         {{ $natureIndex := 1 }} {{ range .NatureTerrains }}
         <button
           class="terrain-button p-2 text-xs text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors{{ if eq .ID 0 }} bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-600{{ else if eq .ID 5 }} bg-blue-100 dark:bg-blue-900 border-blue-500{{ end }} overflow-hidden"
@@ -44,11 +59,8 @@
       </div>
     </div>
 
-    <!-- City/Player Terrains -->
-    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-        🏙️ City Terrains
-      </h3>
+    <!-- City Tab Content -->
+    <div id="city-tab-content" class="tab-content p-4 hidden">
       <div class="space-y-3">
         <!-- Player Color Selection -->
         <div>
@@ -106,11 +118,8 @@
       </div>
     </div>
 
-    <!-- Units -->
-    <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-        🪖 Units
-      </h3>
+    <!-- Unit Tab Content -->
+    <div id="unit-tab-content" class="tab-content p-4 hidden">
       <div class="space-y-3">
         <!-- Player Color Selection for Units -->
         <div>
@@ -170,3 +179,22 @@
     </div>
   </div>
 </div>
+
+<style>
+  .tab-button.active-tab {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background-color: white;
+  }
+  .dark .tab-button.active-tab {
+    color: #60a5fa;
+    border-bottom-color: #60a5fa;
+    background-color: #1f2937;
+  }
+  .tab-button:not(.active-tab) {
+    color: #6b7280;
+  }
+  .dark .tab-button:not(.active-tab) {
+    color: #9ca3af;
+  }
+</style>

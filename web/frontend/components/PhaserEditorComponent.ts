@@ -92,6 +92,9 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             // Set up Phaser container within our root element
             this.setupPhaserContainer();
             
+            // Bind toolbar event handlers
+            this.bindToolbarEvents();
+            
             this.log('Phaser container setup complete');
             
             // Now initialize Phaser editor with the properly set up container
@@ -121,6 +124,30 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
         
         this.isInitialized = false;
         this.log('PhaserEditorComponent destroyed');
+    }
+    
+    /**
+     * Bind toolbar event handlers
+     */
+    private bindToolbarEvents(): void {
+        // Bind clear tile button
+        const clearTileBtn = this.findElement('#clear-tile-btn');
+        if (clearTileBtn) {
+            clearTileBtn.addEventListener('click', () => {
+                this.activateClearMode();
+            });
+            this.log('Clear tile button bound');
+        }
+    }
+    
+    /**
+     * Activate clear mode
+     */
+    private activateClearMode(): void {
+        if (this.pageState) {
+            this.pageState.setPlacementMode('clear');
+            this.log('Clear mode activated via toolbar button');
+        }
     }
     
     /**

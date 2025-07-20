@@ -606,42 +606,51 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     }
 
     private initializeKeyboardShortcuts(): void {
+        // Context filter to ignore shortcuts when modifier keys are pressed
+        const noModifiersFilter = (event: KeyboardEvent): boolean => {
+            return !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey;
+        };
+        
         const shortcuts: ShortcutConfig[] = [
-            // Nature terrain shortcuts (n + number)
+            // Tab switching shortcuts (single key press)
             {
                 key: 'n',
-                handler: (args?: string) => this.selectNatureTerrain(args),
-                previewHandler: (args?: string) => this.previewNatureTerrain(args),
-                cancelHandler: () => this.cancelSelection(),
-                description: 'Select nature terrain by index',
-                category: 'Terrain',
-                requiresArgs: true,
-                argType: 'number'
+                handler: () => this.switchToNatureTab(),
+                description: 'Switch to Nature terrain tab',
+                category: 'Navigation',
+                requiresArgs: false,
+                contextFilter: noModifiersFilter
             },
-            
-            // City terrain shortcuts (c + number)  
             {
                 key: 'c',
-                handler: (args?: string) => this.selectCityTerrain(args),
-                previewHandler: (args?: string) => this.previewCityTerrain(args),
-                cancelHandler: () => this.cancelSelection(),
-                description: 'Select city terrain by index',
-                category: 'Terrain',
-                requiresArgs: true,
-                argType: 'number'
+                handler: () => this.switchToCityTab(),
+                description: 'Switch to City terrain tab',
+                category: 'Navigation',
+                requiresArgs: false,
+                contextFilter: noModifiersFilter
             },
-            
-            // Unit selection shortcuts (u + number)
             {
                 key: 'u',
-                handler: (args?: string) => this.selectUnit(args),
-                previewHandler: (args?: string) => this.previewUnit(args),
-                cancelHandler: () => this.cancelSelection(),
-                description: 'Select unit type by index',
-                category: 'Units',
-                requiresArgs: true,
-                argType: 'number'
+                handler: () => this.switchToUnitTab(),
+                description: 'Switch to Unit tab',
+                category: 'Navigation',
+                requiresArgs: false,
+                contextFilter: noModifiersFilter
             },
+            
+            // Multi-digit number selection within active tab (s + number)
+            {
+                key: 's',
+                handler: (args?: string) => this.selectByNumberInActiveTab(args),
+                previewHandler: (args?: string) => this.previewByNumberInActiveTab(args),
+                cancelHandler: () => this.cancelNumberSelection(),
+                description: 'Select item by number in active tab (s + 1-99)',
+                category: 'Selection',
+                requiresArgs: true,
+                argType: 'number',
+                contextFilter: noModifiersFilter
+            },
+            
             
             // Player selection shortcuts (p + number)
             {
@@ -652,7 +661,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 description: 'Set current player',
                 category: 'Units',
                 requiresArgs: true,
-                argType: 'number'
+                argType: 'number',
+                contextFilter: noModifiersFilter
             },
             
             // Brush size shortcuts (b + number)
@@ -664,54 +674,41 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 description: 'Set brush size (1-6)',
                 category: 'Tools',
                 requiresArgs: true,
-                argType: 'number'
+                argType: 'number',
+                contextFilter: noModifiersFilter
             },
             
             
-            // Reset shortcuts (esc)
+            // Clear mode and reset shortcuts
             {
                 key: 'Escape',
+                handler: () => this.activateClearMode(),
+                description: 'Activate clear mode',
+                category: 'Tools',
+                contextFilter: noModifiersFilter
+            },
+            {
+                key: 'r',
                 handler: () => this.resetToDefaults(),
                 description: 'Reset all tools to defaults',
-                category: 'General'
+                category: 'General',
+                contextFilter: noModifiersFilter
             }
         ];
 
         this.keyboardShortcutManager = new KeyboardShortcutManager({
             shortcuts,
-            timeout: 3000,
-            immediateExecution: true, // Enable immediate execution mode
-            previewDelay: 300, // 300ms preview delay
+            timeout: 2000,
+            immediateExecution: true,
+            previewDelay: 300,
             onStateChange: (state, command) => this.handleKeyboardStateChange(state, command)
         });
         
+        // Add custom number input handler for pure digit sequences
+        this.setupCustomNumberInput();
+        
     }
 
-    private handleKeyboardStateChange(state: KeyboardState, command?: string): void {
-        if (state === KeyboardState.AWAITING_ARGS && command) {
-            // Show overlays immediately when entering AWAITING_ARGS state
-            let overlayType: 'nature' | 'city' | 'unit' | null = null;
-            
-            switch (command) {
-                case 'n':
-                    overlayType = 'nature';
-                    break;
-                case 'c':
-                    overlayType = 'city';
-                    break;
-                case 'u':
-                    overlayType = 'unit';
-                    break;
-            }
-            
-            if (overlayType) {
-                this.showNumberOverlays(overlayType);
-            }
-        } else if (state === KeyboardState.NORMAL) {
-            // Hide overlays when returning to NORMAL state
-            this.hideNumberOverlays();
-        }
-    }
 
     private loadInitialState(): void {
         // Theme button state is handled by BasePage
@@ -1732,66 +1729,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         return 'Unknown';
     }
     
-    // Dynamic number overlay system
-    private showNumberOverlays(type: 'nature' | 'city' | 'unit'): void {
-        this.hideNumberOverlays(); // Remove any existing overlays
-        
-        let selector = '';
-        let maxIndex = 0;
-        
-        switch (type) {
-            case 'nature':
-                selector = '[data-nature-index]';
-                maxIndex = document.querySelectorAll(selector).length;
-                break;
-            case 'city':
-                selector = '[data-city-index]';
-                maxIndex = document.querySelectorAll(selector).length;
-                break;
-            case 'unit':
-                selector = '[data-unit-index]';
-                maxIndex = document.querySelectorAll(selector).length;
-                break;
-        }
-        
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach((button) => {
-            const element = button as HTMLElement;
-            let index = '';
-            
-            switch (type) {
-                case 'nature':
-                    index = element.getAttribute('data-nature-index') || '';
-                    break;
-                case 'city':
-                    index = element.getAttribute('data-city-index') || '';
-                    break;
-                case 'unit':
-                    index = element.getAttribute('data-unit-index') || '';
-                    break;
-            }
-            
-            if (index) {
-                const overlay = document.createElement('div');
-                overlay.className = 'shortcut-number-overlay absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center z-10 -mt-1 -mr-1';
-                overlay.textContent = index;
-                
-                // Make button container relative if not already
-                if (getComputedStyle(element).position === 'static') {
-                    element.style.position = 'relative';
-                }
-                
-                element.appendChild(overlay);
-            }
-        });
-        
-        this.logToConsole(`Showing ${type} shortcut numbers (1-${maxIndex - 1})`);
-    }
-    
-    private hideNumberOverlays(): void {
-        const overlays = document.querySelectorAll('.shortcut-number-overlay');
-        overlays.forEach(overlay => overlay.remove());
-    }
 
     // Preview handlers for immediate execution mode
     private previewNatureTerrain(args?: string): void {
@@ -1899,77 +1836,177 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.logToConsole('Selection cancelled - state restored');
     }
 
-    // Keyboard shortcut handlers
-    private selectNatureTerrain(args?: string): void {
-        const index = parseInt(args || '1');
-        
-        this.hidePreviewIndicator(); // Hide preview indicator when committing
-        this.hideNumberOverlays(); // Hide number overlays when committing
-        
-        if (index === 0) {
-            // N+0 for clear mode
-            if (this.pageState) {
-                this.pageState.setSelectedTerrain(0);
+    // Tab switching handlers
+    private switchToNatureTab(): void {
+        if (this.editorToolsPanel) {
+            this.editorToolsPanel.switchToTab('nature');
+            this.logToConsole('Switched to Nature terrain tab');
+        }
+    }
+    
+    private switchToCityTab(): void {
+        if (this.editorToolsPanel) {
+            this.editorToolsPanel.switchToTab('city');
+            this.logToConsole('Switched to City terrain tab');
+        }
+    }
+    
+    private switchToUnitTab(): void {
+        if (this.editorToolsPanel) {
+            this.editorToolsPanel.switchToTab('unit');
+            this.logToConsole('Switched to Unit tab');
+        }
+    }
+    
+    // Custom number input handling for pure digit sequences
+    private numberInputBuffer: string = '';
+    private numberInputTimeout: number | null = null;
+    private isInKeyboardShortcutMode: boolean = false;
+    
+    private setupCustomNumberInput(): void {
+        // Add our own keydown listener that runs before the KeyboardShortcutManager
+        document.addEventListener('keydown', (event) => {
+            // Only handle if we're not in keyboard shortcut mode and no modifiers are pressed
+            if (this.isInKeyboardShortcutMode || 
+                event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
+                return;
             }
-            // Button selection handled by EditorToolsPanel
-            this.showToast('Clear Mode', 'Clear mode selected', 'success');
+            
+            // Only handle if the target is not an input field
+            const target = event.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+                return;
+            }
+            
+            // Handle digit input
+            if (event.key >= '0' && event.key <= '9') {
+                event.preventDefault();
+                this.handleDigitInput(event.key);
+            } else if (event.key === 'Enter' && this.numberInputBuffer) {
+                event.preventDefault();
+                this.executeNumberSelection();
+            } else if (event.key === 'Escape' && this.numberInputBuffer) {
+                event.preventDefault();
+                this.clearNumberInput();
+            } else if (event.key === 'Backspace' && this.numberInputBuffer) {
+                event.preventDefault();
+                this.removeLastDigit();
+            }
+        }, true); // Use capture phase to run before other handlers
+    }
+    
+    private handleKeyboardStateChange(state: KeyboardState, command?: string): void {
+        this.isInKeyboardShortcutMode = state !== KeyboardState.NORMAL;
+        
+        if (state === KeyboardState.AWAITING_ARGS && command === 's') {
+            if (this.editorToolsPanel) {
+                this.editorToolsPanel.showNumberOverlays();
+            }
+        } else if (state === KeyboardState.NORMAL) {
+            if (this.editorToolsPanel) {
+                this.editorToolsPanel.hideNumberOverlays();
+            }
+        }
+    }
+    
+    private handleDigitInput(digit: string): void {
+        // Clear any existing timeout
+        if (this.numberInputTimeout) {
+            clearTimeout(this.numberInputTimeout);
+        }
+        
+        // Add digit to buffer
+        this.numberInputBuffer += digit;
+        
+        // Show overlays when starting number input
+        if (this.editorToolsPanel && this.numberInputBuffer.length === 1) {
+            this.editorToolsPanel.showNumberOverlays();
+        }
+        
+        // Set timeout to execute after 1.5 seconds of no input
+        this.numberInputTimeout = window.setTimeout(() => {
+            this.executeNumberSelection();
+        }, 1500);
+        
+        this.logToConsole(`Number input: ${this.numberInputBuffer}`);
+    }
+    
+    private removeLastDigit(): void {
+        if (this.numberInputBuffer.length > 0) {
+            this.numberInputBuffer = this.numberInputBuffer.slice(0, -1);
+            
+            if (this.numberInputBuffer.length === 0) {
+                this.clearNumberInput();
+            } else {
+                // Reset timeout
+                if (this.numberInputTimeout) {
+                    clearTimeout(this.numberInputTimeout);
+                }
+                this.numberInputTimeout = window.setTimeout(() => {
+                    this.executeNumberSelection();
+                }, 1500);
+                
+                this.logToConsole(`Number input: ${this.numberInputBuffer}`);
+            }
+        }
+    }
+    
+    private executeNumberSelection(): void {
+        if (!this.editorToolsPanel || !this.numberInputBuffer) return;
+        
+        const index = parseInt(this.numberInputBuffer);
+        if (isNaN(index)) {
+            this.clearNumberInput();
             return;
         }
         
-        // Use visual index mapping
-        const terrainId = this.getTerrainIdByNatureIndex(index);
-        const terrainName = this.getTerrainNameByNatureIndex(index);
+        const activeTab = this.editorToolsPanel.getActiveTab();
+        this.editorToolsPanel.selectByIndex(index);
+        this.logToConsole(`Selected item ${index} in ${activeTab} tab`);
         
-        if (terrainId !== null) {
-            this.setBrushTerrain(terrainId);
-            // Placement mode updated via pageState.setSelectedTerrain()
-            // Button selection handled by EditorToolsPanel
-            this.showToast('Terrain Selected', `${terrainName} selected`, 'success');
-        } else {
-            this.showToast('Invalid Selection', `Nature terrain ${index} not available`, 'error');
+        this.clearNumberInput();
+    }
+    
+    private clearNumberInput(): void {
+        this.numberInputBuffer = '';
+        if (this.numberInputTimeout) {
+            clearTimeout(this.numberInputTimeout);
+            this.numberInputTimeout = null;
+        }
+        if (this.editorToolsPanel) {
+            this.editorToolsPanel.hideNumberOverlays();
         }
     }
     
-    private selectCityTerrain(args?: string): void {
-        const index = parseInt(args || '1');
+    // Multi-digit number selection handlers for s+number shortcut
+    private selectByNumberInActiveTab(args?: string): void {
+        if (!args || !this.editorToolsPanel) return;
         
-        this.hidePreviewIndicator(); // Hide preview indicator when committing
-        this.hideNumberOverlays(); // Hide number overlays when committing
+        const index = parseInt(args);
+        if (isNaN(index)) return;
         
-        // Use visual index mapping
-        const terrainId = this.getTerrainIdByCityIndex(index);
-        const terrainName = this.getTerrainNameByCityIndex(index);
-        
-        if (terrainId !== null) {
-            this.setBrushTerrain(terrainId);
-            // Placement mode updated via pageState.setSelectedTerrain()
-            // Button selection handled by EditorToolsPanel
-            this.showToast('City Terrain Selected', `${terrainName} selected`, 'success');
-        } else {
-            this.showToast('Invalid Selection', `City terrain ${index} not available`, 'error');
-        }
+        const activeTab = this.editorToolsPanel.getActiveTab();
+        this.editorToolsPanel.selectByIndex(index);
+        this.editorToolsPanel.hideNumberOverlays();
+        this.logToConsole(`Selected item ${index} in ${activeTab} tab`);
     }
     
-    private selectUnit(args?: string): void {
-        const index = parseInt(args || '1');
+    private previewByNumberInActiveTab(args?: string): void {
+        if (!args || !this.editorToolsPanel) return;
         
-        this.hidePreviewIndicator(); // Hide preview indicator when committing
-        this.hideNumberOverlays(); // Hide number overlays when committing
+        const index = parseInt(args);
+        if (isNaN(index)) return;
         
-        // Use visual index mapping
-        const unitId = this.getUnitIdByIndex(index);
-        const unitName = this.getUnitNameByIndex(index);
-        
-        if (unitId !== null) {
-            if (this.pageState) {
-                this.pageState.setSelectedUnit(unitId);
-            }
-            // Button selection handled by EditorToolsPanel
-            const currentPlayer = this.pageState?.getToolState().selectedPlayer || 1;
-            this.showToast('Unit Selected', `${unitName} selected for player ${currentPlayer}`, 'success');
-        } else {
-            this.showToast('Invalid Selection', `Unit ${index} not available`, 'error');
+        this.editorToolsPanel.showNumberOverlays();
+        const activeTab = this.editorToolsPanel.getActiveTab();
+        this.logToConsole(`Preview: item ${index} in ${activeTab} tab`);
+    }
+    
+    private cancelNumberSelection(): void {
+        if (this.editorToolsPanel) {
+            this.editorToolsPanel.hideNumberOverlays();
         }
+        this.logToConsole('Cancelled number selection');
     }
     
     private selectPlayer(args?: string): void {
@@ -2022,8 +2059,20 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }
     }
     
+    private activateClearMode(): void {
+        // Clear any pending number input
+        this.clearNumberInput();
+        
+        if (this.pageState) {
+            this.pageState.setPlacementMode('clear');
+        }
+        this.showToast('Clear Mode', 'Clear mode activated - press R to reset', 'info');
+    }
+    
     private resetToDefaults(): void {
-        this.hidePreviewIndicator(); // Hide preview indicator when committing
+        if (this.editorToolsPanel) {
+            this.editorToolsPanel.hideNumberOverlays();
+        }
         
         // Reset to default terrain (grass) via pageState
         if (this.pageState) {

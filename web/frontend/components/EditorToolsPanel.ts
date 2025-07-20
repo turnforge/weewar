@@ -6,7 +6,7 @@ import { ComponentLifecycle } from './ComponentLifecycle';
 const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
 
 /**
- * EditorToolsPanel Component - State generator and DOM owner for editor tools
+ * EditorToolsPanel Component - State generator and DOM owner for editor tools with tabbed interface
  * 
  * This component demonstrates the new lifecycle architecture with explicit dependency injection:
  * 1. initializeDOM() - Set up UI controls and event handlers without dependencies
@@ -19,12 +19,14 @@ const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)
  * - Handle brush size dropdown and player selection dropdowns
  * - Maintain visual selection state (button highlights, etc.)
  * - Update page state via direct method calls (not events)
+ * - Manage tab switching between Nature/City/Unit sections
  * 
  * Architecture:
  * - Receives MapEditorPageState instance via explicit setter (not dependency injection)
  * - Updates state directly when user interacts with controls
  * - Manages its own DOM elements without external interference
  * - Does NOT observe state changes (it's the generator, not observer)
+ * - Provides tab switching API for keyboard shortcuts
  */
 export class EditorToolsPanel extends BaseComponent {
     // Dependencies (injected via explicit setters)
@@ -34,6 +36,9 @@ export class EditorToolsPanel extends BaseComponent {
     private isUIBound = false;
     private isActivated = false;
     private pendingOperations: Array<() => void> = [];
+    
+    // Tab state management
+    private activeTab: 'nature' | 'city' | 'unit' = 'nature';
     
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('editor-tools-panel', rootElement, eventBus, debugMode);
@@ -50,6 +55,7 @@ export class EditorToolsPanel extends BaseComponent {
             this.log('Binding EditorToolsPanel to DOM');
             
             // Set up UI elements and event handlers (independent of dependencies)
+            this.bindTabButtons();
             this.bindTerrainButtons();
             this.bindUnitButtons();
             this.bindBrushSizeControl();
@@ -111,6 +117,9 @@ export class EditorToolsPanel extends BaseComponent {
         // Sync UI to match current page state
         this.syncUIWithPageState();
         
+        // Ensure default tab is shown
+        this.switchToTab(this.activeTab);
+        
         this.isActivated = true;
         this.log('EditorToolsPanel activated successfully');
     }
@@ -125,6 +134,10 @@ export class EditorToolsPanel extends BaseComponent {
         // Reset state
         this.isActivated = false;
         this.pageState = null;
+        this.activeTab = 'nature';
+        
+        // Clean up overlays
+        this.hideNumberOverlays();
         
         this.log('EditorToolsPanel deactivated');
     }
@@ -181,6 +194,170 @@ export class EditorToolsPanel extends BaseComponent {
     
     protected destroyComponent(): void {
         this.deactivate();
+    }
+    
+    /**
+     * Bind tab button click events
+     */
+    private bindTabButtons(): void {
+        const tabButtons = this.findElements('.tab-button');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const clickedButton = e.currentTarget as HTMLElement;
+                const tabName = clickedButton.getAttribute('data-tab') as 'nature' | 'city' | 'unit';
+                
+                if (tabName) {
+                    this.switchToTab(tabName);
+                }
+            });
+        });
+        
+        this.log(`Bound ${tabButtons.length} tab buttons`);
+    }
+    
+    /**
+     * Switch to a specific tab
+     */
+    public switchToTab(tabName: 'nature' | 'city' | 'unit'): void {
+        this.activeTab = tabName;
+        
+        // Update tab button active states
+        const tabButtons = this.findElements('.tab-button');
+        tabButtons.forEach(button => {
+            const buttonTab = button.getAttribute('data-tab');
+            if (buttonTab === tabName) {
+                button.classList.add('active-tab');
+            } else {
+                button.classList.remove('active-tab');
+            }
+        });
+        
+        // Show/hide tab content
+        const tabContents = this.findElements('.tab-content');
+        tabContents.forEach(content => {
+            const contentId = content.id;
+            if (contentId === `${tabName}-tab-content`) {
+                content.classList.remove('hidden');
+            } else {
+                content.classList.add('hidden');
+            }
+        });
+        
+        this.log(`Switched to ${tabName} tab`);
+    }
+    
+    /**
+     * Get current active tab
+     */
+    public getActiveTab(): 'nature' | 'city' | 'unit' {
+        return this.activeTab;
+    }
+    
+    /**
+     * Select item by index within the active tab
+     */
+    public selectByIndex(index: number): void {
+        this.executeWhenReady(() => {
+            switch (this.activeTab) {
+                case 'nature':
+                    this.selectNatureTerrainByIndex(index);
+                    break;
+                case 'city':
+                    this.selectCityTerrainByIndex(index);
+                    break;
+                case 'unit':
+                    this.selectUnitByIndex(index);
+                    break;
+            }
+        });
+    }
+    
+    /**
+     * Show number overlays for the active tab
+     */
+    public showNumberOverlays(): void {
+        let selector = '';
+        
+        switch (this.activeTab) {
+            case 'nature':
+                selector = '[data-nature-index]';
+                break;
+            case 'city':
+                selector = '[data-city-index]';
+                break;
+            case 'unit':
+                selector = '[data-unit-index]';
+                break;
+        }
+        
+        const buttons = this.findElements(selector);
+        buttons.forEach(button => {
+            const index = button.getAttribute(`data-${this.activeTab}-index`);
+            if (index && parseInt(index) > 0) {
+                this.addNumberOverlay(button as HTMLElement, index);
+            }
+        });
+        
+        this.log(`Showing number overlays for ${this.activeTab} tab`);
+    }
+    
+    /**
+     * Hide all number overlays
+     */
+    public hideNumberOverlays(): void {
+        const overlays = this.findElements('.shortcut-number-overlay');
+        overlays.forEach(overlay => overlay.remove());
+    }
+    
+    /**
+     * Add number overlay to a specific element
+     */
+    private addNumberOverlay(element: HTMLElement, number: string): void {
+        // Remove existing overlay if present
+        const existingOverlay = element.querySelector('.shortcut-number-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
+        // Create new overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'shortcut-number-overlay absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center z-10 -mt-1 -mr-1';
+        overlay.textContent = number;
+        
+        // Position relative parent
+        element.style.position = 'relative';
+        element.appendChild(overlay);
+    }
+    
+    /**
+     * Select nature terrain by index
+     */
+    private selectNatureTerrainByIndex(index: number): void {
+        const button = this.findElement(`[data-nature-index="${index}"]`);
+        if (button) {
+            (button as HTMLElement).click();
+        }
+    }
+    
+    /**
+     * Select city terrain by index
+     */
+    private selectCityTerrainByIndex(index: number): void {
+        const button = this.findElement(`[data-city-index="${index}"]`);
+        if (button) {
+            (button as HTMLElement).click();
+        }
+    }
+    
+    /**
+     * Select unit by index
+     */
+    private selectUnitByIndex(index: number): void {
+        const button = this.findElement(`[data-unit-index="${index}"]`);
+        if (button) {
+            (button as HTMLElement).click();
+        }
     }
     
     /**

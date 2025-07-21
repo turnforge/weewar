@@ -1,5 +1,5 @@
 import { BaseComponent } from './Component';
-import { EventBus, EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload } from './EventBus';
+import { EventBus, EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload, ReferenceImageLoadedPayload, GridSetVisibilityPayload, CoordinatesSetVisibilityPayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload } from './EventBus';
 import { PhaserMapEditor } from './phaser/PhaserMapEditor';
 import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType } from './MapEditorPageState';
 import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
@@ -44,6 +44,74 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     
     protected initializeComponent(): void {
         this.log('Initializing PhaserEditorComponent');
+        
+        // Subscribe to reference image events from ReferenceImagePanel
+        this.eventBus.subscribe<ReferenceImageLoadedPayload>(
+            EditorEventTypes.REFERENCE_IMAGE_LOADED,
+            (payload) => {
+                this.handleReferenceImageLoaded(payload.data);
+            },
+            this.componentId
+        );
+        
+        // Subscribe to grid visibility events from MapEditorPage
+        this.eventBus.subscribe<GridSetVisibilityPayload>(
+            EditorEventTypes.GRID_SET_VISIBILITY,
+            (payload) => {
+                this.handleGridSetVisibility(payload.data);
+            },
+            this.componentId
+        );
+        
+        // Subscribe to coordinates visibility events from MapEditorPage
+        this.eventBus.subscribe<CoordinatesSetVisibilityPayload>(
+            EditorEventTypes.COORDINATES_SET_VISIBILITY,
+            (payload) => {
+                this.handleCoordinatesSetVisibility(payload.data);
+            },
+            this.componentId
+        );
+        
+        // Subscribe to reference image control events from ReferenceImagePanel
+        this.eventBus.subscribe<ReferenceSetModePayload>(
+            EditorEventTypes.REFERENCE_SET_MODE,
+            (payload) => {
+                this.handleReferenceSetMode(payload.data);
+            },
+            this.componentId
+        );
+        
+        this.eventBus.subscribe<ReferenceSetAlphaPayload>(
+            EditorEventTypes.REFERENCE_SET_ALPHA,
+            (payload) => {
+                this.handleReferenceSetAlpha(payload.data);
+            },
+            this.componentId
+        );
+        
+        this.eventBus.subscribe<ReferenceSetPositionPayload>(
+            EditorEventTypes.REFERENCE_SET_POSITION,
+            (payload) => {
+                this.handleReferenceSetPosition(payload.data);
+            },
+            this.componentId
+        );
+        
+        this.eventBus.subscribe<ReferenceSetScalePayload>(
+            EditorEventTypes.REFERENCE_SET_SCALE,
+            (payload) => {
+                this.handleReferenceSetScale(payload.data);
+            },
+            this.componentId
+        );
+        
+        this.eventBus.subscribe(
+            EditorEventTypes.REFERENCE_CLEAR,
+            () => {
+                this.handleReferenceClear();
+            },
+            this.componentId
+        );
         
         // Tool changes now handled via PageState Observer pattern
         // PageState will notify us when tools change
@@ -371,6 +439,126 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
         this.log('Map cleared, clearing Phaser display');
         this.phaserEditor?.clearAllTiles();
         this.phaserEditor?.clearAllUnits();
+    }
+    
+    /**
+     * Handle grid visibility set event from MapEditorPage
+     */
+    private handleGridSetVisibility(data: GridSetVisibilityPayload): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot set grid visibility');
+            return;
+        }
+        
+        this.phaserEditor.setShowGrid(data.show);
+        this.log(`Grid visibility set to: ${data.show}`);
+    }
+    
+    /**
+     * Handle coordinates visibility set event from MapEditorPage
+     */
+    private handleCoordinatesSetVisibility(data: CoordinatesSetVisibilityPayload): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot set coordinates visibility');
+            return;
+        }
+        
+        this.phaserEditor.setShowCoordinates(data.show);
+        this.log(`Coordinates visibility set to: ${data.show}`);
+    }
+    
+    /**
+     * Handle reference image mode set event from ReferenceImagePanel
+     */
+    private handleReferenceSetMode(data: ReferenceSetModePayload): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot set reference mode');
+            return;
+        }
+        
+        this.phaserEditor.setReferenceMode(data.mode);
+        this.log(`Reference mode set to: ${data.mode}`);
+    }
+    
+    /**
+     * Handle reference image alpha set event from ReferenceImagePanel
+     */
+    private handleReferenceSetAlpha(data: ReferenceSetAlphaPayload): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot set reference alpha');
+            return;
+        }
+        
+        this.phaserEditor.setReferenceAlpha(data.alpha);
+        this.log(`Reference alpha set to: ${data.alpha}`);
+    }
+    
+    /**
+     * Handle reference image position set event from ReferenceImagePanel
+     */
+    private handleReferenceSetPosition(data: ReferenceSetPositionPayload): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot set reference position');
+            return;
+        }
+        
+        this.phaserEditor.setReferencePosition(data.x, data.y);
+        this.log(`Reference position set to: (${data.x}, ${data.y})`);
+    }
+    
+    /**
+     * Handle reference image scale set event from ReferenceImagePanel
+     */
+    private handleReferenceSetScale(data: ReferenceSetScalePayload): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot set reference scale');
+            return;
+        }
+        
+        this.phaserEditor.setReferenceScale(data.scaleX, data.scaleY);
+        this.log(`Reference scale set to: (${data.scaleX}, ${data.scaleY})`);
+    }
+    
+    /**
+     * Handle reference image clear event from ReferenceImagePanel
+     */
+    private handleReferenceClear(): void {
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot clear reference image');
+            return;
+        }
+        
+        this.phaserEditor.clearReferenceImage();
+        this.log('Reference image cleared');
+    }
+    
+    /**
+     * Handle reference image loaded event from ReferenceImagePanel
+     */
+    private async handleReferenceImageLoaded(data: ReferenceImageLoadedPayload): Promise<void> {
+        this.log(`Reference image loaded: ${data.width}x${data.height} from ${data.source}`);
+        
+        if (!this.phaserEditor || !this.isInitialized) {
+            this.log('Phaser not ready, cannot load reference image');
+            return;
+        }
+        
+        try {
+            // Convert the URL back to a blob and create a File object
+            const response = await fetch(data.url);
+            const blob = await response.blob();
+            const file = new File([blob], `reference-${data.source}`, { type: blob.type });
+            
+            // Load the reference image into Phaser using the existing file method
+            const result = await this.phaserEditor.loadReferenceFromFile(file);
+            if (result) {
+                this.log(`Reference image loaded into Phaser from ${data.source}`);
+            } else {
+                this.log(`Failed to load reference image into Phaser from ${data.source}`);
+            }
+        } catch (error) {
+            this.handleError(`Failed to load reference image into Phaser from ${data.source}`, error);
+        }
     }
     
     /**

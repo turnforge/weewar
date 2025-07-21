@@ -1,6 +1,6 @@
 import { ComponentLifecycle } from './ComponentLifecycle';
 import { BaseComponent } from './Component';
-import { EventBus, EditorEventTypes, ReferenceLoadFromFilePayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload, ReferenceScaleChangedPayload, ReferenceStateChangedPayload } from './EventBus';
+import { EventBus, EditorEventTypes, ReferenceLoadFromFilePayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload, ReferenceScaleChangedPayload, ReferenceStateChangedPayload, ReferenceImageLoadedPayload } from './EventBus';
 
 /**
  * ReferenceImagePanel - Demonstrates new lifecycle architecture
@@ -166,8 +166,22 @@ export class ReferenceImagePanel extends BaseComponent {
     private handleReferenceStateChanged(data: ReferenceStateChangedPayload): void {
         this.log(`Received reference state changed:`, data);
         
-        // Update local state cache
-        this.referenceState = { ...data };
+        // Update local state cache safely, preserving structure
+        if (data.scale) {
+            this.referenceState.scale = { ...data.scale };
+        }
+        if (data.position) {
+            this.referenceState.position = { ...data.position };
+        }
+        if (typeof data.alpha === 'number') {
+            this.referenceState.alpha = data.alpha;
+        }
+        if (typeof data.mode === 'number') {
+            this.referenceState.mode = data.mode;
+        }
+        if (typeof data.isLoaded === 'boolean') {
+            this.referenceState.isLoaded = data.isLoaded;
+        }
         
         // Update UI based on new state
         this.updateReferenceScaleDisplay();
@@ -395,39 +409,112 @@ export class ReferenceImagePanel extends BaseComponent {
     
     private async loadReferenceFromClipboard(): Promise<void> {
         try {
-            this.log('Requesting reference image load from clipboard via EventBus');
-            
-            // Emit event to PhaserEditorComponent via EventBus
-            this.eventBus.emit(EditorEventTypes.REFERENCE_LOAD_FROM_CLIPBOARD, {}, this.componentId);
-            
-            // UI feedback - actual success/failure will come via EventBus response events
+            this.log('Loading reference image directly from clipboard');
             this.showToast('Loading', 'Loading reference image from clipboard...', 'info');
             this.updateReferenceStatus('Loading from clipboard...');
             
+            // Check if clipboard API is available
+            if (!navigator.clipboard || !navigator.clipboard.read) {
+                throw new Error('Clipboard API not supported in this browser');
+            }
+            
+            // Read from clipboard
+            const clipboardItems = await navigator.clipboard.read();
+            let imageFound = false;
+            
+            for (const clipboardItem of clipboardItems) {
+                for (const type of clipboardItem.types) {
+                    if (type.startsWith('image/')) {
+                        const blob = await clipboardItem.getType(type);
+                        await this.loadReferenceFromBlob(blob, 'clipboard');
+                        imageFound = true;
+                        break;
+                    }
+                }
+                if (imageFound) break;
+            }
+            
+            if (!imageFound) {
+                throw new Error('No image found in clipboard');
+            }
+            
         } catch (error) {
-            this.handleError(`Failed to request reference image load`, error);
-            this.showToast('Error', 'Failed to request reference image load', 'error');
+            this.handleError(`Failed to load reference image from clipboard`, error);
+            this.showToast('Error', 'Failed to load image from clipboard', 'error');
+            this.updateReferenceStatus('Failed to load from clipboard');
         }
     }
     
     private async loadReferenceFromFile(file: File): Promise<void> {
         try {
-            this.log(`Requesting reference image load from file: ${file.name} (${file.size} bytes)`);
+            this.log(`Loading reference image directly from file: ${file.name} (${file.size} bytes)`);
+            this.showToast('Loading', `Loading reference image from ${file.name}...`, 'info');
+            this.updateReferenceStatus(`Loading from ${file.name}...`);
             
-            // Emit event to PhaserEditorComponent via EventBus
-            this.eventBus.emit<ReferenceLoadFromFilePayload>(
-                EditorEventTypes.REFERENCE_LOAD_FROM_FILE, 
-                { file }, 
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                throw new Error('Selected file is not an image');
+            }
+            
+            // Load image directly
+            await this.loadReferenceFromBlob(file, file.name);
+            
+        } catch (error) {
+            this.handleError(`Failed to load reference image from file`, error);
+            this.showToast('Error', 'Failed to load image from file', 'error');
+            this.updateReferenceStatus('Failed to load from file');
+        }
+    }
+    
+    /**
+     * Common method to load reference image from blob/file
+     */
+    private async loadReferenceFromBlob(blob: Blob, source: string): Promise<void> {
+        try {
+            // Create object URL for the blob
+            const imageUrl = URL.createObjectURL(blob);
+            
+            // Create image element to validate and get dimensions
+            const img = new Image();
+            
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = imageUrl;
+            });
+            
+            this.log(`Reference image loaded successfully: ${img.width}x${img.height} from ${source}`);
+            
+            // Update UI state first
+            this.referenceState.isLoaded = true;
+            this.updateReferenceStatus(`Loaded from ${source} (${img.width}x${img.height})`);
+            this.showToast('Success', `Reference image loaded from ${source}`, 'success');
+            this.updateUIState();
+            
+            // Set default mode to background if currently hidden - BEFORE emitting event
+            this.setDefaultMode();
+            
+            // Notify EventBus that image was loaded (notification, not request)
+            // This happens AFTER setDefaultMode so Phaser gets the image with correct mode
+            this.eventBus.emit<ReferenceImageLoadedPayload>(
+                EditorEventTypes.REFERENCE_IMAGE_LOADED, 
+                {
+                    source: source,
+                    width: img.width,
+                    height: img.height,
+                    url: imageUrl
+                }, 
                 this.componentId
             );
             
-            // UI feedback - actual success/failure will come via EventBus response events
-            this.showToast('Loading', `Loading reference image: ${file.name}`, 'info');
-            this.updateReferenceStatus(`Loading file: ${file.name}`);
+            // Clean up the object URL after a delay to allow other components to use it
+            setTimeout(() => {
+                URL.revokeObjectURL(imageUrl);
+            }, 1000);
             
         } catch (error) {
-            this.handleError(`Failed to request reference image load from file`, error);
-            this.showToast('Error', 'Failed to request reference image load', 'error');
+            this.handleError(`Failed to process reference image from ${source}`, error);
+            throw error; // Re-throw to be handled by caller
         }
     }
     
@@ -501,33 +588,39 @@ export class ReferenceImagePanel extends BaseComponent {
     }
     
     private adjustReferenceScaleX(delta: number): void {
-        const newScaleX = Math.max(0.1, Math.min(5.0, this.referenceState.scale.x + delta));
+        const currentScaleX = this.referenceState?.scale?.x ?? 1.0;
+        const newScaleX = Math.max(0.1, Math.min(5.0, currentScaleX + delta));
         
         // Emit event to PhaserEditorComponent via EventBus
         this.eventBus.emit<ReferenceSetScalePayload>(
             EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: newScaleX, scaleY: this.referenceState.scale.y }, 
+            { scaleX: newScaleX, scaleY: this.referenceState?.scale?.y ?? 1.0 }, 
             this.componentId
         );
         
         // Update local state cache
-        this.referenceState.scale.x = newScaleX;
+        if (this.referenceState?.scale) {
+            this.referenceState.scale.x = newScaleX;
+        }
         this.updateReferenceScaleDisplay();
         this.log(`Reference X scale: ${newScaleX.toFixed(2)}`);
     }
     
     private adjustReferenceScaleY(delta: number): void {
-        const newScaleY = Math.max(0.1, Math.min(5.0, this.referenceState.scale.y + delta));
+        const currentScaleY = this.referenceState?.scale?.y ?? 1.0;
+        const newScaleY = Math.max(0.1, Math.min(5.0, currentScaleY + delta));
         
         // Emit event to PhaserEditorComponent via EventBus
         this.eventBus.emit<ReferenceSetScalePayload>(
             EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: this.referenceState.scale.x, scaleY: newScaleY }, 
+            { scaleX: this.referenceState?.scale?.x ?? 1.0, scaleY: newScaleY }, 
             this.componentId
         );
         
         // Update local state cache
-        this.referenceState.scale.y = newScaleY;
+        if (this.referenceState?.scale) {
+            this.referenceState.scale.y = newScaleY;
+        }
         this.updateReferenceScaleDisplay();
         this.log(`Reference Y scale: ${newScaleY.toFixed(2)}`);
     }
@@ -538,12 +631,14 @@ export class ReferenceImagePanel extends BaseComponent {
         // Emit event to PhaserEditorComponent via EventBus
         this.eventBus.emit<ReferenceSetScalePayload>(
             EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: clampedScale, scaleY: this.referenceState.scale.y }, 
+            { scaleX: clampedScale, scaleY: this.referenceState?.scale?.y ?? 1.0 }, 
             this.componentId
         );
         
         // Update local state cache
-        this.referenceState.scale.x = clampedScale;
+        if (this.referenceState?.scale) {
+            this.referenceState.scale.x = clampedScale;
+        }
         this.updateReferenceScaleDisplay();
         this.log(`Reference X scale: ${clampedScale.toFixed(2)}`);
     }
@@ -554,12 +649,14 @@ export class ReferenceImagePanel extends BaseComponent {
         // Emit event to PhaserEditorComponent via EventBus
         this.eventBus.emit<ReferenceSetScalePayload>(
             EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: this.referenceState.scale.x, scaleY: clampedScale }, 
+            { scaleX: this.referenceState?.scale?.x ?? 1.0, scaleY: clampedScale }, 
             this.componentId
         );
         
         // Update local state cache
-        this.referenceState.scale.y = clampedScale;
+        if (this.referenceState?.scale) {
+            this.referenceState.scale.y = clampedScale;
+        }
         this.updateReferenceScaleDisplay();
         this.log(`Reference Y scale: ${clampedScale.toFixed(2)}`);
     }
@@ -568,12 +665,16 @@ export class ReferenceImagePanel extends BaseComponent {
         const scaleXInput = this.rootElement.querySelector('#reference-scale-x-value') as HTMLInputElement;
         const scaleYInput = this.rootElement.querySelector('#reference-scale-y-value') as HTMLInputElement;
         
+        // Defensive programming: ensure scale values exist
+        const scaleX = this.referenceState?.scale?.x ?? 1.0;
+        const scaleY = this.referenceState?.scale?.y ?? 1.0;
+        
         if (scaleXInput) {
-            scaleXInput.value = this.referenceState.scale.x.toFixed(2);
+            scaleXInput.value = scaleX.toFixed(2);
         }
         
         if (scaleYInput) {
-            scaleYInput.value = this.referenceState.scale.y.toFixed(2);
+            scaleYInput.value = scaleY.toFixed(2);
         }
     }
     

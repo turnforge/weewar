@@ -6,7 +6,7 @@ import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from './Keyboa
 import { shouldIgnoreShortcut } from './DOMUtils';
 import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
 import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType, ToolStateChangedEventData, VisualStateChangedEventData, WorkflowStateChangedEventData, ToolState } from './MapEditorPageState';
-import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload } from './EventBus';
+import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload, GridSetVisibilityPayload, CoordinatesSetVisibilityPayload } from './EventBus';
 import { EditorToolsPanel } from './EditorToolsPanel';
 import { ReferenceImagePanel } from './ReferenceImagePanel';
 import { ComponentLifecycle } from './ComponentLifecycle';
@@ -117,7 +117,6 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             
             // Initialize basic components first
             this.initializeSpecificComponents();
-            this.initializeDockview();
             
             // Create child components that implement ComponentLifecycle
             const childComponents: ComponentLifecycle[] = [];
@@ -180,6 +179,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             
             // Set cross-component dependencies now that all components are created
             this.setupCrossComponentDependencies();
+            
+            // Initialize dockview now that all child components are ready
+            this.initializeDockview();
             
             // Update UI state
             this.updateEditorStatus('Ready');
@@ -542,22 +544,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         // NOTE: Terrain/unit button bindings, player selection, and brush size controls 
         // are now handled by EditorToolsPanel component via EventBus
 
-        // Visual options
-        const showGridCheckbox = document.getElementById('show-grid') as HTMLInputElement;
-        if (showGridCheckbox) {
-            showGridCheckbox.addEventListener('change', (e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                this.setShowGrid(checked);
-            });
-        }
-        
-        const showCoordinatesCheckbox = document.getElementById('show-coordinates') as HTMLInputElement;
-        if (showCoordinatesCheckbox) {
-            showCoordinatesCheckbox.addEventListener('change', (e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                this.setShowCoordinates(checked);
-            });
-        }
+        // Visual options (grid/coordinates) now bound in bindPhaserPanelEvents
 
 
 
@@ -603,6 +590,36 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         // Reference image controls are now handled by ReferenceImagePanel directly
         // No event handlers needed here - ReferenceImagePanel binds its own DOM events
+    }
+    
+    /**
+     * Bind events specific to the Phaser panel (called when panel is created)
+     */
+    private bindPhaserPanelEvents(container: HTMLElement): void {
+        // Visual options - grid and coordinates checkboxes
+        const showGridCheckbox = container.querySelector('#show-grid') as HTMLInputElement;
+        if (showGridCheckbox) {
+            showGridCheckbox.addEventListener('change', (e) => {
+                const checked = (e.target as HTMLInputElement).checked;
+                this.setShowGrid(checked);
+                this.logToConsole(`Grid checkbox changed to: ${checked}`);
+            });
+            this.logToConsole('Grid checkbox event handler bound');
+        } else {
+            this.logToConsole('Grid checkbox not found in Phaser panel');
+        }
+        
+        const showCoordinatesCheckbox = container.querySelector('#show-coordinates') as HTMLInputElement;
+        if (showCoordinatesCheckbox) {
+            showCoordinatesCheckbox.addEventListener('change', (e) => {
+                const checked = (e.target as HTMLInputElement).checked;
+                this.setShowCoordinates(checked);
+                this.logToConsole(`Coordinates checkbox changed to: ${checked}`);
+            });
+            this.logToConsole('Coordinates checkbox event handler bound');
+        } else {
+            this.logToConsole('Coordinates checkbox not found in Phaser panel');
+        }
     }
 
     private initializeKeyboardShortcuts(): void {
@@ -686,6 +703,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 description: 'Activate clear mode',
                 category: 'Tools',
                 contextFilter: noModifiersFilter
+                /*
             },
             {
                 key: 'r',
@@ -693,6 +711,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 description: 'Reset all tools to defaults',
                 category: 'General',
                 contextFilter: noModifiersFilter
+               */
             }
         ];
 
@@ -857,16 +876,33 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     }
     
     public setShowGrid(showGrid: boolean): void {
-        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
-            this.phaserEditorComponent.setShowGrid(showGrid);
+        // Update page state - this will emit visual state changed event
+        if (this.pageState) {
+            this.pageState.setShowGrid(showGrid);
         }
+        
+        // Emit event to PhaserEditorComponent via EventBus
+        this.eventBus.emit<GridSetVisibilityPayload>(
+            EditorEventTypes.GRID_SET_VISIBILITY,
+            { show: showGrid },
+            'map-editor-page'
+        );
+        this.logToConsole(`Grid visibility set to: ${showGrid}`);
     }
     
     public setShowCoordinates(showCoordinates: boolean): void {
-        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
-            this.phaserEditorComponent.setShowCoordinates(showCoordinates);
-        } else {
+        // Update page state - this will emit visual state changed event
+        if (this.pageState) {
+            this.pageState.setShowCoordinates(showCoordinates);
         }
+        
+        // Emit event to PhaserEditorComponent via EventBus
+        this.eventBus.emit<CoordinatesSetVisibilityPayload>(
+            EditorEventTypes.COORDINATES_SET_VISIBILITY,
+            { show: showCoordinates },
+            'map-editor-page'
+        );
+        this.logToConsole(`Coordinates visibility set to: ${showCoordinates}`);
     }
 
     public downloadImage(): void {
@@ -1183,6 +1219,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 // Initialize PhaserEditorComponent
                 this.phaserEditorComponent = new PhaserEditorComponent(container, this.eventBus, this.pageState, this.map, true);
                 this.logToConsole('PhaserEditorComponent initialized');
+                
+                // Bind grid and coordinates checkboxes now that the template is in the DOM
+                this.bindPhaserPanelEvents(container);
             },
             dispose: () => {
                 if (this.phaserEditorComponent) {

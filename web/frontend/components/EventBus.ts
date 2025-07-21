@@ -227,6 +227,7 @@ export const EditorEventTypes = {
     REFERENCE_STATE_CHANGED: 'reference-state-changed',
     REFERENCE_ALPHA_CHANGED: 'reference-alpha-changed',
     REFERENCE_MODE_CHANGED: 'reference-mode-changed',
+    REFERENCE_IMAGE_LOADED: 'reference-image-loaded',
     
     // Map modification events
     TILE_PAINTED: 'tile-painted',
@@ -238,6 +239,8 @@ export const EditorEventTypes = {
     TOOLS_UI_UPDATED: 'tools-ui-updated',
     GRID_TOGGLE: 'grid-toggle',
     COORDINATES_TOGGLE: 'coordinates-toggle',
+    GRID_SET_VISIBILITY: 'grid-set-visibility',
+    COORDINATES_SET_VISIBILITY: 'coordinates-set-visibility',
     
     // Page state events (centralized state management)
     PAGE_STATE_CHANGED: 'page-state-changed',
@@ -332,6 +335,14 @@ export interface CoordinatesTogglePayload {
     showCoordinates: boolean;
 }
 
+export interface GridSetVisibilityPayload {
+    show: boolean;
+}
+
+export interface CoordinatesSetVisibilityPayload {
+    show: boolean;
+}
+
 // Reference image event payloads
 
 // ReferenceImagePanel → PhaserEditorComponent events
@@ -382,6 +393,13 @@ export interface ReferenceAlphaChangedPayload {
 
 export interface ReferenceModeChangedPayload {
     mode: number; // 0=hidden, 1=background, 2=overlay
+}
+
+export interface ReferenceImageLoadedPayload {
+    source: string; // 'clipboard' | 'file' | filename
+    width: number;
+    height: number;
+    url: string; // Object URL for the image
 }
 
 // Map modification event payloads

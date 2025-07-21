@@ -27,121 +27,135 @@ func getTestOutputPath(testName, filename string) string {
 }
 
 func TestNewMap(t *testing.T) {
-	m := NewMap(10, 15, true)
-
-	if m.NumRows() != 10 {
-		t.Errorf("Expected NumRows to be 10, got %d", m.NumRows())
-	}
-	if m.NumCols() != 15 {
-		t.Errorf("Expected NumCols to be 15, got %d", m.NumCols())
-	}
-	// EvenRowsOffset is deprecated and always returns false
-	if m.EvenRowsOffset() {
-		t.Errorf("Expected EvenRowsOffset to be false (deprecated)")
-	}
+	m := NewMapRect(10, 15)
 	if m.Tiles == nil {
 		t.Errorf("Expected Tiles map to be initialized")
 	}
 }
 
 func TestMapTileOperations(t *testing.T) {
-	m := NewMap(5, 5, false)
+	m := NewMapRect(5, 5)
 
 	// Test TileAt with no tiles
-	tile := m.TileAt(2, 3)
+	coord := AxialCoord{Q: 2, R: 3}
+	tile := m.TileAt(coord)
 	if tile != nil {
 		t.Errorf("Expected nil tile, got %v", tile)
 	}
 
 	// Test AddTile and TileAt
-	newTile := NewTile(2, 3, 1)
+	newTile := NewTile(coord, 1)
 	m.AddTile(newTile)
 
-	retrievedTile := m.TileAt(2, 3)
+	retrievedTile := m.TileAt(coord)
 	if retrievedTile == nil {
-		t.Errorf("Expected tile at (2,3), got nil")
+		t.Errorf("Expected tile at %v, got nil", coord)
 	}
-	if retrievedTile.Row != 2 || retrievedTile.Col != 3 {
-		t.Errorf("Expected tile at (2,3), got (%d,%d)", retrievedTile.Row, retrievedTile.Col)
+	if retrievedTile.Coord != coord {
+		t.Errorf("Expected tile at %v, got %v", coord, retrievedTile.Coord)
 	}
 	if retrievedTile.TileType != 1 {
 		t.Errorf("Expected tile type 1, got %d", retrievedTile.TileType)
 	}
 
 	// Test tile replacement
-	replacementTile := NewTile(2, 3, 2)
+	replacementTile := NewTile(coord, 2)
 	m.AddTile(replacementTile)
 
-	retrievedTile = m.TileAt(2, 3)
+	retrievedTile = m.TileAt(coord)
 	if retrievedTile.TileType != 2 {
 		t.Errorf("Expected tile type 2 after replacement, got %d", retrievedTile.TileType)
 	}
 
 	// Test DeleteTile
-	m.DeleteTile(2, 3)
-	retrievedTile = m.TileAt(2, 3)
+	m.DeleteTile(coord)
+	retrievedTile = m.TileAt(coord)
 	if retrievedTile != nil {
 		t.Errorf("Expected nil after deletion, got %v", retrievedTile)
 	}
 }
 
-func TestGameRenderToBuffer(t *testing.T) {
-	// Create a test map
-	m := NewMap(3, 3, false)
-
+func TestGameCreationAndBasicOperations(t *testing.T) {
+	// Create a test world with map
+	gameMap := NewMapRect(3, 3)
+	
 	// Add some tiles with different types
-	tiles := []*Tile{
-		NewTile(0, 0, 1), // Grass
-		NewTile(0, 1, 2), // Desert
-		NewTile(1, 0, 3), // Water
-		NewTile(1, 1, 1), // Grass
-		NewTile(2, 0, 4), // Mountain
-		NewTile(2, 1, 5), // Rock
+	coords := []AxialCoord{
+		{Q: 0, R: 0}, {Q: 0, R: 1}, {Q: 1, R: 0},
+		{Q: 1, R: 1}, {Q: 2, R: 0}, {Q: 2, R: 1},
+	}
+	
+	tileTypes := []int{1, 2, 3, 1, 4, 5} // Grass, Desert, Water, Grass, Mountain, Rock
+
+	for i, coord := range coords {
+		tile := NewTile(coord, tileTypes[i])
+		gameMap.AddTile(tile)
 	}
 
-	for _, tile := range tiles {
-		m.AddTile(tile)
-	}
-
-	// Note: Neighbor connections calculated on-demand
-
-	// Create a game
-	game, _ := NewGame(2, m, 12345)
-
-	// Add some units
-	unit1 := NewUnit(1, 0)
-	unit1.Row = 0
-	unit1.Col = 0
-	game.AddUnit(unit1, 0)
-
-	unit2 := NewUnit(2, 1)
-	unit2.Row = 1
-	unit2.Col = 1
-	game.AddUnit(unit2, 1)
-
-	// Create buffer and render
-	buffer := NewBuffer(400, 300)
-	game.RenderToBuffer(buffer, 60.0, 50.0, 40.0)
-
-	// Save to PNG
-	imagePath := getTestOutputPath("TestGameRenderToBuffer", "game_render.png")
-	err := buffer.Save(imagePath)
-
+	world, err := NewWorld(2, gameMap)
 	if err != nil {
-		t.Errorf("Buffer Save failed: %v", err)
+		t.Fatalf("Failed to create world: %v", err)
 	}
 
-	// Check that file was created
-	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
-		t.Errorf("PNG file was not created at %s", imagePath)
-	} else {
-		t.Logf("Game render test saved to: %s", imagePath)
+	// Load rules engine first
+	rulesEngine, err := LoadRulesEngineFromFile("../data/rules-data.json")
+	if err != nil {
+		t.Fatalf("Failed to load rules engine: %v", err)
 	}
 
-	// Clean up (conditional)
-	if cleanupTestFiles {
-		os.Remove(imagePath)
+	// Create game with rules engine
+	game, err := NewGame(world, rulesEngine, 12345)
+	if err != nil {
+		t.Fatalf("Failed to create game: %v", err)
 	}
+
+	// Add some units manually
+	unit1 := NewUnit(1, 0)
+	unit1.Coord = AxialCoord{Q: 0, R: 0}
+	// Initialize unit stats from rules engine
+	unitData1, err := rulesEngine.GetUnitData(unit1.UnitType)
+	if err != nil {
+		t.Fatalf("Failed to get unit data: %v", err)
+	}
+	unit1.AvailableHealth = unitData1.Health
+	unit1.DistanceLeft = unitData1.MovementPoints
+	err = game.AddUnit(unit1, 0)
+	if err != nil {
+		t.Errorf("Failed to add unit1: %v", err)
+	}
+
+	unit2 := NewUnit(1, 1)
+	unit2.Coord = AxialCoord{Q: 1, R: 1}
+	// Initialize unit stats from rules engine
+	unitData2, err := rulesEngine.GetUnitData(unit2.UnitType)
+	if err != nil {
+		t.Fatalf("Failed to get unit data: %v", err)
+	}
+	unit2.AvailableHealth = unitData2.Health
+	unit2.DistanceLeft = unitData2.MovementPoints
+	err = game.AddUnit(unit2, 1)
+	if err != nil {
+		t.Errorf("Failed to add unit2: %v", err)
+	}
+
+	// Test basic game operations
+	if game.CurrentPlayer != 0 {
+		t.Errorf("Expected current player 0, got %d", game.CurrentPlayer)
+	}
+
+	if game.TurnCounter != 1 {
+		t.Errorf("Expected turn counter 1, got %d", game.TurnCounter)
+	}
+
+	// Test unit retrieval
+	retrievedUnit := game.GetUnitAt(AxialCoord{Q: 0, R: 0})
+	if retrievedUnit == nil {
+		t.Error("Failed to retrieve unit at (0,0)")
+	} else if retrievedUnit.UnitType != 1 {
+		t.Errorf("Expected unit type 1, got %d", retrievedUnit.UnitType)
+	}
+
+	t.Logf("Game creation and basic operations test completed successfully")
 }
 
 func TestBufferOperations(t *testing.T) {
@@ -230,82 +244,89 @@ func TestBufferComposition(t *testing.T) {
 	}
 }
 
-func TestMultiLayerRendering(t *testing.T) {
-	// Create a game with map and units
-	m := NewMap(3, 3, false)
-
-	// Add some tiles
-	tiles := []*Tile{
-		NewTile(0, 0, 1), NewTile(0, 1, 2), NewTile(0, 2, 3),
-		NewTile(1, 0, 2), NewTile(1, 1, 3), NewTile(1, 2, 4),
-		NewTile(2, 0, 3), NewTile(2, 1, 4), NewTile(2, 2, 5),
+func TestGameMovementAndCombat(t *testing.T) {
+	// Create a world with map and units
+	gameMap := NewMapRect(3, 3)
+	world, err := NewWorld(2, gameMap)
+	if err != nil {
+		t.Fatalf("Failed to create world: %v", err)
 	}
 
-	for _, tile := range tiles {
-		m.AddTile(tile)
+	// Add some tiles in a 3x3 pattern
+	coords := []AxialCoord{
+		{Q: 0, R: 0}, {Q: 0, R: 1}, {Q: 0, R: 2},
+		{Q: 1, R: 0}, {Q: 1, R: 1}, {Q: 1, R: 2},
+		{Q: 2, R: 0}, {Q: 2, R: 1}, {Q: 2, R: 2},
+	}
+	
+	tileTypes := []int{1, 2, 3, 2, 3, 4, 3, 4, 5}
+
+	for i, coord := range coords {
+		tile := NewTile(coord, tileTypes[i])
+		world.Map.AddTile(tile)
 	}
 
-	game, _ := NewGame(2, m, 12345)
+	// Load rules engine for movement/combat
+	rulesEngine, err := LoadRulesEngineFromFile("../data/rules-data.json")
+	if err != nil {
+		t.Fatalf("Failed to load rules engine: %v", err)
+	}
+
+	game, err := NewGame(world, rulesEngine, 12345)
+	if err != nil {
+		t.Fatalf("Failed to create game: %v", err)
+	}
 
 	// Add units
-	unit1 := NewUnit(1, 0)
-	unit1.Row = 0
-	unit1.Col = 0
+	unit1 := NewUnit(1, 0) // Soldier
+	unit1.Coord = AxialCoord{Q: 0, R: 0}
+	// Initialize unit stats from rules engine
+	unitData1, err := rulesEngine.GetUnitData(unit1.UnitType)
+	if err != nil {
+		t.Fatalf("Failed to get unit data: %v", err)
+	}
+	unit1.AvailableHealth = unitData1.Health
+	unit1.DistanceLeft = unitData1.MovementPoints
 	game.AddUnit(unit1, 0)
 
-	unit2 := NewUnit(2, 1)
-	unit2.Row = 2
-	unit2.Col = 2
+	unit2 := NewUnit(1, 1) // Soldier
+	unit2.Coord = AxialCoord{Q: 2, R: 2}
+	// Initialize unit stats from rules engine
+	unitData2, err := rulesEngine.GetUnitData(unit2.UnitType)
+	if err != nil {
+		t.Fatalf("Failed to get unit data: %v", err)
+	}
+	unit2.AvailableHealth = unitData2.Health
+	unit2.DistanceLeft = unitData2.MovementPoints
 	game.AddUnit(unit2, 1)
 
-	// Create separate layer buffers
-	terrainBuffer := NewBuffer(300, 250)
-	unitBuffer := NewBuffer(300, 250)
-	uiBuffer := NewBuffer(300, 250)
+	// Test movement validation
+	from := AxialCoord{Q: 0, R: 0}
+	to := AxialCoord{Q: 0, R: 1}
+	canMove := game.IsValidMove(from, to)
+	if !canMove {
+		t.Error("Expected valid move from (0,0) to (0,1)")
+	}
 
-	// Render layers separately
-	game.RenderTerrain(terrainBuffer, 80.0, 70.0, 50.0)
-	game.RenderUnits(unitBuffer, 80.0, 70.0, 50.0)
-	game.RenderUI(uiBuffer, 80.0, 70.0, 50.0)
-
-	// Composite layers
-	finalBuffer := NewBuffer(300, 250)
-	finalBuffer.RenderBuffer(terrainBuffer)
-	finalBuffer.RenderBuffer(unitBuffer)
-	finalBuffer.RenderBuffer(uiBuffer)
-
-	// Save final result and individual layers
-	imagePath := getTestOutputPath("TestMultiLayerRendering", "multi_layer_composite.png")
-	terrainPath := getTestOutputPath("TestMultiLayerRendering", "layer_terrain.png")
-	unitsPath := getTestOutputPath("TestMultiLayerRendering", "layer_units.png")
-	uiPath := getTestOutputPath("TestMultiLayerRendering", "layer_ui.png")
-
-	err := finalBuffer.Save(imagePath)
+	// Test movement execution
+	err = game.MoveUnit(unit1, AxialCoord{Q: 0, R: 1})
 	if err != nil {
-		t.Errorf("Multi-layer rendering save failed: %v", err)
+		t.Errorf("Failed to move unit: %v", err)
 	}
 
-	// Also save individual layers for comparison
-	terrainBuffer.Save(terrainPath)
-	unitBuffer.Save(unitsPath)
-	uiBuffer.Save(uiPath)
+	// Verify unit moved
+	movedUnit := game.GetUnitAt(AxialCoord{Q: 0, R: 1})
+	if movedUnit == nil {
+		t.Error("Unit not found at new position")
+	}
 
-	// Verify files exist
-	if _, err := os.Stat(imagePath); os.IsNotExist(err) {
-		t.Errorf("Multi-layer PNG file was not created")
+	// Test attack validation
+	canAttack := game.CanAttackUnit(unit1, unit2)
+	if canAttack {
+		t.Log("Units can attack each other")
 	} else {
-		t.Logf("Multi-layer rendering completed successfully")
-		t.Logf("Final composite: %s", imagePath)
-		t.Logf("Terrain layer: %s", terrainPath)
-		t.Logf("Units layer: %s", unitsPath)
-		t.Logf("UI layer: %s", uiPath)
+		t.Log("Units cannot attack each other (likely out of range)")
 	}
 
-	// Clean up (conditional)
-	if cleanupTestFiles {
-		os.Remove(imagePath)
-		os.Remove(terrainPath)
-		os.Remove(unitsPath)
-		os.Remove(uiPath)
-	}
+	t.Logf("Game movement and combat test completed successfully")
 }

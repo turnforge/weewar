@@ -22,8 +22,8 @@ wasm:
 	mkdir -p web/static/wasm
 	echo "Building weewar-cli WASM..."
 	GOOS=js GOARCH=wasm go build -o web/static/wasm/weewar-cli.wasm cmd/weewar-wasm/*.go
-	echo "Building map editor WASM..."
-	GOOS=js GOARCH=wasm go build -o web/static/wasm/editor.wasm cmd/editor-wasm/*.go
+	# echo "Building map editor WASM..."
+	# GOOS=js GOARCH=wasm go build -o web/static/wasm/editor.wasm cmd/editor-wasm/*.go
 	echo "Copying wasm_exec.js..."
 
 wasmexecjs:

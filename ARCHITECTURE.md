@@ -11,6 +11,15 @@
 - **Legacy System Removal**: Completely eliminated old canvas system and related complexity
 - **UI Reorganization**: Moved view controls to logical locations with Phaser editor tools
 
+### Rules Engine Integration (January 2025) ✅
+- **Data-Driven Game Mechanics**: Complete replacement of hardcoded logic with rules engine
+- **Enhanced Game Constructor**: NewGame now requires RulesEngine parameter for proper initialization  
+- **Movement System Integration**: Terrain passability and cost validation through rules data
+- **Combat System Enhancement**: Probabilistic damage with counter-attacks using DamageDistribution
+- **Attack Validation Integration**: Rules-based unit attack capability checking
+- **Test System Migration**: All tests updated to AxialCoord system with proper unit initialization
+- **API Consistency**: Unified pattern where game mechanics go through rules engine first with fallbacks
+
 ### Core Components
 
 #### 1. KeyboardShortcutManager (`web/frontend/components/KeyboardShortcutManager.ts`) ✅ COMPLETED

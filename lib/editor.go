@@ -14,6 +14,8 @@ type WorldEditor struct {
 	// Current world being edited
 	currentWorld *World
 
+	TerrainData []*TerrainData
+
 	// Editor state
 	filename     string
 	modified     bool
@@ -140,7 +142,7 @@ func (e *WorldEditor) SetAssetProvider(provider AssetProvider) {
 
 // SetBrushTerrain sets the terrain type for painting
 func (e *WorldEditor) SetBrushTerrain(terrainType int) error {
-	if terrainType < 0 || terrainType >= len(terrainData) {
+	if terrainType < 0 || terrainType >= len(e.TerrainData) {
 		return fmt.Errorf("invalid terrain type: %d", terrainType)
 	}
 	e.brushTerrain = terrainType
@@ -357,7 +359,7 @@ func (e *WorldEditor) ValidateMap() []string {
 	// Check for invalid terrain types
 	for coord, tile := range e.currentWorld.Map.Tiles {
 		if tile != nil {
-			if tile.TileType < 0 || tile.TileType >= len(terrainData) {
+			if tile.TileType < 0 || tile.TileType >= len(e.TerrainData) {
 				issues = append(issues, fmt.Sprintf("Invalid terrain type %d at %v",
 					tile.TileType, coord))
 			}

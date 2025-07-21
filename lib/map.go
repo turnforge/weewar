@@ -6,42 +6,42 @@ import (
 	"math"
 )
 
-// Basic terrain data - matches weewar-data.json
-var terrainData = []TerrainData{
-	{0, "Clear", 1, 0, TerrainNature},             // Default fallback
-	{1, "Land Base", 2, 20, TerrainPlayer},        // Player base
-	{2, "Naval Base", 2, 20, TerrainPlayer},       // Naval base
-	{3, "Airport Base", 2, 20, TerrainPlayer},     // Airport base
-	{4, "Desert", 1, 0, TerrainNature},            // Desert terrain
-	{5, "Grass", 1, 0, TerrainNature},             // Grass terrain
-	{6, "Hospital", 1, 15, TerrainPlayer},         // Hospital
-	{7, "Mountains", 2, 10, TerrainNature},        // Mountain terrain
-	{8, "Swamp", 2, 5, TerrainNature},             // Swamp terrain
-	{9, "Forest", 1, 5, TerrainNature},            // Forest terrain
-	{10, "Water (Regular)", 2, 0, TerrainNature},  // Regular water
-	{12, "Lava", 4, 0, TerrainNature},             // Lava terrain
-	{14, "Water (Shallow)", 2, 0, TerrainNature},  // Shallow water
-	{15, "Water (Deep)", 2, 0, TerrainNature},     // Deep water
-	{16, "Missile Silo", 2, 15, TerrainPlayer},    // Missile silo
-	{17, "Bridge (Regular)", 1, 0, TerrainNature}, // Regular bridge
-	{18, "Bridge (Shallow)", 1, 0, TerrainNature}, // Shallow bridge
-	{19, "Bridge (Deep)", 1, 0, TerrainNature},    // Deep bridge
-	{20, "Mines", 1, 10, TerrainPlayer},           // Mines
-	{21, "City", 1, 15, TerrainPlayer},            // City
-	{22, "Road", 1, -5, TerrainNature},            // Road (movement bonus)
-	{23, "Water (Rocky)", 2, 0, TerrainNature},    // Rocky water
-	{25, "Guard Tower", 2, 25, TerrainPlayer},     // Guard tower
-	{26, "Snow", 2, 5, TerrainNature},             // Snow terrain
+// Default sample terrain data
+var DefaultTerrainData = []TerrainData{
+	{0, "Clear", 1, 0, TerrainNature, nil},             // Default fallback
+	{1, "Land Base", 2, 20, TerrainPlayer, nil},        // Player base
+	{2, "Naval Base", 2, 20, TerrainPlayer, nil},       // Naval base
+	{3, "Airport Base", 2, 20, TerrainPlayer, nil},     // Airport base
+	{4, "Desert", 1, 0, TerrainNature, nil},            // Desert terrain
+	{5, "Grass", 1, 0, TerrainNature, nil},             // Grass terrain
+	{6, "Hospital", 1, 15, TerrainPlayer, nil},         // Hospital
+	{7, "Mountains", 2, 10, TerrainNature, nil},        // Mountain terrain
+	{8, "Swamp", 2, 5, TerrainNature, nil},             // Swamp terrain
+	{9, "Forest", 1, 5, TerrainNature, nil},            // Forest terrain
+	{10, "Water (Regular)", 2, 0, TerrainNature, nil},  // Regular water
+	{12, "Lava", 4, 0, TerrainNature, nil},             // Lava terrain
+	{14, "Water (Shallow)", 2, 0, TerrainNature, nil},  // Shallow water
+	{15, "Water (Deep)", 2, 0, TerrainNature, nil},     // Deep water
+	{16, "Missile Silo", 2, 15, TerrainPlayer, nil},    // Missile silo
+	{17, "Bridge (Regular)", 1, 0, TerrainNature, nil}, // Regular bridge
+	{18, "Bridge (Shallow)", 1, 0, TerrainNature, nil}, // Shallow bridge
+	{19, "Bridge (Deep)", 1, 0, TerrainNature, nil},    // Deep bridge
+	{20, "Mines", 1, 10, TerrainPlayer, nil},           // Mines
+	{21, "City", 1, 15, TerrainPlayer, nil},            // City
+	{22, "Road", 1, -5, TerrainNature, nil},            // Road (movement bonus)
+	{23, "Water (Rocky)", 2, 0, TerrainNature, nil},    // Rocky water
+	{25, "Guard Tower", 2, 25, TerrainPlayer, nil},     // Guard tower
+	{26, "Snow", 2, 5, TerrainNature, nil},             // Snow terrain
 }
 
 // GetTerrainData returns terrain data for the given type
 func GetTerrainData(terrainType int) *TerrainData {
-	for i := range terrainData {
-		if terrainData[i].ID == terrainType {
-			return &terrainData[i]
+	for i := range DefaultTerrainData {
+		if DefaultTerrainData[i].ID == terrainType {
+			return &DefaultTerrainData[i]
 		}
 	}
-	return &terrainData[0] // Default to unknown
+	return &DefaultTerrainData[0] // Default to unknown
 }
 
 type MapBounds struct {

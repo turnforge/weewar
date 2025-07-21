@@ -10,11 +10,13 @@ const (
 
 // TerrainData represents terrain type information
 type TerrainData struct {
-	ID           int
-	Name         string
-	MoveCost     int
-	DefenseBonus int
-	Type         TerrainType // Nature or Player terrain
+	ID           int         `json:"id"`
+	Name         string      `json:"name"`
+	BaseMoveCost float64     `json:"baseMoveCost"`  // Base movement cost for this terrain
+	DefenseBonus float64     `json:"defenseBonus"`
+	Type         TerrainType `json:"type"`         // Nature or Player terrain
+	Properties   []string    `json:"properties,omitempty"`
+	// Note: Unit-specific movement costs in RulesEngine can override base cost
 }
 
 // Tile represents a single hex tile on the map

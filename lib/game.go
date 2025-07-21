@@ -11,6 +11,24 @@ import (
 // Core Types (from core.go)
 // =============================================================================
 
+// PlayerInfo contains game-specific information about a player
+type PlayerInfo struct {
+	PlayerID int    `json:"playerID"` // 0-based player index
+	Name     string `json:"name"`     // Player display name
+	TeamID   int    `json:"teamID"`   // Which team this player belongs to
+	IsActive bool   `json:"isActive"` // Whether player is still in the game
+	Color    string `json:"color"`    // Player's display color
+}
+
+// TeamInfo contains information about a team
+type TeamInfo struct {
+	TeamID      int    `json:"teamID"`      // 0-based team index
+	Name        string `json:"name"`        // Team display name
+	Color       string `json:"color"`       // Team color
+	IsActive    bool   `json:"isActive"`    // Whether team has active players
+	PlayerCount int    `json:"playerCount"` // Number of players in this team
+}
+
 // Game represents the unified game state and implements GameInterface
 type Game struct {
 	// Pure game state
@@ -20,6 +38,10 @@ type Game struct {
 	CurrentPlayer int        `json:"currentPlayer"` // 0-based player index
 	TurnCounter   int        `json:"turnCounter"`   // 1-based turn number
 	Status        GameStatus `json:"status"`        // Game status
+
+	// Player and team information
+	Players []PlayerInfo `json:"players"` // Information about each player
+	Teams   []TeamInfo   `json:"teams"`   // Information about each team
 
 	// Game systems and configuration
 	Seed int64 `json:"seed"` // Random seed for deterministic gameplay
@@ -32,6 +54,9 @@ type Game struct {
 
 	// Asset management
 	assetProvider AssetProvider `json:"-"` // Asset provider for tiles and units (interface for platform flexibility)
+
+	// Rules engine for data-driven game mechanics
+	rulesEngine *RulesEngine `json:"-"` // Rules engine for movement costs, combat, unit data
 
 	// Game metadata
 	CreatedAt    time.Time `json:"createdAt"`    // When game was created
@@ -70,30 +95,66 @@ func (g *Game) PlayerCount() int {
 	return g.World.PlayerCount
 }
 
+// GetPlayerInfo returns information about a specific player
+func (g *Game) GetPlayerInfo(playerID int) (*PlayerInfo, error) {
+	if playerID < 0 || playerID >= len(g.Players) {
+		return nil, fmt.Errorf("invalid player ID: %d", playerID)
+	}
+	return &g.Players[playerID], nil
+}
+
+// GetTeamInfo returns information about a specific team
+func (g *Game) GetTeamInfo(teamID int) (*TeamInfo, error) {
+	if teamID < 0 || teamID >= len(g.Teams) {
+		return nil, fmt.Errorf("invalid team ID: %d", teamID)
+	}
+	return &g.Teams[teamID], nil
+}
+
+// GetPlayersOnTeam returns all players belonging to a specific team
+func (g *Game) GetPlayersOnTeam(teamID int) []*PlayerInfo {
+	var teamPlayers []*PlayerInfo
+	for i := range g.Players {
+		if g.Players[i].TeamID == teamID {
+			teamPlayers = append(teamPlayers, &g.Players[i])
+		}
+	}
+	return teamPlayers
+}
+
+// ArePlayersOnSameTeam checks if two players are on the same team
+func (g *Game) ArePlayersOnSameTeam(playerID1, playerID2 int) bool {
+	if playerID1 < 0 || playerID1 >= len(g.Players) || 
+	   playerID2 < 0 || playerID2 >= len(g.Players) {
+		return false
+	}
+	return g.Players[playerID1].TeamID == g.Players[playerID2].TeamID
+}
+
 // =============================================================================
 // Helper Functions
 // =============================================================================
 
-// initializeStartingUnits adds initial units to the game
+// initializeStartingUnits initializes stats for units already in the World
 func (g *Game) initializeStartingUnits() error {
-	// Add some basic starting units for each player using cube coordinates
-	startingPositions := [][]AxialCoord{
-		{{Q: 1, R: 1}, {Q: 2, R: 1}},  // Player 0
-		{{Q: 9, R: 6}, {Q: 10, R: 6}}, // Player 1
+	// Get unit stats from rules engine (required)
+	if g.rulesEngine == nil {
+		return fmt.Errorf("rules engine not set - required for unit initialization")
 	}
 
-	for playerID := 0; playerID < g.World.PlayerCount && playerID < len(startingPositions); playerID++ {
-		positions := startingPositions[playerID]
-
-		for _, coord := range positions {
-			// Create a basic infantry unit
-			unit := NewUnit(1, playerID) // Unit type 1 = Infantry
-			unit.Coord = coord
-			unit.AvailableHealth = 100
-			unit.DistanceLeft = 3
-
-			// Add unit to game
-			g.AddUnit(unit, playerID)
+	// Initialize stats for existing units in the world
+	for playerID := 0; playerID < g.World.PlayerCount; playerID++ {
+		for _, unit := range g.World.UnitsByPlayer[playerID] {
+			// Get unit data from rules engine
+			unitData, err := g.rulesEngine.GetUnitData(unit.UnitType)
+			if err != nil {
+				return fmt.Errorf("failed to get unit data for type %d: %w", unit.UnitType, err)
+			}
+			
+			// Initialize unit stats from rules data
+			unit.AvailableHealth = unitData.Health
+			unit.DistanceLeft = unitData.MovementPoints
+			unit.TurnCounter = g.TurnCounter
 		}
 	}
 
@@ -106,9 +167,19 @@ func (g *Game) resetPlayerUnits(playerID int) error {
 		return fmt.Errorf("invalid player ID: %d", playerID)
 	}
 
+	if g.rulesEngine == nil {
+		return fmt.Errorf("rules engine not set - required for unit reset")
+	}
+
 	for _, unit := range g.World.UnitsByPlayer[playerID] {
-		// Reset movement points (simplified)
-		unit.DistanceLeft = 3 // TODO: Get from unit data
+		// Get unit data from rules engine
+		unitData, err := g.rulesEngine.GetUnitData(unit.UnitType)
+		if err != nil {
+			return fmt.Errorf("failed to get unit data for type %d: %w", unit.UnitType, err)
+		}
+		
+		// Reset movement points from rules data
+		unit.DistanceLeft = unitData.MovementPoints
 		unit.TurnCounter = g.TurnCounter
 	}
 
@@ -212,11 +283,23 @@ func (g *Game) SetAssetProvider(provider AssetProvider) {
 	g.assetProvider = provider
 }
 
-// NewGame creates a new game instance with the specified parameters
-func NewGame(world *World, seed int64) (*Game, error) {
-	// Validate parameters
+// GetRulesEngine returns the current RulesEngine instance
+func (g *Game) GetRulesEngine() *RulesEngine {
+	return g.rulesEngine
+}
 
-	// Create the World (pure state)
+// SetRulesEngine sets the RulesEngine instance for data-driven game mechanics
+func (g *Game) SetRulesEngine(rulesEngine *RulesEngine) {
+	g.rulesEngine = rulesEngine
+}
+
+// NewGame creates a new game instance with the specified parameters
+func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) {
+	// Validate parameters
+	if rulesEngine == nil {
+		return nil, fmt.Errorf("rules engine is required")
+	}
+
 	// Create the game struct
 	game := &Game{
 		World:         world,
@@ -231,6 +314,7 @@ func NewGame(world *World, seed int64) (*Game, error) {
 		rng:           rand.New(rand.NewSource(seed)),
 		eventManager:  NewEventManager(),
 		assetProvider: NewAssetManager("data"),
+		rulesEngine:   rulesEngine,
 	}
 
 	// Initialize units storage for compatibility (will be migrated)
@@ -260,6 +344,7 @@ func LoadGame(saveData []byte) (*Game, error) {
 	game.rng = rand.New(rand.NewSource(game.Seed))
 	game.eventManager = NewEventManager()
 	game.assetProvider = NewAssetManager("data")
+	game.rulesEngine = nil // Will be set by caller
 
 	// Note: Neighbor connections are no longer stored, calculated on-demand
 

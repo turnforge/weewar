@@ -125,27 +125,40 @@ func (g *Game) IsValidMove(from, to AxialCoord) bool {
 		return false
 	}
 
-	// For now, allow movement to any adjacent tile
-	// TODO: Implement proper movement range and pathfinding validation
+	// Check if the unit can move on the target terrain
+	_, err := g.rulesEngine.GetTerrainMovementCost(startTile.Unit.UnitType, endTile.TileType)
+	if err != nil {
+		return false // Cannot move on this terrain type
+	}
+
+	// Check if destination is within movement range using rules engine
+	cost, err := g.rulesEngine.GetMovementCost(g.World.Map, startTile.Unit.UnitType, from, to)
+	if err != nil || cost > float64(startTile.Unit.DistanceLeft) {
+		return false
+	}
+
 	return true
 }
 
 // GetMovementCost calculates movement points required using cube coordinates
 func (g *Game) GetMovementCost(from, to AxialCoord) int {
-	// For now, return a simple cost based on distance
-	// TODO: Implement proper terrain-based movement costs
 	if from == to {
 		return 0
 	}
 
-	// Calculate proper hex distance using cube coordinates
-	distance := CubeDistance(from, to)
-
-	if distance <= 1 {
-		return 1 // Adjacent tiles cost 1 movement point
+	// Get the unit at the from position to determine unit type
+	fromTile := g.World.Map.TileAt(from)
+	if fromTile == nil || fromTile.Unit == nil {
+		return CubeDistance(from, to) // Fallback to distance if no unit
 	}
 
-	return distance // Use proper hex distance calculation
+	// Use rules engine for terrain-specific movement cost calculation
+	if cost, err := g.rulesEngine.GetMovementCost(g.World.Map, fromTile.Unit.UnitType, from, to); err == nil {
+		return int(cost + 0.5) // Round to nearest integer
+	}
+
+	// Fallback to simple distance calculation
+	return CubeDistance(from, to)
 }
 
 // GetUnitMovementLeft returns remaining movement points
@@ -162,8 +175,12 @@ func (g *Game) GetUnitAttackRange(unit *Unit) int {
 		return 0
 	}
 
-	// For now, return a simple range based on unit type
-	// TODO: Get from unit data
+	// Use rules engine to get unit data
+	if unitData, err := g.rulesEngine.GetUnitData(unit.UnitType); err == nil {
+		return unitData.AttackRange
+	}
+
+	// Fallback to simple range based on unit type
 	switch unit.UnitType {
 	case 1: // Infantry
 		return 1
@@ -248,29 +265,53 @@ func (g *Game) AttackUnit(attacker, defender *Unit) (*CombatResult, error) {
 		return nil, fmt.Errorf("attacker cannot attack defender")
 	}
 
-	// Calculate damage (simplified combat)
+	// Calculate damage using rules engine
 	attackerDamage := 0
-	defenderDamage := g.calculateDamage(attacker, defender)
+	defenderDamage := 0
+	
+	var err error
+	defenderDamage, err = g.rulesEngine.CalculateCombatDamage(attacker.UnitType, defender.UnitType, g.rng)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate combat damage: %w", err)
+	}
+	
+	// Check if defender can counter-attack
+	if canCounter, err := g.rulesEngine.CanUnitAttackTarget(defender, attacker); err == nil && canCounter {
+		attackerDamage, err = g.rulesEngine.CalculateCombatDamage(defender.UnitType, attacker.UnitType, g.rng)
+		if err != nil {
+			// If counter-attack calculation fails, no counter damage
+			attackerDamage = 0
+		}
+	}
 
 	// Apply damage
 	defender.AvailableHealth -= defenderDamage
 	if defender.AvailableHealth < 0 {
 		defender.AvailableHealth = 0
 	}
+	
+	attacker.AvailableHealth -= attackerDamage
+	if attacker.AvailableHealth < 0 {
+		attacker.AvailableHealth = 0
+	}
 
-	// Check if defender was killed
+	// Check if units were killed
 	defenderKilled := defender.AvailableHealth <= 0
+	attackerKilled := attacker.AvailableHealth <= 0
 
-	// Remove defender if killed
+	// Remove killed units
 	if defenderKilled {
 		g.RemoveUnit(defender)
+	}
+	if attackerKilled {
+		g.RemoveUnit(attacker)
 	}
 
 	// Create combat result
 	result := &CombatResult{
 		AttackerDamage: attackerDamage,
 		DefenderDamage: defenderDamage,
-		AttackerKilled: false,
+		AttackerKilled: attackerKilled,
 		DefenderKilled: defenderKilled,
 		AttackerHealth: attacker.AvailableHealth,
 		DefenderHealth: defender.AvailableHealth,
@@ -321,11 +362,12 @@ func (g *Game) CanAttackUnit(attacker, defender *Unit) bool {
 		return false
 	}
 
-	// Check if attacker is in range
-	distance := g.calculateDistance(attacker.Coord, defender.Coord)
-	attackRange := g.GetUnitAttackRange(attacker)
-
-	return distance <= attackRange
+	// Use rules engine for attack validation
+	canAttack, err := g.rulesEngine.CanUnitAttackTarget(attacker, defender)
+	if err != nil {
+		return false
+	}
+	return canAttack
 }
 
 // MoveUnitAt executes unit movement from one coordinate to another
@@ -394,27 +436,28 @@ func (g *Game) CanMove(from, to Position) (bool, error) {
 	return g.CanMoveUnit(unit, to), nil
 }
 
-// calculateDamage calculates damage dealt in combat (simplified)
-func (g *Game) calculateDamage(attacker, defender *Unit) int {
-	// Simplified damage calculation
-	// TODO: Implement proper damage calculation based on unit types, terrain, etc.
-
-	baseDamage := 30
-
-	// Add some randomness
-	variation := g.rng.Intn(20) - 10 // -10 to +10
-	damage := baseDamage + variation
-
-	if damage < 10 {
-		damage = 10 // Minimum damage
-	}
-
-	return damage
-}
 
 // calculateDistance calculates distance between two positions
 // Source: https://www.redblobgames.com/grids/hexagons-v1/#distances
 func (g *Game) calculateDistance(a, b AxialCoord) int {
 	// Simplified hex distance calculation
 	return (abs(a.Q-b.Q) + abs(a.Q+a.R-b.Q-b.R) + abs(a.R-b.R)) / 2
+}
+
+// GetUnitMovementOptions returns all tiles a unit can move to using rules engine
+func (g *Game) GetUnitMovementOptions(unit *Unit) ([]TileOption, error) {
+	if unit == nil {
+		return nil, fmt.Errorf("unit is nil")
+	}
+
+	return g.rulesEngine.GetMovementOptions(g.World.Map, unit, unit.DistanceLeft)
+}
+
+// GetUnitAttackOptions returns all positions a unit can attack using rules engine  
+func (g *Game) GetUnitAttackOptions(unit *Unit) ([]AxialCoord, error) {
+	if unit == nil {
+		return nil, fmt.Errorf("unit is nil")
+	}
+
+	return g.rulesEngine.GetAttackOptions(g.World.Map, unit)
 }

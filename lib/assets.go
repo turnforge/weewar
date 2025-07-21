@@ -16,12 +16,12 @@ import (
 
 // AssetManager handles loading and caching of game assets
 type AssetManager struct {
-	dataPath      string
-	tileCache     map[int]image.Image
-	unitCache     map[string]image.Image // key: "unitId_playerColor"
-	gameData      *GameDataAssets
-	cacheMutex    sync.RWMutex
-	dataLoaded    bool
+	dataPath   string
+	tileCache  map[int]image.Image
+	unitCache  map[string]image.Image // key: "unitId_playerColor"
+	gameData   *GameDataAssets
+	cacheMutex sync.RWMutex
+	dataLoaded bool
 }
 
 // GameDataAssets represents the structure of weewar-data.json
@@ -48,45 +48,45 @@ func (am *AssetManager) GetTileImage(tileType int) (image.Image, error) {
 		return img, nil
 	}
 	am.cacheMutex.RUnlock()
-	
+
 	// Load tile image
 	tilePath := filepath.Join(am.dataPath, "Tiles", fmt.Sprintf("%d_files", tileType), "0.png")
 	img, err := am.loadImageFile(tilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load tile image for type %d: %w", tileType, err)
 	}
-	
+
 	// Cache the image
 	am.cacheMutex.Lock()
 	am.tileCache[tileType] = img
 	am.cacheMutex.Unlock()
-	
+
 	return img, nil
 }
 
 // GetUnitImage returns the unit image for a given unit type and player color
 func (am *AssetManager) GetUnitImage(unitType int, playerColor int) (image.Image, error) {
 	key := fmt.Sprintf("%d_%d", unitType, playerColor)
-	
+
 	am.cacheMutex.RLock()
 	if img, exists := am.unitCache[key]; exists {
 		am.cacheMutex.RUnlock()
 		return img, nil
 	}
 	am.cacheMutex.RUnlock()
-	
+
 	// Load unit image
 	unitPath := filepath.Join(am.dataPath, "Units", fmt.Sprintf("%d_files", unitType), fmt.Sprintf("%d.png", playerColor))
 	img, err := am.loadImageFile(unitPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load unit image for type %d, color %d: %w", unitType, playerColor, err)
 	}
-	
+
 	// Cache the image
 	am.cacheMutex.Lock()
 	am.unitCache[key] = img
 	am.cacheMutex.Unlock()
-	
+
 	return img, nil
 }
 
@@ -97,12 +97,12 @@ func (am *AssetManager) loadImageFile(path string) (image.Image, error) {
 		return nil, err
 	}
 	defer file.Close()
-	
+
 	img, err := png.Decode(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode PNG image: %w", err)
 	}
-	
+
 	return img, nil
 }
 
@@ -131,7 +131,7 @@ func (am *AssetManager) PreloadCommonAssets() error {
 			}
 		}
 	}
-	
+
 	// Preload common unit types with basic player colors (0-5)
 	for unitType := 1; unitType <= 44; unitType++ {
 		for playerColor := 0; playerColor <= 5; playerColor++ {
@@ -144,7 +144,7 @@ func (am *AssetManager) PreloadCommonAssets() error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -152,7 +152,7 @@ func (am *AssetManager) PreloadCommonAssets() error {
 func (am *AssetManager) ClearCache() {
 	am.cacheMutex.Lock()
 	defer am.cacheMutex.Unlock()
-	
+
 	am.tileCache = make(map[int]image.Image)
 	am.unitCache = make(map[string]image.Image)
 }
@@ -162,21 +162,21 @@ func (am *AssetManager) LoadGameData() error {
 	if am.dataLoaded {
 		return nil // Already loaded
 	}
-	
+
 	dataFile := filepath.Join(am.dataPath, "weewar-data.json")
-	
+
 	file, err := os.Open(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to open game data file: %w", err)
 	}
 	defer file.Close()
-	
+
 	am.gameData = &GameDataAssets{}
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(am.gameData); err != nil {
 		return fmt.Errorf("failed to decode game data: %w", err)
 	}
-	
+
 	am.dataLoaded = true
 	return nil
 }
@@ -188,13 +188,13 @@ func (am *AssetManager) GetUnitData(unitType int) (*UnitData, error) {
 			return nil, err
 		}
 	}
-	
+
 	for i := range am.gameData.Units {
 		if am.gameData.Units[i].ID == unitType {
 			return &am.gameData.Units[i], nil
 		}
 	}
-	
+
 	return nil, fmt.Errorf("unit type %d not found", unitType)
 }
 
@@ -205,13 +205,13 @@ func (am *AssetManager) GetTerrainDataAsset(terrainType int) (*TerrainData, erro
 			return nil, err
 		}
 	}
-	
+
 	for i := range am.gameData.Terrains {
 		if am.gameData.Terrains[i].ID == terrainType {
 			return &am.gameData.Terrains[i], nil
 		}
 	}
-	
+
 	return nil, fmt.Errorf("terrain type %d not found", terrainType)
 }
 
@@ -219,6 +219,6 @@ func (am *AssetManager) GetTerrainDataAsset(terrainType int) (*TerrainData, erro
 func (am *AssetManager) GetCacheStats() (int, int) {
 	am.cacheMutex.RLock()
 	defer am.cacheMutex.RUnlock()
-	
+
 	return len(am.tileCache), len(am.unitCache)
 }

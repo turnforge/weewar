@@ -2,6 +2,7 @@ package weewar
 
 import (
 	"image"
+
 	"github.com/panyam/turnengine/games/weewar/assets"
 )
 
@@ -15,11 +16,11 @@ type AssetProvider interface {
 	// Image loading
 	GetTileImage(tileType int) (image.Image, error)
 	GetUnitImage(unitType int, playerColor int) (image.Image, error)
-	
+
 	// Asset existence checks
 	HasTileAsset(tileType int) bool
 	HasUnitAsset(unitType int, playerColor int) bool
-	
+
 	// Performance optimization
 	PreloadCommonAssets() error
 	ClearCache()

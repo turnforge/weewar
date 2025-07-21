@@ -87,3 +87,13 @@ func CreateHexagonPath(cx, cy, radius float64) *canvas.Path {
 
 	return path
 }
+
+// contains checks if slice contains string
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}

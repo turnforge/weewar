@@ -43,25 +43,25 @@
         </div>
 
         <!-- Game Configuration Content -->
-        <div class="flex-1 flex flex-col lg:flex-row max-w-9xl mx-auto w-full">
+        <div class="flex-1 flex flex-col lg:flex-row max-w-9xl mx-auto w-full min-w-0">
             <!-- Map Preview Section - MapViewer Component Root -->
-            <div class="flex-1 p-6 lg:pr-3 order-2 lg:order-1">
+            <div class="flex-1 min-w-0 p-6 lg:pr-3 order-2 lg:order-1">
                 <!-- Mobile: full width, height equals width (square aspect) -->
                 <!-- Desktop: take remaining width, full height -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full h-full lg:h-full aspect-square lg:aspect-auto" data-component="map-viewer">
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full aspect-square lg:aspect-auto lg:h-[70vh] lg:flex lg:flex-col" data-component="map-viewer">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 lg:flex-shrink-0">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">
                             {{ if .Map.Name }}Map Preview{{ else }}Map Selection{{ end }}
                         </h2>
                     </div>
                     {{ if .Map.Name }}
                     <!-- Phaser Map Viewer Container: Full width/height in desktop, square aspect in mobile -->
-                    <div id="phaser-viewer-container" class="w-full h-full flex-1">
+                    <div id="phaser-viewer-container" class="w-full flex-1 lg:min-h-0">
                         <!-- Phaser canvas will be inserted here and sized to 100% width/height -->
                     </div>
                     {{ else }}
                     <!-- Map Selection Placeholder -->
-                    <div class="flex items-center justify-center h-full text-center">
+                    <div class="flex items-center justify-center flex-1 lg:min-h-0 text-center">
                         <div class="p-8">
                             <div class="text-6xl text-gray-400 dark:text-gray-500 mb-4">🗺️</div>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Map Selected</h3>
@@ -75,8 +75,8 @@
                 </div>
             </div>
 
-            <!-- Game Configuration Panel: +100px wider (484px vs 384px) -->
-            <div class="w-full lg:w-[484px] p-6 lg:pl-3 flex-shrink-0 order-1 lg:order-2">
+            <!-- Game Configuration Panel: Fixed width (484px) -->
+            <div class="w-full lg:w-[484px] lg:flex-shrink-0 p-6 lg:pl-3 order-1 lg:order-2">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700" data-component="game-config-panel">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">Game Configuration</h2>

@@ -15,9 +15,9 @@
     <input id="mapIdInput" value="{{ .MapId }}" type="hidden" />
     
     <!-- Start Game Container -->
-    <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-h-0">
+    <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-h-0 lg:overflow-hidden">
         <!-- Game Info Section -->
-        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex-shrink-0">
             <div class="max-w-9xl mx-auto">
                 <div class="flex items-center justify-between">
                     <div>
@@ -43,20 +43,20 @@
         </div>
 
         <!-- Game Configuration Content -->
-        <div class="flex-1 flex flex-col lg:flex-row max-w-9xl mx-auto w-full min-w-0">
+        <div class="flex-1 flex flex-col lg:flex-row max-w-9xl mx-auto w-full min-w-0 lg:min-h-0 overflow-y-auto lg:overflow-hidden">
             <!-- Map Preview Section - MapViewer Component Root -->
-            <div class="flex-1 min-w-0 p-6 lg:pr-3 order-2 lg:order-1">
-                <!-- Mobile: full width, height equals width (square aspect) -->
-                <!-- Desktop: take remaining width, full height -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full aspect-square lg:aspect-auto lg:h-[70vh] lg:flex lg:flex-col" data-component="map-viewer">
+            <div class="flex-1 min-w-0 p-6 lg:pr-3 order-2 lg:order-1 lg:min-h-0">
+                <!-- Mobile: fixed 400px height, scrollable -->
+                <!-- Desktop: take remaining width, full available height -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full h-[400px] lg:h-full flex flex-col" data-component="map-viewer">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700 lg:flex-shrink-0">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">
                             {{ if .Map.Name }}Map Preview{{ else }}Map Selection{{ end }}
                         </h2>
                     </div>
                     {{ if .Map.Name }}
-                    <!-- Phaser Map Viewer Container: Full width/height in desktop, square aspect in mobile -->
-                    <div id="phaser-viewer-container" class="w-full flex-1 lg:min-h-0">
+                    <!-- Phaser Map Viewer Container: Fixed height on mobile, responsive on desktop -->
+                    <div id="phaser-viewer-container" class="w-full flex-1 min-h-0 overflow-hidden">
                         <!-- Phaser canvas will be inserted here and sized to 100% width/height -->
                     </div>
                     {{ else }}

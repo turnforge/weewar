@@ -1891,22 +1891,87 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     // Tab switching handlers
     private switchToNatureTab(): void {
         if (this.editorToolsPanel) {
+            // If already on nature tab, toggle overlay for nature tab
+            if (this.editorToolsPanel.getActiveTab() === 'nature') {
+                this.toggleOverlayForTab('nature');
+                return;
+            }
+            
+            // Switch to nature tab and turn on overlay
             this.editorToolsPanel.switchToTab('nature');
+            this.setOverlayForTab('nature', true);
             this.logToConsole('Switched to Nature terrain tab');
         }
     }
     
     private switchToCityTab(): void {
         if (this.editorToolsPanel) {
+            // If already on city tab, toggle overlay for city tab
+            if (this.editorToolsPanel.getActiveTab() === 'city') {
+                this.toggleOverlayForTab('city');
+                return;
+            }
+            
+            // Switch to city tab and turn on overlay
             this.editorToolsPanel.switchToTab('city');
+            this.setOverlayForTab('city', true);
             this.logToConsole('Switched to City terrain tab');
         }
     }
     
     private switchToUnitTab(): void {
         if (this.editorToolsPanel) {
+            // If already on unit tab, toggle overlay for unit tab
+            if (this.editorToolsPanel.getActiveTab() === 'unit') {
+                this.toggleOverlayForTab('unit');
+                return;
+            }
+            
+            // Switch to unit tab and turn on overlay
             this.editorToolsPanel.switchToTab('unit');
+            this.setOverlayForTab('unit', true);
             this.logToConsole('Switched to Unit tab');
+        }
+    }
+    
+    // Number overlay control methods per tab
+    private setOverlayForTab(tab: 'nature' | 'city' | 'unit', visible: boolean): void {
+        if (!this.editorToolsPanel) return;
+        
+        this.overlayState[tab] = visible;
+        
+        // If this is the active tab, update the visual overlay
+        if (this.editorToolsPanel.getActiveTab() === tab) {
+            if (visible) {
+                this.editorToolsPanel.showNumberOverlays();
+            } else {
+                this.editorToolsPanel.hideNumberOverlays();
+            }
+        }
+        
+        this.logToConsole(`${tab.charAt(0).toUpperCase() + tab.slice(1)} tab overlay ${visible ? 'shown' : 'hidden'}`);
+    }
+    
+    private toggleOverlayForTab(tab: 'nature' | 'city' | 'unit'): void {
+        const currentState = this.overlayState[tab];
+        this.setOverlayForTab(tab, !currentState);
+    }
+    
+    private isAnyOverlayVisible(): boolean {
+        return Object.values(this.overlayState).some(visible => visible);
+    }
+    
+    // Called when tab is switched (not via keyboard shortcuts)
+    private onTabSwitched(tabName: 'nature' | 'city' | 'unit'): void {
+        // Update overlay visibility based on the new tab's state
+        const shouldShow = this.overlayState[tabName];
+        
+        if (this.editorToolsPanel) {
+            if (shouldShow) {
+                this.editorToolsPanel.showNumberOverlays();
+            } else {
+                this.editorToolsPanel.hideNumberOverlays();
+            }
         }
     }
     
@@ -1914,6 +1979,13 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private numberInputBuffer: string = '';
     private numberInputTimeout: number | null = null;
     private isInKeyboardShortcutMode: boolean = false;
+    
+    // Number overlay toggle state per tab
+    private overlayState = {
+        nature: false,
+        city: false,
+        unit: false
+    };
     
     private setupCustomNumberInput(): void {
         // Add our own keydown listener that runs before the KeyboardShortcutManager
@@ -1944,12 +2016,21 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.isInKeyboardShortcutMode = state !== KeyboardState.NORMAL;
         
         if (state === KeyboardState.AWAITING_ARGS && command === 's') {
+            // Show overlays for 's' command (temporary)
             if (this.editorToolsPanel) {
                 this.editorToolsPanel.showNumberOverlays();
             }
         } else if (state === KeyboardState.NORMAL) {
+            // When returning to normal state, restore overlay based on current tab's state
             if (this.editorToolsPanel) {
-                this.editorToolsPanel.hideNumberOverlays();
+                const activeTab = this.editorToolsPanel.getActiveTab();
+                const shouldShow = this.overlayState[activeTab];
+                
+                if (shouldShow) {
+                    this.editorToolsPanel.showNumberOverlays();
+                } else {
+                    this.editorToolsPanel.hideNumberOverlays();
+                }
             }
         }
     }
@@ -2018,8 +2099,17 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             clearTimeout(this.numberInputTimeout);
             this.numberInputTimeout = null;
         }
+        
+        // Restore overlay state based on current tab's toggle state
         if (this.editorToolsPanel) {
-            this.editorToolsPanel.hideNumberOverlays();
+            const activeTab = this.editorToolsPanel.getActiveTab();
+            const shouldShow = this.overlayState[activeTab];
+            
+            if (shouldShow) {
+                this.editorToolsPanel.showNumberOverlays();
+            } else {
+                this.editorToolsPanel.hideNumberOverlays();
+            }
         }
     }
     

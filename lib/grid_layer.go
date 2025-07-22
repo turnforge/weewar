@@ -94,7 +94,7 @@ func (gl *GridLayer) Render(world *World, options LayerRenderOptions) {
 			}
 
 			// Draw coordinates if enabled
-			if false && options.ShowCoordinates {
+			if options.ShowCoordinates {
 				gl.drawCoordinates(currCoord, currX, currY, options)
 			}
 			currCoord = currCoord.Neighbor(RIGHT)

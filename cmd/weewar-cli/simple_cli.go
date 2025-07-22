@@ -460,7 +460,7 @@ func (cli *SimpleCLI) handleHelp() string {
   player [ID]          - Show player information (e.g. "player A")
   record <cmd>         - Recording commands (start/stop/clear/show)
   replay               - Show current move list as JSON
-  render               - Manually render game state to PNG files (auto-sized)
+  render [coords]      - Manually render game state to PNG files (auto-sized)
   help                 - Show this help
   quit                 - Exit game
 
@@ -475,7 +475,8 @@ Examples:
   select C1            # Select unit C1 and show movement/attack options
   record start         # Start recording moves
   record show          # Show recorded moves
-  render               # Render current game state (auto-sized based on map)`
+  render               # Render current game state (auto-sized based on map)
+  render coords        # Render with Q/R coordinates shown on each tile`
 }
 
 // GetSelectedUnit returns currently selected unit (for rendering)
@@ -603,6 +604,12 @@ func (cli *SimpleCLI) handleRender(args []string) string {
 		return "No game loaded - cannot render"
 	}
 
+	// Check for coords parameter
+	showCoords := false
+	if len(args) > 0 && args[0] == "coords" {
+		showCoords = true
+	}
+
 	// Use default render directory if auto-render is not configured
 	renderDir := cli.renderDir
 	if renderDir == "" {
@@ -614,23 +621,31 @@ func (cli *SimpleCLI) handleRender(args []string) string {
 
 	// Generate timestamp filename
 	timestamp := time.Now().Unix()
-	timestampedFilename := fmt.Sprintf("render_T%d_P%d_%d.png",
-		cli.game.TurnCounter, cli.game.CurrentPlayer, timestamp)
+	coordsSuffix := ""
+	if showCoords {
+		coordsSuffix = "_coords"
+	}
+	timestampedFilename := fmt.Sprintf("render_T%d_P%d_%d%s.png",
+		cli.game.TurnCounter, cli.game.CurrentPlayer, timestamp, coordsSuffix)
 	timestampedPath := filepath.Join(renderDir, timestampedFilename)
 
 	// Always generate latest.png
 	latestPath := filepath.Join(renderDir, "latest.png")
 
 	// Render both files (width/height determined by map bounds)
-	if err := cli.renderGameWithOverlays(timestampedPath); err != nil {
+	if err := cli.renderGameWithOverlays(timestampedPath, showCoords); err != nil {
 		return fmt.Sprintf("Failed to render game: %v", err)
 	}
 
-	if err := cli.renderGameWithOverlays(latestPath); err != nil {
+	if err := cli.renderGameWithOverlays(latestPath, showCoords); err != nil {
 		return fmt.Sprintf("Rendered %s but failed to create latest.png: %v", timestampedFilename, err)
 	}
 
-	return fmt.Sprintf("Rendered game to %s and %s (auto-sized)", timestampedPath, latestPath)
+	coordsStatus := ""
+	if showCoords {
+		coordsStatus = " with coordinates"
+	}
+	return fmt.Sprintf("Rendered game%s to %s and %s (auto-sized)", coordsStatus, timestampedPath, latestPath)
 }
 
 // EnableAutoRender configures auto-rendering after each command
@@ -667,13 +682,13 @@ func (cli *SimpleCLI) autoRenderGameState() {
 	latestPath := filepath.Join(cli.renderDir, "latest.png")
 
 	// Render timestamped file (auto-sized based on map bounds)
-	if err := cli.renderGameWithOverlays(timestampedPath); err != nil {
+	if err := cli.renderGameWithOverlays(timestampedPath, false); err != nil {
 		fmt.Printf("Warning: Auto-render failed: %v\n", err)
 		return
 	}
 
 	// Render latest.png (ignore errors to avoid spam)
-	cli.renderGameWithOverlays(latestPath)
+	cli.renderGameWithOverlays(latestPath, false)
 
 	// Clean up old files if maxRenders is set
 	if cli.maxRenders > 0 {
@@ -682,7 +697,7 @@ func (cli *SimpleCLI) autoRenderGameState() {
 }
 
 // renderGameWithOverlays renders the game with movement/attack option overlays using LayeredRenderer
-func (cli *SimpleCLI) renderGameWithOverlays(filename string) error {
+func (cli *SimpleCLI) renderGameWithOverlays(filename string, showCoords bool) error {
 	// Use standard tile dimensions
 	tileWidth := 64.0
 	tileHeight := 64.0
@@ -717,10 +732,10 @@ func (cli *SimpleCLI) renderGameWithOverlays(filename string) error {
 
 	// Set up the layers in the renderer
 	renderer.Layers = []weewar.Layer{
-		gridLayer,      // Grid lines (top)
 		tileLayer,      // Terrain (bottom)
 		unitLayer,      // Units (on top of highlights)
 		highlightLayer, // Highlights (overlays)
+		gridLayer,      // Grid lines (top)
 	}
 	renderer.SetAssetProvider(globalAssetProvider)
 
@@ -729,6 +744,9 @@ func (cli *SimpleCLI) renderGameWithOverlays(filename string) error {
 
 	// Set the world in the renderer
 	renderer.SetWorld(cli.game.World)
+	
+	// Configure coordinate display
+	renderer.SetShowCoordinates(showCoords)
 
 	// Update highlight layer with current selection
 	highlightLayer.SetHighlights(cli.movableCoords, cli.attackCoords, cli.selectedUnit)

@@ -83,6 +83,11 @@ func (r *LayeredRenderer) SetAssetProvider(provider AssetProvider) {
 	}
 }
 
+// SetShowCoordinates enables or disables coordinate display
+func (r *LayeredRenderer) SetShowCoordinates(showCoordinates bool) {
+	r.renderOptions.ShowCoordinates = showCoordinates
+}
+
 // SetTileDimensions updates the tile rendering dimensions
 func (r *LayeredRenderer) SetTileDimensions(tileWidth, tileHeight, yIncrement float64) {
 	r.renderOptions.TileWidth = tileWidth

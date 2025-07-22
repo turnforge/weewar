@@ -21,6 +21,9 @@ test:
 buf:
 	buf generate
 
+cli:
+	cd cmd/weewar-cli && go build .
+
 wasm:
 	echo "Building WeeWar WASM modules..."
 	mkdir -p web/static/wasm

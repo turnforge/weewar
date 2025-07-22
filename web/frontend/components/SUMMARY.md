@@ -10,9 +10,9 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 
 *   **`EventBus.ts`**: Type-safe, synchronous event system with error isolation and source exclusion for inter-component communication
 *   **`Component.ts`**: Base interface and abstract class defining standard component lifecycle with simplified constructor pattern
-*   **`MapViewer.ts`**: Phaser-based map visualization component with proper DOM scoping and event-driven initialization  
-*   **`MapStatsPanel.ts`**: Statistics display component with safe DOM selectors and event-driven updates
-*   **`MapDetailsPage.ts`**: Orchestrator page following new architecture - handles data loading and component coordination only
+*   **`WorldViewer.ts`**: Phaser-based world visualization component with proper DOM scoping and event-driven initialization  
+*   **`WorldStatsPanel.ts`**: Statistics display component with safe DOM selectors and event-driven updates
+*   **`WorldDetailsPage.ts`**: Orchestrator page following new architecture - handles data loading and component coordination only
 *   **`UI_DESIGN_PRINCIPLES.md`**: Comprehensive documentation of architecture decisions, timing patterns, and critical lessons learned
 
 ## Component Features
@@ -28,7 +28,7 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 
 *   **Section-Based System**: `BaseSection.ts`, `TextSectionView/Edit.ts`, `DrawingSectionView/Edit.ts` - older composition pattern
 *   **Managers & Handlers**: `ThemeManager.ts`, `Modal.ts`, `ToastManager.ts`, `TableOfContents.ts` - utility components  
-*   **Map Editor**: `MapEditorPage.ts` - interactive canvas-based hex grid map editor (needs migration to new architecture)
+*   **World Editor**: `WorldEditorPage.ts` - interactive canvas-based hex grid world editor (needs migration to new architecture)
 *   **Other Pages**: `DesignEditorPage.ts`, `HomePage.ts`, `LoginPage.ts` - various page implementations
 
 ## Key Architecture Principles
@@ -50,22 +50,32 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 
 ## Integration Capabilities
 
-*   **Phaser.js**: WebGL-based map rendering with proper timing handling
+*   **Phaser.js**: WebGL-based world rendering with proper timing handling
 *   **HTMX**: Component hydration support for server-driven UI updates  
 *   **Canvas/WebGL**: Specialized initialization patterns for graphics contexts
 *   **Toast/Modal Systems**: User feedback and interaction patterns
 *   **Theme Management**: Coordinated theming across component boundaries
 
-## Recent Session Work (2025-01-20)
+## Recent Session Work (2025-01-22)
 
-### Component Architecture Cleanup ✅
-*   **MapEditorPage Streamlining**: Removed dead code and consolidated component management patterns
+### Interactive Game Viewer Foundation ✅
+*   **GameViewerPage Architecture**: Complete interactive game interface with lifecycle controller integration
+*   **External Orchestration Pattern**: LifecycleController with breadth-first component initialization eliminates race conditions
+*   **ComponentLifecycle Interface**: Multi-phase initialization (initializeDOM, injectDependencies, activate, deactivate)
+*   **WASM Bridge Architecture**: GameState component with async loading and synchronous gameplay operations
+*   **Synchronous UI Pattern**: Immediate UI feedback with notification events for coordination only
+
+### Component Communication Architecture ✅  
+*   **Event-Driven Coordination**: Components communicate via EventBus without tight coupling
+*   **Source Filtering**: Components ignore events they originate to prevent feedback loops
+*   **Error Isolation**: Component failures don't cascade through event system
+*   **Debug Support**: Comprehensive logging and lifecycle event callbacks
+*   **Notification Events**: System coordination (`game-created`, `unit-moved`, `turn-ended`) for logging, animations
+
+### Previous Session Work (2025-01-20)
+
+#### Component Architecture Cleanup ✅
+*   **WorldEditorPage Streamlining**: Removed dead code and consolidated component management patterns
 *   **Panel Integration Optimization**: Improved coordination between EditorToolsPanel, TileStatsPanel, and PhaserEditor
 *   **Reference Management**: Cleaner component initialization and lifecycle patterns
 *   **State Management Consolidation**: Reduced complexity in page-level state handling
-
-### Dead Code Elimination ✅
-*   **Unused Method Removal**: Eliminated obsolete functionality and redundant state management
-*   **Import Cleanup**: Removed unnecessary dependencies and unused imports
-*   **Code Organization**: Improved maintainability through method consolidation
-*   **Technical Debt Reduction**: Streamlined component boundaries and event handling

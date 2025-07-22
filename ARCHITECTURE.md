@@ -887,11 +887,96 @@ export class MapEditorPage extends BasePage implements MapObserver {
 
 ---
 
-**Last Updated**: 2025-01-21  
-**Architecture Version**: 10.0 (Auto-Rendering & Visual System)  
-**Status**: Complete auto-rendering system with player-specific assets and consolidated movement API. Game mechanics fully operational with proper JSON deserialization.
+**Last Updated**: 2025-01-22  
+**Architecture Version**: 10.2 (Interactive Game Viewer Foundation)  
+**Status**: Complete interactive game viewer architecture with lifecycle controller and WASM bridge foundation. Ready for frontend-WASM integration.
 
-**Latest Achievement (v10.0)**: Auto-Rendering & Visual System with JSON Deserialization Fix:
+**Latest Achievement (v10.2)**: Interactive Game Viewer Foundation:
+
+## Interactive Game Viewer Architecture (v10.2) ✅ COMPLETED
+
+### GameViewerPage Foundation ✅
+**Purpose**: Interactive game play interface with external orchestration and WASM integration
+- **GameViewerPage Route**: `/games/mapId/view` loads maps as interactive games with URL parameter configuration
+- **Game Configuration**: URL parameters for playerCount, maxTurns, unit restrictions, player types, and team settings
+- **World Loading**: Hidden template elements with JSON data loaded and deserialized into World class
+- **Game Control UI**: Turn management controls, unit selection panels, game log interface, and action buttons
+- **MapViewer Integration**: Reuses existing Phaser map rendering for interactive game display
+- **StartGamePage Integration**: "Start Game" button redirects with configuration instead of POST requests
+
+```typescript
+class GameViewerPage extends BasePage implements ComponentLifecycle {
+    // Game configuration from URL parameters and hidden inputs
+    private gameConfig: GameConfiguration;
+    private worldViewer: WorldViewer | null = null;
+    private gameState: GameState | null = null;
+    
+    // Lifecycle phases: initializeDOM, injectDependencies, activate, deactivate
+    initializeDOM(): ComponentLifecycle[];
+    async activate(): Promise<void>;
+}
+```
+
+### External Orchestration Pattern ✅
+**Purpose**: Eliminate initialization race conditions through breadth-first component management
+- **LifecycleController**: Orchestrates multi-phase component initialization with synchronization barriers
+- **ComponentLifecycle Interface**: Standard phases (initializeDOM, injectDependencies, activate, deactivate)
+- **Breadth-First Discovery**: Component tree traversal prevents parent-child initialization dependencies
+- **Dependency Injection Phase**: Centralized dependency resolution with validation and error handling
+- **Phase Synchronization**: All components complete each phase before proceeding to next phase
+
+```typescript
+export class LifecycleController {
+    // Phase 0: Discovery - breadth-first component tree traversal
+    private async discoverComponents(rootComponent, rootName): Promise<void>;
+    
+    // Phase 1: DOM binding happens during discovery
+    // Phase 2: Dependency injection with validation
+    private async executeDependencyInjectionPhase(): Promise<void>;
+    
+    // Phase 3: Activation when all components ready
+    private async executePhase(methodName, targetPhase): Promise<void>;
+}
+```
+
+### WASM Bridge Architecture ✅
+**Purpose**: Clean interface between UI components and Go WASM game engine
+- **GameState Component**: WASM module loading with async initialization and synchronous gameplay operations
+- **Synchronous UI Pattern**: Immediate UI updates with separate notification events for system coordination
+- **Error Isolation**: WASM failures don't break UI, graceful degradation to map display only
+- **Type-Safe APIs**: Structured data exchange with comprehensive TypeScript interfaces
+- **Ready State Management**: `isReady()` and `waitUntilReady()` for proper initialization sequencing
+
+```typescript
+export class GameState extends BaseComponent {
+    // Async initialization - called once during startup
+    public async waitUntilReady(): Promise<void>;
+    
+    // Synchronous operations - immediate UI feedback
+    public selectUnit(q: number, r: number): UnitSelectionData;
+    public moveUnit(fromQ, fromR, toQ, toR): any;
+    public attackUnit(attackerQ, attackerR, defenderQ, defenderR): any;
+    public endTurn(): GameCreateData;
+}
+```
+
+### Component Communication Architecture ✅
+**Purpose**: Event-driven coordination without tight coupling
+- **Notification Events**: System coordination (`game-created`, `unit-moved`, `turn-ended`) for logging, animations
+- **UI Response Pattern**: Synchronous method calls return data immediately, events for additional coordination
+- **Source Filtering**: Components ignore events they originate to prevent feedback loops
+- **Error Isolation**: Component failures don't cascade through event system
+- **Debug Support**: Comprehensive logging and lifecycle event callbacks
+
+### Architecture Benefits ✅
+- **Race Condition Prevention**: Breadth-first initialization eliminates timing dependencies
+- **Immediate User Experience**: Synchronous UI updates provide instant feedback
+- **Error Resilience**: Component failures isolated, graceful degradation patterns
+- **WASM Integration**: Clean async loading with synchronous gameplay operations
+- **Future-Proof**: Architecture supports multiplayer, AI integration, and advanced features
+- **Debug Support**: Comprehensive logging and lifecycle event tracking
+
+**Previous Achievement (v10.0)**: Auto-Rendering & Visual System with JSON Deserialization Fix:
 
 ## Auto-Rendering & Visual System Architecture (v10.0) ✅ COMPLETED
 

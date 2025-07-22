@@ -370,43 +370,38 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [x] **Opportunity Recognition**: Discovery of tactical advantages with value assessment and execution requirements
 - [x] **Strategic Analysis**: Long-term position assessment with strengths, weaknesses, and key factors
 
-## 🎯 Phase 10: Web Interface Integration (Next Priority)
-**Status**: Ready for Implementation  
-**Timeline**: Q1-Q2 2025
+## 🎯 Phase 10: Interactive Web Gameplay (Current Priority)
+**Status**: Frontend-WASM Integration Critical Path  
+**Timeline**: January 2025
 
-### WASM Bridge Development (Week 1-2)
-- [ ] Reactivate cmd/weewar-wasm/ module with enhanced game APIs
-- [ ] Define structured GameMove format for testing and replay
-- [ ] Add move recording and replay functionality to Game class
-- [ ] Implement player-action focused WASM APIs for web interface
-- [ ] Test WASM performance and browser integration
+### GameViewerPage Foundation ✅ COMPLETED
+- [x] ~~Complete GameViewerPage architecture with lifecycle controller and WASM bridge~~ ✅ COMPLETED
+- [x] ~~External orchestration pattern with breadth-first component initialization~~ ✅ COMPLETED
+- [x] ~~ComponentLifecycle interface with multi-phase initialization~~ ✅ COMPLETED
+- [x] ~~GameState component with async WASM loading and synchronous operations~~ ✅ COMPLETED
+- [x] ~~Game control UI with turn management, unit selection, and game log~~ ✅ COMPLETED
+- [x] ~~StartGamePage integration with URL-based configuration~~ ✅ COMPLETED
 
-### AI Integration with Web Interface (Week 2-3)
-- [ ] Add WASM bindings for AI toolkit (`lib/ai/` package)
-- [ ] Create web UI for AI difficulty and personality selection
-- [ ] Implement AI move suggestions in web interface
-- [ ] Add AI vs AI game mode with visualization
-- [ ] Create AI analysis panel showing position evaluation
+### WASM Integration Completion (Week 1 - Critical)
+- [ ] **Debug WASM Loading Issues**: Fix WASM path resolution and module loading in GameState component
+- [ ] **Resolve World Data Loading**: Fix null world data in GameViewerPage and template integration
+- [ ] **Fix Initialization Sequence**: Prevent multiple initialization calls and race conditions
+- [ ] **Test WASM API Integration**: Verify all WASM functions (createGameFromMap, selectUnit, moveUnit, attackUnit, endTurn) work
+- [ ] **Complete Data Format Alignment**: Ensure WASM responses match TypeScript interface expectations
 
-### Web-Based Gameplay (Week 3-4)
-- [ ] Create GameState component following BaseComponent patterns
-- [ ] Add game mode switching to existing Phaser editor
-- [ ] Implement interactive unit selection and movement
-- [ ] Add turn management UI and game state visualization
-- [ ] Integrate with existing EventBus communication
+### Interactive Gameplay Features (Week 2 - High Priority)
+- [ ] **Enable Unit Selection**: Connect GameViewerPage unit selection to Phaser viewer highlighting
+- [ ] **Implement Movement Highlighting**: Show valid movement options as colored overlays in Phaser viewer
+- [ ] **Add Click-to-Move**: Enable clicking on highlighted tiles to move selected units
+- [ ] **Implement Attack Targeting**: Show attack options and enable click-to-attack functionality
+- [ ] **Complete Turn Management**: Test full turn cycle with proper UI updates and state synchronization
 
-### Testing & Validation (Week 4)
-- [ ] Create comprehensive test suite using recorded CLI sessions
-- [ ] Validate rules compliance with original WeeWar mechanics
-- [ ] Performance optimization for rules engine and WASM APIs
-- [ ] Create reference game sessions for regression testing
-- [ ] Test AI performance in web environment
-
-### Advanced AI Features (Future)
-- [ ] Machine learning integration for adaptive AI difficulty
-- [ ] Tournament mode with AI vs Human competitions
-- [ ] AI coaching mode with move explanations and tutorials
-- [ ] Advanced analytics and AI performance tracking
+### AI Integration and Advanced Features (Week 3-4 - Future)
+- [ ] **AI Integration with Web Interface**: Add WASM bindings for AI toolkit (`lib/ai/` package)
+- [ ] **AI Web UI**: Create web interface for AI difficulty and personality selection
+- [ ] **AI Move Suggestions**: Implement AI move hints and analysis in game interface
+- [ ] **AI vs AI Games**: Add AI vs AI mode with visualization and speed controls
+- [ ] **Advanced Game Controls**: Undo/redo, center camera, show all units, game history
 
 ## 🔮 Phase 8: Platform Features (Future)
 **Status**: Future vision  
@@ -474,8 +469,8 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 
 ---
 
-**Last Updated**: 2025-01-21  
-**Current Focus**: CLI Production Complete - Web Interface Integration (Next Priority)  
-**Next Milestone**: WASM bridge development and interactive web gameplay
+**Last Updated**: 2025-01-22  
+**Current Focus**: Frontend-WASM Integration Critical Path - Interactive Web Gameplay  
+**Next Milestone**: Fix WASM loading issues and complete unit interaction
 
-**Major Achievement**: Complete CLI transformation providing production-ready headless gaming platform. Rules engine integration complete with data-driven mechanics. Game foundation ready for web interface bridge.
+**Major Achievement**: Complete interactive game viewer foundation with lifecycle controller and WASM bridge architecture. External orchestration pattern eliminates race conditions. Ready for final WASM integration and interactive gameplay.

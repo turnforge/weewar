@@ -113,7 +113,11 @@ func (hl *HighlightLayer) renderHighlightHex(world *weewar.World, coord weewar.A
 	}
 
 	// Fill the hex with semi-transparent color
-	hl.BaseLayer.GetBuffer().FillPath(points, color)
+	// hl.BaseLayer.GetBuffer().FillPath(points, color)
+	blackColor := weewar.Color{R: 255, G: 0, B: 0, A: 100} // Semi-transparent red
+	hl.BaseLayer.GetBuffer().StrokePath(points, blackColor, weewar.StrokeProperties{
+		Width: 5.0,
+	})
 }
 
 // SimpleCLI is a thin wrapper over Game methods with minimal logic

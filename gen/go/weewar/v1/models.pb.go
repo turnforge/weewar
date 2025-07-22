@@ -275,17 +275,17 @@ func (x *Game) GetDifficulty() string {
 	return ""
 }
 
-type Map struct {
+type World struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	// Unique ID for the map
+	// Unique ID for the world
 	Id string `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
-	// User that created the map
+	// User that created the world
 	CreatorId string `protobuf:"bytes,4,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
 	// Name if items have names
 	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
-	// Description if map has a description
+	// Description if world has a description
 	Description string `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	// Some tags
 	Tags []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
@@ -294,27 +294,27 @@ type Map struct {
 	// Difficulty - example attribute
 	Difficulty string `protobuf:"bytes,9,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
 	// JSON-fied tile data about what units and terrains are at each location
-	Tiles map[string]*MapTile `protobuf:"bytes,11,rep,name=tiles,proto3" json:"tiles,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// All units on the map and who they belong to
-	MapUnits      []*MapUnit `protobuf:"bytes,12,rep,name=map_units,json=mapUnits,proto3" json:"map_units,omitempty"`
+	Tiles map[string]*Tile `protobuf:"bytes,11,rep,name=tiles,proto3" json:"tiles,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// All units on the world and who they belong to
+	Units         []*Unit `protobuf:"bytes,12,rep,name=units,proto3" json:"units,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Map) Reset() {
-	*x = Map{}
+func (x *World) Reset() {
+	*x = World{}
 	mi := &file_weewar_v1_models_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Map) String() string {
+func (x *World) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Map) ProtoMessage() {}
+func (*World) ProtoMessage() {}
 
-func (x *Map) ProtoReflect() protoreflect.Message {
+func (x *World) ProtoReflect() protoreflect.Message {
 	mi := &file_weewar_v1_models_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -326,89 +326,89 @@ func (x *Map) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Map.ProtoReflect.Descriptor instead.
-func (*Map) Descriptor() ([]byte, []int) {
+// Deprecated: Use World.ProtoReflect.Descriptor instead.
+func (*World) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_models_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Map) GetCreatedAt() *timestamppb.Timestamp {
+func (x *World) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return nil
 }
 
-func (x *Map) GetUpdatedAt() *timestamppb.Timestamp {
+func (x *World) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.UpdatedAt
 	}
 	return nil
 }
 
-func (x *Map) GetId() string {
+func (x *World) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *Map) GetCreatorId() string {
+func (x *World) GetCreatorId() string {
 	if x != nil {
 		return x.CreatorId
 	}
 	return ""
 }
 
-func (x *Map) GetName() string {
+func (x *World) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *Map) GetDescription() string {
+func (x *World) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *Map) GetTags() []string {
+func (x *World) GetTags() []string {
 	if x != nil {
 		return x.Tags
 	}
 	return nil
 }
 
-func (x *Map) GetImageUrl() string {
+func (x *World) GetImageUrl() string {
 	if x != nil {
 		return x.ImageUrl
 	}
 	return ""
 }
 
-func (x *Map) GetDifficulty() string {
+func (x *World) GetDifficulty() string {
 	if x != nil {
 		return x.Difficulty
 	}
 	return ""
 }
 
-func (x *Map) GetTiles() map[string]*MapTile {
+func (x *World) GetTiles() map[string]*Tile {
 	if x != nil {
 		return x.Tiles
 	}
 	return nil
 }
 
-func (x *Map) GetMapUnits() []*MapUnit {
+func (x *World) GetUnits() []*Unit {
 	if x != nil {
-		return x.MapUnits
+		return x.Units
 	}
 	return nil
 }
 
-type MapTile struct {
+type Tile struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Q and R in Cubed coordinates
 	Q        int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
@@ -420,20 +420,20 @@ type MapTile struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MapTile) Reset() {
-	*x = MapTile{}
+func (x *Tile) Reset() {
+	*x = Tile{}
 	mi := &file_weewar_v1_models_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MapTile) String() string {
+func (x *Tile) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MapTile) ProtoMessage() {}
+func (*Tile) ProtoMessage() {}
 
-func (x *MapTile) ProtoReflect() protoreflect.Message {
+func (x *Tile) ProtoReflect() protoreflect.Message {
 	mi := &file_weewar_v1_models_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -445,40 +445,40 @@ func (x *MapTile) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MapTile.ProtoReflect.Descriptor instead.
-func (*MapTile) Descriptor() ([]byte, []int) {
+// Deprecated: Use Tile.ProtoReflect.Descriptor instead.
+func (*Tile) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_models_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *MapTile) GetQ() int32 {
+func (x *Tile) GetQ() int32 {
 	if x != nil {
 		return x.Q
 	}
 	return 0
 }
 
-func (x *MapTile) GetR() int32 {
+func (x *Tile) GetR() int32 {
 	if x != nil {
 		return x.R
 	}
 	return 0
 }
 
-func (x *MapTile) GetTileType() int32 {
+func (x *Tile) GetTileType() int32 {
 	if x != nil {
 		return x.TileType
 	}
 	return 0
 }
 
-func (x *MapTile) GetPlayer() int32 {
+func (x *Tile) GetPlayer() int32 {
 	if x != nil {
 		return x.Player
 	}
 	return 0
 }
 
-type MapUnit struct {
+type Unit struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Q and R in Cubed coordinates
 	Q             int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
@@ -489,20 +489,20 @@ type MapUnit struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MapUnit) Reset() {
-	*x = MapUnit{}
+func (x *Unit) Reset() {
+	*x = Unit{}
 	mi := &file_weewar_v1_models_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MapUnit) String() string {
+func (x *Unit) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MapUnit) ProtoMessage() {}
+func (*Unit) ProtoMessage() {}
 
-func (x *MapUnit) ProtoReflect() protoreflect.Message {
+func (x *Unit) ProtoReflect() protoreflect.Message {
 	mi := &file_weewar_v1_models_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -514,33 +514,33 @@ func (x *MapUnit) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MapUnit.ProtoReflect.Descriptor instead.
-func (*MapUnit) Descriptor() ([]byte, []int) {
+// Deprecated: Use Unit.ProtoReflect.Descriptor instead.
+func (*Unit) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_models_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *MapUnit) GetQ() int32 {
+func (x *Unit) GetQ() int32 {
 	if x != nil {
 		return x.Q
 	}
 	return 0
 }
 
-func (x *MapUnit) GetR() int32 {
+func (x *Unit) GetR() int32 {
 	if x != nil {
 		return x.R
 	}
 	return 0
 }
 
-func (x *MapUnit) GetPlayer() int32 {
+func (x *Unit) GetPlayer() int32 {
 	if x != nil {
 		return x.Player
 	}
 	return 0
 }
 
-func (x *MapUnit) GetUnitType() int32 {
+func (x *Unit) GetUnitType() int32 {
 	if x != nil {
 		return x.UnitType
 	}
@@ -681,8 +681,8 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\timage_url\x18\a \x01(\tR\bimageUrl\x12\x1e\n" +
 	"\n" +
 	"difficulty\x18\b \x01(\tR\n" +
-	"difficulty\"\xe1\x03\n" +
-	"\x03Map\x129\n" +
+	"difficulty\"\xd8\x03\n" +
+	"\x05World\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
@@ -696,19 +696,19 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\timage_url\x18\b \x01(\tR\bimageUrl\x12\x1e\n" +
 	"\n" +
 	"difficulty\x18\t \x01(\tR\n" +
-	"difficulty\x12/\n" +
-	"\x05tiles\x18\v \x03(\v2\x19.weewar.v1.Map.TilesEntryR\x05tiles\x12/\n" +
-	"\tmap_units\x18\f \x03(\v2\x12.weewar.v1.MapUnitR\bmapUnits\x1aL\n" +
+	"difficulty\x121\n" +
+	"\x05tiles\x18\v \x03(\v2\x1b.weewar.v1.World.TilesEntryR\x05tiles\x12%\n" +
+	"\x05units\x18\f \x03(\v2\x0f.weewar.v1.UnitR\x05units\x1aI\n" +
 	"\n" +
 	"TilesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12(\n" +
-	"\x05value\x18\x02 \x01(\v2\x12.weewar.v1.MapTileR\x05value:\x028\x01\"Z\n" +
-	"\aMapTile\x12\f\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12%\n" +
+	"\x05value\x18\x02 \x01(\v2\x0f.weewar.v1.TileR\x05value:\x028\x01\"W\n" +
+	"\x04Tile\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
 	"\ttile_type\x18\x03 \x01(\x05R\btileType\x12\x16\n" +
-	"\x06player\x18\x04 \x01(\x05R\x06player\"Z\n" +
-	"\aMapUnit\x12\f\n" +
+	"\x06player\x18\x04 \x01(\x05R\x06player\"W\n" +
+	"\x04Unit\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n" +
 	"\x06player\x18\x03 \x01(\x05R\x06player\x12\x1b\n" +
@@ -746,23 +746,23 @@ var file_weewar_v1_models_proto_goTypes = []any{
 	(*Pagination)(nil),            // 0: weewar.v1.Pagination
 	(*PaginationResponse)(nil),    // 1: weewar.v1.PaginationResponse
 	(*Game)(nil),                  // 2: weewar.v1.Game
-	(*Map)(nil),                   // 3: weewar.v1.Map
-	(*MapTile)(nil),               // 4: weewar.v1.MapTile
-	(*MapUnit)(nil),               // 5: weewar.v1.MapUnit
+	(*World)(nil),                 // 3: weewar.v1.World
+	(*Tile)(nil),                  // 4: weewar.v1.Tile
+	(*Unit)(nil),                  // 5: weewar.v1.Unit
 	(*User)(nil),                  // 6: weewar.v1.User
-	nil,                           // 7: weewar.v1.Map.TilesEntry
+	nil,                           // 7: weewar.v1.World.TilesEntry
 	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_weewar_v1_models_proto_depIdxs = []int32{
 	8, // 0: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
 	8, // 1: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
-	8, // 2: weewar.v1.Map.created_at:type_name -> google.protobuf.Timestamp
-	8, // 3: weewar.v1.Map.updated_at:type_name -> google.protobuf.Timestamp
-	7, // 4: weewar.v1.Map.tiles:type_name -> weewar.v1.Map.TilesEntry
-	5, // 5: weewar.v1.Map.map_units:type_name -> weewar.v1.MapUnit
+	8, // 2: weewar.v1.World.created_at:type_name -> google.protobuf.Timestamp
+	8, // 3: weewar.v1.World.updated_at:type_name -> google.protobuf.Timestamp
+	7, // 4: weewar.v1.World.tiles:type_name -> weewar.v1.World.TilesEntry
+	5, // 5: weewar.v1.World.units:type_name -> weewar.v1.Unit
 	8, // 6: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	8, // 7: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	4, // 8: weewar.v1.Map.TilesEntry.value:type_name -> weewar.v1.MapTile
+	4, // 8: weewar.v1.World.TilesEntry.value:type_name -> weewar.v1.Tile
 	9, // [9:9] is the sub-list for method output_type
 	9, // [9:9] is the sub-list for method input_type
 	9, // [9:9] is the sub-list for extension type_name

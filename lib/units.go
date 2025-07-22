@@ -11,22 +11,22 @@ type UnitStats struct {
 }
 
 type UnitData struct {
-	BaseStats       UnitStats                   `json:"baseStats"`
-	ID              int                         `json:"id"`
-	Name            string                      `json:"name"`
-	MovementPoints  int                         `json:"movementPoints"`
-	AttackRange     int                         `json:"attackRange"`
-	Health          int                         `json:"health"`
-	Properties      []string                    `json:"properties,omitempty"`
+	BaseStats      UnitStats `json:"baseStats"`
+	ID             int       `json:"id"`
+	Name           string    `json:"name"`
+	MovementPoints int       `json:"movementPoints"`
+	AttackRange    int       `json:"attackRange"`
+	Health         int       `json:"health"`
+	Properties     []string  `json:"properties,omitempty"`
 	// Note: Movement costs and attack data managed separately by RulesEngine
 }
 
 // DamageDistribution represents combat damage in canonical format
 type DamageDistribution struct {
-	MinDamage      int             `json:"minDamage"`
-	MaxDamage      int             `json:"maxDamage"`
-	DamageBuckets  []DamageBucket  `json:"damageBuckets"`
-	ExpectedDamage float64         `json:"expectedDamage"`
+	MinDamage      int            `json:"minDamage"`
+	MaxDamage      int            `json:"maxDamage"`
+	DamageBuckets  []DamageBucket `json:"damageBuckets"`
+	ExpectedDamage float64        `json:"expectedDamage"`
 }
 
 // DamageBucket represents a damage value with its probability weight

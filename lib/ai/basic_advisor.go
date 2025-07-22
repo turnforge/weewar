@@ -119,7 +119,7 @@ func (ba *BasicAIAdvisor) GetOpportunities(game *weewar.Game, playerID int) ([]O
 }
 
 // GetStrategicValue returns the strategic value of a specific position
-func (ba *BasicAIAdvisor) GetStrategicValue(game *weewar.Game, position weewar.Position) float64 {
+func (ba *BasicAIAdvisor) GetStrategicValue(game *weewar.Game, position weewar.AxialCoord) float64 {
 	if game == nil || game.World == nil {
 		return 0.0
 	}
@@ -176,8 +176,8 @@ func (ba *BasicAIAdvisor) generateAllValidMoves(game *weewar.Game, playerID int)
 	endTurnMove := &MoveProposal{
 		Action:   ActionEndTurn,
 		UnitID:   -1,
-		From:     weewar.Position{},
-		To:       weewar.Position{},
+		From:     weewar.AxialCoord{},
+		To:       weewar.AxialCoord{},
 		Priority: 0.1, // Low priority by default
 		Risk:     0.0,
 		Value:    0.0,
@@ -250,7 +250,7 @@ func (ba *BasicAIAdvisor) findEnemyThreats(game *weewar.Game, targetUnit *weewar
 			// TODO: Use game.CanAttackUnit(enemyUnit, targetUnit)
 			if ba.canUnitAttackTarget(game, enemyUnit, targetUnit) {
 				threat := Threat{
-					Position:    enemyUnit.Position,
+					Position:    enemyUnit.Coord,
 					ThreatLevel: ba.calculateThreatLevel(enemyUnit, targetUnit),
 					ThreatType:  ThreatDirectAttack,
 					TargetUnit:  targetUnit,
@@ -305,7 +305,7 @@ func (ba *BasicAIAdvisor) findAttackOpportunities(game *weewar.Game, attackerUni
 
 				if opportunityValue > 0.3 { // Only consider good opportunities
 					opportunity := Opportunity{
-						Position:        enemyUnit.Position,
+						Position:        enemyUnit.Coord,
 						OpportunityType: OpportunityWeakUnit,
 						Value:           opportunityValue,
 						RequiredUnit:    attackerUnit,
@@ -342,12 +342,12 @@ func (ba *BasicAIAdvisor) findCaptureOpportunities(game *weewar.Game, unit *weew
 func (ba *BasicAIAdvisor) canUnitAttackTarget(game *weewar.Game, attacker, target *weewar.Unit) bool {
 	// TODO: Implement proper attack range checking using game methods
 	// For now, use simple distance check
-	distance := ba.calculateDistance(attacker.Position, target.Position)
+	distance := ba.calculateDistance(attacker.Coord, target.Coord)
 	return distance <= 1.0 // Assume range of 1 for most units
 }
 
 // calculateDistance returns the distance between two positions
-func (ba *BasicAIAdvisor) calculateDistance(pos1, pos2 weewar.Position) float64 {
+func (ba *BasicAIAdvisor) calculateDistance(pos1, pos2 weewar.AxialCoord) float64 {
 	// Hexagonal distance calculation
 	dx := float64(pos1.Q - pos2.Q)
 	dy := float64(pos1.R - pos2.R)
@@ -358,8 +358,8 @@ func (ba *BasicAIAdvisor) calculateDistance(pos1, pos2 weewar.Position) float64 
 // calculateThreatLevel assesses how dangerous a threat is
 func (ba *BasicAIAdvisor) calculateThreatLevel(threatUnit, targetUnit *weewar.Unit) float64 {
 	// Simple threat calculation based on unit health
-	threatHealth := float64(threatUnit.Health) / 100.0
-	targetHealth := float64(targetUnit.Health) / 100.0
+	threatHealth := float64(threatUnit.AvailableHealth) / 100.0
+	targetHealth := float64(targetUnit.AvailableHealth) / 100.0
 
 	// Higher threat level if attacker is healthy and target is weak
 	return threatHealth * (1.0 - targetHealth*0.5)
@@ -367,8 +367,8 @@ func (ba *BasicAIAdvisor) calculateThreatLevel(threatUnit, targetUnit *weewar.Un
 
 // calculateAttackOpportunityValue assesses how good an attack opportunity is
 func (ba *BasicAIAdvisor) calculateAttackOpportunityValue(attacker, target *weewar.Unit) float64 {
-	attackerHealth := float64(attacker.Health) / 100.0
-	targetHealth := float64(target.Health) / 100.0
+	attackerHealth := float64(attacker.AvailableHealth) / 100.0
+	targetHealth := float64(target.AvailableHealth) / 100.0
 
 	// Good opportunity if attacker is healthy and target is weak
 	return attackerHealth * (1.0 - targetHealth)
@@ -377,7 +377,7 @@ func (ba *BasicAIAdvisor) calculateAttackOpportunityValue(attacker, target *weew
 // getUnitName returns a human-readable unit name
 func (ba *BasicAIAdvisor) getUnitName(unit *weewar.Unit) string {
 	// TODO: Get actual unit name from unit data
-	return fmt.Sprintf("Unit%d", unit.TypeID)
+	return fmt.Sprintf("Unit%d", unit.UnitType)
 }
 
 // generateThreatSolutions suggests ways to deal with a threat

@@ -19,6 +19,7 @@ const components = [
   ["MapDetailsPage", 0, "ts"],
   ["MapEditorPage", 0, "ts"],
   ["StartGamePage", 0, "ts"],
+  ["GameViewerPage", 0, "ts"],
 ];
 
 module.exports = (_env, options) => {

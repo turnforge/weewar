@@ -10,7 +10,7 @@ func (r *RootViewsHandler) setupGamesMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", r.ViewRenderer(Copier(&GameListingPage{}), ""))
 	mux.HandleFunc("/new", r.ViewRenderer(Copier(&StartGamePage{}), ""))
-	mux.HandleFunc("/{gameId}/view", r.ViewRenderer(Copier(&GameDetailPage{}), ""))
+	mux.HandleFunc("/{gameId}/view", r.ViewRenderer(Copier(&GameViewerPage{}), ""))
 	mux.HandleFunc("/{gameId}/copy", func(w http.ResponseWriter, r *http.Request) {
 		notationId := r.PathValue("notationId")
 		http.Redirect(w, r, fmt.Sprintf("/appitems/new?copyFrom=%s", notationId), http.StatusFound)

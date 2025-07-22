@@ -13,7 +13,7 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 *   **`MapViewer.ts`**: Phaser-based map visualization component with proper DOM scoping and event-driven initialization  
 *   **`MapStatsPanel.ts`**: Statistics display component with safe DOM selectors and event-driven updates
 *   **`MapDetailsPage.ts`**: Orchestrator page following new architecture - handles data loading and component coordination only
-*   **`DESIGN_PRINCIPLES.md`**: Comprehensive documentation of architecture decisions, timing patterns, and critical lessons learned
+*   **`UI_DESIGN_PRINCIPLES.md`**: Comprehensive documentation of architecture decisions, timing patterns, and critical lessons learned
 
 ## Component Features
 

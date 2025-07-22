@@ -29,7 +29,7 @@ rules:
       - "echo '✅ Backend build and tests complete'"
       - "pkill weewar || true"
       # - "kill -9 `ps -ef | grep weewar  | sed -e \"s/  */:/g\" | cut -d ':' -f 3`"
-      - "/tmp/weewar serve"
+      - "./bin/weewar serve"
 
   - name: "cli"
     color: "red"

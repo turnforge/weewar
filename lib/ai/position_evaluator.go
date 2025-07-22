@@ -15,9 +15,6 @@ type PositionEvaluator struct {
 	// Configuration
 	weights *EvaluationWeights
 
-	// Unit cost mapping (Advance Wars based values)
-	unitCosts map[int]float64
-
 	// Cached calculations for performance
 	threatCache      map[string][]Threat
 	opportunityCache map[string][]Opportunity
@@ -55,7 +52,6 @@ type EvaluationWeights struct {
 func NewPositionEvaluator(rulesEngine *weewar.RulesEngine) *PositionEvaluator {
 	pe := &PositionEvaluator{
 		weights:          NewBalancedWeights(),
-		unitCosts:        getDefaultUnitCosts(),
 		threatCache:      make(map[string][]Threat),
 		opportunityCache: make(map[string][]Opportunity),
 		rulesEngine:      rulesEngine,
@@ -181,7 +177,7 @@ func (pe *PositionEvaluator) evaluateMaterial(game *weewar.Game, playerID int) f
 }
 
 func (pe *PositionEvaluator) evaluateUnitValue(game *weewar.Game, playerID int) float64 {
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	// playerUnits := game.GetUnitsForPlayer(playerID)
 	playerValue := 0.0
 	totalValue := 0.0
 
@@ -189,7 +185,7 @@ func (pe *PositionEvaluator) evaluateUnitValue(game *weewar.Game, playerID int) 
 	for pid := 0; pid < game.PlayerCount(); pid++ {
 		units := game.GetUnitsForPlayer(pid)
 		for _, unit := range units {
-			unitCost := pe.getUnitCost(unit.TypeID)
+			unitCost := pe.getUnitCost(unit.UnitType)
 			if pid == playerID {
 				playerValue += unitCost
 			}
@@ -210,8 +206,8 @@ func (pe *PositionEvaluator) evaluateUnitHealth(game *weewar.Game, playerID int)
 	totalValue := 0.0
 
 	for _, unit := range playerUnits {
-		healthPercent := float64(unit.Health) / 100.0
-		unitValue := pe.getUnitCost(unit.TypeID)
+		healthPercent := float64(unit.AvailableHealth) / 100.0
+		unitValue := pe.getUnitCost(unit.UnitType)
 
 		totalHealthScore += healthPercent * unitValue
 		totalValue += unitValue
@@ -230,7 +226,7 @@ func (pe *PositionEvaluator) evaluateUnitPositioning(game *weewar.Game, playerID
 
 	for _, unit := range playerUnits {
 		positionScore := pe.evaluateUnitPosition(unit, game)
-		unitValue := pe.getUnitCost(unit.TypeID)
+		unitValue := pe.getUnitCost(unit.UnitType)
 
 		totalPositionalScore += positionScore * unitValue
 	}
@@ -238,7 +234,7 @@ func (pe *PositionEvaluator) evaluateUnitPositioning(game *weewar.Game, playerID
 	// Normalize by total unit value
 	totalValue := 0.0
 	for _, unit := range playerUnits {
-		totalValue += pe.getUnitCost(unit.TypeID)
+		totalValue += pe.getUnitCost(unit.UnitType)
 	}
 
 	if totalValue == 0 {
@@ -266,10 +262,10 @@ func (pe *PositionEvaluator) evaluateBaseControl(game *weewar.Game, playerID int
 
 	// Iterate through all terrain tiles to find bases
 	if game.World != nil && game.World.Map != nil {
-		for _, terrain := range game.World.TerrainMap {
-			if pe.isProductionBase(terrain.TypeID) {
+		for _, terrain := range game.World.Map.Tiles {
+			if pe.isProductionBase(terrain.TileType) {
 				totalBases++
-				if pe.isControlledByPlayer(terrain.Position, playerID, game) {
+				if pe.isControlledByPlayer(terrain.Coord, playerID, game) {
 					controlledBases++
 				}
 			}
@@ -288,10 +284,10 @@ func (pe *PositionEvaluator) evaluateIncomeControl(game *weewar.Game, playerID i
 	totalCities := 0.0
 
 	if game.World != nil && game.World.Map != nil {
-		for _, terrain := range game.World.TerrainMap {
-			if pe.isIncomeBuilding(terrain.TypeID) {
+		for _, terrain := range game.World.Map.Tiles {
+			if pe.isIncomeBuilding(terrain.TileType) {
 				totalCities++
-				if pe.isControlledByPlayer(terrain.Position, playerID, game) {
+				if pe.isControlledByPlayer(terrain.Coord, playerID, game) {
 					controlledCities++
 				}
 			}
@@ -329,7 +325,7 @@ func (pe *PositionEvaluator) evaluateThreatLevel(game *weewar.Game, playerID int
 	totalThreat := 0.0
 
 	for _, threat := range threats {
-		targetValue := pe.getUnitCost(threat.TargetUnit.TypeID)
+		targetValue := pe.getUnitCost(threat.TargetUnit.UnitType)
 		threatValue := targetValue * threat.ThreatLevel
 		totalThreat += threatValue
 	}
@@ -350,7 +346,7 @@ func (pe *PositionEvaluator) evaluateAttackOptions(game *weewar.Game, playerID i
 
 	for _, opp := range opportunities {
 		if opp.OpportunityType == OpportunityWeakUnit && opp.TargetUnit != nil {
-			targetValue := pe.getUnitCost(opp.TargetUnit.TypeID)
+			targetValue := pe.getUnitCost(opp.TargetUnit.UnitType)
 			opportunityValue := targetValue * opp.Value
 			totalOpportunity += opportunityValue
 		}
@@ -390,7 +386,11 @@ func (pe *PositionEvaluator) evaluateMobility(game *weewar.Game, playerID int) f
 	for _, unit := range playerUnits {
 		// Calculate movement options for each unit
 		// For now, use simple movement points
-		mobility := float64(unit.MovementPoints) / 10.0 // Normalize by max expected movement
+		unitData, err := pe.rulesEngine.GetUnitData(unit.UnitType)
+		if err != nil {
+			panic(err) // we should know about all units and they should be valid
+		}
+		mobility := float64(unitData.MovementPoints) / 10.0 // Normalize by max expected movement
 		totalMobility += mobility
 	}
 
@@ -422,10 +422,11 @@ func (pe *PositionEvaluator) evaluateSupportNetwork(game *weewar.Game, playerID 
 // =============================================================================
 
 func (pe *PositionEvaluator) getUnitCost(unitTypeID int) float64 {
-	if cost, exists := pe.unitCosts[unitTypeID]; exists {
-		return cost
+	unitData, err := pe.rulesEngine.GetUnitData(unitTypeID)
+	if err != nil {
+		panic(err)
 	}
-	return 5000 // Default cost for unknown units
+	return float64(unitData.BaseStats.Cost)
 }
 
 func (pe *PositionEvaluator) getTotalUnitValue(game *weewar.Game, playerID int) float64 {
@@ -433,7 +434,7 @@ func (pe *PositionEvaluator) getTotalUnitValue(game *weewar.Game, playerID int) 
 	total := 0.0
 
 	for _, unit := range units {
-		total += pe.getUnitCost(unit.TypeID)
+		total += pe.getUnitCost(unit.UnitType)
 	}
 
 	return total
@@ -443,21 +444,21 @@ func (pe *PositionEvaluator) evaluateUnitPosition(unit *weewar.Unit, game *weewa
 	positionScore := 0.0
 
 	// Terrain defensive bonus
-	if game.World != nil && game.World.TerrainMap != nil {
-		if terrain, exists := game.World.TerrainMap[unit.Position]; exists && pe.rulesEngine != nil {
-			if terrainData, err := pe.rulesEngine.GetTerrainData(terrain.TypeID); err == nil {
+	if game.World != nil {
+		if unitAt := game.World.UnitAt(unit.Coord); unitAt != nil && pe.rulesEngine != nil {
+			if terrainData, err := pe.rulesEngine.GetTerrainData(unitAt.UnitType); err == nil {
 				positionScore += terrainData.DefenseBonus * 0.3
 			}
 		}
 	}
 
 	// Strategic location value (proximity to objectives)
-	positionScore += pe.getStrategicLocationValue(unit.Position, game) * 0.7
+	positionScore += pe.getStrategicLocationValue(unit.Coord, game) * 0.7
 
 	return math.Min(positionScore, 1.0)
 }
 
-func (pe *PositionEvaluator) getStrategicLocationValue(pos weewar.Position, game *weewar.Game) float64 {
+func (pe *PositionEvaluator) getStrategicLocationValue(pos weewar.AxialCoord, game *weewar.Game) float64 {
 	// Simplified strategic value based on distance to map center
 	// TODO: Implement proper strategic location evaluation
 	return 0.5
@@ -468,8 +469,8 @@ func (pe *PositionEvaluator) countNearbyAllies(unit *weewar.Unit, game *weewar.G
 	playerUnits := game.GetUnitsForPlayer(playerID)
 
 	for _, ally := range playerUnits {
-		if ally.ID != unit.ID {
-			distance := pe.calculateDistance(unit.Position, ally.Position)
+		if ally.Coord != unit.Coord {
+			distance := pe.calculateDistance(unit.Coord, ally.Coord)
 			if distance <= 2.0 { // Within 2 hexes
 				count++
 			}
@@ -479,7 +480,7 @@ func (pe *PositionEvaluator) countNearbyAllies(unit *weewar.Unit, game *weewar.G
 	return count
 }
 
-func (pe *PositionEvaluator) calculateDistance(pos1, pos2 weewar.Position) float64 {
+func (pe *PositionEvaluator) calculateDistance(pos1, pos2 weewar.AxialCoord) float64 {
 	// Hexagonal distance calculation
 	dx := float64(pos1.Q - pos2.Q)
 	dy := float64(pos1.R - pos2.R)
@@ -487,30 +488,36 @@ func (pe *PositionEvaluator) calculateDistance(pos1, pos2 weewar.Position) float
 }
 
 func (pe *PositionEvaluator) isProductionBase(terrainTypeID int) bool {
-	// Base terrain type IDs (from game data analysis)
-	productionBases := map[int]bool{
-		10: true, // Land Base
-		11: true, // Naval Base
-		12: true, // Airport Base
-	}
+	panic("not implemented with real types")
+	/*
+		// Base terrain type IDs (from game data analysis)
+		productionBases := map[int]bool{
+			10: true, // Land Base
+			11: true, // Naval Base
+			12: true, // Airport Base
+		}
 
-	return productionBases[terrainTypeID]
+		return productionBases[terrainTypeID]
+	*/
 }
 
 func (pe *PositionEvaluator) isIncomeBuilding(terrainTypeID int) bool {
-	// Income building terrain type IDs
-	incomeBuildings := map[int]bool{
-		5: true, // City
-		6: true, // Hospital (if it provides income)
-	}
+	panic("not implemented")
+	/*
+		// Income building terrain type IDs
+		incomeBuildings := map[int]bool{
+			5: true, // City
+			6: true, // Hospital (if it provides income)
+		}
 
-	return incomeBuildings[terrainTypeID]
+		return incomeBuildings[terrainTypeID]
+	*/
 }
 
-func (pe *PositionEvaluator) isControlledByPlayer(pos weewar.Position, playerID int, game *weewar.Game) bool {
+func (pe *PositionEvaluator) isControlledByPlayer(pos weewar.AxialCoord, playerID int, game *weewar.Game) bool {
 	// Check if there's a friendly unit on this position
 	if game.World != nil {
-		if unit := game.World.GetUnitAt(pos); unit != nil {
+		if unit := game.World.UnitAt(pos); unit != nil {
 			return unit.PlayerID == playerID
 		}
 	}
@@ -575,42 +582,4 @@ func (pe *PositionEvaluator) calculateConfidence(eval *PositionEvaluation) float
 	// Convert variance to confidence (lower variance = higher confidence)
 	confidence := 1.0 - math.Min(variance*4.0, 1.0) // Scale variance to 0-1 range
 	return math.Max(confidence, 0.1)                // Minimum confidence of 0.1
-}
-
-// getDefaultUnitCosts returns Advance Wars based unit costs
-func getDefaultUnitCosts() map[int]float64 {
-	return map[int]float64{
-		// Infantry units
-		1: 1000, // Infantry (Soldier)
-		2: 3000, // Mech
-		3: 2500, // Paratrooper
-
-		// Ground vehicles
-		4: 7000,  // Tank (Basic)
-		5: 16000, // Tank (Advanced)
-		6: 6000,  // Artillery (Basic)
-		7: 12000, // Artillery (Advanced)
-		8: 8000,  // Anti-Air
-		9: 2500,  // Engineer
-
-		// Air units
-		10: 9000,  // Helicopter (Basic)
-		11: 12000, // Fighter
-		12: 20000, // Bomber
-		13: 15000, // Advanced Fighter
-
-		// Naval units
-		14: 6000,  // Speedboat
-		15: 12000, // Destroyer
-		16: 18000, // Cruiser
-		17: 28000, // Battleship
-		18: 30000, // Aircraft Carrier
-
-		// Special units
-		19: 5000, // Medic
-		20: 4000, // Miner
-		21: 8000, // Guard Tower
-
-		// Add more units as needed...
-	}
 }

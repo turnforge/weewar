@@ -434,19 +434,41 @@ class StartGamePage extends BasePage {
 
         try {
             console.log('Starting game with configuration:', this.gameConfig);
-            console.log('Will call CreateGame RPC with:', {
-                mapId: this.currentMapId,
-                players: this.gameConfig.players.filter(p => p.type !== 'none'),
-                allowedUnits: this.gameConfig.allowedUnits,
-                turnTimeLimit: this.gameConfig.turnTimeLimit,
-                teamMode: this.gameConfig.teamMode
+            
+            // Build URL parameters for GameViewerPage
+            const urlParams = new URLSearchParams();
+            
+            // Add player count
+            const activePlayers = this.gameConfig.players.filter(p => p.type !== 'none');
+            urlParams.set('playerCount', activePlayers.length.toString());
+            
+            // Add turn time limit (if set)
+            if (this.gameConfig.turnTimeLimit > 0) {
+                urlParams.set('maxTurns', '0'); // For now, we'll use maxTurns=0 (unlimited)
+                urlParams.set('turnTimeLimit', this.gameConfig.turnTimeLimit.toString());
+            }
+            
+            // Add allowed units as query parameters
+            this.gameConfig.allowedUnits.forEach(unitId => {
+                urlParams.set(`unit_${unitId}`, 'allowed');
             });
             
-            // TODO: Call CreateGame RPC endpoint here
-            // const response = await this.callCreateGameAPI();
+            // Add team configuration
+            activePlayers.forEach(player => {
+                urlParams.set(`player_${player.id}_type`, player.type);
+                urlParams.set(`player_${player.id}_team`, player.team.toString());
+            });
             
-            // For now, just show what would be sent and a placeholder message
-            this.showToast('Info', 'Game configuration ready! (CreateGame RPC call would happen here)', 'info');
+            // Redirect to GameViewerPage with map and configuration
+            const gameViewerUrl = `/games/${this.currentMapId}/view?${urlParams.toString()}`;
+            
+            console.log('Redirecting to GameViewer:', gameViewerUrl);
+            this.showToast('Success', 'Starting game...', 'success');
+            
+            // Small delay to show the toast
+            setTimeout(() => {
+                window.location.href = gameViewerUrl;
+            }, 500);
             
         } catch (error) {
             console.error('Failed to start game:', error);

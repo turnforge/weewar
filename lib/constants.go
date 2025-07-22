@@ -1,6 +1,10 @@
 package weewar
 
-import "path/filepath"
+import (
+	"path/filepath"
+
+	"github.com/panyam/goutils/utils"
+)
 
 const (
 	DefaultTileWidth  = 64.0
@@ -15,5 +19,5 @@ const WEEWAR_DATA_ROOT = "~/dev-app-data/weewar"
 
 // For dev
 func DevDataPath(path string) string {
-	return filepath.Join(WEEWAR_DATA_ROOT, path)
+	return filepath.Join(utils.ExpandUserPath(WEEWAR_DATA_ROOT), path)
 }

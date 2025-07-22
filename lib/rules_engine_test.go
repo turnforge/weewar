@@ -103,7 +103,7 @@ func TestRulesEngineMovementCosts(t *testing.T) {
 	}
 
 	// Test terrain movement cost for unit 1 on terrain 1
-	cost, err := rulesEngine.GetTerrainMovementCost(1, 1)
+	cost, err := rulesEngine.getUnitTerrainCost(1, 1)
 	if err != nil {
 		t.Fatalf("Failed to get movement cost: %v", err)
 	}
@@ -125,7 +125,7 @@ func TestRulesEngineMovementCosts(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		cost, err := rulesEngine.GetTerrainMovementCost(tc.unitID, tc.terrainID)
+		cost, err := rulesEngine.getUnitTerrainCost(tc.unitID, tc.terrainID)
 		if err != nil {
 			t.Logf("No movement cost data for %s: %v", tc.desc, err)
 		} else {
@@ -261,6 +261,12 @@ func TestRulesEngineDijkstraMovement(t *testing.T) {
 		}
 	}
 
+	// Create a world for the test
+	world, err := NewWorld(2, gameMap)
+	if err != nil {
+		t.Fatalf("Failed to create world: %v", err)
+	}
+
 	// Create a test unit (Soldier - unit type 1)
 	startCoord := AxialCoord{Q: 2, R: 2} // Center of map
 	unit := &Unit{
@@ -281,7 +287,7 @@ func TestRulesEngineDijkstraMovement(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		options, err := rulesEngine.GetMovementOptions(gameMap, unit, tc.movement)
+		options, err := rulesEngine.GetMovementOptions(world, unit, tc.movement)
 		if err != nil {
 			t.Fatalf("Failed to get movement options for %s: %v", tc.desc, err)
 		}
@@ -346,6 +352,12 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 		}
 	}
 
+	// Create a world for the test
+	world, err := NewWorld(2, gameMap)
+	if err != nil {
+		t.Fatalf("Failed to create world: %v", err)
+	}
+
 	// Test unit at corner
 	unit := &Unit{
 		UnitType: 1, // Soldier
@@ -353,7 +365,7 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 		PlayerID: 0,
 	}
 
-	options, err := rulesEngine.GetMovementOptions(gameMap, unit, 3)
+	options, err := rulesEngine.GetMovementOptions(world, unit, 3)
 	if err != nil {
 		t.Fatalf("Failed to get movement options: %v", err)
 	}

@@ -1,13 +1,13 @@
 import * as Phaser from 'phaser';
-import { EditablePhaserMapScene } from './EditablePhaserMapScene';
+import { EditablePhaserWorldScene } from './EditablePhaserWorldScene';
 import { hexToPixel, pixelToHex, HexCoord, PixelCoord } from './hexUtils';
 
-export class PhaserMapEditor {
+export class PhaserWorldEditor {
     private game: Phaser.Game | null = null;
-    private scene: EditablePhaserMapScene | null = null;
+    private scene: EditablePhaserWorldScene | null = null;
     private containerElement: HTMLElement | null = null;
-    private sceneReadyPromise: Promise<EditablePhaserMapScene> | null = null;
-    private sceneReadyResolver: ((scene: EditablePhaserMapScene) => void) | null = null;
+    private sceneReadyPromise: Promise<EditablePhaserWorldScene> | null = null;
+    private sceneReadyResolver: ((scene: EditablePhaserWorldScene) => void) | null = null;
     
     private currentTerrain: number = 1;
     private currentColor: number = 0;
@@ -15,7 +15,7 @@ export class PhaserMapEditor {
     
     // Event callbacks
     private onTileClickCallback: ((q: number, r: number) => void) | null = null;
-    private onMapChangeCallback: (() => void) | null = null;
+    private onWorldChangeCallback: (() => void) | null = null;
     private onReferenceScaleChangeCallback: ((x: number, y: number) => void) | null = null;
     
     constructor(containerIdOrElement: string | HTMLElement) {
@@ -36,7 +36,7 @@ export class PhaserMapEditor {
     
     private initialize() {
         // Create the scene ready promise immediately
-        this.sceneReadyPromise = new Promise<EditablePhaserMapScene>((resolve) => {
+        this.sceneReadyPromise = new Promise<EditablePhaserWorldScene>((resolve) => {
             this.sceneReadyResolver = resolve;
         });
         
@@ -46,7 +46,7 @@ export class PhaserMapEditor {
             width: '100%',
             height: '100%',
             backgroundColor: '#2c3e50',
-            scene: EditablePhaserMapScene,
+            scene: EditablePhaserWorldScene,
             scale: {
                 mode: Phaser.Scale.RESIZE,
                 width: '100%',
@@ -72,18 +72,18 @@ export class PhaserMapEditor {
         
         // Get reference to the scene once it's created
         this.game.events.once('ready', () => {
-            this.scene = this.game!.scene.getScene('EditablePhaserMapScene') as EditablePhaserMapScene;
+            this.scene = this.game!.scene.getScene('EditablePhaserWorldScene') as EditablePhaserWorldScene;
             
             // Set up event listeners
             this.setupEventListeners();
             
             // Resolve the scene ready promise
             if (this.sceneReadyResolver) {
-                console.log('[PhaserMapEditor] Scene is ready, resolving promise');
+                console.log('[PhaserWorldEditor] Scene is ready, resolving promise');
                 this.sceneReadyResolver(this.scene);
             }
             
-            console.log('[PhaserMapEditor] Phaser game initialized successfully');
+            console.log('[PhaserWorldEditor] Phaser game initialized successfully');
         });
     }
     
@@ -104,44 +104,44 @@ export class PhaserMapEditor {
     }
     
     private handleTileClick(q: number, r: number) {
-        // Let the external callback handle the logic (MapEditorPage will decide what to do)
+        // Let the external callback handle the logic (WorldEditorPage will decide what to do)
         if (this.onTileClickCallback) {
             this.onTileClickCallback(q, r);
         }
         
-        // Note: onMapChangeCallback will be called by the specific paint methods when needed
+        // Note: onWorldChangeCallback will be called by the specific paint methods when needed
     }
     
     /**
      * Wait for scene to be ready - this should be used by all methods that need the scene
      */
-    public async waitForSceneReady(): Promise<EditablePhaserMapScene> {
+    public async waitForSceneReady(): Promise<EditablePhaserWorldScene> {
         if (this.scene) {
             return this.scene;
         }
         
         if (!this.sceneReadyPromise) {
-            throw new Error('[PhaserMapEditor] Scene ready promise not initialized');
+            throw new Error('[PhaserWorldEditor] Scene ready promise not initialized');
         }
         
-        console.log('[PhaserMapEditor] Waiting for scene to be ready...');
+        console.log('[PhaserWorldEditor] Waiting for scene to be ready...');
         return this.sceneReadyPromise;
     }
 
     // Public API methods
     public setTerrain(terrain: number) {
         this.currentTerrain = terrain;
-        console.log(`[PhaserMapEditor] Current terrain set to: ${terrain}`);
+        console.log(`[PhaserWorldEditor] Current terrain set to: ${terrain}`);
     }
     
     public setColor(color: number) {
         this.currentColor = color;
-        console.log(`[PhaserMapEditor] Current color set to: ${color}`);
+        console.log(`[PhaserWorldEditor] Current color set to: ${color}`);
     }
     
     public setBrushSize(size: number) {
         this.brushSize = size;
-        console.log(`[PhaserMapEditor] Brush size set to: ${size}`);
+        console.log(`[PhaserWorldEditor] Brush size set to: ${size}`);
     }
     
     public setShowGrid(show: boolean) {
@@ -203,8 +203,8 @@ export class PhaserMapEditor {
     public createTestPattern() {
         this.scene?.createTestPattern();
         
-        if (this.onMapChangeCallback) {
-            this.onMapChangeCallback();
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
         }
     }
     
@@ -225,11 +225,11 @@ export class PhaserMapEditor {
     public async setTilesData(tiles: Array<{ q: number; r: number; terrain: number; color: number }>) {
         try {
             const scene = await this.waitForSceneReady();
-            console.log(`[PhaserMapEditor] Setting tiles data: ${tiles.length} tiles`);
+            console.log(`[PhaserWorldEditor] Setting tiles data: ${tiles.length} tiles`);
             
             // Wait for assets to be ready before placing tiles
             await scene.waitForAssetsReady();
-            console.log(`[PhaserMapEditor] Assets ready, placing tiles`);
+            console.log(`[PhaserWorldEditor] Assets ready, placing tiles`);
             
             scene.clearAllTiles();
             
@@ -237,9 +237,9 @@ export class PhaserMapEditor {
                 scene.setTile(tile.q, tile.r, tile.terrain, tile.color);
             });
             
-            console.log(`[PhaserMapEditor] Successfully loaded ${tiles.length} tiles`);
+            console.log(`[PhaserWorldEditor] Successfully loaded ${tiles.length} tiles`);
         } catch (error) {
-            console.error('[PhaserMapEditor] Failed to set tiles data:', error);
+            console.error('[PhaserWorldEditor] Failed to set tiles data:', error);
         }
     }
     
@@ -254,8 +254,8 @@ export class PhaserMapEditor {
         }
     }
     
-    public onMapChange(callback: () => void) {
-        this.onMapChangeCallback = callback;
+    public onWorldChange(callback: () => void) {
+        this.onWorldChangeCallback = callback;
     }
     
     public onReferenceScaleChange(callback: (x: number, y: number) => void) {
@@ -309,7 +309,7 @@ export class PhaserMapEditor {
         return { x: camera.scrollX, y: camera.scrollY };
     }
     
-    // Advanced map generation methods
+    // Advanced world generation methods
     public fillAllTerrain(terrain: number, color: number = 0) {
         if (!this.scene) return;
         
@@ -318,8 +318,8 @@ export class PhaserMapEditor {
             this.scene!.setTile(tile.q, tile.r, terrain, color);
         });
         
-        if (this.onMapChangeCallback) {
-            this.onMapChangeCallback();
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
         }
     }
     
@@ -336,8 +336,8 @@ export class PhaserMapEditor {
             this.scene!.setTile(tile.q, tile.r, randomTerrain, randomColor);
         });
         
-        if (this.onMapChangeCallback) {
-            this.onMapChangeCallback();
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
         }
     }
     
@@ -372,8 +372,8 @@ export class PhaserMapEditor {
             }
         }
         
-        if (this.onMapChangeCallback) {
-            this.onMapChangeCallback();
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
         }
     }
     
@@ -387,11 +387,11 @@ export class PhaserMapEditor {
         // In the future, this should be replaced with actual unit sprites
         this.scene.setUnit(q, r, unitType, playerId);
         
-        if (this.onMapChangeCallback) {
-            this.onMapChangeCallback();
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
         }
         
-        console.log(`[PhaserMapEditor] Painted unit ${unitType} (player ${playerId}) at Q=${q}, R=${r}`);
+        console.log(`[PhaserWorldEditor] Painted unit ${unitType} (player ${playerId}) at Q=${q}, R=${r}`);
     }
     
     /**
@@ -403,11 +403,11 @@ export class PhaserMapEditor {
         // Remove unit from the scene
         this.scene.removeUnit(q, r);
         
-        if (this.onMapChangeCallback) {
-            this.onMapChangeCallback();
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
         }
         
-        console.log(`[PhaserMapEditor] Removed unit at Q=${q}, R=${r}`);
+        console.log(`[PhaserWorldEditor] Removed unit at Q=${q}, R=${r}`);
     }
     
     // Cleanup
@@ -431,7 +431,7 @@ export class PhaserMapEditor {
             const scene = await this.waitForSceneReady();
             return scene.loadReferenceFromClipboard();
         } catch (error) {
-            console.error('[PhaserMapEditor] Failed to load reference from clipboard:', error);
+            console.error('[PhaserWorldEditor] Failed to load reference from clipboard:', error);
             return false;
         }
     }
@@ -440,24 +440,24 @@ export class PhaserMapEditor {
      * Load reference image from file
      */
     public async loadReferenceFromFile(file: File): Promise<boolean> {
-        console.log(`[PhaserMapEditor] loadReferenceFromFile called with: ${file.name}`);
+        console.log(`[PhaserWorldEditor] loadReferenceFromFile called with: ${file.name}`);
         
         try {
             const scene = await this.waitForSceneReady();
-            console.log(`[PhaserMapEditor] Scene ready, type: ${scene.constructor.name}`);
+            console.log(`[PhaserWorldEditor] Scene ready, type: ${scene.constructor.name}`);
             
             // Check if the method exists
             if (typeof scene.loadReferenceFromFile !== 'function') {
-                console.error('[PhaserMapEditor] loadReferenceFromFile method not found on scene');
+                console.error('[PhaserWorldEditor] loadReferenceFromFile method not found on scene');
                 return false;
             }
             
-            console.log(`[PhaserMapEditor] Method exists, calling scene.loadReferenceFromFile`);
+            console.log(`[PhaserWorldEditor] Method exists, calling scene.loadReferenceFromFile`);
             const result = await scene.loadReferenceFromFile(file);
-            console.log(`[PhaserMapEditor] Scene loadReferenceFromFile returned: ${result}`);
+            console.log(`[PhaserWorldEditor] Scene loadReferenceFromFile returned: ${result}`);
             return result;
         } catch (error) {
-            console.error('[PhaserMapEditor] Error in loadReferenceFromFile:', error);
+            console.error('[PhaserWorldEditor] Error in loadReferenceFromFile:', error);
             return false;
         }
     }

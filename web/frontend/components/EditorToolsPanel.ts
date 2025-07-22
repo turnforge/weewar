@@ -1,6 +1,6 @@
 import { BaseComponent } from './Component';
 import { EventBus, EditorEventTypes } from './EventBus';
-import { MapEditorPageState } from './MapEditorPageState';
+import { WorldEditorPageState } from './WorldEditorPageState';
 import { ComponentLifecycle } from './ComponentLifecycle';
 
 const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
@@ -10,7 +10,7 @@ const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)
  * 
  * This component demonstrates the new lifecycle architecture with explicit dependency injection:
  * 1. initializeDOM() - Set up UI controls and event handlers without dependencies
- * 2. injectDependencies() - Receive MapEditorPageState when available
+ * 2. injectDependencies() - Receive WorldEditorPageState when available
  * 3. activate() - Enable full functionality once all dependencies are ready
  * 
  * Responsibilities:
@@ -22,7 +22,7 @@ const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)
  * - Manage tab switching between Nature/City/Unit sections
  * 
  * Architecture:
- * - Receives MapEditorPageState instance via explicit setter (not dependency injection)
+ * - Receives WorldEditorPageState instance via explicit setter (not dependency injection)
  * - Updates state directly when user interacts with controls
  * - Manages its own DOM elements without external interference
  * - Does NOT observe state changes (it's the generator, not observer)
@@ -30,7 +30,7 @@ const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)
  */
 export class EditorToolsPanel extends BaseComponent {
     // Dependencies (injected via explicit setters)
-    private pageState: MapEditorPageState | null = null;
+    private pageState: WorldEditorPageState | null = null;
     
     // Internal state tracking
     private isUIBound = false;
@@ -88,7 +88,7 @@ export class EditorToolsPanel extends BaseComponent {
     }
     
     // Explicit dependency setters
-    public setPageState(pageState: MapEditorPageState): void {
+    public setPageState(pageState: WorldEditorPageState): void {
         this.pageState = pageState;
         this.log('Page state set via explicit setter');
         
@@ -99,7 +99,7 @@ export class EditorToolsPanel extends BaseComponent {
     }
     
     // Explicit dependency getters
-    public getPageState(): MapEditorPageState | null {
+    public getPageState(): WorldEditorPageState | null {
         return this.pageState;
     }
     

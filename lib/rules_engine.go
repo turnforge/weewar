@@ -160,7 +160,7 @@ func (re *RulesEngine) IsValidPath(unit *Unit, path []AxialCoord, world *World) 
 	if unit == nil {
 		return false, fmt.Errorf("unit is nil")
 	}
-	
+
 	if len(path) == 0 {
 		return false, fmt.Errorf("path is empty")
 	}
@@ -197,7 +197,7 @@ func (re *RulesEngine) IsValidPath(unit *Unit, path []AxialCoord, world *World) 
 		// 3. Check terrain traversability
 		stepCost, err := re.getUnitTerrainCost(unit.UnitType, toTile.TileType)
 		if err != nil {
-			return false, fmt.Errorf("path step %d: unit type %d cannot traverse terrain %d: %w", 
+			return false, fmt.Errorf("path step %d: unit type %d cannot traverse terrain %d: %w",
 				i, unit.UnitType, toTile.TileType, err)
 		}
 
@@ -213,7 +213,7 @@ func (re *RulesEngine) IsValidPath(unit *Unit, path []AxialCoord, world *World) 
 
 	// 6. Check total movement cost against unit's remaining movement
 	if totalCost > float64(unit.DistanceLeft) {
-		return false, fmt.Errorf("path requires %.2f movement points, unit has %d remaining", 
+		return false, fmt.Errorf("path requires %.2f movement points, unit has %d remaining",
 			totalCost, unit.DistanceLeft)
 	}
 
@@ -335,16 +335,16 @@ func (re *RulesEngine) GetMovementOptions(world *World, unit *Unit, remainingMov
 func (re *RulesEngine) dijkstraMovement(world *World, unitType int, startCoord AxialCoord, maxMovement float64) ([]TileOption, error) {
 	// Distance map: coord -> minimum cost to reach
 	distances := make(map[AxialCoord]float64)
-	
+
 	// Priority queue for Dijkstra (simple implementation)
 	type queueItem struct {
 		coord AxialCoord
 		cost  float64
 	}
-	
+
 	queue := []queueItem{{coord: startCoord, cost: 0}}
 	distances[startCoord] = 0
-	
+
 	// Dijkstra's algorithm
 	for len(queue) > 0 {
 		// Find minimum cost item (simple O(n) for now, could use heap)
@@ -354,20 +354,20 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int, startCoord A
 				minIdx = i
 			}
 		}
-		
+
 		current := queue[minIdx]
 		// Remove from queue
 		queue = append(queue[:minIdx], queue[minIdx+1:]...)
-		
+
 		// Skip if we've already processed this with lower cost
 		if cost, exists := distances[current.coord]; exists && current.cost > cost {
 			continue
 		}
-		
+
 		// Get all 6 hex neighbors using existing helper
 		var neighbors [6]AxialCoord
 		current.coord.Neighbors(&neighbors)
-		
+
 		// Explore neighbors
 		for _, neighborCoord := range neighbors {
 			// Check if neighbor tile exists and is passable
@@ -375,25 +375,25 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int, startCoord A
 			if tile == nil {
 				continue // Invalid tile
 			}
-			
+
 			// Skip if occupied by another unit (movement rule: only empty tiles)
 			if world.UnitAt(neighborCoord) != nil {
 				continue // Occupied tile
 			}
-			
+
 			// Get movement cost to this terrain
 			moveCost, err := re.getUnitTerrainCost(unitType, tile.TileType)
 			if err != nil {
 				continue // Cannot move on this terrain
 			}
-			
+
 			newCost := current.cost + moveCost
-			
+
 			// Skip if exceeds movement budget
 			if newCost > maxMovement {
 				continue
 			}
-			
+
 			// Check if this is a better path to the neighbor
 			if existingCost, exists := distances[neighborCoord]; !exists || newCost < existingCost {
 				distances[neighborCoord] = newCost
@@ -401,7 +401,7 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int, startCoord A
 			}
 		}
 	}
-	
+
 	// Convert distances map to TileOption slice (excluding start position)
 	var options []TileOption
 	for coord, cost := range distances {
@@ -412,7 +412,7 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int, startCoord A
 			})
 		}
 	}
-	
+
 	return options, nil
 }
 
@@ -487,4 +487,42 @@ func (re *RulesEngine) CanUnitAttackTarget(attacker *Unit, target *Unit) (bool, 
 	}
 
 	return distance <= unitData.AttackRange, nil
+}
+
+// Default sample terrain data
+var DefaultTerrainData = []TerrainData{
+	{0, "Clear", 1, 0, TerrainNature, nil},             // Default fallback
+	{1, "Land Base", 2, 20, TerrainPlayer, nil},        // Player base
+	{2, "Naval Base", 2, 20, TerrainPlayer, nil},       // Naval base
+	{3, "Airport Base", 2, 20, TerrainPlayer, nil},     // Airport base
+	{4, "Desert", 1, 0, TerrainNature, nil},            // Desert terrain
+	{5, "Grass", 1, 0, TerrainNature, nil},             // Grass terrain
+	{6, "Hospital", 1, 15, TerrainPlayer, nil},         // Hospital
+	{7, "Mountains", 2, 10, TerrainNature, nil},        // Mountain terrain
+	{8, "Swamp", 2, 5, TerrainNature, nil},             // Swamp terrain
+	{9, "Forest", 1, 5, TerrainNature, nil},            // Forest terrain
+	{10, "Water (Regular)", 2, 0, TerrainNature, nil},  // Regular water
+	{12, "Lava", 4, 0, TerrainNature, nil},             // Lava terrain
+	{14, "Water (Shallow)", 2, 0, TerrainNature, nil},  // Shallow water
+	{15, "Water (Deep)", 2, 0, TerrainNature, nil},     // Deep water
+	{16, "Missile Silo", 2, 15, TerrainPlayer, nil},    // Missile silo
+	{17, "Bridge (Regular)", 1, 0, TerrainNature, nil}, // Regular bridge
+	{18, "Bridge (Shallow)", 1, 0, TerrainNature, nil}, // Shallow bridge
+	{19, "Bridge (Deep)", 1, 0, TerrainNature, nil},    // Deep bridge
+	{20, "Mines", 1, 10, TerrainPlayer, nil},           // Mines
+	{21, "City", 1, 15, TerrainPlayer, nil},            // City
+	{22, "Road", 1, -5, TerrainNature, nil},            // Road (movement bonus)
+	{23, "Water (Rocky)", 2, 0, TerrainNature, nil},    // Rocky water
+	{25, "Guard Tower", 2, 25, TerrainPlayer, nil},     // Guard tower
+	{26, "Snow", 2, 5, TerrainNature, nil},             // Snow terrain
+}
+
+// GetTerrainData returns terrain data for the given type
+func GetTerrainData(terrainType int) *TerrainData {
+	for i := range DefaultTerrainData {
+		if DefaultTerrainData[i].ID == terrainType {
+			return &DefaultTerrainData[i]
+		}
+	}
+	return &DefaultTerrainData[0] // Default to unknown
 }

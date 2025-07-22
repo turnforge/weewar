@@ -1,8 +1,8 @@
 /**
- * MapEditorPageState - Centralized state management for MapEditorPage
+ * WorldEditorPageState - Centralized state management for WorldEditorPage
  * 
  * Provides single source of truth for all editor UI state that needs to be
- * shared between components within the MapEditorPage. Uses Observer pattern
+ * shared between components within the WorldEditorPage. Uses Observer pattern
  * for efficient component synchronization.
  */
 
@@ -38,7 +38,7 @@ export interface VisualState {
 }
 
 export interface WorkflowState {
-    hasPendingMapDataLoad: boolean;
+    hasPendingWorldDataLoad: boolean;
     pendingGridState: boolean | null;
     lastAction: string;
 }
@@ -72,7 +72,7 @@ export interface SavedUIState {
 }
 
 /**
- * MapEditorPageState - Centralized state management for map editor page
+ * WorldEditorPageState - Centralized state management for world editor page
  * 
  * Features:
  * - Observer pattern for real-time component synchronization
@@ -81,7 +81,7 @@ export interface SavedUIState {
  * - Batched state updates for performance
  * - Comprehensive state validation
  */
-export class MapEditorPageState {
+export class WorldEditorPageState {
     // Core state data
     private toolState: ToolState;
     private visualState: VisualState;
@@ -109,7 +109,7 @@ export class MapEditorPageState {
         };
         
         this.workflowState = {
-            hasPendingMapDataLoad: false,
+            hasPendingWorldDataLoad: false,
             pendingGridState: null,
             lastAction: 'initialized'
         };
@@ -263,8 +263,8 @@ export class MapEditorPageState {
         }
     }
     
-    public setHasPendingMapDataLoad(pending: boolean): void {
-        this.updateWorkflowState({ hasPendingMapDataLoad: pending });
+    public setHasPendingWorldDataLoad(pending: boolean): void {
+        this.updateWorkflowState({ hasPendingWorldDataLoad: pending });
     }
     
     public setPendingGridState(state: boolean | null): void {

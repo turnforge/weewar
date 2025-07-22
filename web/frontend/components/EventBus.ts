@@ -180,17 +180,17 @@ export class EventBus {
 
 // Define common event types for type safety
 export const EventTypes = {
-    MAP_DATA_LOADED: 'map-data-loaded',
-    MAP_DATA_ERROR: 'map-data-error', 
-    MAP_STATS_UPDATED: 'map-stats-updated',
-    MAP_VIEWER_READY: 'map-viewer-ready',
-    MAP_VIEWER_ERROR: 'map-viewer-error',
+    WORLD_DATA_LOADED: 'world-data-loaded',
+    WORLD_DATA_ERROR: 'world-data-error', 
+    WORLD_STATS_UPDATED: 'world-stats-updated',
+    WORLD_VIEWER_READY: 'world-viewer-ready',
+    WORLD_VIEWER_ERROR: 'world-viewer-error',
     COMPONENT_INITIALIZED: 'component-initialized',
     COMPONENT_HYDRATED: 'component-hydrated',
     COMPONENT_ERROR: 'component-error'
 } as const;
 
-// Editor-specific event types for MapEditorPage components
+// Editor-specific event types for WorldEditorPage components
 export const EditorEventTypes = {
     // Editor state events
     TERRAIN_SELECTED: 'terrain-selected',
@@ -199,10 +199,10 @@ export const EditorEventTypes = {
     PLACEMENT_MODE_CHANGED: 'placement-mode-changed',
     PLAYER_CHANGED: 'player-changed',
     
-    // Map events
-    MAP_LOADED: 'map-loaded',
-    MAP_SAVED: 'map-saved',
-    MAP_CHANGED: 'map-changed',
+    // World events
+    WORLD_LOADED: 'world-loaded',
+    WORLD_SAVED: 'world-saved',
+    WORLD_CHANGED: 'world-changed',
     TILE_CLICKED: 'tile-clicked',
     
     // UI events
@@ -229,7 +229,7 @@ export const EditorEventTypes = {
     REFERENCE_MODE_CHANGED: 'reference-mode-changed',
     REFERENCE_IMAGE_LOADED: 'reference-image-loaded',
     
-    // Map modification events
+    // World modification events
     TILE_PAINTED: 'tile-painted',
     UNIT_PLACED: 'unit-placed',
     TILE_CLEARED: 'tile-cleared',
@@ -253,8 +253,8 @@ export type EventType = typeof EventTypes[keyof typeof EventTypes];
 export type EditorEventType = typeof EditorEventTypes[keyof typeof EditorEventTypes];
 
 // Event payload type definitions for type safety
-export interface MapDataLoadedPayload {
-    mapId: string;
+export interface WorldDataLoadedPayload {
+    worldId: string;
     totalTiles: number;
     totalUnits: number;
     bounds: {
@@ -266,7 +266,7 @@ export interface MapDataLoadedPayload {
     terrainCounts: { [terrainType: number]: number };
 }
 
-export interface MapStatsUpdatedPayload {
+export interface WorldStatsUpdatedPayload {
     totalTiles: number;
     totalUnits: number;
     dimensions: {
@@ -402,7 +402,7 @@ export interface ReferenceImageLoadedPayload {
     url: string; // Object URL for the image
 }
 
-// Map modification event payloads
+// World modification event payloads
 export interface TilePaintedPayload {
     q: number;
     r: number;
@@ -428,7 +428,7 @@ export interface UnitRemovedPayload {
     r: number;
 }
 
-// Page state event payloads (import from MapEditorPageState.ts)
+// Page state event payloads (import from WorldEditorPageState.ts)
 export interface PageStateChangedPayload {
     eventType: 'tool-state-changed' | 'visual-state-changed' | 'workflow-state-changed';
     data: any; // Will be ToolStateChangedEventData | VisualStateChangedEventData | WorkflowStateChangedEventData

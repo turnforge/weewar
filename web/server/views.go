@@ -163,7 +163,7 @@ func (n *RootViewsHandler) setupRoutes() {
 
 	// Then seutp your "resource" specific endpoints
 	n.mux.Handle("/games/", http.StripPrefix("/games", n.setupGamesMux()))
-	n.mux.Handle("/maps/", http.StripPrefix("/maps", n.setupMapsMux()))
+	n.mux.Handle("/worlds/", http.StripPrefix("/worlds", n.setupWorldsMux()))
 
 	n.mux.HandleFunc("/about", n.ViewRenderer(Copier(&GenericPage{}), "AboutPage"))
 	n.mux.HandleFunc("/contact", n.ViewRenderer(Copier(&GenericPage{}), "ContactUsPage"))

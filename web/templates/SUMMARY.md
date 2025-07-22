@@ -15,13 +15,13 @@ This folder contains all the Go HTML template files (`*.html`) used for server-s
     *   Other UI elements: `suggested-section-card`.
 *   `Section.html`: Template for the outer frame of a single section, including its header (number, title, icon), universal controls (move, delete, add, settings, LLM, fullscreen), section-specific action bars (for System Description view/edit), and the main content container (`.section-content`) where the specific view/edit component renders.
 *   `HomePage.html`, `DesignEditorPage.html`, `LoginPage.html`: Top-level page templates that include `BasePage.html` and compose other smaller templates (like `DesignList.html`, `TableOfContents.html`, `DocumentTitle.html`).
-*   `MapListingPage.html`, `MapDetailsPage.html`, `MapEditorPage.html`: Complete maps management templates for listing, viewing, and editing maps.
-*   `MapList.html`: Reusable component for displaying maps in a grid layout with search, sort, and action controls.
-*   `MapEditorPage.html`: **Interactive canvas-based map editor** with streamlined 2-panel layout:
-    *   Left sidebar: Map management, grid-based terrain palette (6 types), brush settings, painting tools, history controls
-    *   Center: Real-time updating HTML5 canvas with hex grid visualization and map resize controls
+*   `WorldListingPage.html`, `WorldDetailsPage.html`, `WorldEditorPage.html`: Complete worlds management templates for listing, viewing, and editing worlds.
+*   `WorldList.html`: Reusable component for displaying worlds in a grid layout with search, sort, and action controls.
+*   `WorldEditorPage.html`: **Interactive canvas-based world editor** with streamlined 2-panel layout:
+    *   Left sidebar: World management, grid-based terrain palette (6 types), brush settings, painting tools, history controls
+    *   Center: Real-time updating HTML5 canvas with hex grid visualization and world resize controls
     *   Right sidebar: Advanced tools only (rendering/export panels removed)
-    *   Interactive canvas with click-to-paint terrain and Add/Remove buttons for map resizing
+    *   Interactive canvas with click-to-paint terrain and Add/Remove buttons for world resizing
     *   WASM integration ready with clean data-attribute event handling
 *   `DesignList.html`, `TableOfContents.html`, `DocumentTitle.html`, `SectionsList.html`: Templates for major reusable UI components rendered server-side initially (and potentially updated client-side later).
 *   `gen/`: Subfolder containing bundled JavaScript output referenced by page templates (e.g., `{{# include "gen/DesignEditorPage.html" #}}`).

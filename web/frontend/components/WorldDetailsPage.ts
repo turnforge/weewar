@@ -1,11 +1,11 @@
 import { BasePage } from './BasePage';
 import { EventBus, EventTypes } from './EventBus';
-import { MapViewer } from './MapViewer';
-import { MapStatsPanel } from './MapStatsPanel';
-import { Map } from './Map';
+import { WorldViewer } from './WorldViewer';
+import { WorldStatsPanel } from './WorldStatsPanel';
+import { World } from './World';
 
 /**
- * Map Details Page - Orchestrator for map viewing functionality
+ * World Details Page - Orchestrator for world viewing functionality
  * Responsible for:
  * - Data loading and coordination
  * - Component initialization and management
@@ -14,17 +14,17 @@ import { Map } from './Map';
  * 
  * Does NOT handle:
  * - Direct DOM manipulation (delegated to components)
- * - Phaser management (delegated to MapViewer)
- * - Statistics display (delegated to MapStatsPanel)
+ * - Phaser management (delegated to WorldViewer)
+ * - Statistics display (delegated to WorldStatsPanel)
  */
-class MapDetailsPage extends BasePage {
-    private currentMapId: string | null;
-    private isLoadingMap: boolean = false;
-    private map: Map | null = null;
+class WorldDetailsPage extends BasePage {
+    private currentWorldId: string | null;
+    private isLoadingWorld: boolean = false;
+    private world: World | null = null;
     
     // Component instances
-    private mapViewer: MapViewer | null = null;
-    private mapStatsPanel: MapStatsPanel | null = null;
+    private worldViewer: WorldViewer | null = null;
+    private worldStatsPanel: WorldStatsPanel | null = null;
 
     constructor() {
         super();
@@ -43,30 +43,30 @@ class MapDetailsPage extends BasePage {
      */
     private initializeComponents(): void {
         try {
-            console.log('Initializing MapDetailsPage components');
+            console.log('Initializing WorldDetailsPage components');
             
-            // Subscribe to MapViewer ready event BEFORE creating the component
-            console.log('MapDetailsPage: Subscribing to map-viewer-ready event');
-            this.eventBus.subscribe('map-viewer-ready', () => {
-                console.log('MapDetailsPage: MapViewer is ready, loading map data...');
-                if (this.currentMapId) {
+            // Subscribe to WorldViewer ready event BEFORE creating the component
+            console.log('WorldDetailsPage: Subscribing to world-viewer-ready event');
+            this.eventBus.subscribe('world-viewer-ready', () => {
+                console.log('WorldDetailsPage: WorldViewer is ready, loading world data...');
+                if (this.currentWorldId) {
                   // Give Phaser time to fully initialize webgl context and scene
                   setTimeout(async () => {
-                    await this.loadMapData()
+                    await this.loadWorldData()
                   }, 10)
                 }
-            }, 'map-details-page');
+            }, 'world-details-page');
             
-            // Create MapViewer component
-            const mapViewerRoot = this.ensureElement('[data-component="map-viewer"]', 'map-viewer-root');
-            console.log('MapDetailsPage: Creating MapViewer with eventBus:', this.eventBus);
-            this.mapViewer = new MapViewer(mapViewerRoot, this.eventBus, true);
+            // Create WorldViewer component
+            const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
+            console.log('WorldDetailsPage: Creating WorldViewer with eventBus:', this.eventBus);
+            this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
             
-            // Create MapStatsPanel component  
-            const mapStatsRoot = this.ensureElement('[data-component="map-stats-panel"]', 'map-stats-root');
-            this.mapStatsPanel = new MapStatsPanel(mapStatsRoot, this.eventBus, true);
+            // Create WorldStatsPanel component  
+            const worldStatsRoot = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');
+            this.worldStatsPanel = new WorldStatsPanel(worldStatsRoot, this.eventBus, true);
             
-            console.log('MapDetailsPage components initialized');
+            console.log('WorldDetailsPage components initialized');
             
         } catch (error) {
             console.error('Failed to initialize components:', error);
@@ -101,10 +101,10 @@ class MapDetailsPage extends BasePage {
             });
         }
 
-        // Bind copy map button if it exists
-        const copyButton = document.querySelector('[data-action="copy-map"]');
+        // Bind copy world button if it exists
+        const copyButton = document.querySelector('[data-action="copy-world"]');
         if (copyButton) {
-            copyButton.addEventListener('click', this.copyMap.bind(this));
+            copyButton.addEventListener('click', this.copyWorld.bind(this));
         }
     }
 
@@ -112,79 +112,79 @@ class MapDetailsPage extends BasePage {
     private loadInitialState(): void {
         // Theme button state is handled by BasePage
 
-        const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
-        const mapId = mapIdInput?.value.trim() || null;
+        const worldIdInput = document.getElementById("worldIdInput") as HTMLInputElement | null;
+        const worldId = worldIdInput?.value.trim() || null;
 
-        if (mapId) {
-            this.currentMapId = mapId;
-            console.log(`Found Map ID: ${this.currentMapId}. Will load data after Phaser initialization.`);
+        if (worldId) {
+            this.currentWorldId = worldId;
+            console.log(`Found World ID: ${this.currentWorldId}. Will load data after Phaser initialization.`);
         } else {
-            console.error("Map ID input element not found or has no value. Cannot load document.");
-            this.showToast("Error", "Could not load document: Map ID missing.", "error");
+            console.error("World ID input element not found or has no value. Cannot load document.");
+            this.showToast("Error", "Could not load document: World ID missing.", "error");
         }
     }
 
     /**
-     * Load map data and coordinate between components
+     * Load world data and coordinate between components
      */
-    private async loadMapData(): Promise<void> {
+    private async loadWorldData(): Promise<void> {
         try {
-            console.log(`MapDetailsPage: Loading map data...`);
+            console.log(`WorldDetailsPage: Loading world data...`);
             
-            // Load map data from the hidden JSON element
-            const mapData = this.loadMapDataFromElement();
+            // Load world data from the hidden JSON element
+            const worldData = this.loadWorldDataFromElement();
             
-            if (mapData) {
-                this.map = Map.deserialize(mapData);
-                console.log('Map data loaded successfully');
+            if (worldData) {
+                this.world = World.deserialize(worldData);
+                console.log('World data loaded successfully');
                 
-                // Use MapViewer component to load the map
-                if (this.mapViewer) {
-                    await this.mapViewer.loadMap(mapData);
-                    this.showToast('Success', 'Map loaded successfully', 'success');
+                // Use WorldViewer component to load the world
+                if (this.worldViewer) {
+                    await this.worldViewer.loadWorld(worldData);
+                    this.showToast('Success', 'World loaded successfully', 'success');
                 } else {
-                    console.warn('MapViewer component not available');
+                    console.warn('WorldViewer component not available');
                 }
                 
             } else {
-                console.error('No map data found');
-                this.showToast('Error', 'No map data found', 'error');
+                console.error('No world data found');
+                this.showToast('Error', 'No world data found', 'error');
             }
             
         } catch (error) {
-            console.error('Failed to load map data:', error);
-            this.showToast('Error', 'Failed to load map data', 'error');
+            console.error('Failed to load world data:', error);
+            this.showToast('Error', 'Failed to load world data', 'error');
         }
     }
     
     /**
-     * Load map data from the hidden JSON element in the page
+     * Load world data from the hidden JSON element in the page
      */
-    private loadMapDataFromElement(): any {
+    private loadWorldDataFromElement(): any {
         try {
-            const mapDataElement = document.getElementById('map-data-json');
-            console.log(`Map data element found: ${mapDataElement ? 'YES' : 'NO'}`);
+            const worldDataElement = document.getElementById('world-data-json');
+            console.log(`World data element found: ${worldDataElement ? 'YES' : 'NO'}`);
             
-            if (mapDataElement && mapDataElement.textContent) {
-                console.log(`Raw map data content: ${mapDataElement.textContent.substring(0, 200)}...`);
-                const mapData = JSON.parse(mapDataElement.textContent);
+            if (worldDataElement && worldDataElement.textContent) {
+                console.log(`Raw world data content: ${worldDataElement.textContent.substring(0, 200)}...`);
+                const worldData = JSON.parse(worldDataElement.textContent);
                 
-                if (mapData && mapData !== null) {
-                    console.log('Map data found in page element');
-                    console.log(`Map data keys: ${Object.keys(mapData).join(', ')}`);
-                    if (mapData.tiles) {
-                        console.log(`Tiles data keys: ${Object.keys(mapData.tiles).join(', ')}`);
+                if (worldData && worldData !== null) {
+                    console.log('World data found in page element');
+                    console.log(`World data keys: ${Object.keys(worldData).join(', ')}`);
+                    if (worldData.tiles) {
+                        console.log(`Tiles data keys: ${Object.keys(worldData.tiles).join(', ')}`);
                     }
-                    if (mapData.map_units) {
-                        console.log(`Units data length: ${mapData.map_units.length}`);
+                    if (worldData.world_units) {
+                        console.log(`Units data length: ${worldData.world_units.length}`);
                     }
-                    return mapData;
+                    return worldData;
                 }
             }
-            console.log('No map data found in page element');
+            console.log('No world data found in page element');
             return null;
         } catch (error) {
-            console.error('Error parsing map data from page element:', error);
+            console.error('Error parsing world data from page element:', error);
             return null;
         }
     }
@@ -192,36 +192,36 @@ class MapDetailsPage extends BasePage {
 
     // Theme management is handled by BasePage
 
-    /** Copy map functionality */
-    private copyMap(): void {
-        if (!this.currentMapId) {
-            this.showToast('Error', 'No map ID available for copying', 'error');
+    /** Copy world functionality */
+    private copyWorld(): void {
+        if (!this.currentWorldId) {
+            this.showToast('Error', 'No world ID available for copying', 'error');
             return;
         }
         
         // Navigate to editor page with copy mode
-        const copyUrl = `/maps/new?copy=${this.currentMapId}`;
+        const copyUrl = `/worlds/new?copy=${this.currentWorldId}`;
         window.location.href = copyUrl;
     }
 
     public destroy(): void {
         // Clean up components
-        if (this.mapViewer) {
-            this.mapViewer.destroy();
-            this.mapViewer = null;
+        if (this.worldViewer) {
+            this.worldViewer.destroy();
+            this.worldViewer = null;
         }
         
-        if (this.mapStatsPanel) {
-            this.mapStatsPanel.destroy();
-            this.mapStatsPanel = null;
+        if (this.worldStatsPanel) {
+            this.worldStatsPanel.destroy();
+            this.worldStatsPanel = null;
         }
         
-        // Clean up map data
-        this.map = null;
-        this.currentMapId = null;
+        // Clean up world data
+        this.world = null;
+        this.currentWorldId = null;
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const lc = new MapDetailsPage();
+    const lc = new WorldDetailsPage();
 });

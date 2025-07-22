@@ -8,51 +8,51 @@ import (
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
-type MapDetailsPage struct {
+type WorldDetailsPage struct {
 	BasePage
-	Header Header
-	Map    *protos.Map // Use the same type as MapEditorPage for consistency
-	MapId  string
+	Header  Header
+	World   *protos.World // Use the same type as WorldEditorPage for consistency
+	WorldId string
 }
 
-func (p *MapDetailsPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
-	p.MapId = r.PathValue("mapId")
-	if p.MapId == "" {
-		http.Error(w, "Map ID is required", http.StatusBadRequest)
+func (p *WorldDetailsPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
+	p.WorldId = r.PathValue("worldId")
+	if p.WorldId == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		return nil, true
 	}
 
-	p.Title = "Map Details"
+	p.Title = "World Details"
 	p.Header.Load(r, w, vc)
 
-	// Fetch the Map using the client manager
-	client, err := vc.ClientMgr.GetMapsSvcClient()
+	// Fetch the World using the client manager
+	client, err := vc.ClientMgr.GetWorldsSvcClient()
 	if err != nil {
-		log.Printf("Error getting Maps client: %v", err)
+		log.Printf("Error getting Worlds client: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return nil, true
 	}
 
-	req := &protos.GetMapRequest{
-		Id: p.MapId,
+	req := &protos.GetWorldRequest{
+		Id: p.WorldId,
 	}
 
-	resp, err := client.GetMap(context.Background(), req)
+	resp, err := client.GetWorld(context.Background(), req)
 	if err != nil {
-		log.Printf("Error fetching Map %s: %v", p.MapId, err)
-		http.Error(w, "Map not found", http.StatusNotFound)
+		log.Printf("Error fetching World %s: %v", p.WorldId, err)
+		http.Error(w, "World not found", http.StatusNotFound)
 		return nil, true
 	}
 
-	if resp.Map != nil {
-		// Use the Map data for display
-		p.Map = resp.Map
-		p.Title = p.Map.Name
+	if resp.World != nil {
+		// Use the World data for display
+		p.World = resp.World
+		p.Title = p.World.Name
 	}
 
 	return nil, false
 }
 
-func (p *MapDetailsPage) Copy() View {
-	return &MapDetailsPage{}
+func (p *WorldDetailsPage) Copy() View {
+	return &WorldDetailsPage{}
 }

@@ -68,10 +68,10 @@ func NewApiHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *ApiHandle
 	out.mux.Handle(gamesConnectPath, gamesConnectHandler)
 	log.Printf("Registered Games Connect handler at: %s", gamesConnectPath)
 
-	mapsAdapter := NewConnectMapsServiceAdapter(services.NewMapsService())
-	mapsConnectPath, mapsConnectHandler := v1connect.NewMapsServiceHandler(mapsAdapter)
-	out.mux.Handle(mapsConnectPath, mapsConnectHandler)
-	log.Printf("Registered Maps Connect handler at: %s", mapsConnectPath)
+	worldsAdapter := NewConnectWorldsServiceAdapter(services.NewWorldsService())
+	worldsConnectPath, worldsConnectHandler := v1connect.NewWorldsServiceHandler(worldsAdapter)
+	out.mux.Handle(worldsConnectPath, worldsConnectHandler)
+	log.Printf("Registered Worlds Connect handler at: %s", worldsConnectPath)
 
 	return &out
 }
@@ -105,7 +105,7 @@ func (web *ApiHandler) createSvcMux(grpc_addr string) (*runtime.ServeMux, error)
 					var msg proto.Message
 					msg, err = anypb.UnmarshalNew(detail, proto.UnmarshalOptions{})
 					if err != nil {
-						// Attempt to convert the known proto message to a map
+						// Attempt to convert the known proto message to a world
 						// This might need a custom function depending on the marshaler
 						// For standard JSON, structpb.NewStruct might work if it was a struct
 						// For simplicity, let's just use the detail itself for now.
@@ -137,7 +137,7 @@ func (web *ApiHandler) createSvcMux(grpc_addr string) (*runtime.ServeMux, error)
 		log.Fatal("Unable to register appitems service: ", err)
 		return nil, err
 	}
-	err = v1.RegisterMapsServiceHandlerFromEndpoint(ctx, svcMux, grpc_addr, opts)
+	err = v1.RegisterWorldsServiceHandlerFromEndpoint(ctx, svcMux, grpc_addr, opts)
 	if err != nil {
 		log.Fatal("Unable to register appitems service: ", err)
 		return nil, err

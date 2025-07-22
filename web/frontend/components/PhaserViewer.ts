@@ -1,16 +1,16 @@
-import { PhaserMapScene } from './phaser/PhaserMapScene';
+import { PhaserWorldScene } from './phaser/PhaserWorldScene';
 
 /**
- * PhaserViewer handles readonly display of maps using Phaser.js
+ * PhaserViewer handles readonly display of worlds using Phaser.js
  * This component is similar to PhaserPanel but without editing capabilities
  */
 export class PhaserViewer {
-    private scene: PhaserMapScene | null = null;
+    private scene: PhaserWorldScene | null = null;
     private game: Phaser.Game | null = null;
     private containerElement: HTMLElement | null = null;
     private isInitialized: boolean = false;
-    private sceneReadyPromise: Promise<PhaserMapScene> | null = null;
-    private sceneReadyResolver: ((scene: PhaserMapScene) => void) | null = null;
+    private sceneReadyPromise: Promise<PhaserWorldScene> | null = null;
+    private sceneReadyResolver: ((scene: PhaserWorldScene) => void) | null = null;
     
     // Event callbacks
     private onLogCallback: ((message: string) => void) | null = null;
@@ -30,7 +30,7 @@ export class PhaserViewer {
             }
             
             // Create the scene ready promise immediately
-            this.sceneReadyPromise = new Promise<PhaserMapScene>((resolve) => {
+            this.sceneReadyPromise = new Promise<PhaserWorldScene>((resolve) => {
                 this.sceneReadyResolver = resolve;
             });
             
@@ -70,7 +70,7 @@ export class PhaserViewer {
             width: width,
             height: height,
             backgroundColor: '#2c3e50',
-            scene: PhaserMapScene, // Use the class directly
+            scene: PhaserWorldScene, // Use the class directly
             scale: {
                 mode: Phaser.Scale.RESIZE,
                 width: width,
@@ -97,7 +97,7 @@ export class PhaserViewer {
             
             // Get reference to the scene once it's created
             this.game.events.once('ready', () => {
-                this.scene = this.game!.scene.getScene('PhaserMapScene') as PhaserMapScene;
+                this.scene = this.game!.scene.getScene('PhaserWorldScene') as PhaserWorldScene;
                 
                 if (this.scene && this.sceneReadyResolver) {
                     this.log('Phaser viewer scene is ready');
@@ -119,7 +119,7 @@ export class PhaserViewer {
     /**
      * Wait for scene to be ready
      */
-    public async waitForSceneReady(): Promise<PhaserMapScene> {
+    public async waitForSceneReady(): Promise<PhaserWorldScene> {
         if (this.scene) {
             return this.scene;
         }
@@ -133,16 +133,16 @@ export class PhaserViewer {
     }
     
     /**
-     * Load map data into the viewer
+     * Load world data into the viewer
      */
-    public async loadMapData(tiles: Array<{ q: number; r: number; terrain: number; color: number }>, 
+    public async loadWorldData(tiles: Array<{ q: number; r: number; terrain: number; color: number }>, 
                             units?: Array<{ q: number; r: number; unitType: number; playerId: number }>): Promise<void> {
         try {
             const scene = await this.waitForSceneReady();
             
             // Wait for assets to be ready before placing tiles
             await scene.waitForAssetsReady();
-            this.log('Assets ready, loading map data');
+            this.log('Assets ready, loading world data');
             
             // Clear existing content
             scene.clearAllTiles();
@@ -164,22 +164,22 @@ export class PhaserViewer {
                 this.log(`Loaded ${units.length} units`);
             }
             
-            // Center camera on the map
-            this.centerOnMap(tiles);
+            // Center camera on the world
+            this.centerOnWorld(tiles);
             
         } catch (error) {
-            this.log(`Failed to load map data: ${error}`);
+            this.log(`Failed to load world data: ${error}`);
             throw error;
         }
     }
     
     /**
-     * Center camera on the loaded map
+     * Center camera on the loaded world
      */
-    private centerOnMap(tiles: Array<{ q: number; r: number; terrain: number; color: number }>): void {
+    private centerOnWorld(tiles: Array<{ q: number; r: number; terrain: number; color: number }>): void {
         if (!this.scene || !tiles || tiles.length === 0) return;
         
-        // Find bounds of the map
+        // Find bounds of the world
         const qs = tiles.map(t => t.q);
         const rs = tiles.map(t => t.r);
         
@@ -188,20 +188,20 @@ export class PhaserViewer {
         const minR = Math.min(...rs);
         const maxR = Math.max(...rs);
         
-        // Center on middle of map
+        // Center on middle of world
         const centerQ = (minQ + maxQ) / 2;
         const centerR = (minR + maxR) / 2;
         
         this.scene.cameras.main.centerOn(centerQ * 64, centerR * 48); // Using tile dimensions
         
         // Set appropriate zoom level
-        const mapWidth = (maxQ - minQ + 1) * 64;
-        const mapHeight = (maxR - minR + 1) * 48;
+        const worldWidth = (maxQ - minQ + 1) * 64;
+        const worldHeight = (maxR - minR + 1) * 48;
         const containerWidth = this.containerElement?.clientWidth || 600;
         const containerHeight = this.containerElement?.clientHeight || 400;
         
-        const zoomX = containerWidth / mapWidth;
-        const zoomY = containerHeight / mapHeight;
+        const zoomX = containerWidth / worldWidth;
+        const zoomY = containerHeight / worldHeight;
         const zoom = Math.min(zoomX, zoomY, 2); // Max zoom of 2x
         
         this.scene.cameras.main.setZoom(Math.max(zoom, 0.5)); // Min zoom of 0.5x

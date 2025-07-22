@@ -1,21 +1,25 @@
 import { BasePage } from './BasePage';
 import { EventBus, EventTypes } from './EventBus';
-import { MapViewer } from './MapViewer';
-import { Map } from './Map';
+import { WorldViewer } from './WorldViewer';
+import { World } from './World';
+import { GameState, GameCreateData, UnitSelectionData } from './GameState';
+import { ComponentLifecycle } from './ComponentLifecycle';
+import { LifecycleController } from './LifecycleController';
 
 /**
  * Game Viewer Page - Interactive game play interface
  * Responsible for:
- * - Loading map as a game instance
+ * - Loading world as a game instance
  * - Coordinating WASM game engine
  * - Managing game state and turn flow
  * - Handling player interactions (unit selection, movement, attacks)
  * - Providing game controls and UI feedback
  */
-class GameViewerPage extends BasePage {
-    private currentMapId: string | null;
-    private map: Map | null = null;
-    private mapViewer: MapViewer | null = null;
+class GameViewerPage extends BasePage implements ComponentLifecycle {
+    private currentWorldId: string | null;
+    private world: World | null = null;
+    private worldViewer: WorldViewer | null = null;
+    private gameState: GameState | null = null;
     
     // Game configuration from URL parameters
     private playerCount: number = 2;
@@ -28,24 +32,25 @@ class GameViewerPage extends BasePage {
         playerTeams: {}
     };
     
-    // Game state
-    private currentPlayer: number = 1;
-    private currentTurn: number = 1;
+    // UI state
     private selectedUnit: any = null;
     private gameLog: string[] = [];
 
     constructor() {
+        console.log('GameViewerPage: Constructor starting...');
         super();
+        console.log('GameViewerPage: super() completed, basic setup only');
         this.loadGameConfiguration();
+        console.log('GameViewerPage: Constructor completed - lifecycle will be managed externally');
     }
 
     /**
      * Load game configuration from URL parameters and hidden inputs
      */
     private loadGameConfiguration(): void {
-        // Get mapId from hidden input
-        const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
-        this.currentMapId = mapIdInput?.value.trim() || null;
+        // Get worldId from hidden input
+        const worldIdInput = document.getElementById("worldIdInput") as HTMLInputElement | null;
+        this.currentWorldId = worldIdInput?.value.trim() || null;
 
         // Get basic config from hidden inputs
         const playerCountInput = document.getElementById("playerCount") as HTMLInputElement | null;
@@ -80,19 +85,25 @@ class GameViewerPage extends BasePage {
      */
     protected initializeSpecificComponents(): void {
         try {
-            console.log('Initializing GameViewerPage components');
+            console.log('GameViewerPage: initializeSpecificComponents() starting...');
 
             // State: Load game configuration is already done in constructor
+            console.log('GameViewerPage: About to subscribe to events...');
             
             // Subscribe: Subscribe to events BEFORE creating components
-            this.subscribeToMapViewerEvents();
+            this.subscribeToWorldViewerEvents();
+            console.log('GameViewerPage: Event subscriptions completed');
             
             // Create: Initialize child components  
-            this.createMapViewerComponent();
+            console.log('GameViewerPage: About to create WorldViewer component...');
+            this.createWorldViewerComponent();
+            console.log('GameViewerPage: WorldViewer component created');
             
             // Initialize game UI state
+            console.log('GameViewerPage: Updating UI state...');
             this.updateGameStatus('Game Loading...');
             this.initializeGameLog();
+            console.log('GameViewerPage: UI state updated, initialization complete');
 
         } catch (error) {
             console.error('Failed to initialize GameViewerPage components:', error);
@@ -101,83 +112,145 @@ class GameViewerPage extends BasePage {
     }
 
     /**
-     * Subscribe to MapViewer events before component creation
+     * Subscribe to WorldViewer and GameState events before component creation
      */
-    private subscribeToMapViewerEvents(): void {
-        // Subscribe BEFORE creating MapViewer to catch initialization events
-        this.eventBus.subscribe('map-viewer-ready', () => {
-            console.log('GameViewerPage: MapViewer ready, loading map...');
-            if (this.currentMapId) {
+    private subscribeToWorldViewerEvents(): void {
+        // Subscribe BEFORE creating WorldViewer to catch initialization events
+        this.eventBus.subscribe('world-viewer-ready', (payload) => {
+            console.log('GameViewerPage: WorldViewer ready event received', payload);
+            if (this.currentWorldId) {
+                console.log('GameViewerPage: WorldId found, proceeding to load world:', this.currentWorldId);
                 // WebGL context timing - wait for next event loop tick
                 setTimeout(async () => {
-                    await this.loadMapAndInitializeGame();
+                    console.log('GameViewerPage: Starting loadWorldAndInitializeGame...');
+                    await this.loadWorldAndInitializeGame();
                 }, 10);
+            } else {
+                console.warn('GameViewerPage: No currentWorldId found!');
             }
+        }, 'game-viewer-page');
+
+        // GameState notification events (for system coordination, not user interaction responses)
+        this.eventBus.subscribe('wasm-loaded', (payload) => {
+            console.log('GameViewerPage: WASM loaded successfully');
+        }, 'game-viewer-page');
+
+        this.eventBus.subscribe('game-created', (payload) => {
+            const gameData: GameCreateData = payload.data;
+            console.log('GameViewerPage: Game created notification', gameData);
+            // Game UI already updated synchronously, this is just for logging/coordination
+        }, 'game-viewer-page');
+
+        this.eventBus.subscribe('unit-moved', (payload) => {
+            console.log('GameViewerPage: Unit moved notification', payload.data);
+            // Could trigger animations, sound effects, etc.
+        }, 'game-viewer-page');
+
+        this.eventBus.subscribe('unit-attacked', (payload) => {
+            console.log('GameViewerPage: Unit attacked notification', payload.data);
+            // Could trigger combat animations, sound effects, etc.
+        }, 'game-viewer-page');
+
+        this.eventBus.subscribe('turn-ended', (payload) => {
+            const gameData: GameCreateData = payload.data;
+            console.log('GameViewerPage: Turn ended notification', gameData);
+            // Could trigger end-of-turn animations, notifications, etc.
         }, 'game-viewer-page');
     }
 
     /**
-     * Create MapViewer component instance
+     * Create WorldViewer and GameState component instances
      */
-    private createMapViewerComponent(): void {
-        const mapViewerContainer = document.getElementById('phaser-viewer-container');
-        if (mapViewerContainer) {
+    private createWorldViewerComponent(): void {
+        console.log('GameViewerPage: Looking for phaser-viewer-container...');
+        const worldViewerContainer = document.getElementById('phaser-viewer-container');
+        console.log('GameViewerPage: Found container element:', worldViewerContainer);
+        
+        if (worldViewerContainer) {
+            console.log('GameViewerPage: Creating WorldViewer with container...');
             // Pass element directly (not string ID) as per UI_DESIGN_PRINCIPLES.md
-            this.mapViewer = new MapViewer(mapViewerContainer, this.eventBus, true);
+            this.worldViewer = new WorldViewer(worldViewerContainer, this.eventBus, true);
+            console.log('GameViewerPage: WorldViewer created:', this.worldViewer);
         } else {
             console.warn('GameViewerPage: phaser-viewer-container not found');
         }
+
+        // Create GameState component (no specific container needed)
+        console.log('GameViewerPage: Creating GameState component...');
+        const gameStateContainer = document.createElement('div');
+        gameStateContainer.style.display = 'none'; // Hidden data component
+        document.body.appendChild(gameStateContainer);
+        this.gameState = new GameState(gameStateContainer, this.eventBus, true);
+        console.log('GameViewerPage: GameState created:', this.gameState);
     }
 
     /**
-     * Load map data and initialize game
+     * Load world data and initialize game
      */
-    private async loadMapAndInitializeGame(): Promise<void> {
+    private async loadWorldAndInitializeGame(): Promise<void> {
         try {
-            console.log('Loading map and initializing game...');
+            console.log('Loading world and initializing game...');
 
-            // Load map data from hidden element
-            const mapData = this.loadMapDataFromElement();
-            if (!mapData) {
-                throw new Error('No map data found');
+            // Load world data from hidden element
+            const worldData = this.loadWorldDataFromElement();
+            if (!worldData) {
+                throw new Error('No world data found');
             }
 
-            // Deserialize map
-            this.map = Map.deserialize(mapData);
+            // Deserialize world
+            this.world = World.deserialize(worldData);
             
-            // Load map into viewer
-            if (this.mapViewer) {
-                await this.mapViewer.loadMap(mapData);
-                this.showToast('Success', `Game loaded: ${this.map.getName() || 'Untitled'}`, 'success');
+            // Load world into viewer
+            if (this.worldViewer) {
+                await this.worldViewer.loadWorld(worldData);
+                this.showToast('Success', `Game loaded: ${this.world.getName() || 'Untitled'}`, 'success');
             }
 
-            // Initialize game state
-            this.initializeGameState();
+            // Initialize game using WASM
+            console.log('About to initialize game with WASM...');
+            try {
+                await this.initializeGameWithWASM();
+                console.log('WASM initialization completed successfully');
+            } catch (error) {
+                console.error('WASM initialization failed, but continuing with world display:', error);
+                // Continue without WASM for now - still show the map
+                this.updateGameStatus('Map loaded - WASM initialization failed');
+            }
             
-            // Update UI
-            this.updateGameStatus('Ready - Player 1\'s Turn');
-            this.logGameEvent(`Game started with ${this.gameConfig.playerCount} players`);
-            this.logGameEvent('Player 1\'s turn begins');
+            // Update UI will be handled by GameState events
 
         } catch (error) {
-            console.error('Failed to load map and initialize game:', error);
+            console.error('Failed to load world and initialize game:', error);
             this.showToast('Error', 'Failed to load game', 'error');
         }
     }
 
     /**
-     * Initialize game state
+     * Initialize game using WASM game engine
      */
-    private initializeGameState(): void {
-        this.currentPlayer = 1;
-        this.currentTurn = 1;
-        this.selectedUnit = null;
-        
-        // Update turn counter
-        this.updateTurnCounter();
-        
-        // TODO: Initialize WASM game engine here
-        console.log('Game state initialized');
+    private async initializeGameWithWASM(): Promise<void> {
+        if (!this.gameState) {
+            throw new Error('GameState component not initialized');
+        }
+
+        try {
+            // Wait for WASM to be ready (only async part)
+            await this.gameState.waitUntilReady();
+            
+            // Create game from world data via WASM (synchronous once WASM loaded)
+            const worldDataStr = JSON.stringify(this.loadWorldDataFromElement());
+            const gameData = await this.gameState.createGameFromMap(worldDataStr, this.gameConfig.playerCount);
+            
+            // Update UI synchronously
+            this.updateGameUIFromState(gameData);
+            this.logGameEvent(`Game started with ${this.gameConfig.playerCount} players`);
+            console.log('Game initialized with WASM engine');
+            
+        } catch (error) {
+            console.error('Failed to initialize game with WASM:', error);
+            this.showToast('Error', 'Failed to initialize game engine', 'error');
+            throw error;
+        }
     }
 
     /**
@@ -220,46 +293,48 @@ class GameViewerPage extends BasePage {
     }
 
     /**
-     * Load map data from hidden element
+     * Load world data from hidden element
      */
-    private loadMapDataFromElement(): any {
+    private loadWorldDataFromElement(): any {
         try {
-            const mapDataElement = document.getElementById('map-data-json');
-            if (mapDataElement && mapDataElement.textContent) {
-                const mapData = JSON.parse(mapDataElement.textContent);
-                return mapData && mapData !== null ? mapData : null;
+            const worldDataElement = document.getElementById('world-data-json');
+            if (worldDataElement && worldDataElement.textContent) {
+                const worldData = JSON.parse(worldDataElement.textContent);
+                return worldData && worldData !== null ? worldData : null;
             }
             return null;
         } catch (error) {
-            console.error('Error parsing map data:', error);
+            console.error('Error parsing world data:', error);
             return null;
         }
     }
 
     /**
-     * Game action handlers
+     * Game action handlers - all synchronous for immediate UI feedback
      */
     private endTurn(): void {
-        console.log(`Player ${this.currentPlayer} ends turn`);
-        
-        // Move to next player
-        this.currentPlayer = (this.currentPlayer % this.gameConfig.playerCount) + 1;
-        
-        // If back to player 1, increment turn counter
-        if (this.currentPlayer === 1) {
-            this.currentTurn++;
+        if (!this.gameState?.isReady()) {
+            this.showToast('Error', 'Game not ready', 'error');
+            return;
         }
-        
-        // Update UI
-        this.updateGameStatus(`Ready - Player ${this.currentPlayer}'s Turn`);
-        this.updateTurnCounter();
-        this.logGameEvent(`Player ${this.currentPlayer}'s turn begins`);
-        
-        // Clear selection
-        this.clearUnitSelection();
-        
-        // TODO: Call WASM endTurn() function
-        this.showToast('Info', `Player ${this.currentPlayer}'s turn`, 'info');
+
+        try {
+            console.log('Ending current player\'s turn...');
+            
+            // Synchronous WASM call
+            const gameData = this.gameState.endTurn();
+            
+            // Immediate UI update
+            this.updateGameUIFromState(gameData);
+            this.clearUnitSelection();
+            
+            this.logGameEvent(`Player ${gameData.currentPlayer + 1}'s turn begins`);
+            this.showToast('Info', `Player ${gameData.currentPlayer + 1}'s turn`, 'info');
+            
+        } catch (error) {
+            console.error('Failed to end turn:', error);
+            this.showToast('Error', 'Failed to end turn', 'error');
+        }
     }
 
     private undoMove(): void {
@@ -274,8 +349,9 @@ class GameViewerPage extends BasePage {
             return;
         }
         console.log('Move mode selected for unit:', this.selectedUnit);
-        // TODO: Highlight valid move tiles
-        this.showToast('Info', 'Click on a tile to move', 'info');
+        // Movement options are already loaded from unit selection
+        // TODO: Integrate with Phaser to highlight valid move tiles
+        this.showToast('Info', 'Click on a highlighted tile to move', 'info');
     }
 
     private selectAttackMode(): void {
@@ -284,14 +360,27 @@ class GameViewerPage extends BasePage {
             return;
         }
         console.log('Attack mode selected for unit:', this.selectedUnit);
-        // TODO: Highlight valid attack targets
-        this.showToast('Info', 'Click on an enemy unit to attack', 'info');
+        // Attack options are already loaded from unit selection
+        // TODO: Integrate with Phaser to highlight valid attack targets
+        this.showToast('Info', 'Click on a highlighted enemy to attack', 'info');
     }
 
     private showAllPlayerUnits(): void {
-        console.log(`Showing all units for Player ${this.currentPlayer}`);
-        // TODO: Highlight all player units and center camera
-        this.showToast('Info', `Showing all Player ${this.currentPlayer} units`, 'info');
+        if (!this.gameState?.isReady()) {
+            return;
+        }
+
+        try {
+            // Synchronous WASM call
+            const gameData = this.gameState.getGameState();
+            
+            console.log(`Showing all units for Player ${gameData.currentPlayer + 1}`);
+            // TODO: Highlight all player units and center camera
+            this.showToast('Info', `Showing all Player ${gameData.currentPlayer + 1} units`, 'info');
+            
+        } catch (error) {
+            console.error('Failed to get game state:', error);
+        }
     }
 
     private centerOnAction(): void {
@@ -303,17 +392,89 @@ class GameViewerPage extends BasePage {
     /**
      * Unit selection management
      */
-    private selectUnit(unit: any): void {
-        this.selectedUnit = unit;
-        console.log('Unit selected:', unit);
+    private selectUnitAt(q: number, r: number): void {
+        if (!this.gameState?.isReady()) {
+            this.showToast('Error', 'Game not ready', 'error');
+            return;
+        }
+
+        try {
+            // Synchronous WASM call
+            const selectionData = this.gameState.selectUnit(q, r);
+            
+            // Immediate UI update
+            this.handleUnitSelection(selectionData);
+            
+        } catch (error) {
+            console.error('Failed to select unit:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unable to select unit';
+            this.showToast('Warning', errorMessage, 'warning');
+        }
+    }
+
+    private handleUnitSelection(selectionData: UnitSelectionData): void {
+        this.selectedUnit = selectionData.unit;
+        console.log('Unit selected:', selectionData);
         
         // Update selected unit info panel
-        this.updateSelectedUnitInfo(unit);
+        this.updateSelectedUnitInfo(selectionData.unit);
         
         // Show unit action buttons
         const unitInfoPanel = document.getElementById('selected-unit-info');
         if (unitInfoPanel) {
             unitInfoPanel.classList.remove('hidden');
+        }
+
+        // TODO: Highlight movement and attack options on the map
+        console.log('Movement options:', selectionData.movableCoords);
+        console.log('Attack options:', selectionData.attackableCoords);
+    }
+
+    private moveUnit(fromQ: number, fromR: number, toQ: number, toR: number): void {
+        if (!this.gameState?.isReady()) {
+            this.showToast('Error', 'Game not ready', 'error');
+            return;
+        }
+
+        try {
+            // Synchronous WASM call
+            const result = this.gameState.moveUnit(fromQ, fromR, toQ, toR);
+            
+            // Immediate UI feedback
+            this.logGameEvent(`Unit moved from (${fromQ},${fromR}) to (${toQ},${toR})`);
+            this.showToast('Success', 'Unit moved successfully', 'success');
+            
+            // Clear selection after successful move
+            this.clearUnitSelection();
+            
+        } catch (error) {
+            console.error('Failed to move unit:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to move unit';
+            this.showToast('Error', errorMessage, 'error');
+        }
+    }
+
+    private attackUnit(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number): void {
+        if (!this.gameState?.isReady()) {
+            this.showToast('Error', 'Game not ready', 'error');
+            return;
+        }
+
+        try {
+            // Synchronous WASM call
+            const result = this.gameState.attackUnit(attackerQ, attackerR, defenderQ, defenderR);
+            
+            // Immediate UI feedback
+            this.logGameEvent(`Attack: (${attackerQ},${attackerR}) → (${defenderQ},${defenderR})`);
+            this.showToast('Success', 'Attack completed', 'success');
+            
+            // Clear selection after attack
+            this.clearUnitSelection();
+            
+        } catch (error) {
+            console.error('Failed to attack:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to attack';
+            this.showToast('Error', errorMessage, 'error');
         }
     }
 
@@ -340,10 +501,14 @@ class GameViewerPage extends BasePage {
         }
     }
 
-    private updateTurnCounter(): void {
+    private updateGameUIFromState(gameData: GameCreateData): void {
+        // Update game status
+        this.updateGameStatus(`Ready - Player ${gameData.currentPlayer + 1}'s Turn`);
+        
+        // Update turn counter
         const turnElement = document.getElementById('turn-counter');
         if (turnElement) {
-            turnElement.textContent = `Turn ${this.currentTurn}`;
+            turnElement.textContent = `Turn ${gameData.turnCounter}`;
         }
     }
 
@@ -385,14 +550,91 @@ class GameViewerPage extends BasePage {
         }
     }
 
-    public destroy(): void {
-        if (this.mapViewer) {
-            this.mapViewer.destroy();
-            this.mapViewer = null;
+    // =============================================================================
+    // ComponentLifecycle Interface Implementation
+    // =============================================================================
+
+    /**
+     * Phase 1: Initialize DOM and discover child components
+     */
+    initializeDOM(): ComponentLifecycle[] {
+        console.log('GameViewerPage: initializeDOM() - Phase 1');
+        
+        // Subscribe to events BEFORE creating components
+        this.subscribeToWorldViewerEvents();
+        
+        // Create child components
+        this.createWorldViewerComponent();
+        
+        // Initialize basic UI state
+        this.updateGameStatus('Game Loading...');
+        this.initializeGameLog();
+        
+        console.log('GameViewerPage: DOM initialized, returning child components');
+        
+        // Return child components for lifecycle management
+        const childComponents: ComponentLifecycle[] = [];
+        if (this.worldViewer) {
+            childComponents.push(this.worldViewer);
+        }
+        if (this.gameState) {
+            childComponents.push(this.gameState);
+        }
+        return childComponents;
+    }
+
+    /**
+     * Phase 2: Inject dependencies (none needed for GameViewerPage)
+     */
+    injectDependencies(deps: Record<string, any>): void {
+        console.log('GameViewerPage: injectDependencies() - Phase 2', Object.keys(deps));
+        // GameViewerPage doesn't need external dependencies
+    }
+
+    /**
+     * Phase 3: Activate component when all dependencies are ready
+     */
+    async activate(): Promise<void> {
+        console.log('GameViewerPage: activate() - Phase 3');
+        
+        // Bind events now that all components are ready
+        this.bindSpecificEvents();
+        
+        // Wait for world viewer to be ready, then load world and initialize game
+        if (this.currentWorldId) {
+            console.log('GameViewerPage: WorldId found, loading world and initializing game...');
+            // Small delay to ensure WorldViewer is fully ready
+            setTimeout(async () => {
+                await this.loadWorldAndInitializeGame();
+            }, 50);
+        } else {
+            console.warn('GameViewerPage: No currentWorldId found!');
         }
         
-        this.map = null;
-        this.currentMapId = null;
+        console.log('GameViewerPage: activation complete');
+    }
+
+    /**
+     * Cleanup phase (called by lifecycle controller if needed)
+     */
+    deactivate(): void {
+        console.log('GameViewerPage: deactivate() - cleanup');
+        this.destroy();
+    }
+
+    public destroy(): void {
+        if (this.worldViewer) {
+            this.worldViewer.destroy();
+            this.worldViewer = null;
+        }
+        
+        if (this.gameState) {
+            this.gameState.destroy();
+            this.gameState = null;
+        }
+        
+        this.world = null;
+        this.currentWorldId = null;
         this.selectedUnit = null;
         this.gameLog = [];
     }
@@ -407,7 +649,27 @@ type GameConfiguration = {
     playerTeams: { [playerId: string]: number };
 };
 
-// Initialize page when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize page when DOM is ready using LifecycleController
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, starting GameViewerPage initialization...');
+    
+    // Create page instance (just basic setup)
     const gameViewerPage = new GameViewerPage();
+    
+    // Create lifecycle controller with debug logging
+    const lifecycleController = new LifecycleController({
+        enableDebugLogging: true,
+        phaseTimeoutMs: 15000, // Increased timeout for WASM loading
+        continueOnError: false // Fail fast for debugging
+    });
+    
+    // Set up lifecycle event logging
+    lifecycleController.onLifecycleEvent((event) => {
+        console.log(`[GameViewer Lifecycle] ${event.type}: ${event.componentName} - ${event.phase}`, event.error || '');
+    });
+    
+    // Start breadth-first initialization
+    await lifecycleController.initializeFromRoot(gameViewerPage, 'GameViewerPage');
+    
+    console.log('GameViewerPage fully initialized via LifecycleController');
 });

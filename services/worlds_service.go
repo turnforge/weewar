@@ -16,30 +16,30 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var MAPS_STORAGE_DIR = weewar.DevDataPath("storage/maps")
+var WORLDS_STORAGE_DIR = weewar.DevDataPath("storage/worlds")
 
-// MapsServiceImpl implements the MapsService gRPC interface
-type MapsServiceImpl struct {
-	v1.UnimplementedMapsServiceServer
+// WorldsServiceImpl implements the WorldsService gRPC interface
+type WorldsServiceImpl struct {
+	v1.UnimplementedWorldsServiceServer
 	storageDir string
 }
 
-// NewMapsService creates a new MapsService implementation
-func NewMapsService() *MapsServiceImpl {
-	service := &MapsServiceImpl{
-		storageDir: MAPS_STORAGE_DIR,
+// NewWorldsService creates a new WorldsService implementation
+func NewWorldsService() *WorldsServiceImpl {
+	service := &WorldsServiceImpl{
+		storageDir: WORLDS_STORAGE_DIR,
 	}
 
 	// Ensure storage directory exists
 	if err := os.MkdirAll(service.storageDir, 0755); err != nil {
-		log.Printf("Failed to create maps storage directory: %v", err)
+		log.Printf("Failed to create worlds storage directory: %v", err)
 	}
 
 	return service
 }
 
-// MapMetadata represents the metadata stored in metadata.json
-type MapMetadata struct {
+// WorldMetadata represents the metadata stored in metadata.json
+type WorldMetadata struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
@@ -50,130 +50,130 @@ type MapMetadata struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// MapData represents the complete map data stored in data.json
-type MapData struct {
-	// Map tiles with hex coordinates as keys "q,r"
-	Tiles map[string]*MapTileData `json:"tiles"`
-	// All units on the map
-	MapUnits []*MapUnitData `json:"map_units"`
+// WorldData represents the complete world data stored in data.json
+type WorldData struct {
+	// World tiles with hex coordinates as keys "q,r"
+	Tiles map[string]*TileData `json:"tiles"`
+	// All units on the world
+	Units []*UnitData `json:"world_units"`
 }
 
-// MapTileData represents tile data for storage
-type MapTileData struct {
+// TileData represents tile data for storage
+type TileData struct {
 	Q        int32 `json:"q"`
 	R        int32 `json:"r"`
 	TileType int32 `json:"tile_type"`
 	Player   int32 `json:"player"`
 }
 
-// MapUnitData represents unit data for storage
-type MapUnitData struct {
+// UnitData represents unit data for storage
+type UnitData struct {
 	Q        int32 `json:"q"`
 	R        int32 `json:"r"`
 	Player   int32 `json:"player"`
 	UnitType int32 `json:"unit_type"`
 }
 
-// getMapPath returns the directory path for a map
-func (s *MapsServiceImpl) getMapPath(mapID string) string {
-	return filepath.Join(s.storageDir, mapID)
+// getWorldPath returns the directory path for a world
+func (s *WorldsServiceImpl) getWorldPath(worldID string) string {
+	return filepath.Join(s.storageDir, worldID)
 }
 
-// getMetadataPath returns the metadata.json file path for a map
-func (s *MapsServiceImpl) getMetadataPath(mapID string) string {
-	return filepath.Join(s.getMapPath(mapID), "metadata.json")
+// getMetadataPath returns the metadata.json file path for a world
+func (s *WorldsServiceImpl) getMetadataPath(worldID string) string {
+	return filepath.Join(s.getWorldPath(worldID), "metadata.json")
 }
 
-// getDataPath returns the data.json file path for a map
-func (s *MapsServiceImpl) getDataPath(mapID string) string {
-	return filepath.Join(s.getMapPath(mapID), "data.json")
+// getDataPath returns the data.json file path for a world
+func (s *WorldsServiceImpl) getDataPath(worldID string) string {
+	return filepath.Join(s.getWorldPath(worldID), "data.json")
 }
 
-// loadMapMetadata loads metadata from metadata.json
-func (s *MapsServiceImpl) loadMapMetadata(mapID string) (*MapMetadata, error) {
-	metadataPath := s.getMetadataPath(mapID)
+// loadWorldMetadata loads metadata from metadata.json
+func (s *WorldsServiceImpl) loadWorldMetadata(worldID string) (*WorldMetadata, error) {
+	metadataPath := s.getMetadataPath(worldID)
 	data, err := os.ReadFile(metadataPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata for map %s: %w", mapID, err)
+		return nil, fmt.Errorf("failed to read metadata for world %s: %w", worldID, err)
 	}
 
-	var metadata MapMetadata
+	var metadata WorldMetadata
 	if err := json.Unmarshal(data, &metadata); err != nil {
-		return nil, fmt.Errorf("failed to parse metadata for map %s: %w", mapID, err)
+		return nil, fmt.Errorf("failed to parse metadata for world %s: %w", worldID, err)
 	}
 
 	return &metadata, nil
 }
 
-// loadMapData loads complete map data from data.json
-func (s *MapsServiceImpl) loadMapData(mapID string) (*MapData, error) {
-	dataPath := s.getDataPath(mapID)
+// loadWorldData loads complete world data from data.json
+func (s *WorldsServiceImpl) loadWorldData(worldID string) (*WorldData, error) {
+	dataPath := s.getDataPath(worldID)
 	data, err := os.ReadFile(dataPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read map data for map %s: %w", mapID, err)
+		return nil, fmt.Errorf("failed to read world data for world %s: %w", worldID, err)
 	}
 
-	var mapData MapData
-	if err := json.Unmarshal(data, &mapData); err != nil {
-		return nil, fmt.Errorf("failed to parse map data for map %s: %w", mapID, err)
+	var worldData WorldData
+	if err := json.Unmarshal(data, &worldData); err != nil {
+		return nil, fmt.Errorf("failed to parse world data for world %s: %w", worldID, err)
 	}
 
-	return &mapData, nil
+	return &worldData, nil
 }
 
-// saveMapMetadata saves metadata to metadata.json
-func (s *MapsServiceImpl) saveMapMetadata(mapID string, metadata *MapMetadata) error {
-	mapDir := s.getMapPath(mapID)
-	if err := os.MkdirAll(mapDir, 0755); err != nil {
-		return fmt.Errorf("failed to create map directory %s: %w", mapDir, err)
+// saveWorldMetadata saves metadata to metadata.json
+func (s *WorldsServiceImpl) saveWorldMetadata(worldID string, metadata *WorldMetadata) error {
+	worldDir := s.getWorldPath(worldID)
+	if err := os.MkdirAll(worldDir, 0755); err != nil {
+		return fmt.Errorf("failed to create world directory %s: %w", worldDir, err)
 	}
 
 	data, err := json.MarshalIndent(metadata, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal metadata for map %s: %w", mapID, err)
+		return fmt.Errorf("failed to marshal metadata for world %s: %w", worldID, err)
 	}
 
-	metadataPath := s.getMetadataPath(mapID)
+	metadataPath := s.getMetadataPath(worldID)
 	if err := os.WriteFile(metadataPath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write metadata for map %s: %w", mapID, err)
+		return fmt.Errorf("failed to write metadata for world %s: %w", worldID, err)
 	}
 
 	return nil
 }
 
-// saveMapData saves complete map data to data.json
-func (s *MapsServiceImpl) saveMapData(mapID string, mapData *MapData) error {
-	data, err := json.MarshalIndent(mapData, "", "  ")
+// saveWorldData saves complete world data to data.json
+func (s *WorldsServiceImpl) saveWorldData(worldID string, worldData *WorldData) error {
+	data, err := json.MarshalIndent(worldData, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal map data for map %s: %w", mapID, err)
+		return fmt.Errorf("failed to marshal world data for world %s: %w", worldID, err)
 	}
 
-	dataPath := s.getDataPath(mapID)
+	dataPath := s.getDataPath(worldID)
 	if err := os.WriteFile(dataPath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write map data for map %s: %w", mapID, err)
+		return fmt.Errorf("failed to write world data for world %s: %w", worldID, err)
 	}
 
 	return nil
 }
 
-// checkMapId checks if a map ID already exists in storage
-func (s *MapsServiceImpl) checkMapId(mapID string) (bool, error) {
-	metadataPath := s.getMetadataPath(mapID)
+// checkWorldId checks if a world ID already exists in storage
+func (s *WorldsServiceImpl) checkWorldId(worldID string) (bool, error) {
+	metadataPath := s.getMetadataPath(worldID)
 	_, err := os.ReadFile(metadataPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			// Map doesn't exist - ID is available
+			// World doesn't exist - ID is available
 			return false, nil
 		}
 		// Other file system error
-		return false, fmt.Errorf("failed to check map ID %s: %w", mapID, err)
+		return false, fmt.Errorf("failed to check world ID %s: %w", worldID, err)
 	}
-	// Map exists - ID is taken
+	// World exists - ID is taken
 	return true, nil
 }
 
-// newMapId generates a new unique map ID of specified length (default 8 chars)
-func (s *MapsServiceImpl) newMapId(numChars ...int) (string, error) {
+// newWorldId generates a new unique world ID of specified length (default 8 chars)
+func (s *WorldsServiceImpl) newWorldId(numChars ...int) (string, error) {
 	const maxRetries = 10
 
 	// Default to 8 characters if not specified
@@ -193,31 +193,31 @@ func (s *MapsServiceImpl) newMapId(numChars ...int) (string, error) {
 		}
 
 		// Convert to hex string and truncate to exact length
-		mapID := hex.EncodeToString(bytes)[:length]
+		worldID := hex.EncodeToString(bytes)[:length]
 
 		// Check if this ID is already taken
-		exists, err := s.checkMapId(mapID)
+		exists, err := s.checkWorldId(worldID)
 		if err != nil {
-			return "", fmt.Errorf("failed to check map ID uniqueness: %w", err)
+			return "", fmt.Errorf("failed to check world ID uniqueness: %w", err)
 		}
 
 		if !exists {
 			// Found a unique ID
-			return mapID, nil
+			return worldID, nil
 		}
 
 		// ID collision, try again
-		log.Printf("Map ID collision detected (attempt %d/%d): %s", attempt+1, maxRetries, mapID)
+		log.Printf("World ID collision detected (attempt %d/%d): %s", attempt+1, maxRetries, worldID)
 	}
 
-	return "", fmt.Errorf("failed to generate unique map ID after %d attempts", maxRetries)
+	return "", fmt.Errorf("failed to generate unique world ID after %d attempts", maxRetries)
 }
 
 // convertToProtoTiles converts storage tiles to protobuf format
-func (s *MapsServiceImpl) convertToProtoTiles(tiles map[string]*MapTileData) map[string]*v1.MapTile {
-	result := make(map[string]*v1.MapTile)
+func (s *WorldsServiceImpl) convertToProtoTiles(tiles map[string]*TileData) map[string]*v1.Tile {
+	result := make(map[string]*v1.Tile)
 	for key, tile := range tiles {
-		result[key] = &v1.MapTile{
+		result[key] = &v1.Tile{
 			Q:        tile.Q,
 			R:        tile.R,
 			TileType: tile.TileType,
@@ -228,10 +228,10 @@ func (s *MapsServiceImpl) convertToProtoTiles(tiles map[string]*MapTileData) map
 }
 
 // convertToProtoUnits converts storage units to protobuf format
-func (s *MapsServiceImpl) convertToProtoUnits(units []*MapUnitData) []*v1.MapUnit {
-	result := make([]*v1.MapUnit, len(units))
+func (s *WorldsServiceImpl) convertToProtoUnits(units []*UnitData) []*v1.Unit {
+	result := make([]*v1.Unit, len(units))
 	for i, unit := range units {
-		result[i] = &v1.MapUnit{
+		result[i] = &v1.Unit{
 			Q:        unit.Q,
 			R:        unit.R,
 			Player:   unit.Player,
@@ -242,10 +242,10 @@ func (s *MapsServiceImpl) convertToProtoUnits(units []*MapUnitData) []*v1.MapUni
 }
 
 // convertFromProtoTiles converts protobuf tiles to storage format
-func (s *MapsServiceImpl) convertFromProtoTiles(tiles map[string]*v1.MapTile) map[string]*MapTileData {
-	result := make(map[string]*MapTileData)
+func (s *WorldsServiceImpl) convertFromProtoTiles(tiles map[string]*v1.Tile) map[string]*TileData {
+	result := make(map[string]*TileData)
 	for key, tile := range tiles {
-		result[key] = &MapTileData{
+		result[key] = &TileData{
 			Q:        tile.Q,
 			R:        tile.R,
 			TileType: tile.TileType,
@@ -256,10 +256,10 @@ func (s *MapsServiceImpl) convertFromProtoTiles(tiles map[string]*v1.MapTile) ma
 }
 
 // convertFromProtoUnits converts protobuf units to storage format
-func (s *MapsServiceImpl) convertFromProtoUnits(units []*v1.MapUnit) []*MapUnitData {
-	result := make([]*MapUnitData, len(units))
+func (s *WorldsServiceImpl) convertFromProtoUnits(units []*v1.Unit) []*UnitData {
+	result := make([]*UnitData, len(units))
 	for i, unit := range units {
-		result[i] = &MapUnitData{
+		result[i] = &UnitData{
 			Q:        unit.Q,
 			R:        unit.R,
 			Player:   unit.Player,
@@ -269,59 +269,59 @@ func (s *MapsServiceImpl) convertFromProtoUnits(units []*v1.MapUnit) []*MapUnitD
 	return result
 }
 
-// convertMetadataToProto converts MapMetadata to protobuf Map (metadata only)
-func (s *MapsServiceImpl) convertMetadataToProto(metadata *MapMetadata) *v1.Map {
-	return &v1.Map{
+// convertMetadataToProto converts WorldMetadata to protobuf World (metadata only)
+func (s *WorldsServiceImpl) convertMetadataToProto(metadata *WorldMetadata) *v1.World {
+	return &v1.World{
 		Id:          metadata.ID,
 		Name:        metadata.Name,
 		Description: metadata.Description,
 		Tags:        metadata.Tags,
 		Difficulty:  metadata.Difficulty,
 		CreatorId:   metadata.CreatorID,
-		ImageUrl:    fmt.Sprintf("/maps/%s/preview", metadata.ID),
+		ImageUrl:    fmt.Sprintf("/worlds/%s/preview", metadata.ID),
 		CreatedAt:   timestamppb.New(metadata.CreatedAt),
 		UpdatedAt:   timestamppb.New(metadata.UpdatedAt),
 	}
 }
 
-// convertToFullProto converts metadata + data to complete protobuf Map
-func (s *MapsServiceImpl) convertToFullProto(metadata *MapMetadata, mapData *MapData) *v1.Map {
-	protoMap := s.convertMetadataToProto(metadata)
-	protoMap.Tiles = s.convertToProtoTiles(mapData.Tiles)
-	protoMap.MapUnits = s.convertToProtoUnits(mapData.MapUnits)
-	return protoMap
+// convertToFullProto converts metadata + data to complete protobuf World
+func (s *WorldsServiceImpl) convertToFullProto(metadata *WorldMetadata, worldData *WorldData) *v1.World {
+	protoWorld := s.convertMetadataToProto(metadata)
+	protoWorld.Tiles = s.convertToProtoTiles(worldData.Tiles)
+	protoWorld.Units = s.convertToProtoUnits(worldData.Units)
+	return protoWorld
 }
 
-// ListMaps returns all available maps (metadata only for performance)
-func (s *MapsServiceImpl) ListMaps(ctx context.Context, req *v1.ListMapsRequest) (resp *v1.ListMapsResponse, err error) {
-	resp = &v1.ListMapsResponse{
-		Items: []*v1.Map{},
+// ListWorlds returns all available worlds (metadata only for performance)
+func (s *WorldsServiceImpl) ListWorlds(ctx context.Context, req *v1.ListWorldsRequest) (resp *v1.ListWorldsResponse, err error) {
+	resp = &v1.ListWorldsResponse{
+		Items: []*v1.World{},
 		Pagination: &v1.PaginationResponse{
 			HasMore:      false,
 			TotalResults: 0,
 		},
 	}
 
-	// Read all map directories
+	// Read all world directories
 	entries, err := os.ReadDir(s.storageDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Storage directory doesn't exist yet, return empty list
 			return resp, nil
 		}
-		return nil, fmt.Errorf("failed to read maps storage directory: %w", err)
+		return nil, fmt.Errorf("failed to read worlds storage directory: %w", err)
 	}
 
-	var maps []*v1.Map
+	var worlds []*v1.World
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
 
-		mapID := entry.Name()
-		metadata, err := s.loadMapMetadata(mapID)
+		worldID := entry.Name()
+		metadata, err := s.loadWorldMetadata(worldID)
 		if err != nil {
-			log.Printf("Failed to load metadata for map %s: %v", mapID, err)
+			log.Printf("Failed to load metadata for world %s: %v", worldID, err)
 			continue
 		}
 
@@ -330,184 +330,184 @@ func (s *MapsServiceImpl) ListMaps(ctx context.Context, req *v1.ListMapsRequest)
 			continue
 		}
 
-		// Only return metadata for listing (not full map data)
-		maps = append(maps, s.convertMetadataToProto(metadata))
+		// Only return metadata for listing (not full world data)
+		worlds = append(worlds, s.convertMetadataToProto(metadata))
 	}
 
-	resp.Items = maps
-	resp.Pagination.TotalResults = int32(len(maps))
+	resp.Items = worlds
+	resp.Pagination.TotalResults = int32(len(worlds))
 
 	return resp, nil
 }
 
-// GetMap returns a specific map with complete data including tiles and units
-func (s *MapsServiceImpl) GetMap(ctx context.Context, req *v1.GetMapRequest) (resp *v1.GetMapResponse, err error) {
+// GetWorld returns a specific world with complete data including tiles and units
+func (s *WorldsServiceImpl) GetWorld(ctx context.Context, req *v1.GetWorldRequest) (resp *v1.GetWorldResponse, err error) {
 	if req.Id == "" {
-		return nil, fmt.Errorf("map ID is required")
+		return nil, fmt.Errorf("world ID is required")
 	}
 
-	metadata, err := s.loadMapMetadata(req.Id)
+	metadata, err := s.loadWorldMetadata(req.Id)
 	if err != nil {
-		return nil, fmt.Errorf("map not found: %w", err)
+		return nil, fmt.Errorf("world not found: %w", err)
 	}
 
-	mapData, err := s.loadMapData(req.Id)
+	worldData, err := s.loadWorldData(req.Id)
 	if err != nil {
-		// If data.json doesn't exist, create empty map data
-		log.Printf("Map data not found for %s, creating empty data: %v", req.Id, err)
-		mapData = &MapData{
-			Tiles:    make(map[string]*MapTileData),
-			MapUnits: []*MapUnitData{},
+		// If data.json doesn't exist, create empty world data
+		log.Printf("World data not found for %s, creating empty data: %v", req.Id, err)
+		worldData = &WorldData{
+			Tiles: make(map[string]*TileData),
+			Units: []*UnitData{},
 		}
 	}
 
-	resp = &v1.GetMapResponse{
-		Map: s.convertToFullProto(metadata, mapData),
+	resp = &v1.GetWorldResponse{
+		World: s.convertToFullProto(metadata, worldData),
 	}
 
 	return resp, nil
 }
 
-// CreateMap creates a new map
-func (s *MapsServiceImpl) CreateMap(ctx context.Context, req *v1.CreateMapRequest) (resp *v1.CreateMapResponse, err error) {
-	if req.Map == nil {
-		return nil, fmt.Errorf("map data is required")
+// CreateWorld creates a new world
+func (s *WorldsServiceImpl) CreateWorld(ctx context.Context, req *v1.CreateWorldRequest) (resp *v1.CreateWorldResponse, err error) {
+	if req.World == nil {
+		return nil, fmt.Errorf("world data is required")
 	}
 
-	var mapID string
+	var worldID string
 
-	// Determine which map ID to use
-	if req.Map.Id != "" {
-		// Map ID provided - check if it's available
-		exists, err := s.checkMapId(req.Map.Id)
+	// Determine which world ID to use
+	if req.World.Id != "" {
+		// World ID provided - check if it's available
+		exists, err := s.checkWorldId(req.World.Id)
 		if err != nil {
-			return nil, fmt.Errorf("failed to check map ID: %w", err)
+			return nil, fmt.Errorf("failed to check world ID: %w", err)
 		}
 
 		if exists {
-			// Map ID is taken, generate a new one
-			mapID, err = s.newMapId()
+			// World ID is taken, generate a new one
+			worldID, err = s.newWorldId()
 			if err != nil {
-				return nil, fmt.Errorf("failed to generate new map ID: %w", err)
+				return nil, fmt.Errorf("failed to generate new world ID: %w", err)
 			}
 		} else {
-			// Map ID is available, use it
-			mapID = req.Map.Id
+			// World ID is available, use it
+			worldID = req.World.Id
 		}
 	} else {
-		// No map ID provided, generate a new one
-		mapID, err = s.newMapId()
+		// No world ID provided, generate a new one
+		worldID, err = s.newWorldId()
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate map ID: %w", err)
+			return nil, fmt.Errorf("failed to generate world ID: %w", err)
 		}
 	}
 
 	now := time.Now()
-	metadata := &MapMetadata{
-		ID:          mapID,
-		Name:        req.Map.Name,
-		Description: req.Map.Description,
-		Tags:        req.Map.Tags,
-		Difficulty:  req.Map.Difficulty,
-		CreatorID:   req.Map.CreatorId,
+	metadata := &WorldMetadata{
+		ID:          worldID,
+		Name:        req.World.Name,
+		Description: req.World.Description,
+		Tags:        req.World.Tags,
+		Difficulty:  req.World.Difficulty,
+		CreatorID:   req.World.CreatorId,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
 
-	if err := s.saveMapMetadata(mapID, metadata); err != nil {
-		return nil, fmt.Errorf("failed to create map: %w", err)
+	if err := s.saveWorldMetadata(worldID, metadata); err != nil {
+		return nil, fmt.Errorf("failed to create world: %w", err)
 	}
 
-	// Create map data with tiles and units from request
-	mapData := &MapData{
-		Tiles:    s.convertFromProtoTiles(req.Map.Tiles),
-		MapUnits: s.convertFromProtoUnits(req.Map.MapUnits),
+	// Create world data with tiles and units from request
+	worldData := &WorldData{
+		Tiles: s.convertFromProtoTiles(req.World.Tiles),
+		Units: s.convertFromProtoUnits(req.World.Units),
 	}
 
 	// Initialize empty if no data provided
-	if mapData.Tiles == nil {
-		mapData.Tiles = make(map[string]*MapTileData)
+	if worldData.Tiles == nil {
+		worldData.Tiles = make(map[string]*TileData)
 	}
-	if mapData.MapUnits == nil {
-		mapData.MapUnits = []*MapUnitData{}
-	}
-
-	if err := s.saveMapData(mapID, mapData); err != nil {
-		log.Printf("Failed to create data.json for map %s: %v", mapID, err)
+	if worldData.Units == nil {
+		worldData.Units = []*UnitData{}
 	}
 
-	resp = &v1.CreateMapResponse{
-		Map: s.convertToFullProto(metadata, mapData),
+	if err := s.saveWorldData(worldID, worldData); err != nil {
+		log.Printf("Failed to create data.json for world %s: %v", worldID, err)
+	}
+
+	resp = &v1.CreateWorldResponse{
+		World: s.convertToFullProto(metadata, worldData),
 	}
 
 	return resp, nil
 }
 
-// UpdateMap updates an existing map
-func (s *MapsServiceImpl) UpdateMap(ctx context.Context, req *v1.UpdateMapRequest) (resp *v1.UpdateMapResponse, err error) {
-	if req.Map == nil || req.Map.Id == "" {
-		return nil, fmt.Errorf("map ID is required")
+// UpdateWorld updates an existing world
+func (s *WorldsServiceImpl) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequest) (resp *v1.UpdateWorldResponse, err error) {
+	if req.World == nil || req.World.Id == "" {
+		return nil, fmt.Errorf("world ID is required")
 	}
 
 	// Load existing metadata
-	metadata, err := s.loadMapMetadata(req.Map.Id)
+	metadata, err := s.loadWorldMetadata(req.World.Id)
 	if err != nil {
-		return nil, fmt.Errorf("map not found: %w", err)
+		return nil, fmt.Errorf("world not found: %w", err)
 	}
 
 	// Update metadata fields
-	if req.Map.Name != "" {
-		metadata.Name = req.Map.Name
+	if req.World.Name != "" {
+		metadata.Name = req.World.Name
 	}
-	if req.Map.Description != "" {
-		metadata.Description = req.Map.Description
+	if req.World.Description != "" {
+		metadata.Description = req.World.Description
 	}
-	if req.Map.Tags != nil {
-		metadata.Tags = req.Map.Tags
+	if req.World.Tags != nil {
+		metadata.Tags = req.World.Tags
 	}
-	if req.Map.Difficulty != "" {
-		metadata.Difficulty = req.Map.Difficulty
+	if req.World.Difficulty != "" {
+		metadata.Difficulty = req.World.Difficulty
 	}
 	metadata.UpdatedAt = time.Now()
 
-	if err := s.saveMapMetadata(req.Map.Id, metadata); err != nil {
-		return nil, fmt.Errorf("failed to update map metadata: %w", err)
+	if err := s.saveWorldMetadata(req.World.Id, metadata); err != nil {
+		return nil, fmt.Errorf("failed to update world metadata: %w", err)
 	}
 
-	// Update map data if provided
-	if req.Map.Tiles != nil || req.Map.MapUnits != nil {
-		mapData := &MapData{
-			Tiles:    s.convertFromProtoTiles(req.Map.Tiles),
-			MapUnits: s.convertFromProtoUnits(req.Map.MapUnits),
+	// Update world data if provided
+	if req.World.Tiles != nil || req.World.Units != nil {
+		worldData := &WorldData{
+			Tiles: s.convertFromProtoTiles(req.World.Tiles),
+			Units: s.convertFromProtoUnits(req.World.Units),
 		}
 
-		if err := s.saveMapData(req.Map.Id, mapData); err != nil {
-			return nil, fmt.Errorf("failed to update map data: %w", err)
+		if err := s.saveWorldData(req.World.Id, worldData); err != nil {
+			return nil, fmt.Errorf("failed to update world data: %w", err)
 		}
 
-		resp = &v1.UpdateMapResponse{
-			Map: s.convertToFullProto(metadata, mapData),
+		resp = &v1.UpdateWorldResponse{
+			World: s.convertToFullProto(metadata, worldData),
 		}
 	} else {
-		resp = &v1.UpdateMapResponse{
-			Map: s.convertMetadataToProto(metadata),
+		resp = &v1.UpdateWorldResponse{
+			World: s.convertMetadataToProto(metadata),
 		}
 	}
 
 	return resp, nil
 }
 
-// DeleteMap deletes a map
-func (s *MapsServiceImpl) DeleteMap(ctx context.Context, req *v1.DeleteMapRequest) (resp *v1.DeleteMapResponse, err error) {
+// DeleteWorld deletes a world
+func (s *WorldsServiceImpl) DeleteWorld(ctx context.Context, req *v1.DeleteWorldRequest) (resp *v1.DeleteWorldResponse, err error) {
 	if req.Id == "" {
-		return nil, fmt.Errorf("map ID is required")
+		return nil, fmt.Errorf("world ID is required")
 	}
 
-	mapPath := s.getMapPath(req.Id)
-	if err := os.RemoveAll(mapPath); err != nil {
-		return nil, fmt.Errorf("failed to delete map: %w", err)
+	worldPath := s.getWorldPath(req.Id)
+	if err := os.RemoveAll(worldPath); err != nil {
+		return nil, fmt.Errorf("failed to delete world: %w", err)
 	}
 
-	resp = &v1.DeleteMapResponse{}
+	resp = &v1.DeleteWorldResponse{}
 	return resp, nil
 }

@@ -78,57 +78,57 @@ func (a *ConnectGameServiceAdapter) StreamSomeThing(ctx context.Context, req *co
 }
 */
 
-// ConnectMapsServiceAdapter adapts the gRPC MapsService to Connect's interface
-type ConnectMapsServiceAdapter struct {
-	svc *services.MapsServiceImpl
+// ConnectWorldsServiceAdapter adapts the gRPC WorldsService to Connect's interface
+type ConnectWorldsServiceAdapter struct {
+	svc *services.WorldsServiceImpl
 }
 
-func NewConnectMapsServiceAdapter(svc *services.MapsServiceImpl) *ConnectMapsServiceAdapter {
-	return &ConnectMapsServiceAdapter{svc: svc}
+func NewConnectWorldsServiceAdapter(svc *services.WorldsServiceImpl) *ConnectWorldsServiceAdapter {
+	return &ConnectWorldsServiceAdapter{svc: svc}
 }
 
-func (a *ConnectMapsServiceAdapter) CreateMap(ctx context.Context, req *connect.Request[v1.CreateMapRequest]) (*connect.Response[v1.CreateMapResponse], error) {
-	resp, err := a.svc.CreateMap(ctx, req.Msg)
+func (a *ConnectWorldsServiceAdapter) CreateWorld(ctx context.Context, req *connect.Request[v1.CreateWorldRequest]) (*connect.Response[v1.CreateWorldResponse], error) {
+	resp, err := a.svc.CreateWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
 
-func (a *ConnectMapsServiceAdapter) ListMaps(ctx context.Context, req *connect.Request[v1.ListMapsRequest]) (*connect.Response[v1.ListMapsResponse], error) {
-	resp, err := a.svc.ListMaps(ctx, req.Msg)
+func (a *ConnectWorldsServiceAdapter) ListWorlds(ctx context.Context, req *connect.Request[v1.ListWorldsRequest]) (*connect.Response[v1.ListWorldsResponse], error) {
+	resp, err := a.svc.ListWorlds(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
 
-func (a *ConnectMapsServiceAdapter) GetMap(ctx context.Context, req *connect.Request[v1.GetMapRequest]) (*connect.Response[v1.GetMapResponse], error) {
-	resp, err := a.svc.GetMap(ctx, req.Msg)
+func (a *ConnectWorldsServiceAdapter) GetWorld(ctx context.Context, req *connect.Request[v1.GetWorldRequest]) (*connect.Response[v1.GetWorldResponse], error) {
+	resp, err := a.svc.GetWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
 
-func (a *ConnectMapsServiceAdapter) GetMaps(ctx context.Context, req *connect.Request[v1.GetMapsRequest]) (*connect.Response[v1.GetMapsResponse], error) {
-	resp, err := a.svc.GetMaps(ctx, req.Msg)
+func (a *ConnectWorldsServiceAdapter) GetWorlds(ctx context.Context, req *connect.Request[v1.GetWorldsRequest]) (*connect.Response[v1.GetWorldsResponse], error) {
+	resp, err := a.svc.GetWorlds(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
 
-func (a *ConnectMapsServiceAdapter) DeleteMap(ctx context.Context, req *connect.Request[v1.DeleteMapRequest]) (*connect.Response[v1.DeleteMapResponse], error) {
-	resp, err := a.svc.DeleteMap(ctx, req.Msg)
+func (a *ConnectWorldsServiceAdapter) DeleteWorld(ctx context.Context, req *connect.Request[v1.DeleteWorldRequest]) (*connect.Response[v1.DeleteWorldResponse], error) {
+	resp, err := a.svc.DeleteWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
 
-func (a *ConnectMapsServiceAdapter) UpdateMap(ctx context.Context, req *connect.Request[v1.UpdateMapRequest]) (*connect.Response[v1.UpdateMapResponse], error) {
-	resp, err := a.svc.UpdateMap(ctx, req.Msg)
+func (a *ConnectWorldsServiceAdapter) UpdateWorld(ctx context.Context, req *connect.Request[v1.UpdateWorldRequest]) (*connect.Response[v1.UpdateWorldResponse], error) {
+	resp, err := a.svc.UpdateWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (a *ConnectMapsServiceAdapter) UpdateMap(ctx context.Context, req *connect.
 }
 
 /** If you had a streamer than you can use this to act as a bridge between websocket and grpc streams
-func (a *ConnectMapServiceAdapter) StreamSomeThing(ctx context.Context, req *connect.Request[v1.StreamSomeThingRequest], stream *connect.ServerStream[v1.StreamSomeThingResponse]) error {
+func (a *ConnectWorldServiceAdapter) StreamSomeThing(ctx context.Context, req *connect.Request[v1.StreamSomeThingRequest], stream *connect.ServerStream[v1.StreamSomeThingResponse]) error {
 	// Create a custom stream implementation that bridges to Connect
 	bridgeStream := &ConnectStreamBridge[v1.StreamSomeThingResponse]{
 		connectStream: stream,

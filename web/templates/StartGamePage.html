@@ -2,17 +2,17 @@
 {{# include "BasePage.html" #}}
 
 {{ define "ExtraHeaderButtons" }}
-<!-- Back to Map Button -->
-<a href="/maps/{{ .MapId }}/view" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800">
+<!-- Back to World Button -->
+<a href="/worlds/{{ .WorldId }}/view" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800">
     <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
     </svg>
-    Back to Map
+    Back to World
 </a>
 {{ end }}
 
 {{ define "BodySection" }}
-    <input id="mapIdInput" value="{{ .MapId }}" type="hidden" />
+    <input id="worldIdInput" value="{{ .WorldId }}" type="hidden" />
     
     <!-- Start Game Container -->
     <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-h-0 lg:overflow-hidden">
@@ -23,17 +23,17 @@
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">New Game</h1>
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ if .Map.Name }}Configure your game on {{ .Map.Name }}{{ else }}Select a map and configure your game{{ end }}
+                            {{ if .World.Name }}Configure your game on {{ .World.Name }}{{ else }}Select a world and configure your game{{ end }}
                         </p>
                     </div>
-                    {{ if .Map.Name }}
+                    {{ if .World.Name }}
                     <div class="text-right">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Map: <span class="font-mono">{{ .Map.Name }}</span>
+                            World: <span class="font-mono">{{ .World.Name }}</span>
                         </div>
-                        {{ if .Map.CreatedAt }}
+                        {{ if .World.CreatedAt }}
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Created: {{ .Map.CreatedAt.AsTime.Format "Jan 2, 2006" }}
+                            Created: {{ .World.CreatedAt.AsTime.Format "Jan 2, 2006" }}
                         </div>
                         {{ end }}
                     </div>
@@ -44,30 +44,30 @@
 
         <!-- Game Configuration Content -->
         <div class="flex-1 flex flex-col lg:flex-row max-w-9xl mx-auto w-full min-w-0 lg:min-h-0 overflow-y-auto lg:overflow-hidden">
-            <!-- Map Preview Section - MapViewer Component Root -->
+            <!-- World Preview Section - WorldViewer Component Root -->
             <div class="flex-1 min-w-0 p-6 lg:pr-3 order-2 lg:order-1 lg:min-h-0">
                 <!-- Mobile: fixed 400px height, scrollable -->
                 <!-- Desktop: take remaining width, full available height -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full h-[400px] lg:h-full flex flex-col" data-component="map-viewer">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 w-full h-[400px] lg:h-full flex flex-col" data-component="world-viewer">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700 lg:flex-shrink-0">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                            {{ if .Map.Name }}Map Preview{{ else }}Map Selection{{ end }}
+                            {{ if .World.Name }}World Preview{{ else }}World Selection{{ end }}
                         </h2>
                     </div>
-                    {{ if .Map.Name }}
-                    <!-- Phaser Map Viewer Container: Fixed height on mobile, responsive on desktop -->
+                    {{ if .World.Name }}
+                    <!-- Phaser World Viewer Container: Fixed height on mobile, responsive on desktop -->
                     <div id="phaser-viewer-container" class="w-full flex-1 min-h-0 overflow-hidden">
                         <!-- Phaser canvas will be inserted here and sized to 100% width/height -->
                     </div>
                     {{ else }}
-                    <!-- Map Selection Placeholder -->
+                    <!-- World Selection Placeholder -->
                     <div class="flex items-center justify-center flex-1 lg:min-h-0 text-center">
                         <div class="p-8">
                             <div class="text-6xl text-gray-400 dark:text-gray-500 mb-4">🗺️</div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Map Selected</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Choose a map to start your game</p>
-                            <a href="/maps/" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                Browse Maps
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No World Selected</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Choose a world to start your game</p>
+                            <a href="/worlds/" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Browse Worlds
                             </a>
                         </div>
                     </div>
@@ -149,8 +149,8 @@
             </div>
         </div>
         
-        <!-- Hidden Map Data for Frontend -->
-        <pre id="map-data-json" style="display: none;">{{ if .Map }}{{ .Map | ToJson }}{{ else }}null{{ end }}</pre>
+        <!-- Hidden World Data for Frontend -->
+        <pre id="world-data-json" style="display: none;">{{ if .World }}{{ .World | ToJson }}{{ else }}null{{ end }}</pre>
     </main>
 {{ end }}
 

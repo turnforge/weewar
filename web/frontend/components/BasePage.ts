@@ -20,8 +20,13 @@ export abstract class BasePage {
         // Create page-level event bus
         this.eventBus = new EventBus(true); // Enable debug mode
         
+        // Initialize base components first
         this.initializeBaseComponents();
         this.bindBaseEvents();
+        
+        // Then initialize page-specific components and events
+        this.initializeSpecificComponents();
+        this.bindSpecificEvents();
     }
 
     /**

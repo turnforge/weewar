@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/models.proto.
  */
 export const file_weewar_v1_models: GenFile = /*@__PURE__*/
-  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiRgoKUGFnaW5hdGlvbhIQCghwYWdlX2tleRgBIAEoCRITCgtwYWdlX29mZnNldBgCIAEoBRIRCglwYWdlX3NpemUYAyABKAUibgoSUGFnaW5hdGlvblJlc3BvbnNlEhUKDW5leHRfcGFnZV9rZXkYAiABKAkSGAoQbmV4dF9wYWdlX29mZnNldBgDIAEoBRIQCghoYXNfbW9yZRgEIAEoCBIVCg10b3RhbF9yZXN1bHRzGAUgASgFIsoBCgRHYW1lEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLwAgoDTWFwEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEhIKCmNyZWF0b3JfaWQYBCABKAkSDAoEbmFtZRgFIAEoCRITCgtkZXNjcmlwdGlvbhgGIAEoCRIMCgR0YWdzGAcgAygJEhEKCWltYWdlX3VybBgIIAEoCRISCgpkaWZmaWN1bHR5GAkgASgJEigKBXRpbGVzGAsgAygLMhkud2Vld2FyLnYxLk1hcC5UaWxlc0VudHJ5EiUKCW1hcF91bml0cxgMIAMoCzISLndlZXdhci52MS5NYXBVbml0GkAKClRpbGVzRW50cnkSCwoDa2V5GAEgASgJEiEKBXZhbHVlGAIgASgLMhIud2Vld2FyLnYxLk1hcFRpbGU6AjgBIkIKB01hcFRpbGUSCQoBcRgBIAEoBRIJCgFyGAIgASgFEhEKCXRpbGVfdHlwZRgDIAEoBRIOCgZwbGF5ZXIYBCABKAUiQgoHTWFwVW5pdBIJCgFxGAEgASgFEgkKAXIYAiABKAUSDgoGcGxheWVyGAMgASgFEhEKCXVuaXRfdHlwZRgEIAEoBSLKAQoEVXNlchIuCgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIKCgJpZBgDIAEoCRIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJaW1hZ2VfdXJsGAcgASgJEhIKCmRpZmZpY3VsdHkYCCABKAlCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiRgoKUGFnaW5hdGlvbhIQCghwYWdlX2tleRgBIAEoCRITCgtwYWdlX29mZnNldBgCIAEoBRIRCglwYWdlX3NpemUYAyABKAUibgoSUGFnaW5hdGlvblJlc3BvbnNlEhUKDW5leHRfcGFnZV9rZXkYAiABKAkSGAoQbmV4dF9wYWdlX29mZnNldBgDIAEoBRIQCghoYXNfbW9yZRgEIAEoCBIVCg10b3RhbF9yZXN1bHRzGAUgASgFIsoBCgRHYW1lEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSLqAgoFV29ybGQSLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSEgoKY3JlYXRvcl9pZBgEIAEoCRIMCgRuYW1lGAUgASgJEhMKC2Rlc2NyaXB0aW9uGAYgASgJEgwKBHRhZ3MYByADKAkSEQoJaW1hZ2VfdXJsGAggASgJEhIKCmRpZmZpY3VsdHkYCSABKAkSKgoFdGlsZXMYCyADKAsyGy53ZWV3YXIudjEuV29ybGQuVGlsZXNFbnRyeRIeCgV1bml0cxgMIAMoCzIPLndlZXdhci52MS5Vbml0Gj0KClRpbGVzRW50cnkSCwoDa2V5GAEgASgJEh4KBXZhbHVlGAIgASgLMg8ud2Vld2FyLnYxLlRpbGU6AjgBIj8KBFRpbGUSCQoBcRgBIAEoBRIJCgFyGAIgASgFEhEKCXRpbGVfdHlwZRgDIAEoBRIOCgZwbGF5ZXIYBCABKAUiPwoEVW5pdBIJCgFxGAEgASgFEgkKAXIYAiABKAUSDgoGcGxheWVyGAMgASgFEhEKCXVuaXRfdHlwZRgEIAEoBSLKAQoEVXNlchIuCgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIKCgJpZBgDIAEoCRIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJaW1hZ2VfdXJsGAcgASgJEhIKCmRpZmZpY3VsdHkYCCABKAlCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message weewar.v1.Pagination
@@ -164,9 +164,9 @@ export const GameSchema: GenMessage<Game> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 2);
 
 /**
- * @generated from message weewar.v1.Map
+ * @generated from message weewar.v1.World
  */
-export type Map = Message<"weewar.v1.Map"> & {
+export type World = Message<"weewar.v1.World"> & {
   /**
    * @generated from field: google.protobuf.Timestamp created_at = 1;
    */
@@ -178,14 +178,14 @@ export type Map = Message<"weewar.v1.Map"> & {
   updatedAt?: Timestamp;
 
   /**
-   * Unique ID for the map
+   * Unique ID for the world
    *
    * @generated from field: string id = 3;
    */
   id: string;
 
   /**
-   * User that created the map
+   * User that created the world
    *
    * @generated from field: string creator_id = 4;
    */
@@ -199,7 +199,7 @@ export type Map = Message<"weewar.v1.Map"> & {
   name: string;
 
   /**
-   * Description if map has a description
+   * Description if world has a description
    *
    * @generated from field: string description = 6;
    */
@@ -229,29 +229,29 @@ export type Map = Message<"weewar.v1.Map"> & {
   /**
    * JSON-fied tile data about what units and terrains are at each location
    *
-   * @generated from field: map<string, weewar.v1.MapTile> tiles = 11;
+   * @generated from field: map<string, weewar.v1.Tile> tiles = 11;
    */
-  tiles: { [key: string]: MapTile };
+  tiles: { [key: string]: Tile };
 
   /**
-   * All units on the map and who they belong to
+   * All units on the world and who they belong to
    *
-   * @generated from field: repeated weewar.v1.MapUnit map_units = 12;
+   * @generated from field: repeated weewar.v1.Unit units = 12;
    */
-  mapUnits: MapUnit[];
+  units: Unit[];
 };
 
 /**
- * Describes the message weewar.v1.Map.
- * Use `create(MapSchema)` to create a new message.
+ * Describes the message weewar.v1.World.
+ * Use `create(WorldSchema)` to create a new message.
  */
-export const MapSchema: GenMessage<Map> = /*@__PURE__*/
+export const WorldSchema: GenMessage<World> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 3);
 
 /**
- * @generated from message weewar.v1.MapTile
+ * @generated from message weewar.v1.Tile
  */
-export type MapTile = Message<"weewar.v1.MapTile"> & {
+export type Tile = Message<"weewar.v1.Tile"> & {
   /**
    * Q and R in Cubed coordinates
    *
@@ -280,16 +280,16 @@ export type MapTile = Message<"weewar.v1.MapTile"> & {
 };
 
 /**
- * Describes the message weewar.v1.MapTile.
- * Use `create(MapTileSchema)` to create a new message.
+ * Describes the message weewar.v1.Tile.
+ * Use `create(TileSchema)` to create a new message.
  */
-export const MapTileSchema: GenMessage<MapTile> = /*@__PURE__*/
+export const TileSchema: GenMessage<Tile> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 4);
 
 /**
- * @generated from message weewar.v1.MapUnit
+ * @generated from message weewar.v1.Unit
  */
-export type MapUnit = Message<"weewar.v1.MapUnit"> & {
+export type Unit = Message<"weewar.v1.Unit"> & {
   /**
    * Q and R in Cubed coordinates
    *
@@ -314,10 +314,10 @@ export type MapUnit = Message<"weewar.v1.MapUnit"> & {
 };
 
 /**
- * Describes the message weewar.v1.MapUnit.
- * Use `create(MapUnitSchema)` to create a new message.
+ * Describes the message weewar.v1.Unit.
+ * Use `create(UnitSchema)` to create a new message.
  */
-export const MapUnitSchema: GenMessage<MapUnit> = /*@__PURE__*/
+export const UnitSchema: GenMessage<Unit> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 5);
 
 /**

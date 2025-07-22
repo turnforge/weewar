@@ -1,26 +1,26 @@
 import { BasePage } from './BasePage';
 import { EventBus, EventTypes } from './EventBus';
-import { MapViewer } from './MapViewer';
-import { Map } from './Map';
+import { WorldViewer } from './WorldViewer';
+import { World } from './World';
 
 /**
  * Start Game Page - Orchestrator for game configuration functionality
  * Responsible for:
- * - Map data loading and preview coordination
+ * - World data loading and preview coordination
  * - Game configuration management
  * - Player configuration handling
  * - Game creation workflow
  * 
  * Does NOT handle:
  * - Direct DOM manipulation (delegated to components)
- * - Phaser management (delegated to MapViewer)
+ * - Phaser management (delegated to WorldViewer)
  * - Game logic (delegated to game engine)
  */
 class StartGamePage extends BasePage {
-    private currentMapId: string | null;
-    private isLoadingMap: boolean = false;
-    private map: Map | null = null;
-    private playerCount: number = 2; // Default to 2, will be updated from map data
+    private currentWorldId: string | null;
+    private isLoadingWorld: boolean = false;
+    private world: World | null = null;
+    private playerCount: number = 2; // Default to 2, will be updated from world data
     private gameConfig: GameConfiguration = {
         players: [],
         allowedUnits: [], // Will be populated with unit IDs
@@ -29,7 +29,7 @@ class StartGamePage extends BasePage {
     };
     
     // Component instances
-    private mapViewer: MapViewer | null = null;
+    private worldViewer: WorldViewer | null = null;
 
     constructor() {
         super();
@@ -50,22 +50,22 @@ class StartGamePage extends BasePage {
         try {
             console.log('Initializing StartGamePage components');
             
-            // Subscribe to MapViewer ready event BEFORE creating the component
-            console.log('StartGamePage: Subscribing to map-viewer-ready event');
-            this.eventBus.subscribe('map-viewer-ready', () => {
-                console.log('StartGamePage: MapViewer is ready, loading map data...');
-                if (this.currentMapId) {
+            // Subscribe to WorldViewer ready event BEFORE creating the component
+            console.log('StartGamePage: Subscribing to world-viewer-ready event');
+            this.eventBus.subscribe('world-viewer-ready', () => {
+                console.log('StartGamePage: WorldViewer is ready, loading world data...');
+                if (this.currentWorldId) {
                   // Give Phaser time to fully initialize webgl context and scene
                   setTimeout(async () => {
-                    await this.loadMapData()
+                    await this.loadWorldData()
                   }, 10)
                 }
             }, 'start-game-page');
             
-            // Create MapViewer component for preview
-            const mapViewerRoot = this.ensureElement('[data-component="map-viewer"]', 'map-viewer-root');
-            console.log('StartGamePage: Creating MapViewer with eventBus:', this.eventBus);
-            this.mapViewer = new MapViewer(mapViewerRoot, this.eventBus, true);
+            // Create WorldViewer component for preview
+            const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
+            console.log('StartGamePage: Creating WorldViewer with eventBus:', this.eventBus);
+            this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
             
             console.log('StartGamePage components initialized');
             
@@ -107,72 +107,72 @@ class StartGamePage extends BasePage {
 
     /** Load document data and set initial UI states */
     private loadInitialState(): void {
-        const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
-        const mapId = mapIdInput?.value.trim() || null;
+        const worldIdInput = document.getElementById("worldIdInput") as HTMLInputElement | null;
+        const worldId = worldIdInput?.value.trim() || null;
 
-        if (mapId) {
-            this.currentMapId = mapId;
-            console.log(`Found Map ID: ${this.currentMapId}. Will load data after Phaser initialization.`);
+        if (worldId) {
+            this.currentWorldId = worldId;
+            console.log(`Found World ID: ${this.currentWorldId}. Will load data after Phaser initialization.`);
         } else {
-            console.error("Map ID input element not found or has no value. Cannot load map.");
-            this.showToast("Error", "Could not load map: Map ID missing.", "error");
+            console.error("World ID input element not found or has no value. Cannot load world.");
+            this.showToast("Error", "Could not load world: World ID missing.", "error");
         }
     }
 
     /**
-     * Load map data and coordinate between components
+     * Load world data and coordinate between components
      */
-    private async loadMapData(): Promise<void> {
+    private async loadWorldData(): Promise<void> {
         try {
-            console.log(`StartGamePage: Loading map data...`);
+            console.log(`StartGamePage: Loading world data...`);
             
-            // Load map data from the hidden JSON element
-            const mapData = this.loadMapDataFromElement();
+            // Load world data from the hidden JSON element
+            const worldData = this.loadWorldDataFromElement();
             
-            if (mapData) {
-                this.map = Map.deserialize(mapData);
-                console.log('Map data loaded successfully');
+            if (worldData) {
+                this.world = World.deserialize(worldData);
+                console.log('World data loaded successfully');
                 
-                // Calculate player count from map units
-                this.playerCount = this.calculatePlayerCountFromMap(mapData);
+                // Calculate player count from world units
+                this.playerCount = this.calculatePlayerCountFromWorld(worldData);
                 console.log('Detected player count:', this.playerCount);
                 
-                // Initialize game configuration based on map
+                // Initialize game configuration based on world
                 this.initializeGameConfiguration();
                 
                 // Bind unit restriction events (units are now server-rendered)
                 this.bindUnitRestrictionEvents();
                 
-                // Use MapViewer component to load the map
-                if (this.mapViewer) {
-                    await this.mapViewer.loadMap(mapData);
-                    this.showToast('Success', 'Map loaded successfully', 'success');
+                // Use WorldViewer component to load the world
+                if (this.worldViewer) {
+                    await this.worldViewer.loadWorld(worldData);
+                    this.showToast('Success', 'World loaded successfully', 'success');
                 } else {
-                    console.warn('MapViewer component not available');
+                    console.warn('WorldViewer component not available');
                 }
                 
             } else {
-                console.error('No map data found');
-                this.showToast('Error', 'No map data found', 'error');
+                console.error('No world data found');
+                this.showToast('Error', 'No world data found', 'error');
             }
             
         } catch (error) {
-            console.error('Failed to load map data:', error);
-            this.showToast('Error', 'Failed to load map data', 'error');
+            console.error('Failed to load world data:', error);
+            this.showToast('Error', 'Failed to load world data', 'error');
         }
     }
     
     /**
-     * Calculate player count from map units
+     * Calculate player count from world units
      */
-    private calculatePlayerCountFromMap(mapData: any): number {
-        if (!mapData || !mapData.map_units) {
+    private calculatePlayerCountFromWorld(worldData: any): number {
+        if (!worldData || !worldData.world_units) {
             return 2; // Default fallback
         }
         
-        // Find the highest player ID in map units
+        // Find the highest player ID in world units
         let maxPlayer = 0;
-        for (const unit of mapData.map_units) {
+        for (const unit of worldData.world_units) {
             if (unit.player && unit.player > maxPlayer) {
                 maxPlayer = unit.player;
             }
@@ -290,7 +290,7 @@ class StartGamePage extends BasePage {
      * Get CSS class for player color
      */
     private getPlayerColorClass(color: string): string {
-        const colorMap: { [key: string]: string } = {
+        const colorWorld: { [key: string]: string } = {
             'red': 'bg-red-500',
             'blue': 'bg-blue-500',
             'green': 'bg-green-500',
@@ -298,7 +298,7 @@ class StartGamePage extends BasePage {
             'purple': 'bg-purple-500',
             'orange': 'bg-orange-500'
         };
-        return colorMap[color] || 'bg-gray-500';
+        return colorWorld[color] || 'bg-gray-500';
     }
     
     /**
@@ -328,26 +328,26 @@ class StartGamePage extends BasePage {
     
     
     /**
-     * Load map data from the hidden JSON element in the page
+     * Load world data from the hidden JSON element in the page
      */
-    private loadMapDataFromElement(): any {
+    private loadWorldDataFromElement(): any {
         try {
-            const mapDataElement = document.getElementById('map-data-json');
-            console.log(`Map data element found: ${mapDataElement ? 'YES' : 'NO'}`);
+            const worldDataElement = document.getElementById('world-data-json');
+            console.log(`World data element found: ${worldDataElement ? 'YES' : 'NO'}`);
             
-            if (mapDataElement && mapDataElement.textContent) {
-                console.log(`Raw map data content: ${mapDataElement.textContent.substring(0, 200)}...`);
-                const mapData = JSON.parse(mapDataElement.textContent);
+            if (worldDataElement && worldDataElement.textContent) {
+                console.log(`Raw world data content: ${worldDataElement.textContent.substring(0, 200)}...`);
+                const worldData = JSON.parse(worldDataElement.textContent);
                 
-                if (mapData && mapData !== null) {
-                    console.log('Map data found in page element');
-                    return mapData;
+                if (worldData && worldData !== null) {
+                    console.log('World data found in page element');
+                    return worldData;
                 }
             }
-            console.log('No map data found in page element');
+            console.log('No world data found in page element');
             return null;
         } catch (error) {
-            console.error('Error parsing map data from page element:', error);
+            console.error('Error parsing world data from page element:', error);
             return null;
         }
     }
@@ -427,8 +427,8 @@ class StartGamePage extends BasePage {
             return;
         }
 
-        if (!this.currentMapId) {
-            this.showToast('Error', 'No map selected', 'error');
+        if (!this.currentWorldId) {
+            this.showToast('Error', 'No world selected', 'error');
             return;
         }
 
@@ -459,8 +459,8 @@ class StartGamePage extends BasePage {
                 urlParams.set(`player_${player.id}_team`, player.team.toString());
             });
             
-            // Redirect to GameViewerPage with map and configuration
-            const gameViewerUrl = `/games/${this.currentMapId}/view?${urlParams.toString()}`;
+            // Redirect to GameViewerPage with world and configuration
+            const gameViewerUrl = `/games/${this.currentWorldId}/view?${urlParams.toString()}`;
             
             console.log('Redirecting to GameViewer:', gameViewerUrl);
             this.showToast('Success', 'Starting game...', 'success');
@@ -480,7 +480,7 @@ class StartGamePage extends BasePage {
     private async callCreateGameAPI(): Promise<any> {
         // This will eventually call the CreateGame RPC endpoint
         const gameRequest = {
-            mapId: this.currentMapId,
+            worldId: this.currentWorldId,
             players: this.gameConfig.players.filter(p => p.type !== 'none').map(p => ({
                 playerId: p.id,
                 playerType: p.type,
@@ -504,14 +504,14 @@ class StartGamePage extends BasePage {
 
     public destroy(): void {
         // Clean up components
-        if (this.mapViewer) {
-            this.mapViewer.destroy();
-            this.mapViewer = null;
+        if (this.worldViewer) {
+            this.worldViewer.destroy();
+            this.worldViewer = null;
         }
         
-        // Clean up map data
-        this.map = null;
-        this.currentMapId = null;
+        // Clean up world data
+        this.world = null;
+        this.currentWorldId = null;
     }
 }
 

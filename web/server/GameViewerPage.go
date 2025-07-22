@@ -11,20 +11,20 @@ import (
 
 type GameViewerPage struct {
 	BasePage
-	Header Header
-	Map    *protos.Map
-	MapId  string
-	
+	Header  Header
+	World   *protos.World
+	WorldId string
+
 	// Game creation parameters from URL
 	PlayerCount      int
-	MaxTurns        int
+	MaxTurns         int
 	UnitRestrictions map[string]string // unitId -> restriction level
 }
 
 func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
-	p.MapId = r.PathValue("gameId") // gameId is actually mapId for now
-	if p.MapId == "" {
-		http.Error(w, "Map ID is required", http.StatusBadRequest)
+	p.WorldId = r.PathValue("gameId") // gameId is actually worldId for now
+	if p.WorldId == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		return nil, true
 	}
 
@@ -34,32 +34,32 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 	// Parse game creation parameters from query string
 	p.parseGameParameters(r)
 
-	// Load the map (same as MapEditorPage)
-	client, err := vc.ClientMgr.GetMapsSvcClient()
+	// Load the world (same as WorldEditorPage)
+	client, err := vc.ClientMgr.GetWorldsSvcClient()
 	if err != nil {
-		log.Printf("Error getting Maps client: %v", err)
+		log.Printf("Error getting Worlds client: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return nil, true
 	}
 
-	req := &protos.GetMapRequest{
-		Id: p.MapId,
+	req := &protos.GetWorldRequest{
+		Id: p.WorldId,
 	}
 
-	resp, err := client.GetMap(context.Background(), req)
+	resp, err := client.GetWorld(context.Background(), req)
 	if err != nil {
-		log.Printf("Error fetching Map %s: %v", p.MapId, err)
-		http.Error(w, "Map not found", http.StatusNotFound)
+		log.Printf("Error fetching World %s: %v", p.WorldId, err)
+		http.Error(w, "World not found", http.StatusNotFound)
 		return nil, true
 	}
 
-	if resp.Map != nil {
-		p.Map = resp.Map
-		p.Title = "Playing: " + p.Map.Name
+	if resp.World != nil {
+		p.World = resp.World
+		p.Title = "Playing: " + p.World.Name
 	}
 
-	log.Printf("GameViewerPage loaded - MapId: %s, Players: %d, MaxTurns: %d", 
-		p.MapId, p.PlayerCount, p.MaxTurns)
+	log.Printf("GameViewerPage loaded - WorldId: %s, Players: %d, MaxTurns: %d",
+		p.WorldId, p.PlayerCount, p.MaxTurns)
 
 	return nil, false
 }
@@ -67,7 +67,7 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 // parseGameParameters extracts game creation parameters from URL query string
 func (p *GameViewerPage) parseGameParameters(r *http.Request) {
 	query := r.URL.Query()
-	
+
 	// Parse player count
 	if playerCountStr := query.Get("playerCount"); playerCountStr != "" {
 		if count, err := strconv.Atoi(playerCountStr); err == nil {
@@ -78,7 +78,7 @@ func (p *GameViewerPage) parseGameParameters(r *http.Request) {
 	} else {
 		p.PlayerCount = 2
 	}
-	
+
 	// Parse max turns
 	if maxTurnsStr := query.Get("maxTurns"); maxTurnsStr != "" {
 		if turns, err := strconv.Atoi(maxTurnsStr); err == nil {
@@ -87,7 +87,7 @@ func (p *GameViewerPage) parseGameParameters(r *http.Request) {
 			p.MaxTurns = 0 // unlimited
 		}
 	}
-	
+
 	// Parse unit restrictions (format: unitId=restriction&unitId2=restriction2)
 	p.UnitRestrictions = make(map[string]string)
 	for key, values := range query {

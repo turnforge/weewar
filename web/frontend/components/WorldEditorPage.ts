@@ -4,8 +4,8 @@ import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { TileStatsPanel } from './TileStatsPanel';
 import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from './KeyboardShortcutManager';
 import { shouldIgnoreShortcut } from './DOMUtils';
-import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
-import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType, ToolStateChangedEventData, VisualStateChangedEventData, WorkflowStateChangedEventData, ToolState } from './MapEditorPageState';
+import { World, WorldObserver, WorldEvent, WorldEventType, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from './World';
+import { WorldEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType, ToolStateChangedEventData, VisualStateChangedEventData, WorkflowStateChangedEventData, ToolState } from './WorldEditorPageState';
 import { EventBus, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload, GridSetVisibilityPayload, CoordinatesSetVisibilityPayload } from './EventBus';
 import { EditorToolsPanel } from './EditorToolsPanel';
 import { ReferenceImagePanel } from './ReferenceImagePanel';
@@ -15,18 +15,18 @@ import { LifecycleController } from './LifecycleController';
 const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
 
 /**
- * Map Editor page with unified Map architecture and centralized page state
+ * World Editor page with unified World architecture and centralized page state
  * Now implements ComponentLifecycle for breadth-first initialization
  */
-class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
-    private map: Map | null = null;
-    private pageState: MapEditorPageState;
+class WorldEditorPage extends BasePage implements WorldObserver, PageStateObserver {
+    private world: World | null = null;
+    private pageState: WorldEditorPageState;
     private editorOutput: HTMLElement | null = null;
 
     // Dockview interface
     private dockview: DockviewApi | null = null;
     
-    // Phaser editor component for map editing
+    // Phaser editor component for world editing
     private phaserEditorComponent: PhaserEditorComponent | null = null;
     
     // TileStats panel for displaying statistics
@@ -49,12 +49,12 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private savedToolState: ToolState | null = null;
 
     // UI state  
-    private hasPendingMapDataLoad: boolean = false;
+    private hasPendingWorldDataLoad: boolean = false;
 
     constructor() {
         super();
         // Basic setup only - detailed initialization moved to lifecycle phases
-        this.pageState = new MapEditorPageState();
+        this.pageState = new WorldEditorPageState();
         this.pageState.subscribe(this); // Subscribe to page state changes
         this.loadInitialState();
         this.subscribeToEditorEvents();
@@ -83,12 +83,12 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             // Dependencies are set directly using explicit setters in initializeDOM phase
             
             // Start breadth-first initialization
-            await this.lifecycleController.initializeFromRoot(this, 'MapEditorPage');
+            await this.lifecycleController.initializeFromRoot(this, 'WorldEditorPage');
             
-            console.log('MapEditorPage initialization complete via LifecycleController');
+            console.log('WorldEditorPage initialization complete via LifecycleController');
             
         } catch (error) {
-            console.error('MapEditorPage lifecycle initialization failed:', error);
+            console.error('WorldEditorPage lifecycle initialization failed:', error);
             // Fallback to old initialization method if needed
             this.fallbackInitialization();
         }
@@ -113,7 +113,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
      */
     public initializeDOM(): ComponentLifecycle[] {
         try {
-            console.log('MapEditorPage: Starting DOM initialization phase');
+            console.log('WorldEditorPage: Starting DOM initialization phase');
             
             // Initialize basic components first
             this.initializeSpecificComponents();
@@ -136,14 +136,14 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 // PhaserEditorComponent communication via EventBus - no direct dependency needed
                 
                 childComponents.push(this.referenceImagePanel);
-                console.log('MapEditorPage: Created ReferenceImagePanel child component with dependencies');
+                console.log('WorldEditorPage: Created ReferenceImagePanel child component with dependencies');
             }
             
-            console.log(`MapEditorPage: DOM initialization complete, discovered ${childComponents.length} child components`);
+            console.log(`WorldEditorPage: DOM initialization complete, discovered ${childComponents.length} child components`);
             return childComponents;
             
         } catch (error) {
-            console.error('MapEditorPage: DOM initialization failed:', error);
+            console.error('WorldEditorPage: DOM initialization failed:', error);
             throw error;
         }
     }
@@ -152,17 +152,17 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
      * Phase 2: Inject dependencies from lifecycle controller
      */
     public injectDependencies(deps: Record<string, any>): void {
-        console.log('MapEditorPage: Injecting dependencies:', Object.keys(deps));
+        console.log('WorldEditorPage: Injecting dependencies:', Object.keys(deps));
         
-        // MapEditorPage doesn't need any specific dependencies from other components
+        // WorldEditorPage doesn't need any specific dependencies from other components
         // It provides dependencies to child components instead
         
         // Store a reference to the lifecycle controller if provided
         if (deps.lifecycleController) {
-            console.log('MapEditorPage: Lifecycle controller reference injected');
+            console.log('WorldEditorPage: Lifecycle controller reference injected');
         }
         
-        console.log('MapEditorPage: Dependencies injection complete');
+        console.log('WorldEditorPage: Dependencies injection complete');
     }
     
     /**
@@ -170,7 +170,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
      */
     public activate(): void {
         try {
-            console.log('MapEditorPage: Starting activation phase');
+            console.log('WorldEditorPage: Starting activation phase');
             
             // Bind events now that all components are ready
             this.bindSpecificEvents();
@@ -186,10 +186,10 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             // Update UI state
             this.updateEditorStatus('Ready');
             
-            console.log('MapEditorPage: Activation complete');
+            console.log('WorldEditorPage: Activation complete');
             
         } catch (error) {
-            console.error('MapEditorPage: Activation failed:', error);
+            console.error('WorldEditorPage: Activation failed:', error);
             throw error;
         }
     }
@@ -204,54 +204,54 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         // ReferenceImagePanel and PhaserEditorComponent communicate via EventBus
         // No direct dependencies needed - they remain decoupled
         
-        console.log('MapEditorPage: Components use EventBus communication - no direct dependencies needed');
+        console.log('WorldEditorPage: Components use EventBus communication - no direct dependencies needed');
     }
     
     /**
      * Phase 4: Deactivate and cleanup
      */
     public deactivate(): void {
-        console.log('MapEditorPage: Starting deactivation');
+        console.log('WorldEditorPage: Starting deactivation');
         
         // Use existing destroy method for cleanup
         this.destroy();
         
-        console.log('MapEditorPage: Deactivation complete');
+        console.log('WorldEditorPage: Deactivation complete');
     }
     
     // Dependencies are set directly using explicit setters - no ComponentDependencyDeclaration needed
     
-    // MapObserver implementation
-    public onMapEvent(event: MapEvent): void {
+    // WorldObserver implementation
+    public onWorldEvent(event: WorldEvent): void {
         switch (event.type) {
-            case MapEventType.MAP_LOADED:
-                const loadedData = event.data as MapLoadedEventData;
+            case WorldEventType.WORLD_LOADED:
+                const loadedData = event.data as WorldLoadedEventData;
                 this.updateEditorStatus('Loaded');
                 this.updateSaveButtonState();
                 break;
                 
-            case MapEventType.MAP_SAVED:
+            case WorldEventType.WORLD_SAVED:
                 this.updateEditorStatus('Saved');
                 this.updateSaveButtonState();
-                if (event.data.success && event.data.mapId) {
-                    // Update URL if this was a new map
-                    if (this.map?.getIsNewMap()) {
-                        history.replaceState(null, '', `/maps/${event.data.mapId}/edit`);
+                if (event.data.success && event.data.worldId) {
+                    // Update URL if this was a new world
+                    if (this.world?.getIsNewWorld()) {
+                        history.replaceState(null, '', `/worlds/${event.data.worldId}/edit`);
                     }
                 }
                 break;
                 
-            case MapEventType.TILES_CHANGED:
-            case MapEventType.UNITS_CHANGED:
-                // Map data changed, update UI state
+            case WorldEventType.TILES_CHANGED:
+            case WorldEventType.UNITS_CHANGED:
+                // World data changed, update UI state
                 this.updateSaveButtonState();
                 break;
                 
-            case MapEventType.MAP_CLEARED:
+            case WorldEventType.WORLD_CLEARED:
                 this.updateSaveButtonState();
                 break;
                 
-            case MapEventType.MAP_METADATA_CHANGED:
+            case WorldEventType.WORLD_METADATA_CHANGED:
                 this.updateSaveButtonState();
                 break;
         }
@@ -262,7 +262,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         switch (event.type) {
             case PageStateEventType.TOOL_STATE_CHANGED:
                 // Tool state changes are handled by components that need them
-                // MapEditorPage mainly coordinates but doesn't need to react to tool changes
+                // WorldEditorPage mainly coordinates but doesn't need to react to tool changes
                 this.logToConsole(`Tool state changed: ${JSON.stringify(event.data)}`);
                 break;
                 
@@ -283,7 +283,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
      * This prevents race conditions where components emit events before subscribers are ready
      */
     private subscribeToEditorEvents(): void {
-        console.log('MapEditorPage: Subscribing to editor events');
+        console.log('WorldEditorPage: Subscribing to editor events');
         
         // Note: Tool state changes now handled via PageState Observer pattern
         // EditorToolsPanel directly updates pageState, which notifies observers
@@ -291,23 +291,23 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         // Subscribe to tile clicks from Phaser
         this.eventBus.subscribe<TileClickedPayload>(EditorEventTypes.TILE_CLICKED, (payload) => {
             this.handlePhaserTileClick(payload.data.q, payload.data.r);
-        }, 'map-editor-page');
+        }, 'world-editor-page');
         
         // Subscribe to Phaser ready event
         this.eventBus.subscribe(EditorEventTypes.PHASER_READY, () => {
             this.handlePhaserReady();
-        }, 'map-editor-page');
+        }, 'world-editor-page');
         
-        // Map changes are automatically tracked by Map class via Observer pattern
+        // World changes are automatically tracked by World class via Observer pattern
         
-        console.log('MapEditorPage: Editor event subscriptions complete');
+        console.log('WorldEditorPage: Editor event subscriptions complete');
     }
 
     protected initializeSpecificComponents(): void {
-        const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
-        const isNewMapInput = document.getElementById("isNewMap") as HTMLInputElement | null;
+        const worldIdInput = document.getElementById("worldIdInput") as HTMLInputElement | null;
+        const isNewWorldInput = document.getElementById("isNewWorld") as HTMLInputElement | null;
         
-        // Map ID and new map state are now handled by the Map instance
+        // World ID and new world state are now handled by the World instance
 
         this.editorOutput = document.getElementById('editor-output');
 
@@ -394,9 +394,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
 
     protected bindSpecificEvents(): void {
         // Header buttons
-        const saveButton = document.getElementById('save-map-btn');
+        const saveButton = document.getElementById('save-world-btn');
         if (saveButton) {
-            saveButton.addEventListener('click', this.saveMap.bind(this));
+            saveButton.addEventListener('click', this.saveWorld.bind(this));
         }
 
         // Keyboard shortcuts
@@ -406,8 +406,8 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 // Only handle our specific shortcuts in input fields, let other keys pass through
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
-                    if (this.map?.getHasUnsavedChanges()) {
-                        this.saveMap();
+                    if (this.world?.getHasUnsavedChanges()) {
+                        this.saveWorld();
                     }
                 }
                 return;
@@ -416,15 +416,15 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             // Ctrl+S or Cmd+S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                if (this.map?.getHasUnsavedChanges()) {
-                    this.saveMap();
+                if (this.world?.getHasUnsavedChanges()) {
+                    this.saveWorld();
                 }
             }
         });
 
-        const exportButton = document.getElementById('export-map-btn');
+        const exportButton = document.getElementById('export-world-btn');
         if (exportButton) {
-            exportButton.addEventListener('click', this.exportMap.bind(this));
+            exportButton.addEventListener('click', this.exportWorld.bind(this));
         }
 
 
@@ -433,51 +433,51 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             clearConsoleButton.addEventListener('click', this.clearConsole.bind(this));
         }
 
-        // Map title editing
-        const mapTitleInput = document.getElementById('map-title-input') as HTMLInputElement;
+        // World title editing
+        const worldTitleInput = document.getElementById('world-title-input') as HTMLInputElement;
         const saveTitleButton = document.getElementById('save-title-btn') as HTMLButtonElement;
         const cancelTitleButton = document.getElementById('cancel-title-btn') as HTMLButtonElement;
         
-        if (mapTitleInput && saveTitleButton && cancelTitleButton) {
-            let originalTitle = mapTitleInput.value;
+        if (worldTitleInput && saveTitleButton && cancelTitleButton) {
+            let originalTitle = worldTitleInput.value;
             let isEditing = false;
             
             const updateEditingState = (editing: boolean) => {
                 isEditing = editing;
                 if (editing) {
-                    mapTitleInput.classList.add('editing');
+                    worldTitleInput.classList.add('editing');
                     saveTitleButton.classList.remove('hidden');
                     cancelTitleButton.classList.remove('hidden');
                 } else {
-                    mapTitleInput.classList.remove('editing');
+                    worldTitleInput.classList.remove('editing');
                     saveTitleButton.classList.add('hidden');
                     cancelTitleButton.classList.add('hidden');
                 }
             };
             
             const cancelEditing = () => {
-                mapTitleInput.value = originalTitle;
-                mapTitleInput.blur();
+                worldTitleInput.value = originalTitle;
+                worldTitleInput.blur();
                 updateEditingState(false);
                 resizeInput();
             };
             
             const saveTitle = () => {
-                const newTitle = mapTitleInput.value.trim();
+                const newTitle = worldTitleInput.value.trim();
                 if (newTitle && newTitle !== originalTitle) {
-                    this.saveMapTitle(newTitle);
+                    this.saveWorldTitle(newTitle);
                     originalTitle = newTitle; // Update original after successful save
                 }
-                mapTitleInput.blur();
+                worldTitleInput.blur();
                 updateEditingState(false);
             };
             
             // Focus events for editing state
-            mapTitleInput.addEventListener('focus', () => {
+            worldTitleInput.addEventListener('focus', () => {
                 updateEditingState(true);
             });
             
-            mapTitleInput.addEventListener('blur', (e) => {
+            worldTitleInput.addEventListener('blur', (e) => {
                 // Don't blur if clicking on save/cancel buttons
                 const relatedTarget = e.relatedTarget as HTMLElement;
                 if (relatedTarget && (relatedTarget.id === 'save-title-btn' || relatedTarget.id === 'cancel-title-btn')) {
@@ -485,22 +485,22 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 }
                 
                 // Auto-save if there are changes
-                const newTitle = mapTitleInput.value.trim();
+                const newTitle = worldTitleInput.value.trim();
                 if (newTitle && newTitle !== originalTitle) {
-                    this.saveMapTitle(newTitle);
+                    this.saveWorldTitle(newTitle);
                     originalTitle = newTitle;
                 } else if (!newTitle) {
-                    mapTitleInput.value = originalTitle;
+                    worldTitleInput.value = originalTitle;
                 }
                 updateEditingState(false);
             });
             
             // Input changes
-            mapTitleInput.addEventListener('input', () => {
+            worldTitleInput.addEventListener('input', () => {
                 resizeInput();
-                const hasChanges = mapTitleInput.value.trim() !== originalTitle;
+                const hasChanges = worldTitleInput.value.trim() !== originalTitle;
                 // Update button states based on changes
-                if (hasChanges && mapTitleInput.value.trim()) {
+                if (hasChanges && worldTitleInput.value.trim()) {
                     saveTitleButton.classList.remove('opacity-50');
                     saveTitleButton.disabled = false;
                 } else {
@@ -510,7 +510,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             });
             
             // Keyboard shortcuts
-            mapTitleInput.addEventListener('keydown', (e) => {
+            worldTitleInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     saveTitle();
@@ -533,10 +533,10 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             
             // Auto-resize input based on content
             const resizeInput = () => {
-                mapTitleInput.style.width = 'auto';
-                mapTitleInput.style.width = Math.max(120, mapTitleInput.scrollWidth + 20) + 'px';
+                worldTitleInput.style.width = 'auto';
+                worldTitleInput.style.width = Math.max(120, worldTitleInput.scrollWidth + 20) + 'px';
             };
-            mapTitleInput.addEventListener('input', resizeInput);
+            worldTitleInput.addEventListener('input', resizeInput);
             resizeInput(); // Initial resize
         }
 
@@ -567,9 +567,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                     console.log('Fill All Grass clicked via delegation');
                     this.fillAllGrass();
                     break;
-                case 'create-island-map':
-                    console.log('Create Island Map clicked via delegation');
-                    this.createIslandMap();
+                case 'create-island-world':
+                    console.log('Create Island World clicked via delegation');
+                    this.createIslandWorld();
                     break;
                 case 'create-mountain-ridge':
                     console.log('Create Mountain Ridge clicked via delegation');
@@ -583,9 +583,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                     console.log('Randomize Terrain clicked via delegation');
                     this.randomizeTerrain();
                     break;
-                case 'clear-map':
-                    console.log('Clear Map clicked via delegation');
-                    this.clearMap();
+                case 'clear-world':
+                    console.log('Clear World clicked via delegation');
+                    this.clearWorld();
                     break;
                 case 'download-image':
                     console.log('Download Image clicked via delegation');
@@ -749,70 +749,70 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.updateEditorStatus('Initializing...');
 
         // Read initial state from DOM
-        const mapIdInput = document.getElementById("mapIdInput") as HTMLInputElement | null;
-        const isNewMapInput = document.getElementById("isNewMap") as HTMLInputElement | null;
+        const worldIdInput = document.getElementById("worldIdInput") as HTMLInputElement | null;
+        const isNewWorldInput = document.getElementById("isNewWorld") as HTMLInputElement | null;
         
-        const mapId = mapIdInput?.value.trim() || null;
-        const isNewMap = isNewMapInput?.value === "true";
+        const worldId = worldIdInput?.value.trim() || null;
+        const isNewWorld = isNewWorldInput?.value === "true";
 
-        // Create Map instance and subscribe to events
-        this.map = new Map('New Map', 8, 8);
-        this.map.subscribe(this);
+        // Create World instance and subscribe to events
+        this.world = new World('New World', 8, 8);
+        this.world.subscribe(this);
         
-        if (!isNewMap && mapId) {
-            // Load existing map
-            this.map.setMapId(mapId);
-            this.loadExistingMap(mapId);
+        if (!isNewWorld && worldId) {
+            // Load existing world
+            this.world.setWorldId(worldId);
+            this.loadExistingWorld(worldId);
         } else {
-            // Initialize new map
-            this.initializeNewMap();
+            // Initialize new world
+            this.initializeNewWorld();
         }
         
         // Phaser component initialization will be handled by dockview when the component is created
     }
 
 
-    private initializeNewMap(): void {
-        // Try to load template map data from hidden element first
+    private initializeNewWorld(): void {
+        // Try to load template world data from hidden element first
         try {
-            this.map!.loadFromElement('map-data-json');
-            this.hasPendingMapDataLoad = true;
+            this.world!.loadFromElement('world-data-json');
+            this.hasPendingWorldDataLoad = true;
         } catch (error) {
-            // No template data, map is already initialized as empty
-            console.log('No template data found, using empty map');
-            this.hasPendingMapDataLoad = true;
+            // No template data, world is already initialized as empty
+            console.log('No template data found, using empty world');
+            this.hasPendingWorldDataLoad = true;
         }
         
-        this.updateEditorStatus('New Map');
+        this.updateEditorStatus('New World');
     }
 
-    private async loadExistingMap(mapId: string): Promise<void> {
+    private async loadExistingWorld(worldId: string): Promise<void> {
         try {
-            await this.map!.load(mapId);
-            this.hasPendingMapDataLoad = true;
+            await this.world!.load(worldId);
+            this.hasPendingWorldDataLoad = true;
         } catch (error) {
-            console.error('Failed to load map:', error);
-            this.logToConsole(`Failed to load map: ${error}`);
+            console.error('Failed to load world:', error);
+            this.logToConsole(`Failed to load world: ${error}`);
             this.updateEditorStatus('Load Error');
         }
     }
     
     /**
-     * Load map data from hidden element in the HTML
+     * Load world data from hidden element in the HTML
      */
     
     /**
-     * Load map data (tiles and units) into the Phaser scene
+     * Load world data (tiles and units) into the Phaser scene
      */
-    private async loadMapDataIntoPhaser(): Promise<void> {
+    private async loadWorldDataIntoPhaser(): Promise<void> {
         
-        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized() || !this.map) {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized() || !this.world) {
             return;
         }
         
         try {
             // Load tiles first using setTilesData for better performance
-            const allTiles = this.map.getAllTiles();
+            const allTiles = this.world.getAllTiles();
             if (allTiles.length > 0) {
                 const tilesArray: Array<{ q: number; r: number; terrain: number; color: number }> = [];
                 allTiles.forEach(tile => {
@@ -830,7 +830,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             }
             
             // Load units AFTER tiles are loaded - ensure proper rendering order
-            const allUnits = this.map.getAllUnits();
+            const allUnits = this.world.getAllUnits();
             if (allUnits.length > 0) {
                 let unitsLoaded = 0;
                 
@@ -849,25 +849,25 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                     // Refresh tile stats after all loading is complete
                     this.refreshTileStats();
                     
-                    // Center camera on the loaded map
-                    this.centerCameraOnMap();
+                    // Center camera on the loaded world
+                    this.centerCameraOnWorld();
                 }, 300); // Increased delay to ensure tiles are rendered first
             } else {
                 // No units to load, refresh stats immediately
                 this.refreshTileStats();
                 
-                // Center camera on the loaded map
-                this.centerCameraOnMap();
+                // Center camera on the loaded world
+                this.centerCameraOnWorld();
             }
             
         } catch (error) {
-            console.error('Error loading map data into Phaser:', error);
+            console.error('Error loading world data into Phaser:', error);
             this.logToConsole(`Error loading into Phaser: ${error}`);
         }
     }
 
     /**
-     * Show loading indicator on map
+     * Show loading indicator on world
      */
 
 
@@ -900,7 +900,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.eventBus.emit<GridSetVisibilityPayload>(
             EditorEventTypes.GRID_SET_VISIBILITY,
             { show: showGrid },
-            'map-editor-page'
+            'world-editor-page'
         );
         this.logToConsole(`Grid visibility set to: ${showGrid}`);
     }
@@ -915,7 +915,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.eventBus.emit<CoordinatesSetVisibilityPayload>(
             EditorEventTypes.COORDINATES_SET_VISIBILITY,
             { show: showCoordinates },
-            'map-editor-page'
+            'world-editor-page'
         );
         this.logToConsole(`Coordinates visibility set to: ${showCoordinates}`);
     }
@@ -938,15 +938,15 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     // Advanced tool functions
     public fillAllGrass(): void {
         
-        if (this.map) {
-            this.map.fillAllTerrain(1, 0); // Terrain type 1 = Grass
-            this.logToConsole('Filled map with grass via Map Observer pattern');
+        if (this.world) {
+            this.world.fillAllTerrain(1, 0); // Terrain type 1 = Grass
+            this.logToConsole('Filled world with grass via World Observer pattern');
         } else {
-            this.logToConsole('Map not available, cannot fill grass');
+            this.logToConsole('World not available, cannot fill grass');
         }
     }
 
-    public createIslandMap(): void {
+    public createIslandWorld(): void {
         
         if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized()) {
             // Get current viewport center
@@ -960,7 +960,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
 
     public createMountainRidge(): void {
         
-        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized() && this.map) {
+        if (this.phaserEditorComponent && this.phaserEditorComponent.getIsInitialized() && this.world) {
             // Get current viewport center
             const center = this.phaserEditorComponent.getViewportCenter();
             
@@ -975,14 +975,14 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                     const relativeR = r - center.r;
                     // Create a ridge pattern - mountains in center, rocks on edges
                     if (Math.abs(relativeR) <= 1) {
-                        this.map.setTileAt(q, r, 4, 0); // Mountain
+                        this.world.setTileAt(q, r, 4, 0); // Mountain
                     } else {
-                        this.map.setTileAt(q, r, 5, 0); // Rock
+                        this.world.setTileAt(q, r, 5, 0); // Rock
                     }
                 }
             }
         } else {
-            this.logToConsole('Map or Phaser panel not available, cannot create mountain ridge');
+            this.logToConsole('World or Phaser panel not available, cannot create mountain ridge');
         }
     }
 
@@ -1028,39 +1028,39 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }
     }
 
-    public clearMap(): void {
-        console.log('clearMap() method called');
-        this.logToConsole('Clearing entire map...');
+    public clearWorld(): void {
+        console.log('clearWorld() method called');
+        this.logToConsole('Clearing entire world...');
         
-        // Clear map data - this will trigger observer notifications to update Phaser
-        if (this.map) {
-            console.log('Map instance exists, calling clearAll()');
-            this.map.clearAll();
-            this.logToConsole('Map data cleared - Phaser will update via observer pattern');
+        // Clear world data - this will trigger observer notifications to update Phaser
+        if (this.world) {
+            console.log('World instance exists, calling clearAll()');
+            this.world.clearAll();
+            this.logToConsole('World data cleared - Phaser will update via observer pattern');
         } else {
-            console.log('Map instance is null!');
-            this.logToConsole('Map instance not available');
+            console.log('World instance is null!');
+            this.logToConsole('World instance not available');
         }
         
         // Show success message
-        this.showToast('Map Cleared', 'All tiles and units have been removed', 'info');
-        this.logToConsole('Clear map operation completed');
+        this.showToast('World Cleared', 'All tiles and units have been removed', 'info');
+        this.logToConsole('Clear world operation completed');
     }
 
     // Canvas management methods removed - now handled by Phaser panel
 
-    private async saveMap(): Promise<void> {
-        if (!this.map) {
-            this.showToast('Error', 'No map data to save', 'error');
+    private async saveWorld(): Promise<void> {
+        if (!this.world) {
+            this.showToast('Error', 'No world data to save', 'error');
             return;
         }
 
         try {
             this.updateEditorStatus('Saving...');
-            const result = await this.map.save();
+            const result = await this.world.save();
 
             if (result.success) {
-                this.showToast('Success', 'Map saved successfully', 'success');
+                this.showToast('Success', 'World saved successfully', 'success');
             } else {
                 throw new Error(result.error || 'Unknown save error');
             }
@@ -1068,24 +1068,24 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             console.error('Save failed:', error);
             this.logToConsole(`Save failed: ${error}`);
             this.updateEditorStatus('Save Error');
-            this.showToast('Error', 'Failed to save map', 'error');
+            this.showToast('Error', 'Failed to save world', 'error');
         }
     }
 
-    private async exportMap(): Promise<void> {
-        if (!this.map || !this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
-            this.showToast('Error', 'No map data to export', 'error');
+    private async exportWorld(): Promise<void> {
+        if (!this.world || !this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized()) {
+            this.showToast('Error', 'No world data to export', 'error');
             return;
         }
 
         try {
-            // Map now handles its own export operations
-            const result = await this.map.save();
+            // World now handles its own export operations
+            const result = await this.world.save();
             
             if (result.success) {
-                this.showToast('Success', 'Map exported successfully', 'success');
+                this.showToast('Success', 'World exported successfully', 'success');
             } else {
-                this.showToast('Error', result.error || 'Failed to export map', 'error');
+                this.showToast('Error', result.error || 'Failed to export world', 'error');
             }
         } catch (error) {
             console.error('Export failed:', error);
@@ -1093,39 +1093,39 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }
     }
 
-    private async saveMapTitle(newTitle: string): Promise<void> {
+    private async saveWorldTitle(newTitle: string): Promise<void> {
         if (!newTitle.trim()) {
-            this.showToast('Error', 'Map title cannot be empty', 'error');
+            this.showToast('Error', 'World title cannot be empty', 'error');
             return;
         }
 
-        const oldTitle = this.map?.getName() || 'Untitled Map';
+        const oldTitle = this.world?.getName() || 'Untitled World';
 
-        // Update the local map data
-        if (this.map) {
-            this.map.setName(newTitle);
+        // Update the local world data
+        if (this.world) {
+            this.world.setName(newTitle);
         }
 
         try {
-            this.logToConsole(`Updating map title to: ${newTitle}`);
+            this.logToConsole(`Updating world title to: ${newTitle}`);
             
-            // Save the map (this will include the title update)
-            await this.saveMap();
+            // Save the world (this will include the title update)
+            await this.saveWorld();
             
-            this.showToast('Success', 'Map title updated', 'success');
+            this.showToast('Success', 'World title updated', 'success');
             
         } catch (error) {
-            console.error('Failed to save map title:', error);
-            this.logToConsole(`Failed to save map title: ${error}`);
-            this.showToast('Error', 'Failed to update map title', 'error');
+            console.error('Failed to save world title:', error);
+            this.logToConsole(`Failed to save world title: ${error}`);
+            this.showToast('Error', 'Failed to update world title', 'error');
             
             // Revert the title on error
-            if (this.map) {
-                this.map.setName(oldTitle);
+            if (this.world) {
+                this.world.setName(oldTitle);
             }
-            const mapTitleInput = document.getElementById('map-title-input') as HTMLInputElement;
-            if (mapTitleInput) {
-                mapTitleInput.value = oldTitle;
+            const worldTitleInput = document.getElementById('world-title-input') as HTMLInputElement;
+            if (worldTitleInput) {
+                worldTitleInput.value = oldTitle;
             }
         }
     }
@@ -1148,7 +1148,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             this.editorOutput.innerHTML = currentContent + (currentContent ? '<br>' : '') + this.escapeHtml(logEntry);
             this.editorOutput.scrollTop = this.editorOutput.scrollHeight;
         }
-        console.log(`[MapEditor] ${message}`);
+        console.log(`[WorldEditor] ${message}`);
     }
 
     private escapeHtml(text: string): string {
@@ -1233,7 +1233,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             element: container,
             init: () => {
                 // Initialize PhaserEditorComponent
-                this.phaserEditorComponent = new PhaserEditorComponent(container, this.eventBus, this.pageState, this.map, true);
+                this.phaserEditorComponent = new PhaserEditorComponent(container, this.eventBus, this.pageState, this.world, true);
                 this.logToConsole('PhaserEditorComponent initialized');
                 
                 // Bind grid and coordinates checkboxes now that the template is in the DOM
@@ -1356,11 +1356,11 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private createDefaultDockviewLayout(): void {
         if (!this.dockview) return;
 
-        // Add main Phaser Map editor panel first (center) - will take remaining width
+        // Add main Phaser World editor panel first (center) - will take remaining width
         this.dockview.addPanel({
             id: 'phaser',
             component: 'phaser',
-            title: '🗺️ Map Editor'
+            title: '🗺️ World Editor'
         });
 
         // Add tools panel to the left of Phaser (270px width)
@@ -1383,7 +1383,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         this.dockview.addPanel({
             id: 'tilestats',
             component: 'tilestats',
-            title: '📊 Map Statistics',
+            title: '📊 World Statistics',
             position: { direction: 'below', referencePanel: 'advancedTools' }
         });
         
@@ -1436,7 +1436,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
                 referenceImagePanel.api.setSize({ height: 300 });
             }
 
-            this.logToConsole('Panel sizes set: Tools=270px, Advanced=260px, ReferenceImage=300px, Map Editor=remaining');
+            this.logToConsole('Panel sizes set: Tools=270px, Advanced=260px, ReferenceImage=300px, World Editor=remaining');
         } catch (error) {
             this.logToConsole(`Failed to set panel sizes: ${error}`);
         }
@@ -1446,11 +1446,11 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         if (!this.dockview) return;
         
         const layout = this.dockview.toJSON();
-        localStorage.setItem('map-editor-dockview-layout', JSON.stringify(layout));
+        localStorage.setItem('world-editor-dockview-layout', JSON.stringify(layout));
     }
     
     private loadDockviewLayout(): any {
-        const saved = localStorage.getItem('map-editor-dockview-layout');
+        const saved = localStorage.getItem('world-editor-dockview-layout');
         return saved ? JSON.parse(saved) : null;
     }
 
@@ -1458,7 +1458,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private setupUnsavedChangesWarning(): void {
         // Browser beforeunload warning
         window.addEventListener('beforeunload', (e) => {
-            if (this.map?.getHasUnsavedChanges()) {
+            if (this.world?.getHasUnsavedChanges()) {
                 e.preventDefault();
                 e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
                 return 'You have unsaved changes. Are you sure you want to leave?';
@@ -1471,13 +1471,13 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }, 100);
     }
     
-    // Map changes are now automatically tracked via Observer pattern
+    // World changes are now automatically tracked via Observer pattern
     // No need for manual tracking
     
     private updateSaveButtonState(): void {
-        const saveButton = document.getElementById('save-map-btn');
-        if (saveButton && this.map) {
-            if (this.map.getHasUnsavedChanges()) {
+        const saveButton = document.getElementById('save-world-btn');
+        if (saveButton && this.world) {
+            if (this.world.getHasUnsavedChanges()) {
                 saveButton.classList.remove('opacity-50');
                 saveButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
                 saveButton.removeAttribute('disabled');
@@ -1540,9 +1540,9 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
      * Set unit at the given coordinates - Observer pattern handles Phaser updates
      */
     private setUnitAt(q: number, r: number, unitType: number, playerId: number): void {
-        // Update map data - Observer pattern will handle Phaser updates
-        if (this.map) {
-            this.map.setUnitAt(q, r, unitType, playerId);
+        // Update world data - Observer pattern will handle Phaser updates
+        if (this.world) {
+            this.world.setUnitAt(q, r, unitType, playerId);
         }
     }
     
@@ -1602,10 +1602,10 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             await this.tileStatsPanel.initializeDOM();
             
             // Phase 2: Set dependencies directly using explicit setters
-            if (this.map) {
-                this.tileStatsPanel.setMap(this.map);
+            if (this.world) {
+                this.tileStatsPanel.setWorld(this.world);
             } else {
-                throw new Error('Map is not available for TileStatsPanel');
+                throw new Error('World is not available for TileStatsPanel');
             }
             await this.tileStatsPanel.injectDependencies({});
             
@@ -1632,20 +1632,20 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             return;
         }
         
-        // TileStatsPanel now reads directly from Map
+        // TileStatsPanel now reads directly from World
         this.tileStatsPanel.refreshStats();
     }
     
     /**
-     * Center the camera on the loaded map by calculating bounds and focusing on center
+     * Center the camera on the loaded world by calculating bounds and focusing on center
      */
-    private centerCameraOnMap(): void {
-        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized() || !this.map) {
+    private centerCameraOnWorld(): void {
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.getIsInitialized() || !this.world) {
             this.logToConsole('Cannot center camera - components not ready');
             return;
         }
         
-        const allTiles = this.map.getAllTiles();
+        const allTiles = this.world.getAllTiles();
         if (allTiles.length === 0) {
             this.logToConsole('No tiles to center camera on');
             return;
@@ -1720,7 +1720,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         }
     }
     
-    // Visual index mapping functions
+    // Visual index worldping functions
     private getTerrainIdByNatureIndex(index: number): number | null {
         if (index === 0) return 0; // Clear button
         
@@ -1797,7 +1797,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
             return;
         }
         
-        // Use visual index mapping
+        // Use visual index worldping
         const terrainId = this.getTerrainIdByNatureIndex(index);
         const terrainName = this.getTerrainNameByNatureIndex(index);
         
@@ -1813,7 +1813,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private previewCityTerrain(args?: string): void {
         const index = parseInt(args || '1');
         
-        // Use visual index mapping
+        // Use visual index worldping
         const terrainId = this.getTerrainIdByCityIndex(index);
         const terrainName = this.getTerrainNameByCityIndex(index);
         
@@ -1829,7 +1829,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private previewUnit(args?: string): void {
         const index = parseInt(args || '1');
         
-        // Use visual index mapping
+        // Use visual index worldping
         const unitId = this.getUnitIdByIndex(index);
         const unitName = this.getUnitNameByIndex(index);
         
@@ -1865,7 +1865,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     private previewBrushSize(args?: string): void {
         const index = parseInt(args || '1'); // 1-based index
         
-        // Map 1-based index to actual brush size values
+        // World 1-based index to actual brush size values
         const brushSizeValues = [0, 1, 3, 5, 10, 15]; // Corresponds to the select options
         
         if (index >= 1 && index <= brushSizeValues.length) {
@@ -2172,7 +2172,7 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
         
         this.hidePreviewIndicator(); // Hide preview indicator when committing
         
-        // Map 1-based index to actual brush size values
+        // World 1-based index to actual brush size values
         const brushSizeValues = [0, 1, 3, 5, 10, 15]; // Corresponds to the select options
         
         if (index >= 1 && index <= brushSizeValues.length) {
@@ -2252,15 +2252,15 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
     // Old EventBus handlers removed - components now use pageState directly
     
     private handlePhaserReady(): void {
-        console.log('MapEditorPage: Phaser ready via EventBus');
+        console.log('WorldEditorPage: Phaser ready via EventBus');
         this.logToConsole('EventBus: Phaser editor is ready');
         
-        // Load pending map data if available
-        if (this.hasPendingMapDataLoad) {
-            console.log('MapEditorPage: Loading pending map data');
+        // Load pending world data if available
+        if (this.hasPendingWorldDataLoad) {
+            console.log('WorldEditorPage: Loading pending world data');
             // Give Phaser time to fully initialize webgl context and scene
             setTimeout(() => {
-                this.loadMapDataIntoPhaser();
+                this.loadWorldDataIntoPhaser();
             }, 10);
         }
     }
@@ -2289,5 +2289,5 @@ class MapEditorPage extends BasePage implements MapObserver, PageStateObserver {
 
 // Initialize the editor when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new MapEditorPage();
+    new WorldEditorPage();
 });

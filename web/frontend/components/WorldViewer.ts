@@ -1,70 +1,66 @@
 import { BaseComponent, DOMValidation } from './Component';
-import { EventBus, EventPayload, EventTypes, MapDataLoadedPayload } from './EventBus';
+import { EventBus, EventPayload, EventTypes, WorldDataLoadedPayload } from './EventBus';
 import { PhaserViewer } from './PhaserViewer';
-import { Map } from './Map';
+import { World } from './World';
 
 /**
- * MapViewer Component - Manages Phaser-based map visualization
+ * WorldViewer Component - Manages Phaser-based world visualization
  * Responsible for:
  * - Phaser initialization and lifecycle management
- * - Map data rendering (tiles and units)
+ * - World data rendering (tiles and units)
  * - Camera controls and viewport management
  * - Theme and display options
  * 
  * Layout and styling are handled by parent container and CSS classes.
  */
-export class MapViewer extends BaseComponent {
+export class WorldViewer extends BaseComponent {
     private phaserViewer: PhaserViewer | null;
-    private loadedMapData: MapDataLoadedPayload | null;
+    private loadedWorldData: WorldDataLoadedPayload | null;
     private viewerContainer: HTMLElement | null;
     
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
-        console.log('MapViewer constructor: received eventBus:', eventBus);
-        super('map-viewer', rootElement, eventBus, debugMode);
+        console.log('WorldViewer constructor: received eventBus:', eventBus);
+        super('world-viewer', rootElement, eventBus, debugMode);
     }
     
     protected initializeComponent(): void {
-        this.log('Initializing MapViewer component');
+        this.log('Initializing WorldViewer component');
         
-        // Subscribe to map data events
-        this.subscribe<MapDataLoadedPayload>(EventTypes.MAP_DATA_LOADED, (payload) => {
-            this.handleMapDataLoaded(payload);
+        // Subscribe to world data events
+        this.subscribe<WorldDataLoadedPayload>(EventTypes.WORLD_DATA_LOADED, (payload) => {
+            this.handleWorldDataLoaded(payload);
         });
         
-        this.log('MapViewer component initialized');
+        this.log('WorldViewer component initialized');
     }
     
     protected bindToDOM(): void {
         try {
-            this.log('Binding MapViewer to DOM');
+            this.log('Binding WorldViewer to DOM');
             
-            // Find or create the Phaser container within our root element
-            this.viewerContainer = this.findElement('#phaser-viewer-container');
-            console.log('After findElement:', this.viewerContainer);
+            // Use the root element directly as the viewer container
+            // since GameViewerPage passes the phaser-viewer-container element directly
+            this.viewerContainer = this.rootElement;
             
-            if (!this.viewerContainer) {
-                // Create the container if it doesn't exist
-                this.viewerContainer = document.createElement('div');
-                this.viewerContainer.id = 'phaser-viewer-container';
+            // Ensure the container has the right classes
+            if (!this.viewerContainer.classList.contains('w-full')) {
                 this.viewerContainer.className = 'w-full h-full min-h-96';
-                this.rootElement.appendChild(this.viewerContainer);
-                console.log('After creating container:', this.viewerContainer);
             }
             
-            this.log('MapViewer bound to DOM');
+            this.log('WorldViewer bound to DOM, container:', this.viewerContainer);
             
             // Initialize Phaser viewer immediately
-            console.log('MapViewer: About to call initializePhaserViewer()');
+            console.log('WorldViewer: About to call initializePhaserViewer()');
             this.initializePhaserViewer();
-            console.log('MapViewer: Called initializePhaserViewer()');
+            console.log('WorldViewer: Called initializePhaserViewer()');
             
         } catch (error) {
-            this.handleError('Failed to bind MapViewer to DOM', error);
+            this.handleError('Failed to bind WorldViewer to DOM', error);
         }
     }
     
     protected destroyComponent(): void {
-        this.log('Destroying MapViewer component');
+        this.log('Destroying WorldViewer component');
         
         // Clean up Phaser viewer
         if (this.phaserViewer) {
@@ -72,7 +68,7 @@ export class MapViewer extends BaseComponent {
             this.phaserViewer = null;
         }
         
-        this.loadedMapData = null;
+        this.loadedWorldData = null;
         this.viewerContainer = null;
     }
     
@@ -100,13 +96,13 @@ export class MapViewer extends BaseComponent {
      */
     private initializePhaserViewer(): void {
         try {
-            console.log('MapViewer: initializePhaserViewer() called');
+            console.log('WorldViewer: initializePhaserViewer() called');
             if (!this.viewerContainer) {
                 throw new Error('Viewer container not available');
             }
             
             this.log('Initializing Phaser viewer');
-            console.log('MapViewer: viewerContainer is:', this.viewerContainer);
+            console.log('WorldViewer: viewerContainer is:', this.viewerContainer);
             
             // Create new PhaserViewer instance
             this.phaserViewer = new PhaserViewer();
@@ -123,16 +119,16 @@ export class MapViewer extends BaseComponent {
             }
             
             // Emit ready event
-            console.log('MapViewer: Emitting MAP_VIEWER_READY event');
-            this.emit(EventTypes.MAP_VIEWER_READY, {
+            console.log('WorldViewer: Emitting WORLD_VIEWER_READY event');
+            this.emit(EventTypes.WORLD_VIEWER_READY, {
                 componentId: this.componentId,
                 success: true
             });
-            console.log('MapViewer: MAP_VIEWER_READY event emitted');
+            console.log('WorldViewer: WORLD_VIEWER_READY event emitted');
             
-            // Load map data if we have it
-            if (this.loadedMapData) {
-                this.loadMapIntoViewer(this.loadedMapData);
+            // Load world data if we have it
+            if (this.loadedWorldData) {
+                this.loadWorldIntoViewer(this.loadedWorldData);
             }
             
             this.log('Phaser viewer initialized successfully');
@@ -141,7 +137,7 @@ export class MapViewer extends BaseComponent {
             this.handleError('Failed to initialize Phaser viewer', error);
             
             // Emit error event
-            this.emit(EventTypes.MAP_VIEWER_ERROR, {
+            this.emit(EventTypes.WORLD_VIEWER_ERROR, {
                 componentId: this.componentId,
                 error: error,
             });
@@ -149,39 +145,39 @@ export class MapViewer extends BaseComponent {
     }
     
     /**
-     * Handle map data loaded event
+     * Handle world data loaded event
      */
-    private handleMapDataLoaded(payload: EventPayload<MapDataLoadedPayload>): void {
-        this.log(`Received map data for map: ${payload.data.mapId}`);
-        this.loadedMapData = payload.data;
+    private handleWorldDataLoaded(payload: EventPayload<WorldDataLoadedPayload>): void {
+        this.log(`Received world data for world: ${payload.data.worldId}`);
+        this.loadedWorldData = payload.data;
         
         // Load into Phaser if viewer is ready
         if (this.phaserViewer && this.phaserViewer.getIsInitialized()) {
-            this.loadMapIntoViewer(payload.data);
+            this.loadWorldIntoViewer(payload.data);
         }
     }
     
     /**
-     * Load map data into the Phaser viewer
+     * Load world data into the Phaser viewer
      */
-    private async loadMapIntoViewer(mapData: MapDataLoadedPayload): Promise<void> {
+    private async loadWorldIntoViewer(worldData: WorldDataLoadedPayload): Promise<void> {
         if (!this.phaserViewer || !this.phaserViewer.getIsInitialized()) {
-            this.log('Phaser viewer not ready, deferring map load');
+            this.log('Phaser viewer not ready, deferring world load');
             return;
         }
         
         try {
-            this.log('Loading map data into Phaser viewer');
+            this.log('Loading world data into Phaser viewer');
             
-            // Convert map data to Phaser format
+            // Convert world data to Phaser format
             const tilesArray: Array<{ q: number; r: number; terrain: number; color: number }> = [];
             const unitsArray: Array<{ q: number; r: number; unitType: number; playerId: number }> = [];
             
             // Process tiles from bounds
-            if (mapData.bounds) {
-                for (let q = mapData.bounds.minQ; q <= mapData.bounds.maxQ; q++) {
-                    for (let r = mapData.bounds.minR; r <= mapData.bounds.maxR; r++) {
-                        // This would need to be coordinated with the map data structure
+            if (worldData.bounds) {
+                for (let q = worldData.bounds.minQ; q <= worldData.bounds.maxQ; q++) {
+                    for (let r = worldData.bounds.minR; r <= worldData.bounds.maxR; r++) {
+                        // This would need to be coordinated with the world data structure
                         // For now, create placeholder logic
                         tilesArray.push({
                             q: q,
@@ -194,30 +190,30 @@ export class MapViewer extends BaseComponent {
             }
             
             // Load into Phaser viewer
-            await this.phaserViewer.loadMapData(tilesArray, unitsArray);
+            await this.phaserViewer.loadWorldData(tilesArray, unitsArray);
             
             this.log(`Loaded ${tilesArray.length} tiles and ${unitsArray.length} units into viewer`);
             
         } catch (error) {
-            this.handleError('Failed to load map into viewer', error);
+            this.handleError('Failed to load world into viewer', error);
         }
     }
     
     /**
-     * Public API for loading map data
+     * Public API for loading world data
      */
-    public async loadMap(mapData: any): Promise<void> {
+    public async loadWorld(worldData: any): Promise<void> {
         try {
-            if (!mapData) {
-                throw new Error('No map data provided');
+            if (!worldData) {
+                throw new Error('No world data provided');
             }
             
-            this.log('Loading map data');
+            this.log('Loading world data');
             
-            // Process map data
-            const map = Map.deserialize(mapData);
-            const allTiles = map.getAllTiles();
-            const allUnits = map.getAllUnits();
+            // Process world data
+            const world = World.deserialize(worldData);
+            const allTiles = world.getAllTiles();
+            const allUnits = world.getAllUnits();
             
             // Convert to arrays
             const tilesArray: Array<{ q: number; r: number; terrain: number; color: number }> = [];
@@ -242,11 +238,11 @@ export class MapViewer extends BaseComponent {
             });
             
             // Calculate bounds and stats
-            const bounds = map.getBounds();
+            const bounds = world.getBounds();
             
-            // Store map data
-            this.loadedMapData = {
-                mapId: mapData.id || 'unknown',
+            // Store world data
+            this.loadedWorldData = {
+                worldId: worldData.id || 'unknown',
                 totalTiles: allTiles.length,
                 totalUnits: allUnits.length,
                 bounds: bounds ? {
@@ -260,16 +256,16 @@ export class MapViewer extends BaseComponent {
             
             // Load into Phaser if ready
             if (this.phaserViewer && this.phaserViewer.getIsInitialized()) {
-                await this.phaserViewer.loadMapData(tilesArray, unitsArray);
+                await this.phaserViewer.loadWorldData(tilesArray, unitsArray);
             }
             
             // Emit data loaded event for other components
-            this.emit(EventTypes.MAP_DATA_LOADED, this.loadedMapData);
+            this.emit(EventTypes.WORLD_DATA_LOADED, this.loadedWorldData);
             
-            this.log('Map loaded successfully');
+            this.log('World loaded successfully');
             
         } catch (error) {
-            this.handleError('Failed to load map', error);
+            this.handleError('Failed to load world', error);
             throw error;
         }
     }

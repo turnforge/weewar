@@ -24,39 +24,39 @@ func init() {
 type StartGamePage struct {
 	BasePage
 	Header    Header
-	Map       *protos.Map
-	MapId     string
+	World     *protos.World
+	WorldId   string
 	UnitTypes []UnitType
 }
 
 func (p *StartGamePage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
-	// Get mapId from query parameter (optional)
-	p.MapId = r.URL.Query().Get("mapId")
+	// Get worldId from query parameter (optional)
+	p.WorldId = r.URL.Query().Get("worldId")
 
 	p.Title = "New Game"
 	p.Header.Load(r, w, vc)
 
-	// If a mapId is provided, fetch the map data
-	if p.MapId != "" {
-		// Fetch the Map using the client manager
-		client, err := vc.ClientMgr.GetMapsSvcClient()
+	// If a worldId is provided, fetch the world data
+	if p.WorldId != "" {
+		// Fetch the World using the client manager
+		client, err := vc.ClientMgr.GetWorldsSvcClient()
 		if err != nil {
-			log.Printf("Error getting Maps client: %v", err)
+			log.Printf("Error getting Worlds client: %v", err)
 			// Don't fail the page, just log the error
-			p.MapId = ""
+			p.WorldId = ""
 		} else {
-			req := &protos.GetMapRequest{
-				Id: p.MapId,
+			req := &protos.GetWorldRequest{
+				Id: p.WorldId,
 			}
 
-			resp, err := client.GetMap(context.Background(), req)
+			resp, err := client.GetWorld(context.Background(), req)
 			if err != nil {
-				log.Printf("Error fetching Map %s: %v", p.MapId, err)
-				// Don't fail the page, just clear the mapId
-				p.MapId = ""
-			} else if resp.Map != nil {
-				p.Map = resp.Map
-				p.Title = "New Game - " + p.Map.Name
+				log.Printf("Error fetching World %s: %v", p.WorldId, err)
+				// Don't fail the page, just clear the worldId
+				p.WorldId = ""
+			} else if resp.World != nil {
+				p.World = resp.World
+				p.Title = "New Game - " + p.World.Name
 			}
 		}
 	}
@@ -75,7 +75,7 @@ func (p *StartGamePage) loadUnitTypes() {
 	// Get all available unit types from the rules engine
 	rulesEngine := DefaultRulesEngine
 
-	// If rules engine is not populated, fall back to GetUnitData function which uses the unitDataMap
+	// If rules engine is not populated, fall back to GetUnitData function which uses the unitDataWorld
 	unitIDs := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29}
 
 	// If rules engine has units loaded, use those; otherwise use the static list
@@ -95,7 +95,7 @@ func (p *StartGamePage) loadUnitTypes() {
 			}
 		}
 	} else {
-		// Fall back to static unit data map
+		// Fall back to static unit data world
 		for _, unitID := range unitIDs {
 			unitData := weewar.GetUnitData(unitID)
 			if unitData != nil {

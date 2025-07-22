@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
 import { hexToPixel, pixelToHex, HexCoord, PixelCoord } from './hexUtils';
 
-export class PhaserMapScene extends Phaser.Scene {
+export class PhaserWorldScene extends Phaser.Scene {
     private tileWidth: number = 64;
     private tileHeight: number = 64;
     private yIncrement: number = 48; // 3/4 * tileHeight for pointy-topped hexes
@@ -38,7 +38,7 @@ export class PhaserMapScene extends Phaser.Scene {
     private assetsReadyResolver: (() => void) | null = null;
     
     constructor(config?: string | Phaser.Types.Scenes.SettingsConfig) {
-        super(config || { key: 'PhaserMapScene' });
+        super(config || { key: 'PhaserWorldScene' });
     }
     
     preload() {
@@ -49,7 +49,7 @@ export class PhaserMapScene extends Phaser.Scene {
         
         // Track when all assets are loaded
         this.load.on('complete', () => {
-            console.log('[PhaserMapScene] All assets loaded successfully');
+            console.log('[PhaserWorldScene] All assets loaded successfully');
             this.terrainsLoaded = true;
             this.unitsLoaded = true;
             if (this.assetsReadyResolver) {
@@ -84,7 +84,7 @@ export class PhaserMapScene extends Phaser.Scene {
         // Set initial theme
         this.updateTheme();
         
-        console.log('[PhaserMapScene] Scene created successfully');
+        console.log('[PhaserWorldScene] Scene created successfully');
         
         // Trigger scene ready callback if set
         if (this.sceneReadyCallback) {
@@ -118,8 +118,8 @@ export class PhaserMapScene extends Phaser.Scene {
             this.load.image(`terrain_${type}_0`, assetPath); // Color 0 alias for consistency
         });
         
-        console.log(`[PhaserMapScene] Loading city terrain assets: ${cityTerrains.join(', ')} (with colors)`);
-        console.log(`[PhaserMapScene] Loading nature terrain assets: ${natureTerrains.join(', ')} (default only)`);
+        console.log(`[PhaserWorldScene] Loading city terrain assets: ${cityTerrains.join(', ')} (with colors)`);
+        console.log(`[PhaserWorldScene] Loading nature terrain assets: ${natureTerrains.join(', ')} (default only)`);
     }
     
     private loadUnitAssets() {
@@ -136,7 +136,7 @@ export class PhaserMapScene extends Phaser.Scene {
             }
         });
         
-        console.log(`[PhaserMapScene] Loading unit assets: ${unitTypes.join(', ')} (with colors)`);
+        console.log(`[PhaserWorldScene] Loading unit assets: ${unitTypes.join(', ')} (with colors)`);
     }
     
     private setupCameraControls() {
@@ -311,7 +311,7 @@ export class PhaserMapScene extends Phaser.Scene {
     }
     
     
-    // Public methods for map manipulation
+    // Public methods for world manipulation
     public setTile(q: number, r: number, terrainType: number, color: number = 0) {
         const key = `${q},${r}`;
         const position = hexToPixel(q, r);
@@ -329,18 +329,18 @@ export class PhaserMapScene extends Phaser.Scene {
             tileSprite.setOrigin(0.5, 0.5);
             this.tiles.set(key, tileSprite);
         } else {
-            console.warn(`[PhaserMapScene] Texture not found: ${textureKey}`);
-            console.warn(`[PhaserMapScene] Available textures:`, this.textures.list);
+            console.warn(`[PhaserWorldScene] Texture not found: ${textureKey}`);
+            console.warn(`[PhaserWorldScene] Available textures:`, this.textures.list);
             
             // Try fallback to basic terrain texture without color
             const fallbackKey = `terrain_${terrainType}`;
             if (this.textures.exists(fallbackKey)) {
-                console.log(`[PhaserMapScene] Using fallback texture: ${fallbackKey}`);
+                console.log(`[PhaserWorldScene] Using fallback texture: ${fallbackKey}`);
                 const tileSprite = this.add.sprite(position.x, position.y, fallbackKey);
                 tileSprite.setOrigin(0.5, 0.5);
                 this.tiles.set(key, tileSprite);
             } else {
-                console.error(`[PhaserMapScene] Fallback texture also not found: ${fallbackKey}`);
+                console.error(`[PhaserWorldScene] Fallback texture also not found: ${fallbackKey}`);
             }
         }
         
@@ -392,18 +392,18 @@ export class PhaserMapScene extends Phaser.Scene {
             unitSprite.setDepth(10); // Units render above tiles
             this.units.set(key, unitSprite);
         } else {
-            console.warn(`[PhaserMapScene] Unit texture not found: ${textureKey}`);
+            console.warn(`[PhaserWorldScene] Unit texture not found: ${textureKey}`);
             
             // Try fallback to basic unit texture without color
             const fallbackKey = `unit_${unitType}`;
             if (this.textures.exists(fallbackKey)) {
-                console.log(`[PhaserMapScene] Using fallback unit texture: ${fallbackKey}`);
+                console.log(`[PhaserWorldScene] Using fallback unit texture: ${fallbackKey}`);
                 const unitSprite = this.add.sprite(position.x, position.y, fallbackKey);
                 unitSprite.setOrigin(0.5, 0.5);
                 unitSprite.setDepth(10);
                 this.units.set(key, unitSprite);
             } else {
-                console.error(`[PhaserMapScene] Fallback unit texture also not found: ${fallbackKey}`);
+                console.error(`[PhaserWorldScene] Fallback unit texture also not found: ${fallbackKey}`);
             }
         }
     }
@@ -609,17 +609,17 @@ export class PhaserMapScene extends Phaser.Scene {
         // Update grid display
         this.updateGridDisplay();
         
-        console.log('[PhaserMapScene] Test pattern created with negative coordinates support');
+        console.log('[PhaserWorldScene] Test pattern created with negative coordinates support');
     }
     
     // Callback for tile clicks (to be overridden by parent)
     private onTileClick(q: number, r: number) {
-        console.log(`[PhaserMapScene] Tile clicked: Q=${q}, R=${r}`);
+        console.log(`[PhaserWorldScene] Tile clicked: Q=${q}, R=${r}`);
         
-        // DISABLED: Old terrain painting logic - now handled by MapEditorPage
-        // The MapEditorPage will handle all placement logic based on the current mode
+        // DISABLED: Old terrain painting logic - now handled by WorldEditorPage
+        // The WorldEditorPage will handle all placement logic based on the current mode
         
-        // Just emit the tile click event for the MapEditorPage to handle
+        // Just emit the tile click event for the WorldEditorPage to handle
         this.events.emit('tileClicked', { q, r });
     }
     
@@ -714,10 +714,10 @@ export class PhaserMapScene extends Phaser.Scene {
         }
         
         if (!this.assetsReadyPromise) {
-            throw new Error('[PhaserMapScene] Assets ready promise not initialized');
+            throw new Error('[PhaserWorldScene] Assets ready promise not initialized');
         }
         
-        console.log('[PhaserMapScene] Waiting for assets to be ready...');
+        console.log('[PhaserWorldScene] Waiting for assets to be ready...');
         return this.assetsReadyPromise;
     }
     

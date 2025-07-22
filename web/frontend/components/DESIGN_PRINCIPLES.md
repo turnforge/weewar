@@ -78,10 +78,10 @@ this.rootElement.style.height = '500px';
 **Example:**
 ```typescript
 // ✅ CORRECT - EventBus communication
-this.emit(EventTypes.MAP_DATA_LOADED, mapData);
+this.emit(EventTypes.WORLD_DATA_LOADED, worldData);
 
 // ❌ WRONG - Direct method calls
-otherComponent.updateData(mapData);
+otherComponent.updateData(worldData);
 ```
 
 ### 6. Error Isolation and Handling
@@ -342,10 +342,10 @@ This prevents components from interfering with each other's layout and makes the
 **Solution**: Specific data attributes create clear boundaries:
 ```html
 <!-- Template with clear component boundaries -->
-<div data-component="map-viewer">
+<div data-component="world-viewer">
     <div id="phaser-viewer-container"></div>
 </div>
-<div data-component="map-stats-panel">
+<div data-component="world-stats-panel">
     <div data-stat-section="basic">
         <span data-stat="total-tiles">64</span>
     </div>
@@ -474,12 +474,12 @@ const component = new Component(); // Emits 'ready' event → handler called
 ```typescript
 // ❌ PROBLEMATIC: Immediate usage after "initialized"
 this.phaserViewer.initialize(containerId); // Returns true
-this.phaserViewer.loadMapData(data); // May fail - WebGL not fully ready
+this.phaserViewer.loadWorldData(data); // May fail - WebGL not fully ready
 
 // ✅ WORKING: Small delay for WebGL context completion
 this.phaserViewer.initialize(containerId);
 setTimeout(() => {
-    this.phaserViewer.loadMapData(data); // WebGL context ready
+    this.phaserViewer.loadWorldData(data); // WebGL context ready
 }, 10); // Next event loop tick
 ```
 
@@ -526,7 +526,7 @@ class BasePage {
 
 ```typescript
 // Phase 1: State setup (synchronous)
-this.loadInitialState(); // Set currentMapId, etc.
+this.loadInitialState(); // Set currentWorldId, etc.
 
 // Phase 2: Event subscriptions (before component creation)  
 this.eventBus.subscribe('component-ready', this.handleReady);
@@ -567,7 +567,7 @@ protected bindToDOM(): void {
     this.initializePhaserViewer();
     
     // 3. But delay actual usage for WebGL context readiness  
-    setTimeout(() => this.loadMapData(), 10);
+    setTimeout(() => this.loadWorldData(), 10);
 }
 ```
 

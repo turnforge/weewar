@@ -1,18 +1,18 @@
-import { PhaserMapEditor } from './phaser/PhaserMapEditor';
+import { PhaserWorldEditor } from './phaser/PhaserWorldEditor';
 
 /**
- * PhaserPanel handles the Phaser.js-based map editor interface
+ * PhaserPanel handles the Phaser.js-based world editor interface
  * This component manages the Phaser editor lifecycle and provides
- * integration with the main MapEditorPage
+ * integration with the main WorldEditorPage
  */
 export class PhaserPanel {
-    private phaserEditor: PhaserMapEditor | null = null;
+    private phaserEditor: PhaserWorldEditor | null = null;
     private containerElement: HTMLElement | null = null;
     private isInitialized: boolean = false;
     
     // Event callbacks
     private onTileClickCallback: ((q: number, r: number) => void) | null = null;
-    private onMapChangeCallback: (() => void) | null = null;
+    private onWorldChangeCallback: (() => void) | null = null;
     private onLogCallback: ((message: string) => void) | null = null;
     private onReferenceScaleChangeCallback: ((x: number, y: number) => void) | null = null;
     
@@ -43,7 +43,7 @@ export class PhaserPanel {
             }
             
             // Initialize Phaser editor
-            this.phaserEditor = new PhaserMapEditor('phaser-container');
+            this.phaserEditor = new PhaserWorldEditor('phaser-container');
             
             // Set up internal event handlers
             this.setupEventHandlers();
@@ -73,11 +73,11 @@ export class PhaserPanel {
             }
         });
         
-        // Handle map changes
-        this.phaserEditor.onMapChange(() => {
-            this.log('Map changed');
-            if (this.onMapChangeCallback) {
-                this.onMapChangeCallback();
+        // Handle world changes
+        this.phaserEditor.onWorldChange(() => {
+            this.log('World changed');
+            if (this.onWorldChangeCallback) {
+                this.onWorldChangeCallback();
             }
         });
         
@@ -223,7 +223,7 @@ export class PhaserPanel {
     }
     
     /**
-     * Clear all tiles from the map
+     * Clear all tiles from the world
      */
     public clearAllTiles(): void {
         if (!this.isInitialized || !this.phaserEditor) {
@@ -236,7 +236,7 @@ export class PhaserPanel {
     }
     
     /**
-     * Clear all units from the map
+     * Clear all units from the world
      */
     public clearAllUnits(): void {
         if (!this.isInitialized || !this.phaserEditor) {
@@ -329,7 +329,7 @@ export class PhaserPanel {
     }
     
     /**
-     * Set tiles data (load a map)
+     * Set tiles data (load a world)
      */
     public async setTilesData(tiles: Array<{ q: number; r: number; terrain: number; color: number }>): Promise<void> {
         if (!this.isInitialized || !this.phaserEditor) {
@@ -346,7 +346,7 @@ export class PhaserPanel {
     }
     
     /**
-     * Advanced map generation methods
+     * Advanced world generation methods
      */
     public fillAllTerrain(terrain: number, color: number = 0): void {
         if (!this.isInitialized || !this.phaserEditor) {
@@ -385,8 +385,8 @@ export class PhaserPanel {
         this.onTileClickCallback = callback;
     }
     
-    public onMapChange(callback: () => void): void {
-        this.onMapChangeCallback = callback;
+    public onWorldChange(callback: () => void): void {
+        this.onWorldChangeCallback = callback;
     }
     
     public onLog(callback: (message: string) => void): void {
@@ -600,7 +600,7 @@ export class PhaserPanel {
         this.isInitialized = false;
         this.containerElement = null;
         this.onTileClickCallback = null;
-        this.onMapChangeCallback = null;
+        this.onWorldChangeCallback = null;
         this.onLogCallback = null;
         
         this.log('Phaser panel destroyed');

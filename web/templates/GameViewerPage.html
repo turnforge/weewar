@@ -84,7 +84,7 @@
 {{ end }}
 
 {{ define "BodySection" }}
-    <input id="mapIdInput" value="{{ .MapId }}" type="hidden" />
+    <input id="worldIdInput" value="{{ .WorldId }}" type="hidden" />
     <input id="playerCount" value="{{ .PlayerCount }}" type="hidden" />
     <input id="maxTurns" value="{{ .MaxTurns }}" type="hidden" />
     
@@ -98,7 +98,7 @@
                         Game Loading...
                     </span>
                     <div class="text-sm text-gray-600 dark:text-gray-300">
-                        <span>{{ .Map.Name }}</span>
+                        <span>{{ .World.Name }}</span>
                         <span class="mx-2">•</span>
                         <span>{{ .PlayerCount }} Players</span>
                         {{ if ne .MaxTurns 0 }}
@@ -167,8 +167,8 @@
             </div>
         </div>
         
-        <!-- Hidden Map Data for Frontend -->
-        <pre id="map-data-json" style="display: none;">{{ if .Map }}{{ .Map | ToJson }}{{ else }}null{{ end }}</pre>
+        <!-- Hidden World Data for Frontend -->
+        <pre id="world-data-json" style="display: none;">{{ if .World }}{{ .World | ToJson }}{{ else }}null{{ end }}</pre>
     </main>
 {{ end }}
 

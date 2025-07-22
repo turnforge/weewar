@@ -1,44 +1,44 @@
-<!-- templates/MapDetailsPage.html -->
+<!-- templates/WorldDetailsPage.html -->
 {{# include "BasePage.html" #}}
 
 {{ define "ExtraHeaderButtons" }}
 <!-- Edit Button -->
-<a href="/maps/{{ .MapId }}/edit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
+<a href="/worlds/{{ .WorldId }}/edit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
     <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
     </svg>
-    Edit Map
+    Edit World
 </a>
 
 <!-- Copy Button -->
-<button data-action="copy-map" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800">
+<button data-action="copy-world" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800">
     <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
     </svg>
-    Copy Map
+    Copy World
 </button>
 {{ end }}
 
 {{ define "BodySection" }}
-    <input id="mapIdInput" value="{{ .MapId }}" type="hidden" />
+    <input id="worldIdInput" value="{{ .WorldId }}" type="hidden" />
     
-    <!-- Map Viewer Container -->
+    <!-- World Viewer Container -->
     <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-h-0">
-        <!-- Map Info Section -->
+        <!-- World Info Section -->
         <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div class="max-w-9xl mx-auto">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ if .Map.Name }}{{ .Map.Name }}{{ else }}Map Details{{ end }}</h1>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ .Map.Description }}</p>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ if .World.Name }}{{ .World.Name }}{{ else }}World Details{{ end }}</h1>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ .World.Description }}</p>
                     </div>
                     <div class="text-right">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Map ID: <span class="font-mono">{{ .MapId }}</span>
+                            World ID: <span class="font-mono">{{ .WorldId }}</span>
                         </div>
-                        {{ if .Map.CreatedAt }}
+                        {{ if .World.CreatedAt }}
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Created: {{ .Map.CreatedAt.AsTime.Format "Jan 2, 2006" }}
+                            Created: {{ .World.CreatedAt.AsTime.Format "Jan 2, 2006" }}
                         </div>
                         {{ end }}
                     </div>
@@ -46,26 +46,26 @@
             </div>
         </div>
 
-        <!-- Map Content -->
+        <!-- World Content -->
         <div class="flex-1 flex max-w-9xl mx-auto w-full">
-            <!-- Map Preview Section - MapViewer Component Root -->
+            <!-- World Preview Section - WorldViewer Component Root -->
             <div class="flex-1 p-6 pr-3" style="width: calc(100% - 250px);">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full" data-component="map-viewer">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full" data-component="world-viewer">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Map Preview</h2>
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">World Preview</h2>
                     </div>
-                    <!-- Phaser Map Viewer Container -->
+                    <!-- Phaser World Viewer Container -->
                     <div id="phaser-viewer-container" class="w-full h-full min-h-96" style="max-height:800px">
                         <!-- Phaser canvas will be inserted here -->
                     </div>
                 </div>
             </div>
 
-            <!-- Map Stats Sidebar - MapStatsPanel Component Root -->
+            <!-- World Stats Sidebar - WorldStatsPanel Component Root -->
             <div class="p-6 pl-3" style="width: 250px; flex-shrink: 0;">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700" data-component="map-stats-panel">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700" data-component="world-stats-panel">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Map Statistics</h2>
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">World Statistics</h2>
                     </div>
                     <div class="p-4 space-y-4">
                         <!-- Basic Stats -->
@@ -135,10 +135,10 @@
 
                         <!-- Actions -->
                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <a href="/maps/{{ .MapId }}/edit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                Edit Map
+                            <a href="/worlds/{{ .WorldId }}/edit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Edit World
                             </a>
-                            <a href="/maps/{{ .MapId }}/start" class="mt-2 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <a href="/worlds/{{ .WorldId }}/start" class="mt-2 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                 <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M19 10a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -150,8 +150,8 @@
             </div>
         </div>
         
-        <!-- Hidden Map Data for Frontend -->
-        <pre id="map-data-json" style="display: none;">{{ if .Map }}{{ .Map | ToJson }}{{ else }}null{{ end }}</pre>
+        <!-- Hidden World Data for Frontend -->
+        <pre id="world-data-json" style="display: none;">{{ if .World }}{{ .World | ToJson }}{{ else }}null{{ end }}</pre>
     </main>
 {{ end }}
 
@@ -159,10 +159,10 @@
 {{ end }} 
 
 {{ define "PostBodySection" }}
-<!-- Any additional scripts or content for Map detail page -->
-{{# include "gen/MapDetailsPage.html" #}}
+<!-- Any additional scripts or content for World detail page -->
+{{# include "gen/WorldDetailsPage.html" #}}
 {{ end }}
 
-{{ define "MapDetailsPage" }}
+{{ define "WorldDetailsPage" }}
 {{ template "BasePage" . }}
 {{ end }}

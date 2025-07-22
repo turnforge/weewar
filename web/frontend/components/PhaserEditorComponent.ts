@@ -1,19 +1,19 @@
 import { BaseComponent } from './Component';
 import { EventBus, EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload, ReferenceImageLoadedPayload, GridSetVisibilityPayload, CoordinatesSetVisibilityPayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload } from './EventBus';
-import { PhaserMapEditor } from './phaser/PhaserMapEditor';
-import { MapEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType } from './MapEditorPageState';
-import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
+import { PhaserWorldEditor } from './phaser/PhaserWorldEditor';
+import { WorldEditorPageState, PageStateObserver, PageStateEvent, PageStateEventType } from './WorldEditorPageState';
+import { World, WorldObserver, WorldEvent, WorldEventType, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from './World';
 
 /**
- * PhaserEditorComponent - Manages the Phaser.js-based map editor interface using BaseComponent architecture
+ * PhaserEditorComponent - Manages the Phaser.js-based world editor interface using BaseComponent architecture
  * 
  * Responsibilities:
- * - Initialize and manage Phaser.js map editor lifecycle
+ * - Initialize and manage Phaser.js world editor lifecycle
  * - Handle editor-specific DOM container setup
  * - Emit tile click events to EventBus
  * - Listen for tool changes (terrain, unit, brush size) from EditorToolsPanel
- * - Manage map rendering, camera controls, and visual settings
- * - Handle map data loading and saving operations
+ * - Manage world rendering, camera controls, and visual settings
+ * - Handle world data loading and saving operations
  * - Manage reference image features for overlay/background
  * 
  * Does NOT handle:
@@ -22,13 +22,13 @@ import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsC
  * - Save/load UI (will be handled by SaveLoadComponent)
  * - Direct DOM manipulation outside of phaser-container
  */
-export class PhaserEditorComponent extends BaseComponent implements PageStateObserver, MapObserver {
-    private phaserEditor: PhaserMapEditor | null = null;
+export class PhaserEditorComponent extends BaseComponent implements PageStateObserver, WorldObserver {
+    private phaserEditor: PhaserWorldEditor | null = null;
     private isInitialized: boolean = false;
-    private pageState: MapEditorPageState | null = null;
-    private map: Map | null = null;
+    private pageState: WorldEditorPageState | null = null;
+    private world: World | null = null;
     
-    constructor(rootElement: HTMLElement, eventBus: EventBus, pageState?: MapEditorPageState | null, map?: Map | null, debugMode: boolean = false) {
+    constructor(rootElement: HTMLElement, eventBus: EventBus, pageState?: WorldEditorPageState | null, world?: World | null, debugMode: boolean = false) {
         super('phaser-editor', rootElement, eventBus, debugMode);
         
         if (pageState) {
@@ -36,9 +36,9 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             this.pageState.subscribe(this);
         }
         
-        if (map) {
-            this.map = map;
-            this.map.subscribe(this);
+        if (world) {
+            this.world = world;
+            this.world.subscribe(this);
         }
     }
     
@@ -54,7 +54,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             this.componentId
         );
         
-        // Subscribe to grid visibility events from MapEditorPage
+        // Subscribe to grid visibility events from WorldEditorPage
         this.eventBus.subscribe<GridSetVisibilityPayload>(
             EditorEventTypes.GRID_SET_VISIBILITY,
             (payload) => {
@@ -63,7 +63,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             this.componentId
         );
         
-        // Subscribe to coordinates visibility events from MapEditorPage
+        // Subscribe to coordinates visibility events from WorldEditorPage
         this.eventBus.subscribe<CoordinatesSetVisibilityPayload>(
             EditorEventTypes.COORDINATES_SET_VISIBILITY,
             (payload) => {
@@ -128,27 +128,27 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
         }
     }
     
-    // MapObserver implementation
-    public onMapEvent(event: MapEvent): void {
+    // WorldObserver implementation
+    public onWorldEvent(event: WorldEvent): void {
         if (!this.phaserEditor || !this.isInitialized) {
             return;
         }
         
         switch (event.type) {
-            case MapEventType.MAP_LOADED:
-                this.handleMapLoaded(event.data as MapLoadedEventData);
+            case WorldEventType.WORLD_LOADED:
+                this.handleWorldLoaded(event.data as WorldLoadedEventData);
                 break;
                 
-            case MapEventType.TILES_CHANGED:
+            case WorldEventType.TILES_CHANGED:
                 this.handleTilesChanged(event.data as TilesChangedEventData);
                 break;
                 
-            case MapEventType.UNITS_CHANGED:
+            case WorldEventType.UNITS_CHANGED:
                 this.handleUnitsChanged(event.data as UnitsChangedEventData);
                 break;
                 
-            case MapEventType.MAP_CLEARED:
-                this.handleMapCleared();
+            case WorldEventType.WORLD_CLEARED:
+                this.handleWorldCleared();
                 break;
         }
     }
@@ -226,7 +226,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
         let phaserContainer = this.findElement('#editor-canvas-container');
         
         if (phaserContainer) {
-            // Rename the existing container to phaser-container for PhaserMapEditor
+            // Rename the existing container to phaser-container for PhaserWorldEditor
             phaserContainer.id = 'phaser-container';
             this.log('Using existing editor-canvas-container as phaser-container');
         } else {
@@ -253,7 +253,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             
             if (rect.width > 0 && rect.height > 0) {
                 // Continue with Phaser initialization
-                this.phaserEditor = new PhaserMapEditor(containerElement);
+                this.phaserEditor = new PhaserWorldEditor(containerElement);
                 this.setupPhaserEventHandlers();
                 
                 const isDarkMode = document.documentElement.classList.contains('dark');
@@ -297,7 +297,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             }
             
             // Create Phaser editor instance with the element directly
-            this.phaserEditor = new PhaserMapEditor(containerElement);
+            this.phaserEditor = new PhaserWorldEditor(containerElement);
             
             // Set up event handlers
             this.setupPhaserEventHandlers();
@@ -338,10 +338,10 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             this.handleTileClick(q, r);
         });
         
-        // Handle map changes
-        this.phaserEditor.onMapChange(() => {
-            this.log('Map changed in Phaser');
-            this.emit(EditorEventTypes.MAP_CHANGED, {});
+        // Handle world changes
+        this.phaserEditor.onWorldChange(() => {
+            this.log('World changed in Phaser');
+            this.emit(EditorEventTypes.WORLD_CHANGED, {});
         });
         
         // Handle reference scale changes
@@ -373,16 +373,16 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     }
     
     /**
-     * Handle Map event handlers
+     * Handle World event handlers
      */
-    private handleMapLoaded(data: MapLoadedEventData): void {
-        this.log('Map loaded, updating Phaser display');
+    private handleWorldLoaded(data: WorldLoadedEventData): void {
+        this.log('World loaded, updating Phaser display');
         
-        // Load tile data from Map into Phaser
-        if (this.map) {
-            const mapTiles = this.map.getAllTiles();
-            // Transform Map format to Phaser format
-            const phaserTilesData = mapTiles.map(tile => ({
+        // Load tile data from World into Phaser
+        if (this.world) {
+            const worldTiles = this.world.getAllTiles();
+            // Transform World format to Phaser format
+            const phaserTilesData = worldTiles.map(tile => ({
                 q: tile.q,
                 r: tile.r,
                 terrain: tile.tileType,
@@ -390,7 +390,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             }));
             this.phaserEditor?.setTilesData(phaserTilesData);
             
-            const unitsData = this.map.getAllUnits();
+            const unitsData = this.world.getAllUnits();
             // Load units into Phaser (if we add this method later)
             // this.phaserEditor?.setUnitsData(unitsData);
         }
@@ -399,7 +399,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     private handleTilesChanged(data: TilesChangedEventData): void {
         this.log(`Updating ${data.changes.length} tile changes in Phaser`);
         
-        // Update individual tiles in Phaser based on Map changes
+        // Update individual tiles in Phaser based on World changes
         for (const change of data.changes) {
             if (change.tile) {
                 this.phaserEditor?.paintTile(
@@ -419,7 +419,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     private handleUnitsChanged(data: UnitsChangedEventData): void {
         this.log(`Updating ${data.changes.length} unit changes in Phaser`);
         
-        // Update individual units in Phaser based on Map changes
+        // Update individual units in Phaser based on World changes
         for (const change of data.changes) {
             if (change.unit) {
                 this.phaserEditor?.paintUnit(
@@ -435,14 +435,14 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
         }
     }
     
-    private handleMapCleared(): void {
-        this.log('Map cleared, clearing Phaser display');
+    private handleWorldCleared(): void {
+        this.log('World cleared, clearing Phaser display');
         this.phaserEditor?.clearAllTiles();
         this.phaserEditor?.clearAllUnits();
     }
     
     /**
-     * Handle grid visibility set event from MapEditorPage
+     * Handle grid visibility set event from WorldEditorPage
      */
     private handleGridSetVisibility(data: GridSetVisibilityPayload): void {
         if (!this.phaserEditor || !this.isInitialized) {
@@ -455,7 +455,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     }
     
     /**
-     * Handle coordinates visibility set event from MapEditorPage
+     * Handle coordinates visibility set event from WorldEditorPage
      */
     private handleCoordinatesSetVisibility(data: CoordinatesSetVisibilityPayload): void {
         if (!this.phaserEditor || !this.isInitialized) {
@@ -579,18 +579,18 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
             
             switch (toolState.placementMode) {
                 case 'terrain':
-                    // Update Map data (single source of truth)
+                    // Update World data (single source of truth)
                     let playerId = 0;
-                    if (this.map) {
+                    if (this.world) {
                         // Determine player ownership for the terrain
                         playerId = this.getPlayerIdForTerrain(toolState.selectedTerrain, toolState);
-                        this.map.setTileAt(q, r, toolState.selectedTerrain, playerId);
-                        // Map will emit TILES_CHANGED event, which will update Phaser via onMapEvent
+                        this.world.setTileAt(q, r, toolState.selectedTerrain, playerId);
+                        // World will emit TILES_CHANGED event, which will update Phaser via onWorldEvent
                     }
                     
                     this.log(`Painted terrain ${toolState.selectedTerrain} (player ${playerId}) at Q=${q}, R=${r} with brush size ${toolState.brushSize}`);
                     
-                    // Emit tile painted event for backward compatibility (for components not yet using Map events)
+                    // Emit tile painted event for backward compatibility (for components not yet using World events)
                     this.emit<TilePaintedPayload>(EditorEventTypes.TILE_PAINTED, {
                         q: q,
                         r: r,
@@ -601,10 +601,10 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
                     break;
                     
                 case 'unit':
-                    // Update Map data (single source of truth)
-                    if (this.map) {
-                        this.map.setUnitAt(q, r, toolState.selectedUnit, toolState.selectedPlayer);
-                        // Map will emit UNITS_CHANGED event, which will update Phaser via onMapEvent
+                    // Update World data (single source of truth)
+                    if (this.world) {
+                        this.world.setUnitAt(q, r, toolState.selectedUnit, toolState.selectedPlayer);
+                        // World will emit UNITS_CHANGED event, which will update Phaser via onWorldEvent
                     }
                     
                     this.log(`Painted unit ${toolState.selectedUnit} (player ${toolState.selectedPlayer}) at Q=${q}, R=${r}`);
@@ -619,11 +619,11 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
                     break;
                     
                 case 'clear':
-                    // Update Map data (single source of truth)
-                    if (this.map) {
-                        this.map.removeTileAt(q, r);
-                        this.map.removeUnitAt(q, r);
-                        // Map will emit events, which will update Phaser via onMapEvent
+                    // Update World data (single source of truth)
+                    if (this.world) {
+                        this.world.removeTileAt(q, r);
+                        this.world.removeUnitAt(q, r);
+                        // World will emit events, which will update Phaser via onWorldEvent
                     }
                     
                     this.log(`Cleared tile and unit at Q=${q}, R=${r}`);
@@ -697,7 +697,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     }
     
     /**
-     * Load map tiles data
+     * Load world tiles data
      */
     public async setTilesData(tiles: Array<{ q: number; r: number; terrain: number; color: number }>): Promise<void> {
         if (this.phaserEditor && this.isInitialized) {
@@ -748,7 +748,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     }
     
     /**
-     * Get viewport center for map generation
+     * Get viewport center for world generation
      */
     public getViewportCenter(): { q: number; r: number } {
         if (this.phaserEditor && this.isInitialized) {
@@ -768,7 +768,7 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     }
     
     /**
-     * Map generation methods
+     * World generation methods
      */
     public fillAllTerrain(terrain: number, color: number = 0): void {
         if (this.phaserEditor && this.isInitialized) {
@@ -922,11 +922,11 @@ export class PhaserEditorComponent extends BaseComponent implements PageStateObs
     }
     
     /**
-     * Register map change callback
+     * Register world change callback
      */
-    public onMapChange(callback: () => void): void {
+    public onWorldChange(callback: () => void): void {
         if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.onMapChange(callback);
+            this.phaserEditor.onWorldChange(callback);
         }
     }
     

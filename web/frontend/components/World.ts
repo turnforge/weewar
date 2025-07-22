@@ -1,22 +1,22 @@
 import { HexCoord } from './phaser/hexUtils';
 
 // Observer pattern interfaces
-export interface MapObserver {
-    onMapEvent(event: MapEvent): void;
+export interface WorldObserver {
+    onWorldEvent(event: WorldEvent): void;
 }
 
-export interface MapEvent {
-    type: MapEventType;
+export interface WorldEvent {
+    type: WorldEventType;
     data: any;
 }
 
-export enum MapEventType {
+export enum WorldEventType {
     TILES_CHANGED = 'tiles-changed',      // Batch tile operations
     UNITS_CHANGED = 'units-changed',      // Batch unit operations
-    MAP_LOADED = 'map-loaded',
-    MAP_SAVED = 'map-saved',
-    MAP_CLEARED = 'map-cleared',
-    MAP_METADATA_CHANGED = 'map-metadata-changed'
+    WORLD_LOADED = 'world-loaded',
+    WORLD_SAVED = 'world-saved',
+    WORLD_CLEARED = 'world-cleared',
+    WORLD_METADATA_CHANGED = 'world-metadata-changed'
 }
 
 // Batch event data types
@@ -40,20 +40,20 @@ export interface UnitsChangedEventData {
     changes: UnitChange[];
 }
 
-export interface MapLoadedEventData {
-    mapId: string | null;
-    isNewMap: boolean;
+export interface WorldLoadedEventData {
+    worldId: string | null;
+    isNewWorld: boolean;
     tileCount: number;
     unitCount: number;
 }
 
 export interface SaveResult {
     success: boolean;
-    mapId?: string;
+    worldId?: string;
     error?: string;
 }
 
-class MapBounds {
+class WorldBounds {
   MinQ: number;
   MaxQ: number;
   MinR: number;
@@ -80,57 +80,57 @@ export interface UnitData {
     playerId: number;
 }
 
-export interface MapMetadata {
+export interface WorldMetadata {
     name: string;
     width: number;
     height: number;
 }
 
 /**
- * Map class handles all map data management including tiles, units, and metadata.
+ * World class handles all world data management including tiles, units, and metadata.
  * Enhanced with Observer pattern for change notifications and self-contained persistence.
  */
-export class Map {
+export class World {
     // Core data
-    private metadata: MapMetadata;
+    private metadata: WorldMetadata;
     private tiles: { [key: string]: TileData } = {};
     private units: { [key: string]: UnitData } = {};
     
     // Persistence state
-    private mapId: string | null = null;
-    private isNewMap: boolean = true;
+    private worldId: string | null = null;
+    private isNewWorld: boolean = true;
     private hasUnsavedChanges: boolean = false;
     
     // Observer pattern
-    private observers: MapObserver[] = [];
+    private observers: WorldObserver[] = [];
     private pendingTileChanges: TileChange[] = [];
     private pendingUnitChanges: UnitChange[] = [];
     private batchTimeout: number | null = null;
     
-    constructor(name: string = 'New Map', width: number = 40, height: number = 40) {
+    constructor(name: string = 'New World', width: number = 40, height: number = 40) {
         this.metadata = { name, width, height };
     }
     
     // Observer pattern methods
-    public subscribe(observer: MapObserver): void {
+    public subscribe(observer: WorldObserver): void {
         if (!this.observers.includes(observer)) {
             this.observers.push(observer);
         }
     }
     
-    public unsubscribe(observer: MapObserver): void {
+    public unsubscribe(observer: WorldObserver): void {
         const index = this.observers.indexOf(observer);
         if (index > -1) {
             this.observers.splice(index, 1);
         }
     }
     
-    private emit(event: MapEvent): void {
+    private emit(event: WorldEvent): void {
         this.observers.forEach(observer => {
             try {
-                observer.onMapEvent(event);
+                observer.onWorldEvent(event);
             } catch (error) {
-                console.error('Error in map observer:', error);
+                console.error('Error in world observer:', error);
             }
         });
     }
@@ -149,7 +149,7 @@ export class Map {
     private flushBatchedChanges(): void {
         if (this.pendingTileChanges.length > 0) {
             this.emit({
-                type: MapEventType.TILES_CHANGED,
+                type: WorldEventType.TILES_CHANGED,
                 data: { changes: [...this.pendingTileChanges] } as TilesChangedEventData
             });
             this.pendingTileChanges = [];
@@ -157,7 +157,7 @@ export class Map {
         
         if (this.pendingUnitChanges.length > 0) {
             this.emit({
-                type: MapEventType.UNITS_CHANGED,
+                type: WorldEventType.UNITS_CHANGED,
                 data: { changes: [...this.pendingUnitChanges] } as UnitsChangedEventData
             });
             this.pendingUnitChanges = [];
@@ -179,17 +179,17 @@ export class Map {
     }
     
     // Persistence methods
-    public getMapId(): string | null {
-        return this.mapId;
+    public getWorldId(): string | null {
+        return this.worldId;
     }
     
-    public setMapId(mapId: string | null): void {
-        this.mapId = mapId;
-        this.isNewMap = mapId === null;
+    public setWorldId(worldId: string | null): void {
+        this.worldId = worldId;
+        this.isNewWorld = worldId === null;
     }
     
-    public getIsNewMap(): boolean {
-        return this.isNewMap;
+    public getIsNewWorld(): boolean {
+        return this.isNewWorld;
     }
     
     public getHasUnsavedChanges(): boolean {
@@ -200,7 +200,7 @@ export class Map {
         this.hasUnsavedChanges = false;
     }
     
-    // Map metadata methods
+    // World metadata methods
     public getName(): string {
         return this.metadata.name;
     }
@@ -210,7 +210,7 @@ export class Map {
             this.metadata.name = name;
             this.hasUnsavedChanges = true;
             this.emit({
-                type: MapEventType.MAP_METADATA_CHANGED,
+                type: WorldEventType.WORLD_METADATA_CHANGED,
                 data: { name, width: this.metadata.width, height: this.metadata.height }
             });
         }
@@ -232,7 +232,7 @@ export class Map {
         this.metadata.height = height;
     }
     
-    public getMetadata(): MapMetadata {
+    public getMetadata(): WorldMetadata {
         return { ...this.metadata };
     }
     
@@ -366,13 +366,13 @@ export class Map {
         this.clearAllUnits();
         
         this.emit({
-            type: MapEventType.MAP_CLEARED,
+            type: WorldEventType.WORLD_CLEARED,
             data: {}
         });
     }
     
     public fillAllTerrain(tileType: number, playerId: number, viewport?: { minQ: number, maxQ: number, minR: number, maxR: number }): void {
-        // If viewport is provided, only fill visible area, otherwise fill entire map bounds
+        // If viewport is provided, only fill visible area, otherwise fill entire world bounds
         if (viewport) {
             for (let q = viewport.minQ; q <= viewport.maxQ; q++) {
                 for (let r = viewport.minR; r <= viewport.maxR; r++) {
@@ -380,7 +380,7 @@ export class Map {
                 }
             }
         } else {
-            // Fill based on current map bounds or a reasonable default area
+            // Fill based on current world bounds or a reasonable default area
             const bounds = this.getBounds();
             const minQ = bounds ? bounds.minQ : -10;
             const maxQ = bounds ? bounds.maxQ : 10;
@@ -443,10 +443,10 @@ export class Map {
                 };
             });
 
-            const mapUnits: any[] = [];
+            const worldUnits: any[] = [];
             Object.entries(this.units).forEach(([key, unit]) => {
                 const [q, r] = key.split(',').map(Number);
-                mapUnits.push({
+                worldUnits.push({
                     q,
                     r,
                     player: unit.playerId,
@@ -455,45 +455,45 @@ export class Map {
             });
 
             // Build request
-            const createMapRequest = {
-                map: {
-                    id: this.mapId || 'new-map',
-                    name: this.metadata.name || 'Untitled Map',
+            const createWorldRequest = {
+                world: {
+                    id: this.worldId || 'new-world',
+                    name: this.metadata.name || 'Untitled World',
                     description: '',
                     tags: [],
                     difficulty: 'medium',
                     creator_id: 'editor-user',
                     tiles: tiles,
-                    map_units: mapUnits
+                    world_units: worldUnits
                 }
             };
 
-            const url = this.isNewMap ? '/api/v1/maps' : `/api/v1/maps/${this.mapId}`;
-            const method = this.isNewMap ? 'POST' : 'PATCH';
+            const url = this.isNewWorld ? '/api/v1/worlds' : `/api/v1/worlds/${this.worldId}`;
+            const method = this.isNewWorld ? 'POST' : 'PATCH';
 
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(createMapRequest),
+                body: JSON.stringify(createWorldRequest),
             });
 
             if (response.ok) {
                 const result = await response.json();
-                const newMapId = result.map?.id || result.id;
+                const newWorldId = result.world?.id || result.id;
                 
-                if (this.isNewMap && newMapId) {
-                    this.mapId = newMapId;
-                    this.isNewMap = false;
+                if (this.isNewWorld && newWorldId) {
+                    this.worldId = newWorldId;
+                    this.isNewWorld = false;
                 }
                 
                 this.markAsSaved();
                 
                 this.emit({
-                    type: MapEventType.MAP_SAVED,
-                    data: { mapId: this.mapId, success: true }
+                    type: WorldEventType.WORLD_SAVED,
+                    data: { worldId: this.worldId, success: true }
                 });
                 
-                return { success: true, mapId: newMapId };
+                return { success: true, worldId: newWorldId };
             } else {
                 const errorText = await response.text();
                 throw new Error(`Save failed: ${response.status} ${response.statusText} - ${errorText}`);
@@ -502,53 +502,53 @@ export class Map {
             const errorMessage = error instanceof Error ? error.message : 'Unknown save error';
             
             this.emit({
-                type: MapEventType.MAP_SAVED,
-                data: { mapId: this.mapId, success: false, error: errorMessage }
+                type: WorldEventType.WORLD_SAVED,
+                data: { worldId: this.worldId, success: false, error: errorMessage }
             });
             
             return { success: false, error: errorMessage };
         }
     }
     
-    public async load(mapId: string): Promise<void> {
+    public async load(worldId: string): Promise<void> {
         try {
             // For now, we load from HTML element (server-side rendered data)
             // Future enhancement: could load directly from API
-            this.loadFromElement('map-data-json');
-            this.setMapId(mapId);
+            this.loadFromElement('world-data-json');
+            this.setWorldId(worldId);
             this.hasUnsavedChanges = false;
             
             this.emit({
-                type: MapEventType.MAP_LOADED,
+                type: WorldEventType.WORLD_LOADED,
                 data: {
-                    mapId: this.mapId,
-                    isNewMap: this.isNewMap,
+                    worldId: this.worldId,
+                    isNewWorld: this.isNewWorld,
                     tileCount: this.getTileCount(),
                     unitCount: this.getUnitCount()
-                } as MapLoadedEventData
+                } as WorldLoadedEventData
             });
         } catch (error) {
-            throw new Error(`Failed to load map ${mapId}: ${error}`);
+            throw new Error(`Failed to load world ${worldId}: ${error}`);
         }
     }
     
     public loadFromElement(elementId: string): void {
         const element = document.getElementById(elementId);
         if (!element || !element.textContent) {
-            throw new Error(`Map data element '${elementId}' not found or empty`);
+            throw new Error(`World data element '${elementId}' not found or empty`);
         }
         
         try {
             const data = JSON.parse(element.textContent);
             this.loadFromData(data);
         } catch (error) {
-            throw new Error(`Failed to parse map data from element: ${error}`);
+            throw new Error(`Failed to parse world data from element: ${error}`);
         }
     }
     
     public loadFromData(data: any): void {
         if (!data) {
-            throw new Error('No map data provided');
+            throw new Error('No world data provided');
         }
         
         // Clear existing data without emitting events
@@ -607,9 +607,9 @@ export class Map {
             });
         }
         
-        // Handle map_units array format (from server)
-        if (data.map_units && Array.isArray(data.map_units)) {
-            data.map_units.forEach((unit: any) => {
+        // Handle world_units array format (from server)
+        if (data.world_units && Array.isArray(data.world_units)) {
+            data.world_units.forEach((unit: any) => {
                 if (unit.q !== undefined && unit.r !== undefined && unit.unit_type !== undefined) {
                     const key = `${unit.q},${unit.r}`;
                     const unitData: UnitData = {
@@ -625,14 +625,14 @@ export class Map {
         // Emit batched changes immediately
         if (tileChanges.length > 0) {
             this.emit({
-                type: MapEventType.TILES_CHANGED,
+                type: WorldEventType.TILES_CHANGED,
                 data: { changes: tileChanges } as TilesChangedEventData
             });
         }
         
         if (unitChanges.length > 0) {
             this.emit({
-                type: MapEventType.UNITS_CHANGED,
+                type: WorldEventType.UNITS_CHANGED,
                 data: { changes: unitChanges } as UnitsChangedEventData
             });
         }
@@ -657,23 +657,23 @@ export class Map {
         };
     }
     
-    public static deserialize(data: any): Map {
-        const map = new Map(data.name || 'Untitled Map', data.width || 40, data.height || 40);
-        map.loadFromData(data);
-        return map;
+    public static deserialize(data: any): World {
+        const world = new World(data.name || 'Untitled World', data.width || 40, data.height || 40);
+        world.loadFromData(data);
+        return world;
     }
     
-    // Map validation
+    // World validation
     public validate(): { isValid: boolean; errors: string[] } {
         const errors: string[] = [];
         
         // Check metadata
         if (!this.metadata.name || this.metadata.name.trim() === '') {
-            errors.push('Map name cannot be empty');
+            errors.push('World name cannot be empty');
         }
         
         if (this.metadata.width <= 0 || this.metadata.height <= 0) {
-            errors.push('Map dimensions must be positive');
+            errors.push('World dimensions must be positive');
         }
         
         // Check tiles
@@ -708,7 +708,7 @@ export class Map {
     }
     
     // Clone method for safe copying
-    public clone(): Map {
-        return Map.deserialize(this.serialize());
+    public clone(): World {
+        return World.deserialize(this.serialize());
     }
 }

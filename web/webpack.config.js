@@ -16,8 +16,8 @@ const components = [
   ["LoginPage", 0, "ts"],
   // ["AppItemListingPage", 0, "ts"],
   ["GameDetailsPage", 0, "ts"],
-  ["MapDetailsPage", 0, "ts"],
-  ["MapEditorPage", 0, "ts"],
+  ["WorldDetailsPage", 0, "ts"],
+  ["WorldEditorPage", 0, "ts"],
   ["StartGamePage", 0, "ts"],
   ["GameViewerPage", 0, "ts"],
 ];

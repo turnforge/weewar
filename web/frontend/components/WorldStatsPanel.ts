@@ -1,40 +1,40 @@
 import { BaseComponent } from './Component';
-import { EventBus, EventTypes, MapDataLoadedPayload, MapStatsUpdatedPayload } from './EventBus';
+import { EventBus, EventTypes, WorldDataLoadedPayload, WorldStatsUpdatedPayload } from './EventBus';
 
 /**
- * MapStatsPanel Component - Manages map statistics display
+ * WorldStatsPanel Component - Manages world statistics display
  * Responsible for:
- * - Displaying map statistics (tiles, units, terrain distribution)
- * - Updating display when map data changes
+ * - Displaying world statistics (tiles, units, terrain distribution)
+ * - Updating display when world data changes
  * - Managing basic info and calculated metrics
  * 
  * Layout and styling are handled by parent container and CSS classes.
  */
-export class MapStatsPanel extends BaseComponent {
-    private statsData: MapStatsUpdatedPayload | null = null;
+export class WorldStatsPanel extends BaseComponent {
+    private statsData: WorldStatsUpdatedPayload | null = null;
     
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
-        super('map-stats-panel', rootElement, eventBus, debugMode);
+        super('world-stats-panel', rootElement, eventBus, debugMode);
     }
     
     protected initializeComponent(): void {
-        this.log('Initializing MapStatsPanel component');
+        this.log('Initializing WorldStatsPanel component');
         
-        // Subscribe to map data events
-        this.subscribe<MapDataLoadedPayload>(EventTypes.MAP_DATA_LOADED, (payload) => {
-            this.handleMapDataLoaded(payload.data);
+        // Subscribe to world data events
+        this.subscribe<WorldDataLoadedPayload>(EventTypes.WORLD_DATA_LOADED, (payload) => {
+            this.handleWorldDataLoaded(payload.data);
         });
         
-        this.subscribe<MapStatsUpdatedPayload>(EventTypes.MAP_STATS_UPDATED, (payload) => {
+        this.subscribe<WorldStatsUpdatedPayload>(EventTypes.WORLD_STATS_UPDATED, (payload) => {
             this.handleStatsUpdated(payload.data);
         });
         
-        this.log('MapStatsPanel component initialized');
+        this.log('WorldStatsPanel component initialized');
     }
     
     protected bindToDOM(): void {
         try {
-            this.log('Binding MapStatsPanel to DOM');
+            this.log('Binding WorldStatsPanel to DOM');
             
             // Find or create basic stats section
             let basicStats = this.findElement('[data-stat-section="basic"]');
@@ -48,51 +48,51 @@ export class MapStatsPanel extends BaseComponent {
                 this.createTerrainStatsSection();
             }
             
-            this.log('MapStatsPanel bound to DOM');
+            this.log('WorldStatsPanel bound to DOM');
             
         } catch (error) {
-            this.handleError('Failed to bind MapStatsPanel to DOM', error);
+            this.handleError('Failed to bind WorldStatsPanel to DOM', error);
         }
     }
     
     protected destroyComponent(): void {
-        this.log('Destroying MapStatsPanel component');
+        this.log('Destroying WorldStatsPanel component');
         this.statsData = null;
     }
     
     /**
-     * Handle map data loaded event
+     * Handle world data loaded event
      */
-    private handleMapDataLoaded(mapData: MapDataLoadedPayload): void {
-        this.log(`Received map data for map: ${mapData.mapId}`);
+    private handleWorldDataLoaded(worldData: WorldDataLoadedPayload): void {
+        this.log(`Received world data for world: ${worldData.worldId}`);
         
         // Calculate and update statistics
-        this.calculateAndUpdateStats(mapData);
+        this.calculateAndUpdateStats(worldData);
     }
     
     /**
      * Handle stats updated event
      */
-    private handleStatsUpdated(statsData: MapStatsUpdatedPayload): void {
+    private handleStatsUpdated(statsData: WorldStatsUpdatedPayload): void {
         this.log('Received updated statistics');
         this.statsData = statsData;
         this.updateDisplay();
     }
     
     /**
-     * Calculate statistics from map data and update display
+     * Calculate statistics from world data and update display
      */
-    private calculateAndUpdateStats(mapData: MapDataLoadedPayload): void {
+    private calculateAndUpdateStats(worldData: WorldDataLoadedPayload): void {
         try {
             // Calculate dimensions from bounds
-            const width = mapData.bounds ? mapData.bounds.maxQ - mapData.bounds.minQ + 1 : 0;
-            const height = mapData.bounds ? mapData.bounds.maxR - mapData.bounds.minR + 1 : 0;
+            const width = worldData.bounds ? worldData.bounds.maxQ - worldData.bounds.minQ + 1 : 0;
+            const height = worldData.bounds ? worldData.bounds.maxR - worldData.bounds.minR + 1 : 0;
             
             // Calculate terrain distribution
             const terrainDistribution: { [terrainType: number]: { count: number; percentage: number; name: string } } = {};
             
-            Object.entries(mapData.terrainCounts).forEach(([terrainType, count]) => {
-                const percentage = mapData.totalTiles > 0 ? Math.round((count / mapData.totalTiles) * 100) : 0;
+            Object.entries(worldData.terrainCounts).forEach(([terrainType, count]) => {
+                const percentage = worldData.totalTiles > 0 ? Math.round((count / worldData.totalTiles) * 100) : 0;
                 const terrainNum = parseInt(terrainType);
                 
                 terrainDistribution[terrainNum] = {
@@ -104,8 +104,8 @@ export class MapStatsPanel extends BaseComponent {
             
             // Create stats payload
             this.statsData = {
-                totalTiles: mapData.totalTiles,
-                totalUnits: mapData.totalUnits,
+                totalTiles: worldData.totalTiles,
+                totalUnits: worldData.totalUnits,
                 dimensions: { width, height },
                 terrainDistribution
             };
@@ -114,7 +114,7 @@ export class MapStatsPanel extends BaseComponent {
             this.updateDisplay();
             
             // Emit stats updated event for other components
-            this.emit(EventTypes.MAP_STATS_UPDATED, this.statsData);
+            this.emit(EventTypes.WORLD_STATS_UPDATED, this.statsData);
             
         } catch (error) {
             this.handleError('Failed to calculate statistics', error);
@@ -256,14 +256,14 @@ export class MapStatsPanel extends BaseComponent {
     /**
      * Public API to manually update stats
      */
-    public updateStats(mapData: MapDataLoadedPayload): void {
-        this.calculateAndUpdateStats(mapData);
+    public updateStats(worldData: WorldDataLoadedPayload): void {
+        this.calculateAndUpdateStats(worldData);
     }
     
     /**
      * Get current stats data
      */
-    public getStatsData(): MapStatsUpdatedPayload | null {
+    public getStatsData(): WorldStatsUpdatedPayload | null {
         return this.statsData;
     }
 }

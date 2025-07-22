@@ -1,25 +1,25 @@
-import { Map, MapObserver, MapEvent, MapEventType, TilesChangedEventData, UnitsChangedEventData, MapLoadedEventData } from './Map';
+import { World, WorldObserver, WorldEvent, WorldEventType, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from './World';
 import { BaseComponent } from './Component';
 import { EventBus } from './EventBus';
 import { ComponentLifecycle } from './ComponentLifecycle';
 
 /**
- * TileStatsPanel displays statistics about tiles and units on the map
+ * TileStatsPanel displays statistics about tiles and units on the world
  * 
  * This component demonstrates the new lifecycle architecture:
  * 1. initializeDOM() - Set up UI structure without dependencies
- * 2. injectDependencies() - Receive Map instance when available
- * 3. activate() - Subscribe to Map events and enable functionality
+ * 2. injectDependencies() - Receive World instance when available
+ * 3. activate() - Subscribe to World events and enable functionality
  * 
  * Architecture:
- * - Reads directly from Map (single source of truth) via explicit setter
- * - Observes Map events for automatic updates
+ * - Reads directly from World (single source of truth) via explicit setter
+ * - Observes World events for automatic updates
  * - Creates its own DOM structure for statistics display
  * - Handles refresh button and automatic data updates
  */
-export class TileStatsPanel extends BaseComponent implements MapObserver {
+export class TileStatsPanel extends BaseComponent implements WorldObserver {
     // Dependencies (injected via explicit setters)
-    private map: Map | null = null;
+    private world: World | null = null;
     
     // Internal state tracking
     private isUIBound = false;
@@ -62,27 +62,27 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
         
         // Dependencies should be set directly by parent using setters
         // This phase just validates that required dependencies are available
-        if (!this.map) {
-            throw new Error('TileStatsPanel requires map - use setMap()');
+        if (!this.world) {
+            throw new Error('TileStatsPanel requires world - use setWorld()');
         }
         
         this.log('Dependencies validation complete');
     }
     
     // Explicit dependency setters
-    public setMap(map: Map): void {
-        this.map = map;
-        this.log('Map set via explicit setter');
+    public setWorld(world: World): void {
+        this.world = world;
+        this.log('World set via explicit setter');
         
-        // Subscribe to map events immediately when map is set
-        if (this.map) {
-            this.map.subscribe(this);
+        // Subscribe to world events immediately when world is set
+        if (this.world) {
+            this.world.subscribe(this);
         }
     }
     
     // Explicit dependency getters
-    public getMap(): Map | null {
-        return this.map;
+    public getWorld(): World | null {
+        return this.world;
     }
     
     // Phase 3: Activate component
@@ -108,9 +108,9 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
     public deactivate(): void {
         this.log('Deactivating TileStatsPanel');
         
-        // Unsubscribe from Map events
-        if (this.map) {
-            this.map.unsubscribe(this);
+        // Unsubscribe from World events
+        if (this.world) {
+            this.world.unsubscribe(this);
         }
         
         // Clear any pending operations
@@ -118,7 +118,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
         
         // Reset state
         this.isActivated = false;
-        this.map = null;
+        this.world = null;
         
         this.log('TileStatsPanel deactivated');
     }
@@ -129,7 +129,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
     private createStatsDisplay(): void {
         this.rootElement.innerHTML = `
             <div class="tile-stats-panel h-full bg-white dark:bg-gray-800 p-4 overflow-y-auto">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Map Statistics</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 World Statistics</h3>
                 
                 <!-- Terrain Stats -->
                 <div class="mb-6">
@@ -184,7 +184,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
      * Execute operation when component is ready, or queue it for later
      */
     private executeWhenReady(operation: () => void): void {
-        if (this.isActivated && this.map) {
+        if (this.isActivated && this.world) {
             // Component is ready - execute immediately
             try {
                 operation();
@@ -233,42 +233,42 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
         }
     }
     
-    // MapObserver implementation
-    public onMapEvent(event: MapEvent): void {
+    // WorldObserver implementation
+    public onWorldEvent(event: WorldEvent): void {
         switch (event.type) {
-            case MapEventType.MAP_LOADED:
-            case MapEventType.TILES_CHANGED:
-            case MapEventType.UNITS_CHANGED:
-            case MapEventType.MAP_CLEARED:
-                // Auto-refresh stats when map data changes
+            case WorldEventType.WORLD_LOADED:
+            case WorldEventType.TILES_CHANGED:
+            case WorldEventType.UNITS_CHANGED:
+            case WorldEventType.WORLD_CLEARED:
+                // Auto-refresh stats when world data changes
                 this.refreshStats();
                 break;
         }
     }
     
     /**
-     * Refresh stats by reading current data from Map
+     * Refresh stats by reading current data from World
      */
     public refreshStats(): void {
-        if (!this.isActivated || !this.map) {
+        if (!this.isActivated || !this.world) {
             this.log('Component not ready for stats refresh');
             return;
         }
         
-        console.log('[TileStatsPanel] Refreshing stats from Map data');
+        console.log('[TileStatsPanel] Refreshing stats from World data');
         
-        // Get data directly from Map
-        const tilesData = this.map.getAllTiles();
-        const unitsData = this.map.getAllUnits();
+        // Get data directly from World
+        const tilesData = this.world.getAllTiles();
+        const unitsData = this.world.getAllUnits();
         
         // Transform to compatible format and update display
-        this.updateTerrainStatsFromMap(tilesData);
-        this.updateUnitStatsFromMap(unitsData);
-        this.updatePlayerStatsFromMap(unitsData);
+        this.updateTerrainStatsFromWorld(tilesData);
+        this.updateUnitStatsFromWorld(unitsData);
+        this.updatePlayerStatsFromWorld(unitsData);
     }
     
     /**
-     * Update the stats display with current map data (legacy method for backward compatibility)
+     * Update the stats display with current world data (legacy method for backward compatibility)
      */
     public updateStats(tilesData: Array<{ q: number; r: number; terrain: number; color: number }>, unitsData: { [key: string]: { unitType: number, playerId: number } }): void {
         this.executeWhenReady(() => {
@@ -293,7 +293,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
             terrainCounts[tile.terrain] = (terrainCounts[tile.terrain] || 0) + 1;
         });
         
-        // Terrain type names mapping
+        // Terrain type names worldping
         const terrainNames: { [key: number]: { name: string, icon: string, color: string } } = {
             1: { name: 'Grass', icon: '🌱', color: 'text-green-600 dark:text-green-400' },
             2: { name: 'Desert', icon: '🏜️', color: 'text-yellow-600 dark:text-yellow-400' },
@@ -339,7 +339,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
             unitCounts[unit.unitType] = (unitCounts[unit.unitType] || 0) + 1;
         });
         
-        // Unit type names mapping (basic set)
+        // Unit type names worldping (basic set)
         const unitNames: { [key: number]: { name: string, icon: string } } = {
             1: { name: 'Infantry', icon: '🪖' },
             2: { name: 'Tank', icon: '🛡️' },
@@ -432,9 +432,9 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
     }
     
     /**
-     * Update terrain statistics from Map format data
+     * Update terrain statistics from World format data
      */
-    private updateTerrainStatsFromMap(tilesData: Array<{ q: number; r: number; tileType: number; playerId?: number }>): void {
+    private updateTerrainStatsFromWorld(tilesData: Array<{ q: number; r: number; tileType: number; playerId?: number }>): void {
         const terrainContainer = this.findElement('#terrain-stats');
         const totalTilesElement = this.findElement('#total-tiles');
         
@@ -446,7 +446,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
             terrainCounts[tile.tileType] = (terrainCounts[tile.tileType] || 0) + 1;
         });
         
-        // Use same terrain names mapping
+        // Use same terrain names worldping
         const terrainNames: { [key: number]: { name: string, icon: string, color: string } } = {
             1: { name: 'Grass', icon: '🌱', color: 'text-green-600 dark:text-green-400' },
             2: { name: 'Desert', icon: '🏜️', color: 'text-yellow-600 dark:text-yellow-400' },
@@ -476,9 +476,9 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
     }
     
     /**
-     * Update unit statistics from Map format data
+     * Update unit statistics from World format data
      */
-    private updateUnitStatsFromMap(unitsData: Array<{ q: number; r: number; unitType: number; playerId: number }>): void {
+    private updateUnitStatsFromWorld(unitsData: Array<{ q: number; r: number; unitType: number; playerId: number }>): void {
         const unitContainer = this.findElement('#unit-stats');
         const totalUnitsElement = this.findElement('#total-units');
         
@@ -490,7 +490,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
             unitCounts[unit.unitType] = (unitCounts[unit.unitType] || 0) + 1;
         });
         
-        // Unit type names (simplified mapping)
+        // Unit type names (simplified worldping)
         const unitNames: { [key: number]: { name: string, icon: string, color: string } } = {
             1: { name: 'Infantry', icon: '🚶', color: 'text-blue-600 dark:text-blue-400' },
             2: { name: 'Tank', icon: '🚗', color: 'text-red-600 dark:text-red-400' },
@@ -518,9 +518,9 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
     }
     
     /**
-     * Update player statistics from Map format data
+     * Update player statistics from World format data
      */
-    private updatePlayerStatsFromMap(unitsData: Array<{ q: number; r: number; unitType: number; playerId: number }>): void {
+    private updatePlayerStatsFromWorld(unitsData: Array<{ q: number; r: number; unitType: number; playerId: number }>): void {
         const playerContainer = this.findElement('#player-stats');
         if (!playerContainer) return;
         
@@ -530,7 +530,7 @@ export class TileStatsPanel extends BaseComponent implements MapObserver {
             playerCounts[unit.playerId] = (playerCounts[unit.playerId] || 0) + 1;
         });
         
-        // Player color mapping
+        // Player color worldping
         const playerColors: { [key: number]: string } = {
             1: 'text-blue-600 dark:text-blue-400',
             2: 'text-red-600 dark:text-red-400',

@@ -252,34 +252,8 @@ export class LifecycleController {
         const dependencies: Record<string, any> = {};
         const componentName = this.getComponentName(component);
         
-        // Build dependency map based on component type/name patterns
-        // This is a simple implementation - could be made more sophisticated
-        
-        // Common dependencies available to all components
-        dependencies.lifecycleController = this;
-        
-        // Find other components by name pattern matching
-        for (const [otherComponent, otherName] of this.componentNames) {
-            if (otherComponent === component) continue;
-            
-            // Simple name-based dependency injection
-            // PhaserEditorComponent -> phaserEditor
-            const depName = this.componentTypeToDependencyName(otherName);
-            dependencies[depName] = otherComponent;
-        }
-        
         this.log(`Built dependencies for ${componentName}:`, Object.keys(dependencies));
         return dependencies;
-    }
-    
-    /**
-     * Convert component type name to dependency key
-     */
-    private componentTypeToDependencyName(componentName: string): string {
-        // Convert "PhaserEditorComponent" -> "phaserEditor"
-        // Convert "MapEditorPage" -> "mapEditorPage"
-        const baseName = componentName.replace(/Component$/, '').replace(/Panel$/, '').replace(/Page$/, '');
-        return baseName.charAt(0).toLowerCase() + baseName.slice(1);
     }
     
     /**

@@ -39,12 +39,12 @@ type UnitType struct {
 	IconDataURL string `json:"iconDataURL"`
 }
 
-type MapEditorPage struct {
+type WorldEditorPage struct {
 	BasePage
 	Header         Header
 	IsOwner        bool
-	MapId          string
-	Map            *protos.Map
+	WorldId        string
+	World          *protos.World
 	Errors         map[string]string
 	TBButtons      []*TBButton
 	AllowCustomId  bool
@@ -54,7 +54,7 @@ type MapEditorPage struct {
 	PlayerCount    int
 }
 
-func (g *MapEditorPage) Copy() View { return &MapEditorPage{} }
+func (g *WorldEditorPage) Copy() View { return &WorldEditorPage{} }
 
 // imageToDataURL converts an image to a data URL
 func imageToDataURL(img image.Image) (string, error) {
@@ -68,7 +68,7 @@ func imageToDataURL(img image.Image) (string, error) {
 	return fmt.Sprintf("data:image/png;base64,%s", encoded), nil
 }
 
-func (v *MapEditorPage) SetupDefaults() {
+func (v *WorldEditorPage) SetupDefaults() {
 	v.Header.Width = "w-full"
 	v.Header.PageData = v
 	v.Header.FixedHeader = true
@@ -79,9 +79,9 @@ func (v *MapEditorPage) SetupDefaults() {
 	// Initialize terrain types with actual asset images
 	v.NatureTerrains = []TerrainType{}
 	v.CityTerrains = []TerrainType{}
-	v.PlayerCount = 4 // Default player count for map editor
+	v.PlayerCount = 4 // Default player count for world editor
 
-	// No longer need hardcoded map - terrain type is now in TerrainData struct
+	// No longer need hardcoded world - terrain type is now in TerrainData struct
 
 	for i := 0; i <= 26; i++ {
 		terrainData := weewar.GetTerrainData(i)
@@ -173,56 +173,56 @@ func (v *MapEditorPage) SetupDefaults() {
 	}
 }
 
-func (v *MapEditorPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
+func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
 	v.Header.Load(r, w, vc)
 	v.SetupDefaults()
 	queryParams := r.URL.Query()
-	v.MapId = r.PathValue("mapId")
+	v.WorldId = r.PathValue("worldId")
 	templateName := queryParams.Get("template")
 	loggedInUserId := vc.AuthMiddleware.GetLoggedInUserId(r)
 
-	slog.Info("Loading composer for map with ID: ", "nid", v.MapId)
+	slog.Info("Loading composer for world with ID: ", "nid", v.WorldId)
 
-	if v.MapId == "" {
+	if v.WorldId == "" {
 		if false && loggedInUserId == "" {
 			// For now enforce login even on new
 			qs := r.URL.RawQuery
 			if len(qs) > 0 {
 				qs = "?" + qs
 			}
-			http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/maps/new%s", qs)), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/worlds/new%s", qs)), http.StatusSeeOther)
 			return nil, true
 		}
 		v.IsOwner = true
-		v.Map = &protos.Map{}
-		if v.Map.Name == "" {
-			v.Map.Name = "Untitled Map"
+		v.World = &protos.World{}
+		if v.World.Name == "" {
+			v.World.Name = "Untitled World"
 		}
 		log.Println("Using template: ", templateName)
 	} else {
-		client, _ := vc.ClientMgr.GetMapsSvcClient()
-		resp, err := client.GetMap(context.Background(), &protos.GetMapRequest{
-			Id: v.MapId,
+		client, _ := vc.ClientMgr.GetWorldsSvcClient()
+		resp, err := client.GetWorld(context.Background(), &protos.GetWorldRequest{
+			Id: v.WorldId,
 		})
 		if err != nil {
-			log.Println("Error getting map: ", err)
+			log.Println("Error getting world: ", err)
 			return err, false
 		}
 
-		v.IsOwner = loggedInUserId == resp.Map.CreatorId
-		log.Println("LoggedUser: ", loggedInUserId, resp.Map.CreatorId)
+		v.IsOwner = loggedInUserId == resp.World.CreatorId
+		log.Println("LoggedUser: ", loggedInUserId, resp.World.CreatorId)
 
 		if false && !v.IsOwner {
 			log.Println("Composer is NOT the owner.  Redirecting to view page...")
 			if loggedInUserId == "" {
-				http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/maps/%s/compose", v.MapId)), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/worlds/%s/compose", v.WorldId)), http.StatusSeeOther)
 			} else {
-				http.Redirect(w, r, fmt.Sprintf("/maps/%s/view", v.MapId), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("/worlds/%s/view", v.WorldId), http.StatusSeeOther)
 			}
 			return nil, true
 		}
 
-		v.Map = resp.Map
+		v.World = resp.World
 		v.Header.RightMenuItems = []HeaderMenuItem{
 			{Title: "Save", Id: "saveRightButton", Link: "javascript:void(0)"},
 			{Title: "Delete", Id: "deleteRightButton", Link: "javascript:void(0)"},

@@ -2,39 +2,7 @@ import { Unit, Tile, World, WorldObserver, WorldEvent, WorldEventType, TilesChan
 import { BaseComponent } from './Component';
 import { EventBus } from './EventBus';
 import { ComponentLifecycle } from './ComponentLifecycle';
-
-// Terrain type names mapping
-const TERRAIN_NAMES: { [key: number]: { name: string, icon: string, color: string } } = {
-    1: { name: 'Grass', icon: '🌱', color: 'text-green-600 dark:text-green-400' },
-    2: { name: 'Desert', icon: '🏜️', color: 'text-yellow-600 dark:text-yellow-400' },
-    3: { name: 'Water', icon: '🌊', color: 'text-blue-600 dark:text-blue-400' },
-    4: { name: 'Mountain', icon: '⛰️', color: 'text-gray-600 dark:text-gray-400' },
-    5: { name: 'Rock', icon: '🪨', color: 'text-gray-700 dark:text-gray-300' },
-    16: { name: 'Missile Silo', icon: '🚀', color: 'text-red-600 dark:text-red-400' },
-    20: { name: 'Mines', icon: '⛏️', color: 'text-orange-600 dark:text-orange-400' }
-};
-
-// Player colors
-const PLAYER_COLORS: { [key: number]: string } = {
-    1: 'text-red-600 dark:text-red-400',
-    2: 'text-blue-600 dark:text-blue-400',
-    3: 'text-green-600 dark:text-green-400',
-    4: 'text-yellow-600 dark:text-yellow-400',
-    5: 'text-orange-600 dark:text-orange-400',
-    6: 'text-purple-600 dark:text-purple-400',
-    7: 'text-pink-600 dark:text-pink-400',
-    8: 'text-cyan-600 dark:text-cyan-400'
-};
-
-// Unit type names worldping (basic set)
-const UNIT_NAMES: { [key: number]: { name: string, icon: string } } = {
-    1: { name: 'Infantry', icon: '🪖' },
-    2: { name: 'Tank', icon: '🛡️' },
-    3: { name: 'Artillery', icon: '💥' },
-    4: { name: 'Scout', icon: '🔍' },
-    5: { name: 'Anti-Air', icon: '🎯' },
-    19: { name: 'Rocket Launcher', icon: '🚀' }
-};
+import { TERRAIN_NAMES, UNIT_NAMES, PLAYER_COLORS } from './ColorsAndNames'
 
 /**
  * TileStatsPanel displays statistics about tiles and units on the world

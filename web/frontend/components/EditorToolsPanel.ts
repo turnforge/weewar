@@ -2,8 +2,7 @@ import { BaseComponent } from './Component';
 import { EventBus, EditorEventTypes } from './EventBus';
 import { WorldEditorPageState } from './WorldEditorPageState';
 import { ComponentLifecycle } from './ComponentLifecycle';
-
-const BRUSH_SIZE_NAMES = ['Single (1 hex)', 'Small (3 hexes)', 'Medium (5 hexes)', 'Large (9 hexes)', 'X-Large (15 hexes)', 'XX-Large (25 hexes)'];
+import { BRUSH_SIZE_NAMES, TERRAIN_NAMES, UNIT_NAMES } from './ColorsAndNames'
 
 /**
  * EditorToolsPanel Component - State generator and DOM owner for editor tools with tabbed interface
@@ -374,7 +373,7 @@ export class EditorToolsPanel extends BaseComponent {
                 
                 if (terrain) {
                     const terrainValue = parseInt(terrain);
-                    const terrainName = this.getTerrainName(terrainValue);
+                    const terrainName = TERRAIN_NAMES[terrainValue].name
                     
                     if (terrainValue === 0) {
                         // Clear mode
@@ -421,7 +420,7 @@ export class EditorToolsPanel extends BaseComponent {
                 
                 if (unit) {
                     const unitValue = parseInt(unit);
-                    const unitName = this.getUnitName(unitValue);
+                    const unitName = UNIT_NAMES[unitValue].name;
                     
                     this.executeWhenReady(() => {
                         this.updateButtonSelection(clickedButton);
@@ -609,54 +608,6 @@ export class EditorToolsPanel extends BaseComponent {
         if (cityPlayerSelect) {
             cityPlayerSelect.value = playerId.toString();
         }
-    }
-    
-    
-    /**
-     * Get human-readable terrain name
-     */
-    private getTerrainName(terrainType: number): string {
-        const terrainNames: { [key: number]: string } = {
-            0: 'Clear',
-            1: 'Grass',
-            2: 'Desert', 
-            3: 'Water',
-            4: 'Mountain',
-            5: 'Rock',
-            // Add more terrain types as needed
-        };
-        
-        return terrainNames[terrainType] || `Terrain ${terrainType}`;
-    }
-    
-    /**
-     * Get human-readable unit name
-     */
-    private getUnitName(unitType: number): string {
-        const unitNames: { [key: number]: string } = {
-            1: 'Infantry',
-            2: 'Mech',
-            3: 'Recon',
-            4: 'Tank',
-            5: 'Medium Tank',
-            6: 'Neo Tank',
-            7: 'APC',
-            8: 'Artillery',
-            9: 'Rocket',
-            10: 'Anti-Air',
-            11: 'Missile',
-            12: 'Fighter',
-            13: 'Bomber',
-            14: 'B-Copter',
-            15: 'T-Copter',
-            16: 'Battleship',
-            17: 'Cruiser',
-            18: 'Lander',
-            19: 'Sub',
-            // Add more unit types as needed
-        };
-        
-        return unitNames[unitType] || `Unit ${unitType}`;
     }
     
     /**

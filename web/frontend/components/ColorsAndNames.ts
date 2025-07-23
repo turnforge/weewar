@@ -31,18 +31,18 @@ export const PLAYER_COLORS: { [key: number]: string } = {
 
 // Player background colors for status displays  
 export const PLAYER_BG_COLORS: { [key: number]: string } = {
-    1: 'bg-blue-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    2: 'bg-red-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    3: 'bg-yellow-100 text-blue-800 dark:bg-blue-900 dark:text-gray-200',
-    4: 'bg-gray-100 text-blue-800 dark:bg-blue-900 dark:text-yellow-200',
-    5: 'bg-pink-100 text-blue-800 dark:bg-blue-900 dark:text-pink-200',
-    6: 'bg-orange-100 text-blue-800 dark:bg-blue-900 dark:text-orange-200',
-    7: 'bg-teal-100 text-blue-800 dark:bg-blue-900 dark:text-teal-200',
-    8: 'bg-green-100 text-blue-800 dark:bg-blue-900 dark:text-green-200',
-    9: 'bg-indigo-100 text-blue-800 dark:bg-blue-900 dark:text-indigo-200',
+    1: 'bg-sky-900 text-red-800 dark:bg-sky-900 dark:text-red-200',
+    2: 'bg-red-100 text-blue-800 dark:bg-red-900 dark:text-blue-200',
+    3: 'bg-yellow-100 text-blue-800 dark:bg-yellow-900 dark:text-gray-200',
+    4: 'bg-gray-100 text-blue-800 dark:bg-gray-900 dark:text-yellow-200',
+    5: 'bg-pink-100 text-blue-800 dark:bg-pink-900 dark:text-pink-200',
+    6: 'bg-orange-100 text-blue-800 dark:bg-orange-900 dark:text-orange-200',
+    7: 'bg-teal-100 text-blue-800 dark:bg-teal-900 dark:text-teal-200',
+    8: 'bg-green-100 text-blue-800 dark:bg-green-900 dark:text-green-200',
+    9: 'bg-indigo-100 text-blue-800 dark:bg-indigo-900 dark:text-indigo-200',
     10: 'bg-brown-100 text-brown-800 dark:bg-brown-900 dark:text-brown-200',
-    11: 'bg-cyan-100 text-blue-800 dark:bg-blue-900 dark:text-cyan-200',
-    12: 'bg-purple-100 text-blue-800 dark:bg-blue-900 dark:text-purple-200',
+    11: 'bg-cyan-100 text-blue-800 dark:bg-cyan-900 dark:text-purple-200',
+    12: 'bg-purple-100 text-blue-800 dark:bg-purple-900 dark:text-cyan-200',
 };
 
 // Unit type names worldping (basic set)

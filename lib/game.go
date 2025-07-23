@@ -189,7 +189,7 @@ func (g *Game) validateGameState() error {
 		return fmt.Errorf("game has no world")
 	}
 
-	if g.CurrentPlayer < 0 || g.CurrentPlayer >= g.World.PlayerCount() {
+	if g.CurrentPlayer < 0 || g.CurrentPlayer > g.World.PlayerCount() {
 		return fmt.Errorf("invalid current player: %d", g.CurrentPlayer)
 	}
 
@@ -277,7 +277,7 @@ func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) 
 	game := &Game{
 		World:         world,
 		Seed:          seed,
-		CurrentPlayer: 0,
+		CurrentPlayer: 1,
 		TurnCounter:   1,
 		Status:        GameStatusPlaying,
 		winner:        -1,

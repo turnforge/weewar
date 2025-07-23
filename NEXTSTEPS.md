@@ -437,6 +437,25 @@
 - **Performance Enhancement**: Direct JSON unmarshaling without intermediate conversion steps
 - **Type Safety**: Unified coordinate handling with proper AxialCoord mapping throughout the stack
 
+### 31. Player Color Status Enhancement (v10.6) ✅ COMPLETED
+**Completed**: Player-specific color backgrounds for GameViewerPage turn indicators
+**Key Achievements**:
+- **Player Background Colors**: Added PLAYER_BG_COLORS mapping in ColorsAndNames.ts for status displays
+- **Dynamic Status Colors**: GameViewerPage now shows player turn with appropriate player color background
+- **Game Engine Agnostic**: Uses actual player IDs from game state without indexing assumptions
+- **Multi-Player Support**: Supports up to 12 players with distinct colors (extended from original 8)
+- **Dark Mode Compatible**: Proper light/dark mode color variants for all player backgrounds
+- **Fallback Handling**: Generic green background for non-player status messages
+
+### 32. UI Color System Standardization (v10.6) ✅ COMPLETED  
+**Completed**: Centralized and standardized color system across all components
+**Technical Improvements**:
+- **Centralized Color Management**: All player, terrain, and unit colors defined in single ColorsAndNames.ts file
+- **Consistent Usage**: Same color system used by WorldEditor, GameViewer, and all UI components
+- **Type Safety**: Proper TypeScript interfaces ensure consistent color application
+- **Visual Consistency**: Turn indicators, unit displays, and terrain rendering use unified color scheme
+- **Maintainability**: Single source of truth for all UI colors reduces maintenance burden
+
 ### Phase 10: Interactive Web Gameplay ✅ FOUNDATION COMPLETE
 **Current Phase**: Real Unit Data Integration Complete - Ready for Interactive Features
 **Status**: WASM now uses real world data, ComponentLifecycle architecture complete, unified JSON format established

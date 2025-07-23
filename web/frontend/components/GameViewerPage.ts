@@ -5,6 +5,7 @@ import { Unit, Tile, World } from './World';
 import { GameState, GameCreateData, UnitSelectionData } from './GameState';
 import { ComponentLifecycle } from './ComponentLifecycle';
 import { LifecycleController } from './LifecycleController';
+import { PLAYER_BG_COLORS } from './ColorsAndNames';
 
 /**
  * Game Viewer Page - Interactive game play interface
@@ -407,8 +408,8 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
             this.updateGameUIFromState(gameData);
             this.clearUnitSelection();
             
-            this.logGameEvent(`Player ${gameData.currentPlayer + 1}'s turn begins`);
-            this.showToast('Info', `Player ${gameData.currentPlayer + 1}'s turn`, 'info');
+            this.logGameEvent(`Player ${gameData.currentPlayer}'s turn begins`);
+            this.showToast('Info', `Player ${gameData.currentPlayer}'s turn`, 'info');
             
         } catch (error) {
             console.error('Failed to end turn:', error);
@@ -453,9 +454,9 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
             // Synchronous WASM call
             const gameData = this.gameState.getGameState();
             
-            console.log(`Showing all units for Player ${gameData.currentPlayer + 1}`);
+            console.log(`Showing all units for Player ${gameData.currentPlayer}`);
             // TODO: Highlight all player units and center camera
-            this.showToast('Info', `Showing all Player ${gameData.currentPlayer + 1} units`, 'info');
+            this.showToast('Info', `Showing all Player ${gameData.currentPlayer} units`, 'info');
             
         } catch (error) {
             console.error('Failed to get game state:', error);
@@ -572,17 +573,20 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
     /**
      * UI update functions
      */
-    private updateGameStatus(status: string): void {
+    private updateGameStatus(status: string, currentPlayer?: number): void {
         const statusElement = document.getElementById('game-status');
         if (statusElement) {
             statusElement.textContent = status;
-            statusElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            
+            // Use player-specific background color, fallback to green for general messages
+            const playerColorClass = currentPlayer ? PLAYER_BG_COLORS[currentPlayer] : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            statusElement.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${playerColorClass}`;
         }
     }
 
     private updateGameUIFromState(gameData: GameCreateData): void {
-        // Update game status
-        this.updateGameStatus(`Ready - Player ${gameData.currentPlayer + 1}'s Turn`);
+        // Update game status with player-specific color - use player ID directly
+        this.updateGameStatus(`Ready - Player ${gameData.currentPlayer}'s Turn`, gameData.currentPlayer);
         
         // Update turn counter
         const turnElement = document.getElementById('turn-counter');

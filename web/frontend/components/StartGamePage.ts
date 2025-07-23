@@ -2,6 +2,8 @@ import { BasePage } from './BasePage';
 import { EventBus, EventTypes } from './EventBus';
 import { WorldViewer } from './WorldViewer';
 import { World } from './World';
+import { ComponentLifecycle } from './ComponentLifecycle';
+import { LifecycleController } from './LifecycleController';
 
 /**
  * Start Game Page - Orchestrator for game configuration functionality
@@ -16,7 +18,7 @@ import { World } from './World';
  * - Phaser management (delegated to WorldViewer)
  * - Game logic (delegated to game engine)
  */
-class StartGamePage extends BasePage {
+class StartGamePage extends BasePage implements ComponentLifecycle {
     private currentWorldId: string | null;
     private isLoadingWorld: boolean = false;
     private world: World | null = null;
@@ -32,25 +34,27 @@ class StartGamePage extends BasePage {
     private worldViewer: WorldViewer | null = null;
 
     constructor() {
-        super();
-        this.loadInitialState();
-        this.initializeSpecificComponents();
-        this.bindSpecificEvents();
+        console.log('StartGamePage: Constructor starting...');
+        super(); // BasePage will call initializeSpecificComponents() and bindSpecificEvents() 
+        console.log('StartGamePage: Constructor completed - lifecycle will be managed externally');
     }
 
+    /**
+     * Load initial state (required by BasePage)
+     * This method is called by BasePage constructor, but we're using external LifecycleController
+     * so we make this a no-op and handle initialization through ComponentLifecycle interface
+     */
     protected initializeSpecificComponents(): void {
-        // Initialize components immediately
-        this.initializeComponents();
+        console.log('StartGamePage: initializeSpecificComponents() called by BasePage - doing minimal setup');
+        this.loadInitialState(); // Load initial state here since constructor calls this
+        console.log('StartGamePage: Actual component initialization will be handled by LifecycleController');
     }
     
     /**
-     * Initialize page components using the established component architecture
+     * Subscribe to WorldViewer events before component creation
      */
-    private initializeComponents(): void {
-        try {
-            console.log('Initializing StartGamePage components');
-            
-            // Subscribe to WorldViewer ready event BEFORE creating the component
+    private subscribeToWorldViewerEvents(): void {
+        // Subscribe to WorldViewer ready event BEFORE creating the component
             console.log('StartGamePage: Subscribing to world-viewer-ready event');
             this.eventBus.subscribe('world-viewer-ready', () => {
                 console.log('StartGamePage: WorldViewer is ready, loading world data...');
@@ -61,18 +65,18 @@ class StartGamePage extends BasePage {
                   }, 10)
                 }
             }, 'start-game-page');
-            
-            // Create WorldViewer component for preview
-            const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
-            console.log('StartGamePage: Creating WorldViewer with eventBus:', this.eventBus);
-            this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
-            
-            console.log('StartGamePage components initialized');
-            
-        } catch (error) {
-            console.error('Failed to initialize components:', error);
-            this.showToast('Error', 'Failed to initialize page components', 'error');
-        }
+    }
+
+    /**
+     * Create WorldViewer component instance
+     */
+    private createComponents(): void {
+        // Create WorldViewer component for preview
+        const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
+        console.log('StartGamePage: Creating WorldViewer with eventBus:', this.eventBus);
+        this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
+        
+        console.log('StartGamePage: Components created');
     }
     
     /**
@@ -91,7 +95,19 @@ class StartGamePage extends BasePage {
         return element;
     }
 
+    /**
+     * Bind page-specific events (required by BasePage)
+     * This method is called by BasePage constructor, but we're using external LifecycleController
+     * so we make this a no-op and handle event binding in ComponentLifecycle.activate()
+     */
     protected bindSpecificEvents(): void {
+        console.log('StartGamePage: bindSpecificEvents() called by BasePage - deferred to activate() phase');
+    }
+
+    /**
+     * Internal method to bind page-specific events (called from activate() phase)
+     */
+    private bindPageSpecificEvents(): void {
         // Bind start game button
         const startGameButton = document.querySelector('[data-action="start-game"]');
         if (startGameButton) {
@@ -166,13 +182,13 @@ class StartGamePage extends BasePage {
      * Calculate player count from world units
      */
     private calculatePlayerCountFromWorld(worldData: any): number {
-        if (!worldData || !worldData.world_units) {
+        if (!worldData || !worldData.units) {
             return 2; // Default fallback
         }
         
         // Find the highest player ID in world units
         let maxPlayer = 0;
-        for (const unit of worldData.world_units) {
+        for (const unit of worldData.units) {
             if (unit.player && unit.player > maxPlayer) {
                 maxPlayer = unit.player;
             }
@@ -513,6 +529,60 @@ class StartGamePage extends BasePage {
         this.world = null;
         this.currentWorldId = null;
     }
+
+    // =============================================================================
+    // ComponentLifecycle Interface Implementation
+    // =============================================================================
+
+    /**
+     * Phase 1: Initialize DOM and discover child components
+     */
+    initializeDOM(): ComponentLifecycle[] {
+        console.log('StartGamePage: initializeDOM() - Phase 1');
+        
+        // Subscribe to events BEFORE creating components
+        this.subscribeToWorldViewerEvents();
+        
+        // Create child components
+        this.createComponents();
+        
+        console.log('StartGamePage: DOM initialized, returning child components');
+        
+        // Return child components for lifecycle management
+        const childComponents: ComponentLifecycle[] = [];
+        if (this.worldViewer) {
+            childComponents.push(this.worldViewer);
+        }
+        return childComponents;
+    }
+
+    /**
+     * Phase 2: Inject dependencies (none needed for StartGamePage)
+     */
+    injectDependencies(deps: Record<string, any>): void {
+        console.log('StartGamePage: injectDependencies() - Phase 2', Object.keys(deps));
+        // StartGamePage doesn't need external dependencies
+    }
+
+    /**
+     * Phase 3: Activate component when all dependencies are ready
+     */
+    async activate(): Promise<void> {
+        console.log('StartGamePage: activate() - Phase 3');
+        
+        // Bind events now that all components are ready
+        this.bindPageSpecificEvents();
+        
+        console.log('StartGamePage: activation complete');
+    }
+
+    /**
+     * Cleanup phase (called by lifecycle controller if needed)
+     */
+    deactivate(): void {
+        console.log('StartGamePage: deactivate() - cleanup');
+        this.destroy();
+    }
 }
 
 // Type definitions for game configuration
@@ -532,6 +602,27 @@ interface Player {
 
 type PlayerType = 'human' | 'ai' | 'open' | 'none';
 
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize page when DOM is ready using LifecycleController
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, starting StartGamePage initialization...');
+    
+    // Create page instance (just basic setup)
     const startGamePage = new StartGamePage();
+    
+    // Create lifecycle controller with debug logging
+    const lifecycleController = new LifecycleController({
+        enableDebugLogging: true,
+        phaseTimeoutMs: 15000, // Increased timeout for component loading
+        continueOnError: false // Fail fast for debugging
+    });
+    
+    // Set up lifecycle event logging
+    lifecycleController.onLifecycleEvent((event) => {
+        console.log(`[StartGame Lifecycle] ${event.type}: ${event.componentName} - ${event.phase}`, event.error || '');
+    });
+    
+    // Start breadth-first initialization
+    await lifecycleController.initializeFromRoot(startGamePage, 'StartGamePage');
+    
+    console.log('StartGamePage fully initialized via LifecycleController');
 });

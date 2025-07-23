@@ -3,6 +3,8 @@ import { EventBus, EventTypes } from './EventBus';
 import { WorldViewer } from './WorldViewer';
 import { WorldStatsPanel } from './WorldStatsPanel';
 import { World } from './World';
+import { ComponentLifecycle } from './ComponentLifecycle';
+import { LifecycleController } from './LifecycleController';
 
 /**
  * World Details Page - Orchestrator for world viewing functionality
@@ -17,7 +19,7 @@ import { World } from './World';
  * - Phaser management (delegated to WorldViewer)
  * - Statistics display (delegated to WorldStatsPanel)
  */
-class WorldDetailsPage extends BasePage {
+class WorldDetailsPage extends BasePage implements ComponentLifecycle {
     private currentWorldId: string | null;
     private isLoadingWorld: boolean = false;
     private world: World | null = null;
@@ -27,51 +29,53 @@ class WorldDetailsPage extends BasePage {
     private worldStatsPanel: WorldStatsPanel | null = null;
 
     constructor() {
-        super();
-        this.loadInitialState();
-        this.initializeSpecificComponents();
-        this.bindSpecificEvents();
+        console.log('WorldDetailsPage: Constructor starting...');
+        super(); // BasePage will call initializeSpecificComponents() and bindSpecificEvents() 
+        console.log('WorldDetailsPage: Constructor completed - lifecycle will be managed externally');
     }
 
+    /**
+     * Load game configuration from hidden inputs (required by BasePage)
+     * This method is called by BasePage constructor, but we're using external LifecycleController
+     * so we make this a no-op and handle initialization through ComponentLifecycle interface
+     */
     protected initializeSpecificComponents(): void {
-        // Initialize components immediately
-        this.initializeComponents();
+        console.log('WorldDetailsPage: initializeSpecificComponents() called by BasePage - doing minimal setup');
+        this.loadInitialState(); // Load initial state here since constructor calls this
+        console.log('WorldDetailsPage: Actual component initialization will be handled by LifecycleController');
     }
     
     /**
-     * Initialize page components using the new simplified component architecture
+     * Subscribe to WorldViewer events before component creation
      */
-    private initializeComponents(): void {
-        try {
-            console.log('Initializing WorldDetailsPage components');
-            
-            // Subscribe to WorldViewer ready event BEFORE creating the component
-            console.log('WorldDetailsPage: Subscribing to world-viewer-ready event');
-            this.eventBus.subscribe('world-viewer-ready', () => {
-                console.log('WorldDetailsPage: WorldViewer is ready, loading world data...');
-                if (this.currentWorldId) {
-                  // Give Phaser time to fully initialize webgl context and scene
-                  setTimeout(async () => {
-                    await this.loadWorldData()
-                  }, 10)
-                }
-            }, 'world-details-page');
-            
-            // Create WorldViewer component
-            const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
-            console.log('WorldDetailsPage: Creating WorldViewer with eventBus:', this.eventBus);
-            this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
-            
-            // Create WorldStatsPanel component  
-            const worldStatsRoot = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');
-            this.worldStatsPanel = new WorldStatsPanel(worldStatsRoot, this.eventBus, true);
-            
-            console.log('WorldDetailsPage components initialized');
-            
-        } catch (error) {
-            console.error('Failed to initialize components:', error);
-            this.showToast('Error', 'Failed to initialize page components', 'error');
-        }
+    private subscribeToWorldViewerEvents(): void {
+        // Subscribe to WorldViewer ready event BEFORE creating the component
+        console.log('WorldDetailsPage: Subscribing to world-viewer-ready event');
+        this.eventBus.subscribe('world-viewer-ready', () => {
+            console.log('WorldDetailsPage: WorldViewer is ready, loading world data...');
+            if (this.currentWorldId) {
+              // Give Phaser time to fully initialize webgl context and scene
+              setTimeout(async () => {
+                await this.loadWorldData()
+              }, 10)
+            }
+        }, 'world-details-page');
+    }
+
+    /**
+     * Create WorldViewer and WorldStatsPanel component instances
+     */
+    private createComponents(): void {
+        // Create WorldViewer component
+        const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
+        console.log('WorldDetailsPage: Creating WorldViewer with eventBus:', this.eventBus);
+        this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
+        
+        // Create WorldStatsPanel component  
+        const worldStatsRoot = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');
+        this.worldStatsPanel = new WorldStatsPanel(worldStatsRoot, this.eventBus, true);
+        
+        console.log('WorldDetailsPage: Components created');
     }
     
     /**
@@ -89,11 +93,29 @@ class WorldDetailsPage extends BasePage {
             const mainContainer = document.querySelector('main') || document.body;
             mainContainer.appendChild(element);
         }
+        
+        // Ensure element has an ID for Phaser container
+        if (!element.id) {
+            element.id = fallbackId;
+        }
+        
         return element;
     }
     
 
+    /**
+     * Bind page-specific events (required by BasePage)
+     * This method is called by BasePage constructor, but we're using external LifecycleController
+     * so we make this a no-op and handle event binding in ComponentLifecycle.activate()
+     */
     protected bindSpecificEvents(): void {
+        console.log('WorldDetailsPage: bindSpecificEvents() called by BasePage - deferred to activate() phase');
+    }
+
+    /**
+     * Internal method to bind page-specific events (called from activate() phase)
+     */
+    private bindPageSpecificEvents(): void {
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         if (mobileMenuButton) {
             mobileMenuButton.addEventListener('click', () => {
@@ -175,8 +197,8 @@ class WorldDetailsPage extends BasePage {
                     if (worldData.tiles) {
                         console.log(`Tiles data keys: ${Object.keys(worldData.tiles).join(', ')}`);
                     }
-                    if (worldData.world_units) {
-                        console.log(`Units data length: ${worldData.world_units.length}`);
+                    if (worldData.units) {
+                        console.log(`Units data length: ${worldData.units.length}`);
                     }
                     return worldData;
                 }
@@ -220,8 +242,86 @@ class WorldDetailsPage extends BasePage {
         this.world = null;
         this.currentWorldId = null;
     }
+
+    // =============================================================================
+    // ComponentLifecycle Interface Implementation
+    // =============================================================================
+
+    /**
+     * Phase 1: Initialize DOM and discover child components
+     */
+    initializeDOM(): ComponentLifecycle[] {
+        console.log('WorldDetailsPage: initializeDOM() - Phase 1');
+        
+        // Subscribe to events BEFORE creating components
+        this.subscribeToWorldViewerEvents();
+        
+        // Create child components
+        this.createComponents();
+        
+        console.log('WorldDetailsPage: DOM initialized, returning child components');
+        
+        // Return child components for lifecycle management
+        const childComponents: ComponentLifecycle[] = [];
+        if (this.worldViewer) {
+            childComponents.push(this.worldViewer);
+        }
+        if (this.worldStatsPanel && (this.worldStatsPanel as any).initializeDOM) {
+            childComponents.push(this.worldStatsPanel as any);
+        }
+        return childComponents;
+    }
+
+    /**
+     * Phase 2: Inject dependencies (none needed for WorldDetailsPage)
+     */
+    injectDependencies(deps: Record<string, any>): void {
+        console.log('WorldDetailsPage: injectDependencies() - Phase 2', Object.keys(deps));
+        // WorldDetailsPage doesn't need external dependencies
+    }
+
+    /**
+     * Phase 3: Activate component when all dependencies are ready
+     */
+    async activate(): Promise<void> {
+        console.log('WorldDetailsPage: activate() - Phase 3');
+        
+        // Bind events now that all components are ready
+        this.bindPageSpecificEvents();
+        
+        console.log('WorldDetailsPage: activation complete');
+    }
+
+    /**
+     * Cleanup phase (called by lifecycle controller if needed)
+     */
+    deactivate(): void {
+        console.log('WorldDetailsPage: deactivate() - cleanup');
+        this.destroy();
+    }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const lc = new WorldDetailsPage();
+// Initialize page when DOM is ready using LifecycleController
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, starting WorldDetailsPage initialization...');
+    
+    // Create page instance (just basic setup)
+    const worldDetailsPage = new WorldDetailsPage();
+    
+    // Create lifecycle controller with debug logging
+    const lifecycleController = new LifecycleController({
+        enableDebugLogging: true,
+        phaseTimeoutMs: 15000, // Increased timeout for component loading
+        continueOnError: false // Fail fast for debugging
+    });
+    
+    // Set up lifecycle event logging
+    lifecycleController.onLifecycleEvent((event) => {
+        console.log(`[WorldDetails Lifecycle] ${event.type}: ${event.componentName} - ${event.phase}`, event.error || '');
+    });
+    
+    // Start breadth-first initialization
+    await lifecycleController.initializeFromRoot(worldDetailsPage, 'WorldDetailsPage');
+    
+    console.log('WorldDetailsPage fully initialized via LifecycleController');
 });

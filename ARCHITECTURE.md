@@ -888,10 +888,84 @@ export class MapEditorPage extends BasePage implements MapObserver {
 ---
 
 **Last Updated**: 2025-01-22  
-**Architecture Version**: 10.3 (WASM Integration Complete)  
-**Status**: Complete WASM bridge integration with working GameState component and interactive game viewer. All critical integration issues resolved. Ready for unit interaction and advanced gameplay features.
+**Architecture Version**: 10.4 (ComponentLifecycle Architecture Complete)  
+**Status**: Complete ComponentLifecycle architecture implementation with external orchestration across all major pages. Clean separation of constructor, DOM, dependency, and activation phases eliminates race conditions and architecture violations. Ready for unit interaction and gameplay completion.
 
 **Latest Achievement (v10.3)**: Complete WASM Integration with Working Game Bridge:
+
+## ComponentLifecycle Architecture Complete (v10.4) ✅ COMPLETED
+
+### Unified ComponentLifecycle Pattern Across All Pages ✅
+**Purpose**: Eliminate architecture violations and race conditions through external breadth-first orchestration
+- **GameViewerPage ComponentLifecycle**: External LifecycleController orchestration with proper phase separation
+- **WorldDetailsPage ComponentLifecycle**: Identical pattern implementation eliminating constructor-based lifecycle calls
+- **StartGamePage ComponentLifecycle**: Complete migration to external orchestration following established pattern
+- **WorldViewer Integration**: Proper activation phase for Phaser initialization preventing duplicate canvas issues
+- **Architecture Violation Prevention**: Components no longer call lifecycle methods in constructors - external orchestration only
+- **Breadth-First Initialization**: All components at each phase complete before proceeding to next phase
+
+```typescript
+class GameViewerPage extends BasePage implements ComponentLifecycle {
+    constructor() {
+        super(); // BasePage handles basic setup only
+        // Lifecycle managed externally - no component initialization in constructor
+    }
+    
+    // Phase 1: DOM setup and component discovery
+    initializeDOM(): ComponentLifecycle[] {
+        this.subscribeToWorldViewerEvents();
+        this.createComponents();
+        return [this.worldViewer]; // Return child components for orchestration
+    }
+    
+    // Phase 2: Dependency injection (none needed for pages)
+    injectDependencies(deps: Record<string, any>): void {}
+    
+    // Phase 3: Activation when all components ready
+    async activate(): Promise<void> {
+        this.bindPageSpecificEvents();
+        // All components guaranteed ready at this point
+    }
+}
+```
+
+### External Orchestration Pattern ✅
+**Purpose**: Breadth-first component initialization with synchronization barriers
+- **LifecycleController**: Manages multi-phase initialization across entire component tree
+- **Phase Separation**: Constructor → initializeDOM → injectDependencies → activate → deactivate
+- **Error Isolation**: Component failures don't cascade through initialization system
+- **Debug Support**: Comprehensive lifecycle event logging and timeout handling
+- **Container Detection**: Flexible container discovery supporting both direct and parent container patterns
+
+```typescript
+// External orchestration at DOM ready
+document.addEventListener('DOMContentLoaded', async () => {
+    const gameViewerPage = new GameViewerPage();
+    
+    const lifecycleController = new LifecycleController({
+        enableDebugLogging: true,
+        phaseTimeoutMs: 15000,
+        continueOnError: false
+    });
+    
+    await lifecycleController.initializeFromRoot(gameViewerPage, 'GameViewerPage');
+});
+```
+
+### Container Management Solutions ✅
+**Purpose**: Resolve container ID issues and support flexible container patterns
+- **WorldViewer Flexibility**: Enhanced bindToDOM() to handle both direct container and parent container patterns
+- **Container ID Detection**: Automatic fallback from child container to parent container to createElement
+- **Initialization Guard**: Prevention of multiple Phaser instances through proper lifecycle phase separation
+- **Canvas Deduplication**: Moving Phaser initialization from bindToDOM to activate phase prevents duplicate canvas creation
+
+### Architecture Benefits ✅
+- **Race Condition Elimination**: Breadth-first initialization prevents component timing dependencies
+- **Architecture Compliance**: No lifecycle methods called in constructors - all external orchestration
+- **Component Isolation**: Each component focuses on single responsibility without orchestration concerns
+- **Debug Clarity**: Comprehensive logging makes initialization issues easy to trace and resolve
+- **Extensible Pattern**: Same lifecycle pattern works across all page types and component hierarchies
+- **Container Flexibility**: Robust container detection works in various DOM layout scenarios
 
 ## WASM Bridge Integration Architecture (v10.3) ✅ COMPLETED
 

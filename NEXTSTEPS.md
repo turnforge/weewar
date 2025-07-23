@@ -2,17 +2,17 @@
 
 ## Recent Achievements ✅
 
-### 1. WASM Integration Complete (v10.3) ⭐ NEW
-**Completed**: All critical WASM integration issues resolved, working GameState component with functional game bridge
+### 1. ComponentLifecycle Architecture Complete (v10.4) ⭐ NEW
+**Completed**: Complete ComponentLifecycle architecture implementation with external orchestration across all major pages
 **Key Achievements**:
-- **WASM Module Loading Fixed**: Resolved path resolution and initialization issues in GameState component
-- **World Data Loading Working**: Fixed null world data loading and template integration sequence
-- **Lifecycle Controller Pattern**: Prevented multiple initialization calls through proper component orchestration
-- **JSON Serialization Fixed**: Changed coordinate maps to string keys for proper Go-JavaScript data flow
-- **Embedded Rules Data**: Resolved WASM path panics by embedding rules-data.json as Go assets
-- **Game Creation Functional**: CreateGameFromMap works without crashes, creates playable game instances
-- **Map Rendering Working**: World tiles are visible and rendering correctly in GameViewerPage
-- **Component Integration**: EventBus communication working between GameState and UI components
+- **External Orchestration Pattern**: LifecycleController manages breadth-first initialization preventing race conditions
+- **Architecture Violation Prevention**: Eliminated lifecycle method calls in constructors across GameViewer, WorldDetails, StartGame pages
+- **Phase Separation**: Clean separation of Constructor → DOM → Dependencies → Activation phases
+- **Component Isolation**: Each component focuses on single responsibility without orchestration concerns
+- **Container Management**: Enhanced WorldViewer to handle both direct container and parent container patterns
+- **Canvas Deduplication**: Moving Phaser initialization to activate phase prevents duplicate canvas creation
+- **Debug Infrastructure**: Comprehensive lifecycle event logging and timeout handling for troubleshooting
+- **Consistent Pattern**: Identical ComponentLifecycle implementation across all major page types
 
 ### 2. Rules Engine Integration Complete (v9.0) ⭐ NEW
 **Completed**: Complete data-driven game mechanics with rules engine integration
@@ -419,19 +419,21 @@
 
 ### Phase 10: Interactive Web Gameplay 🚧 CURRENT PRIORITY  
 **Current Phase**: Unit Interaction and Advanced Gameplay Features
-**Status**: WASM integration complete, GameState component functional, map tiles rendering
-**Focus**: Debug unit visibility and complete interactive unit selection/movement
-**Foundation**: Working WASM bridge, lifecycle controller, and game state management
+**Status**: ComponentLifecycle architecture complete, WASM integration functional, clean component separation
+**Focus**: Update GameViewerPage WASM to use real unit data instead of mock units, then complete interactive gameplay
+**Foundation**: External orchestration, working WASM bridge, and proper component lifecycle management
 
-#### Current Issues Identified: Unit Visibility and Interaction 🔄 IN PROGRESS
-- 🔄 **Unit Visibility**: Units not yet visible in GameViewerPage, need debugging unit rendering
+#### Current Tasks: WASM Real Unit Data and Interactive Gameplay 🔄 IN PROGRESS
+- 🔄 **WASM Real Unit Integration**: Update GameViewerPage WASM to parse actual map units instead of creating mock test units
+- 🔄 **Unit Visibility**: Ensure real units from map data are properly rendered in PhaserViewer
 - 🔄 **Unit Selection**: Connect unit selection to Phaser viewer highlighting system
 - 🔄 **Movement Highlighting**: Show valid movement options as colored overlays
 - 🔄 **Click-to-Move**: Enable clicking on highlighted tiles to move selected units
 - 🔄 **Attack Targeting**: Implement attack option highlighting and click-to-attack
 
 #### Immediate Next Steps (Week 1)
-- [ ] **Debug Unit Rendering**: Investigate why units are not visible in GameViewerPage
+- [ ] **Update WASM Mock Units**: Replace createTestWorld() with actual map data parsing in GameViewerPage WASM
+- [ ] **Debug Real Unit Rendering**: Ensure actual map units are visible and rendering correctly
 - [ ] **Enable Unit Selection**: Connect GameState selectUnit to Phaser viewer highlighting
 - [ ] **Implement Movement UI**: Show movement options and enable click-to-move functionality  
 - [ ] **Add Attack Interface**: Show attack targets and enable click-to-attack

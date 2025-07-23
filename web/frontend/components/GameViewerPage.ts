@@ -224,32 +224,6 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         const worldDataStr = JSON.stringify(this.loadWorldDataFromElement());
         const gameData = await this.gameState.createGameFromMap(worldDataStr, this.gameConfig.playerCount);
         
-        // Debug: Log the game data returned by WASM
-        console.log('WASM Game Creation Result:', gameData);
-        console.log('WASM gameData type:', typeof gameData);
-        console.log('WASM allUnits:', gameData?.allUnits);
-        console.log('WASM allUnits type:', typeof gameData?.allUnits);
-        console.log('WASM allUnits keys:', gameData?.allUnits ? Object.keys(gameData.allUnits) : 'none');
-        console.log('WASM allUnits length:', gameData?.allUnits ? Object.keys(gameData.allUnits).length : 0);
-        
-        // Check all properties of gameData
-        if (gameData) {
-            console.log('WASM gameData properties:', Object.keys(gameData));
-            for (const [key, value] of Object.entries(gameData)) {
-                console.log(`WASM gameData.${key}:`, value);
-            }
-        }
-        
-        // Update WorldViewer with WASM-generated units
-        if (gameData?.allUnits && this.worldViewer) {
-            console.log('🚀 About to call updateWorldViewerWithUnits with:', gameData.allUnits);
-            await this.updateWorldViewerWithUnits(gameData.allUnits);
-        } else {
-            console.log('❌ updateWorldViewerWithUnits NOT called because:');
-            console.log('  - gameData?.allUnits:', !!gameData?.allUnits);
-            console.log('  - this.worldViewer:', !!this.worldViewer);
-        }
-        
         // Update UI synchronously
         this.updateGameUIFromState(gameData);
         this.logGameEvent(`Game started with ${this.gameConfig.playerCount} players`);
@@ -331,72 +305,6 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
             console.error('GameViewerPage: Error parsing world data:', error);
             return null;
         }
-    }
-
-    /**
-     * Update WorldViewer with WASM-generated units
-     */
-    private async updateWorldViewerWithUnits(wasmUnits: { [coordKey: string]: any }): Promise<void> {
-        console.log('🎯 updateWorldViewerWithUnits() ENTERED - Function is being called!');
-        console.log('🎯 wasmUnits received:', wasmUnits);
-        // Preconditions - let these fail hard if not met
-        console.assert(this.worldViewer, 'WorldViewer must be initialized');
-        console.assert(this.worldViewer!.isPhaserReady(), 'WorldViewer must be ready');
-        console.assert(wasmUnits, 'WASM units data must be provided');
-
-        // Convert WASM units format to Phaser format
-        const unitsArray: Array<Unit> = [];
-        
-        for (const [coordKey, unit] of Object.entries(wasmUnits)) {
-            // Parse coordinate key like "0,1" back to Q,R
-            const [qStr, rStr] = coordKey.split(',');
-            const q = parseInt(qStr, 10);
-            const r = parseInt(rStr, 10);
-            
-            // Skip invalid coordinates but don't fail completely
-            if (isNaN(q) || isNaN(r) || !unit) {
-                console.warn(`Invalid unit data for coord ${coordKey}:`, unit);
-                continue;
-            }
-
-            const unitData = {
-                q: q,
-                r: r,
-                unitType: unit.unit_type || 1, // Use correct Go field name
-                player: unit.player || 1,
-            };
-            console.log(`Converting unit at ${coordKey}:`, unit, '→', unitData);
-            unitsArray.push(unitData);
-        }
-
-        console.log(`Converting ${Object.keys(wasmUnits).length} WASM units to ${unitsArray.length} Phaser units`);
-        console.log('Sample converted unit:', unitsArray[0]);
-
-        // Get current tiles from world data (PhaserViewer.loadWorldData needs both tiles and units)
-        const worldData = this.loadWorldDataFromElement();
-        console.assert(worldData, 'World data must be available for tile information');
-
-        const world = World.deserialize(worldData!);
-        const allTiles = world.getAllTiles();
-        
-        // Convert tiles to Phaser format
-        const tilesArray: Array<Tile> = [];
-        allTiles.forEach(tile => {
-            tilesArray.push({
-                q: tile.q,
-                r: tile.r,
-                tileType: tile.tileType,
-                player: tile.player,
-            });
-        });
-
-        // Call PhaserViewer directly to reload with both tiles and units
-        console.log('Calling PhaserViewer loadWorldData with tiles and units...');
-        const phaserViewer = (this.worldViewer as any).phaserViewer;
-        console.assert(phaserViewer, 'PhaserViewer must be available in WorldViewer');
-        
-        await phaserViewer.loadWorldData(tilesArray, unitsArray);
-        console.log('Successfully updated PhaserViewer with WASM-generated units');
     }
 
     /**

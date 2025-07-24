@@ -11,6 +11,10 @@ func (g *Game) NextTurn() error {
 		return fmt.Errorf("cannot advance turn: game is not in playing state")
 	}
 
+	// Store previous state for GameLog
+	previousPlayer := g.CurrentPlayer
+	previousTurn := g.TurnCounter
+
 	// Reset unit movement for current player
 	if err := g.resetPlayerUnits(g.CurrentPlayer); err != nil {
 		return fmt.Errorf("failed to reset player units: %w", err)
@@ -31,10 +35,26 @@ func (g *Game) NextTurn() error {
 		g.Status = GameStatusEnded
 		g.eventManager.EmitGameEnded(winner)
 		g.eventManager.EmitGameStateChanged(GameStateChangeGameEnded, winner)
+		
+		// Update GameLog status when game ends
+		g.SetGameLogStatus("completed")
 	}
 
 	// Update timestamp
 	g.LastActionAt = time.Now()
+
+	// Record action in GameLog
+	action := CreateEndTurnAction()
+	changes := []WorldChange{
+		CreatePlayerChangedChange(previousPlayer, g.CurrentPlayer),
+	}
+	
+	// Add turn counter change if it changed
+	if g.TurnCounter != previousTurn {
+		changes = append(changes, CreateTurnAdvancedChange(previousTurn, g.TurnCounter))
+	}
+	
+	g.recordAction(action, changes)
 
 	// Emit turn changed event
 	g.eventManager.EmitTurnChanged(g.CurrentPlayer, g.TurnCounter)
@@ -169,6 +189,13 @@ func (g *Game) MoveUnit(unit *Unit, to AxialCoord) error {
 	// Update timestamp
 	g.LastActionAt = time.Now()
 
+	// Record action in GameLog
+	action := CreateMoveAction(fromPos.Q, fromPos.R, toPos.Q, toPos.R)
+	changes := []WorldChange{
+		CreateUnitMovedChange(fmt.Sprintf("unit_%d_%d", unit.Player, unit.UnitType), fromPos.Q, fromPos.R, toPos.Q, toPos.R),
+	}
+	g.recordAction(action, changes)
+
 	// Emit events
 	g.eventManager.EmitUnitMoved(unit, fromPos, toPos)
 	g.eventManager.EmitGameStateChanged(GameStateChangeUnitMoved, map[string]any{
@@ -250,6 +277,58 @@ func (g *Game) AttackUnit(attacker, defender *Unit) (*CombatResult, error) {
 
 	// Update timestamp
 	g.LastActionAt = time.Now()
+
+	// Record action in GameLog
+	action := CreateAttackAction(attacker.Coord.Q, attacker.Coord.R, defender.Coord.Q, defender.Coord.R)
+	changes := []WorldChange{}
+	
+	// Add damage changes
+	if defenderDamage > 0 {
+		changes = append(changes, WorldChange{
+			Type:       "unitDamaged",
+			EntityType: "unit",
+			EntityID:   fmt.Sprintf("unit_%d_%d", defender.Player, defender.UnitType),
+			FromState:  map[string]interface{}{"health": defender.AvailableHealth + defenderDamage},
+			ToState:    map[string]interface{}{"health": defender.AvailableHealth},
+		})
+	}
+	
+	if attackerDamage > 0 {
+		changes = append(changes, WorldChange{
+			Type:       "unitDamaged",
+			EntityType: "unit",
+			EntityID:   fmt.Sprintf("unit_%d_%d", attacker.Player, attacker.UnitType),
+			FromState:  map[string]interface{}{"health": attacker.AvailableHealth + attackerDamage},
+			ToState:    map[string]interface{}{"health": attacker.AvailableHealth},
+		})
+	}
+	
+	// Add kill changes
+	if defenderKilled {
+		changes = append(changes, CreateUnitKilledChange(
+			fmt.Sprintf("unit_%d_%d", defender.Player, defender.UnitType),
+			map[string]interface{}{
+				"player":     defender.Player,
+				"unitType":   defender.UnitType,
+				"position":   defender.Coord,
+				"health":     defender.AvailableHealth + defenderDamage,
+			},
+		))
+	}
+	
+	if attackerKilled {
+		changes = append(changes, CreateUnitKilledChange(
+			fmt.Sprintf("unit_%d_%d", attacker.Player, attacker.UnitType),
+			map[string]interface{}{
+				"player":     attacker.Player,
+				"unitType":   attacker.UnitType,
+				"position":   attacker.Coord,
+				"health":     attacker.AvailableHealth + attackerDamage,
+			},
+		))
+	}
+	
+	g.recordAction(action, changes)
 
 	// Emit events
 	g.eventManager.EmitUnitAttacked(attacker, defender, result)

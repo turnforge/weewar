@@ -58,6 +58,9 @@ type Game struct {
 	// Rules engine for data-driven game mechanics
 	rulesEngine *RulesEngine `json:"-"` // Rules engine for movement costs, combat, unit data
 
+	// GameLog for recording and replay
+	gameLog *GameLog `json:"-"` // GameLog for action recording and save/load
+
 	// Game metadata
 	CreatedAt    time.Time `json:"createdAt"`    // When game was created
 	LastActionAt time.Time `json:"lastActionAt"` // When last action was taken
@@ -266,6 +269,52 @@ func (g *Game) SetRulesEngine(rulesEngine *RulesEngine) {
 	g.rulesEngine = rulesEngine
 }
 
+// GetGameLog returns the current GameLog instance
+func (g *Game) GetGameLog() *GameLog {
+	return g.gameLog
+}
+
+// SetGameLog sets the GameLog instance and starts a new session
+func (g *Game) SetGameLog(gameLog *GameLog) error {
+	g.gameLog = gameLog
+	
+	if gameLog != nil {
+		// Serialize the current world state for the starting point
+		worldData, err := json.Marshal(g.World)
+		if err != nil {
+			return fmt.Errorf("failed to serialize world for GameLog: %w", err)
+		}
+		
+		// Create session metadata
+		metadata := SessionMetadata{
+			MapName:     g.World.GetName(),
+			PlayerCount: g.World.PlayerCount(),
+			MaxTurns:    0, // TODO: Add max turns support to Game struct
+			GameConfig: map[string]interface{}{
+				"seed":         g.Seed,
+				"currentPlayer": g.CurrentPlayer,
+				"turnCounter":  g.TurnCounter,
+			},
+		}
+		
+		// Start new session
+		worldID := g.World.GetID()
+		if worldID == "" {
+			worldID = "unknown"
+		}
+		
+		return gameLog.StartNewSession(worldID, worldData, metadata)
+	}
+	
+	return nil
+}
+
+// InitializeGameLog creates and configures a GameLog with the specified SaveHandler
+func (g *Game) InitializeGameLog(saveHandler SaveHandler, autoSave bool) error {
+	gameLog := NewGameLog(saveHandler, autoSave)
+	return g.SetGameLog(gameLog)
+}
+
 // NewGame creates a new game instance with the specified parameters
 func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) {
 	// Validate parameters
@@ -288,6 +337,7 @@ func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) 
 		eventManager:  NewEventManager(),
 		assetProvider: NewAssetManager("data"),
 		rulesEngine:   rulesEngine,
+		gameLog:       nil, // Will be initialized when SetGameLog is called
 	}
 
 	// Initialize units storage for compatibility (will be migrated)
@@ -318,6 +368,7 @@ func LoadGame(saveData []byte) (*Game, error) {
 	game.eventManager = NewEventManager()
 	game.assetProvider = NewAssetManager("data")
 	game.rulesEngine = nil // Will be set by caller
+	game.gameLog = nil     // Will be set by caller if needed
 
 	// Note: Neighbor connections are no longer stored, calculated on-demand
 
@@ -460,4 +511,54 @@ func (g *Game) RemoveUnit(unit *Unit) error {
 // AddUnit adds a unit to the game for the specified player
 func (g *Game) AddUnit(unit *Unit) (*Unit, error) {
 	return g.World.AddUnit(unit)
+}
+
+// =============================================================================
+// GameLog Integration Methods
+// =============================================================================
+
+// recordAction is a helper method to record actions in the GameLog
+func (g *Game) recordAction(action GameAction, changes []WorldChange) error {
+	if g.gameLog == nil {
+		// GameLog not configured - silently skip recording
+		return nil
+	}
+	
+	return g.gameLog.RecordAction(g.CurrentPlayer, action, changes)
+}
+
+// saveGameLog triggers a manual save of the GameLog
+func (g *Game) SaveGameLog() error {
+	if g.gameLog == nil {
+		return fmt.Errorf("no GameLog configured")
+	}
+	
+	return g.gameLog.Save()
+}
+
+// getGameLogSessionID returns the current session ID for debugging
+func (g *Game) GetGameLogSessionID() string {
+	if g.gameLog == nil {
+		return ""
+	}
+	
+	return g.gameLog.GetSessionID()
+}
+
+// setGameLogStatus updates the session status (for game completion)
+func (g *Game) SetGameLogStatus(status string) error {
+	if g.gameLog == nil {
+		return nil // Silently skip if no GameLog
+	}
+	
+	return g.gameLog.SetStatus(status)
+}
+
+// getGameLogData returns the current session data for export/debugging
+func (g *Game) GetGameLogData() *GameSession {
+	if g.gameLog == nil {
+		return nil
+	}
+	
+	return g.gameLog.GetCurrentSession()
 }

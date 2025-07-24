@@ -55,8 +55,10 @@ export class GameState extends BaseComponent {
     private wasmLoadPromise: Promise<void> | null;
 
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+        // Initialize gameData before calling super to ensure it's available in initializeComponent
         super('game-state', rootElement, eventBus, debugMode);
         
+        // Initialize gameData after super() since we need this.state from BaseComponent
         this.gameData = {
             ...this.state,
             wasmLoaded: false,
@@ -68,13 +70,16 @@ export class GameState extends BaseComponent {
             winner: -1,
             hasWinner: false
         };
+        
+        // Initialize WASM loading after gameData is set up
+        this.wasmLoadPromise = this.loadWASMModule();
     }
 
     protected initializeComponent(): void {
         this.log('Initializing GameState component...');
         
-        // Start WASM loading immediately
-        this.wasmLoadPromise = this.loadWASMModule();
+        // WASM loading is now handled in constructor after gameData is initialized
+        // No additional initialization needed here
     }
 
     protected bindToDOM(): void {
@@ -95,36 +100,12 @@ export class GameState extends BaseComponent {
      * Load the WASM module asynchronously
      */
     private async loadWASMModule(): Promise<void> {
-        try {
-            this.log('Loading WASM module...');
+        this.log('Loading WASM module...');
+        
+        // Check if WASM is already loaded (for testing environments)
+        if ((window as any).weewarCreateGameFromMap) {
+            this.log('WASM module already loaded (pre-loaded in test environment)');
             
-            // Load Go's WASM support
-            if (!(window as any).Go) {
-                const script = document.createElement('script');
-                script.src = '/static/wasm/wasm_exec.js';
-                document.head.appendChild(script);
-                
-                await new Promise<void>((resolve, reject) => {
-                    script.onload = () => resolve();
-                    script.onerror = () => reject(new Error('Failed to load wasm_exec.js'));
-                });
-            }
-
-            // Initialize Go WASM runtime
-            const go = new (window as any).Go();
-            const wasmModule = await WebAssembly.instantiateStreaming(
-                fetch('/static/wasm/weewar-cli.wasm'),
-                go.importObject
-            );
-
-            // Run the WASM module
-            go.run(wasmModule.instance);
-
-            // Verify WASM APIs are available
-            if (!(window as any).weewarCreateGameFromMap) {
-                throw new Error('WASM APIs not found - module may not have loaded correctly');
-            }
-
             this.wasm = {
                 createGameFromMap: (window as any).weewarCreateGameFromMap,
                 getGameState: (window as any).weewarGetGameState,
@@ -142,13 +123,65 @@ export class GameState extends BaseComponent {
             this.gameData.wasmLoaded = true;
             this.gameData.lastUpdated = Date.now();
 
-            this.log('WASM module loaded successfully');
+            this.log('WASM module ready (pre-loaded)');
             this.emit('wasm-loaded', { success: true });
+            return;
+        }
+        
+        // Load Go's WASM support
+        if (!(window as any).Go) {
+            const script = document.createElement('script');
+            script.src = '/static/wasm/wasm_exec.js';
+            document.head.appendChild(script);
+            
+            await new Promise<void>((resolve, reject) => {
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load wasm_exec.js'));
+            });
+        }
 
+        // Initialize Go WASM runtime
+        const go = new (window as any).Go();
+        const wasmModule = await WebAssembly.instantiateStreaming(
+            fetch('/static/wasm/weewar-cli.wasm'),
+            go.importObject
+        );
+
+        // Run the WASM module
+        go.run(wasmModule.instance);
+
+        // Verify WASM APIs are available
+        if (!(window as any).weewarCreateGameFromMap) {
+            throw new Error('WASM APIs not found - module may not have loaded correctly');
+        }
+
+        this.wasm = {
+            createGameFromMap: (window as any).weewarCreateGameFromMap,
+            getGameState: (window as any).weewarGetGameState,
+            selectUnit: (window as any).weewarSelectUnit,
+            moveUnit: (window as any).weewarMoveUnit,
+            attackUnit: (window as any).weewarAttackUnit,
+            endTurn: (window as any).weewarEndTurn,
+            getTerrainStatsAt: (window as any).weewarGetTerrainStatsAt,
+            canSelectUnit: (window as any).weewarCanSelectUnit,
+            getTileInfo: (window as any).weewarGetTileInfo,
+            getMovementOptions: (window as any).weewarGetMovementOptions,
+            getAttackOptions: (window as any).weewarGetAttackOptions
+        };
+
+        this.gameData.wasmLoaded = true;
+        this.gameData.lastUpdated = Date.now();
+
+        this.log('WASM module loaded successfully');
+        this.emit('wasm-loaded', { success: true });
+
+        /** Disabling try/catch for now
+        try {
         } catch (error) {
             this.handleError('Failed to load WASM module', error);
             this.emit('wasm-load-error', { error });
         }
+       */
     }
 
     /**

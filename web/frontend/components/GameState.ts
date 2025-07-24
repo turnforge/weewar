@@ -154,13 +154,13 @@ export class GameState extends BaseComponent {
     /**
      * Create a new game from map data
      */
-    public async createGameFromMap(mapData: string, playerCount: number): Promise<GameCreateData> {
+    public async createGameFromMap(mapData: string): Promise<GameCreateData> {
         // Ensure WASM is loaded (only async part)
         await this.ensureWASMLoaded();
 
-        this.log(`Creating game with ${playerCount} players`);
+        this.log(`Creating game with players`);
         
-        const response: WASMResponse = this.wasm.createGameFromMap(mapData, playerCount);
+        const response: WASMResponse = this.wasm.createGameFromMap(mapData);
         
         if (!response.success) {
             throw new Error(`Game creation failed: ${response.message}`);

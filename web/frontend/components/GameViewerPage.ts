@@ -233,7 +233,16 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         
         // Create game from world data via WASM (synchronous once WASM loaded)
         const worldDataStr = JSON.stringify(this.loadWorldDataFromElement());
-        const gameData = await this.gameState.createGameFromMap(worldDataStr, this.gameConfig.playerCount);
+        const gameData = await this.gameState.createGameFromMap(worldDataStr);
+        
+        // Debug: Check what player the game started with vs what we expect
+        console.log('[GameViewerPage] Game creation debug:', {
+            gameDataCurrentPlayer: gameData.currentPlayer,
+            worldData: this.loadWorldDataFromElement(),
+            // Show units in world data to see their player ownership
+            units: this.loadWorldDataFromElement()?.units || []
+        });
+        
         
         // Update UI synchronously
         this.updateGameUIFromState(gameData);
@@ -540,6 +549,14 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         try {
             // Check if this unit can be selected by current player
             const canSelect = this.gameState.canSelectUnit(q, r);
+            
+            // Debug info to understand why selection might be failing
+            console.log(`[GameViewerPage] Unit selection debug:`, {
+                position: `(${q}, ${r})`,
+                canSelect: canSelect,
+                currentPlayer: (this.gameState as any).gameData?.currentPlayer,
+                gameInitialized: (this.gameState as any).gameData?.gameInitialized
+            });
             
             if (canSelect) {
                 // This is a selectable unit - use existing selection logic

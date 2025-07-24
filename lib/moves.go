@@ -38,7 +38,7 @@ func (g *Game) NextTurn() error {
 
 	// Emit turn changed event
 	g.eventManager.EmitTurnChanged(g.CurrentPlayer, g.TurnCounter)
-	g.eventManager.EmitGameStateChanged(GameStateChangeTurnChanged, map[string]interface{}{
+	g.eventManager.EmitGameStateChanged(GameStateChangeTurnChanged, map[string]any{
 		"newPlayer":  g.CurrentPlayer,
 		"turnNumber": g.TurnCounter,
 	})
@@ -171,7 +171,7 @@ func (g *Game) MoveUnit(unit *Unit, to AxialCoord) error {
 
 	// Emit events
 	g.eventManager.EmitUnitMoved(unit, fromPos, toPos)
-	g.eventManager.EmitGameStateChanged(GameStateChangeUnitMoved, map[string]interface{}{
+	g.eventManager.EmitGameStateChanged(GameStateChangeUnitMoved, map[string]any{
 		"unit": unit,
 		"from": fromPos,
 		"to":   toPos,
@@ -253,7 +253,7 @@ func (g *Game) AttackUnit(attacker, defender *Unit) (*CombatResult, error) {
 
 	// Emit events
 	g.eventManager.EmitUnitAttacked(attacker, defender, result)
-	g.eventManager.EmitGameStateChanged(GameStateChangeUnitAttacked, map[string]interface{}{
+	g.eventManager.EmitGameStateChanged(GameStateChangeUnitAttacked, map[string]any{
 		"attacker": attacker,
 		"defender": defender,
 		"result":   result,

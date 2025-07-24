@@ -1,6 +1,8 @@
 package weewar
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // =============================================================================
 // UI Helper Methods for WASM/Web Interface
@@ -95,6 +97,7 @@ func (g *Game) CanSelectUnit(q, r int) bool {
 	unit := g.World.UnitAt(coord)
 
 	// Must have a unit and it must belong to current player
+	fmt.Println("Q, R, UR, GCR: ", q, r, unit.Player, g.CurrentPlayer)
 	return unit != nil && unit.Player == g.CurrentPlayer
 }
 

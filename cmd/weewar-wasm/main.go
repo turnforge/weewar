@@ -40,6 +40,9 @@ func main() {
 	js.Global().Set("weewarGetAttackOptions", wasmutils.CreateWrapper(2, 2, func(args []js.Value) (any, error) {
 		return getAttackOptions(args[0].Int(), args[1].Int())
 	}))
+	js.Global().Set("weewarCanSelectUnit", wasmutils.CreateWrapper(2, 2, func(args []js.Value) (any, error) {
+		return canSelectUnit(args[0].Int(), args[1].Int())
+	}))
 
 	js.Global().Set("weewarGetGameState", js.FuncOf(getGameState))
 	js.Global().Set("weewarSelectUnit", js.FuncOf(selectUnit))
@@ -47,7 +50,6 @@ func main() {
 	js.Global().Set("weewarAttackUnit", js.FuncOf(attackUnit))
 	js.Global().Set("weewarEndTurn", js.FuncOf(endTurn))
 	js.Global().Set("weewarGetTerrainStatsAt", js.FuncOf(getTerrainStatsAt))
-	js.Global().Set("weewarCanSelectUnit", js.FuncOf(canSelectUnit))
 	js.Global().Set("weewarGetTileInfo", js.FuncOf(getTileInfo))
 
 	fmt.Println("WeeWar WASM module loaded successfully")
@@ -223,21 +225,13 @@ func getTerrainStatsAt(this js.Value, args []js.Value) any {
 }
 
 // canSelectUnit checks if unit at position can be selected by current player
-func canSelectUnit(this js.Value, args []js.Value) any {
+func canSelectUnit(q, r int) (any, error) {
 	if globalGame == nil {
-		return createJSResponse(false, "No game loaded", nil)
+		return nil, fmt.Errorf("No game loaded")
 	}
-
-	if len(args) < 2 {
-		return createJSResponse(false, "Missing coordinate arguments", nil)
-	}
-
-	q := args[0].Int()
-	r := args[1].Int()
 
 	// Use UI method from lib/ui.go
-	canSelect := globalGame.CanSelectUnit(q, r)
-	return createJSResponse(true, "Selection check completed", canSelect)
+	return globalGame.CanSelectUnit(q, r), nil
 }
 
 // getTileInfo returns basic tile information

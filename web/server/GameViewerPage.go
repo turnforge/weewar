@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -104,8 +103,8 @@ func (p *GameViewerPage) parseGameParameters(r *http.Request) {
 func (p *GameViewerPage) GetTerrainDataJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
 	terrainData, err := json.Marshal(rulesEngine.Terrains)
-	fmt.Println("RuleEngine: ", rulesEngine)
-	fmt.Println("TerrainData: ", terrainData)
+	// fmt.Println("RuleEngine: ", rulesEngine)
+	// fmt.Println("TerrainData: ", terrainData)
 	if err != nil {
 		log.Printf("Error marshaling terrain data: %v", err)
 		return "{}"

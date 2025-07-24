@@ -34,7 +34,7 @@ export abstract class HexHighlightLayer extends BaseLayer {
         // Remove existing highlight if present
         this.removeHighlight(q, r);
         
-        // Create new highlight
+        // Create new highlight positioned directly in world coordinates (like tiles/units)
         const highlight = this.scene.add.graphics();
         
         // Set fill style
@@ -43,12 +43,32 @@ export abstract class HexHighlightLayer extends BaseLayer {
             highlight.lineStyle(strokeWidth, strokeColor, 1.0);
         }
         
-        // Draw hexagon
+        // Get world position and set highlight position directly
         const position = hexToPixel(q, r);
-        this.drawHexagon(highlight, position.x, position.y, this.tileWidth * 0.85, strokeColor !== undefined && strokeWidth !== undefined);
+        highlight.setPosition(position.x, position.y);
+        highlight.setDepth(this.depth);
+
+        const points: Phaser.Geom.Point[] = [];
+        const halfWidth = 32
+        const halfHeight = 32
+        const halfWidth2 = halfWidth;
         
-        // Add to container and store reference
-        this.container.add(highlight);
+        // Pointy-topped hexagon vertices (starting from top point, going clockwise)
+        points.push(new Phaser.Geom.Point(0, - halfHeight))                    // Top
+        points.push(new Phaser.Geom.Point(halfWidth2, - halfHeight * 0.5 )) // Top-right
+        points.push(new Phaser.Geom.Point(halfWidth2, halfHeight * 0.5 )) // Bottom-right
+        points.push(new Phaser.Geom.Point(0, + halfHeight ))                    // Bottom
+        points.push(new Phaser.Geom.Point(- halfWidth2, + halfHeight * 0.5 )) // Bottom-left
+        points.push(new Phaser.Geom.Point(- halfWidth2, - halfHeight * 0.5 ))  // Top-left
+        
+        // Create and draw polygon
+        const polygon = new Phaser.Geom.Polygon(points);
+        highlight.fillPoints(polygon.points, true);
+        if (strokeColor !== undefined && strokeWidth !== undefined) {
+            highlight.strokePoints(polygon.points, true);
+        }
+        
+        // Store reference (no container needed)
         this.highlights.set(key, highlight);
     }
     
@@ -83,24 +103,6 @@ export abstract class HexHighlightLayer extends BaseLayer {
         this.highlights.clear();
     }
     
-    /**
-     * Draw hexagon shape on graphics object
-     */
-    private drawHexagon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, size: number, shouldStroke: boolean = false): void {
-        const points: number[] = [];
-        
-        for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 3) * i;
-            const px = x + size * Math.cos(angle);
-            const py = y + size * Math.sin(angle);
-            points.push(px, py);
-        }
-        
-        graphics.fillPoints(points, true);
-        if (shouldStroke) {
-            graphics.strokePoints(points, true);
-        }
-    }
     
     public destroy(): void {
         this.clearHighlights();
@@ -143,7 +145,7 @@ export class SelectionHighlightLayer extends HexHighlightLayer {
         this.clearSelection();
         
         // Add new selection highlight (yellow with border)
-        this.addHighlight(q, r, 0xFFFF00, 0.2, 0xFFFF00, 4);
+        this.addHighlight(q, r, 0xFFFF00, 0.3, 0xFFFF00, 4);
         this.selectedCoord = { q, r };
     }
     
@@ -221,7 +223,7 @@ export class MovementHighlightLayer extends HexHighlightLayer {
         // Add highlights for each valid movement position
         coords.forEach(coord => {
             // Green highlight with subtle border
-            this.addHighlight(coord.q, coord.r, 0x00FF00, 0.15, 0x00FF00, 2);
+            this.addHighlight(coord.q, coord.r, 0x00FF00, 0.2, 0x00FF00, 2);
         });
     }
     

@@ -293,15 +293,10 @@ export class GameState extends BaseComponent {
      * Get detailed terrain stats for a specific tile (synchronous)
      */
     public getTerrainStatsAt(q: number, r: number): any {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.getTerrainStatsAt(q, r);
-        
+        const response = this.ensureWASMLoadedSync().getTerrainStatsAt(q, r);
         if (!response.success) {
-            throw new Error(`Get terrain stats failed: ${response.message}`);
+          return null
         }
-
-        this.log('Retrieved terrain stats for', { q, r, data: response.data });
         return response.data;
     }
 
@@ -342,42 +337,22 @@ export class GameState extends BaseComponent {
      * Get movement options for unit at position (synchronous)
      */
     public getMovementOptions(q: number, r: number): WASMResponse {
-        this.ensureWASMLoadedSync();
-
-        try {
-            const result = this.wasm.getMovementOptions(q, r);
-            this.log('Retrieved movement options for', { q, r, result });
-            return { success: true, message: 'Movement options retrieved', data: result };
-        } catch (error: any) {
-            const errorMsg = error.message || String(error);
-            this.log('Failed to get movement options:', errorMsg);
-            return { success: false, message: errorMsg, data: null };
-        }
+        return this.ensureWASMLoadedSync().getMovementOptions(q, r);
     }
 
     /**
      * Get attack options for unit at position (synchronous)
      */
     public getAttackOptions(q: number, r: number): WASMResponse {
-        this.ensureWASMLoadedSync();
-
-        try {
-            const result = this.wasm.getAttackOptions(q, r);
-            this.log('Retrieved attack options for', { q, r, result });
-            return { success: true, message: 'Attack options retrieved', data: result };
-        } catch (error: any) {
-            const errorMsg = error.message || String(error);
-            this.log('Failed to get attack options:', errorMsg);
-            return { success: false, message: errorMsg, data: null };
-        }
+        return this.ensureWASMLoadedSync().getAttackOptions(q, r);
     }
 
     /**
      * Ensure WASM module is loaded before API calls
      */
-    private async ensureWASMLoaded(): Promise<void> {
+    private async ensureWASMLoaded(): Promise<any> {
         if (this.gameData.wasmLoaded && this.wasm) {
-            return;
+            return this.wasm;
         }
 
         if (!this.wasmLoadPromise) {
@@ -389,15 +364,17 @@ export class GameState extends BaseComponent {
         if (!this.gameData.wasmLoaded || !this.wasm) {
             throw new Error('WASM module failed to load');
         }
+        return this.wasm
     }
 
     /**
      * Ensure WASM module is loaded (synchronous version for game actions)
      */
-    private ensureWASMLoadedSync(): void {
+    private ensureWASMLoadedSync(): any {
         if (!this.gameData.wasmLoaded || !this.wasm) {
             throw new Error('WASM module not loaded. Call waitUntilReady() first during initialization.');
         }
+        return this.wasm
     }
 
     /**

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package weewar.v1;
 
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 import "weewar/v1/models.proto";
 import "google/api/annotations.proto";
@@ -62,10 +63,7 @@ service GamesService {
     };
   }
 
-  /**
-   * Add moves to an existing game
-   */
-  rpc AddMovesToGame(AddMovesToGameRequest) returns (AddMovesToGameResponse) {
+  rpc ProcessMoves(ProcessMovesRequest) returns (ProcessMovesResponse) {
     option (google.api.http) = {
       post: "/v1/games/{game_id}/moves",
       body: "*",
@@ -213,14 +211,73 @@ message CreateGameResponse {
 }
 
 /**
- * Represents a single game move/action
+ * Request to add moves to a game
+ * The model is that a game in each "tick" can handle multiple moves (by possibly various players).
+ * It is upto the move manager/processor in the game to ensure the "transaction" of moves is handled
+ * atomically.
+ *
+ * For example we may have 3 moves where first two units are moved to a common location
+ * and then they attack another unit.  Here If we treat it as a single unit attacking it
+ * will have different outcomes than a "combined" attack.
+ */
+message ProcessMovesRequest {
+  /**
+   * Game ID to add moves to
+   */
+  string game_id = 1;
+
+  /**
+   * List of moves to add
+   */
+  repeated GameMove moves = 3;
+}
+
+/**
+ * Response after adding moves to game.
+ */
+message ProcessMovesResponse {
+  // Returns the response of the moves along with all the changes incurred as a result
+  /**
+   * Each game move result stores the result of the individual Move in the request.
+   * ie move_results[i] = ResultOfProcessing(ProcessMoveRequest.moves[i])
+   */
+  repeated GameMoveResult move_results = 1;
+
+  /**
+   * List of changes that resulted from the moves on the game state as a whole
+   * For example 10 moves could have resulted in 2 unit creations and 4 city changes
+   *
+   * It is not clear if this is needed.  For example concatenating all changes from all the move_results *may* suffice
+   * as long as the MoveProcessor is making sure that updates are atomic and snapshots the world state before 
+   * starting a snapshot (and not just a move)
+   */
+  repeated WorldChange changes = 2;
+}
+
+/**
+ * Represents a single move which can be one of many actions in the game
  */
 message GameMove {
+	int32 player = 1; // The player making the move
+  google.protobuf.Timestamp timestamp = 2;
   oneof move_type {
-    MoveUnitAction move_unit = 1;
-    AttackUnitAction attack_unit = 2;
-    EndTurnAction end_turn = 3;
+    MoveUnitAction move_unit = 3;
+    AttackUnitAction attack_unit = 4;
+    EndTurnAction end_turn = 5;
   }
+}
+
+/**
+ * Represents the result of executing a move
+ */
+message GameMoveResult {
+  // Whether the result is permenant and can be undone.
+  // Just moving a unit for example is not permanent, but attacking a unit
+  // would be (ie a player cannot undo it).
+  bool is_permanent = 1;
+
+  // A set of changes to the world as a result of making this move
+  repeated WorldChange changes = 3;
 }
 
 /**
@@ -254,12 +311,12 @@ message EndTurnAction {
  * Represents a change to the game world
  */
 message WorldChange {
+  // When did this change happen
   oneof change_type {
     UnitMovedChange unit_moved = 1;
     UnitDamagedChange unit_damaged = 2;
     UnitKilledChange unit_killed = 3;
     PlayerChangedChange player_changed = 4;
-    TurnAdvancedChange turn_advanced = 5;
   }
 }
 
@@ -267,7 +324,6 @@ message WorldChange {
  * A unit moved from one position to another
  */
 message UnitMovedChange {
-  string entity_id = 1;
   int32 from_q = 2;
   int32 from_r = 3;
   int32 to_q = 4;
@@ -278,16 +334,16 @@ message UnitMovedChange {
  * A unit took damage
  */
 message UnitDamagedChange {
-  string entity_id = 1;
   int32 previous_health = 2;
   int32 new_health = 3;
+  int32 q = 4;
+  int32 r = 5;
 }
 
 /**
  * A unit was killed
  */
 message UnitKilledChange {
-  string entity_id = 1;
   int32 player = 2;
   int32 unit_type = 3;
   int32 q = 4;
@@ -300,52 +356,6 @@ message UnitKilledChange {
 message PlayerChangedChange {
   int32 previous_player = 1;
   int32 new_player = 2;
-}
-
-/**
- * Turn counter advanced
- */
-message TurnAdvancedChange {
-  int32 previous_turn = 1;
-  int32 new_turn = 2;
-}
-
-/**
- * Request to add moves to a game
- */
-message AddMovesToGameRequest {
-  /**
-   * Game ID to add moves to
-   */
-  string game_id = 1;
-
-  /**
-   * Player making the moves
-   */
-  int32 player_id = 2;
-
-  /**
-   * List of moves to add
-   */
-  repeated GameMove moves = 3;
-}
-
-/**
- * Response after adding moves to game
- */
-message AddMovesToGameResponse {
-  /**
-   * Whether moves were successfully added
-   */
-  bool success = 1;
-
-  /**
-   * List of changes that resulted from the moves
-   */
-  repeated WorldChange changes = 2;
-
-  /**
-   * Error message if failed
-   */
-  string error_message = 3;
+  int32 previous_turn = 3;
+  int32 new_turn = 4;
 }

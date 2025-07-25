@@ -26,7 +26,7 @@ cli:
 	go build  -o ./bin/weewar-cli cmd/weewar-cli/*.go
 	go build  -o ./bin/weewar-convert cmd/weewar-convert/*.go
 
-wasm:
+wasm: buf
 	echo "Building WeeWar WASM modules..."
 	mkdir -p web/static/wasm
 	echo "Building weewar-cli WASM..."

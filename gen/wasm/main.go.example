@@ -1,0 +1,50 @@
+// Example main.go for weewar_v1_services WASM module
+// Copy this file to your project and customize the service implementations
+//
+// To use:
+// 1. Run `buf generate` to generate the WASM package (weewar_v1_services.wasm.go)
+// 2. Copy this file to your project and update the import path below
+// 3. Implement your services and build with: GOOS=js GOARCH=wasm go build -o weewar_v1_services.wasm
+
+package main
+
+import (
+	// Import the generated WASM package - UPDATE THIS PATH
+	"your-module/path-to-generated/weewar_v1_services"
+	
+	// Import the same protobuf types as the generated WASM file
+	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
+)
+
+func main() {
+	// Initialize service implementations with your business logic
+	exports := &weewar_v1_services.Weewar_v1_servicesServicesExports{
+		// TODO: Replace with your actual GamesService implementation
+		// GamesService: &yourGamesServiceImplementation{
+		//     // Initialize with database, config, etc.
+		//     db: database,
+		//     auth: authService,
+		//     config: appConfig,
+		// },
+		// TODO: Replace with your actual UsersService implementation
+		// UsersService: &yourUsersServiceImplementation{
+		//     // Initialize with database, config, etc.
+		//     db: database,
+		//     auth: authService,
+		//     config: appConfig,
+		// },
+		// TODO: Replace with your actual WorldsService implementation
+		// WorldsService: &yourWorldsServiceImplementation{
+		//     // Initialize with database, config, etc.
+		//     db: database,
+		//     auth: authService,
+		//     config: appConfig,
+		// },
+	}
+	
+	// Register the JavaScript API
+	exports.RegisterAPI()
+	
+	// Keep the WASM module running
+	select {}
+}

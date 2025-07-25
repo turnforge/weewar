@@ -45,9 +45,9 @@ const (
 	GamesServiceDeleteGameProcedure = "/weewar.v1.GamesService/DeleteGame"
 	// GamesServiceUpdateGameProcedure is the fully-qualified name of the GamesService's UpdateGame RPC.
 	GamesServiceUpdateGameProcedure = "/weewar.v1.GamesService/UpdateGame"
-	// GamesServiceAddMovesToGameProcedure is the fully-qualified name of the GamesService's
-	// AddMovesToGame RPC.
-	GamesServiceAddMovesToGameProcedure = "/weewar.v1.GamesService/AddMovesToGame"
+	// GamesServiceProcessMovesProcedure is the fully-qualified name of the GamesService's ProcessMoves
+	// RPC.
+	GamesServiceProcessMovesProcedure = "/weewar.v1.GamesService/ProcessMoves"
 )
 
 // GamesServiceClient is a client for the weewar.v1.GamesService service.
@@ -67,9 +67,7 @@ type GamesServiceClient interface {
 	DeleteGame(context.Context, *connect.Request[v1.DeleteGameRequest]) (*connect.Response[v1.DeleteGameResponse], error)
 	// GetGame returns a specific game with metadata
 	UpdateGame(context.Context, *connect.Request[v1.UpdateGameRequest]) (*connect.Response[v1.UpdateGameResponse], error)
-	// *
-	// Add moves to an existing game
-	AddMovesToGame(context.Context, *connect.Request[v1.AddMovesToGameRequest]) (*connect.Response[v1.AddMovesToGameResponse], error)
+	ProcessMoves(context.Context, *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error)
 }
 
 // NewGamesServiceClient constructs a client for the weewar.v1.GamesService service. By default, it
@@ -119,10 +117,10 @@ func NewGamesServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(gamesServiceMethods.ByName("UpdateGame")),
 			connect.WithClientOptions(opts...),
 		),
-		addMovesToGame: connect.NewClient[v1.AddMovesToGameRequest, v1.AddMovesToGameResponse](
+		processMoves: connect.NewClient[v1.ProcessMovesRequest, v1.ProcessMovesResponse](
 			httpClient,
-			baseURL+GamesServiceAddMovesToGameProcedure,
-			connect.WithSchema(gamesServiceMethods.ByName("AddMovesToGame")),
+			baseURL+GamesServiceProcessMovesProcedure,
+			connect.WithSchema(gamesServiceMethods.ByName("ProcessMoves")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -130,13 +128,13 @@ func NewGamesServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // gamesServiceClient implements GamesServiceClient.
 type gamesServiceClient struct {
-	createGame     *connect.Client[v1.CreateGameRequest, v1.CreateGameResponse]
-	getGames       *connect.Client[v1.GetGamesRequest, v1.GetGamesResponse]
-	listGames      *connect.Client[v1.ListGamesRequest, v1.ListGamesResponse]
-	getGame        *connect.Client[v1.GetGameRequest, v1.GetGameResponse]
-	deleteGame     *connect.Client[v1.DeleteGameRequest, v1.DeleteGameResponse]
-	updateGame     *connect.Client[v1.UpdateGameRequest, v1.UpdateGameResponse]
-	addMovesToGame *connect.Client[v1.AddMovesToGameRequest, v1.AddMovesToGameResponse]
+	createGame   *connect.Client[v1.CreateGameRequest, v1.CreateGameResponse]
+	getGames     *connect.Client[v1.GetGamesRequest, v1.GetGamesResponse]
+	listGames    *connect.Client[v1.ListGamesRequest, v1.ListGamesResponse]
+	getGame      *connect.Client[v1.GetGameRequest, v1.GetGameResponse]
+	deleteGame   *connect.Client[v1.DeleteGameRequest, v1.DeleteGameResponse]
+	updateGame   *connect.Client[v1.UpdateGameRequest, v1.UpdateGameResponse]
+	processMoves *connect.Client[v1.ProcessMovesRequest, v1.ProcessMovesResponse]
 }
 
 // CreateGame calls weewar.v1.GamesService.CreateGame.
@@ -169,9 +167,9 @@ func (c *gamesServiceClient) UpdateGame(ctx context.Context, req *connect.Reques
 	return c.updateGame.CallUnary(ctx, req)
 }
 
-// AddMovesToGame calls weewar.v1.GamesService.AddMovesToGame.
-func (c *gamesServiceClient) AddMovesToGame(ctx context.Context, req *connect.Request[v1.AddMovesToGameRequest]) (*connect.Response[v1.AddMovesToGameResponse], error) {
-	return c.addMovesToGame.CallUnary(ctx, req)
+// ProcessMoves calls weewar.v1.GamesService.ProcessMoves.
+func (c *gamesServiceClient) ProcessMoves(ctx context.Context, req *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error) {
+	return c.processMoves.CallUnary(ctx, req)
 }
 
 // GamesServiceHandler is an implementation of the weewar.v1.GamesService service.
@@ -191,9 +189,7 @@ type GamesServiceHandler interface {
 	DeleteGame(context.Context, *connect.Request[v1.DeleteGameRequest]) (*connect.Response[v1.DeleteGameResponse], error)
 	// GetGame returns a specific game with metadata
 	UpdateGame(context.Context, *connect.Request[v1.UpdateGameRequest]) (*connect.Response[v1.UpdateGameResponse], error)
-	// *
-	// Add moves to an existing game
-	AddMovesToGame(context.Context, *connect.Request[v1.AddMovesToGameRequest]) (*connect.Response[v1.AddMovesToGameResponse], error)
+	ProcessMoves(context.Context, *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error)
 }
 
 // NewGamesServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -239,10 +235,10 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(gamesServiceMethods.ByName("UpdateGame")),
 		connect.WithHandlerOptions(opts...),
 	)
-	gamesServiceAddMovesToGameHandler := connect.NewUnaryHandler(
-		GamesServiceAddMovesToGameProcedure,
-		svc.AddMovesToGame,
-		connect.WithSchema(gamesServiceMethods.ByName("AddMovesToGame")),
+	gamesServiceProcessMovesHandler := connect.NewUnaryHandler(
+		GamesServiceProcessMovesProcedure,
+		svc.ProcessMoves,
+		connect.WithSchema(gamesServiceMethods.ByName("ProcessMoves")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/weewar.v1.GamesService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -259,8 +255,8 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 			gamesServiceDeleteGameHandler.ServeHTTP(w, r)
 		case GamesServiceUpdateGameProcedure:
 			gamesServiceUpdateGameHandler.ServeHTTP(w, r)
-		case GamesServiceAddMovesToGameProcedure:
-			gamesServiceAddMovesToGameHandler.ServeHTTP(w, r)
+		case GamesServiceProcessMovesProcedure:
+			gamesServiceProcessMovesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -294,6 +290,6 @@ func (UnimplementedGamesServiceHandler) UpdateGame(context.Context, *connect.Req
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.UpdateGame is not implemented"))
 }
 
-func (UnimplementedGamesServiceHandler) AddMovesToGame(context.Context, *connect.Request[v1.AddMovesToGameRequest]) (*connect.Response[v1.AddMovesToGameResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.AddMovesToGame is not implemented"))
+func (UnimplementedGamesServiceHandler) ProcessMoves(context.Context, *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.ProcessMoves is not implemented"))
 }

@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/models.proto.
  */
 export const file_weewar_v1_models: GenFile = /*@__PURE__*/
-  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiRgoKUGFnaW5hdGlvbhIQCghwYWdlX2tleRgBIAEoCRITCgtwYWdlX29mZnNldBgCIAEoBRIRCglwYWdlX3NpemUYAyABKAUibgoSUGFnaW5hdGlvblJlc3BvbnNlEhUKDW5leHRfcGFnZV9rZXkYAiABKAkSGAoQbmV4dF9wYWdlX29mZnNldBgDIAEoBRIQCghoYXNfbW9yZRgEIAEoCBIVCg10b3RhbF9yZXN1bHRzGAUgASgFIsoBCgRHYW1lEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEgwKBG5hbWUYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSDAoEdGFncxgGIAMoCRIRCglpbWFnZV91cmwYByABKAkSEgoKZGlmZmljdWx0eRgIIAEoCSKfAgoFV29ybGQSLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSEgoKY3JlYXRvcl9pZBgEIAEoCRIMCgRuYW1lGAUgASgJEhMKC2Rlc2NyaXB0aW9uGAYgASgJEgwKBHRhZ3MYByADKAkSEQoJaW1hZ2VfdXJsGAggASgJEhIKCmRpZmZpY3VsdHkYCSABKAkSHgoFdGlsZXMYCyADKAsyDy53ZWV3YXIudjEuVGlsZRIeCgV1bml0cxgMIAMoCzIPLndlZXdhci52MS5Vbml0Ij8KBFRpbGUSCQoBcRgBIAEoBRIJCgFyGAIgASgFEhEKCXRpbGVfdHlwZRgDIAEoBRIOCgZwbGF5ZXIYBCABKAUiPwoEVW5pdBIJCgFxGAEgASgFEgkKAXIYAiABKAUSDgoGcGxheWVyGAMgASgFEhEKCXVuaXRfdHlwZRgEIAEoBSLKAQoEVXNlchIuCgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIKCgJpZBgDIAEoCRIMCgRuYW1lGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJaW1hZ2VfdXJsGAcgASgJEhIKCmRpZmZpY3VsdHkYCCABKAlCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiRgoKUGFnaW5hdGlvbhIQCghwYWdlX2tleRgBIAEoCRITCgtwYWdlX29mZnNldBgCIAEoBRIRCglwYWdlX3NpemUYAyABKAUibgoSUGFnaW5hdGlvblJlc3BvbnNlEhUKDW5leHRfcGFnZV9rZXkYAiABKAkSGAoQbmV4dF9wYWdlX29mZnNldBgDIAEoBRIQCghoYXNfbW9yZRgEIAEoCBIVCg10b3RhbF9yZXN1bHRzGAUgASgFIp4CCgRHYW1lEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEhIKCmNyZWF0b3JfaWQYBCABKAkSEAoId29ybGRfaWQYBSABKAkSDAoEbmFtZRgGIAEoCRITCgtkZXNjcmlwdGlvbhgHIAEoCRIMCgR0YWdzGAggAygJEhEKCWltYWdlX3VybBgJIAEoCRISCgpkaWZmaWN1bHR5GAogASgJEiwKBmNvbmZpZxgLIAEoCzIcLndlZXdhci52MS5HYW1lQ29uZmlndXJhdGlvbiJmChFHYW1lQ29uZmlndXJhdGlvbhImCgdwbGF5ZXJzGAEgAygLMhUud2Vld2FyLnYxLkdhbWVQbGF5ZXISKQoIc2V0dGluZ3MYAiABKAsyFy53ZWV3YXIudjEuR2FtZVNldHRpbmdzIlQKCkdhbWVQbGF5ZXISEQoJcGxheWVyX2lkGAEgASgFEhMKC3BsYXllcl90eXBlGAIgASgJEg0KBWNvbG9yGAMgASgJEg8KB3RlYW1faWQYBCABKAUiZAoMR2FtZVNldHRpbmdzEhUKDWFsbG93ZWRfdW5pdHMYASADKAUSFwoPdHVybl90aW1lX2xpbWl0GAIgASgFEhEKCXRlYW1fbW9kZRgDIAEoCRIRCgltYXhfdHVybnMYBCABKAUinwIKBVdvcmxkEi4KCmNyZWF0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgoKAmlkGAMgASgJEhIKCmNyZWF0b3JfaWQYBCABKAkSDAoEbmFtZRgFIAEoCRITCgtkZXNjcmlwdGlvbhgGIAEoCRIMCgR0YWdzGAcgAygJEhEKCWltYWdlX3VybBgIIAEoCRISCgpkaWZmaWN1bHR5GAkgASgJEh4KBXRpbGVzGAsgAygLMg8ud2Vld2FyLnYxLlRpbGUSHgoFdW5pdHMYDCADKAsyDy53ZWV3YXIudjEuVW5pdCI/CgRUaWxlEgkKAXEYASABKAUSCQoBchgCIAEoBRIRCgl0aWxlX3R5cGUYAyABKAUSDgoGcGxheWVyGAQgASgFIj8KBFVuaXQSCQoBcRgBIAEoBRIJCgFyGAIgASgFEg4KBnBsYXllchgDIAEoBRIRCgl1bml0X3R5cGUYBCABKAUiygEKBFVzZXISLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSDAoEbmFtZRgEIAEoCRITCgtkZXNjcmlwdGlvbhgFIAEoCRIMCgR0YWdzGAYgAygJEhEKCWltYWdlX3VybBgHIAEoCRISCgpkaWZmaWN1bHR5GAggASgJQp0BCg1jb20ud2Vld2FyLnYxQgtNb2RlbHNQcm90b1ABWjpnaXRodWIuY29tL3BhbnlhbS90dXJuZW5naW5lL2dhbWVzL3dlZXdhci9nZW4vZ28vd2Vld2FyL3YxogIDV1hYqgIJV2Vld2FyLlYxygIJV2Vld2FyXFYx4gIVV2Vld2FyXFYxXEdQQk1ldGFkYXRh6gIKV2Vld2FyOjpWMWIGcHJvdG8z", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message weewar.v1.Pagination
@@ -121,39 +121,60 @@ export type Game = Message<"weewar.v1.Game"> & {
   id: string;
 
   /**
+   * User who started/created the game
+   *
+   * @generated from field: string creator_id = 4;
+   */
+  creatorId: string;
+
+  /**
+   * The world this game was created from
+   *
+   * @generated from field: string world_id = 5;
+   */
+  worldId: string;
+
+  /**
    * Name if items have names
    *
-   * @generated from field: string name = 4;
+   * @generated from field: string name = 6;
    */
   name: string;
 
   /**
    * Description if game has a description
    *
-   * @generated from field: string description = 5;
+   * @generated from field: string description = 7;
    */
   description: string;
 
   /**
    * Some tags
    *
-   * @generated from field: repeated string tags = 6;
+   * @generated from field: repeated string tags = 8;
    */
   tags: string[];
 
   /**
    * A possible image url
    *
-   * @generated from field: string image_url = 7;
+   * @generated from field: string image_url = 9;
    */
   imageUrl: string;
 
   /**
    * Difficulty - example attribute
    *
-   * @generated from field: string difficulty = 8;
+   * @generated from field: string difficulty = 10;
    */
   difficulty: string;
+
+  /**
+   * Game configuration
+   *
+   * @generated from field: weewar.v1.GameConfiguration config = 11;
+   */
+  config?: GameConfiguration;
 };
 
 /**
@@ -162,6 +183,116 @@ export type Game = Message<"weewar.v1.Game"> & {
  */
 export const GameSchema: GenMessage<Game> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 2);
+
+/**
+ * @generated from message weewar.v1.GameConfiguration
+ */
+export type GameConfiguration = Message<"weewar.v1.GameConfiguration"> & {
+  /**
+   * Player configuration
+   *
+   * @generated from field: repeated weewar.v1.GamePlayer players = 1;
+   */
+  players: GamePlayer[];
+
+  /**
+   * Game settings
+   *
+   * @generated from field: weewar.v1.GameSettings settings = 2;
+   */
+  settings?: GameSettings;
+};
+
+/**
+ * Describes the message weewar.v1.GameConfiguration.
+ * Use `create(GameConfigurationSchema)` to create a new message.
+ */
+export const GameConfigurationSchema: GenMessage<GameConfiguration> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_models, 3);
+
+/**
+ * @generated from message weewar.v1.GamePlayer
+ */
+export type GamePlayer = Message<"weewar.v1.GamePlayer"> & {
+  /**
+   * Player ID (1-based)
+   *
+   * @generated from field: int32 player_id = 1;
+   */
+  playerId: number;
+
+  /**
+   * Player type
+   *
+   * "human", "ai", "open"
+   *
+   * @generated from field: string player_type = 2;
+   */
+  playerType: string;
+
+  /**
+   * Player color
+   *
+   * @generated from field: string color = 3;
+   */
+  color: string;
+
+  /**
+   * Team ID (0 = no team, 1+ = team number)
+   *
+   * @generated from field: int32 team_id = 4;
+   */
+  teamId: number;
+};
+
+/**
+ * Describes the message weewar.v1.GamePlayer.
+ * Use `create(GamePlayerSchema)` to create a new message.
+ */
+export const GamePlayerSchema: GenMessage<GamePlayer> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_models, 4);
+
+/**
+ * @generated from message weewar.v1.GameSettings
+ */
+export type GameSettings = Message<"weewar.v1.GameSettings"> & {
+  /**
+   * List of allowed unit type IDs
+   *
+   * @generated from field: repeated int32 allowed_units = 1;
+   */
+  allowedUnits: number[];
+
+  /**
+   * Turn time limit in seconds (0 = no limit)
+   *
+   * @generated from field: int32 turn_time_limit = 2;
+   */
+  turnTimeLimit: number;
+
+  /**
+   * Team mode
+   *
+   * "ffa" or "teams"
+   *
+   * @generated from field: string team_mode = 3;
+   */
+  teamMode: string;
+
+  /**
+   * Maximum number of turns (0 = unlimited)
+   *
+   * @generated from field: int32 max_turns = 4;
+   */
+  maxTurns: number;
+};
+
+/**
+ * Describes the message weewar.v1.GameSettings.
+ * Use `create(GameSettingsSchema)` to create a new message.
+ */
+export const GameSettingsSchema: GenMessage<GameSettings> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_models, 5);
 
 /**
  * @generated from message weewar.v1.World
@@ -246,7 +377,7 @@ export type World = Message<"weewar.v1.World"> & {
  * Use `create(WorldSchema)` to create a new message.
  */
 export const WorldSchema: GenMessage<World> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 3);
+  messageDesc(file_weewar_v1_models, 6);
 
 /**
  * @generated from message weewar.v1.Tile
@@ -284,7 +415,7 @@ export type Tile = Message<"weewar.v1.Tile"> & {
  * Use `create(TileSchema)` to create a new message.
  */
 export const TileSchema: GenMessage<Tile> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 4);
+  messageDesc(file_weewar_v1_models, 7);
 
 /**
  * @generated from message weewar.v1.Unit
@@ -318,7 +449,7 @@ export type Unit = Message<"weewar.v1.Unit"> & {
  * Use `create(UnitSchema)` to create a new message.
  */
 export const UnitSchema: GenMessage<Unit> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 5);
+  messageDesc(file_weewar_v1_models, 8);
 
 /**
  * @generated from message weewar.v1.User
@@ -382,5 +513,5 @@ export type User = Message<"weewar.v1.User"> & {
  * Use `create(UserSchema)` to create a new message.
  */
 export const UserSchema: GenMessage<User> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 6);
+  messageDesc(file_weewar_v1_models, 9);
 

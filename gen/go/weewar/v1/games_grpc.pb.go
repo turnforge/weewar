@@ -19,13 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GamesService_CreateGame_FullMethodName     = "/weewar.v1.GamesService/CreateGame"
-	GamesService_GetGames_FullMethodName       = "/weewar.v1.GamesService/GetGames"
-	GamesService_ListGames_FullMethodName      = "/weewar.v1.GamesService/ListGames"
-	GamesService_GetGame_FullMethodName        = "/weewar.v1.GamesService/GetGame"
-	GamesService_DeleteGame_FullMethodName     = "/weewar.v1.GamesService/DeleteGame"
-	GamesService_UpdateGame_FullMethodName     = "/weewar.v1.GamesService/UpdateGame"
-	GamesService_AddMovesToGame_FullMethodName = "/weewar.v1.GamesService/AddMovesToGame"
+	GamesService_CreateGame_FullMethodName   = "/weewar.v1.GamesService/CreateGame"
+	GamesService_GetGames_FullMethodName     = "/weewar.v1.GamesService/GetGames"
+	GamesService_ListGames_FullMethodName    = "/weewar.v1.GamesService/ListGames"
+	GamesService_GetGame_FullMethodName      = "/weewar.v1.GamesService/GetGame"
+	GamesService_DeleteGame_FullMethodName   = "/weewar.v1.GamesService/DeleteGame"
+	GamesService_UpdateGame_FullMethodName   = "/weewar.v1.GamesService/UpdateGame"
+	GamesService_ProcessMoves_FullMethodName = "/weewar.v1.GamesService/ProcessMoves"
 )
 
 // GamesServiceClient is the client API for GamesService service.
@@ -49,9 +49,7 @@ type GamesServiceClient interface {
 	DeleteGame(ctx context.Context, in *DeleteGameRequest, opts ...grpc.CallOption) (*DeleteGameResponse, error)
 	// GetGame returns a specific game with metadata
 	UpdateGame(ctx context.Context, in *UpdateGameRequest, opts ...grpc.CallOption) (*UpdateGameResponse, error)
-	// *
-	// Add moves to an existing game
-	AddMovesToGame(ctx context.Context, in *AddMovesToGameRequest, opts ...grpc.CallOption) (*AddMovesToGameResponse, error)
+	ProcessMoves(ctx context.Context, in *ProcessMovesRequest, opts ...grpc.CallOption) (*ProcessMovesResponse, error)
 }
 
 type gamesServiceClient struct {
@@ -122,10 +120,10 @@ func (c *gamesServiceClient) UpdateGame(ctx context.Context, in *UpdateGameReque
 	return out, nil
 }
 
-func (c *gamesServiceClient) AddMovesToGame(ctx context.Context, in *AddMovesToGameRequest, opts ...grpc.CallOption) (*AddMovesToGameResponse, error) {
+func (c *gamesServiceClient) ProcessMoves(ctx context.Context, in *ProcessMovesRequest, opts ...grpc.CallOption) (*ProcessMovesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AddMovesToGameResponse)
-	err := c.cc.Invoke(ctx, GamesService_AddMovesToGame_FullMethodName, in, out, cOpts...)
+	out := new(ProcessMovesResponse)
+	err := c.cc.Invoke(ctx, GamesService_ProcessMoves_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -153,9 +151,7 @@ type GamesServiceServer interface {
 	DeleteGame(context.Context, *DeleteGameRequest) (*DeleteGameResponse, error)
 	// GetGame returns a specific game with metadata
 	UpdateGame(context.Context, *UpdateGameRequest) (*UpdateGameResponse, error)
-	// *
-	// Add moves to an existing game
-	AddMovesToGame(context.Context, *AddMovesToGameRequest) (*AddMovesToGameResponse, error)
+	ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error)
 }
 
 // UnimplementedGamesServiceServer should be embedded to have
@@ -183,8 +179,8 @@ func (UnimplementedGamesServiceServer) DeleteGame(context.Context, *DeleteGameRe
 func (UnimplementedGamesServiceServer) UpdateGame(context.Context, *UpdateGameRequest) (*UpdateGameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGame not implemented")
 }
-func (UnimplementedGamesServiceServer) AddMovesToGame(context.Context, *AddMovesToGameRequest) (*AddMovesToGameResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddMovesToGame not implemented")
+func (UnimplementedGamesServiceServer) ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProcessMoves not implemented")
 }
 func (UnimplementedGamesServiceServer) testEmbeddedByValue() {}
 
@@ -314,20 +310,20 @@ func _GamesService_UpdateGame_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GamesService_AddMovesToGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddMovesToGameRequest)
+func _GamesService_ProcessMoves_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProcessMovesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GamesServiceServer).AddMovesToGame(ctx, in)
+		return srv.(GamesServiceServer).ProcessMoves(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GamesService_AddMovesToGame_FullMethodName,
+		FullMethod: GamesService_ProcessMoves_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GamesServiceServer).AddMovesToGame(ctx, req.(*AddMovesToGameRequest))
+		return srv.(GamesServiceServer).ProcessMoves(ctx, req.(*ProcessMovesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -364,8 +360,8 @@ var GamesService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GamesService_UpdateGame_Handler,
 		},
 		{
-			MethodName: "AddMovesToGame",
-			Handler:    _GamesService_AddMovesToGame_Handler,
+			MethodName: "ProcessMoves",
+			Handler:    _GamesService_ProcessMoves_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -284,38 +284,90 @@ type WorldEditor struct {
 - Asset caching and fallback rendering
 - Viewport culling for large maps
 
-### WASM Architecture (v3.0 Refactoring)
+### WASM Architecture Evolution (v3.0 → v4.0 Generated)
 
-#### Problem Statement
-Original WASM code had massive boilerplate:
-- ~1300 lines with repetitive validation
-- Manual Game object creation for every operation
-- Complex initialization requiring browser calls
+#### Previous Architecture (v3.0) - Manual Bindings ❌
+**Problems Identified**:
+- ~1300 lines of repetitive validation and response formatting
+- Manual Game object creation for every operation  
+- Complex global state initialization requiring browser calls
 - Inconsistent error handling and response formats
+- Type unsafe `js.Value` conversions throughout
+- Service logic reimplemented in WASM instead of reusing existing services
 
-#### New WASM Architecture
 ```go
-// Global state initialized in main()
+// Old manual approach (374 lines in cmd/weewar-wasm/main.go)
 var globalEditor *weewar.WorldEditor
 var globalWorld *weewar.World
-var globalAssetProvider weewar.AssetProvider
 
-// Generic wrapper infrastructure
 type WASMFunction func(args []js.Value) (interface{}, error)
+func createWrapper(minArgs, maxArgs int, fn WASMFunction) js.Func { /* boilerplate */ }
+```
 
-func createWrapper(minArgs, maxArgs int, fn WASMFunction) js.Func {
-    // Validates arguments and handles errors uniformly
-    // No reflection - direct js.Value handling
+#### New Generated Architecture (v4.0) - Service Injection ✅
+**Discovery**: protoc-gen-go-wasmjs plugin generates clean service-based WASM bindings
+
+**Generated Files**:
+1. **`gen/wasm/weewar_v1_services.wasm.go`** - Service exports with dependency injection
+2. **`web/frontend/gen/wasm-clients/weewar_v1_servicesClient.client.ts`** - Type-safe TypeScript client
+
+**New Pattern**:
+```go
+// Generated WASM exports (auto-generated)
+type Weewar_v1_servicesServicesExports struct {
+    GamesService  weewarv1.GamesServiceServer
+    UsersService  weewarv1.UsersServiceServer  
+    WorldsService weewarv1.WorldsServiceServer
+}
+
+func (exports *Weewar_v1_servicesServicesExports) RegisterAPI() {
+    // Auto-generated JS API registration
+    js.Global().Set("weewar", js.ValueOf(weewar))
+}
+
+// New main.go (~20 lines) - Dependency injection only
+func main() {
+    exports := &weewar_v1_services.Weewar_v1_servicesServicesExports{
+        GamesService:  services.NewGamesService(store),
+        UsersService:  services.NewUsersService(store),
+        WorldsService: services.NewWorldsService(store),
+    }
+    exports.RegisterAPI()
+    select {} // Keep running
 }
 ```
 
-#### Key WASM Improvements
-1. **Immediate Initialization**: Editor/World/Assets ready on WASM load
-2. **Zero Boilerplate**: Functions like `paintTerrain(args []js.Value)` handle own conversion
-3. **No Game Objects**: Direct World manipulation via WorldEditor
-4. **Generic Wrapper**: Argument validation and error handling abstracted
-5. **Consistent Responses**: Standardized success/error JSON format
-6. **Performance**: No reflection, direct `args[0].Int()` calls
+**Frontend Client**:
+```typescript
+// Generated TypeScript client (auto-generated)
+export class Weewar_v1_servicesClient {
+    public readonly gamesService: GamesServiceClientImpl;
+    public readonly usersService: UsersServiceClientImpl;
+    public readonly worldsService: WorldsServiceClientImpl;
+    
+    public async loadWasm(wasmPath?: string): Promise<void>;
+    public callMethod<TRequest, TResponse>(methodPath: string, request: TRequest): Promise<TResponse>;
+}
+
+// Usage (~50 lines instead of 400+)
+const client = new Weewar_v1_servicesClient();
+await client.loadWasm('./weewar_v1_services.wasm');
+const response = await client.gamesService.createGame(request);
+```
+
+#### Architecture Benefits
+1. **90% Code Reduction**: 374 lines → ~20 lines in main.go, 400+ → ~50 lines in frontend
+2. **Type Safety**: Protobuf types throughout, no `any`/`js.Value` conversions
+3. **Service Reuse**: Same service implementations work for HTTP, gRPC, and WASM
+4. **Auto-Generation**: API changes automatically propagate to Go and TypeScript
+5. **Standard Patterns**: Follows established gRPC/Connect conventions
+6. **Testability**: Service mocks enable proper unit testing
+7. **Maintainability**: No manual WASM binding maintenance required
+
+#### Migration Status
+- **Analysis Complete** ✅: Understanding of generated files and migration path
+- **Implementation Pending**: Service wiring, build integration, frontend migration
+- **Legacy Cleanup Planned**: Remove manual WASM binding code after migration
 
 #### WASM Function Pattern
 ```go

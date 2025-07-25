@@ -207,13 +207,12 @@
     },
     "/v1/games/{gameId}/moves": {
       "post": {
-        "summary": "*\nAdd moves to an existing game",
-        "operationId": "GamesService_AddMovesToGame",
+        "operationId": "GamesService_ProcessMoves",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1AddMovesToGameResponse"
+              "$ref": "#/definitions/v1ProcessMovesResponse"
             }
           },
           "default": {
@@ -238,11 +237,6 @@
             "schema": {
               "type": "object",
               "properties": {
-                "playerId": {
-                  "type": "integer",
-                  "format": "int32",
-                  "title": "*\nPlayer making the moves"
-                },
                 "moves": {
                   "type": "array",
                   "items": {
@@ -252,7 +246,7 @@
                   "title": "*\nList of moves to add"
                 }
               },
-              "title": "*\nRequest to add moves to a game"
+              "description": "*\nRequest to add moves to a game\nThe model is that a game in each \"tick\" can handle multiple moves (by possibly various players).\nIt is upto the move manager/processor in the game to ensure the \"transaction\" of moves is handled\natomically.\n\nFor example we may have 3 moves where first two units are moved to a common location\nand then they attack another unit.  Here If we treat it as a single unit attacking it\nwill have different outcomes than a \"combined\" attack."
             }
           }
         ],
@@ -968,28 +962,6 @@
         }
       }
     },
-    "v1AddMovesToGameResponse": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "type": "boolean",
-          "title": "*\nWhether moves were successfully added"
-        },
-        "changes": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1WorldChange"
-          },
-          "title": "*\nList of changes that resulted from the moves"
-        },
-        "errorMessage": {
-          "type": "string",
-          "title": "*\nError message if failed"
-        }
-      },
-      "title": "*\nResponse after adding moves to game"
-    },
     "v1AttackUnitAction": {
       "type": "object",
       "properties": {
@@ -1182,6 +1154,15 @@
     "v1GameMove": {
       "type": "object",
       "properties": {
+        "player": {
+          "type": "integer",
+          "format": "int32",
+          "title": "The player making the move"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
         "moveUnit": {
           "$ref": "#/definitions/v1MoveUnitAction"
         },
@@ -1192,7 +1173,25 @@
           "$ref": "#/definitions/v1EndTurnAction"
         }
       },
-      "title": "*\nRepresents a single game move/action"
+      "title": "*\nRepresents a single move which can be one of many actions in the game"
+    },
+    "v1GameMoveResult": {
+      "type": "object",
+      "properties": {
+        "isPermanent": {
+          "type": "boolean",
+          "description": "Whether the result is permenant and can be undone.\nJust moving a unit for example is not permanent, but attacking a unit\nwould be (ie a player cannot undo it)."
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1WorldChange"
+          },
+          "title": "A set of changes to the world as a result of making this move"
+        }
+      },
+      "title": "*\nRepresents the result of executing a move"
     },
     "v1GamePlayer": {
       "type": "object",
@@ -1425,9 +1424,40 @@
         "newPlayer": {
           "type": "integer",
           "format": "int32"
+        },
+        "previousTurn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "newTurn": {
+          "type": "integer",
+          "format": "int32"
         }
       },
       "title": "*\nActive player changed"
+    },
+    "v1ProcessMovesResponse": {
+      "type": "object",
+      "properties": {
+        "moveResults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GameMoveResult"
+          },
+          "title": "*\nEach game move result stores the result of the individual Move in the request.\nie move_results[i] = ResultOfProcessing(ProcessMoveRequest.moves[i])"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1WorldChange"
+          },
+          "description": "It is not clear if this is needed.  For example concatenating all changes from all the move_results *may* suffice\nas long as the MoveProcessor is making sure that updates are atomic and snapshots the world state before \nstarting a snapshot (and not just a move)",
+          "title": "*\nList of changes that resulted from the moves on the game state as a whole\nFor example 10 moves could have resulted in 2 unit creations and 4 city changes"
+        }
+      },
+      "description": "*\nResponse after adding moves to game.\n\nReturns the response of the moves along with all the changes incurred as a result"
     },
     "v1Tile": {
       "type": "object",
@@ -1452,20 +1482,6 @@
           "title": "Whether the tile itself belongs to a player"
         }
       }
-    },
-    "v1TurnAdvancedChange": {
-      "type": "object",
-      "properties": {
-        "previousTurn": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "newTurn": {
-          "type": "integer",
-          "format": "int32"
-        }
-      },
-      "title": "*\nTurn counter advanced"
     },
     "v1Unit": {
       "type": "object",
@@ -1492,14 +1508,19 @@
     "v1UnitDamagedChange": {
       "type": "object",
       "properties": {
-        "entityId": {
-          "type": "string"
-        },
         "previousHealth": {
           "type": "integer",
           "format": "int32"
         },
         "newHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
           "type": "integer",
           "format": "int32"
         }
@@ -1509,9 +1530,6 @@
     "v1UnitKilledChange": {
       "type": "object",
       "properties": {
-        "entityId": {
-          "type": "string"
-        },
         "player": {
           "type": "integer",
           "format": "int32"
@@ -1534,9 +1552,6 @@
     "v1UnitMovedChange": {
       "type": "object",
       "properties": {
-        "entityId": {
-          "type": "string"
-        },
         "fromQ": {
           "type": "integer",
           "format": "int32"
@@ -1703,9 +1718,6 @@
         },
         "playerChanged": {
           "$ref": "#/definitions/v1PlayerChangedChange"
-        },
-        "turnAdvanced": {
-          "$ref": "#/definitions/v1TurnAdvancedChange"
         }
       },
       "title": "*\nRepresents a change to the game world"

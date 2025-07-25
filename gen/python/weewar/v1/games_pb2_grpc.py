@@ -45,10 +45,10 @@ class GamesServiceStub(object):
                 request_serializer=weewar_dot_v1_dot_games__pb2.UpdateGameRequest.SerializeToString,
                 response_deserializer=weewar_dot_v1_dot_games__pb2.UpdateGameResponse.FromString,
                 _registered_method=True)
-        self.AddMovesToGame = channel.unary_unary(
-                '/weewar.v1.GamesService/AddMovesToGame',
-                request_serializer=weewar_dot_v1_dot_games__pb2.AddMovesToGameRequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_games__pb2.AddMovesToGameResponse.FromString,
+        self.ProcessMoves = channel.unary_unary(
+                '/weewar.v1.GamesService/ProcessMoves',
+                request_serializer=weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.FromString,
                 _registered_method=True)
 
 
@@ -101,10 +101,8 @@ class GamesServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def AddMovesToGame(self, request, context):
-        """*
-        Add moves to an existing game
-        """
+    def ProcessMoves(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -142,10 +140,10 @@ def add_GamesServiceServicer_to_server(servicer, server):
                     request_deserializer=weewar_dot_v1_dot_games__pb2.UpdateGameRequest.FromString,
                     response_serializer=weewar_dot_v1_dot_games__pb2.UpdateGameResponse.SerializeToString,
             ),
-            'AddMovesToGame': grpc.unary_unary_rpc_method_handler(
-                    servicer.AddMovesToGame,
-                    request_deserializer=weewar_dot_v1_dot_games__pb2.AddMovesToGameRequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_games__pb2.AddMovesToGameResponse.SerializeToString,
+            'ProcessMoves': grpc.unary_unary_rpc_method_handler(
+                    servicer.ProcessMoves,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -322,7 +320,7 @@ class GamesService(object):
             _registered_method=True)
 
     @staticmethod
-    def AddMovesToGame(request,
+    def ProcessMoves(request,
             target,
             options=(),
             channel_credentials=None,
@@ -335,9 +333,9 @@ class GamesService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/weewar.v1.GamesService/AddMovesToGame',
-            weewar_dot_v1_dot_games__pb2.AddMovesToGameRequest.SerializeToString,
-            weewar_dot_v1_dot_games__pb2.AddMovesToGameResponse.FromString,
+            '/weewar.v1.GamesService/ProcessMoves',
+            weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.FromString,
             options,
             channel_credentials,
             insecure,

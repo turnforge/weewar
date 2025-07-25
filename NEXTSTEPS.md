@@ -367,6 +367,32 @@
 
 ## Current Development Focus
 
+### Phase 11: WASM Architecture Modernization 🎯 IN PROGRESS
+**Current Phase**: Generated WASM Architecture Migration
+**Status**: Transitioning from manual WASM bindings to generated service-based architecture
+**Achievement**: Discovered clean generated architecture that eliminates 90% of manual WASM code
+
+#### Current Status: Analysis Complete, Ready for Implementation ✅
+- **Generated Files Analysis**: Comprehensive understanding of new `gen/wasm/` and `web/frontend/gen/wasm-clients/` structure
+- **Migration Path Identified**: Clear path from manual 374-line WASM to ~20-line dependency injection wrapper
+- **Service Integration Plan**: Existing `services/games_service.go` can be directly injected into generated exports
+- **Frontend Cleanup Strategy**: GameState.ts can use generated TypeScript client, eliminating manual WASM calls
+
+#### Implementation Progress ✅ MAJOR PROGRESS
+1. **✅ Service Wiring Complete**: Updated `cmd/weewar-wasm/main.go` to use generated exports with clean dependency injection (374 → 37 lines)
+2. **✅ Service Alignment Complete**: Updated `games_service.go` to use `ProcessMoves` instead of obsolete `AddMovesToGame` 
+3. **✅ WASM Build Successful**: Generated WASM module builds and compiles successfully (33MB output)
+4. **🎯 Next: Frontend Migration** (High Risk): Replace GameState.ts manual WASM calls with generated TypeScript client
+5. **⏳ Pending: Cleanup** (Low Priority): Remove obsolete manual WASM binding code after frontend migration
+
+#### Benefits of New Architecture
+- **90% Code Reduction**: 374 lines of manual bindings → ~20 lines of dependency injection
+- **Type Safety**: Protobuf types throughout instead of `any`/`js.Value` conversions
+- **Service Reuse**: Same service implementations work for HTTP, gRPC, and WASM
+- **Auto-Generation**: API changes automatically propagate to both Go and TypeScript
+- **Standard Patterns**: Follows established gRPC/Connect conventions
+- **Testing**: Service mocks enable proper unit testing
+
 ### Phase 7: Comprehensive UI Framework & Game Foundation ✅ COMPLETED
 
 ### Phase 8: Game Mechanics Implementation ✅ COMPLETED

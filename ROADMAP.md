@@ -370,6 +370,59 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [x] **Opportunity Recognition**: Discovery of tactical advantages with value assessment and execution requirements
 - [x] **Strategic Analysis**: Long-term position assessment with strengths, weaknesses, and key factors
 
+## 🎯 Phase 11: WASM Architecture Modernization (In Progress)
+**Status**: Generated WASM Architecture Migration
+**Timeline**: January 2025
+
+### Generated WASM Architecture Discovery ✅
+- [x] **Buf Plugin Analysis**: Complete understanding of protoc-gen-go-wasmjs generated files
+- [x] **Generated Go WASM**: `gen/wasm/weewar_v1_services.wasm.go` with proper service injection pattern
+- [x] **Generated TypeScript Client**: `web/frontend/gen/wasm-clients/weewar_v1_servicesClient.client.ts` with type-safe APIs
+- [x] **Migration Path Identification**: Clear path from 374-line manual WASM to ~20-line dependency injection
+- [x] **Service Integration Strategy**: Existing services can be directly injected into generated exports
+
+### Current Manual WASM Issues ✅ IDENTIFIED
+- [x] **Massive Boilerplate**: 374 lines of repetitive validation and response formatting
+- [x] **Type Unsafety**: Manual `js.Value` conversions and `any` types throughout
+- [x] **Code Duplication**: Service logic reimplemented in WASM instead of reusing existing services
+- [x] **Testing Difficulties**: Global game state prevents proper unit testing
+- [x] **Maintenance Burden**: API changes require manual updates in multiple places
+
+### New Architecture Benefits ✅ ANALYZED
+- [x] **90% Code Reduction**: Manual bindings → dependency injection wrapper
+- [x] **Type Safety**: Protobuf types throughout, no `any`/`js.Value` conversions
+- [x] **Service Reuse**: Same implementations work for HTTP, gRPC, and WASM transports
+- [x] **Auto-Generation**: API changes automatically propagate to Go and TypeScript
+- [x] **Standard Patterns**: Follows established gRPC/Connect conventions
+- [x] **Testability**: Service mocks enable proper unit testing
+
+### Implementation Plan (Next Phase)
+- [ ] **Service Wiring**: Update `cmd/weewar-wasm/main.go` to use generated exports with service injection
+- [ ] **Build Integration**: Update Makefile to build generated WASM instead of manual approach
+- [ ] **Frontend Migration**: Replace GameState.ts manual WASM calls with generated TypeScript client
+- [ ] **Legacy Cleanup**: Remove obsolete manual WASM binding code
+
+### Generated Architecture Pattern
+```go
+// New main.go (~20 lines)
+func main() {
+    exports := &weewar_v1_services.Weewar_v1_servicesServicesExports{
+        GamesService:  services.NewGamesService(store),
+        UsersService:  services.NewUsersService(store), 
+        WorldsService: services.NewWorldsService(store),
+    }
+    exports.RegisterAPI()
+    select {} // Keep running
+}
+```
+
+```typescript
+// New frontend (~50 lines)
+const client = new Weewar_v1_servicesClient();
+await client.loadWasm();
+const response = await client.gamesService.createGame(request);
+```
+
 ## ✅ Phase 10: Interactive Web Gameplay (Mostly Complete)
 **Status**: WASM Integration Complete, Unit Interaction In Progress  
 **Timeline**: January 2025

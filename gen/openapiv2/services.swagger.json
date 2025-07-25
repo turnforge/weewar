@@ -153,6 +153,14 @@
                       "type": "string",
                       "format": "date-time"
                     },
+                    "creatorId": {
+                      "type": "string",
+                      "title": "User who started/created the game"
+                    },
+                    "worldId": {
+                      "type": "string",
+                      "title": "The world this game was created from"
+                    },
                     "name": {
                       "type": "string",
                       "title": "Name if items have names"
@@ -175,6 +183,10 @@
                     "difficulty": {
                       "type": "string",
                       "title": "Difficulty - example attribute"
+                    },
+                    "config": {
+                      "$ref": "#/definitions/v1GameConfiguration",
+                      "title": "Game configuration"
                     }
                   },
                   "title": "*\nGame being updated"
@@ -185,6 +197,62 @@
                 }
               },
               "title": "UpdateGameRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
+    "/v1/games/{gameId}/moves": {
+      "post": {
+        "summary": "*\nAdd moves to an existing game",
+        "operationId": "GamesService_AddMovesToGame",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AddMovesToGameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "*\nGame ID to add moves to",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "playerId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "*\nPlayer making the moves"
+                },
+                "moves": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1GameMove"
+                  },
+                  "title": "*\nList of moves to add"
+                }
+              },
+              "title": "*\nRequest to add moves to a game"
             }
           }
         ],
@@ -900,6 +968,50 @@
         }
       }
     },
+    "v1AddMovesToGameResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "*\nWhether moves were successfully added"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1WorldChange"
+          },
+          "title": "*\nList of changes that resulted from the moves"
+        },
+        "errorMessage": {
+          "type": "string",
+          "title": "*\nError message if failed"
+        }
+      },
+      "title": "*\nResponse after adding moves to game"
+    },
+    "v1AttackUnitAction": {
+      "type": "object",
+      "properties": {
+        "attackerQ": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "attackerR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "defenderQ": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "defenderR": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nAttack with one unit against another"
+    },
     "v1CreateGameRequest": {
       "type": "object",
       "properties": {
@@ -993,6 +1105,11 @@
       "type": "object",
       "title": "*\nWorld deletion response"
     },
+    "v1EndTurnAction": {
+      "type": "object",
+      "description": "No additional fields needed",
+      "title": "*\nEnd current player's turn"
+    },
     "v1Game": {
       "type": "object",
       "properties": {
@@ -1007,6 +1124,14 @@
         "id": {
           "type": "string",
           "title": "Unique ID for the game"
+        },
+        "creatorId": {
+          "type": "string",
+          "title": "User who started/created the game"
+        },
+        "worldId": {
+          "type": "string",
+          "title": "The world this game was created from"
         },
         "name": {
           "type": "string",
@@ -1030,6 +1155,94 @@
         "difficulty": {
           "type": "string",
           "title": "Difficulty - example attribute"
+        },
+        "config": {
+          "$ref": "#/definitions/v1GameConfiguration",
+          "title": "Game configuration"
+        }
+      }
+    },
+    "v1GameConfiguration": {
+      "type": "object",
+      "properties": {
+        "players": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GamePlayer"
+          },
+          "title": "Player configuration"
+        },
+        "settings": {
+          "$ref": "#/definitions/v1GameSettings",
+          "title": "Game settings"
+        }
+      }
+    },
+    "v1GameMove": {
+      "type": "object",
+      "properties": {
+        "moveUnit": {
+          "$ref": "#/definitions/v1MoveUnitAction"
+        },
+        "attackUnit": {
+          "$ref": "#/definitions/v1AttackUnitAction"
+        },
+        "endTurn": {
+          "$ref": "#/definitions/v1EndTurnAction"
+        }
+      },
+      "title": "*\nRepresents a single game move/action"
+    },
+    "v1GamePlayer": {
+      "type": "object",
+      "properties": {
+        "playerId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Player ID (1-based)"
+        },
+        "playerType": {
+          "type": "string",
+          "description": "\"human\", \"ai\", \"open\"",
+          "title": "Player type"
+        },
+        "color": {
+          "type": "string",
+          "title": "Player color"
+        },
+        "teamId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Team ID (0 = no team, 1+ = team number)"
+        }
+      }
+    },
+    "v1GameSettings": {
+      "type": "object",
+      "properties": {
+        "allowedUnits": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": "List of allowed unit type IDs"
+        },
+        "turnTimeLimit": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Turn time limit in seconds (0 = no limit)"
+        },
+        "teamMode": {
+          "type": "string",
+          "description": "\"ffa\" or \"teams\"",
+          "title": "Team mode"
+        },
+        "maxTurns": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Maximum number of turns (0 = unlimited)"
         }
       }
     },
@@ -1138,6 +1351,28 @@
         }
       }
     },
+    "v1MoveUnitAction": {
+      "type": "object",
+      "properties": {
+        "fromQ": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fromR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "toQ": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "toR": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nMove unit from one position to another"
+    },
     "v1Pagination": {
       "type": "object",
       "properties": {
@@ -1180,6 +1415,20 @@
         }
       }
     },
+    "v1PlayerChangedChange": {
+      "type": "object",
+      "properties": {
+        "previousPlayer": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "newPlayer": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nActive player changed"
+    },
     "v1Tile": {
       "type": "object",
       "properties": {
@@ -1204,6 +1453,20 @@
         }
       }
     },
+    "v1TurnAdvancedChange": {
+      "type": "object",
+      "properties": {
+        "previousTurn": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "newTurn": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nTurn counter advanced"
+    },
     "v1Unit": {
       "type": "object",
       "properties": {
@@ -1225,6 +1488,73 @@
           "format": "int32"
         }
       }
+    },
+    "v1UnitDamagedChange": {
+      "type": "object",
+      "properties": {
+        "entityId": {
+          "type": "string"
+        },
+        "previousHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "newHealth": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nA unit took damage"
+    },
+    "v1UnitKilledChange": {
+      "type": "object",
+      "properties": {
+        "entityId": {
+          "type": "string"
+        },
+        "player": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unitType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nA unit was killed"
+    },
+    "v1UnitMovedChange": {
+      "type": "object",
+      "properties": {
+        "entityId": {
+          "type": "string"
+        },
+        "fromQ": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "fromR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "toQ": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "toR": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nA unit moved from one position to another"
     },
     "v1UpdateGameResponse": {
       "type": "object",
@@ -1358,6 +1688,27 @@
           "title": "All units on the world and who they belong to"
         }
       }
+    },
+    "v1WorldChange": {
+      "type": "object",
+      "properties": {
+        "unitMoved": {
+          "$ref": "#/definitions/v1UnitMovedChange"
+        },
+        "unitDamaged": {
+          "$ref": "#/definitions/v1UnitDamagedChange"
+        },
+        "unitKilled": {
+          "$ref": "#/definitions/v1UnitKilledChange"
+        },
+        "playerChanged": {
+          "$ref": "#/definitions/v1PlayerChangedChange"
+        },
+        "turnAdvanced": {
+          "$ref": "#/definitions/v1TurnAdvancedChange"
+        }
+      },
+      "title": "*\nRepresents a change to the game world"
     }
   }
 }

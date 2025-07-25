@@ -55,20 +55,65 @@ message Game {
   // Unique ID for the game
   string id = 3;
 
+  // User who started/created the game
+  string creator_id = 4;
+
+  // The world this game was created from
+  string world_id = 5;
+
   // Name if items have names
-  string name = 4;
+  string name = 6;
 
   // Description if game has a description
-  string description = 5;
+  string description = 7;
 
   // Some tags
-  repeated string tags = 6;
+  repeated string tags = 8;
 
   // A possible image url
-  string image_url = 7;
+  string image_url = 9;
 
   // Difficulty - example attribute
-  string difficulty = 8;
+  string difficulty = 10;
+
+  // Game configuration
+  GameConfiguration config = 11;
+}
+
+message GameConfiguration {
+  // Player configuration
+  repeated GamePlayer players = 1;
+
+  // Game settings
+  GameSettings settings = 2;
+}
+
+message GamePlayer {
+  // Player ID (1-based)
+  int32 player_id = 1;
+
+  // Player type
+  string player_type = 2; // "human", "ai", "open"
+
+  // Player color
+  string color = 3;
+
+  // Team ID (0 = no team, 1+ = team number)
+  int32 team_id = 4;
+}
+
+message GameSettings {
+  // List of allowed unit type IDs
+  repeated int32 allowed_units = 1;
+
+  // Turn time limit in seconds (0 = no limit)
+  int32 turn_time_limit = 2;
+
+  // Team mode
+  string team_mode = 3; // "ffa" or "teams"
+
+  // Maximum number of turns (0 = unlimited)
+  int32 max_turns = 4;
 }
 
 message World {

@@ -5,6 +5,29 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
 package weewar.v1;
 
+message User {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+
+  // Unique ID for the user
+  string id = 3;
+
+  // Name if items have names
+  string name = 4;
+
+  // Description if user has a description
+  string description = 5;
+
+  // Some tags
+  repeated string tags = 6;
+
+  // A possible image url
+  string image_url = 7;
+
+  // Difficulty - example attribute
+  string difficulty = 8;
+}
+
 message Pagination {
   /**
    * Instead of an offset an abstract  "page" key is provided that offers
@@ -47,7 +70,61 @@ message PaginationResponse {
   int32 total_results = 5;
 }
 
+///////// World related models
 
+message World {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+
+  // Unique ID for the world
+  string id = 3;
+
+  // User that created the world
+  string creator_id = 4;
+
+  // Name if items have names
+  string name = 5;
+
+  // Description if world has a description
+  string description = 6;
+
+  // Some tags
+  repeated string tags = 7;
+
+  // A possible image url
+  string image_url = 8;
+
+  // Difficulty - example attribute
+  string difficulty = 9;
+
+  // JSON-fied tile data about what units and terrains are at each location
+  repeated Tile tiles = 11;
+
+  // All units on the world and who they belong to
+  repeated Unit units = 12;
+}
+
+message Tile {
+  // Q and R in Cubed coordinates
+  int32 q = 1;
+  int32 r = 2;
+  int32 tile_type = 3; // Tile type
+
+  // Whether the tile itself belongs to a player
+  int32 player = 4;
+}
+
+message Unit {
+  // Q and R in Cubed coordinates
+  int32 q = 1;
+  int32 r = 2;
+  int32 player = 3;
+  int32 unit_type = 4;
+}
+
+///////// Game related models
+
+// Describes a game and its metadata
 message Game {
   google.protobuf.Timestamp created_at = 1;
   google.protobuf.Timestamp updated_at = 2;
@@ -116,75 +193,146 @@ message GameSettings {
   int32 max_turns = 4;
 }
 
-message World {
-  google.protobuf.Timestamp created_at = 1;
+// Holds the game's Active/Current state (eg world state)
+message GameState {
   google.protobuf.Timestamp updated_at = 2;
 
-  // Unique ID for the world
-  string id = 3;
+  // ID of the game whos state is being tracked
+  string game_id = 3;
 
-  // User that created the world
-  string creator_id = 4;
-
-  // Name if items have names
-  string name = 5;
-
-  // Description if world has a description
-  string description = 6;
-
-  // Some tags
-  repeated string tags = 7;
-
-  // A possible image url
-  string image_url = 8;
-
-  // Difficulty - example attribute
-  string difficulty = 9;
-
-  // JSON-fied tile data about what units and terrains are at each location
-  repeated Tile tiles = 11;
-
-  // All units on the world and who they belong to
-  repeated Unit units = 12;
+  // Current world state
+  World world = 4;
 }
 
-message Tile {
-  // Q and R in Cubed coordinates
-  int32 q = 1;
-  int32 r = 2;
-  int32 tile_type = 3; // Tile type
+// Holds the game's move history (can be used as a replay log)
+message GameMoveHistory {
+  // Move history for the game
+  string game_id = 1;
 
-  // Whether the tile itself belongs to a player
-  int32 player = 4;
+  // Each entry in our history is a "group" of moves
+  repeated GameMoveGroup groups = 2;
 }
 
-message Unit {
-  // Q and R in Cubed coordinates
-  int32 q = 1;
-  int32 r = 2;
-  int32 player = 3;
-  int32 unit_type = 4;
+// A move group - we can allow X moves at a time 
+message GameMoveGroup {
+  // When the moves happened (or were submitted)
+  google.protobuf.Timestamp started_at = 2;
+  google.protobuf.Timestamp ended_at = 3;
+
+  /**
+   * List of moves to add - 
+   */
+  repeated GameMove moves = 4;
+
+  /*
+   * Each game move result stores the result of the individual Move in the request.
+   * ie move_results[i] = ResultOfProcessing(ProcessMoveRequest.moves[i])
+   */
+  repeated GameMoveResult move_results = 5;
 }
 
-message User {
-  google.protobuf.Timestamp created_at = 1;
-  google.protobuf.Timestamp updated_at = 2;
+/**
+ * Represents a single move which can be one of many actions in the game
+ */
+message GameMove {
+	int32 player = 1; // The player making the move
+  google.protobuf.Timestamp timestamp = 2;
+  oneof move_type {
+    MoveUnitAction move_unit = 3;
+    AttackUnitAction attack_unit = 4;
+    EndTurnAction end_turn = 5;
+  }
+}
 
-  // Unique ID for the user
-  string id = 3;
+/**
+ * Represents the result of executing a move
+ */
+message GameMoveResult {
+  // Whether the result is permenant and can be undone.
+  // Just moving a unit for example is not permanent, but attacking a unit
+  // would be (ie a player cannot undo it).
+  bool is_permanent = 1;
 
-  // Name if items have names
-  string name = 4;
+  // A set of changes to the world as a result of making this move
+  repeated WorldChange changes = 3;
+}
 
-  // Description if user has a description
-  string description = 5;
+/**
+ * Move unit from one position to another
+ */
+message MoveUnitAction {
+  int32 from_q = 1;
+  int32 from_r = 2;
+  int32 to_q = 3;
+  int32 to_r = 4;
+}
 
-  // Some tags
-  repeated string tags = 6;
+/**
+ * Attack with one unit against another
+ */
+message AttackUnitAction {
+  int32 attacker_q = 1;
+  int32 attacker_r = 2;
+  int32 defender_q = 3;
+  int32 defender_r = 4;
+}
 
-  // A possible image url
-  string image_url = 7;
+/**
+ * End current player's turn
+ */
+message EndTurnAction {
+  // No additional fields needed
+}
 
-  // Difficulty - example attribute
-  string difficulty = 8;
+/**
+ * Represents a change to the game world
+ */
+message WorldChange {
+  // When did this change happen
+  oneof change_type {
+    UnitMovedChange unit_moved = 1;
+    UnitDamagedChange unit_damaged = 2;
+    UnitKilledChange unit_killed = 3;
+    PlayerChangedChange player_changed = 4;
+  }
+}
+
+/**
+ * A unit moved from one position to another
+ */
+message UnitMovedChange {
+  int32 from_q = 2;
+  int32 from_r = 3;
+  int32 to_q = 4;
+  int32 to_r = 5;
+}
+
+/**
+ * A unit took damage
+ */
+message UnitDamagedChange {
+  int32 previous_health = 2;
+  int32 new_health = 3;
+  int32 q = 4;
+  int32 r = 5;
+}
+
+/**
+ * A unit was killed
+ */
+message UnitKilledChange {
+  int32 player = 2;
+  int32 unit_type = 3;
+  int32 q = 4;
+  int32 r = 5;
+}
+
+/**
+ * Active player changed
+ */
+message PlayerChangedChange {
+  int32 previous_player = 1;
+  int32 new_player = 2;
+  int32 previous_turn = 3;
+  int32 new_turn = 4;
 }

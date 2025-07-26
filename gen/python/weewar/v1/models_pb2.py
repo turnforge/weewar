@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16weewar/v1/models.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"e\n\nPagination\x12\x19\n\x08page_key\x18\x01 \x01(\tR\x07pageKey\x12\x1f\n\x0bpage_offset\x18\x02 \x01(\x05R\npageOffset\x12\x1b\n\tpage_size\x18\x03 \x01(\x05R\x08pageSize\"\xa2\x01\n\x12PaginationResponse\x12\"\n\rnext_page_key\x18\x02 \x01(\tR\x0bnextPageKey\x12(\n\x10next_page_offset\x18\x03 \x01(\x05R\x0enextPageOffset\x12\x19\n\x08has_more\x18\x04 \x01(\x08R\x07hasMore\x12#\n\rtotal_results\x18\x05 \x01(\x05R\x0ctotalResults\"\x83\x03\n\x04Game\x12\x39\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12\x1d\n\ncreator_id\x18\x04 \x01(\tR\tcreatorId\x12\x19\n\x08world_id\x18\x05 \x01(\tR\x07worldId\x12\x12\n\x04name\x18\x06 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x07 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04tags\x18\x08 \x03(\tR\x04tags\x12\x1b\n\timage_url\x18\t \x01(\tR\x08imageUrl\x12\x1e\n\ndifficulty\x18\n \x01(\tR\ndifficulty\x12\x34\n\x06\x63onfig\x18\x0b \x01(\x0b\x32\x1c.weewar.v1.GameConfigurationR\x06\x63onfig\"y\n\x11GameConfiguration\x12/\n\x07players\x18\x01 \x03(\x0b\x32\x15.weewar.v1.GamePlayerR\x07players\x12\x33\n\x08settings\x18\x02 \x01(\x0b\x32\x17.weewar.v1.GameSettingsR\x08settings\"y\n\nGamePlayer\x12\x1b\n\tplayer_id\x18\x01 \x01(\x05R\x08playerId\x12\x1f\n\x0bplayer_type\x18\x02 \x01(\tR\nplayerType\x12\x14\n\x05\x63olor\x18\x03 \x01(\tR\x05\x63olor\x12\x17\n\x07team_id\x18\x04 \x01(\x05R\x06teamId\"\x95\x01\n\x0cGameSettings\x12#\n\rallowed_units\x18\x01 \x03(\x05R\x0c\x61llowedUnits\x12&\n\x0fturn_time_limit\x18\x02 \x01(\x05R\rturnTimeLimit\x12\x1b\n\tteam_mode\x18\x03 \x01(\tR\x08teamMode\x12\x1b\n\tmax_turns\x18\x04 \x01(\x05R\x08maxTurns\"\x81\x03\n\x05World\x12\x39\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12\x1d\n\ncreator_id\x18\x04 \x01(\tR\tcreatorId\x12\x12\n\x04name\x18\x05 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x06 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04tags\x18\x07 \x03(\tR\x04tags\x12\x1b\n\timage_url\x18\x08 \x01(\tR\x08imageUrl\x12\x1e\n\ndifficulty\x18\t \x01(\tR\ndifficulty\x12%\n\x05tiles\x18\x0b \x03(\x0b\x32\x0f.weewar.v1.TileR\x05tiles\x12%\n\x05units\x18\x0c \x03(\x0b\x32\x0f.weewar.v1.UnitR\x05units\"W\n\x04Tile\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n\ttile_type\x18\x03 \x01(\x05R\x08tileType\x12\x16\n\x06player\x18\x04 \x01(\x05R\x06player\"W\n\x04Unit\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n\x06player\x18\x03 \x01(\x05R\x06player\x12\x1b\n\tunit_type\x18\x04 \x01(\x05R\x08unitType\"\x93\x02\n\x04User\x12\x39\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12\x12\n\x04name\x18\x04 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x05 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04tags\x18\x06 \x03(\tR\x04tags\x12\x1b\n\timage_url\x18\x07 \x01(\tR\x08imageUrl\x12\x1e\n\ndifficulty\x18\x08 \x01(\tR\ndifficultyB\x9d\x01\n\rcom.weewar.v1B\x0bModelsProtoP\x01Z:github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16weewar/v1/models.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x93\x02\n\x04User\x12\x39\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12\x12\n\x04name\x18\x04 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x05 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04tags\x18\x06 \x03(\tR\x04tags\x12\x1b\n\timage_url\x18\x07 \x01(\tR\x08imageUrl\x12\x1e\n\ndifficulty\x18\x08 \x01(\tR\ndifficulty\"e\n\nPagination\x12\x19\n\x08page_key\x18\x01 \x01(\tR\x07pageKey\x12\x1f\n\x0bpage_offset\x18\x02 \x01(\x05R\npageOffset\x12\x1b\n\tpage_size\x18\x03 \x01(\x05R\x08pageSize\"\xa2\x01\n\x12PaginationResponse\x12\"\n\rnext_page_key\x18\x02 \x01(\tR\x0bnextPageKey\x12(\n\x10next_page_offset\x18\x03 \x01(\x05R\x0enextPageOffset\x12\x19\n\x08has_more\x18\x04 \x01(\x08R\x07hasMore\x12#\n\rtotal_results\x18\x05 \x01(\x05R\x0ctotalResults\"\x81\x03\n\x05World\x12\x39\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12\x1d\n\ncreator_id\x18\x04 \x01(\tR\tcreatorId\x12\x12\n\x04name\x18\x05 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x06 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04tags\x18\x07 \x03(\tR\x04tags\x12\x1b\n\timage_url\x18\x08 \x01(\tR\x08imageUrl\x12\x1e\n\ndifficulty\x18\t \x01(\tR\ndifficulty\x12%\n\x05tiles\x18\x0b \x03(\x0b\x32\x0f.weewar.v1.TileR\x05tiles\x12%\n\x05units\x18\x0c \x03(\x0b\x32\x0f.weewar.v1.UnitR\x05units\"W\n\x04Tile\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n\ttile_type\x18\x03 \x01(\x05R\x08tileType\x12\x16\n\x06player\x18\x04 \x01(\x05R\x06player\"W\n\x04Unit\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n\x06player\x18\x03 \x01(\x05R\x06player\x12\x1b\n\tunit_type\x18\x04 \x01(\x05R\x08unitType\"\x83\x03\n\x04Game\x12\x39\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12\x1d\n\ncreator_id\x18\x04 \x01(\tR\tcreatorId\x12\x19\n\x08world_id\x18\x05 \x01(\tR\x07worldId\x12\x12\n\x04name\x18\x06 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x07 \x01(\tR\x0b\x64\x65scription\x12\x12\n\x04tags\x18\x08 \x03(\tR\x04tags\x12\x1b\n\timage_url\x18\t \x01(\tR\x08imageUrl\x12\x1e\n\ndifficulty\x18\n \x01(\tR\ndifficulty\x12\x34\n\x06\x63onfig\x18\x0b \x01(\x0b\x32\x1c.weewar.v1.GameConfigurationR\x06\x63onfig\"y\n\x11GameConfiguration\x12/\n\x07players\x18\x01 \x03(\x0b\x32\x15.weewar.v1.GamePlayerR\x07players\x12\x33\n\x08settings\x18\x02 \x01(\x0b\x32\x17.weewar.v1.GameSettingsR\x08settings\"y\n\nGamePlayer\x12\x1b\n\tplayer_id\x18\x01 \x01(\x05R\x08playerId\x12\x1f\n\x0bplayer_type\x18\x02 \x01(\tR\nplayerType\x12\x14\n\x05\x63olor\x18\x03 \x01(\tR\x05\x63olor\x12\x17\n\x07team_id\x18\x04 \x01(\x05R\x06teamId\"\x95\x01\n\x0cGameSettings\x12#\n\rallowed_units\x18\x01 \x03(\x05R\x0c\x61llowedUnits\x12&\n\x0fturn_time_limit\x18\x02 \x01(\x05R\rturnTimeLimit\x12\x1b\n\tteam_mode\x18\x03 \x01(\tR\x08teamMode\x12\x1b\n\tmax_turns\x18\x04 \x01(\x05R\x08maxTurns\"\x87\x01\n\tGameState\x12\x39\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x17\n\x07game_id\x18\x03 \x01(\tR\x06gameId\x12&\n\x05world\x18\x04 \x01(\x0b\x32\x10.weewar.v1.WorldR\x05world\"\\\n\x0fGameMoveHistory\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x30\n\x06groups\x18\x02 \x03(\x0b\x32\x18.weewar.v1.GameMoveGroupR\x06groups\"\xea\x01\n\rGameMoveGroup\x12\x39\n\nstarted_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tstartedAt\x12\x35\n\x08\x65nded_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x07\x65ndedAt\x12)\n\x05moves\x18\x04 \x03(\x0b\x32\x13.weewar.v1.GameMoveR\x05moves\x12<\n\x0cmove_results\x18\x05 \x03(\x0b\x32\x19.weewar.v1.GameMoveResultR\x0bmoveResults\"\x9a\x02\n\x08GameMove\x12\x16\n\x06player\x18\x01 \x01(\x05R\x06player\x12\x38\n\ttimestamp\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\ttimestamp\x12\x38\n\tmove_unit\x18\x03 \x01(\x0b\x32\x19.weewar.v1.MoveUnitActionH\x00R\x08moveUnit\x12>\n\x0b\x61ttack_unit\x18\x04 \x01(\x0b\x32\x1b.weewar.v1.AttackUnitActionH\x00R\nattackUnit\x12\x35\n\x08\x65nd_turn\x18\x05 \x01(\x0b\x32\x18.weewar.v1.EndTurnActionH\x00R\x07\x65ndTurnB\x0b\n\tmove_type\"e\n\x0eGameMoveResult\x12!\n\x0cis_permanent\x18\x01 \x01(\x08R\x0bisPermanent\x12\x30\n\x07\x63hanges\x18\x03 \x03(\x0b\x32\x16.weewar.v1.WorldChangeR\x07\x63hanges\"d\n\x0eMoveUnitAction\x12\x15\n\x06\x66rom_q\x18\x01 \x01(\x05R\x05\x66romQ\x12\x15\n\x06\x66rom_r\x18\x02 \x01(\x05R\x05\x66romR\x12\x11\n\x04to_q\x18\x03 \x01(\x05R\x03toQ\x12\x11\n\x04to_r\x18\x04 \x01(\x05R\x03toR\"\x8e\x01\n\x10\x41ttackUnitAction\x12\x1d\n\nattacker_q\x18\x01 \x01(\x05R\tattackerQ\x12\x1d\n\nattacker_r\x18\x02 \x01(\x05R\tattackerR\x12\x1d\n\ndefender_q\x18\x03 \x01(\x05R\tdefenderQ\x12\x1d\n\ndefender_r\x18\x04 \x01(\x05R\tdefenderR\"\x0f\n\rEndTurnAction\"\xa5\x02\n\x0bWorldChange\x12;\n\nunit_moved\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.UnitMovedChangeH\x00R\tunitMoved\x12\x41\n\x0cunit_damaged\x18\x02 \x01(\x0b\x32\x1c.weewar.v1.UnitDamagedChangeH\x00R\x0bunitDamaged\x12>\n\x0bunit_killed\x18\x03 \x01(\x0b\x32\x1b.weewar.v1.UnitKilledChangeH\x00R\nunitKilled\x12G\n\x0eplayer_changed\x18\x04 \x01(\x0b\x32\x1e.weewar.v1.PlayerChangedChangeH\x00R\rplayerChangedB\r\n\x0b\x63hange_type\"e\n\x0fUnitMovedChange\x12\x15\n\x06\x66rom_q\x18\x02 \x01(\x05R\x05\x66romQ\x12\x15\n\x06\x66rom_r\x18\x03 \x01(\x05R\x05\x66romR\x12\x11\n\x04to_q\x18\x04 \x01(\x05R\x03toQ\x12\x11\n\x04to_r\x18\x05 \x01(\x05R\x03toR\"w\n\x11UnitDamagedChange\x12\'\n\x0fprevious_health\x18\x02 \x01(\x05R\x0epreviousHealth\x12\x1d\n\nnew_health\x18\x03 \x01(\x05R\tnewHealth\x12\x0c\n\x01q\x18\x04 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x05 \x01(\x05R\x01r\"c\n\x10UnitKilledChange\x12\x16\n\x06player\x18\x02 \x01(\x05R\x06player\x12\x1b\n\tunit_type\x18\x03 \x01(\x05R\x08unitType\x12\x0c\n\x01q\x18\x04 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x05 \x01(\x05R\x01r\"\x9d\x01\n\x13PlayerChangedChange\x12\'\n\x0fprevious_player\x18\x01 \x01(\x05R\x0epreviousPlayer\x12\x1d\n\nnew_player\x18\x02 \x01(\x05R\tnewPlayer\x12#\n\rprevious_turn\x18\x03 \x01(\x05R\x0cpreviousTurn\x12\x19\n\x08new_turn\x18\x04 \x01(\x05R\x07newTurnB\x9d\x01\n\rcom.weewar.v1B\x0bModelsProtoP\x01Z:github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,24 +33,50 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'weewar.v1.models_pb2', _glo
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\rcom.weewar.v1B\013ModelsProtoP\001Z:github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1\242\002\003WXX\252\002\tWeewar.V1\312\002\tWeewar\\V1\342\002\025Weewar\\V1\\GPBMetadata\352\002\nWeewar::V1'
-  _globals['_PAGINATION']._serialized_start=70
-  _globals['_PAGINATION']._serialized_end=171
-  _globals['_PAGINATIONRESPONSE']._serialized_start=174
-  _globals['_PAGINATIONRESPONSE']._serialized_end=336
-  _globals['_GAME']._serialized_start=339
-  _globals['_GAME']._serialized_end=726
-  _globals['_GAMECONFIGURATION']._serialized_start=728
-  _globals['_GAMECONFIGURATION']._serialized_end=849
-  _globals['_GAMEPLAYER']._serialized_start=851
-  _globals['_GAMEPLAYER']._serialized_end=972
-  _globals['_GAMESETTINGS']._serialized_start=975
-  _globals['_GAMESETTINGS']._serialized_end=1124
-  _globals['_WORLD']._serialized_start=1127
-  _globals['_WORLD']._serialized_end=1512
-  _globals['_TILE']._serialized_start=1514
-  _globals['_TILE']._serialized_end=1601
-  _globals['_UNIT']._serialized_start=1603
-  _globals['_UNIT']._serialized_end=1690
-  _globals['_USER']._serialized_start=1693
-  _globals['_USER']._serialized_end=1968
+  _globals['_USER']._serialized_start=71
+  _globals['_USER']._serialized_end=346
+  _globals['_PAGINATION']._serialized_start=348
+  _globals['_PAGINATION']._serialized_end=449
+  _globals['_PAGINATIONRESPONSE']._serialized_start=452
+  _globals['_PAGINATIONRESPONSE']._serialized_end=614
+  _globals['_WORLD']._serialized_start=617
+  _globals['_WORLD']._serialized_end=1002
+  _globals['_TILE']._serialized_start=1004
+  _globals['_TILE']._serialized_end=1091
+  _globals['_UNIT']._serialized_start=1093
+  _globals['_UNIT']._serialized_end=1180
+  _globals['_GAME']._serialized_start=1183
+  _globals['_GAME']._serialized_end=1570
+  _globals['_GAMECONFIGURATION']._serialized_start=1572
+  _globals['_GAMECONFIGURATION']._serialized_end=1693
+  _globals['_GAMEPLAYER']._serialized_start=1695
+  _globals['_GAMEPLAYER']._serialized_end=1816
+  _globals['_GAMESETTINGS']._serialized_start=1819
+  _globals['_GAMESETTINGS']._serialized_end=1968
+  _globals['_GAMESTATE']._serialized_start=1971
+  _globals['_GAMESTATE']._serialized_end=2106
+  _globals['_GAMEMOVEHISTORY']._serialized_start=2108
+  _globals['_GAMEMOVEHISTORY']._serialized_end=2200
+  _globals['_GAMEMOVEGROUP']._serialized_start=2203
+  _globals['_GAMEMOVEGROUP']._serialized_end=2437
+  _globals['_GAMEMOVE']._serialized_start=2440
+  _globals['_GAMEMOVE']._serialized_end=2722
+  _globals['_GAMEMOVERESULT']._serialized_start=2724
+  _globals['_GAMEMOVERESULT']._serialized_end=2825
+  _globals['_MOVEUNITACTION']._serialized_start=2827
+  _globals['_MOVEUNITACTION']._serialized_end=2927
+  _globals['_ATTACKUNITACTION']._serialized_start=2930
+  _globals['_ATTACKUNITACTION']._serialized_end=3072
+  _globals['_ENDTURNACTION']._serialized_start=3074
+  _globals['_ENDTURNACTION']._serialized_end=3089
+  _globals['_WORLDCHANGE']._serialized_start=3092
+  _globals['_WORLDCHANGE']._serialized_end=3385
+  _globals['_UNITMOVEDCHANGE']._serialized_start=3387
+  _globals['_UNITMOVEDCHANGE']._serialized_end=3488
+  _globals['_UNITDAMAGEDCHANGE']._serialized_start=3490
+  _globals['_UNITDAMAGEDCHANGE']._serialized_end=3609
+  _globals['_UNITKILLEDCHANGE']._serialized_start=3611
+  _globals['_UNITKILLEDCHANGE']._serialized_end=3710
+  _globals['_PLAYERCHANGEDCHANGE']._serialized_start=3713
+  _globals['_PLAYERCHANGEDCHANGE']._serialized_end=3870
 # @@protoc_insertion_point(module_scope)

@@ -19,13 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GamesService_CreateGame_FullMethodName   = "/weewar.v1.GamesService/CreateGame"
-	GamesService_GetGames_FullMethodName     = "/weewar.v1.GamesService/GetGames"
-	GamesService_ListGames_FullMethodName    = "/weewar.v1.GamesService/ListGames"
-	GamesService_GetGame_FullMethodName      = "/weewar.v1.GamesService/GetGame"
-	GamesService_DeleteGame_FullMethodName   = "/weewar.v1.GamesService/DeleteGame"
-	GamesService_UpdateGame_FullMethodName   = "/weewar.v1.GamesService/UpdateGame"
-	GamesService_ProcessMoves_FullMethodName = "/weewar.v1.GamesService/ProcessMoves"
+	GamesService_CreateGame_FullMethodName         = "/weewar.v1.GamesService/CreateGame"
+	GamesService_GetGames_FullMethodName           = "/weewar.v1.GamesService/GetGames"
+	GamesService_ListGames_FullMethodName          = "/weewar.v1.GamesService/ListGames"
+	GamesService_GetGame_FullMethodName            = "/weewar.v1.GamesService/GetGame"
+	GamesService_DeleteGame_FullMethodName         = "/weewar.v1.GamesService/DeleteGame"
+	GamesService_UpdateGame_FullMethodName         = "/weewar.v1.GamesService/UpdateGame"
+	GamesService_ProcessMoves_FullMethodName       = "/weewar.v1.GamesService/ProcessMoves"
+	GamesService_GetMovementOptions_FullMethodName = "/weewar.v1.GamesService/GetMovementOptions"
+	GamesService_GetAttackOptions_FullMethodName   = "/weewar.v1.GamesService/GetAttackOptions"
+	GamesService_GetTileInfo_FullMethodName        = "/weewar.v1.GamesService/GetTileInfo"
+	GamesService_GetTerrainStats_FullMethodName    = "/weewar.v1.GamesService/GetTerrainStats"
+	GamesService_CanSelectUnit_FullMethodName      = "/weewar.v1.GamesService/CanSelectUnit"
+	GamesService_CreateGameFromMap_FullMethodName  = "/weewar.v1.GamesService/CreateGameFromMap"
 )
 
 // GamesServiceClient is the client API for GamesService service.
@@ -50,6 +56,13 @@ type GamesServiceClient interface {
 	// GetGame returns a specific game with metadata
 	UpdateGame(ctx context.Context, in *UpdateGameRequest, opts ...grpc.CallOption) (*UpdateGameResponse, error)
 	ProcessMoves(ctx context.Context, in *ProcessMovesRequest, opts ...grpc.CallOption) (*ProcessMovesResponse, error)
+	// Game interaction methods for UI components
+	GetMovementOptions(ctx context.Context, in *GetMovementOptionsRequest, opts ...grpc.CallOption) (*GetMovementOptionsResponse, error)
+	GetAttackOptions(ctx context.Context, in *GetAttackOptionsRequest, opts ...grpc.CallOption) (*GetAttackOptionsResponse, error)
+	GetTileInfo(ctx context.Context, in *GetTileInfoRequest, opts ...grpc.CallOption) (*GetTileInfoResponse, error)
+	GetTerrainStats(ctx context.Context, in *GetTerrainStatsRequest, opts ...grpc.CallOption) (*GetTerrainStatsResponse, error)
+	CanSelectUnit(ctx context.Context, in *CanSelectUnitRequest, opts ...grpc.CallOption) (*CanSelectUnitResponse, error)
+	CreateGameFromMap(ctx context.Context, in *CreateGameFromMapRequest, opts ...grpc.CallOption) (*CreateGameFromMapResponse, error)
 }
 
 type gamesServiceClient struct {
@@ -130,6 +143,66 @@ func (c *gamesServiceClient) ProcessMoves(ctx context.Context, in *ProcessMovesR
 	return out, nil
 }
 
+func (c *gamesServiceClient) GetMovementOptions(ctx context.Context, in *GetMovementOptionsRequest, opts ...grpc.CallOption) (*GetMovementOptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMovementOptionsResponse)
+	err := c.cc.Invoke(ctx, GamesService_GetMovementOptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gamesServiceClient) GetAttackOptions(ctx context.Context, in *GetAttackOptionsRequest, opts ...grpc.CallOption) (*GetAttackOptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAttackOptionsResponse)
+	err := c.cc.Invoke(ctx, GamesService_GetAttackOptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gamesServiceClient) GetTileInfo(ctx context.Context, in *GetTileInfoRequest, opts ...grpc.CallOption) (*GetTileInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTileInfoResponse)
+	err := c.cc.Invoke(ctx, GamesService_GetTileInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gamesServiceClient) GetTerrainStats(ctx context.Context, in *GetTerrainStatsRequest, opts ...grpc.CallOption) (*GetTerrainStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTerrainStatsResponse)
+	err := c.cc.Invoke(ctx, GamesService_GetTerrainStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gamesServiceClient) CanSelectUnit(ctx context.Context, in *CanSelectUnitRequest, opts ...grpc.CallOption) (*CanSelectUnitResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CanSelectUnitResponse)
+	err := c.cc.Invoke(ctx, GamesService_CanSelectUnit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gamesServiceClient) CreateGameFromMap(ctx context.Context, in *CreateGameFromMapRequest, opts ...grpc.CallOption) (*CreateGameFromMapResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateGameFromMapResponse)
+	err := c.cc.Invoke(ctx, GamesService_CreateGameFromMap_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GamesServiceServer is the server API for GamesService service.
 // All implementations should embed UnimplementedGamesServiceServer
 // for forward compatibility.
@@ -152,6 +225,13 @@ type GamesServiceServer interface {
 	// GetGame returns a specific game with metadata
 	UpdateGame(context.Context, *UpdateGameRequest) (*UpdateGameResponse, error)
 	ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error)
+	// Game interaction methods for UI components
+	GetMovementOptions(context.Context, *GetMovementOptionsRequest) (*GetMovementOptionsResponse, error)
+	GetAttackOptions(context.Context, *GetAttackOptionsRequest) (*GetAttackOptionsResponse, error)
+	GetTileInfo(context.Context, *GetTileInfoRequest) (*GetTileInfoResponse, error)
+	GetTerrainStats(context.Context, *GetTerrainStatsRequest) (*GetTerrainStatsResponse, error)
+	CanSelectUnit(context.Context, *CanSelectUnitRequest) (*CanSelectUnitResponse, error)
+	CreateGameFromMap(context.Context, *CreateGameFromMapRequest) (*CreateGameFromMapResponse, error)
 }
 
 // UnimplementedGamesServiceServer should be embedded to have
@@ -181,6 +261,24 @@ func (UnimplementedGamesServiceServer) UpdateGame(context.Context, *UpdateGameRe
 }
 func (UnimplementedGamesServiceServer) ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProcessMoves not implemented")
+}
+func (UnimplementedGamesServiceServer) GetMovementOptions(context.Context, *GetMovementOptionsRequest) (*GetMovementOptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMovementOptions not implemented")
+}
+func (UnimplementedGamesServiceServer) GetAttackOptions(context.Context, *GetAttackOptionsRequest) (*GetAttackOptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAttackOptions not implemented")
+}
+func (UnimplementedGamesServiceServer) GetTileInfo(context.Context, *GetTileInfoRequest) (*GetTileInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTileInfo not implemented")
+}
+func (UnimplementedGamesServiceServer) GetTerrainStats(context.Context, *GetTerrainStatsRequest) (*GetTerrainStatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTerrainStats not implemented")
+}
+func (UnimplementedGamesServiceServer) CanSelectUnit(context.Context, *CanSelectUnitRequest) (*CanSelectUnitResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CanSelectUnit not implemented")
+}
+func (UnimplementedGamesServiceServer) CreateGameFromMap(context.Context, *CreateGameFromMapRequest) (*CreateGameFromMapResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateGameFromMap not implemented")
 }
 func (UnimplementedGamesServiceServer) testEmbeddedByValue() {}
 
@@ -328,6 +426,114 @@ func _GamesService_ProcessMoves_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GamesService_GetMovementOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMovementOptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).GetMovementOptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_GetMovementOptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).GetMovementOptions(ctx, req.(*GetMovementOptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GamesService_GetAttackOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAttackOptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).GetAttackOptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_GetAttackOptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).GetAttackOptions(ctx, req.(*GetAttackOptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GamesService_GetTileInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTileInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).GetTileInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_GetTileInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).GetTileInfo(ctx, req.(*GetTileInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GamesService_GetTerrainStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTerrainStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).GetTerrainStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_GetTerrainStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).GetTerrainStats(ctx, req.(*GetTerrainStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GamesService_CanSelectUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CanSelectUnitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).CanSelectUnit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_CanSelectUnit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).CanSelectUnit(ctx, req.(*CanSelectUnitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GamesService_CreateGameFromMap_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateGameFromMapRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).CreateGameFromMap(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_CreateGameFromMap_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).CreateGameFromMap(ctx, req.(*CreateGameFromMapRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GamesService_ServiceDesc is the grpc.ServiceDesc for GamesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -362,6 +568,30 @@ var GamesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ProcessMoves",
 			Handler:    _GamesService_ProcessMoves_Handler,
+		},
+		{
+			MethodName: "GetMovementOptions",
+			Handler:    _GamesService_GetMovementOptions_Handler,
+		},
+		{
+			MethodName: "GetAttackOptions",
+			Handler:    _GamesService_GetAttackOptions_Handler,
+		},
+		{
+			MethodName: "GetTileInfo",
+			Handler:    _GamesService_GetTileInfo_Handler,
+		},
+		{
+			MethodName: "GetTerrainStats",
+			Handler:    _GamesService_GetTerrainStats_Handler,
+		},
+		{
+			MethodName: "CanSelectUnit",
+			Handler:    _GamesService_CanSelectUnit_Handler,
+		},
+		{
+			MethodName: "CreateGameFromMap",
+			Handler:    _GamesService_CreateGameFromMap_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

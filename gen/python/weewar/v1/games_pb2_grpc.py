@@ -50,6 +50,36 @@ class GamesServiceStub(object):
                 request_serializer=weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.SerializeToString,
                 response_deserializer=weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.FromString,
                 _registered_method=True)
+        self.GetMovementOptions = channel.unary_unary(
+                '/weewar.v1.GamesService/GetMovementOptions',
+                request_serializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsResponse.FromString,
+                _registered_method=True)
+        self.GetAttackOptions = channel.unary_unary(
+                '/weewar.v1.GamesService/GetAttackOptions',
+                request_serializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsResponse.FromString,
+                _registered_method=True)
+        self.GetTileInfo = channel.unary_unary(
+                '/weewar.v1.GamesService/GetTileInfo',
+                request_serializer=weewar_dot_v1_dot_games__pb2.GetTileInfoRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.GetTileInfoResponse.FromString,
+                _registered_method=True)
+        self.GetTerrainStats = channel.unary_unary(
+                '/weewar.v1.GamesService/GetTerrainStats',
+                request_serializer=weewar_dot_v1_dot_games__pb2.GetTerrainStatsRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.GetTerrainStatsResponse.FromString,
+                _registered_method=True)
+        self.CanSelectUnit = channel.unary_unary(
+                '/weewar.v1.GamesService/CanSelectUnit',
+                request_serializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitResponse.FromString,
+                _registered_method=True)
+        self.CreateGameFromMap = channel.unary_unary(
+                '/weewar.v1.GamesService/CreateGameFromMap',
+                request_serializer=weewar_dot_v1_dot_games__pb2.CreateGameFromMapRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.CreateGameFromMapResponse.FromString,
+                _registered_method=True)
 
 
 class GamesServiceServicer(object):
@@ -107,6 +137,43 @@ class GamesServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetMovementOptions(self, request, context):
+        """Game interaction methods for UI components
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetAttackOptions(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetTileInfo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetTerrainStats(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CanSelectUnit(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateGameFromMap(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GamesServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -144,6 +211,36 @@ def add_GamesServiceServicer_to_server(servicer, server):
                     servicer.ProcessMoves,
                     request_deserializer=weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.FromString,
                     response_serializer=weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.SerializeToString,
+            ),
+            'GetMovementOptions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMovementOptions,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsResponse.SerializeToString,
+            ),
+            'GetAttackOptions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAttackOptions,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsResponse.SerializeToString,
+            ),
+            'GetTileInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTileInfo,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetTileInfoRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.GetTileInfoResponse.SerializeToString,
+            ),
+            'GetTerrainStats': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTerrainStats,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetTerrainStatsRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.GetTerrainStatsResponse.SerializeToString,
+            ),
+            'CanSelectUnit': grpc.unary_unary_rpc_method_handler(
+                    servicer.CanSelectUnit,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitResponse.SerializeToString,
+            ),
+            'CreateGameFromMap': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateGameFromMap,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.CreateGameFromMapRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.CreateGameFromMapResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -336,6 +433,168 @@ class GamesService(object):
             '/weewar.v1.GamesService/ProcessMoves',
             weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.SerializeToString,
             weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMovementOptions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/GetMovementOptions',
+            weewar_dot_v1_dot_games__pb2.GetMovementOptionsRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.GetMovementOptionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetAttackOptions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/GetAttackOptions',
+            weewar_dot_v1_dot_games__pb2.GetAttackOptionsRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.GetAttackOptionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTileInfo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/GetTileInfo',
+            weewar_dot_v1_dot_games__pb2.GetTileInfoRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.GetTileInfoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTerrainStats(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/GetTerrainStats',
+            weewar_dot_v1_dot_games__pb2.GetTerrainStatsRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.GetTerrainStatsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CanSelectUnit(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/CanSelectUnit',
+            weewar_dot_v1_dot_games__pb2.CanSelectUnitRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.CanSelectUnitResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateGameFromMap(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/CreateGameFromMap',
+            weewar_dot_v1_dot_games__pb2.CreateGameFromMapRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.CreateGameFromMapResponse.FromString,
             options,
             channel_credentials,
             insecure,

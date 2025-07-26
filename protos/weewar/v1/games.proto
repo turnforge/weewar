@@ -69,6 +69,44 @@ service GamesService {
       body: "*",
     };
   }
+
+  // Game interaction methods for UI components
+  rpc GetMovementOptions(GetMovementOptionsRequest) returns (GetMovementOptionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/movement/{q}/{r}"
+    };
+  }
+
+  rpc GetAttackOptions(GetAttackOptionsRequest) returns (GetAttackOptionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/attack/{q}/{r}"
+    };
+  }
+
+  rpc GetTileInfo(GetTileInfoRequest) returns (GetTileInfoResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/tile/{q}/{r}"
+    };
+  }
+
+  rpc GetTerrainStats(GetTerrainStatsRequest) returns (GetTerrainStatsResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/terrain/{q}/{r}"
+    };
+  }
+
+  rpc CanSelectUnit(CanSelectUnitRequest) returns (CanSelectUnitResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/can-select/{q}/{r}"
+    };
+  }
+
+  rpc CreateGameFromMap(CreateGameFromMapRequest) returns (CreateGameFromMapResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/from-map",
+      body: "*",
+    };
+  }
 }
 
 // GameInfo represents a game in the catalog
@@ -254,108 +292,168 @@ message ProcessMovesResponse {
   repeated WorldChange changes = 2;
 }
 
+// =============================================================================
+// UI Interaction Methods - Request/Response messages
+// =============================================================================
+
 /**
- * Represents a single move which can be one of many actions in the game
+ * Request to get movement options for a unit at a position
  */
-message GameMove {
-	int32 player = 1; // The player making the move
-  google.protobuf.Timestamp timestamp = 2;
-  oneof move_type {
-    MoveUnitAction move_unit = 3;
-    AttackUnitAction attack_unit = 4;
-    EndTurnAction end_turn = 5;
-  }
+message GetMovementOptionsRequest {
+  string game_id = 1;
+  int32 q = 2;
+  int32 r = 3;
 }
 
 /**
- * Represents the result of executing a move
+ * Response with movement options for a unit
  */
-message GameMoveResult {
-  // Whether the result is permenant and can be undone.
-  // Just moving a unit for example is not permanent, but attacking a unit
-  // would be (ie a player cannot undo it).
-  bool is_permanent = 1;
-
-  // A set of changes to the world as a result of making this move
-  repeated WorldChange changes = 3;
+message GetMovementOptionsResponse {
+  repeated MovementOption options = 1;
 }
 
 /**
- * Move unit from one position to another
+ * A possible movement destination with cost
  */
-message MoveUnitAction {
-  int32 from_q = 1;
-  int32 from_r = 2;
-  int32 to_q = 3;
-  int32 to_r = 4;
+message MovementOption {
+  int32 q = 1;
+  int32 r = 2;
+  int32 movement_cost = 3;
+  bool is_valid = 4;
 }
 
 /**
- * Attack with one unit against another
+ * Request to get attack options for a unit at a position
  */
-message AttackUnitAction {
-  int32 attacker_q = 1;
-  int32 attacker_r = 2;
-  int32 defender_q = 3;
-  int32 defender_r = 4;
+message GetAttackOptionsRequest {
+  string game_id = 1;
+  int32 q = 2;
+  int32 r = 3;
 }
 
 /**
- * End current player's turn
+ * Response with attack options for a unit
  */
-message EndTurnAction {
-  // No additional fields needed
+message GetAttackOptionsResponse {
+  repeated AttackOption options = 1;
 }
 
 /**
- * Represents a change to the game world
+ * A possible attack target
  */
-message WorldChange {
-  // When did this change happen
-  oneof change_type {
-    UnitMovedChange unit_moved = 1;
-    UnitDamagedChange unit_damaged = 2;
-    UnitKilledChange unit_killed = 3;
-    PlayerChangedChange player_changed = 4;
-  }
+message AttackOption {
+  int32 q = 1;
+  int32 r = 2;
+  bool can_attack = 3;
+  int32 damage_estimate = 4; // Estimated damage this attack would deal
 }
 
 /**
- * A unit moved from one position to another
+ * Request to get tile information
  */
-message UnitMovedChange {
-  int32 from_q = 2;
-  int32 from_r = 3;
-  int32 to_q = 4;
-  int32 to_r = 5;
+message GetTileInfoRequest {
+  string game_id = 1;
+  int32 q = 2;
+  int32 r = 3;
 }
 
 /**
- * A unit took damage
+ * Response with tile information
  */
-message UnitDamagedChange {
-  int32 previous_health = 2;
-  int32 new_health = 3;
-  int32 q = 4;
-  int32 r = 5;
+message GetTileInfoResponse {
+  TileInfo tile = 1;
 }
 
 /**
- * A unit was killed
+ * Complete information about a tile
  */
-message UnitKilledChange {
-  int32 player = 2;
-  int32 unit_type = 3;
-  int32 q = 4;
-  int32 r = 5;
+message TileInfo {
+  int32 q = 1;
+  int32 r = 2;
+  string terrain_type = 3;
+  UnitInfo unit = 4; // null if no unit on tile
+  BuildingInfo building = 5; // null if no building on tile
 }
 
 /**
- * Active player changed
+ * Information about a unit on a tile
  */
-message PlayerChangedChange {
-  int32 previous_player = 1;
-  int32 new_player = 2;
-  int32 previous_turn = 3;
-  int32 new_turn = 4;
+message UnitInfo {
+  int32 player = 1;
+  int32 unit_type = 2;
+  int32 health = 3;
+  int32 max_health = 4;
+  bool has_moved = 5;
+  bool has_attacked = 6;
+}
+
+/**
+ * Information about a building on a tile
+ */
+message BuildingInfo {
+  int32 building_type = 1;
+  int32 owner = 2; // -1 if neutral
+  int32 capture_points = 3; // for capturable buildings
+}
+
+/**
+ * Request to get terrain statistics
+ */
+message GetTerrainStatsRequest {
+  string game_id = 1;
+  int32 q = 2;
+  int32 r = 3;
+}
+
+/**
+ * Response with terrain statistics
+ */
+message GetTerrainStatsResponse {
+  TerrainStats stats = 1;
+}
+
+/**
+ * Statistics about terrain at a specific tile
+ */
+message TerrainStats {
+  string terrain_type = 1;
+  int32 movement_cost = 2;
+  int32 defense_bonus = 3; // percentage defense bonus (0-100)
+  bool blocks_movement = 4;
+  bool can_capture = 5; // if this tile can be captured
+}
+
+/**
+ * Request to check if a unit can be selected
+ */
+message CanSelectUnitRequest {
+  string game_id = 1;
+  int32 q = 2;
+  int32 r = 3;
+  int32 player_id = 4; // which player is trying to select
+}
+
+/**
+ * Response indicating if unit can be selected
+ */
+message CanSelectUnitResponse {
+  bool can_select = 1;
+  string reason = 2; // explanation if can_select is false
+}
+
+/**
+ * Request to create a game from map data
+ */
+message CreateGameFromMapRequest {
+  string map_data = 1; // JSON or other format containing map information
+  repeated GamePlayer players = 2;
+  GameSettings settings = 3;
+}
+
+/**
+ * Response after creating game from map
+ */
+message CreateGameFromMapResponse {
+  Game game = 1;
+  World initial_world = 2; // The initial world state
 }

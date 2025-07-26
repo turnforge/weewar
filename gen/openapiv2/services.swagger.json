@@ -108,6 +108,38 @@
         ]
       }
     },
+    "/v1/games/from-map": {
+      "post": {
+        "operationId": "GamesService_CreateGameFromMap",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateGameFromMapResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateGameFromMapRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
     "/v1/games/{game.id}": {
       "patch": {
         "summary": "GetGame returns a specific game with metadata",
@@ -205,6 +237,147 @@
         ]
       }
     },
+    "/v1/games/{gameId}/attack/{q}/{r}": {
+      "get": {
+        "operationId": "GamesService_GetAttackOptions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetAttackOptionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "q",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "r",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
+    "/v1/games/{gameId}/can-select/{q}/{r}": {
+      "get": {
+        "operationId": "GamesService_CanSelectUnit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CanSelectUnitResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "q",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "r",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "playerId",
+            "description": "which player is trying to select",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
+    "/v1/games/{gameId}/movement/{q}/{r}": {
+      "get": {
+        "summary": "Game interaction methods for UI components",
+        "operationId": "GamesService_GetMovementOptions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetMovementOptionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "q",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "r",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
     "/v1/games/{gameId}/moves": {
       "post": {
         "operationId": "GamesService_ProcessMoves",
@@ -248,6 +421,94 @@
               },
               "description": "*\nRequest to add moves to a game\nThe model is that a game in each \"tick\" can handle multiple moves (by possibly various players).\nIt is upto the move manager/processor in the game to ensure the \"transaction\" of moves is handled\natomically.\n\nFor example we may have 3 moves where first two units are moved to a common location\nand then they attack another unit.  Here If we treat it as a single unit attacking it\nwill have different outcomes than a \"combined\" attack."
             }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
+    "/v1/games/{gameId}/terrain/{q}/{r}": {
+      "get": {
+        "operationId": "GamesService_GetTerrainStats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetTerrainStatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "q",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "r",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
+    "/v1/games/{gameId}/tile/{q}/{r}": {
+      "get": {
+        "operationId": "GamesService_GetTileInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetTileInfoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "q",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "r",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -962,6 +1223,28 @@
         }
       }
     },
+    "v1AttackOption": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "canAttack": {
+          "type": "boolean"
+        },
+        "damageEstimate": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Estimated damage this attack would deal"
+        }
+      },
+      "title": "*\nA possible attack target"
+    },
     "v1AttackUnitAction": {
       "type": "object",
       "properties": {
@@ -983,6 +1266,72 @@
         }
       },
       "title": "*\nAttack with one unit against another"
+    },
+    "v1BuildingInfo": {
+      "type": "object",
+      "properties": {
+        "buildingType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "owner": {
+          "type": "integer",
+          "format": "int32",
+          "title": "-1 if neutral"
+        },
+        "capturePoints": {
+          "type": "integer",
+          "format": "int32",
+          "title": "for capturable buildings"
+        }
+      },
+      "title": "*\nInformation about a building on a tile"
+    },
+    "v1CanSelectUnitResponse": {
+      "type": "object",
+      "properties": {
+        "canSelect": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "title": "explanation if can_select is false"
+        }
+      },
+      "title": "*\nResponse indicating if unit can be selected"
+    },
+    "v1CreateGameFromMapRequest": {
+      "type": "object",
+      "properties": {
+        "mapData": {
+          "type": "string",
+          "title": "JSON or other format containing map information"
+        },
+        "players": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GamePlayer"
+          }
+        },
+        "settings": {
+          "$ref": "#/definitions/v1GameSettings"
+        }
+      },
+      "title": "*\nRequest to create a game from map data"
+    },
+    "v1CreateGameFromMapResponse": {
+      "type": "object",
+      "properties": {
+        "game": {
+          "$ref": "#/definitions/v1Game"
+        },
+        "initialWorld": {
+          "$ref": "#/definitions/v1World",
+          "title": "The initial world state"
+        }
+      },
+      "title": "*\nResponse after creating game from map"
     },
     "v1CreateGameRequest": {
       "type": "object",
@@ -1132,7 +1481,8 @@
           "$ref": "#/definitions/v1GameConfiguration",
           "title": "Game configuration"
         }
-      }
+      },
+      "title": "Describes a game and its metadata"
     },
     "v1GameConfiguration": {
       "type": "object",
@@ -1245,6 +1595,19 @@
         }
       }
     },
+    "v1GetAttackOptionsResponse": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1AttackOption"
+          }
+        }
+      },
+      "title": "*\nResponse with attack options for a unit"
+    },
     "v1GetGameResponse": {
       "type": "object",
       "properties": {
@@ -1264,6 +1627,37 @@
         }
       },
       "title": "*\nGame batch-get response"
+    },
+    "v1GetMovementOptionsResponse": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1MovementOption"
+          }
+        }
+      },
+      "title": "*\nResponse with movement options for a unit"
+    },
+    "v1GetTerrainStatsResponse": {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "$ref": "#/definitions/v1TerrainStats"
+        }
+      },
+      "title": "*\nResponse with terrain statistics"
+    },
+    "v1GetTileInfoResponse": {
+      "type": "object",
+      "properties": {
+        "tile": {
+          "$ref": "#/definitions/v1TileInfo"
+        }
+      },
+      "title": "*\nResponse with tile information"
     },
     "v1GetUserResponse": {
       "type": "object",
@@ -1372,6 +1766,27 @@
       },
       "title": "*\nMove unit from one position to another"
     },
+    "v1MovementOption": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "movementCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "isValid": {
+          "type": "boolean"
+        }
+      },
+      "title": "*\nA possible movement destination with cost"
+    },
     "v1Pagination": {
       "type": "object",
       "properties": {
@@ -1459,6 +1874,31 @@
       },
       "description": "*\nResponse after adding moves to game.\n\nReturns the response of the moves along with all the changes incurred as a result"
     },
+    "v1TerrainStats": {
+      "type": "object",
+      "properties": {
+        "terrainType": {
+          "type": "string"
+        },
+        "movementCost": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "defenseBonus": {
+          "type": "integer",
+          "format": "int32",
+          "title": "percentage defense bonus (0-100)"
+        },
+        "blocksMovement": {
+          "type": "boolean"
+        },
+        "canCapture": {
+          "type": "boolean",
+          "title": "if this tile can be captured"
+        }
+      },
+      "title": "*\nStatistics about terrain at a specific tile"
+    },
     "v1Tile": {
       "type": "object",
       "properties": {
@@ -1482,6 +1922,31 @@
           "title": "Whether the tile itself belongs to a player"
         }
       }
+    },
+    "v1TileInfo": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "terrainType": {
+          "type": "string"
+        },
+        "unit": {
+          "$ref": "#/definitions/v1UnitInfo",
+          "title": "null if no unit on tile"
+        },
+        "building": {
+          "$ref": "#/definitions/v1BuildingInfo",
+          "title": "null if no building on tile"
+        }
+      },
+      "title": "*\nComplete information about a tile"
     },
     "v1Unit": {
       "type": "object",
@@ -1526,6 +1991,34 @@
         }
       },
       "title": "*\nA unit took damage"
+    },
+    "v1UnitInfo": {
+      "type": "object",
+      "properties": {
+        "player": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "unitType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "health": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "hasMoved": {
+          "type": "boolean"
+        },
+        "hasAttacked": {
+          "type": "boolean"
+        }
+      },
+      "title": "*\nInformation about a unit on a tile"
     },
     "v1UnitKilledChange": {
       "type": "object",

@@ -58,7 +58,7 @@ service GamesService {
   // GetGame returns a specific game with metadata
   rpc UpdateGame(UpdateGameRequest) returns (UpdateGameResponse) {
     option (google.api.http) = {
-      patch: "/v1/games/{game.id=*}"
+      patch: "/v1/games/{game_id=*}"
       body: "*"
     };
   }
@@ -160,15 +160,24 @@ message UpdateGameRequest {
     }
   };
 
+  // Game id to modify
+  string game_id = 1;
+
   /**
    * Game being updated
    */
-  Game game = 1;
+  Game new_game = 2;
+
+  // New world state to save
+  GameState new_state = 3;
+
+  // History to save
+  GameMoveHistory new_history = 4;
 
   /**
    * Mask of fields being updated in this Game to make partial changes.
    */
-  google.protobuf.FieldMask update_mask = 2;
+  google.protobuf.FieldMask update_mask = 5;
 }
 
 /**

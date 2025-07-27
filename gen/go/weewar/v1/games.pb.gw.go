@@ -236,13 +236,13 @@ func request_GamesService_UpdateGame_0(ctx context.Context, marshaler runtime.Ma
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["game.id"]
+	val, ok := pathParams["game_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "game.id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "game_id")
 	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "game.id", val)
+	protoReq.GameId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "game.id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "game_id", err)
 	}
 	msg, err := client.UpdateGame(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -257,13 +257,13 @@ func local_request_GamesService_UpdateGame_0(ctx context.Context, marshaler runt
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["game.id"]
+	val, ok := pathParams["game_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "game.id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "game_id")
 	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "game.id", val)
+	protoReq.GameId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "game.id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "game_id", err)
 	}
 	msg, err := server.UpdateGame(ctx, &protoReq)
 	return msg, metadata, err
@@ -745,7 +745,7 @@ func RegisterGamesServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.GamesService/UpdateGame", runtime.WithHTTPPathPattern("/v1/games/{game.id=*}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.GamesService/UpdateGame", runtime.WithHTTPPathPattern("/v1/games/{game_id=*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1008,7 +1008,7 @@ func RegisterGamesServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.GamesService/UpdateGame", runtime.WithHTTPPathPattern("/v1/games/{game.id=*}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.GamesService/UpdateGame", runtime.WithHTTPPathPattern("/v1/games/{game_id=*}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1132,7 +1132,7 @@ var (
 	pattern_GamesService_ListGames_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "games"}, ""))
 	pattern_GamesService_GetGame_0            = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "games", "id"}, ""))
 	pattern_GamesService_DeleteGame_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "games", "id"}, ""))
-	pattern_GamesService_UpdateGame_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "games", "game.id"}, ""))
+	pattern_GamesService_UpdateGame_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "games", "game_id"}, ""))
 	pattern_GamesService_GetGameState_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "games", "game_id", "state"}, ""))
 	pattern_GamesService_ListMoves_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "games", "game_id", "moves"}, ""))
 	pattern_GamesService_ProcessMoves_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "games", "game_id", "moves"}, ""))

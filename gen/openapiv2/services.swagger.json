@@ -108,7 +108,7 @@
         ]
       }
     },
-    "/v1/games/{game.id}": {
+    "/v1/games/{gameId}": {
       "patch": {
         "summary": "GetGame returns a specific game with metadata",
         "operationId": "GamesService_UpdateGame",
@@ -128,8 +128,8 @@
         },
         "parameters": [
           {
-            "name": "game.id",
-            "description": "Unique ID for the game",
+            "name": "gameId",
+            "description": "Game id to modify",
             "in": "path",
             "required": true,
             "type": "string",
@@ -142,54 +142,17 @@
             "schema": {
               "type": "object",
               "properties": {
-                "game": {
-                  "type": "object",
-                  "properties": {
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "creatorId": {
-                      "type": "string",
-                      "title": "User who started/created the game"
-                    },
-                    "worldId": {
-                      "type": "string",
-                      "title": "The world this game was created from"
-                    },
-                    "name": {
-                      "type": "string",
-                      "title": "Name if items have names"
-                    },
-                    "description": {
-                      "type": "string",
-                      "title": "Description if game has a description"
-                    },
-                    "tags": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "title": "Some tags"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "title": "A possible image url"
-                    },
-                    "difficulty": {
-                      "type": "string",
-                      "title": "Difficulty - example attribute"
-                    },
-                    "config": {
-                      "$ref": "#/definitions/v1GameConfiguration",
-                      "title": "Game configuration"
-                    }
-                  },
+                "newGame": {
+                  "$ref": "#/definitions/v1Game",
                   "title": "*\nGame being updated"
+                },
+                "newState": {
+                  "$ref": "#/definitions/v1GameState",
+                  "title": "New world state to save"
+                },
+                "newHistory": {
+                  "$ref": "#/definitions/v1GameMoveHistory",
+                  "title": "History to save"
                 },
                 "updateMask": {
                   "type": "string",

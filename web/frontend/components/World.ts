@@ -518,16 +518,79 @@ export class World {
     }
     
     public loadFromElement(elementId: string): void {
-        const element = document.getElementById(elementId);
-        if (!element || !element.textContent) {
-            throw new Error(`World data element '${elementId}' not found or empty`);
+        // Now handles dual element loading: metadata + tiles/units data
+        const worldMetadataElement = document.getElementById('world-data-json');
+        const worldTilesElement = document.getElementById('world-tiles-data-json');
+        
+        if (!worldMetadataElement && !worldTilesElement) {
+            // Fallback to old single element for backward compatibility
+            const element = document.getElementById(elementId);
+            if (!element || !element.textContent) {
+                throw new Error(`World data element '${elementId}' not found or empty`);
+            }
+            
+            try {
+                const data = JSON.parse(element.textContent);
+                this.loadFromData(data);
+                return;
+            } catch (error) {
+                throw new Error(`Failed to parse world data from element: ${error}`);
+            }
+        }
+        
+        if (!worldMetadataElement || !worldTilesElement) {
+            throw new Error('Missing required world data elements (both world-data-json and world-tiles-data-json are needed)');
         }
         
         try {
-            const data = JSON.parse(element.textContent);
-            this.loadFromData(data);
+            // Parse world metadata
+            let worldMetadata = null;
+            if (worldMetadataElement.textContent) {
+                worldMetadata = JSON.parse(worldMetadataElement.textContent);
+            }
+            
+            // Parse world tiles/units data
+            let worldTilesData = null;
+            if (worldTilesElement.textContent) {
+                worldTilesData = JSON.parse(worldTilesElement.textContent);
+            }
+            
+            if (worldMetadata && worldTilesData) {
+                // Combine into format expected by loadFromData()
+                const combinedData = {
+                    // World metadata
+                    name: worldMetadata.name || 'Untitled World',
+                    Name: worldMetadata.name || 'Untitled World', // Both for compatibility
+                    id: worldMetadata.id,
+                    
+                    // Calculate dimensions from tiles if present
+                    width: 40,  // Default
+                    height: 40, // Default
+                    
+                    // World tiles and units
+                    tiles: worldTilesData.tiles || [],
+                    units: worldTilesData.units || []
+                };
+                
+                // Calculate actual dimensions from tile bounds
+                if (combinedData.tiles && combinedData.tiles.length > 0) {
+                    let maxQ = 0, maxR = 0, minQ = 0, minR = 0;
+                    combinedData.tiles.forEach((tile: any) => {
+                        if (tile.q > maxQ) maxQ = tile.q;
+                        if (tile.q < minQ) minQ = tile.q;
+                        if (tile.r > maxR) maxR = tile.r;
+                        if (tile.r < minR) minR = tile.r;
+                    });
+                    combinedData.width = maxQ - minQ + 1;
+                    combinedData.height = maxR - minR + 1;
+                }
+                
+                this.loadFromData(combinedData);
+            } else {
+                throw new Error('Failed to parse world metadata or tiles data');
+            }
         } catch (error) {
-            throw new Error(`Failed to parse world data from element: ${error}`);
+            throw new Error(`Failed to parse world data from elements: ${error}`);
         }
     }
     

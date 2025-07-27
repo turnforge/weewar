@@ -1,7 +1,9 @@
 <!-- World Editor Tools Panel -->
 <div id="tools-panel" class="h-full flex flex-col">
   <!-- Tab Navigation -->
-  <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+  <div
+    class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+  >
     <button
       id="nature-tab"
       class="tab-button flex-1 px-4 py-3 text-sm font-medium text-center transition-colors border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 active-tab"
@@ -38,7 +40,7 @@
           class="terrain-button p-2 text-xs text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors{{ if eq .ID 0 }} bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-600{{ else if eq .ID 5 }} bg-blue-100 dark:bg-blue-900 border-blue-500{{ end }} overflow-hidden"
           data-terrain="{{ .ID }}"
           data-nature-index="{{ $natureIndex }}"
-          title="{{ .Name }}{{ if ne .ID 0 }} (Move: {{ .MoveCost }}, Defense: {{ .DefenseBonus }}){{ end }}"
+          title="{{ .Name }}{{ if ne .ID 0 }} (Move: {{ .BaseMoveCost }}, Defense: {{ .DefenseBonus }}){{ end }}"
         >
           {{ $natureIndex = Add $natureIndex 1 }} {{ if eq .ID 0 }}
           <div class="text-sm">🗑️</div>
@@ -98,7 +100,7 @@
             data-terrain="{{ .ID }}"
             data-city-index="{{ $cityIndex }}"
             data-has-colors="true"
-            title="{{ .Name }} (Move: {{ .MoveCost }}, Defense: {{ .DefenseBonus }})"
+            title="{{ .Name }} (Move: {{ .BaseMoveCost }}, Defense: {{ .DefenseBonus }})"
           >
             {{ $cityIndex = Add $cityIndex 1 }} {{ if .IconDataURL }}
             <div class="flex justify-center mb-1">

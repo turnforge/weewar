@@ -344,26 +344,78 @@ class StartGamePage extends BasePage implements ComponentLifecycle {
     
     
     /**
-     * Load world data from the hidden JSON element in the page
+     * Load world data from the hidden JSON elements in the page
+     * Now loads from both world metadata and world tiles/units data
      */
     private loadWorldDataFromElement(): any {
         try {
-            const worldDataElement = document.getElementById('world-data-json');
-            console.log(`World data element found: ${worldDataElement ? 'YES' : 'NO'}`);
+            // Load world metadata
+            const worldMetadataElement = document.getElementById('world-data-json');
+            const worldTilesElement = document.getElementById('world-tiles-data-json');
             
-            if (worldDataElement && worldDataElement.textContent) {
-                console.log(`Raw world data content: ${worldDataElement.textContent.substring(0, 200)}...`);
-                const worldData = JSON.parse(worldDataElement.textContent);
-                
-                if (worldData && worldData !== null) {
-                    console.log('World data found in page element');
-                    return worldData;
-                }
+            console.log(`World metadata element found: ${worldMetadataElement ? 'YES' : 'NO'}`);
+            console.log(`World tiles element found: ${worldTilesElement ? 'YES' : 'NO'}`);
+            
+            if (!worldMetadataElement || !worldTilesElement) {
+                console.log('Missing required world data elements');
+                return null;
             }
-            console.log('No world data found in page element');
+            
+            // Parse world metadata
+            let worldMetadata = null;
+            if (worldMetadataElement.textContent) {
+                console.log(`Raw world metadata: ${worldMetadataElement.textContent.substring(0, 200)}...`);
+                worldMetadata = JSON.parse(worldMetadataElement.textContent);
+            }
+            
+            // Parse world tiles/units data
+            let worldTilesData = null;
+            if (worldTilesElement.textContent) {
+                console.log(`Raw world tiles data: ${worldTilesElement.textContent.substring(0, 200)}...`);
+                worldTilesData = JSON.parse(worldTilesElement.textContent);
+            }
+            
+            if (worldMetadata && worldTilesData) {
+                // Combine into format expected by World.loadFromData()
+                const combinedData = {
+                    // World metadata
+                    name: worldMetadata.name || 'Untitled World',
+                    Name: worldMetadata.name || 'Untitled World', // Both for compatibility
+                    id: worldMetadata.id,
+                    
+                    // Calculate dimensions from tiles if present
+                    width: 40,  // Default
+                    height: 40, // Default
+                    
+                    // World tiles and units
+                    tiles: worldTilesData.tiles || [],
+                    units: worldTilesData.units || []
+                };
+                
+                // Calculate actual dimensions from tile bounds
+                if (combinedData.tiles && combinedData.tiles.length > 0) {
+                    let maxQ = 0, maxR = 0, minQ = 0, minR = 0;
+                    combinedData.tiles.forEach((tile: any) => {
+                        if (tile.q > maxQ) maxQ = tile.q;
+                        if (tile.q < minQ) minQ = tile.q;
+                        if (tile.r > maxR) maxR = tile.r;
+                        if (tile.r < minR) minR = tile.r;
+                    });
+                    combinedData.width = maxQ - minQ + 1;
+                    combinedData.height = maxR - minR + 1;
+                }
+                
+                console.log('Combined world data created for StartGamePage');
+                console.log(`World: ${combinedData.name}, Tiles: ${combinedData.tiles.length}, Units: ${combinedData.units.length}`);
+                console.log(`Dimensions: ${combinedData.width}x${combinedData.height}`);
+                
+                return combinedData;
+            }
+            
+            console.log('No valid world data found in page elements');
             return null;
         } catch (error) {
-            console.error('Error parsing world data from page element:', error);
+            console.error('Error parsing world data from page elements:', error);
             return null;
         }
     }

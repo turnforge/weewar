@@ -1,8 +1,8 @@
 import { BaseComponent, ComponentState } from './Component';
 import { EventBus } from './EventBus';
 import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar_v1_servicesClient.client';
-import { ProcessMovesRequest, ProcessMovesResponse, GameMove, WorldChange, ProcessMovesRequestSchema, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema } from '../gen/weewar/v1/games_pb';
-import { World } from '../gen/weewar/v1/models_pb';
+import { ProcessMovesRequest, ProcessMovesResponse, ProcessMovesRequestSchema } from '../gen/weewar/v1/games_pb';
+import { World, GameMove, WorldChange, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema } from '../gen/weewar/v1/models_pb';
 import { create } from '@bufbuild/protobuf';
 
 /**
@@ -79,6 +79,13 @@ export class GameState extends BaseComponent {
 
     protected initializeComponent(): void {
         this.log('Initializing minimal GameState controller...');
+        
+        // Try to load game data from page elements after WASM is loaded
+        this.wasmLoadPromise?.then(() => {
+            this.loadGameFromPageData();
+        }).catch((error) => {
+            this.log('Could not load game data from page during initialization:', error);
+        });
     }
 
     protected bindToDOM(): void {
@@ -267,13 +274,13 @@ export class GameState extends BaseComponent {
      * Apply unit movement to the shared World object
      */
     private applyUnitMovedToWorld(unitMoved: any): void {
-        if (!this.gameData.world || !this.gameData.world.tiles) {
+        if (!this.gameData.world || !this.gameData.world.worldData?.tiles) {
             this.log('Cannot apply unit move - world not loaded');
             return;
         }
 
         // TODO: Find and move the unit in the world tiles array
-        // This will require accessing world.tiles and finding the unit at fromQ,fromR
+        // This will require accessing world.worldData.tiles and finding the unit at fromQ,fromR
         // then moving it to toQ,toR
         this.log('Applying unit move to world:', unitMoved);
     }
@@ -282,7 +289,7 @@ export class GameState extends BaseComponent {
      * Apply unit damage to the shared World object
      */
     private applyUnitDamagedToWorld(unitDamaged: any): void {
-        if (!this.gameData.world || !this.gameData.world.tiles) {
+        if (!this.gameData.world || !this.gameData.world.worldData?.tiles) {
             this.log('Cannot apply unit damage - world not loaded');
             return;
         }
@@ -295,7 +302,7 @@ export class GameState extends BaseComponent {
      * Apply unit death to the shared World object
      */
     private applyUnitKilledToWorld(unitKilled: any): void {
-        if (!this.gameData.world || !this.gameData.world.tiles) {
+        if (!this.gameData.world || !this.gameData.world.worldData?.tiles) {
             this.log('Cannot apply unit death - world not loaded');
             return;
         }
@@ -402,6 +409,139 @@ export class GameState extends BaseComponent {
                 value: endTurnAction
             }
         });
+    }
+
+    /**
+     * Load game data from pre-populated page elements (v1.Game, v1.GameState, v1.GameMoveHistory)
+     * This replaces the old createGameFromMap approach with direct data loading
+     */
+    public loadGameFromPageData(): void {
+        try {
+            // Load v1.Game data
+            const gameElement = document.getElementById('game-data');
+            if (gameElement?.textContent) {
+                const gameData = JSON.parse(gameElement.textContent);
+                this.setGameId(gameData.id);
+                this.log('Loaded game data:', gameData);
+            }
+
+            // Load v1.GameState data 
+            const gameStateElement = document.getElementById('game-state-data');
+            if (gameStateElement?.textContent) {
+                const gameStateData = JSON.parse(gameStateElement.textContent);
+                if (gameStateData.worldData) {
+                    // Create a World object with the worldData
+                    const world = {
+                        worldData: gameStateData.worldData
+                    };
+                    this.setWorld(world as any);
+                    this.log('Loaded game state with world data');
+                }
+            }
+
+            // Load v1.GameMoveHistory data (optional)
+            const historyElement = document.getElementById('game-history-data');
+            if (historyElement?.textContent) {
+                const historyData = JSON.parse(historyElement.textContent);
+                this.log('Loaded game move history:', historyData);
+                // TODO: Store history if needed for replay functionality
+            }
+
+        } catch (error: any) {
+            this.log('Failed to load game data from page:', error);
+            throw new Error(`Failed to load game data: ${error.message}`);
+        }
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Creates an EndTurn action and processes it
+     */
+    public async endTurn(playerId: number): Promise<void> {
+        const endTurnMove = GameState.createEndTurnAction(playerId);
+        await this.processMoves([endTurnMove]);
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Returns current game state data
+     */
+    public getGameState(): any {
+        return this.getGameData();
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Creates a MoveUnit action and processes it
+     */
+    public async moveUnit(fromQ: number, fromR: number, toQ: number, toR: number): Promise<void> {
+        const moveAction = GameState.createMoveUnitAction(fromQ, fromR, toQ, toR, this.gameData.currentPlayer);
+        await this.processMoves([moveAction]);
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Creates an AttackUnit action and processes it
+     */
+    public async attackUnit(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number): Promise<void> {
+        const attackAction = GameState.createAttackUnitAction(attackerQ, attackerR, defenderQ, defenderR, this.gameData.currentPlayer);
+        await this.processMoves([attackAction]);
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * TODO: Implement using services or local world access
+     */
+    public async getTerrainStatsAt(q: number, r: number): Promise<any> {
+        // TODO: Access world data directly or use a service
+        this.log('getTerrainStatsAt called - needs implementation');
+        return null;
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Uses canSelectUnit service
+     */
+    public async canSelectUnit(q: number, r: number, playerId: number): Promise<boolean> {
+        const client = await this.ensureWASMLoaded();
+        
+        // TODO: Implement using gamesService.canSelectUnit
+        this.log('canSelectUnit called - needs implementation');
+        return false;
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * TODO: Implement using local world access
+     */
+    public async getTileInfo(q: number, r: number): Promise<any> {
+        // TODO: Access world data directly
+        this.log('getTileInfo called - needs implementation');
+        return null;
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Uses getMovementOptions service
+     */
+    public async getMovementOptions(q: number, r: number, playerId: number): Promise<any[]> {
+        const client = await this.ensureWASMLoaded();
+        
+        // TODO: Implement using gamesService.getMovementOptions
+        this.log('getMovementOptions called - needs implementation');
+        return [];
+    }
+
+    /**
+     * Legacy method for compatibility with GameViewerPage
+     * Uses getAttackOptions service
+     */
+    public async getAttackOptions(q: number, r: number, playerId: number): Promise<any[]> {
+        const client = await this.ensureWASMLoaded();
+        
+        // TODO: Implement using gamesService.getAttackOptions
+        this.log('getAttackOptions called - needs implementation');
+        return [];
     }
 
     /**

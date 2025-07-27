@@ -2,7 +2,7 @@ import { BasePage } from './BasePage';
 import { EventBus, EventTypes } from './EventBus';
 import { GameViewer } from './GameViewer';
 import { Unit, Tile, World } from './World';
-import { GameState, GameCreateData, UnitSelectionData } from './GameState';
+import { GameState, GameStateData, GameCreateData, UnitSelectionData } from './GameState';
 import { ComponentLifecycle } from './ComponentLifecycle';
 import { LifecycleController } from './LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
@@ -231,9 +231,9 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         // Wait for WASM to be ready (only async part)
         await this.gameState.waitUntilReady();
         
-        // Create game from world data via WASM (synchronous once WASM loaded)
-        const worldDataStr = JSON.stringify(this.loadWorldDataFromElement());
-        const gameData = await this.gameState.createGameFromMap(worldDataStr);
+        // Load game data from page elements (synchronous once WASM loaded)
+        this.gameState.loadGameFromPageData();
+        const gameData = this.gameState.getGameData();
         
         // Debug: Check what player the game started with vs what we expect
         console.log('[GameViewerPage] Game creation debug:', {
@@ -244,8 +244,8 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         });
         
         
-        // Update UI synchronously
-        this.updateGameUIFromState(gameData);
+        // Update UI synchronously (convert GameStateData to legacy format)
+        this.updateGameUIFromState(this.convertGameStateToLegacyFormat(gameData));
         this.logGameEvent(`Game started with ${this.gameConfig.playerCount} players`);
         console.log('Game initialized with WASM engine');
     }
@@ -328,9 +328,76 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
     }
 
     /**
+     * Convert new GameStateData to legacy GameCreateData format for UI compatibility
+     */
+    private convertGameStateToLegacyFormat(gameData: GameStateData): GameCreateData {
+        // Extract units and players from world data if available
+        const worldData = gameData.world?.worldData;
+        const allUnits = worldData?.units || [];
+        const tiles = worldData?.tiles || [];
+        
+        // Create basic player list from units (extract unique player IDs)
+        const playerIds = [...new Set(allUnits.map((unit: any) => unit.player as number))].filter((id: number) => id > 0);
+        const players = playerIds.map((id: number) => ({
+            id: id,
+            name: `Player ${id}`,
+            color: this.getPlayerColor(id),
+            isHuman: true
+        }));
+        
+        // Create basic teams (no teams for now)
+        const teams: any[] = [];
+        
+        // Calculate map size from tiles
+        const mapSize = this.calculateMapSize(tiles);
+        
+        return {
+            currentPlayer: gameData.currentPlayer,
+            turnCounter: gameData.turnCounter,
+            status: gameData.status,
+            allUnits: allUnits,
+            players: players,
+            teams: teams,
+            mapSize: mapSize,
+            winner: 0, // No winner yet
+            hasWinner: false
+        };
+    }
+    
+    /**
+     * Helper to get player color
+     */
+    private getPlayerColor(playerId: number): string {
+        const colors = ['#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF', '#00FFFF'];
+        return colors[(playerId - 1) % colors.length] || '#FFFFFF';
+    }
+    
+    /**
+     * Helper to calculate map size from tiles
+     */
+    private calculateMapSize(tiles: any[]): { rows: number; cols: number } {
+        if (tiles.length === 0) {
+            return { rows: 0, cols: 0 };
+        }
+        
+        const qValues = tiles.map((t: any) => t.q as number);
+        const rValues = tiles.map((t: any) => t.r as number);
+        
+        const minQ = Math.min(...qValues);
+        const maxQ = Math.max(...qValues);
+        const minR = Math.min(...rValues);
+        const maxR = Math.max(...rValues);
+        
+        return {
+            cols: maxQ - minQ + 1,
+            rows: maxR - minR + 1
+        };
+    }
+
+    /**
      * Game action handlers - all synchronous for immediate UI feedback
      */
-    private endTurn(): void {
+    private async endTurn(): Promise<void> {
         if (!this.gameState?.isReady()) {
             this.showToast('Error', 'Game not ready', 'error');
             return;
@@ -339,11 +406,12 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         try {
             console.log('Ending current player\'s turn...');
             
-            // Synchronous WASM call
-            const gameData = this.gameState.endTurn();
+            // Async WASM call
+            await this.gameState.endTurn(this.gameState.getGameData().currentPlayer);
             
-            // Immediate UI update
-            this.updateGameUIFromState(gameData);
+            // Get updated game data and update UI
+            const gameData = this.gameState.getGameData();
+            this.updateGameUIFromState(this.convertGameStateToLegacyFormat(gameData));
             this.clearUnitSelection();
             
             this.logGameEvent(`Player ${gameData.currentPlayer}'s turn begins`);
@@ -425,15 +493,15 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         console.log('Attack options:', selectionData.attackableCoords);
     }
 
-    private moveUnit(fromQ: number, fromR: number, toQ: number, toR: number): void {
+    private async moveUnit(fromQ: number, fromR: number, toQ: number, toR: number): Promise<void> {
         if (!this.gameState?.isReady()) {
             this.showToast('Error', 'Game not ready', 'error');
             return;
         }
 
         try {
-            // Synchronous WASM call
-            const result = this.gameState.moveUnit(fromQ, fromR, toQ, toR);
+            // Async WASM call
+            await this.gameState.moveUnit(fromQ, fromR, toQ, toR);
             
             // Immediate UI feedback
             this.logGameEvent(`Unit moved from (${fromQ},${fromR}) to (${toQ},${toR})`);
@@ -449,15 +517,15 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
         }
     }
 
-    private attackUnit(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number): void {
+    private async attackUnit(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number): Promise<void> {
         if (!this.gameState?.isReady()) {
             this.showToast('Error', 'Game not ready', 'error');
             return;
         }
 
         try {
-            // Synchronous WASM call
-            const result = this.gameState.attackUnit(attackerQ, attackerR, defenderQ, defenderR);
+            // Async WASM call
+            await this.gameState.attackUnit(attackerQ, attackerR, defenderQ, defenderR);
             
             // Immediate UI feedback
             this.logGameEvent(`Attack: (${attackerQ},${attackerR}) → (${defenderQ},${defenderR})`);
@@ -506,13 +574,13 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
             return false; // Suppress event emission
         }
 
-        // Get terrain info from WASM via ui.go
-        const terrainStats = this.gameState.getTerrainStatsAt(q, r);
-        if (terrainStats != null) {
+        // Get terrain info from WASM via ui.go (async)
+        this.gameState?.getTerrainStatsAt(q, r).then(terrainStats => {
+            if (terrainStats != null) {
             console.log('[GameViewerPage] Retrieved terrain stats:', terrainStats);
             
             // Update terrain stats panel with the data
-            this.terrainStatsPanel.updateTerrainInfo({
+            this.terrainStatsPanel?.updateTerrainInfo({
                 name: terrainStats.name || 'Unknown Terrain',
                 tileType: terrainStats.tileType || 0,
                 movementCost: terrainStats.movementCost || 1.0,
@@ -522,9 +590,12 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
                 r: r,
                 player: terrainStats.player
             });
-            return false;
-        }
-        return true; // We handled it completely, suppress event emission
+            }
+        }).catch(error => {
+            console.error('Failed to get terrain stats:', error);
+        });
+        
+        return false; // We handled it completely, suppress event emission
     };
 
     /**
@@ -539,10 +610,8 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
             return false; // Suppress event emission
         }
 
-        try {
-            // Check if this unit can be selected by current player
-            const canSelect = this.gameState.canSelectUnit(q, r);
-            
+        // Handle async unit selection
+        this.gameState.canSelectUnit(q, r, this.gameState.getGameData().currentPlayer).then(canSelect => {
             // Debug info to understand why selection might be failing
             console.log(`[GameViewerPage] Unit selection debug:`, {
                 position: `(${q}, ${r})`,
@@ -558,20 +627,20 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
                 // This is an enemy or non-selectable unit - just show info
                 console.log(`[GameViewerPage] Non-selectable unit at Q=${q}, R=${r}`);
                 
-                // Get basic tile info to show enemy unit details
-                const tileInfo = this.gameState.getTileInfo(q, r);
-                console.log('[GameViewerPage] Enemy unit tile info:', tileInfo);
-                
-                // For now, just show a message - could extend to show unit details panel later
-                this.showToast('Info', `Enemy unit at (${q}, ${r})`, 'info');
+                // Get basic tile info to show enemy unit details (async)
+                this.gameState?.getTileInfo(q, r).then(tileInfo => {
+                    console.log('[GameViewerPage] Enemy unit tile info:', tileInfo);
+                    // For now, just show a message - could extend to show unit details panel later
+                    this.showToast('Info', `Enemy unit at (${q}, ${r})`, 'info');
+                }).catch(error => {
+                    console.error('Failed to get tile info:', error);
+                });
             }
-
-            return true; // We handled it completely, suppress event emission
-
-        } catch (error) {
+        }).catch(error => {
             console.error('[GameViewerPage] Failed to handle unit click:', error);
-            return false; // Suppress event emission on error
-        }
+        });
+        
+        return false; // Suppress event emission
     };
 
     /**
@@ -585,25 +654,22 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
             return;
         }
 
-        try {
-            // Get movement options from WASM
-            const movementResult = this.gameState.getMovementOptions(q, r);
+        // Get all data async with Promise.all
+        Promise.all([
+            this.gameState.getMovementOptions(q, r, this.gameState.getGameData().currentPlayer),
+            this.gameState.getAttackOptions(q, r, this.gameState.getGameData().currentPlayer),
+            this.gameState.getTileInfo(q, r)
+        ]).then(([movementResult, attackResult, unitInfo]) => {
             console.log('[GameViewerPage] Movement options:', movementResult);
-            
-            // Get attack options from WASM  
-            const attackResult = this.gameState.getAttackOptions(q, r);
             console.log('[GameViewerPage] Attack options:', attackResult);
-            
-            // Get unit info
-            const unitInfo = this.gameState.getTileInfo(q, r);
             console.log('[GameViewerPage] Unit info:', unitInfo);
             
-            // Convert WASM results to coordinate arrays
-            const movableCoords = movementResult.success && movementResult.data ? 
-                movementResult.data.map((pos: any) => ({ q: pos.coord.q, r: pos.coord.r })) : [];
+            // Convert results to coordinate arrays (these are now direct arrays from our methods)
+            const movableCoords = Array.isArray(movementResult) ? 
+                movementResult.map((pos: any) => ({ q: pos.coord?.q || pos.q, r: pos.coord?.r || pos.r })) : [];
             
-            const attackableCoords = attackResult.success && attackResult.data ?
-                attackResult.data.map((pos: any) => ({ q: pos.coord.q, r: pos.coord.r })) : [];
+            const attackableCoords = Array.isArray(attackResult) ?
+                attackResult.map((pos: any) => ({ q: pos.coord?.q || pos.q, r: pos.coord?.r || pos.r })) : [];
             
             console.log(`[GameViewerPage] Unit selection: ${movableCoords.length} movement options, ${attackableCoords.length} attack options`);
             
@@ -630,18 +696,18 @@ class GameViewerPage extends BasePage implements ComponentLifecycle {
                 }
             }
             
-            // Update UI with unit info
-            if (unitInfo.success && unitInfo.data) {
-                this.updateSelectedUnitInfo(unitInfo.data);
+            // Update UI with unit info (unitInfo is now direct data, not wrapped in success/data)
+            if (unitInfo) {
+                this.updateSelectedUnitInfo(unitInfo);
             }
             
             // Add to game log
             console.log(`Unit selected at (${q}, ${r}) - ${movableCoords.length} moves, ${attackableCoords.length} attacks available`);
             
-        } catch (error) {
+        }).catch(error => {
             console.error('[GameViewerPage] Failed to select unit:', error);
             this.showToast('Error', 'Failed to select unit', 'error');
-        }
+        });
     }
 
     /**

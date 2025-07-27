@@ -7,7 +7,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-const SRC_FOLDERS = ["./frontend/components"];
+const SRC_FOLDERS = ["./frontend/components", "./frontend/gen"];
 const OUTPUT_FOLDERS = ["./templates"]; // Where gen.*.html files go
 const OUTPUT_DIR = path.resolve(__dirname, "./static/js/gen/");
 
@@ -105,6 +105,7 @@ module.exports = (_env, options) => {
       alias: {
         'react': path.resolve('./node_modules/react'),
         'react-dom': path.resolve('./node_modules/react-dom'),
+        'process/browser': require.resolve("process/browser"),
       },
       extensions: [".js", ".jsx", ".ts", ".tsx", ".css", ".png"],
       fallback: {
@@ -116,6 +117,7 @@ module.exports = (_env, options) => {
         "https": false, "net": false, "tls": false, "zlib": false, "url": false,
         "assert": false, "util": false, "querystring": false, "child_process": false
       },
+      fullySpecified: false, // Allow non-fully-specified imports for ES modules
     },
     output: {
       path: OUTPUT_DIR, // -> ./static/js/gen/

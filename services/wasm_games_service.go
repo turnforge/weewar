@@ -51,8 +51,6 @@ func (w *WasmGamesServiceImpl) Load(
 	gameBytes []byte,
 	gameStateBytes []byte,
 	gameMoveHistoryBytes []byte,
-	worldBytes []byte,
-	worldDataBytes []byte,
 ) {
 	// Now load data from the bytes
 	if err := pj.Unmarshal(gameBytes, w.SingletonGame); err != nil {

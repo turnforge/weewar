@@ -466,7 +466,7 @@ class StartGamePage extends BasePage implements ComponentLifecycle {
                 window.location.href = gameViewerUrl;
             }, 500);
             
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to start game:', error);
             this.showToast('Error', `Failed to start game: ${error.message}`, 'error');
         }

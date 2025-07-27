@@ -138,6 +138,8 @@ message GetGameRequest {
 
 message GetGameResponse {
   Game game = 1;
+  GameState state = 2;
+  GameMoveHistory history = 3;
 }
 
 message GetGameContentRequest {

@@ -1470,6 +1470,24 @@
       },
       "title": "A move group - we can allow X moves in one \"tick\""
     },
+    "v1GameMoveHistory": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "string",
+          "title": "Move history for the game"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GameMoveGroup"
+          },
+          "title": "Each entry in our history is a \"group\" of moves"
+        }
+      },
+      "title": "Holds the game's move history (can be used as a replay log)"
+    },
     "v1GameMoveResult": {
       "type": "object",
       "properties": {
@@ -1581,6 +1599,12 @@
       "properties": {
         "game": {
           "$ref": "#/definitions/v1Game"
+        },
+        "state": {
+          "$ref": "#/definitions/v1GameState"
+        },
+        "history": {
+          "$ref": "#/definitions/v1GameMoveHistory"
         }
       }
     },

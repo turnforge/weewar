@@ -288,6 +288,8 @@ func (x *GetGameRequest) GetVersion() string {
 type GetGameResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Game          *Game                  `protobuf:"bytes,1,opt,name=game,proto3" json:"game,omitempty"`
+	State         *GameState             `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	History       *GameMoveHistory       `protobuf:"bytes,3,opt,name=history,proto3" json:"history,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -325,6 +327,20 @@ func (*GetGameResponse) Descriptor() ([]byte, []int) {
 func (x *GetGameResponse) GetGame() *Game {
 	if x != nil {
 		return x.Game
+	}
+	return nil
+}
+
+func (x *GetGameResponse) GetState() *GameState {
+	if x != nil {
+		return x.State
+	}
+	return nil
+}
+
+func (x *GetGameResponse) GetHistory() *GameMoveHistory {
+	if x != nil {
+		return x.History
 	}
 	return nil
 }
@@ -1694,9 +1710,11 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"pagination\":\n" +
 	"\x0eGetGameRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\"6\n" +
+	"\aversion\x18\x02 \x01(\tR\aversion\"\x98\x01\n" +
 	"\x0fGetGameResponse\x12#\n" +
-	"\x04game\x18\x01 \x01(\v2\x0f.weewar.v1.GameR\x04game\"A\n" +
+	"\x04game\x18\x01 \x01(\v2\x0f.weewar.v1.GameR\x04game\x12*\n" +
+	"\x05state\x18\x02 \x01(\v2\x14.weewar.v1.GameStateR\x05state\x124\n" +
+	"\ahistory\x18\x03 \x01(\v2\x1a.weewar.v1.GameMoveHistoryR\ahistory\"A\n" +
 	"\x15GetGameContentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\"\x8d\x01\n" +
@@ -1852,63 +1870,66 @@ var file_weewar_v1_games_proto_goTypes = []any{
 	(*Pagination)(nil),                 // 31: weewar.v1.Pagination
 	(*Game)(nil),                       // 32: weewar.v1.Game
 	(*PaginationResponse)(nil),         // 33: weewar.v1.PaginationResponse
-	(*fieldmaskpb.FieldMask)(nil),      // 34: google.protobuf.FieldMask
-	(*GameState)(nil),                  // 35: weewar.v1.GameState
-	(*GameMove)(nil),                   // 36: weewar.v1.GameMove
-	(*GameMoveResult)(nil),             // 37: weewar.v1.GameMoveResult
-	(*WorldChange)(nil),                // 38: weewar.v1.WorldChange
-	(*GameMoveGroup)(nil),              // 39: weewar.v1.GameMoveGroup
+	(*GameState)(nil),                  // 34: weewar.v1.GameState
+	(*GameMoveHistory)(nil),            // 35: weewar.v1.GameMoveHistory
+	(*fieldmaskpb.FieldMask)(nil),      // 36: google.protobuf.FieldMask
+	(*GameMove)(nil),                   // 37: weewar.v1.GameMove
+	(*GameMoveResult)(nil),             // 38: weewar.v1.GameMoveResult
+	(*WorldChange)(nil),                // 39: weewar.v1.WorldChange
+	(*GameMoveGroup)(nil),              // 40: weewar.v1.GameMoveGroup
 }
 var file_weewar_v1_games_proto_depIdxs = []int32{
 	31, // 0: weewar.v1.ListGamesRequest.pagination:type_name -> weewar.v1.Pagination
 	32, // 1: weewar.v1.ListGamesResponse.items:type_name -> weewar.v1.Game
 	33, // 2: weewar.v1.ListGamesResponse.pagination:type_name -> weewar.v1.PaginationResponse
 	32, // 3: weewar.v1.GetGameResponse.game:type_name -> weewar.v1.Game
-	32, // 4: weewar.v1.UpdateGameRequest.game:type_name -> weewar.v1.Game
-	34, // 5: weewar.v1.UpdateGameRequest.update_mask:type_name -> google.protobuf.FieldMask
-	32, // 6: weewar.v1.UpdateGameResponse.game:type_name -> weewar.v1.Game
-	29, // 7: weewar.v1.GetGamesResponse.games:type_name -> weewar.v1.GetGamesResponse.GamesEntry
-	32, // 8: weewar.v1.CreateGameRequest.game:type_name -> weewar.v1.Game
-	32, // 9: weewar.v1.CreateGameResponse.game:type_name -> weewar.v1.Game
-	35, // 10: weewar.v1.CreateGameResponse.game_state:type_name -> weewar.v1.GameState
-	30, // 11: weewar.v1.CreateGameResponse.field_errors:type_name -> weewar.v1.CreateGameResponse.FieldErrorsEntry
-	36, // 12: weewar.v1.ProcessMovesRequest.moves:type_name -> weewar.v1.GameMove
-	37, // 13: weewar.v1.ProcessMovesResponse.move_results:type_name -> weewar.v1.GameMoveResult
-	38, // 14: weewar.v1.ProcessMovesResponse.changes:type_name -> weewar.v1.WorldChange
-	35, // 15: weewar.v1.GetGameStateResponse.state:type_name -> weewar.v1.GameState
-	39, // 16: weewar.v1.ListMovesResponse.move_groups:type_name -> weewar.v1.GameMoveGroup
-	23, // 17: weewar.v1.GetMovementOptionsResponse.options:type_name -> weewar.v1.MovementOption
-	26, // 18: weewar.v1.GetAttackOptionsResponse.options:type_name -> weewar.v1.AttackOption
-	32, // 19: weewar.v1.GetGamesResponse.GamesEntry.value:type_name -> weewar.v1.Game
-	13, // 20: weewar.v1.GamesService.CreateGame:input_type -> weewar.v1.CreateGameRequest
-	11, // 21: weewar.v1.GamesService.GetGames:input_type -> weewar.v1.GetGamesRequest
-	1,  // 22: weewar.v1.GamesService.ListGames:input_type -> weewar.v1.ListGamesRequest
-	3,  // 23: weewar.v1.GamesService.GetGame:input_type -> weewar.v1.GetGameRequest
-	9,  // 24: weewar.v1.GamesService.DeleteGame:input_type -> weewar.v1.DeleteGameRequest
-	7,  // 25: weewar.v1.GamesService.UpdateGame:input_type -> weewar.v1.UpdateGameRequest
-	17, // 26: weewar.v1.GamesService.GetGameState:input_type -> weewar.v1.GetGameStateRequest
-	19, // 27: weewar.v1.GamesService.ListMoves:input_type -> weewar.v1.ListMovesRequest
-	15, // 28: weewar.v1.GamesService.ProcessMoves:input_type -> weewar.v1.ProcessMovesRequest
-	21, // 29: weewar.v1.GamesService.GetMovementOptions:input_type -> weewar.v1.GetMovementOptionsRequest
-	24, // 30: weewar.v1.GamesService.GetAttackOptions:input_type -> weewar.v1.GetAttackOptionsRequest
-	27, // 31: weewar.v1.GamesService.CanSelectUnit:input_type -> weewar.v1.CanSelectUnitRequest
-	14, // 32: weewar.v1.GamesService.CreateGame:output_type -> weewar.v1.CreateGameResponse
-	12, // 33: weewar.v1.GamesService.GetGames:output_type -> weewar.v1.GetGamesResponse
-	2,  // 34: weewar.v1.GamesService.ListGames:output_type -> weewar.v1.ListGamesResponse
-	4,  // 35: weewar.v1.GamesService.GetGame:output_type -> weewar.v1.GetGameResponse
-	10, // 36: weewar.v1.GamesService.DeleteGame:output_type -> weewar.v1.DeleteGameResponse
-	8,  // 37: weewar.v1.GamesService.UpdateGame:output_type -> weewar.v1.UpdateGameResponse
-	18, // 38: weewar.v1.GamesService.GetGameState:output_type -> weewar.v1.GetGameStateResponse
-	20, // 39: weewar.v1.GamesService.ListMoves:output_type -> weewar.v1.ListMovesResponse
-	16, // 40: weewar.v1.GamesService.ProcessMoves:output_type -> weewar.v1.ProcessMovesResponse
-	22, // 41: weewar.v1.GamesService.GetMovementOptions:output_type -> weewar.v1.GetMovementOptionsResponse
-	25, // 42: weewar.v1.GamesService.GetAttackOptions:output_type -> weewar.v1.GetAttackOptionsResponse
-	28, // 43: weewar.v1.GamesService.CanSelectUnit:output_type -> weewar.v1.CanSelectUnitResponse
-	32, // [32:44] is the sub-list for method output_type
-	20, // [20:32] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	34, // 4: weewar.v1.GetGameResponse.state:type_name -> weewar.v1.GameState
+	35, // 5: weewar.v1.GetGameResponse.history:type_name -> weewar.v1.GameMoveHistory
+	32, // 6: weewar.v1.UpdateGameRequest.game:type_name -> weewar.v1.Game
+	36, // 7: weewar.v1.UpdateGameRequest.update_mask:type_name -> google.protobuf.FieldMask
+	32, // 8: weewar.v1.UpdateGameResponse.game:type_name -> weewar.v1.Game
+	29, // 9: weewar.v1.GetGamesResponse.games:type_name -> weewar.v1.GetGamesResponse.GamesEntry
+	32, // 10: weewar.v1.CreateGameRequest.game:type_name -> weewar.v1.Game
+	32, // 11: weewar.v1.CreateGameResponse.game:type_name -> weewar.v1.Game
+	34, // 12: weewar.v1.CreateGameResponse.game_state:type_name -> weewar.v1.GameState
+	30, // 13: weewar.v1.CreateGameResponse.field_errors:type_name -> weewar.v1.CreateGameResponse.FieldErrorsEntry
+	37, // 14: weewar.v1.ProcessMovesRequest.moves:type_name -> weewar.v1.GameMove
+	38, // 15: weewar.v1.ProcessMovesResponse.move_results:type_name -> weewar.v1.GameMoveResult
+	39, // 16: weewar.v1.ProcessMovesResponse.changes:type_name -> weewar.v1.WorldChange
+	34, // 17: weewar.v1.GetGameStateResponse.state:type_name -> weewar.v1.GameState
+	40, // 18: weewar.v1.ListMovesResponse.move_groups:type_name -> weewar.v1.GameMoveGroup
+	23, // 19: weewar.v1.GetMovementOptionsResponse.options:type_name -> weewar.v1.MovementOption
+	26, // 20: weewar.v1.GetAttackOptionsResponse.options:type_name -> weewar.v1.AttackOption
+	32, // 21: weewar.v1.GetGamesResponse.GamesEntry.value:type_name -> weewar.v1.Game
+	13, // 22: weewar.v1.GamesService.CreateGame:input_type -> weewar.v1.CreateGameRequest
+	11, // 23: weewar.v1.GamesService.GetGames:input_type -> weewar.v1.GetGamesRequest
+	1,  // 24: weewar.v1.GamesService.ListGames:input_type -> weewar.v1.ListGamesRequest
+	3,  // 25: weewar.v1.GamesService.GetGame:input_type -> weewar.v1.GetGameRequest
+	9,  // 26: weewar.v1.GamesService.DeleteGame:input_type -> weewar.v1.DeleteGameRequest
+	7,  // 27: weewar.v1.GamesService.UpdateGame:input_type -> weewar.v1.UpdateGameRequest
+	17, // 28: weewar.v1.GamesService.GetGameState:input_type -> weewar.v1.GetGameStateRequest
+	19, // 29: weewar.v1.GamesService.ListMoves:input_type -> weewar.v1.ListMovesRequest
+	15, // 30: weewar.v1.GamesService.ProcessMoves:input_type -> weewar.v1.ProcessMovesRequest
+	21, // 31: weewar.v1.GamesService.GetMovementOptions:input_type -> weewar.v1.GetMovementOptionsRequest
+	24, // 32: weewar.v1.GamesService.GetAttackOptions:input_type -> weewar.v1.GetAttackOptionsRequest
+	27, // 33: weewar.v1.GamesService.CanSelectUnit:input_type -> weewar.v1.CanSelectUnitRequest
+	14, // 34: weewar.v1.GamesService.CreateGame:output_type -> weewar.v1.CreateGameResponse
+	12, // 35: weewar.v1.GamesService.GetGames:output_type -> weewar.v1.GetGamesResponse
+	2,  // 36: weewar.v1.GamesService.ListGames:output_type -> weewar.v1.ListGamesResponse
+	4,  // 37: weewar.v1.GamesService.GetGame:output_type -> weewar.v1.GetGameResponse
+	10, // 38: weewar.v1.GamesService.DeleteGame:output_type -> weewar.v1.DeleteGameResponse
+	8,  // 39: weewar.v1.GamesService.UpdateGame:output_type -> weewar.v1.UpdateGameResponse
+	18, // 40: weewar.v1.GamesService.GetGameState:output_type -> weewar.v1.GetGameStateResponse
+	20, // 41: weewar.v1.GamesService.ListMoves:output_type -> weewar.v1.ListMovesResponse
+	16, // 42: weewar.v1.GamesService.ProcessMoves:output_type -> weewar.v1.ProcessMovesResponse
+	22, // 43: weewar.v1.GamesService.GetMovementOptions:output_type -> weewar.v1.GetMovementOptionsResponse
+	25, // 44: weewar.v1.GamesService.GetAttackOptions:output_type -> weewar.v1.GetAttackOptionsResponse
+	28, // 45: weewar.v1.GamesService.CanSelectUnit:output_type -> weewar.v1.CanSelectUnitResponse
+	34, // [34:46] is the sub-list for method output_type
+	22, // [22:34] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_games_proto_init() }

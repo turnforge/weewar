@@ -99,10 +99,10 @@ func ListFSEntities[T proto.Message](f *FileStorage, validate func(entry T) bool
 			continue
 		}
 
-		gameID := entry.Name()
-		newInstance, err := LoadFSArtifact[T](f, gameID, "metadata")
+		entityId := entry.Name()
+		newInstance, err := LoadFSArtifact[T](f, entityId, "metadata")
 		if err != nil {
-			log.Printf("Failed to load metadata for game %s: %v", gameID, err)
+			log.Printf("Failed to artifact for entity %s: %v", entityId, err)
 			continue
 		}
 		// if message != nil { // it may have been filtered out
@@ -119,7 +119,7 @@ func ListFSEntities[T proto.Message](f *FileStorage, validate func(entry T) bool
 func LoadFSArtifact[T proto.Message](f *FileStorage, id string, name string) (out T, err error) {
 	data, err := f.ReadArtifactFile(id, name)
 	if err != nil {
-		log.Printf("Failed to load metadata for game %s: %v", id, err)
+		log.Printf("Failed to load artifact (%s) for entity %s: %v", name, id, err)
 		return
 	}
 

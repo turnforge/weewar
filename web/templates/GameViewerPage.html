@@ -98,7 +98,7 @@
                         Game Loading...
                     </span>
                     <div class="text-sm text-gray-600 dark:text-gray-300">
-                        <span>{{ .World.Name }}</span>
+                        <span>{{ .Game.Name }}</span>
                         <span class="mx-2">•</span>
                         <span>{{ .PlayerCount }} Players</span>
                         {{ if ne .MaxTurns 0 }}
@@ -173,7 +173,9 @@
         </div>
         
         <!-- Hidden World Data for Frontend -->
-        <pre id="world-data-json" style="display: none;">{{ if .World }}{{ .World | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="game.data-json" style="display: none;">{{ if .Game }}{{ .Game | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="game-state-data-json" style="display: none;">{{ if .GameState }}{{ .GameState | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="game-history-data-json" style="display: none;">{{ if .GameHistory }}{{ .GameHistory | ToJson }}{{ else }}null{{ end }}</pre>
         
         <!-- Hidden Rules Engine Data for Frontend -->
         <pre id="terrain-data-json" style="display: none;">{{ .GetTerrainDataJSON }}</pre>

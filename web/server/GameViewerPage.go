@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
@@ -13,9 +12,13 @@ import (
 
 type GameViewerPage struct {
 	BasePage
-	Header  Header
-	World   *protos.World
-	WorldId string
+	Header      Header
+	GameId      string
+	WorldId     string
+	Game        *protos.Game
+	GameState   *protos.GameState
+	GameHistory *protos.GameMoveHistory
+	// World  *protos.World
 
 	// Game creation parameters from URL
 	PlayerCount      int
@@ -24,9 +27,92 @@ type GameViewerPage struct {
 }
 
 func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
-	p.WorldId = r.PathValue("gameId") // gameId is actually worldId for now
-	if p.WorldId == "" {
-		http.Error(w, "World ID is required", http.StatusBadRequest)
+	p.GameId = r.PathValue("gameId") // gameId is actually worldId for now
+	if p.GameId == "" {
+		http.Error(w, "Game ID is required", http.StatusBadRequest)
+		return nil, true
+	}
+
+	// Load the world (same as WorldEditorPage)
+	client, err := vc.ClientMgr.GetGamesSvcClient()
+	if err != nil {
+		log.Printf("Error getting Games client: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return nil, true
+	}
+
+	req := &protos.GetGameRequest{Id: p.GameId}
+
+	resp, err := client.GetGame(context.Background(), req)
+	if err != nil {
+		log.Printf("Error fetching Game %s: %v", p.GameId, err)
+		http.Error(w, "Game not found", http.StatusNotFound)
+		return nil, true
+	}
+
+	if resp.Game != nil {
+		p.Game = resp.Game
+		p.Title = "Playing: " + p.Game.Name
+	}
+
+	if resp.State != nil {
+		p.GameState = resp.State
+	}
+
+	if resp.History != nil {
+		p.GameHistory = resp.History
+	}
+
+	log.Printf("GameViewerPage loaded - GameId: %s, Players: %d, MaxTurns: %d",
+		p.WorldId, p.PlayerCount, p.MaxTurns)
+
+	return nil, false
+}
+
+// GetTerrainDataJSON returns terrain data from rules engine as JSON string
+func (p *GameViewerPage) GetTerrainDataJSON() string {
+	rulesEngine := weewar.DefaultRulesEngine()
+	terrainData, err := json.Marshal(rulesEngine.Terrains)
+	// fmt.Println("RuleEngine: ", rulesEngine)
+	// fmt.Println("TerrainData: ", terrainData)
+	if err != nil {
+		log.Printf("Error marshaling terrain data: %v", err)
+		return "{}"
+	}
+	return string(terrainData)
+}
+
+// GetUnitDataJSON returns unit data from rules engine as JSON string
+func (p *GameViewerPage) GetUnitDataJSON() string {
+	rulesEngine := weewar.DefaultRulesEngine()
+	unitData, err := json.Marshal(rulesEngine.Units)
+	if err != nil {
+		log.Printf("Error marshaling unit data: %v", err)
+		return "{}"
+	}
+	return string(unitData)
+}
+
+// GetMovementMatrixJSON returns movement cost matrix as JSON string
+func (p *GameViewerPage) GetMovementMatrixJSON() string {
+	rulesEngine := weewar.DefaultRulesEngine()
+	movementData, err := json.Marshal(rulesEngine.MovementMatrix)
+	if err != nil {
+		log.Printf("Error marshaling movement matrix: %v", err)
+		return "{}"
+	}
+	return string(movementData)
+}
+
+func (p *GameViewerPage) Copy() View {
+	return &GameViewerPage{}
+}
+
+/*
+func (p *GameViewerPage) LoadPost(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
+	p.GameId = r.PathValue("gameId") // gameId is actually worldId for now
+	if p.GameId == "" {
+		http.Error(w, "Game ID is required", http.StatusBadRequest)
 		return nil, true
 	}
 
@@ -98,42 +184,4 @@ func (p *GameViewerPage) parseGameParameters(r *http.Request) {
 		}
 	}
 }
-
-// GetTerrainDataJSON returns terrain data from rules engine as JSON string
-func (p *GameViewerPage) GetTerrainDataJSON() string {
-	rulesEngine := weewar.DefaultRulesEngine()
-	terrainData, err := json.Marshal(rulesEngine.Terrains)
-	// fmt.Println("RuleEngine: ", rulesEngine)
-	// fmt.Println("TerrainData: ", terrainData)
-	if err != nil {
-		log.Printf("Error marshaling terrain data: %v", err)
-		return "{}"
-	}
-	return string(terrainData)
-}
-
-// GetUnitDataJSON returns unit data from rules engine as JSON string
-func (p *GameViewerPage) GetUnitDataJSON() string {
-	rulesEngine := weewar.DefaultRulesEngine()
-	unitData, err := json.Marshal(rulesEngine.Units)
-	if err != nil {
-		log.Printf("Error marshaling unit data: %v", err)
-		return "{}"
-	}
-	return string(unitData)
-}
-
-// GetMovementMatrixJSON returns movement cost matrix as JSON string
-func (p *GameViewerPage) GetMovementMatrixJSON() string {
-	rulesEngine := weewar.DefaultRulesEngine()
-	movementData, err := json.Marshal(rulesEngine.MovementMatrix)
-	if err != nil {
-		log.Printf("Error marshaling movement matrix: %v", err)
-		return "{}"
-	}
-	return string(movementData)
-}
-
-func (p *GameViewerPage) Copy() View {
-	return &GameViewerPage{}
-}
+*/

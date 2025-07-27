@@ -556,7 +556,7 @@ class StartGamePage extends BasePage implements ComponentLifecycle {
         console.log('CreateGame API request:', gameRequest);
         
         // Make the gRPC gateway call
-        const response = await fetch('/v1/games', {
+        const response = await fetch('/api/v1/games', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

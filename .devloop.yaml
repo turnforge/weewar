@@ -19,7 +19,7 @@ rules:
           - "web/**/*.go"
       - action: "exclude"
         patterns:
-          - "web/**"
+          - "web"
       - action: "include"
         patterns:
           - "**/*.go"
@@ -65,6 +65,7 @@ rules:
           - "dist/**"
           - "test-results/**"
           - "playwright-report/**"
+          - "node_modules"
       - action: "include"
         patterns:
           - "**/*.ts"

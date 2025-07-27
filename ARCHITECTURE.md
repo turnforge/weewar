@@ -1,6 +1,6 @@
 # WeeWar Architecture Overview
 
-## Current Architecture (Phaser-First v4.0 + Layer System v10.7)
+## Current Architecture (Phaser-First v4.0 + ProcessMoves Integration v12.0)
 
 ### Major Architectural Transformation (January 2025)
 - **Phaser.js Editor Integration**: Complete migration from canvas-based to Phaser.js-based map editor
@@ -10,6 +10,14 @@
 - **Professional UX**: Intuitive mouse interaction with paint modes and drag behavior
 - **Legacy System Removal**: Completely eliminated old canvas system and related complexity
 - **UI Reorganization**: Moved view controls to logical locations with Phaser editor tools
+
+### Frontend ProcessMoves Integration (January 2025) ✅
+- **Unified Game Data Architecture**: Complete integration of Game, GameState, and GameHistory loading from page elements
+- **ProcessMoves WASM Integration**: All game actions flow through unified ProcessMoves pattern with WASM client
+- **Type Consolidation**: Eliminated lib.Unit/lib.Tile in favor of protobuf types throughout entire frontend
+- **Game Data Loading**: Server pre-populates JSON data eliminating complex frontend API calls
+- **Clean Event Architecture**: Event-driven UI updates following successful data loading
+- **Rendering Package Separation**: All rendering functionality moved to lib/rendering for clean core engine
 
 ### Rules Engine Integration (January 2025) ✅
 - **Data-Driven Game Mechanics**: Complete replacement of hardcoded logic with rules engine

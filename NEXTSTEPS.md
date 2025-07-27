@@ -368,9 +368,9 @@
 ## Current Development Focus
 
 ### Phase 12: Frontend ProcessMoves Integration ✅ COMPLETED
-**Completed Phase**: Complete Frontend Architecture Integration with ProcessMoves
+**Completed Phase**: Complete Frontend Architecture Integration with ProcessMoves and Game Data Loading
 **Status**: Frontend builds with 0 TypeScript errors, full ProcessMoves integration working end-to-end
-**Achievement**: Revolutionary frontend transformation enabling production-ready web gameplay through ProcessMoves
+**Achievement**: Revolutionary frontend transformation enabling production-ready web gameplay through ProcessMoves with clean game data loading architecture
 
 #### Major Frontend Architecture Transformation ✅ COMPLETED
 - **Type Consolidation Success**: Eliminated lib.Unit/lib.Tile in favor of protobuf types throughout entire codebase
@@ -380,6 +380,14 @@
 - **Backward Compatibility**: convertGameStateToLegacyFormat() adapter maintains compatibility with existing World types
 - **Async Method Conversion**: Complete GameViewerPage transformation to handle async GameState methods
 
+#### Game Data Loading Architecture ✅ COMPLETED
+- **Unified JSON Template System**: Backend provides Game, GameState, and GameHistory data as JSON in template elements
+- **GameState Component Modernization**: Updated loadGameFromPageData() to use correct element IDs matching template output
+- **Frontend Data Integration**: GameViewerPage loads from multiple JSON elements and integrates with WasmGameService
+- **World/WorldData Separation**: Proper handling of separated World metadata and WorldData throughout frontend
+- **WASM Service Integration**: Complete integration with generated WASM client for ProcessMoves operations
+- **Clean Event Architecture**: game-loaded events trigger UI updates after successful data loading
+
 #### Technical Implementation Achievements ✅ COMPLETED
 - **Webpack ES Module Resolution**: Fixed protobuf imports and module resolution for clean builds
 - **GameState Architecture**: Unified GameState component with page data loading replacing createGameFromMap
@@ -387,6 +395,7 @@
 - **Legacy Method Bridge**: Added compatibility methods (endTurn, moveUnit, attackUnit) for smooth migration
 - **Coordinate System Integration**: Type-safe conversion between protobuf int32 and lib AxialCoord systems
 - **World Data Structure**: Fixed World.worldData.tiles access patterns throughout frontend components
+- **Template Element Integration**: Proper loading from game.data-json, game-state-data-json, game-history-data-json elements
 
 #### Architecture Benefits Achieved ✅
 - **Unified Data Flow**: All actions flow through ProcessMoves → ApplyChangeResults → World updates → UI notifications
@@ -396,6 +405,7 @@
 - **Type Safety**: Complete TypeScript safety with protobuf types throughout the stack
 - **Clean Separation**: Backend handles data preparation, frontend focuses on UI and user interaction
 - **Production Ready**: Build system and runtime architecture ready for deployment
+- **Rendering Package Separation**: All rendering-related functionality moved to lib/rendering for clean core engine
 
 ### Phase 11: WASM Architecture Modernization ✅ COMPLETED
 **Completed Phase**: Consolidated ProcessMoves Bidirectional Sync Architecture

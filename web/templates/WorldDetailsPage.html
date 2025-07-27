@@ -151,7 +151,8 @@
         </div>
         
         <!-- Hidden World Data for Frontend -->
-        <pre id="world-data-json" style="display: none;">{{ if .GetWorldDataForJS }}{{ .GetWorldDataForJS | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="world-data-json" style="display: none;">{{ if .World }}{{ .World | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="world-tiles-data-json" style="display: none;">{{ if .World.WorldData }}{{ .World.WorldData | ToJson }}{{ else }}null{{ end }}</pre>
     </main>
 {{ end }}
 

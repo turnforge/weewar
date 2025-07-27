@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -86,6 +87,18 @@ func NewRootViewsHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *Roo
 		},
 		"safeHTMLAttr": func(s string) template.HTMLAttr {
 			return template.HTMLAttr(s)
+		},
+		"ToJson": func(v interface{}) template.JS {
+			if v == nil {
+				return template.JS("null")
+			}
+			// Regular JSON marshaling for all types (protojson.Marshal is not needed for template output)
+			jsonBytes, err := json.Marshal(v)
+			if err != nil {
+				log.Printf("Error marshaling to JSON: %v", err)
+				return template.JS("null")
+			}
+			return template.JS(jsonBytes)
 		},
 	})
 	out.Context = &ViewContext{

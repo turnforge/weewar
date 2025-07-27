@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/panyam/turnengine/games/weewar/assets"
+	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
@@ -32,8 +33,8 @@ func init() {
 type MoveRecord struct {
 	Command   string `json:"command"`
 	Timestamp string `json:"timestamp"`
-	Turn      int    `json:"turn"`
-	Player    int    `json:"player"`
+	Turn      int32  `json:"turn"`
+	Player    int32  `json:"player"`
 }
 
 // MoveList represents a sequence of recorded moves
@@ -46,7 +47,7 @@ type HighlightLayer struct {
 	*weewar.BaseLayer
 	movableCoords []weewar.AxialCoord
 	attackCoords  []weewar.AxialCoord
-	selectedUnit  *weewar.Unit
+	selectedUnit  *v1.Unit
 }
 
 // NewHighlightLayer creates a new highlight layer
@@ -57,7 +58,7 @@ func NewHighlightLayer(width, height int, scheduler weewar.LayerScheduler) *High
 }
 
 // SetHighlights updates the coordinates to highlight
-func (hl *HighlightLayer) SetHighlights(movable []weewar.AxialCoord, attack []weewar.AxialCoord, selected *weewar.Unit) {
+func (hl *HighlightLayer) SetHighlights(movable []weewar.AxialCoord, attack []weewar.AxialCoord, selected *v1.Unit) {
 	hl.movableCoords = movable
 	hl.attackCoords = attack
 	hl.selectedUnit = selected
@@ -66,7 +67,7 @@ func (hl *HighlightLayer) SetHighlights(movable []weewar.AxialCoord, attack []we
 
 // Render renders highlight overlays to the layer buffer
 func (hl *HighlightLayer) Render(world *weewar.World, options weewar.LayerRenderOptions) {
-	if world == nil || world.Map == nil {
+	if world == nil {
 		return
 	}
 
@@ -88,7 +89,7 @@ func (hl *HighlightLayer) Render(world *weewar.World, options weewar.LayerRender
 	// Render selected unit highlight (yellow border)
 	if hl.selectedUnit != nil {
 		yellowColor := weewar.Color{R: 255, G: 255, B: 0, A: 180} // Semi-transparent yellow
-		hl.renderHighlightHex(world, hl.selectedUnit.Coord, yellowColor, options)
+		hl.renderHighlightHex(world, weewar.CoordFromInt32(hl.selectedUnit.Q, hl.selectedUnit.R), yellowColor, options)
 	}
 
 	hl.ClearDirty()
@@ -97,7 +98,7 @@ func (hl *HighlightLayer) Render(world *weewar.World, options weewar.LayerRender
 // renderHighlightHex renders a highlight overlay for a hex coordinate
 func (hl *HighlightLayer) renderHighlightHex(world *weewar.World, coord weewar.AxialCoord, color weewar.Color, options weewar.LayerRenderOptions) {
 	// Get pixel position using Map's coordinate system
-	x, y := world.Map.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
+	x, y := world.CenterXYForTile(coord, options.TileWidth, options.TileHeight, options.YIncrement)
 	x -= float64(hl.X)
 	y -= float64(hl.Y)
 	y += (options.TileHeight - options.YIncrement)
@@ -123,7 +124,7 @@ func (hl *HighlightLayer) renderHighlightHex(world *weewar.World, coord weewar.A
 // SimpleCLI is a thin wrapper over Game methods with minimal logic
 type SimpleCLI struct {
 	game          *weewar.Game
-	selectedUnit  *weewar.Unit
+	selectedUnit  *v1.Unit
 	movableCoords []weewar.AxialCoord
 	attackCoords  []weewar.AxialCoord
 	recording     bool
@@ -232,7 +233,8 @@ func (cli *SimpleCLI) handleMove(args []string) string {
 	toCoord := toTarget.GetCoordinate()
 
 	// Call the game's move method
-	err = cli.game.MoveUnitAt(fromCoord, toCoord)
+	unit := cli.game.World.UnitAt(fromCoord)
+	err = cli.game.World.MoveUnit(unit, toCoord)
 	if err != nil {
 		return fmt.Sprintf("Move failed: %v", err)
 	}
@@ -489,7 +491,7 @@ Examples:
 }
 
 // GetSelectedUnit returns currently selected unit (for rendering)
-func (cli *SimpleCLI) GetSelectedUnit() *weewar.Unit {
+func (cli *SimpleCLI) GetSelectedUnit() *v1.Unit {
 	return cli.selectedUnit
 }
 

@@ -11,6 +11,9 @@ rules:
   - name: "backend"
     color: "blue"
     watch:
+      - action: "exclude"
+        patterns:
+          - "**/*/*.log"
       - action: "include"
         patterns:
           - "web/**/*.go"
@@ -56,6 +59,8 @@ rules:
     watch:
       - action: "exclude"
         patterns:
+          - "frontend/gen/**"
+          - "**/*.log"
           - "node_modules/**"
           - "dist/**"
           - "test-results/**"
@@ -63,7 +68,6 @@ rules:
       - action: "include"
         patterns:
           - "**/*.ts"
-          - "**/*.js"
           - "**/*.css"
           - "**/*.html"
           - "**/*.spec.ts"

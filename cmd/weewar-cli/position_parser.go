@@ -6,13 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
 // ParseTarget represents either a unit ID or a coordinate position
 type ParseTarget struct {
 	IsUnit     bool              // true if this represents a unit, false if coordinate
-	Unit       *weewar.Unit      // the unit if IsUnit is true
+	Unit       *v1.Unit          // the unit if IsUnit is true
 	Coordinate weewar.AxialCoord // the coordinate if IsUnit is false
 	Raw        string            // original input string
 }
@@ -69,15 +70,15 @@ func parseUnitID(game *weewar.Game, input string) (*ParseTarget, error) {
 		return nil, fmt.Errorf("invalid unit number: %s", unitNumberStr)
 	}
 
-	playerID := int(playerLetter - 'A')
+	playerID := int32(playerLetter - 'A')
 	log.Println("Looking for player ID: ", playerID)
 
 	// Find the unit by counting units for this player
-	if playerID >= len(game.World.UnitsByPlayer) {
+	if playerID > game.World.PlayerCount() {
 		return nil, fmt.Errorf("player %c does not exist", playerLetter)
 	}
 
-	playerUnits := game.World.UnitsByPlayer[playerID]
+	playerUnits := game.World.GetPlayerUnits(int(playerID))
 	if unitNumber > len(playerUnits) {
 		return nil, fmt.Errorf("player %c only has %d units, requested unit %d",
 			playerLetter, len(playerUnits), unitNumber)
@@ -92,7 +93,7 @@ func parseUnitID(game *weewar.Game, input string) (*ParseTarget, error) {
 	return &ParseTarget{
 		IsUnit:     true,
 		Unit:       unit,
-		Coordinate: unit.Coord, // Also provide the coordinate for convenience
+		Coordinate: weewar.CoordFromInt32(unit.Q, unit.R), // Also provide the coordinate for convenience
 		Raw:        input,
 	}, nil
 }
@@ -166,6 +167,6 @@ func (t *ParseTarget) GetCoordinate() weewar.AxialCoord {
 }
 
 // GetUnit returns the unit if this target represents a unit, nil otherwise
-func (t *ParseTarget) GetUnit() *weewar.Unit {
+func (t *ParseTarget) GetUnit() *v1.Unit {
 	return t.Unit
 }

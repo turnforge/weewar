@@ -1,4 +1,4 @@
-package weewar
+package rendering
 
 // =============================================================================
 // BufferRenderer - PNG/File Output Implementation

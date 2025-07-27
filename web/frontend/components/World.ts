@@ -111,7 +111,7 @@ export class World {
     private pendingUnitChanges: UnitChange[] = [];
     private batchTimeout: number | null = null;
     
-    constructor(name: string = 'New World', width: number = 40, height: number = 40) {
+    constructor(public name: string = 'New World', width: number = 40, height: number = 40) {
         this.metadata = { name, width, height };
     }
     

@@ -13,20 +13,20 @@ import (
 
 var WORLDS_STORAGE_DIR = weewar.DevDataPath("storage/worlds")
 
-// WorldsServiceImpl implements the WorldsService gRPC interface
-type WorldsServiceImpl struct {
+// FSWorldsServiceImpl implements the FSWorldsService gRPC interface
+type FSWorldsServiceImpl struct {
 	BaseWorldsServiceImpl
 	storage *FileStorage
 }
 
-// NewWorldsService creates a new WorldsService implementation
-func NewWorldsServiceImpl() *WorldsServiceImpl {
-	service := &WorldsServiceImpl{storage: NewFileStorage(WORLDS_STORAGE_DIR)}
+// NewFSWorldsService creates a new FSWorldsService implementation
+func NewFSWorldsServiceImpl() *FSWorldsServiceImpl {
+	service := &FSWorldsServiceImpl{storage: NewFileStorage(WORLDS_STORAGE_DIR)}
 	return service
 }
 
 // ListWorlds returns all available worlds (metadata only for performance)
-func (s *WorldsServiceImpl) ListWorlds(ctx context.Context, req *v1.ListWorldsRequest) (resp *v1.ListWorldsResponse, err error) {
+func (s *FSWorldsServiceImpl) ListWorlds(ctx context.Context, req *v1.ListWorldsRequest) (resp *v1.ListWorldsResponse, err error) {
 	resp = &v1.ListWorldsResponse{
 		Items: []*v1.World{},
 		Pagination: &v1.PaginationResponse{
@@ -40,7 +40,7 @@ func (s *WorldsServiceImpl) ListWorlds(ctx context.Context, req *v1.ListWorldsRe
 }
 
 // GetWorld returns a specific world with complete data including tiles and units
-func (s *WorldsServiceImpl) GetWorld(ctx context.Context, req *v1.GetWorldRequest) (resp *v1.GetWorldResponse, err error) {
+func (s *FSWorldsServiceImpl) GetWorld(ctx context.Context, req *v1.GetWorldRequest) (resp *v1.GetWorldResponse, err error) {
 	if req.Id == "" {
 		return nil, fmt.Errorf("world ID is required")
 	}
@@ -64,7 +64,7 @@ func (s *WorldsServiceImpl) GetWorld(ctx context.Context, req *v1.GetWorldReques
 }
 
 // UpdateWorld updates an existing world
-func (s *WorldsServiceImpl) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequest) (resp *v1.UpdateWorldResponse, err error) {
+func (s *FSWorldsServiceImpl) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequest) (resp *v1.UpdateWorldResponse, err error) {
 	if req.World == nil || req.World.Id == "" {
 		return nil, fmt.Errorf("world ID is required")
 	}
@@ -121,7 +121,7 @@ func (s *WorldsServiceImpl) UpdateWorld(ctx context.Context, req *v1.UpdateWorld
 }
 
 // DeleteWorld deletes a world
-func (s *WorldsServiceImpl) DeleteWorld(ctx context.Context, req *v1.DeleteWorldRequest) (resp *v1.DeleteWorldResponse, err error) {
+func (s *FSWorldsServiceImpl) DeleteWorld(ctx context.Context, req *v1.DeleteWorldRequest) (resp *v1.DeleteWorldResponse, err error) {
 	if req.Id == "" {
 		return nil, fmt.Errorf("world ID is required")
 	}
@@ -132,7 +132,7 @@ func (s *WorldsServiceImpl) DeleteWorld(ctx context.Context, req *v1.DeleteWorld
 }
 
 // CreateWorld creates a new world
-func (s *WorldsServiceImpl) CreateWorld(ctx context.Context, req *v1.CreateWorldRequest) (resp *v1.CreateWorldResponse, err error) {
+func (s *FSWorldsServiceImpl) CreateWorld(ctx context.Context, req *v1.CreateWorldRequest) (resp *v1.CreateWorldResponse, err error) {
 	if req.World == nil {
 		return nil, fmt.Errorf("world data is required")
 	}

@@ -6,7 +6,7 @@ import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegen
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { FieldMask } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_field_mask } from "@bufbuild/protobuf/wkt";
-import type { Pagination, PaginationResponse, World } from "./models_pb";
+import type { Pagination, PaginationResponse, World, WorldData } from "./models_pb";
 import { file_weewar_v1_models } from "./models_pb";
 import { file_google_api_annotations } from "../../google/api/annotations_pb";
 import { file_protoc_gen_openapiv2_options_annotations } from "../../protoc-gen-openapiv2/options/annotations_pb";
@@ -16,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/worlds.proto.
  */
 export const file_weewar_v1_worlds: GenFile = /*@__PURE__*/
-  fileDesc("ChZ3ZWV3YXIvdjEvd29ybGRzLnByb3RvEgl3ZWV3YXIudjEikgEKCVdvcmxkSW5mbxIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhAKCGNhdGVnb3J5GAQgASgJEhIKCmRpZmZpY3VsdHkYBSABKAkSDAoEdGFncxgGIAMoCRIMCgRpY29uGAcgASgJEhQKDGxhc3RfdXBkYXRlZBgIIAEoCSJQChFMaXN0V29ybGRzUmVxdWVzdBIpCgpwYWdpbmF0aW9uGAEgASgLMhUud2Vld2FyLnYxLlBhZ2luYXRpb24SEAoIb3duZXJfaWQYAiABKAkiaAoSTGlzdFdvcmxkc1Jlc3BvbnNlEh8KBWl0ZW1zGAEgAygLMhAud2Vld2FyLnYxLldvcmxkEjEKCnBhZ2luYXRpb24YAiABKAsyHS53ZWV3YXIudjEuUGFnaW5hdGlvblJlc3BvbnNlIi4KD0dldFdvcmxkUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJIjMKEEdldFdvcmxkUmVzcG9uc2USHwoFd29ybGQYASABKAsyEC53ZWV3YXIudjEuV29ybGQiNQoWR2V0V29ybGRDb250ZW50UmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJImEKF0dldFdvcmxkQ29udGVudFJlc3BvbnNlEhYKDndlZXdhcl9jb250ZW50GAEgASgJEhYKDnJlY2lwZV9jb250ZW50GAIgASgJEhYKDnJlYWRtZV9jb250ZW50GAMgASgJIoEBChJVcGRhdGVXb3JsZFJlcXVlc3QSHwoFd29ybGQYASABKAsyEC53ZWV3YXIudjEuV29ybGQSLwoLdXBkYXRlX21hc2sYAiABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrOhmSQRYKFCoSVXBkYXRlV29ybGRSZXF1ZXN0IlIKE1VwZGF0ZVdvcmxkUmVzcG9uc2USHwoFd29ybGQYASABKAsyEC53ZWV3YXIudjEuV29ybGQ6GpJBFwoVKhNVcGRhdGVXb3JsZFJlc3BvbnNlIiAKEkRlbGV0ZVdvcmxkUmVxdWVzdBIKCgJpZBgBIAEoCSIVChNEZWxldGVXb3JsZFJlc3BvbnNlIh8KEEdldFdvcmxkc1JlcXVlc3QSCwoDaWRzGAEgAygJIo4BChFHZXRXb3JsZHNSZXNwb25zZRI4CgZ3b3JsZHMYASADKAsyKC53ZWV3YXIudjEuR2V0V29ybGRzUmVzcG9uc2UuV29ybGRzRW50cnkaPwoLV29ybGRzRW50cnkSCwoDa2V5GAEgASgJEh8KBXZhbHVlGAIgASgLMhAud2Vld2FyLnYxLldvcmxkOgI4ASI1ChJDcmVhdGVXb3JsZFJlcXVlc3QSHwoFd29ybGQYASABKAsyEC53ZWV3YXIudjEuV29ybGQisQEKE0NyZWF0ZVdvcmxkUmVzcG9uc2USHwoFd29ybGQYASABKAsyEC53ZWV3YXIudjEuV29ybGQSRQoMZmllbGRfZXJyb3JzGAIgAygLMi8ud2Vld2FyLnYxLkNyZWF0ZVdvcmxkUmVzcG9uc2UuRmllbGRFcnJvcnNFbnRyeRoyChBGaWVsZEVycm9yc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEy8QQKDVdvcmxkc1NlcnZpY2USYwoLQ3JlYXRlV29ybGQSHS53ZWV3YXIudjEuQ3JlYXRlV29ybGRSZXF1ZXN0Gh4ud2Vld2FyLnYxLkNyZWF0ZVdvcmxkUmVzcG9uc2UiFYLT5JMCDzoBKiIKL3YxL3dvcmxkcxJjCglHZXRXb3JsZHMSGy53ZWV3YXIudjEuR2V0V29ybGRzUmVxdWVzdBocLndlZXdhci52MS5HZXRXb3JsZHNSZXNwb25zZSIbgtPkkwIVEhMvdjEvd29ybGRzOmJhdGNoR2V0El0KCkxpc3RXb3JsZHMSHC53ZWV3YXIudjEuTGlzdFdvcmxkc1JlcXVlc3QaHS53ZWV3YXIudjEuTGlzdFdvcmxkc1Jlc3BvbnNlIhKC0+STAgwSCi92MS93b3JsZHMSXAoIR2V0V29ybGQSGi53ZWV3YXIudjEuR2V0V29ybGRSZXF1ZXN0Ghsud2Vld2FyLnYxLkdldFdvcmxkUmVzcG9uc2UiF4LT5JMCERIPL3YxL3dvcmxkcy97aWR9EmcKC0RlbGV0ZVdvcmxkEh0ud2Vld2FyLnYxLkRlbGV0ZVdvcmxkUmVxdWVzdBoeLndlZXdhci52MS5EZWxldGVXb3JsZFJlc3BvbnNlIhmC0+STAhMqES92MS93b3JsZHMve2lkPSp9EnAKC1VwZGF0ZVdvcmxkEh0ud2Vld2FyLnYxLlVwZGF0ZVdvcmxkUmVxdWVzdBoeLndlZXdhci52MS5VcGRhdGVXb3JsZFJlc3BvbnNlIiKC0+STAhw6ASoyFy92MS93b3JsZHMve3dvcmxkLmlkPSp9Qp0BCg1jb20ud2Vld2FyLnYxQgtXb3JsZHNQcm90b1ABWjpnaXRodWIuY29tL3BhbnlhbS90dXJuZW5naW5lL2dhbWVzL3dlZXdhci9nZW4vZ28vd2Vld2FyL3YxogIDV1hYqgIJV2Vld2FyLlYxygIJV2Vld2FyXFYx4gIVV2Vld2FyXFYxXEdQQk1ldGFkYXRh6gIKV2Vld2FyOjpWMWIGcHJvdG8z", [file_google_protobuf_field_mask, file_weewar_v1_models, file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations]);
+  fileDesc("ChZ3ZWV3YXIvdjEvd29ybGRzLnByb3RvEgl3ZWV3YXIudjEikgEKCVdvcmxkSW5mbxIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhAKCGNhdGVnb3J5GAQgASgJEhIKCmRpZmZpY3VsdHkYBSABKAkSDAoEdGFncxgGIAMoCRIMCgRpY29uGAcgASgJEhQKDGxhc3RfdXBkYXRlZBgIIAEoCSJQChFMaXN0V29ybGRzUmVxdWVzdBIpCgpwYWdpbmF0aW9uGAEgASgLMhUud2Vld2FyLnYxLlBhZ2luYXRpb24SEAoIb3duZXJfaWQYAiABKAkiaAoSTGlzdFdvcmxkc1Jlc3BvbnNlEh8KBWl0ZW1zGAEgAygLMhAud2Vld2FyLnYxLldvcmxkEjEKCnBhZ2luYXRpb24YAiABKAsyHS53ZWV3YXIudjEuUGFnaW5hdGlvblJlc3BvbnNlIi4KD0dldFdvcmxkUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJIl0KEEdldFdvcmxkUmVzcG9uc2USHwoFd29ybGQYASABKAsyEC53ZWV3YXIudjEuV29ybGQSKAoKd29ybGRfZGF0YRgCIAEoCzIULndlZXdhci52MS5Xb3JsZERhdGEiwAEKElVwZGF0ZVdvcmxkUmVxdWVzdBIfCgV3b3JsZBgBIAEoCzIQLndlZXdhci52MS5Xb3JsZBIoCgp3b3JsZF9kYXRhGAIgASgLMhQud2Vld2FyLnYxLldvcmxkRGF0YRITCgtjbGVhcl93b3JsZBgDIAEoCBIvCgt1cGRhdGVfbWFzaxgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2s6GZJBFgoUKhJVcGRhdGVXb3JsZFJlcXVlc3QifAoTVXBkYXRlV29ybGRSZXNwb25zZRIfCgV3b3JsZBgBIAEoCzIQLndlZXdhci52MS5Xb3JsZBIoCgp3b3JsZF9kYXRhGAIgASgLMhQud2Vld2FyLnYxLldvcmxkRGF0YToakkEXChUqE1VwZGF0ZVdvcmxkUmVzcG9uc2UiIAoSRGVsZXRlV29ybGRSZXF1ZXN0EgoKAmlkGAEgASgJIhUKE0RlbGV0ZVdvcmxkUmVzcG9uc2UiHwoQR2V0V29ybGRzUmVxdWVzdBILCgNpZHMYASADKAkijgEKEUdldFdvcmxkc1Jlc3BvbnNlEjgKBndvcmxkcxgBIAMoCzIoLndlZXdhci52MS5HZXRXb3JsZHNSZXNwb25zZS5Xb3JsZHNFbnRyeRo/CgtXb3JsZHNFbnRyeRILCgNrZXkYASABKAkSHwoFdmFsdWUYAiABKAsyEC53ZWV3YXIudjEuV29ybGQ6AjgBIl8KEkNyZWF0ZVdvcmxkUmVxdWVzdBIfCgV3b3JsZBgBIAEoCzIQLndlZXdhci52MS5Xb3JsZBIoCgp3b3JsZF9kYXRhGAIgASgLMhQud2Vld2FyLnYxLldvcmxkRGF0YSLbAQoTQ3JlYXRlV29ybGRSZXNwb25zZRIfCgV3b3JsZBgBIAEoCzIQLndlZXdhci52MS5Xb3JsZBIoCgp3b3JsZF9kYXRhGAIgASgLMhQud2Vld2FyLnYxLldvcmxkRGF0YRJFCgxmaWVsZF9lcnJvcnMYAyADKAsyLy53ZWV3YXIudjEuQ3JlYXRlV29ybGRSZXNwb25zZS5GaWVsZEVycm9yc0VudHJ5GjIKEEZpZWxkRXJyb3JzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ATLxBAoNV29ybGRzU2VydmljZRJjCgtDcmVhdGVXb3JsZBIdLndlZXdhci52MS5DcmVhdGVXb3JsZFJlcXVlc3QaHi53ZWV3YXIudjEuQ3JlYXRlV29ybGRSZXNwb25zZSIVgtPkkwIPOgEqIgovdjEvd29ybGRzEmMKCUdldFdvcmxkcxIbLndlZXdhci52MS5HZXRXb3JsZHNSZXF1ZXN0Ghwud2Vld2FyLnYxLkdldFdvcmxkc1Jlc3BvbnNlIhuC0+STAhUSEy92MS93b3JsZHM6YmF0Y2hHZXQSXQoKTGlzdFdvcmxkcxIcLndlZXdhci52MS5MaXN0V29ybGRzUmVxdWVzdBodLndlZXdhci52MS5MaXN0V29ybGRzUmVzcG9uc2UiEoLT5JMCDBIKL3YxL3dvcmxkcxJcCghHZXRXb3JsZBIaLndlZXdhci52MS5HZXRXb3JsZFJlcXVlc3QaGy53ZWV3YXIudjEuR2V0V29ybGRSZXNwb25zZSIXgtPkkwIREg8vdjEvd29ybGRzL3tpZH0SZwoLRGVsZXRlV29ybGQSHS53ZWV3YXIudjEuRGVsZXRlV29ybGRSZXF1ZXN0Gh4ud2Vld2FyLnYxLkRlbGV0ZVdvcmxkUmVzcG9uc2UiGYLT5JMCEyoRL3YxL3dvcmxkcy97aWQ9Kn0ScAoLVXBkYXRlV29ybGQSHS53ZWV3YXIudjEuVXBkYXRlV29ybGRSZXF1ZXN0Gh4ud2Vld2FyLnYxLlVwZGF0ZVdvcmxkUmVzcG9uc2UiIoLT5JMCHDoBKjIXL3YxL3dvcmxkcy97d29ybGQuaWQ9Kn1CnQEKDWNvbS53ZWV3YXIudjFCC1dvcmxkc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_field_mask, file_weewar_v1_models, file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations]);
 
 /**
  * WorldInfo represents a world in the catalog
@@ -154,6 +154,11 @@ export type GetWorldResponse = Message<"weewar.v1.GetWorldResponse"> & {
    * @generated from field: weewar.v1.World world = 1;
    */
   world?: World;
+
+  /**
+   * @generated from field: weewar.v1.WorldData world_data = 2;
+   */
+  worldData?: WorldData;
 };
 
 /**
@@ -162,57 +167,6 @@ export type GetWorldResponse = Message<"weewar.v1.GetWorldResponse"> & {
  */
 export const GetWorldResponseSchema: GenMessage<GetWorldResponse> = /*@__PURE__*/
   messageDesc(file_weewar_v1_worlds, 4);
-
-/**
- * @generated from message weewar.v1.GetWorldContentRequest
- */
-export type GetWorldContentRequest = Message<"weewar.v1.GetWorldContentRequest"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * Optional, defaults to default_version
-   *
-   * @generated from field: string version = 2;
-   */
-  version: string;
-};
-
-/**
- * Describes the message weewar.v1.GetWorldContentRequest.
- * Use `create(GetWorldContentRequestSchema)` to create a new message.
- */
-export const GetWorldContentRequestSchema: GenMessage<GetWorldContentRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 5);
-
-/**
- * @generated from message weewar.v1.GetWorldContentResponse
- */
-export type GetWorldContentResponse = Message<"weewar.v1.GetWorldContentResponse"> & {
-  /**
-   * @generated from field: string weewar_content = 1;
-   */
-  weewarContent: string;
-
-  /**
-   * @generated from field: string recipe_content = 2;
-   */
-  recipeContent: string;
-
-  /**
-   * @generated from field: string readme_content = 3;
-   */
-  readmeContent: string;
-};
-
-/**
- * Describes the message weewar.v1.GetWorldContentResponse.
- * Use `create(GetWorldContentResponseSchema)` to create a new message.
- */
-export const GetWorldContentResponseSchema: GenMessage<GetWorldContentResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 6);
 
 /**
  * @generated from message weewar.v1.UpdateWorldRequest
@@ -227,10 +181,20 @@ export type UpdateWorldRequest = Message<"weewar.v1.UpdateWorldRequest"> & {
   world?: World;
 
   /**
+   * @generated from field: weewar.v1.WorldData world_data = 2;
+   */
+  worldData?: WorldData;
+
+  /**
+   * @generated from field: bool clear_world = 3;
+   */
+  clearWorld: boolean;
+
+  /**
    * *
    * Mask of fields being updated in this World to make partial changes.
    *
-   * @generated from field: google.protobuf.FieldMask update_mask = 2;
+   * @generated from field: google.protobuf.FieldMask update_mask = 4;
    */
   updateMask?: FieldMask;
 };
@@ -240,7 +204,7 @@ export type UpdateWorldRequest = Message<"weewar.v1.UpdateWorldRequest"> & {
  * Use `create(UpdateWorldRequestSchema)` to create a new message.
  */
 export const UpdateWorldRequestSchema: GenMessage<UpdateWorldRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 7);
+  messageDesc(file_weewar_v1_worlds, 5);
 
 /**
  * *
@@ -256,6 +220,11 @@ export type UpdateWorldResponse = Message<"weewar.v1.UpdateWorldResponse"> & {
    * @generated from field: weewar.v1.World world = 1;
    */
   world?: World;
+
+  /**
+   * @generated from field: weewar.v1.WorldData world_data = 2;
+   */
+  worldData?: WorldData;
 };
 
 /**
@@ -263,7 +232,7 @@ export type UpdateWorldResponse = Message<"weewar.v1.UpdateWorldResponse"> & {
  * Use `create(UpdateWorldResponseSchema)` to create a new message.
  */
 export const UpdateWorldResponseSchema: GenMessage<UpdateWorldResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 8);
+  messageDesc(file_weewar_v1_worlds, 6);
 
 /**
  * *
@@ -286,7 +255,7 @@ export type DeleteWorldRequest = Message<"weewar.v1.DeleteWorldRequest"> & {
  * Use `create(DeleteWorldRequestSchema)` to create a new message.
  */
 export const DeleteWorldRequestSchema: GenMessage<DeleteWorldRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 9);
+  messageDesc(file_weewar_v1_worlds, 7);
 
 /**
  * *
@@ -302,7 +271,7 @@ export type DeleteWorldResponse = Message<"weewar.v1.DeleteWorldResponse"> & {
  * Use `create(DeleteWorldResponseSchema)` to create a new message.
  */
 export const DeleteWorldResponseSchema: GenMessage<DeleteWorldResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 10);
+  messageDesc(file_weewar_v1_worlds, 8);
 
 /**
  * *
@@ -325,7 +294,7 @@ export type GetWorldsRequest = Message<"weewar.v1.GetWorldsRequest"> & {
  * Use `create(GetWorldsRequestSchema)` to create a new message.
  */
 export const GetWorldsRequestSchema: GenMessage<GetWorldsRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 11);
+  messageDesc(file_weewar_v1_worlds, 9);
 
 /**
  * *
@@ -345,7 +314,7 @@ export type GetWorldsResponse = Message<"weewar.v1.GetWorldsResponse"> & {
  * Use `create(GetWorldsResponseSchema)` to create a new message.
  */
 export const GetWorldsResponseSchema: GenMessage<GetWorldsResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 12);
+  messageDesc(file_weewar_v1_worlds, 10);
 
 /**
  * *
@@ -361,6 +330,11 @@ export type CreateWorldRequest = Message<"weewar.v1.CreateWorldRequest"> & {
    * @generated from field: weewar.v1.World world = 1;
    */
   world?: World;
+
+  /**
+   * @generated from field: weewar.v1.WorldData world_data = 2;
+   */
+  worldData?: WorldData;
 };
 
 /**
@@ -368,7 +342,7 @@ export type CreateWorldRequest = Message<"weewar.v1.CreateWorldRequest"> & {
  * Use `create(CreateWorldRequestSchema)` to create a new message.
  */
 export const CreateWorldRequestSchema: GenMessage<CreateWorldRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 13);
+  messageDesc(file_weewar_v1_worlds, 11);
 
 /**
  * *
@@ -386,10 +360,15 @@ export type CreateWorldResponse = Message<"weewar.v1.CreateWorldResponse"> & {
   world?: World;
 
   /**
+   * @generated from field: weewar.v1.WorldData world_data = 2;
+   */
+  worldData?: WorldData;
+
+  /**
    * *
    * Error specific to a field if there are any errors.
    *
-   * @generated from field: map<string, string> field_errors = 2;
+   * @generated from field: map<string, string> field_errors = 3;
    */
   fieldErrors: { [key: string]: string };
 };
@@ -399,7 +378,7 @@ export type CreateWorldResponse = Message<"weewar.v1.CreateWorldResponse"> & {
  * Use `create(CreateWorldResponseSchema)` to create a new message.
  */
 export const CreateWorldResponseSchema: GenMessage<CreateWorldResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_worlds, 14);
+  messageDesc(file_weewar_v1_worlds, 12);
 
 /**
  * WorldsService manages the world examples catalog

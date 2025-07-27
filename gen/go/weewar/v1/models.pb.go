@@ -526,12 +526,16 @@ func (x *Tile) GetPlayer() int32 {
 type Unit struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Q and R in Cubed coordinates
-	Q             int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
-	R             int32 `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
-	Player        int32 `protobuf:"varint,3,opt,name=player,proto3" json:"player,omitempty"`
-	UnitType      int32 `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Q        int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
+	R        int32 `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
+	Player   int32 `protobuf:"varint,3,opt,name=player,proto3" json:"player,omitempty"`
+	UnitType int32 `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
+	// Runtime state fields
+	AvailableHealth int32 `protobuf:"varint,5,opt,name=available_health,json=availableHealth,proto3" json:"available_health,omitempty"` // Current health points
+	DistanceLeft    int32 `protobuf:"varint,6,opt,name=distance_left,json=distanceLeft,proto3" json:"distance_left,omitempty"`          // Movement points remaining this turn
+	TurnCounter     int32 `protobuf:"varint,7,opt,name=turn_counter,json=turnCounter,proto3" json:"turn_counter,omitempty"`             // Which turn this unit was created/last acted
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Unit) Reset() {
@@ -588,6 +592,27 @@ func (x *Unit) GetPlayer() int32 {
 func (x *Unit) GetUnitType() int32 {
 	if x != nil {
 		return x.UnitType
+	}
+	return 0
+}
+
+func (x *Unit) GetAvailableHealth() int32 {
+	if x != nil {
+		return x.AvailableHealth
+	}
+	return 0
+}
+
+func (x *Unit) GetDistanceLeft() int32 {
+	if x != nil {
+		return x.DistanceLeft
+	}
+	return 0
+}
+
+func (x *Unit) GetTurnCounter() int32 {
+	if x != nil {
+		return x.TurnCounter
 	}
 	return 0
 }
@@ -1939,12 +1964,15 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
 	"\ttile_type\x18\x03 \x01(\x05R\btileType\x12\x16\n" +
-	"\x06player\x18\x04 \x01(\x05R\x06player\"W\n" +
+	"\x06player\x18\x04 \x01(\x05R\x06player\"\xca\x01\n" +
 	"\x04Unit\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n" +
 	"\x06player\x18\x03 \x01(\x05R\x06player\x12\x1b\n" +
-	"\tunit_type\x18\x04 \x01(\x05R\bunitType\"\x83\x03\n" +
+	"\tunit_type\x18\x04 \x01(\x05R\bunitType\x12)\n" +
+	"\x10available_health\x18\x05 \x01(\x05R\x0favailableHealth\x12#\n" +
+	"\rdistance_left\x18\x06 \x01(\x05R\fdistanceLeft\x12!\n" +
+	"\fturn_counter\x18\a \x01(\x05R\vturnCounter\"\x83\x03\n" +
 	"\x04Game\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +

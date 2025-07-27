@@ -4,9 +4,9 @@
 
 import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
-import type { FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { FieldMask } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_field_mask, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
-import type { Game, Pagination, PaginationResponse } from "./models_pb";
+import type { Game, GameMove, GameMoveGroup, GameMoveHistory, GameMoveResult, GameState, Pagination, PaginationResponse, WorldChange } from "./models_pb";
 import { file_weewar_v1_models } from "./models_pb";
 import { file_google_api_annotations } from "../../google/api/annotations_pb";
 import { file_protoc_gen_openapiv2_options_annotations } from "../../protoc-gen-openapiv2/options/annotations_pb";
@@ -16,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/games.proto.
  */
 export const file_weewar_v1_games: GenFile = /*@__PURE__*/
-  fileDesc("ChV3ZWV3YXIvdjEvZ2FtZXMucHJvdG8SCXdlZXdhci52MSKRAQoIR2FtZUluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghjYXRlZ29yeRgEIAEoCRISCgpkaWZmaWN1bHR5GAUgASgJEgwKBHRhZ3MYBiADKAkSDAoEaWNvbhgHIAEoCRIUCgxsYXN0X3VwZGF0ZWQYCCABKAkiTwoQTGlzdEdhbWVzUmVxdWVzdBIpCgpwYWdpbmF0aW9uGAEgASgLMhUud2Vld2FyLnYxLlBhZ2luYXRpb24SEAoIb3duZXJfaWQYAiABKAkiZgoRTGlzdEdhbWVzUmVzcG9uc2USHgoFaXRlbXMYASADKAsyDy53ZWV3YXIudjEuR2FtZRIxCgpwYWdpbmF0aW9uGAIgASgLMh0ud2Vld2FyLnYxLlBhZ2luYXRpb25SZXNwb25zZSItCg5HZXRHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJIjAKD0dldEdhbWVSZXNwb25zZRIdCgRnYW1lGAEgASgLMg8ud2Vld2FyLnYxLkdhbWUiNAoVR2V0R2FtZUNvbnRlbnRSZXF1ZXN0EgoKAmlkGAEgASgJEg8KB3ZlcnNpb24YAiABKAkiYAoWR2V0R2FtZUNvbnRlbnRSZXNwb25zZRIWCg53ZWV3YXJfY29udGVudBgBIAEoCRIWCg5yZWNpcGVfY29udGVudBgCIAEoCRIWCg5yZWFkbWVfY29udGVudBgDIAEoCSJ9ChFVcGRhdGVHYW1lUmVxdWVzdBIdCgRnYW1lGAEgASgLMg8ud2Vld2FyLnYxLkdhbWUSLwoLdXBkYXRlX21hc2sYAiABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrOhiSQRUKEyoRVXBkYXRlR2FtZVJlcXVlc3QiTgoSVXBkYXRlR2FtZVJlc3BvbnNlEh0KBGdhbWUYASABKAsyDy53ZWV3YXIudjEuR2FtZToZkkEWChQqElVwZGF0ZUdhbWVSZXNwb25zZSIfChFEZWxldGVHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCSIUChJEZWxldGVHYW1lUmVzcG9uc2UiHgoPR2V0R2FtZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSKIAQoQR2V0R2FtZXNSZXNwb25zZRI1CgVnYW1lcxgBIAMoCzImLndlZXdhci52MS5HZXRHYW1lc1Jlc3BvbnNlLkdhbWVzRW50cnkaPQoKR2FtZXNFbnRyeRILCgNrZXkYASABKAkSHgoFdmFsdWUYAiABKAsyDy53ZWV3YXIudjEuR2FtZToCOAEiMgoRQ3JlYXRlR2FtZVJlcXVlc3QSHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lIq0BChJDcmVhdGVHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEkQKDGZpZWxkX2Vycm9ycxgCIAMoCzIuLndlZXdhci52MS5DcmVhdGVHYW1lUmVzcG9uc2UuRmllbGRFcnJvcnNFbnRyeRoyChBGaWVsZEVycm9yc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiSgoTUHJvY2Vzc01vdmVzUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEiIKBW1vdmVzGAMgAygLMhMud2Vld2FyLnYxLkdhbWVNb3ZlInAKFFByb2Nlc3NNb3Zlc1Jlc3BvbnNlEi8KDG1vdmVfcmVzdWx0cxgBIAMoCzIZLndlZXdhci52MS5HYW1lTW92ZVJlc3VsdBInCgdjaGFuZ2VzGAIgAygLMhYud2Vld2FyLnYxLldvcmxkQ2hhbmdlIugBCghHYW1lTW92ZRIOCgZwbGF5ZXIYASABKAUSLQoJdGltZXN0YW1wGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgltb3ZlX3VuaXQYAyABKAsyGS53ZWV3YXIudjEuTW92ZVVuaXRBY3Rpb25IABIyCgthdHRhY2tfdW5pdBgEIAEoCzIbLndlZXdhci52MS5BdHRhY2tVbml0QWN0aW9uSAASLAoIZW5kX3R1cm4YBSABKAsyGC53ZWV3YXIudjEuRW5kVHVybkFjdGlvbkgAQgsKCW1vdmVfdHlwZSJPCg5HYW1lTW92ZVJlc3VsdBIUCgxpc19wZXJtYW5lbnQYASABKAgSJwoHY2hhbmdlcxgDIAMoCzIWLndlZXdhci52MS5Xb3JsZENoYW5nZSJMCg5Nb3ZlVW5pdEFjdGlvbhIOCgZmcm9tX3EYASABKAUSDgoGZnJvbV9yGAIgASgFEgwKBHRvX3EYAyABKAUSDAoEdG9fchgEIAEoBSJiChBBdHRhY2tVbml0QWN0aW9uEhIKCmF0dGFja2VyX3EYASABKAUSEgoKYXR0YWNrZXJfchgCIAEoBRISCgpkZWZlbmRlcl9xGAMgASgFEhIKCmRlZmVuZGVyX3IYBCABKAUiDwoNRW5kVHVybkFjdGlvbiLyAQoLV29ybGRDaGFuZ2USMAoKdW5pdF9tb3ZlZBgBIAEoCzIaLndlZXdhci52MS5Vbml0TW92ZWRDaGFuZ2VIABI0Cgx1bml0X2RhbWFnZWQYAiABKAsyHC53ZWV3YXIudjEuVW5pdERhbWFnZWRDaGFuZ2VIABIyCgt1bml0X2tpbGxlZBgDIAEoCzIbLndlZXdhci52MS5Vbml0S2lsbGVkQ2hhbmdlSAASOAoOcGxheWVyX2NoYW5nZWQYBCABKAsyHi53ZWV3YXIudjEuUGxheWVyQ2hhbmdlZENoYW5nZUgAQg0KC2NoYW5nZV90eXBlIk0KD1VuaXRNb3ZlZENoYW5nZRIOCgZmcm9tX3EYAiABKAUSDgoGZnJvbV9yGAMgASgFEgwKBHRvX3EYBCABKAUSDAoEdG9fchgFIAEoBSJWChFVbml0RGFtYWdlZENoYW5nZRIXCg9wcmV2aW91c19oZWFsdGgYAiABKAUSEgoKbmV3X2hlYWx0aBgDIAEoBRIJCgFxGAQgASgFEgkKAXIYBSABKAUiSwoQVW5pdEtpbGxlZENoYW5nZRIOCgZwbGF5ZXIYAiABKAUSEQoJdW5pdF90eXBlGAMgASgFEgkKAXEYBCABKAUSCQoBchgFIAEoBSJrChNQbGF5ZXJDaGFuZ2VkQ2hhbmdlEhcKD3ByZXZpb3VzX3BsYXllchgBIAEoBRISCgpuZXdfcGxheWVyGAIgASgFEhUKDXByZXZpb3VzX3R1cm4YAyABKAUSEAoIbmV3X3R1cm4YBCABKAUyzgUKDEdhbWVzU2VydmljZRJfCgpDcmVhdGVHYW1lEhwud2Vld2FyLnYxLkNyZWF0ZUdhbWVSZXF1ZXN0Gh0ud2Vld2FyLnYxLkNyZWF0ZUdhbWVSZXNwb25zZSIUgtPkkwIOOgEqIgkvdjEvZ2FtZXMSXwoIR2V0R2FtZXMSGi53ZWV3YXIudjEuR2V0R2FtZXNSZXF1ZXN0Ghsud2Vld2FyLnYxLkdldEdhbWVzUmVzcG9uc2UiGoLT5JMCFBISL3YxL2dhbWVzOmJhdGNoR2V0ElkKCUxpc3RHYW1lcxIbLndlZXdhci52MS5MaXN0R2FtZXNSZXF1ZXN0Ghwud2Vld2FyLnYxLkxpc3RHYW1lc1Jlc3BvbnNlIhGC0+STAgsSCS92MS9nYW1lcxJYCgdHZXRHYW1lEhkud2Vld2FyLnYxLkdldEdhbWVSZXF1ZXN0Ghoud2Vld2FyLnYxLkdldEdhbWVSZXNwb25zZSIWgtPkkwIQEg4vdjEvZ2FtZXMve2lkfRJjCgpEZWxldGVHYW1lEhwud2Vld2FyLnYxLkRlbGV0ZUdhbWVSZXF1ZXN0Gh0ud2Vld2FyLnYxLkRlbGV0ZUdhbWVSZXNwb25zZSIYgtPkkwISKhAvdjEvZ2FtZXMve2lkPSp9EmsKClVwZGF0ZUdhbWUSHC53ZWV3YXIudjEuVXBkYXRlR2FtZVJlcXVlc3QaHS53ZWV3YXIudjEuVXBkYXRlR2FtZVJlc3BvbnNlIiCC0+STAho6ASoyFS92MS9nYW1lcy97Z2FtZS5pZD0qfRJ1CgxQcm9jZXNzTW92ZXMSHi53ZWV3YXIudjEuUHJvY2Vzc01vdmVzUmVxdWVzdBofLndlZXdhci52MS5Qcm9jZXNzTW92ZXNSZXNwb25zZSIkgtPkkwIeOgEqIhkvdjEvZ2FtZXMve2dhbWVfaWR9L21vdmVzQpwBCg1jb20ud2Vld2FyLnYxQgpHYW1lc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_field_mask, file_weewar_v1_models, file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations]);
+  fileDesc("ChV3ZWV3YXIvdjEvZ2FtZXMucHJvdG8SCXdlZXdhci52MSKRAQoIR2FtZUluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghjYXRlZ29yeRgEIAEoCRISCgpkaWZmaWN1bHR5GAUgASgJEgwKBHRhZ3MYBiADKAkSDAoEaWNvbhgHIAEoCRIUCgxsYXN0X3VwZGF0ZWQYCCABKAkiTwoQTGlzdEdhbWVzUmVxdWVzdBIpCgpwYWdpbmF0aW9uGAEgASgLMhUud2Vld2FyLnYxLlBhZ2luYXRpb24SEAoIb3duZXJfaWQYAiABKAkiZgoRTGlzdEdhbWVzUmVzcG9uc2USHgoFaXRlbXMYASADKAsyDy53ZWV3YXIudjEuR2FtZRIxCgpwYWdpbmF0aW9uGAIgASgLMh0ud2Vld2FyLnYxLlBhZ2luYXRpb25SZXNwb25zZSItCg5HZXRHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJIoIBCg9HZXRHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEiMKBXN0YXRlGAIgASgLMhQud2Vld2FyLnYxLkdhbWVTdGF0ZRIrCgdoaXN0b3J5GAMgASgLMhoud2Vld2FyLnYxLkdhbWVNb3ZlSGlzdG9yeSI0ChVHZXRHYW1lQ29udGVudFJlcXVlc3QSCgoCaWQYASABKAkSDwoHdmVyc2lvbhgCIAEoCSJgChZHZXRHYW1lQ29udGVudFJlc3BvbnNlEhYKDndlZXdhcl9jb250ZW50GAEgASgJEhYKDnJlY2lwZV9jb250ZW50GAIgASgJEhYKDnJlYWRtZV9jb250ZW50GAMgASgJIuwBChFVcGRhdGVHYW1lUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEiEKCG5ld19nYW1lGAIgASgLMg8ud2Vld2FyLnYxLkdhbWUSJwoJbmV3X3N0YXRlGAMgASgLMhQud2Vld2FyLnYxLkdhbWVTdGF0ZRIvCgtuZXdfaGlzdG9yeRgEIAEoCzIaLndlZXdhci52MS5HYW1lTW92ZUhpc3RvcnkSLwoLdXBkYXRlX21hc2sYBSABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrOhiSQRUKEyoRVXBkYXRlR2FtZVJlcXVlc3QiTgoSVXBkYXRlR2FtZVJlc3BvbnNlEh0KBGdhbWUYASABKAsyDy53ZWV3YXIudjEuR2FtZToZkkEWChQqElVwZGF0ZUdhbWVSZXNwb25zZSIfChFEZWxldGVHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCSIUChJEZWxldGVHYW1lUmVzcG9uc2UiHgoPR2V0R2FtZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSKIAQoQR2V0R2FtZXNSZXNwb25zZRI1CgVnYW1lcxgBIAMoCzImLndlZXdhci52MS5HZXRHYW1lc1Jlc3BvbnNlLkdhbWVzRW50cnkaPQoKR2FtZXNFbnRyeRILCgNrZXkYASABKAkSHgoFdmFsdWUYAiABKAsyDy53ZWV3YXIudjEuR2FtZToCOAEiMgoRQ3JlYXRlR2FtZVJlcXVlc3QSHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lItcBChJDcmVhdGVHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEigKCmdhbWVfc3RhdGUYAiABKAsyFC53ZWV3YXIudjEuR2FtZVN0YXRlEkQKDGZpZWxkX2Vycm9ycxgDIAMoCzIuLndlZXdhci52MS5DcmVhdGVHYW1lUmVzcG9uc2UuRmllbGRFcnJvcnNFbnRyeRoyChBGaWVsZEVycm9yc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiSgoTUHJvY2Vzc01vdmVzUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEiIKBW1vdmVzGAMgAygLMhMud2Vld2FyLnYxLkdhbWVNb3ZlInAKFFByb2Nlc3NNb3Zlc1Jlc3BvbnNlEi8KDG1vdmVfcmVzdWx0cxgBIAMoCzIZLndlZXdhci52MS5HYW1lTW92ZVJlc3VsdBInCgdjaGFuZ2VzGAIgAygLMhYud2Vld2FyLnYxLldvcmxkQ2hhbmdlIiYKE0dldEdhbWVTdGF0ZVJlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCSI7ChRHZXRHYW1lU3RhdGVSZXNwb25zZRIjCgVzdGF0ZRgBIAEoCzIULndlZXdhci52MS5HYW1lU3RhdGUiQwoQTGlzdE1vdmVzUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEg4KBm9mZnNldBgCIAEoBRIOCgZsYXN0X24YAyABKAUiVAoRTGlzdE1vdmVzUmVzcG9uc2USEAoIaGFzX21vcmUYASABKAgSLQoLbW92ZV9ncm91cHMYAiADKAsyGC53ZWV3YXIudjEuR2FtZU1vdmVHcm91cCJCChlHZXRNb3ZlbWVudE9wdGlvbnNSZXF1ZXN0Eg8KB2dhbWVfaWQYASABKAkSCQoBcRgCIAEoBRIJCgFyGAMgASgFIkgKGkdldE1vdmVtZW50T3B0aW9uc1Jlc3BvbnNlEioKB29wdGlvbnMYASADKAsyGS53ZWV3YXIudjEuTW92ZW1lbnRPcHRpb24iTwoOTW92ZW1lbnRPcHRpb24SCQoBcRgBIAEoBRIJCgFyGAIgASgFEhUKDW1vdmVtZW50X2Nvc3QYAyABKAUSEAoIaXNfdmFsaWQYBCABKAgiQAoXR2V0QXR0YWNrT3B0aW9uc1JlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCRIJCgFxGAIgASgFEgkKAXIYAyABKAUiRAoYR2V0QXR0YWNrT3B0aW9uc1Jlc3BvbnNlEigKB29wdGlvbnMYASADKAsyFy53ZWV3YXIudjEuQXR0YWNrT3B0aW9uIlEKDEF0dGFja09wdGlvbhIJCgFxGAEgASgFEgkKAXIYAiABKAUSEgoKY2FuX2F0dGFjaxgDIAEoCBIXCg9kYW1hZ2VfZXN0aW1hdGUYBCABKAUiUAoUQ2FuU2VsZWN0VW5pdFJlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCRIJCgFxGAIgASgFEgkKAXIYAyABKAUSEQoJcGxheWVyX2lkGAQgASgFIjsKFUNhblNlbGVjdFVuaXRSZXNwb25zZRISCgpjYW5fc2VsZWN0GAEgASgIEg4KBnJlYXNvbhgCIAEoCTLOCgoMR2FtZXNTZXJ2aWNlEl8KCkNyZWF0ZUdhbWUSHC53ZWV3YXIudjEuQ3JlYXRlR2FtZVJlcXVlc3QaHS53ZWV3YXIudjEuQ3JlYXRlR2FtZVJlc3BvbnNlIhSC0+STAg46ASoiCS92MS9nYW1lcxJfCghHZXRHYW1lcxIaLndlZXdhci52MS5HZXRHYW1lc1JlcXVlc3QaGy53ZWV3YXIudjEuR2V0R2FtZXNSZXNwb25zZSIagtPkkwIUEhIvdjEvZ2FtZXM6YmF0Y2hHZXQSWQoJTGlzdEdhbWVzEhsud2Vld2FyLnYxLkxpc3RHYW1lc1JlcXVlc3QaHC53ZWV3YXIudjEuTGlzdEdhbWVzUmVzcG9uc2UiEYLT5JMCCxIJL3YxL2dhbWVzElgKB0dldEdhbWUSGS53ZWV3YXIudjEuR2V0R2FtZVJlcXVlc3QaGi53ZWV3YXIudjEuR2V0R2FtZVJlc3BvbnNlIhaC0+STAhASDi92MS9nYW1lcy97aWR9EmMKCkRlbGV0ZUdhbWUSHC53ZWV3YXIudjEuRGVsZXRlR2FtZVJlcXVlc3QaHS53ZWV3YXIudjEuRGVsZXRlR2FtZVJlc3BvbnNlIhiC0+STAhIqEC92MS9nYW1lcy97aWQ9Kn0SawoKVXBkYXRlR2FtZRIcLndlZXdhci52MS5VcGRhdGVHYW1lUmVxdWVzdBodLndlZXdhci52MS5VcGRhdGVHYW1lUmVzcG9uc2UiIILT5JMCGjoBKjIVL3YxL2dhbWVzL3tnYW1lX2lkPSp9EnIKDEdldEdhbWVTdGF0ZRIeLndlZXdhci52MS5HZXRHYW1lU3RhdGVSZXF1ZXN0Gh8ud2Vld2FyLnYxLkdldEdhbWVTdGF0ZVJlc3BvbnNlIiGC0+STAhsSGS92MS9nYW1lcy97Z2FtZV9pZH0vc3RhdGUSaQoJTGlzdE1vdmVzEhsud2Vld2FyLnYxLkxpc3RNb3Zlc1JlcXVlc3QaHC53ZWV3YXIudjEuTGlzdE1vdmVzUmVzcG9uc2UiIYLT5JMCGxIZL3YxL2dhbWVzL3tnYW1lX2lkfS9tb3ZlcxJ1CgxQcm9jZXNzTW92ZXMSHi53ZWV3YXIudjEuUHJvY2Vzc01vdmVzUmVxdWVzdBofLndlZXdhci52MS5Qcm9jZXNzTW92ZXNSZXNwb25zZSIkgtPkkwIeOgEqIhkvdjEvZ2FtZXMve2dhbWVfaWR9L21vdmVzEo8BChJHZXRNb3ZlbWVudE9wdGlvbnMSJC53ZWV3YXIudjEuR2V0TW92ZW1lbnRPcHRpb25zUmVxdWVzdBolLndlZXdhci52MS5HZXRNb3ZlbWVudE9wdGlvbnNSZXNwb25zZSIsgtPkkwImEiQvdjEvZ2FtZXMve2dhbWVfaWR9L21vdmVtZW50L3txfS97cn0ShwEKEEdldEF0dGFja09wdGlvbnMSIi53ZWV3YXIudjEuR2V0QXR0YWNrT3B0aW9uc1JlcXVlc3QaIy53ZWV3YXIudjEuR2V0QXR0YWNrT3B0aW9uc1Jlc3BvbnNlIiqC0+STAiQSIi92MS9nYW1lcy97Z2FtZV9pZH0vYXR0YWNrL3txfS97cn0SggEKDUNhblNlbGVjdFVuaXQSHy53ZWV3YXIudjEuQ2FuU2VsZWN0VW5pdFJlcXVlc3QaIC53ZWV3YXIudjEuQ2FuU2VsZWN0VW5pdFJlc3BvbnNlIi6C0+STAigSJi92MS9nYW1lcy97Z2FtZV9pZH0vY2FuLXNlbGVjdC97cX0ve3J9QpwBCg1jb20ud2Vld2FyLnYxQgpHYW1lc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_field_mask, file_weewar_v1_models, file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations]);
 
 /**
  * GameInfo represents a game in the catalog
@@ -154,6 +154,16 @@ export type GetGameResponse = Message<"weewar.v1.GetGameResponse"> & {
    * @generated from field: weewar.v1.Game game = 1;
    */
   game?: Game;
+
+  /**
+   * @generated from field: weewar.v1.GameState state = 2;
+   */
+  state?: GameState;
+
+  /**
+   * @generated from field: weewar.v1.GameMoveHistory history = 3;
+   */
+  history?: GameMoveHistory;
 };
 
 /**
@@ -219,18 +229,39 @@ export const GetGameContentResponseSchema: GenMessage<GetGameContentResponse> = 
  */
 export type UpdateGameRequest = Message<"weewar.v1.UpdateGameRequest"> & {
   /**
+   * Game id to modify
+   *
+   * @generated from field: string game_id = 1;
+   */
+  gameId: string;
+
+  /**
    * *
    * Game being updated
    *
-   * @generated from field: weewar.v1.Game game = 1;
+   * @generated from field: weewar.v1.Game new_game = 2;
    */
-  game?: Game;
+  newGame?: Game;
+
+  /**
+   * New world state to save
+   *
+   * @generated from field: weewar.v1.GameState new_state = 3;
+   */
+  newState?: GameState;
+
+  /**
+   * History to save
+   *
+   * @generated from field: weewar.v1.GameMoveHistory new_history = 4;
+   */
+  newHistory?: GameMoveHistory;
 
   /**
    * *
    * Mask of fields being updated in this Game to make partial changes.
    *
-   * @generated from field: google.protobuf.FieldMask update_mask = 2;
+   * @generated from field: google.protobuf.FieldMask update_mask = 5;
    */
   updateMask?: FieldMask;
 };
@@ -386,10 +417,17 @@ export type CreateGameResponse = Message<"weewar.v1.CreateGameResponse"> & {
   game?: Game;
 
   /**
+   * The starting game state
+   *
+   * @generated from field: weewar.v1.GameState game_state = 2;
+   */
+  gameState?: GameState;
+
+  /**
    * *
    * Error specific to a field if there are any errors.
    *
-   * @generated from field: map<string, string> field_errors = 2;
+   * @generated from field: map<string, string> field_errors = 3;
    */
   fieldErrors: { [key: string]: string };
 };
@@ -480,358 +518,348 @@ export const ProcessMovesResponseSchema: GenMessage<ProcessMovesResponse> = /*@_
 
 /**
  * *
- * Represents a single move which can be one of many actions in the game
+ * Request to get the game's latest state
  *
- * @generated from message weewar.v1.GameMove
+ * @generated from message weewar.v1.GetGameStateRequest
  */
-export type GameMove = Message<"weewar.v1.GameMove"> & {
+export type GetGameStateRequest = Message<"weewar.v1.GetGameStateRequest"> & {
   /**
-   * The player making the move
+   * *
+   * Game ID to add moves to
    *
-   * @generated from field: int32 player = 1;
+   * @generated from field: string game_id = 1;
    */
-  player: number;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp timestamp = 2;
-   */
-  timestamp?: Timestamp;
-
-  /**
-   * @generated from oneof weewar.v1.GameMove.move_type
-   */
-  moveType: {
-    /**
-     * @generated from field: weewar.v1.MoveUnitAction move_unit = 3;
-     */
-    value: MoveUnitAction;
-    case: "moveUnit";
-  } | {
-    /**
-     * @generated from field: weewar.v1.AttackUnitAction attack_unit = 4;
-     */
-    value: AttackUnitAction;
-    case: "attackUnit";
-  } | {
-    /**
-     * @generated from field: weewar.v1.EndTurnAction end_turn = 5;
-     */
-    value: EndTurnAction;
-    case: "endTurn";
-  } | { case: undefined; value?: undefined };
+  gameId: string;
 };
 
 /**
- * Describes the message weewar.v1.GameMove.
- * Use `create(GameMoveSchema)` to create a new message.
+ * Describes the message weewar.v1.GetGameStateRequest.
+ * Use `create(GetGameStateRequestSchema)` to create a new message.
  */
-export const GameMoveSchema: GenMessage<GameMove> = /*@__PURE__*/
+export const GetGameStateRequestSchema: GenMessage<GetGameStateRequest> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 17);
 
 /**
  * *
- * Represents the result of executing a move
+ * Response holding latest game state
  *
- * @generated from message weewar.v1.GameMoveResult
+ * @generated from message weewar.v1.GetGameStateResponse
  */
-export type GameMoveResult = Message<"weewar.v1.GameMoveResult"> & {
+export type GetGameStateResponse = Message<"weewar.v1.GetGameStateResponse"> & {
   /**
-   * Whether the result is permenant and can be undone.
-   * Just moving a unit for example is not permanent, but attacking a unit
-   * would be (ie a player cannot undo it).
-   *
-   * @generated from field: bool is_permanent = 1;
+   * @generated from field: weewar.v1.GameState state = 1;
    */
-  isPermanent: boolean;
-
-  /**
-   * A set of changes to the world as a result of making this move
-   *
-   * @generated from field: repeated weewar.v1.WorldChange changes = 3;
-   */
-  changes: WorldChange[];
+  state?: GameState;
 };
 
 /**
- * Describes the message weewar.v1.GameMoveResult.
- * Use `create(GameMoveResultSchema)` to create a new message.
+ * Describes the message weewar.v1.GetGameStateResponse.
+ * Use `create(GetGameStateResponseSchema)` to create a new message.
  */
-export const GameMoveResultSchema: GenMessage<GameMoveResult> = /*@__PURE__*/
+export const GetGameStateResponseSchema: GenMessage<GetGameStateResponse> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 18);
 
 /**
  * *
- * Move unit from one position to another
+ * Request to list moves for a game
  *
- * @generated from message weewar.v1.MoveUnitAction
+ * @generated from message weewar.v1.ListMovesRequest
  */
-export type MoveUnitAction = Message<"weewar.v1.MoveUnitAction"> & {
+export type ListMovesRequest = Message<"weewar.v1.ListMovesRequest"> & {
   /**
-   * @generated from field: int32 from_q = 1;
+   * *
+   * Game ID to add moves to
+   *
+   * @generated from field: string game_id = 1;
    */
-  fromQ: number;
+  gameId: string;
 
   /**
-   * @generated from field: int32 from_r = 2;
+   * Offset of the move to begin fetching from in reverse order from "latest".
+   * 0 => start from now
+   *
+   * @generated from field: int32 offset = 2;
    */
-  fromR: number;
+  offset: number;
 
   /**
-   * @generated from field: int32 to_q = 3;
+   * *
+   * Limit to last N moves (from offset).  if <= 0 return all moves
+   *
+   * @generated from field: int32 last_n = 3;
    */
-  toQ: number;
-
-  /**
-   * @generated from field: int32 to_r = 4;
-   */
-  toR: number;
+  lastN: number;
 };
 
 /**
- * Describes the message weewar.v1.MoveUnitAction.
- * Use `create(MoveUnitActionSchema)` to create a new message.
+ * Describes the message weewar.v1.ListMovesRequest.
+ * Use `create(ListMovesRequestSchema)` to create a new message.
  */
-export const MoveUnitActionSchema: GenMessage<MoveUnitAction> = /*@__PURE__*/
+export const ListMovesRequestSchema: GenMessage<ListMovesRequest> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 19);
 
 /**
  * *
- * Attack with one unit against another
+ * Response after adding moves to game.
  *
- * @generated from message weewar.v1.AttackUnitAction
+ * @generated from message weewar.v1.ListMovesResponse
  */
-export type AttackUnitAction = Message<"weewar.v1.AttackUnitAction"> & {
+export type ListMovesResponse = Message<"weewar.v1.ListMovesResponse"> & {
   /**
-   * @generated from field: int32 attacker_q = 1;
+   * Whether there are more moves before this
+   *
+   * @generated from field: bool has_more = 1;
    */
-  attackerQ: number;
+  hasMore: boolean;
 
   /**
-   * @generated from field: int32 attacker_r = 2;
+   * @generated from field: repeated weewar.v1.GameMoveGroup move_groups = 2;
    */
-  attackerR: number;
-
-  /**
-   * @generated from field: int32 defender_q = 3;
-   */
-  defenderQ: number;
-
-  /**
-   * @generated from field: int32 defender_r = 4;
-   */
-  defenderR: number;
+  moveGroups: GameMoveGroup[];
 };
 
 /**
- * Describes the message weewar.v1.AttackUnitAction.
- * Use `create(AttackUnitActionSchema)` to create a new message.
+ * Describes the message weewar.v1.ListMovesResponse.
+ * Use `create(ListMovesResponseSchema)` to create a new message.
  */
-export const AttackUnitActionSchema: GenMessage<AttackUnitAction> = /*@__PURE__*/
+export const ListMovesResponseSchema: GenMessage<ListMovesResponse> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 20);
 
 /**
  * *
- * End current player's turn
+ * Request to get movement options for a unit at a position
  *
- * No additional fields needed
- *
- * @generated from message weewar.v1.EndTurnAction
+ * @generated from message weewar.v1.GetMovementOptionsRequest
  */
-export type EndTurnAction = Message<"weewar.v1.EndTurnAction"> & {
+export type GetMovementOptionsRequest = Message<"weewar.v1.GetMovementOptionsRequest"> & {
+  /**
+   * @generated from field: string game_id = 1;
+   */
+  gameId: string;
+
+  /**
+   * @generated from field: int32 q = 2;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 3;
+   */
+  r: number;
 };
 
 /**
- * Describes the message weewar.v1.EndTurnAction.
- * Use `create(EndTurnActionSchema)` to create a new message.
+ * Describes the message weewar.v1.GetMovementOptionsRequest.
+ * Use `create(GetMovementOptionsRequestSchema)` to create a new message.
  */
-export const EndTurnActionSchema: GenMessage<EndTurnAction> = /*@__PURE__*/
+export const GetMovementOptionsRequestSchema: GenMessage<GetMovementOptionsRequest> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 21);
 
 /**
  * *
- * Represents a change to the game world
+ * Response with movement options for a unit
  *
- * @generated from message weewar.v1.WorldChange
+ * @generated from message weewar.v1.GetMovementOptionsResponse
  */
-export type WorldChange = Message<"weewar.v1.WorldChange"> & {
+export type GetMovementOptionsResponse = Message<"weewar.v1.GetMovementOptionsResponse"> & {
   /**
-   * When did this change happen
-   *
-   * @generated from oneof weewar.v1.WorldChange.change_type
+   * @generated from field: repeated weewar.v1.MovementOption options = 1;
    */
-  changeType: {
-    /**
-     * @generated from field: weewar.v1.UnitMovedChange unit_moved = 1;
-     */
-    value: UnitMovedChange;
-    case: "unitMoved";
-  } | {
-    /**
-     * @generated from field: weewar.v1.UnitDamagedChange unit_damaged = 2;
-     */
-    value: UnitDamagedChange;
-    case: "unitDamaged";
-  } | {
-    /**
-     * @generated from field: weewar.v1.UnitKilledChange unit_killed = 3;
-     */
-    value: UnitKilledChange;
-    case: "unitKilled";
-  } | {
-    /**
-     * @generated from field: weewar.v1.PlayerChangedChange player_changed = 4;
-     */
-    value: PlayerChangedChange;
-    case: "playerChanged";
-  } | { case: undefined; value?: undefined };
+  options: MovementOption[];
 };
 
 /**
- * Describes the message weewar.v1.WorldChange.
- * Use `create(WorldChangeSchema)` to create a new message.
+ * Describes the message weewar.v1.GetMovementOptionsResponse.
+ * Use `create(GetMovementOptionsResponseSchema)` to create a new message.
  */
-export const WorldChangeSchema: GenMessage<WorldChange> = /*@__PURE__*/
+export const GetMovementOptionsResponseSchema: GenMessage<GetMovementOptionsResponse> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 22);
 
 /**
  * *
- * A unit moved from one position to another
+ * A possible movement destination with cost
  *
- * @generated from message weewar.v1.UnitMovedChange
+ * @generated from message weewar.v1.MovementOption
  */
-export type UnitMovedChange = Message<"weewar.v1.UnitMovedChange"> & {
+export type MovementOption = Message<"weewar.v1.MovementOption"> & {
   /**
-   * @generated from field: int32 from_q = 2;
+   * @generated from field: int32 q = 1;
    */
-  fromQ: number;
+  q: number;
 
   /**
-   * @generated from field: int32 from_r = 3;
+   * @generated from field: int32 r = 2;
    */
-  fromR: number;
+  r: number;
 
   /**
-   * @generated from field: int32 to_q = 4;
+   * @generated from field: int32 movement_cost = 3;
    */
-  toQ: number;
+  movementCost: number;
 
   /**
-   * @generated from field: int32 to_r = 5;
+   * @generated from field: bool is_valid = 4;
    */
-  toR: number;
+  isValid: boolean;
 };
 
 /**
- * Describes the message weewar.v1.UnitMovedChange.
- * Use `create(UnitMovedChangeSchema)` to create a new message.
+ * Describes the message weewar.v1.MovementOption.
+ * Use `create(MovementOptionSchema)` to create a new message.
  */
-export const UnitMovedChangeSchema: GenMessage<UnitMovedChange> = /*@__PURE__*/
+export const MovementOptionSchema: GenMessage<MovementOption> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 23);
 
 /**
  * *
- * A unit took damage
+ * Request to get attack options for a unit at a position
  *
- * @generated from message weewar.v1.UnitDamagedChange
+ * @generated from message weewar.v1.GetAttackOptionsRequest
  */
-export type UnitDamagedChange = Message<"weewar.v1.UnitDamagedChange"> & {
+export type GetAttackOptionsRequest = Message<"weewar.v1.GetAttackOptionsRequest"> & {
   /**
-   * @generated from field: int32 previous_health = 2;
+   * @generated from field: string game_id = 1;
    */
-  previousHealth: number;
+  gameId: string;
 
   /**
-   * @generated from field: int32 new_health = 3;
-   */
-  newHealth: number;
-
-  /**
-   * @generated from field: int32 q = 4;
+   * @generated from field: int32 q = 2;
    */
   q: number;
 
   /**
-   * @generated from field: int32 r = 5;
+   * @generated from field: int32 r = 3;
    */
   r: number;
 };
 
 /**
- * Describes the message weewar.v1.UnitDamagedChange.
- * Use `create(UnitDamagedChangeSchema)` to create a new message.
+ * Describes the message weewar.v1.GetAttackOptionsRequest.
+ * Use `create(GetAttackOptionsRequestSchema)` to create a new message.
  */
-export const UnitDamagedChangeSchema: GenMessage<UnitDamagedChange> = /*@__PURE__*/
+export const GetAttackOptionsRequestSchema: GenMessage<GetAttackOptionsRequest> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 24);
 
 /**
  * *
- * A unit was killed
+ * Response with attack options for a unit
  *
- * @generated from message weewar.v1.UnitKilledChange
+ * @generated from message weewar.v1.GetAttackOptionsResponse
  */
-export type UnitKilledChange = Message<"weewar.v1.UnitKilledChange"> & {
+export type GetAttackOptionsResponse = Message<"weewar.v1.GetAttackOptionsResponse"> & {
   /**
-   * @generated from field: int32 player = 2;
+   * @generated from field: repeated weewar.v1.AttackOption options = 1;
    */
-  player: number;
-
-  /**
-   * @generated from field: int32 unit_type = 3;
-   */
-  unitType: number;
-
-  /**
-   * @generated from field: int32 q = 4;
-   */
-  q: number;
-
-  /**
-   * @generated from field: int32 r = 5;
-   */
-  r: number;
+  options: AttackOption[];
 };
 
 /**
- * Describes the message weewar.v1.UnitKilledChange.
- * Use `create(UnitKilledChangeSchema)` to create a new message.
+ * Describes the message weewar.v1.GetAttackOptionsResponse.
+ * Use `create(GetAttackOptionsResponseSchema)` to create a new message.
  */
-export const UnitKilledChangeSchema: GenMessage<UnitKilledChange> = /*@__PURE__*/
+export const GetAttackOptionsResponseSchema: GenMessage<GetAttackOptionsResponse> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 25);
 
 /**
  * *
- * Active player changed
+ * A possible attack target
  *
- * @generated from message weewar.v1.PlayerChangedChange
+ * @generated from message weewar.v1.AttackOption
  */
-export type PlayerChangedChange = Message<"weewar.v1.PlayerChangedChange"> & {
+export type AttackOption = Message<"weewar.v1.AttackOption"> & {
   /**
-   * @generated from field: int32 previous_player = 1;
+   * @generated from field: int32 q = 1;
    */
-  previousPlayer: number;
+  q: number;
 
   /**
-   * @generated from field: int32 new_player = 2;
+   * @generated from field: int32 r = 2;
    */
-  newPlayer: number;
+  r: number;
 
   /**
-   * @generated from field: int32 previous_turn = 3;
+   * @generated from field: bool can_attack = 3;
    */
-  previousTurn: number;
+  canAttack: boolean;
 
   /**
-   * @generated from field: int32 new_turn = 4;
+   * Estimated damage this attack would deal
+   *
+   * @generated from field: int32 damage_estimate = 4;
    */
-  newTurn: number;
+  damageEstimate: number;
 };
 
 /**
- * Describes the message weewar.v1.PlayerChangedChange.
- * Use `create(PlayerChangedChangeSchema)` to create a new message.
+ * Describes the message weewar.v1.AttackOption.
+ * Use `create(AttackOptionSchema)` to create a new message.
  */
-export const PlayerChangedChangeSchema: GenMessage<PlayerChangedChange> = /*@__PURE__*/
+export const AttackOptionSchema: GenMessage<AttackOption> = /*@__PURE__*/
   messageDesc(file_weewar_v1_games, 26);
+
+/**
+ * *
+ * Request to check if a unit can be selected
+ *
+ * @generated from message weewar.v1.CanSelectUnitRequest
+ */
+export type CanSelectUnitRequest = Message<"weewar.v1.CanSelectUnitRequest"> & {
+  /**
+   * @generated from field: string game_id = 1;
+   */
+  gameId: string;
+
+  /**
+   * @generated from field: int32 q = 2;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 3;
+   */
+  r: number;
+
+  /**
+   * which player is trying to select
+   *
+   * @generated from field: int32 player_id = 4;
+   */
+  playerId: number;
+};
+
+/**
+ * Describes the message weewar.v1.CanSelectUnitRequest.
+ * Use `create(CanSelectUnitRequestSchema)` to create a new message.
+ */
+export const CanSelectUnitRequestSchema: GenMessage<CanSelectUnitRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_games, 27);
+
+/**
+ * *
+ * Response indicating if unit can be selected
+ *
+ * @generated from message weewar.v1.CanSelectUnitResponse
+ */
+export type CanSelectUnitResponse = Message<"weewar.v1.CanSelectUnitResponse"> & {
+  /**
+   * @generated from field: bool can_select = 1;
+   */
+  canSelect: boolean;
+
+  /**
+   * explanation if can_select is false
+   *
+   * @generated from field: string reason = 2;
+   */
+  reason: string;
+};
+
+/**
+ * Describes the message weewar.v1.CanSelectUnitResponse.
+ * Use `create(CanSelectUnitResponseSchema)` to create a new message.
+ */
+export const CanSelectUnitResponseSchema: GenMessage<CanSelectUnitResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_games, 28);
 
 /**
  * GamesService manages the game examples catalog
@@ -903,12 +931,58 @@ export const GamesService: GenService<{
     output: typeof UpdateGameResponseSchema;
   },
   /**
+   * Gets the latest game state
+   *
+   * @generated from rpc weewar.v1.GamesService.GetGameState
+   */
+  getGameState: {
+    methodKind: "unary";
+    input: typeof GetGameStateRequestSchema;
+    output: typeof GetGameStateResponseSchema;
+  },
+  /**
+   * List the moves for a game
+   *
+   * @generated from rpc weewar.v1.GamesService.ListMoves
+   */
+  listMoves: {
+    methodKind: "unary";
+    input: typeof ListMovesRequestSchema;
+    output: typeof ListMovesResponseSchema;
+  },
+  /**
    * @generated from rpc weewar.v1.GamesService.ProcessMoves
    */
   processMoves: {
     methodKind: "unary";
     input: typeof ProcessMovesRequestSchema;
     output: typeof ProcessMovesResponseSchema;
+  },
+  /**
+   * Game interaction methods for UI components
+   *
+   * @generated from rpc weewar.v1.GamesService.GetMovementOptions
+   */
+  getMovementOptions: {
+    methodKind: "unary";
+    input: typeof GetMovementOptionsRequestSchema;
+    output: typeof GetMovementOptionsResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GamesService.GetAttackOptions
+   */
+  getAttackOptions: {
+    methodKind: "unary";
+    input: typeof GetAttackOptionsRequestSchema;
+    output: typeof GetAttackOptionsResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GamesService.CanSelectUnit
+   */
+  canSelectUnit: {
+    methodKind: "unary";
+    input: typeof CanSelectUnitRequestSchema;
+    output: typeof CanSelectUnitResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_weewar_v1_games, 0);

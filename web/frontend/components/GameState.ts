@@ -1,32 +1,29 @@
 import { BaseComponent, ComponentState } from './Component';
 import { EventBus } from './EventBus';
+import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar_v1_servicesClient.client';
+import { ProcessMovesRequest, ProcessMovesResponse, GameMove, WorldChange, ProcessMovesRequestSchema, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema } from '../gen/weewar/v1/games_pb';
+import { World } from '../gen/weewar/v1/models_pb';
+import { create } from '@bufbuild/protobuf';
 
 /**
- * Extended state interface for GameState component
+ * Minimal game state interface focused on core game data
  */
 export interface GameStateData extends ComponentState {
     wasmLoaded: boolean;
-    gameInitialized: boolean;
+    gameId: string;
     currentPlayer: number;
     turnCounter: number;
     status: string;
-    mapSize: { rows: number; cols: number };
-    winner: number;
-    hasWinner: boolean;
+    world: World | null; // Shared world object that all UI components reference
 }
 
 /**
- * Type definitions for WASM API responses
+ * Legacy interface for backward compatibility with GameViewerPage
+ * TODO: Remove once GameViewerPage is updated to use new architecture
  */
-export interface WASMResponse {
-    success: boolean;
-    message: string;
-    data: any;
-}
-
 export interface GameCreateData {
     currentPlayer: number;
-    turnCounter: number; 
+    turnCounter: number;
     status: string;
     allUnits: any[];
     players: any[];
@@ -36,6 +33,10 @@ export interface GameCreateData {
     hasWinner: boolean;
 }
 
+/**
+ * Legacy interface for backward compatibility with GameViewerPage  
+ * TODO: Remove once GameViewerPage is updated to use new architecture
+ */
 export interface UnitSelectionData {
     unit: any;
     movableCoords: Array<{ coord: { Q: number; R: number }; cost: number }>;
@@ -43,52 +44,50 @@ export interface UnitSelectionData {
 }
 
 /**
- * GameState component manages WASM module loading and game state
- * Provides a clean interface between UI components and the Go WASM game engine
+ * GameState component - Minimal controller for ProcessMoves and world state management
  * 
- * This component follows the thin wrapper principle - it only manages loading
- * and state synchronization, delegating all game logic to the WASM module.
+ * Core responsibilities:
+ * 1. Process game moves via ProcessMoves service
+ * 2. Apply world changes to internal state
+ * 3. Notify observers (UI components) of state changes
+ * 
+ * This replaces the previous 13+ manual WASM methods with a clean service-based approach.
  */
 export class GameState extends BaseComponent {
-    private wasm: any;
+    private client: Weewar_v1_servicesClient;
     private gameData: GameStateData;
     private wasmLoadPromise: Promise<void> | null;
 
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
-        // Initialize gameData before calling super to ensure it's available in initializeComponent
         super('game-state', rootElement, eventBus, debugMode);
         
-        // Initialize gameData after super() since we need this.state from BaseComponent
+        // Initialize minimal game data
         this.gameData = {
             ...this.state,
             wasmLoaded: false,
-            gameInitialized: false,
+            gameId: '', // Will be set when game is loaded/created
             currentPlayer: 0,
             turnCounter: 1,
             status: 'loading',
-            mapSize: { rows: 0, cols: 0 },
-            winner: -1,
-            hasWinner: false
+            world: null // Will be populated when game/world is loaded
         };
         
-        // Initialize WASM loading after gameData is set up
+        // Initialize WASM client and loading
+        this.client = new Weewar_v1_servicesClient();
         this.wasmLoadPromise = this.loadWASMModule();
     }
 
     protected initializeComponent(): void {
-        this.log('Initializing GameState component...');
-        
-        // WASM loading is now handled in constructor after gameData is initialized
-        // No additional initialization needed here
+        this.log('Initializing minimal GameState controller...');
     }
 
     protected bindToDOM(): void {
-        // GameState is a data component with no DOM interactions
+        // GameState is a data controller with no DOM interactions
         // It communicates via EventBus only
     }
 
     protected destroyComponent(): void {
-        this.wasm = null;
+        // this.client = null;
         this.wasmLoadPromise = null;
     }
 
@@ -97,335 +96,312 @@ export class GameState extends BaseComponent {
     }
 
     /**
-     * Load the WASM module asynchronously
+     * Load the WASM module using generated client
      */
     private async loadWASMModule(): Promise<void> {
-        this.log('Loading WASM module...');
+        this.log('Loading WASM module with generated client...');
         
-        // Check if WASM is already loaded (for testing environments)
-        if ((window as any).weewarCreateGameFromMap) {
-            this.log('WASM module already loaded (pre-loaded in test environment)');
+        try {
+            await this.client.loadWasm('/static/wasm/weewar-cli.wasm');
             
-            this.wasm = {
-                createGameFromMap: (window as any).weewarCreateGameFromMap,
-                getGameState: (window as any).weewarGetGameState,
-                selectUnit: (window as any).weewarSelectUnit,
-                moveUnit: (window as any).weewarMoveUnit,
-                attackUnit: (window as any).weewarAttackUnit,
-                endTurn: (window as any).weewarEndTurn,
-                getTerrainStatsAt: (window as any).weewarGetTerrainStatsAt,
-                canSelectUnit: (window as any).weewarCanSelectUnit,
-                getTileInfo: (window as any).weewarGetTileInfo,
-                getMovementOptions: (window as any).weewarGetMovementOptions,
-                getAttackOptions: (window as any).weewarGetAttackOptions,
-                saveGame: (window as any).weewarSaveGame,
-                loadGame: (window as any).weewarLoadGame
-            };
-
             this.gameData.wasmLoaded = true;
             this.gameData.lastUpdated = Date.now();
 
-            this.log('WASM module ready (pre-loaded)');
+            this.log('WASM module loaded successfully via generated client');
             this.emit('wasm-loaded', { success: true });
+        } catch (error) {
+            this.log('Failed to load WASM module:', error);
+            this.emit('wasm-load-error', { error });
+            throw error;
+        }
+    }
+
+    /**
+     * Ensure WASM module is loaded before API calls
+     */
+    private async ensureWASMLoaded(): Promise<Weewar_v1_servicesClient> {
+        if (this.gameData.wasmLoaded && this.client.isReady()) {
+            return this.client;
+        }
+
+        if (!this.wasmLoadPromise) {
+            throw new Error('WASM loading not started');
+        }
+
+        await this.wasmLoadPromise;
+
+        if (!this.gameData.wasmLoaded || !this.client.isReady()) {
+            throw new Error('WASM module failed to load');
+        }
+        return this.client;
+    }
+
+    /**
+     * Check if WASM is ready for operations
+     */
+    public isReady(): boolean {
+        return this.gameData.wasmLoaded;
+    }
+
+    /**
+     * Wait for WASM to be ready (use during initialization)
+     */
+    public async waitUntilReady(): Promise<void> {
+        await this.ensureWASMLoaded();
+    }
+
+    /**
+     * Set the current game ID for subsequent move processing
+     */
+    public setGameId(gameId: string): void {
+        this.gameData.gameId = gameId;
+        this.gameData.lastUpdated = Date.now();
+        this.log('Game ID set to:', gameId);
+    }
+
+    /**
+     * Set the shared world object that all UI components reference
+     */
+    public setWorld(world: World): void {
+        this.gameData.world = world;
+        this.gameData.lastUpdated = Date.now();
+        this.log('World object set');
+        
+        // Notify observers that world has been loaded/updated
+        this.emit('world-loaded', { world: world });
+    }
+
+    /**
+     * Get the shared world object (used by all UI components)
+     */
+    public getWorld(): World | null {
+        return this.gameData.world;
+    }
+
+    /**
+     * CORE METHOD: Process game moves and apply world changes
+     * 
+     * This is the primary interface for all game actions:
+     * - Unit movements
+     * - Unit attacks  
+     * - End turn actions
+     * - Any other game state modifications
+     */
+    public async processMoves(moves: GameMove[]): Promise<WorldChange[]> {
+        const client = await this.ensureWASMLoaded();
+
+        if (!this.gameData.gameId) {
+            throw new Error('Game ID not set. Call setGameId() first.');
+        }
+
+        try {
+            this.log('Processing moves:', moves);
+
+            // Create request for ProcessMoves service
+            const request = create(ProcessMovesRequestSchema, {
+                gameId: this.gameData.gameId,
+                moves: moves
+            });
+
+            // Call the ProcessMoves service  
+            const response: ProcessMovesResponse = await client.gamesService.processMoves(request);
+
+            // Extract world changes from response
+            const worldChanges = response.changes || [];
+            
+            this.log('Received world changes:', worldChanges);
+
+            // Apply changes to internal state and notify observers
+            this.applyWorldChanges(worldChanges);
+            
+            return worldChanges;
+
+        } catch (error: any) {
+            this.log('ProcessMoves failed:', error);
+            throw new Error(`ProcessMoves failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Apply world changes to internal game state and shared World object
+     */
+    private applyWorldChanges(changes: WorldChange[]): void {
+        let stateChanged = false;
+
+        // Process each world change and update internal state + shared world
+        for (const change of changes) {
+            // Handle different types of world changes using union type
+            if (change.changeType.case === 'playerChanged') {
+                this.gameData.currentPlayer = change.changeType.value.newPlayer;
+                this.gameData.turnCounter = change.changeType.value.newTurn;
+                stateChanged = true;
+                this.log('Player changed:', change.changeType.value);
+            }
+            
+            if (change.changeType.case === 'unitMoved') {
+                this.applyUnitMovedToWorld(change.changeType.value);
+                stateChanged = true;
+                this.log('Unit moved:', change.changeType.value);
+            }
+
+            if (change.changeType.case === 'unitDamaged') {
+                this.applyUnitDamagedToWorld(change.changeType.value);
+                stateChanged = true;
+                this.log('Unit damaged:', change.changeType.value);
+            }
+
+            if (change.changeType.case === 'unitKilled') {
+                this.applyUnitKilledToWorld(change.changeType.value);
+                stateChanged = true;
+                this.log('Unit killed:', change.changeType.value);
+            }
+        }
+
+        if (stateChanged) {
+            this.gameData.lastUpdated = Date.now();
+            this.notifyObservers(changes);
+        }
+    }
+
+    /**
+     * Apply unit movement to the shared World object
+     */
+    private applyUnitMovedToWorld(unitMoved: any): void {
+        if (!this.gameData.world || !this.gameData.world.tiles) {
+            this.log('Cannot apply unit move - world not loaded');
             return;
         }
-        
-        // Load Go's WASM support
-        if (!(window as any).Go) {
-            const script = document.createElement('script');
-            script.src = '/static/wasm/wasm_exec.js';
-            document.head.appendChild(script);
-            
-            await new Promise<void>((resolve, reject) => {
-                script.onload = () => resolve();
-                script.onerror = () => reject(new Error('Failed to load wasm_exec.js'));
-            });
-        }
 
-        // Initialize Go WASM runtime
-        const go = new (window as any).Go();
-        const wasmModule = await WebAssembly.instantiateStreaming(
-            fetch('/static/wasm/weewar-cli.wasm'),
-            go.importObject
-        );
-
-        // Run the WASM module
-        go.run(wasmModule.instance);
-
-        // Verify WASM APIs are available
-        if (!(window as any).weewarCreateGameFromMap) {
-            throw new Error('WASM APIs not found - module may not have loaded correctly');
-        }
-
-        this.wasm = {
-            createGameFromMap: (window as any).weewarCreateGameFromMap,
-            getGameState: (window as any).weewarGetGameState,
-            selectUnit: (window as any).weewarSelectUnit,
-            moveUnit: (window as any).weewarMoveUnit,
-            attackUnit: (window as any).weewarAttackUnit,
-            endTurn: (window as any).weewarEndTurn,
-            getTerrainStatsAt: (window as any).weewarGetTerrainStatsAt,
-            canSelectUnit: (window as any).weewarCanSelectUnit,
-            getTileInfo: (window as any).weewarGetTileInfo,
-            getMovementOptions: (window as any).weewarGetMovementOptions,
-            getAttackOptions: (window as any).weewarGetAttackOptions,
-            saveGame: (window as any).weewarSaveGame,
-            loadGame: (window as any).weewarLoadGame
-        };
-
-        this.gameData.wasmLoaded = true;
-        this.gameData.lastUpdated = Date.now();
-
-        this.log('WASM module loaded successfully');
-        this.emit('wasm-loaded', { success: true });
-
-        /** Disabling try/catch for now
-        try {
-        } catch (error) {
-            this.handleError('Failed to load WASM module', error);
-            this.emit('wasm-load-error', { error });
-        }
-       */
+        // TODO: Find and move the unit in the world tiles array
+        // This will require accessing world.tiles and finding the unit at fromQ,fromR
+        // then moving it to toQ,toR
+        this.log('Applying unit move to world:', unitMoved);
     }
 
     /**
-     * Create a new game from map data
+     * Apply unit damage to the shared World object
      */
-    public async createGameFromMap(mapData: string): Promise<GameCreateData> {
-        // Ensure WASM is loaded (only async part)
-        await this.ensureWASMLoaded();
-
-        this.log(`Creating game with players`);
-        
-        const response: WASMResponse = this.wasm.createGameFromMap(mapData);
-        
-        if (!response.success) {
-            throw new Error(`Game creation failed: ${response.message}`);
+    private applyUnitDamagedToWorld(unitDamaged: any): void {
+        if (!this.gameData.world || !this.gameData.world.tiles) {
+            this.log('Cannot apply unit damage - world not loaded');
+            return;
         }
 
-        // Update game state from WASM response
-        const gameData: GameCreateData = response.data;
-        this.updateGameState(gameData);
-
-        this.gameData.gameInitialized = true;
-        this.log('Game created successfully', gameData);
-        
-        // Emit notification event (not for response handling)
-        this.emit('game-created', gameData);
-        return gameData;
+        // TODO: Find the unit at q,r and update its health
+        this.log('Applying unit damage to world:', unitDamaged);
     }
 
     /**
-     * Get current game state from WASM (synchronous once WASM loaded)
+     * Apply unit death to the shared World object
      */
-    public getGameState(): GameCreateData {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.getGameState();
-        
-        if (!response.success) {
-            throw new Error(`Get game state failed: ${response.message}`);
+    private applyUnitKilledToWorld(unitKilled: any): void {
+        if (!this.gameData.world || !this.gameData.world.tiles) {
+            this.log('Cannot apply unit death - world not loaded');
+            return;
         }
 
-        const gameData: GameCreateData = response.data;
-        this.updateGameState(gameData);
-        
-        // Emit notification event
-        this.emit('game-state-updated', gameData);
-        return gameData;
+        // TODO: Find and remove the unit at q,r from the world
+        this.log('Applying unit death to world:', unitKilled);
     }
 
     /**
-     * Select a unit and get movement/attack options (synchronous)
+     * Notify all observers (UI components) of world state changes
      */
-    public selectUnit(q: number, r: number): UnitSelectionData {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.selectUnit(q, r);
-        
-        if (!response.success) {
-            throw new Error(`Unit selection failed: ${response.message}`);
-        }
-
-        const selectionData: UnitSelectionData = response.data;
-        this.log('Unit selected', selectionData);
-        
-        // Emit notification event
-        this.emit('unit-selected', selectionData);
-        return selectionData;
-    }
-
-    /**
-     * Move a unit from one position to another (synchronous)
-     */
-    public moveUnit(fromQ: number, fromR: number, toQ: number, toR: number): any {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.moveUnit(fromQ, fromR, toQ, toR);
-        
-        if (!response.success) {
-            throw new Error(`Unit move failed: ${response.message}`);
-        }
-
-        this.log('Unit moved successfully', response.data);
-        
-        // Emit notification event
-        this.emit('unit-moved', { 
-            from: { q: fromQ, r: fromR }, 
-            to: { q: toQ, r: toR }, 
-            result: response.data 
+    private notifyObservers(changes: WorldChange[]): void {
+        // Emit specific events for different types of changes
+        this.emit('world-changed', { 
+            changes: changes,
+            gameState: this.getGameData()
         });
-        
-        return response.data;
+
+        // Emit granular events for specific UI components
+        for (const change of changes) {
+            if (change.changeType.case === 'playerChanged') {
+                this.emit('turn-ended', {
+                    previousPlayer: change.changeType.value.previousPlayer,
+                    currentPlayer: change.changeType.value.newPlayer,
+                    turnCounter: change.changeType.value.newTurn
+                });
+            }
+
+            if (change.changeType.case === 'unitMoved') {
+                this.emit('unit-moved', {
+                    from: { q: change.changeType.value.fromQ, r: change.changeType.value.fromR },
+                    to: { q: change.changeType.value.toQ, r: change.changeType.value.toR }
+                });
+            }
+
+            if (change.changeType.case === 'unitDamaged') {
+                this.emit('unit-damaged', {
+                    position: { q: change.changeType.value.q, r: change.changeType.value.r },
+                    previousHealth: change.changeType.value.previousHealth,
+                    newHealth: change.changeType.value.newHealth
+                });
+            }
+
+            if (change.changeType.case === 'unitKilled') {
+                this.emit('unit-killed', {
+                    position: { q: change.changeType.value.q, r: change.changeType.value.r },
+                    player: change.changeType.value.player,
+                    unitType: change.changeType.value.unitType
+                });
+            }
+        }
     }
 
     /**
-     * Attack with one unit against another (synchronous)
+     * Helper function to create GameMove for unit movement
      */
-    public attackUnit(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number): any {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.attackUnit(attackerQ, attackerR, defenderQ, defenderR);
-        
-        if (!response.success) {
-            throw new Error(`Attack failed: ${response.message}`);
-        }
-
-        this.log('Attack completed', response.data);
-        
-        // Emit notification event
-        this.emit('unit-attacked', { 
-            attacker: { q: attackerQ, r: attackerR },
-            defender: { q: defenderQ, r: defenderR },
-            result: response.data 
+    public static createMoveUnitAction(fromQ: number, fromR: number, toQ: number, toR: number, playerId: number): GameMove {
+        const moveAction = create(MoveUnitActionSchema, {
+            fromQ: fromQ,
+            fromR: fromR,
+            toQ: toQ,
+            toR: toR
         });
-        
-        return response.data;
+
+        return create(GameMoveSchema, {
+            player: playerId,
+            moveType: {
+                case: 'moveUnit',
+                value: moveAction
+            }
+        });
     }
 
     /**
-     * End current player's turn (synchronous)
+     * Helper function to create GameMove for unit attack
      */
-    public endTurn(): GameCreateData {
-        this.ensureWASMLoadedSync();
+    public static createAttackUnitAction(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number, playerId: number): GameMove {
+        const attackAction = create(AttackUnitActionSchema, {
+            attackerQ: attackerQ,
+            attackerR: attackerR,
+            defenderQ: defenderQ,
+            defenderR: defenderR
+        });
 
-        const response: WASMResponse = this.wasm.endTurn();
-        
-        if (!response.success) {
-            throw new Error(`End turn failed: ${response.message}`);
-        }
-
-        const gameData: GameCreateData = response.data;
-        this.updateGameState(gameData);
-
-        this.log('Turn ended successfully', gameData);
-        
-        // Emit notification event
-        this.emit('turn-ended', gameData);
-        
-        return gameData;
+        return create(GameMoveSchema, {
+            player: playerId,
+            moveType: {
+                case: 'attackUnit',
+                value: attackAction
+            }
+        });
     }
 
     /**
-     * Get detailed terrain stats for a specific tile (synchronous)
+     * Helper function to create GameMove for end turn
      */
-    public getTerrainStatsAt(q: number, r: number): any {
-        const response = this.ensureWASMLoadedSync().getTerrainStatsAt(q, r);
-        if (!response.success) {
-          return null
-        }
-        return response.data;
-    }
+    public static createEndTurnAction(playerId: number): GameMove {
+        const endTurnAction = create(EndTurnActionSchema, {});
 
-    /**
-     * Check if a unit at the given position can be selected by current player (synchronous)
-     */
-    public canSelectUnit(q: number, r: number): boolean {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.canSelectUnit(q, r);
-        
-        if (!response.success) {
-            // For boolean checks, return false on error rather than throwing
-            this.log('CanSelectUnit check failed:', response.message);
-            return false;
-        }
-
-        return response.data;
-    }
-
-    /**
-     * Get basic tile information (synchronous)
-     */
-    public getTileInfo(q: number, r: number): any {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.getTileInfo(q, r);
-        
-        if (!response.success) {
-            throw new Error(`Get tile info failed: ${response.message}`);
-        }
-
-        this.log('Retrieved tile info for', { q, r, data: response.data });
-        return response.data;
-    }
-
-    /**
-     * Get movement options for unit at position (synchronous)
-     */
-    public getMovementOptions(q: number, r: number): WASMResponse {
-        return this.ensureWASMLoadedSync().getMovementOptions(q, r);
-    }
-
-    /**
-     * Get attack options for unit at position (synchronous)
-     */
-    public getAttackOptions(q: number, r: number): WASMResponse {
-        return this.ensureWASMLoadedSync().getAttackOptions(q, r);
-    }
-
-    /**
-     * Save current game session (synchronous)
-     */
-    public saveGame(): any {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.saveGame();
-        
-        if (!response.success) {
-            throw new Error(`Save failed: ${response.message}`);
-        }
-
-        this.log('Game saved successfully', response.data);
-        
-        // Emit notification event
-        this.emit('game-saved', response.data);
-        
-        return response.data;
-    }
-
-    /**
-     * Load game from JSON string and update game state (synchronous)
-     */
-    public loadGame(gameLogJSON: string): GameCreateData {
-        this.ensureWASMLoadedSync();
-
-        const response: WASMResponse = this.wasm.loadGame(gameLogJSON);
-        
-        if (!response.success) {
-            throw new Error(`Load failed: ${response.message}`);
-        }
-
-        // Update internal game state from loaded data
-        const gameData: GameCreateData = response.data;
-        this.updateGameState(gameData);
-
-        this.log('Game loaded successfully', gameData);
-        
-        // Emit notification event
-        this.emit('game-loaded', gameData);
-        
-        return gameData;
+        return create(GameMoveSchema, {
+            player: playerId,
+            moveType: {
+                case: 'endTurn',
+                value: endTurnAction
+            }
+        });
     }
 
     /**
@@ -450,68 +426,11 @@ export class GameState extends BaseComponent {
                 
                 const result = await response.json();
                 return JSON.stringify({ success: true, sessionId: result.sessionId });
-            } catch (error) {
+            } catch (error: any) {
                 return JSON.stringify({ success: false, error: error.message });
             }
         };
         
         console.log('Game save/load bridge functions initialized');
-    }
-
-    /**
-     * Ensure WASM module is loaded before API calls
-     */
-    private async ensureWASMLoaded(): Promise<any> {
-        if (this.gameData.wasmLoaded && this.wasm) {
-            return this.wasm;
-        }
-
-        if (!this.wasmLoadPromise) {
-            throw new Error('WASM loading not started');
-        }
-
-        await this.wasmLoadPromise;
-
-        if (!this.gameData.wasmLoaded || !this.wasm) {
-            throw new Error('WASM module failed to load');
-        }
-        return this.wasm
-    }
-
-    /**
-     * Ensure WASM module is loaded (synchronous version for game actions)
-     */
-    private ensureWASMLoadedSync(): any {
-        if (!this.gameData.wasmLoaded || !this.wasm) {
-            throw new Error('WASM module not loaded. Call waitUntilReady() first during initialization.');
-        }
-        return this.wasm
-    }
-
-    /**
-     * Check if WASM is ready for synchronous operations
-     */
-    public isReady(): boolean {
-        return this.gameData.wasmLoaded && this.gameData.gameInitialized;
-    }
-
-    /**
-     * Wait for WASM to be ready (only use during initialization)
-     */
-    public async waitUntilReady(): Promise<void> {
-        await this.ensureWASMLoaded();
-    }
-
-    /**
-     * Update internal game state from WASM response
-     */
-    private updateGameState(gameData: GameCreateData): void {
-        this.gameData.currentPlayer = gameData.currentPlayer;
-        this.gameData.turnCounter = gameData.turnCounter;
-        this.gameData.status = gameData.status;
-        this.gameData.mapSize = gameData.mapSize;
-        this.gameData.winner = gameData.winner;
-        this.gameData.hasWinner = gameData.hasWinner;
-        this.gameData.lastUpdated = Date.now();
     }
 }

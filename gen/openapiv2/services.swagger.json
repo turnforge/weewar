@@ -1883,6 +1883,22 @@
         "unitType": {
           "type": "integer",
           "format": "int32"
+        },
+        "availableHealth": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Current health points",
+          "title": "Runtime state fields"
+        },
+        "distanceLeft": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Movement points remaining this turn"
+        },
+        "turnCounter": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Which turn this unit was created/last acted"
         }
       }
     },

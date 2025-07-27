@@ -109,7 +109,7 @@ func TestGameCreationAndBasicOperations(t *testing.T) {
 	}
 	unit1.AvailableHealth = unitData1.Health
 	unit1.DistanceLeft = unitData1.MovementPoints
-	_, err = game.AddUnit(unit1)
+	_, err = game.World.AddUnit(unit1)
 	if err != nil {
 		t.Errorf("Failed to add unit1: %v", err)
 	}
@@ -123,7 +123,7 @@ func TestGameCreationAndBasicOperations(t *testing.T) {
 	}
 	unit2.AvailableHealth = unitData2.Health
 	unit2.DistanceLeft = unitData2.MovementPoints
-	_, err = game.AddUnit(unit2)
+	_, err = game.World.AddUnit(unit2)
 	if err != nil {
 		t.Errorf("Failed to add unit2: %v", err)
 	}
@@ -273,7 +273,7 @@ func TestGameMovementAndCombat(t *testing.T) {
 	}
 	unit1.AvailableHealth = unitData1.Health
 	unit1.DistanceLeft = unitData1.MovementPoints
-	game.AddUnit(unit1)
+	game.World.AddUnit(unit1)
 
 	unit2 := NewUnit(1, 1) // Soldier
 	unit2.Coord = AxialCoord{Q: 2, R: 2}
@@ -284,7 +284,7 @@ func TestGameMovementAndCombat(t *testing.T) {
 	}
 	unit2.AvailableHealth = unitData2.Health
 	unit2.DistanceLeft = unitData2.MovementPoints
-	game.AddUnit(unit2)
+	game.World.AddUnit(unit2)
 
 	// Test movement validation
 	from := AxialCoord{Q: 0, R: 0}
@@ -295,7 +295,7 @@ func TestGameMovementAndCombat(t *testing.T) {
 	}
 
 	// Test movement execution
-	err = game.MoveUnit(unit1, AxialCoord{Q: 0, R: 1})
+	err = game.World.MoveUnit(unit1, AxialCoord{Q: 0, R: 1})
 	if err != nil {
 		t.Errorf("Failed to move unit: %v", err)
 	}

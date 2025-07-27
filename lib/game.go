@@ -49,17 +49,11 @@ type Game struct {
 	// Random number generator
 	rng *rand.Rand `json:"-"` // RNG for deterministic gameplay
 
-	// Event system
-	eventManager *EventManager `json:"-"` // Event manager for observer pattern
-
 	// Asset management
 	assetProvider AssetProvider `json:"-"` // Asset provider for tiles and units (interface for platform flexibility)
 
 	// Rules engine for data-driven game mechanics
 	rulesEngine *RulesEngine `json:"-"` // Rules engine for movement costs, combat, unit data
-
-	// GameLog for recording and replay
-	gameLog *GameLog `json:"-"` // GameLog for action recording and save/load
 
 	// Game metadata
 	CreatedAt    time.Time `json:"createdAt"`    // When game was created
@@ -269,52 +263,6 @@ func (g *Game) SetRulesEngine(rulesEngine *RulesEngine) {
 	g.rulesEngine = rulesEngine
 }
 
-// GetGameLog returns the current GameLog instance
-func (g *Game) GetGameLog() *GameLog {
-	return g.gameLog
-}
-
-// SetGameLog sets the GameLog instance and starts a new session
-func (g *Game) SetGameLog(gameLog *GameLog) error {
-	g.gameLog = gameLog
-	
-	if gameLog != nil {
-		// Serialize the current world state for the starting point
-		worldData, err := json.Marshal(g.World)
-		if err != nil {
-			return fmt.Errorf("failed to serialize world for GameLog: %w", err)
-		}
-		
-		// Create session metadata
-		metadata := SessionMetadata{
-			MapName:     g.World.GetName(),
-			PlayerCount: g.World.PlayerCount(),
-			MaxTurns:    0, // TODO: Add max turns support to Game struct
-			GameConfig: map[string]interface{}{
-				"seed":         g.Seed,
-				"currentPlayer": g.CurrentPlayer,
-				"turnCounter":  g.TurnCounter,
-			},
-		}
-		
-		// Start new session
-		worldID := g.World.GetID()
-		if worldID == "" {
-			worldID = "unknown"
-		}
-		
-		return gameLog.StartNewSession(worldID, worldData, metadata)
-	}
-	
-	return nil
-}
-
-// InitializeGameLog creates and configures a GameLog with the specified SaveHandler
-func (g *Game) InitializeGameLog(saveHandler SaveHandler, autoSave bool) error {
-	gameLog := NewGameLog(saveHandler, autoSave)
-	return g.SetGameLog(gameLog)
-}
-
 // NewGame creates a new game instance with the specified parameters
 func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) {
 	// Validate parameters
@@ -334,10 +282,8 @@ func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) 
 		CreatedAt:     time.Now(),
 		LastActionAt:  time.Now(),
 		rng:           rand.New(rand.NewSource(seed)),
-		eventManager:  NewEventManager(),
 		assetProvider: NewAssetManager("data"),
 		rulesEngine:   rulesEngine,
-		gameLog:       nil, // Will be initialized when SetGameLog is called
 	}
 
 	// Initialize units storage for compatibility (will be migrated)
@@ -349,9 +295,6 @@ func NewGame(world *World, rulesEngine *RulesEngine, seed int64) (*Game, error) 
 	if err := game.initializeStartingUnits(); err != nil {
 		return nil, fmt.Errorf("failed to initialize starting units: %w", err)
 	}
-
-	// Emit game created event
-	game.eventManager.EmitGameStateChanged(GameStateChangeGameStarted, game)
 
 	return game, nil
 }
@@ -365,10 +308,8 @@ func LoadGame(saveData []byte) (*Game, error) {
 
 	// Restore transient state
 	game.rng = rand.New(rand.NewSource(game.Seed))
-	game.eventManager = NewEventManager()
 	game.assetProvider = NewAssetManager("data")
 	game.rulesEngine = nil // Will be set by caller
-	game.gameLog = nil     // Will be set by caller if needed
 
 	// Note: Neighbor connections are no longer stored, calculated on-demand
 
@@ -454,111 +395,4 @@ func (g *Game) GetUnitTypeName(unitType int) string {
 
 	// Fallback to generic name
 	return fmt.Sprintf("Unit Type %d", unitType)
-}
-
-// GetUnitHealth returns current health points
-func (g *Game) GetUnitHealth(unit *Unit) int {
-	if unit == nil {
-		return 0
-	}
-	return unit.AvailableHealth
-}
-
-// CreateUnit spawns new unit using cube coordinates
-/*
-func (g *Game) CreateUnit(unitType, playerID int, coord AxialCoord) (*Unit, error) {
-	// Validate parameters
-	if playerID < 0 || playerID >= g.World.PlayerCount {
-		return nil, fmt.Errorf("invalid player ID: %d", playerID)
-	}
-
-	// Check if position is valid and empty
-	tile := g.World.privateMap.TileAt(coord)
-	if tile == nil {
-		return nil, fmt.Errorf("invalid position: %v", coord)
-	}
-
-	// Create the unit
-	unit := NewUnit(unitType, playerID)
-	unit.Coord = coord
-	unit.AvailableHealth = 100 // TODO: Get from unit data
-	unit.DistanceLeft = 3      // TODO: Get from unit data
-
-	// Add to game
-	g.AddUnit(unit, playerID)
-
-	// Emit events
-	g.eventManager.EmitUnitCreated(unit)
-	g.eventManager.EmitGameStateChanged(GameStateChangeUnitCreated, unit)
-
-	return unit, nil
-}
-*/
-
-// RemoveUnit removes unit from game
-func (g *Game) RemoveUnit(unit *Unit) error {
-	err := g.World.RemoveUnit(unit)
-	if err == nil {
-
-		// Emit events
-		g.eventManager.EmitUnitDestroyed(unit)
-		g.eventManager.EmitGameStateChanged(GameStateChangeUnitDestroyed, unit)
-	}
-
-	return err
-}
-
-// AddUnit adds a unit to the game for the specified player
-func (g *Game) AddUnit(unit *Unit) (*Unit, error) {
-	return g.World.AddUnit(unit)
-}
-
-// =============================================================================
-// GameLog Integration Methods
-// =============================================================================
-
-// recordAction is a helper method to record actions in the GameLog
-func (g *Game) recordAction(action GameAction, changes []WorldChange) error {
-	if g.gameLog == nil {
-		// GameLog not configured - silently skip recording
-		return nil
-	}
-	
-	return g.gameLog.RecordAction(g.CurrentPlayer, action, changes)
-}
-
-// saveGameLog triggers a manual save of the GameLog
-func (g *Game) SaveGameLog() error {
-	if g.gameLog == nil {
-		return fmt.Errorf("no GameLog configured")
-	}
-	
-	return g.gameLog.Save()
-}
-
-// getGameLogSessionID returns the current session ID for debugging
-func (g *Game) GetGameLogSessionID() string {
-	if g.gameLog == nil {
-		return ""
-	}
-	
-	return g.gameLog.GetSessionID()
-}
-
-// setGameLogStatus updates the session status (for game completion)
-func (g *Game) SetGameLogStatus(status string) error {
-	if g.gameLog == nil {
-		return nil // Silently skip if no GameLog
-	}
-	
-	return g.gameLog.SetStatus(status)
-}
-
-// getGameLogData returns the current session data for export/debugging
-func (g *Game) GetGameLogData() *GameSession {
-	if g.gameLog == nil {
-		return nil
-	}
-	
-	return g.gameLog.GetCurrentSession()
 }

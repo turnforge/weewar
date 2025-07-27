@@ -450,36 +450,16 @@ class StartGamePage extends BasePage implements ComponentLifecycle {
 
         try {
             console.log('Starting game with configuration:', this.gameConfig);
+            this.showToast('Success', 'Creating game...', 'success');
             
-            // Build URL parameters for GameViewerPage
-            const urlParams = new URLSearchParams();
+            // Call the CreateGame API
+            const result = await this.callCreateGameAPI();
             
-            // Add player count
-            const activePlayers = this.gameConfig.players.filter(p => p.type !== 'none');
-            urlParams.set('playerCount', activePlayers.length.toString());
+            // Redirect to the newly created game
+            const gameViewerUrl = `/games/${result.gameId}/view`;
+            console.log('Game created successfully, redirecting to:', gameViewerUrl);
             
-            // Add turn time limit (if set)
-            if (this.gameConfig.turnTimeLimit > 0) {
-                urlParams.set('maxTurns', '0'); // For now, we'll use maxTurns=0 (unlimited)
-                urlParams.set('turnTimeLimit', this.gameConfig.turnTimeLimit.toString());
-            }
-            
-            // Add allowed units as query parameters
-            this.gameConfig.allowedUnits.forEach(unitId => {
-                urlParams.set(`unit_${unitId}`, 'allowed');
-            });
-            
-            // Add team configuration
-            activePlayers.forEach(player => {
-                urlParams.set(`player_${player.id}_type`, player.type);
-                urlParams.set(`player_${player.id}_team`, player.team.toString());
-            });
-            
-            // Redirect to GameViewerPage with world and configuration
-            const gameViewerUrl = `/games/${this.currentWorldId}/view?${urlParams.toString()}`;
-            
-            console.log('Redirecting to GameViewer:', gameViewerUrl);
-            this.showToast('Success', 'Starting game...', 'success');
+            this.showToast('Success', 'Game created! Redirecting...', 'success');
             
             // Small delay to show the toast
             setTimeout(() => {
@@ -488,34 +468,63 @@ class StartGamePage extends BasePage implements ComponentLifecycle {
             
         } catch (error) {
             console.error('Failed to start game:', error);
-            this.showToast('Error', 'Failed to start game', 'error');
+            this.showToast('Error', `Failed to start game: ${error.message}`, 'error');
         }
     }
 
-    // Placeholder for future CreateGame API call
-    private async callCreateGameAPI(): Promise<any> {
-        // This will eventually call the CreateGame RPC endpoint
+    // Call CreateGame API via gRPC gateway
+    private async callCreateGameAPI(): Promise<{ gameId: string }> {
+        // Prepare the request payload matching the updated proto structure
+        const activePlayers = this.gameConfig.players.filter(p => p.type !== 'none');
+        
         const gameRequest = {
-            worldId: this.currentWorldId,
-            players: this.gameConfig.players.filter(p => p.type !== 'none').map(p => ({
-                playerId: p.id,
-                playerType: p.type,
-                color: p.color,
-                teamId: p.team
-            })),
-            gameSettings: {
-                allowedUnits: this.gameConfig.allowedUnits,
-                turnTimeLimit: this.gameConfig.turnTimeLimit,
-                teamMode: this.gameConfig.teamMode
+            game: {
+                world_id: this.currentWorldId,
+                name: `Game from ${this.world?.name || 'World'}`,
+                description: 'Game created from StartGamePage',
+                creator_id: 'default-user', // TODO: Get from authentication
+                tags: [],
+                config: {
+                    players: activePlayers.map(p => ({
+                        player_id: p.id,
+                        player_type: p.type,
+                        color: p.color,
+                        team_id: p.team
+                    })),
+                    settings: {
+                        allowed_units: this.gameConfig.allowedUnits.map(id => parseInt(id)),
+                        turn_time_limit: this.gameConfig.turnTimeLimit,
+                        team_mode: this.gameConfig.teamMode,
+                        max_turns: 0 // Unlimited for now
+                    }
+                }
             }
         };
 
-        console.log('CreateGame RPC request would be:', gameRequest);
+        console.log('CreateGame API request:', gameRequest);
         
-        // TODO: Replace with actual gRPC call
-        // return await grpcClient.createGame(gameRequest);
+        // Make the gRPC gateway call
+        const response = await fetch('/v1/games', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(gameRequest)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API call failed: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('CreateGame API response:', result);
         
-        return { gameId: 'placeholder-game-id' };
+        if (!result.game || !result.game.id) {
+            throw new Error('No game ID returned from server');
+        }
+        
+        return { gameId: result.game.id };
     }
 
     public destroy(): void {

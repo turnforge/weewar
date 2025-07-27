@@ -25,6 +25,10 @@ type WorldBounds struct {
 // World represents the pure game state without any rendering or UI concerns.
 // This is the single source of truth for all game data.
 type World struct {
+	// By having a parent world - we are able to offer "pushed" environments - to test things out like starting
+	// transactions etc
+	parent *World
+
 	// JSON-friendly representation
 	Name string
 	// PlayerCount int `json:"playerCount"` // Number of players in the game
@@ -33,6 +37,13 @@ type World struct {
 	unitsByPlayer [][]*Unit            `json:"-"` // All units in the game world by player ID
 	unitsByCoord  map[AxialCoord]*Unit `json:"-"` // All units in the game world by player ID
 	tilesByCoord  map[AxialCoord]*Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
+
+	// In case we are pushed environment this will tell us
+	// if a unit was "deleted" in this layer so not to recurse
+	//up when looking up a missing unit
+	unitDeleted map[AxialCoord]bool `json:"-"`
+	// Same as above but for tiles
+	tileDeleted map[AxialCoord]bool `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
 
 	// Coordinate bounds - These can be evaluated.
 	minQ int `json:"-"` // Minimum Q coordinate (inclusive)
@@ -59,9 +70,17 @@ func NewWorld(name string) *World {
 		Name:         name,
 		tilesByCoord: map[AxialCoord]*Tile{},
 		unitsByCoord: map[AxialCoord]*Unit{},
+		tileDeleted:  map[AxialCoord]bool{},
+		unitDeleted:  map[AxialCoord]bool{},
 	}
 
 	return w
+}
+
+func (w *World) Push() *World {
+	out := NewWorld(w.Name)
+	out.parent = w
+	return out
 }
 
 // =============================================================================
@@ -69,10 +88,15 @@ func NewWorld(name string) *World {
 // =============================================================================
 
 func (w *World) PlayerCount() int {
+	if w.parent != nil {
+		return w.PlayerCount()
+	}
 	return len(w.unitsByPlayer)
 }
 
 func (w *World) TilesByCoord() iter.Seq2[AxialCoord, *Tile] {
+	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
+	// or conversely iterate parent and only return parent's K,V value if it is not in this layer
 	return func(yield func(AxialCoord, *Tile) bool) {
 		for k, v := range w.tilesByCoord {
 			if !yield(k, v) {
@@ -82,7 +106,9 @@ func (w *World) TilesByCoord() iter.Seq2[AxialCoord, *Tile] {
 	}
 }
 
-func (w *World) UnitsByCoord(coord AxialCoord) iter.Seq2[AxialCoord, *Unit] {
+func (w *World) UnitsByCoord() iter.Seq2[AxialCoord, *Unit] {
+	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
+	// or conversely iterate parent and only return parent's K,V value if it is not in this layer
 	return func(yield func(AxialCoord, *Unit) bool) {
 		for k, v := range w.unitsByCoord {
 			if !yield(k, v) {
@@ -93,17 +119,27 @@ func (w *World) UnitsByCoord(coord AxialCoord) iter.Seq2[AxialCoord, *Unit] {
 }
 
 // Getize returns the dimensions of the world map
-func (w *World) UnitAt(coord AxialCoord) *Unit {
-	return w.unitsByCoord[coord]
+func (w *World) UnitAt(coord AxialCoord) (out *Unit) {
+	out = w.unitsByCoord[coord]
+	if out == nil && w.parent != nil {
+		out = w.parent.UnitAt(coord)
+	}
+	return
 }
 
 // TileAt returns the tile at the specified cube coordinates
-func (w *World) TileAt(coord AxialCoord) *Tile {
-	return w.tilesByCoord[coord]
+func (w *World) TileAt(coord AxialCoord) (out *Tile) {
+	out = w.tilesByCoord[coord]
+	if out == nil && w.parent != nil {
+		out = w.parent.TileAt(coord)
+	}
+	return
 }
 
 // GetPlayerUnits returns all units belonging to the specified player
 func (w *World) GetPlayerUnits(playerID int) []*Unit {
+	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
+	// or conversely iterate parent and only return parent's K,V value if it is not in this layer
 	return w.unitsByPlayer[playerID]
 }
 
@@ -133,11 +169,13 @@ func (w *World) AddTile(tile *Tile) {
 	if q < w.minQ || q > w.maxQ || r < w.minR || r > w.maxR {
 		w.boundsChanged = true
 	}
+	w.tileDeleted[tile.Coord] = false
 	w.tilesByCoord[tile.Coord] = tile
 }
 
 // DeleteTile removes the tile at the specified cube coordinate
 func (w *World) DeleteTile(coord AxialCoord) {
+	w.tileDeleted[coord] = true
 	delete(w.tilesByCoord, coord)
 }
 
@@ -158,6 +196,7 @@ func (w *World) AddUnit(unit *Unit) (oldunit *Unit, err error) {
 	oldunit = w.UnitAt(unit.Coord)
 
 	// make sure to replace a unit here
+	w.unitDeleted[unit.Coord] = false
 	w.unitsByPlayer[unit.Player] = append(w.unitsByPlayer[unit.Player], unit)
 	w.unitsByCoord[unit.Coord] = unit
 	return
@@ -174,6 +213,7 @@ func (w *World) RemoveUnit(unit *Unit) error {
 		return fmt.Errorf("invalid tile")
 	}
 	p := unit.Player
+	w.unitDeleted[unit.Coord] = true
 	delete(w.unitsByCoord, unit.Coord)
 	for i, u := range w.unitsByPlayer[p] {
 		if u == unit {

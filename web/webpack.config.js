@@ -7,10 +7,15 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-const SRC_FOLDERS = ["./frontend/components", "./frontend/gen"];
+const SRC_FOLDERS = [
+  "./frontend/components",
+  "./frontend/lib",
+  "./frontend/gen"
+];
 const OUTPUT_FOLDERS = ["./templates"]; // Where gen.*.html files go
 const OUTPUT_DIR = path.resolve(__dirname, "./static/js/gen/");
 
+// Each entry is the EntryPage name, index in the SRC_FOLDERS where it can be found, type of file - ts vs tsx
 const components = [
   ["HomePage", 0, "ts"],
   ["LoginPage", 0, "ts"],

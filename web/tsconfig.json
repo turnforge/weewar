@@ -27,6 +27,7 @@
   },
   "include": [
     "./frontend/gen/**/*.ts",
+    "./frontend/lib/**/*.ts",
     "./frontend/components/*.ts",
     "./frontend/components/*.tsx"
   ],

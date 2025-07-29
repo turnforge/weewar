@@ -55,29 +55,12 @@ class WorldEditorPage extends BasePage {
         super('world-editor-page', eventBus, true); // Enable debug mode
         
         // Subscribe to World events via EventBus
-        this.subscribe(WorldEventType.WORLD_LOADED, this, (data: WorldLoadedEventData) => {
-            this.handleWorldLoaded(data);
-        });
-        
-        this.subscribe(WorldEventType.WORLD_SAVED, this, (data: any) => {
-            this.handleWorldSaved(data);
-        });
-        
-        this.subscribe(WorldEventType.TILES_CHANGED, this, () => {
-            this.handleWorldDataChanged();
-        });
-        
-        this.subscribe(WorldEventType.UNITS_CHANGED, this, () => {
-            this.handleWorldDataChanged();
-        });
-        
-        this.subscribe(WorldEventType.WORLD_CLEARED, this, () => {
-            this.handleWorldDataChanged();
-        });
-        
-        this.subscribe(WorldEventType.WORLD_METADATA_CHANGED, this, () => {
-            this.handleWorldDataChanged();
-        });
+        this.subscribe(WorldEventType.WORLD_LOADED, this, (data: any) => { this.handleWorldLoaded(data); });
+        this.subscribe(WorldEventType.WORLD_SAVED, this, (data: any) => { this.handleWorldSaved(data); });
+        this.subscribe(WorldEventType.TILES_CHANGED, this, () => { this.handleWorldDataChanged(); });
+        this.subscribe(WorldEventType.UNITS_CHANGED, this, () => { this.handleWorldDataChanged(); });
+        this.subscribe(WorldEventType.WORLD_CLEARED, this, () => { this.handleWorldDataChanged(); });
+        this.subscribe(WorldEventType.WORLD_METADATA_CHANGED, this, () => { this.handleWorldDataChanged(); });
     }
     
     /**

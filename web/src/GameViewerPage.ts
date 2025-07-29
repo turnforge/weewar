@@ -32,6 +32,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
     // UI state
     private selectedUnit: any = null;
     private gameLog: string[] = [];
+    
+    constructor(eventBus: EventBus) {
+        super('game-viewer-page', eventBus, true); // Enable debug mode
+    }
 
     /**
      * Load game configuration from URL parameters and hidden inputs
@@ -82,10 +86,11 @@ class GameViewerPage extends BasePage implements LCMComponent {
      * This method is called by BasePage constructor, but we're using external LifecycleController
      * so we make this a no-op and handle initialization through LCMComponent interface
      */
-    protected initializeSpecificComponents(): void {
+    protected initializeSpecificComponents(): LCMComponent[] {
         console.log('GameViewerPage: initializeSpecificComponents() called by BasePage - doing minimal setup');
         this.loadGameConfiguration(); // Load game config here since constructor calls this
         console.log('GameViewerPage: Actual component initialization will be handled by LifecycleController');
+        return [];
     }
 
     /**

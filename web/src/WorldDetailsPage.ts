@@ -37,10 +37,11 @@ class WorldDetailsPage extends BasePage implements LCMComponent {
      * This method is called by BasePage constructor, but we're using external LifecycleController
      * so we make this a no-op and handle initialization through LCMComponent interface
      */
-    protected initializeSpecificComponents(): void {
+    protected initializeSpecificComponents(): LCMComponent[] {
         console.log('WorldDetailsPage: initializeSpecificComponents() called by BasePage - doing minimal setup');
         this.loadInitialState(); // Load initial state here since constructor calls this
         console.log('WorldDetailsPage: Actual component initialization will be handled by LifecycleController');
+        return [];
     }
     
     /**

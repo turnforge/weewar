@@ -32,15 +32,21 @@ class StartGamePage extends BasePage implements LCMComponent {
     
     // Component instances
     private worldViewer: WorldViewer | null = null;
+    
+    constructor(eventBus: EventBus) {
+        super('start-game-page', eventBus, true); // Enable debug mode
+    }
+    
     /**
      * Load initial state (required by BasePage)
      * This method is called by BasePage constructor, but we're using external LifecycleController
      * so we make this a no-op and handle initialization through LCMComponent interface
      */
-    protected initializeSpecificComponents(): void {
+    protected initializeSpecificComponents(): LCMComponent[] {
         console.log('StartGamePage: initializeSpecificComponents() called by BasePage - doing minimal setup');
         this.loadInitialState(); // Load initial state here since constructor calls this
         console.log('StartGamePage: Actual component initialization will be handled by LifecycleController');
+        return [];
     }
     
     /**

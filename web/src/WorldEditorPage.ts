@@ -50,49 +50,6 @@ class WorldEditorPage extends BasePage implements WorldObserver, PageStateObserv
 
     // UI state  
     private hasPendingWorldDataLoad: boolean = false;
-
-    constructor() {
-        super();
-        // Basic setup only - detailed initialization moved to lifecycle phases
-        this.pageState = new WorldEditorPageState();
-        this.pageState.subscribe(this); // Subscribe to page state changes
-        this.loadInitialState();
-        this.subscribeToEditorEvents();
-        
-        // Initialize the lifecycle controller and start component initialization
-        this.initializeWithLifecycleController();
-    }
-    
-    /**
-     * Initialize the page using the new lifecycle controller
-     */
-    private async initializeWithLifecycleController(): Promise<void> {
-        try {
-            // Create lifecycle controller with debug logging
-            this.lifecycleController = new LifecycleController({
-                enableDebugLogging: true,
-                phaseTimeoutMs: 15000, // Increased timeout for complex initialization
-                continueOnError: false // Fail fast for debugging
-            });
-            
-            // Set up lifecycle event logging
-            this.lifecycleController.onLifecycleEvent((event) => {
-                console.log(`[Lifecycle] ${event.type}: ${event.componentName} - ${event.phase}`, event.error || '');
-            });
-            
-            // Dependencies are set directly using explicit setters in performLocalInit phase
-            
-            // Start breadth-first initialization
-            await this.lifecycleController.initializeFromRoot(this, 'WorldEditorPage');
-            
-            console.log('WorldEditorPage initialization complete via LifecycleController');
-            
-        } catch (error) {
-            console.error('WorldEditorPage lifecycle initialization failed:', error);
-            // Fallback to old initialization method if needed
-            this.fallbackInitialization();
-        }
-    }
     
     /**
      * Fallback initialization if lifecycle controller fails
@@ -112,40 +69,38 @@ class WorldEditorPage extends BasePage implements WorldObserver, PageStateObserv
      * Phase 1: Initialize DOM and discover child components
      */
     public performLocalInit(): LCMComponent[] {
-        try {
-            console.log('WorldEditorPage: Starting DOM initialization phase');
+        this.pageState = new WorldEditorPageState();
+        this.pageState.subscribe(this); // Subscribe to page state changes
+        this.subscribeToEditorEvents();
+
+        console.log('WorldEditorPage: Starting DOM initialization phase');
+        
+        // Initialize basic components first
+        this.initializeSpecificComponents();
+        
+        // Create child components that implement LCMComponent
+        const childComponents: LCMComponent[] = [];
+        
+        // Create ReferenceImagePanel as a lifecycle-managed component
+        const referenceTemplate = document.getElementById('reference-image-panel-template');
+        if (referenceTemplate) {
+            const referenceContainer = referenceTemplate.cloneNode(true) as HTMLElement;
+            referenceContainer.style.display = 'block';
+            this.referenceImagePanel = new ReferenceImagePanel(referenceContainer, this.eventBus, true);
             
-            // Initialize basic components first
-            this.initializeSpecificComponents();
+            // Set dependencies directly using explicit setters
+            this.referenceImagePanel.setToastCallback((title: string, message: string, type: 'success' | 'error' | 'info') => {
+                this.showToast(title, message, type);
+            });
             
-            // Create child components that implement LCMComponent
-            const childComponents: LCMComponent[] = [];
+            // PhaserEditorComponent communication via EventBus - no direct dependency needed
             
-            // Create ReferenceImagePanel as a lifecycle-managed component
-            const referenceTemplate = document.getElementById('reference-image-panel-template');
-            if (referenceTemplate) {
-                const referenceContainer = referenceTemplate.cloneNode(true) as HTMLElement;
-                referenceContainer.style.display = 'block';
-                this.referenceImagePanel = new ReferenceImagePanel(referenceContainer, this.eventBus, true);
-                
-                // Set dependencies directly using explicit setters
-                this.referenceImagePanel.setToastCallback((title: string, message: string, type: 'success' | 'error' | 'info') => {
-                    this.showToast(title, message, type);
-                });
-                
-                // PhaserEditorComponent communication via EventBus - no direct dependency needed
-                
-                childComponents.push(this.referenceImagePanel);
-                console.log('WorldEditorPage: Created ReferenceImagePanel child component with dependencies');
-            }
-            
-            console.log(`WorldEditorPage: DOM initialization complete, discovered ${childComponents.length} child components`);
-            return childComponents;
-            
-        } catch (error) {
-            console.error('WorldEditorPage: DOM initialization failed:', error);
-            throw error;
+            childComponents.push(this.referenceImagePanel);
+            console.log('WorldEditorPage: Created ReferenceImagePanel child component with dependencies');
         }
+        
+        console.log(`WorldEditorPage: DOM initialization complete, discovered ${childComponents.length} child components`);
+        return childComponents;
     }
     
     /**
@@ -153,35 +108,30 @@ class WorldEditorPage extends BasePage implements WorldObserver, PageStateObserv
      */
     public setupDependencies(): void {
         console.log('WorldEditorPage: Dependencies injection complete');
+        this.loadInitialState();
     }
     
     /**
      * Phase 3: Activate the component when all dependencies are ready
      */
     public activate(): void {
-        try {
-            console.log('WorldEditorPage: Starting activation phase');
-            
-            // Bind events now that all components are ready
-            this.bindSpecificEvents();
-            this.initializeKeyboardShortcuts();
-            this.setupUnsavedChangesWarning();
-            
-            // Set cross-component dependencies now that all components are created
-            this.setupCrossComponentDependencies();
-            
-            // Initialize dockview now that all child components are ready
-            this.initializeDockview();
-            
-            // Update UI state
-            this.updateEditorStatus('Ready');
-            
-            console.log('WorldEditorPage: Activation complete');
-            
-        } catch (error) {
-            console.error('WorldEditorPage: Activation failed:', error);
-            throw error;
-        }
+        console.log('WorldEditorPage: Starting activation phase');
+        
+        // Bind events now that all components are ready
+        this.bindSpecificEvents();
+        this.initializeKeyboardShortcuts();
+        this.setupUnsavedChangesWarning();
+        
+        // Set cross-component dependencies now that all components are created
+        this.setupCrossComponentDependencies();
+        
+        // Initialize dockview now that all child components are ready
+        this.initializeDockview();
+        
+        // Update UI state
+        this.updateEditorStatus('Ready');
+        
+        console.log('WorldEditorPage: Activation complete');
     }
     
     /**
@@ -732,7 +682,6 @@ class WorldEditorPage extends BasePage implements WorldObserver, PageStateObserv
         this.setupCustomNumberInput();
         
     }
-
 
     private loadInitialState(): void {
         // Theme button state is handled by BasePage
@@ -2234,6 +2183,19 @@ class WorldEditorPage extends BasePage implements WorldObserver, PageStateObserv
 }
 
 // Initialize the editor when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    new WorldEditorPage();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Create page-level event bus
+    const eventBus = new EventBus(true); // Enable debug mode
+
+    const page = new WorldEditorPage(eventBus);
+
+    // Create lifecycle controller with debug logging
+    const lifecycleController = new LifecycleController(eventBus{
+        enableDebugLogging: true,
+        phaseTimeoutMs: 15000, // Increased timeout for complex initialization
+        continueOnError: false // Fail fast for debugging
+    });
+
+    // Start breadth-first initialization
+    await lifecycleController.initializeFromRoot(page);
 });

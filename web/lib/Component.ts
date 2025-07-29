@@ -50,8 +50,8 @@ export abstract class BaseComponent implements Component, LCMComponent {
         // Update the DOM
         this.rootElement.innerHTML = newHTML;
         
-        // Re-bind to the new DOM structure
-        this.bindToDOM();
+        // Note: In pure LCMComponent approach, re-binding should be handled
+        // by the component's LCMComponent lifecycle methods if needed
     }
     
     public destroy(): void {
@@ -109,18 +109,6 @@ export abstract class BaseComponent implements Component, LCMComponent {
     }
     
     // Abstract methods that components must implement
-    
-    /**
-     * Component-specific initialization logic
-     * Called once during construction to set up the component
-     */
-    private initializeComponent(): void {}
-    
-    /**
-     * Bind to DOM elements (handles both empty and pre-populated root elements)
-     * Called during initialization and after content updates
-     */
-    private bindToDOM(): void {}
     
     /**
      * Component-specific cleanup logic

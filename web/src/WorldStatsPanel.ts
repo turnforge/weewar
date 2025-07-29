@@ -51,9 +51,7 @@ export class WorldStatsPanel extends BaseComponent {
             
             this.log('WorldStatsPanel bound to DOM');
             
-        } catch (error) {
-            this.handleError('Failed to bind WorldStatsPanel to DOM', error);
-        }
+        // Removed try/catch - let errors propagate for easier debugging
     }
     
     protected destroyComponent(): void {
@@ -117,9 +115,7 @@ export class WorldStatsPanel extends BaseComponent {
             // Emit stats updated event for other components
             this.emit(WorldEventTypes.WORLD_STATS_UPDATED, this.statsData);
             
-        } catch (error) {
-            this.handleError('Failed to calculate statistics', error);
-        }
+        // Removed try/catch - let errors propagate for easier debugging
     }
     
     /**
@@ -132,9 +128,7 @@ export class WorldStatsPanel extends BaseComponent {
             this.updateBasicStats();
             this.updateTerrainStats();
             
-        } catch (error) {
-            this.handleError('Failed to update stats display', error);
-        }
+        // Removed try/catch - let errors propagate for easier debugging
     }
     
     /**

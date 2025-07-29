@@ -77,11 +77,13 @@ export class LifecycleController {
             for (let i = 0;i < queue.length;i++) {
                 const component = queue[i]
 
-                // Skip if already discovered
+                // Enforce tree structure: each component should have exactly one parent
                 if (visited.has(component)) {
-                    // Technically this should be an assertion failure becuase a component cannot be a "child" of more
-                    // than one parent
-                    continue;
+                    throw new Error(
+                        `Component hierarchy integrity violation: Component '${component.constructor.name}' ` +
+                        `discovered as child of multiple parents at level ${level}. ` +
+                        `Component hierarchies must form a tree structure where each component has exactly one parent.`
+                    );
                 }
                 
                 if (newqueue.length == 0) {

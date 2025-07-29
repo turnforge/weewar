@@ -314,8 +314,8 @@ class WorldDetailsPage extends BasePage implements LCMComponent {
     /**
      * Phase 2: Inject dependencies (none needed for WorldDetailsPage)
      */
-    setupDependencies(deps: Record<string, any>): void {
-        console.log('WorldDetailsPage: setupDependencies() - Phase 2', Object.keys(deps));
+    setupDependencies(): void {
+        console.log('WorldDetailsPage: setupDependencies() - Phase 2');
         // WorldDetailsPage doesn't need external dependencies
     }
 

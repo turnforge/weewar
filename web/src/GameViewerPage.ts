@@ -883,7 +883,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
      * Phase 2: Inject dependencies (none needed for GameViewerPage)
      */
     setupDependencies(): void {
-        console.log('GameViewerPage: setupDependencies() - Phase 2', Object.keys(deps));
+        console.log('GameViewerPage: setupDependencies() - Phase 2')
         // GameViewerPage doesn't need external dependencies
     }
 

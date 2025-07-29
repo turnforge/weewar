@@ -46,8 +46,8 @@ export class EventBus {
      */
     public subscribe<T = any>(
         eventTypeOrTypes: string | string[], 
-        handler: EventHandler<T>, 
         target: any,
+        handler: EventHandler<T>, 
     ): () => void {
         if (typeof(eventTypeOrTypes) === "string") {
           eventTypeOrTypes = [eventTypeOrTypes]

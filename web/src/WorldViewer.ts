@@ -1,4 +1,4 @@
-import { BaseComponent, DOMValidation } from '../lib/Component';
+import { BaseComponent } from '../lib/Component';
 import { EventBus, EventPayload, } from '../lib/EventBus';
 import { WorldEventTypes, WorldDataLoadedPayload } from './events';
 import { PhaserWorldScene } from './phaser/PhaserWorldScene';
@@ -39,7 +39,7 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
         this.log('Initializing WorldViewer component');
         
         // Subscribe to world data events
-        this.subscribe<WorldDataLoadedPayload>(WorldEventTypes.WORLD_DATA_LOADED, (payload) => {
+        this.subscribe<WorldDataLoadedPayload>(WorldEventTypes.WORLD_DATA_LOADED, this, (payload) => {
             this.handleWorldDataLoaded(payload);
         });
         
@@ -93,23 +93,7 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
     }
     
     
-    public validateDOM(rootElement: HTMLElement): DOMValidation {
-        const validation: DOMValidation = {
-            isValid: true,
-            missingElements: [],
-            invalidElements: [],
-            warnings: []
-        };
-        
-        // Check for Phaser container
-        const phaserContainer = rootElement.querySelector('#phaser-viewer-container');
-        if (!phaserContainer) {
-            validation.isValid = false;
-            validation.missingElements.push('phaser-viewer-container');
-        }
-        
-        return validation;
-    }
+    // validateDOM method removed - not needed in pure LCMComponent approach
     
     /**
      * Initialize the appropriate Phaser scene (PhaserWorldScene or PhaserGameScene)
@@ -141,7 +125,7 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
         this.emit(WorldEventTypes.WORLD_VIEWER_READY, {
             componentId: this.componentId,
             success: true
-        });
+        }, this);
         console.log('WorldViewer: WORLD_VIEWER_READY event emitted');
         
         // Load world data if we have it
@@ -223,7 +207,7 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
         }
         
         // Emit data loaded event for other components
-        this.emit(WorldEventTypes.WORLD_DATA_LOADED, this.loadedWorldData);
+        this.emit(WorldEventTypes.WORLD_DATA_LOADED, this.loadedWorldData, this);
     }
     
     /**
@@ -330,7 +314,7 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
      * Phase 2: Inject dependencies (none needed for WorldViewer)
      */
     setupDependencies(): void {
-        console.log('WorldViewer: setupDependencies() - Phase 2', Object.keys(deps));
+        console.log('WorldViewer: setupDependencies() - Phase 2')
         // WorldViewer doesn't need external dependencies
     }
 

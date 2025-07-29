@@ -51,31 +51,25 @@ export class EditorToolsPanel extends BaseComponent {
             return [];
         }
         
-        try {
-            this.log('Binding EditorToolsPanel to DOM');
-            
-            // Set up UI elements and event handlers (independent of dependencies)
-            this.bindTabButtons();
-            this.bindTerrainButtons();
-            this.bindUnitButtons();
-            this.bindBrushSizeControl();
-            this.bindPlayerControl();
-            this.bindCityPlayerControl();
-            
-            this.isUIBound = true;
-            this.log('EditorToolsPanel bound to DOM successfully');
-            
-            // This is a leaf component - no children
-            return [];
-            
-        } catch (error) {
-            this.handleError('Failed to bind EditorToolsPanel to DOM', error);
-            throw error;
-        }
+        this.log('Binding EditorToolsPanel to DOM');
+        
+        // Set up UI elements and event handlers (independent of dependencies)
+        this.bindTabButtons();
+        this.bindTerrainButtons();
+        this.bindUnitButtons();
+        this.bindBrushSizeControl();
+        this.bindPlayerControl();
+        this.bindCityPlayerControl();
+        
+        this.isUIBound = true;
+        this.log('EditorToolsPanel bound to DOM successfully');
+        
+        // This is a leaf component - no children
+        return [];
     }
     
     // Phase 2: Inject dependencies - simplified to use explicit setters
-    public injectDependencies(deps: Record<string, any>): void {
+    public injectDependencies(): void {
         this.log('EditorToolsPanel: Dependencies injection phase - using explicit setters');
         
         // Dependencies should be set directly by parent using setters

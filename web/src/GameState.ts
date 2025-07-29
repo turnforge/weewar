@@ -1,4 +1,4 @@
-import { BaseComponent, ComponentState } from '../lib/Component';
+import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar_v1_servicesClient.client';
 import { ProcessMovesRequest, ProcessMovesResponse, ProcessMovesRequestSchema } from '../gen/weewar/v1/games_pb';
@@ -8,7 +8,7 @@ import { create } from '@bufbuild/protobuf';
 /**
  * Minimal game state interface focused on core game data
  */
-export interface GameStateData extends ComponentState {
+export interface GameStateData {
     wasmLoaded: boolean;
     gameId: string;
     currentPlayer: number;

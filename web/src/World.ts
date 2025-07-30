@@ -142,6 +142,10 @@ export class World {
     public startBatch(): void {
         this.isBatching = true;
     }
+
+    public get id(): string | null {
+      return this.worldId
+    }
     
     public commitBatch(): void {
         if (!this.isBatching) {
@@ -446,193 +450,167 @@ export class World {
         };
     }
     
-    // Self-contained persistence methods
-    public async save(): Promise<SaveResult> {
-            // Transform TypeScript World data into protobuf-compatible format
-            const tiles: Array<ProtoTile> = Object.values(this.tiles).map(tile => 
-                create(TileSchema, {
-                    q: tile.q,
-                    r: tile.r,
-                    tileType: tile.tileType,
-                    player: tile.player
-                })
-            );
-            
-            const units: Array<ProtoUnit> = Object.values(this.units).map(unit => 
-                create(UnitSchema, {
-                    q: unit.q,
-                    r: unit.r,
-                    player: unit.player,
-                    unitType: unit.unitType,
-                    availableHealth: (unit as any).available_health || 100,
-                    distanceLeft: (unit as any).distance_left || 0,
-                    turnCounter: (unit as any).turn_counter || 0
-                })
-            );
-
-            // Build World metadata (separate from WorldData)
-            const worldMetadata: ProtoWorld = create(WorldSchema, {
-                id: this.worldId || undefined,
-                name: this.metadata.name || 'Untitled World',
-                description: '',
-                tags: [],
-                difficulty: 'medium',
-                creatorId: 'editor-user'
-            });
-
-            // Build WorldData (tiles and units)
-            const worldData: ProtoWorldData = create(WorldDataSchema, {
-                tiles: tiles,
-                units: units
-            });
-
-            // Build request payload based on whether it's a new world or update
-            let request: CreateWorldRequest | UpdateWorldRequest;
-            let url: string;
-            let method: string;
-
-            if (this.isNewWorld) {
-                // CreateWorldRequest
-                request = create(CreateWorldRequestSchema, {
-                    world: worldMetadata,
-                    worldData: worldData
-                });
-                url = '/api/v1/worlds';
-                method = 'POST';
-            } else {
-                // UpdateWorldRequest  
-                request = create(UpdateWorldRequestSchema, {
-                    world: create(WorldSchema, {
-                        ...worldMetadata,
-                        id: this.worldId!
-                    }),
-                    worldData: worldData,
-                    clearWorld: false // Don't clear existing data
-                    // Note: update_mask is optional, omitting for now
-                });
-                url = `/api/v1/worlds/${this.worldId}`;
-                method = 'PATCH';
-            }
-
-            // Convert protobuf request to JSON for HTTP call
-            const requestJson = toJson(
-                this.isNewWorld ? CreateWorldRequestSchema : UpdateWorldRequestSchema, 
-                request
-            );
-
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestJson),
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                const newWorldId = result.world?.id || result.id;
-                
-                if (this.isNewWorld && newWorldId) {
-                    this.worldId = newWorldId;
-                    this.isNewWorld = false;
-                }
-                
-                this.markAsSaved();
-                
-                this.emitStateChange(WorldEventType.WORLD_SAVED, {
-                    worldId: this.worldId, success: true
-                });
-                
-                return { success: true, worldId: newWorldId };
-            } else {
-                const errorText = await response.text();
-                throw new Error(`Save failed: ${response.status} ${response.statusText} - ${errorText}`);
-            }
-    }
-    
+    /*
     public async load(worldId: string): Promise<void> {
             // For now, we load from HTML element (server-side rendered data)
             // Future enhancement: could load directly from API
             this.loadFromElement('world-data-json');
             this.setWorldId(worldId);
-            this.hasUnsavedChanges = false;
+    }
+    */
+    
+    // Self-contained persistence methods
+    public async save(): Promise<SaveResult> {
+        // Transform TypeScript World data into protobuf-compatible format
+        const tiles: Array<ProtoTile> = Object.values(this.tiles).map(tile => 
+            create(TileSchema, {
+                q: tile.q,
+                r: tile.r,
+                tileType: tile.tileType,
+                player: tile.player
+            })
+        );
+        
+        const units: Array<ProtoUnit> = Object.values(this.units).map(unit => 
+            create(UnitSchema, {
+                q: unit.q,
+                r: unit.r,
+                player: unit.player,
+                unitType: unit.unitType,
+                availableHealth: (unit as any).available_health || 100,
+                distanceLeft: (unit as any).distance_left || 0,
+                turnCounter: (unit as any).turn_counter || 0
+            })
+        );
+
+        // Build World metadata (separate from WorldData)
+        const worldMetadata: ProtoWorld = create(WorldSchema, {
+            id: this.worldId || undefined,
+            name: this.metadata.name || 'Untitled World',
+            description: '',
+            tags: [],
+            difficulty: 'medium',
+            creatorId: 'editor-user'
+        });
+
+        // Build WorldData (tiles and units)
+        const worldData: ProtoWorldData = create(WorldDataSchema, {
+            tiles: tiles,
+            units: units
+        });
+
+        // Build request payload based on whether it's a new world or update
+        let request: CreateWorldRequest | UpdateWorldRequest;
+        let url: string;
+        let method: string;
+
+        if (this.isNewWorld) {
+            // CreateWorldRequest
+            request = create(CreateWorldRequestSchema, {
+                world: worldMetadata,
+                worldData: worldData
+            });
+            url = '/api/v1/worlds';
+            method = 'POST';
+        } else {
+            // UpdateWorldRequest  
+            request = create(UpdateWorldRequestSchema, {
+                world: create(WorldSchema, {
+                    ...worldMetadata,
+                    id: this.worldId!
+                }),
+                worldData: worldData,
+                clearWorld: false // Don't clear existing data
+                // Note: update_mask is optional, omitting for now
+            });
+            url = `/api/v1/worlds/${this.worldId}`;
+            method = 'PATCH';
+        }
+
+        // Convert protobuf request to JSON for HTTP call
+        const requestJson = toJson(
+            this.isNewWorld ? CreateWorldRequestSchema : UpdateWorldRequestSchema, 
+            request
+        );
+
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestJson),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            const newWorldId = result.world?.id || result.id;
             
-            this.emitStateChange(WorldEventType.WORLD_LOADED, {
-                worldId: this.worldId,
-                isNewWorld: this.isNewWorld,
-                tileCount: this.getTileCount(),
-                unitCount: this.getUnitCount()
-            } as WorldLoadedEventData);
+            if (this.isNewWorld && newWorldId) {
+                this.worldId = newWorldId;
+                this.isNewWorld = false;
+            }
+            
+            this.markAsSaved();
+            
+            this.emitStateChange(WorldEventType.WORLD_SAVED, {
+                worldId: this.worldId, success: true
+            });
+            
+            return { success: true, worldId: newWorldId };
+        } else {
+            const errorText = await response.text();
+            throw new Error(`Save failed: ${response.status} ${response.statusText} - ${errorText}`);
+        }
     }
     
-    public loadFromElement(elementId: string): void {
+    public loadFromElement(worldMetadataElement: HTMLElement, worldTilesElement: HTMLElement): World {
         // Now handles dual element loading: metadata + tiles/units data
-        const worldMetadataElement = document.getElementById('world-data-json');
-        const worldTilesElement = document.getElementById('world-tiles-data-json');
-        
-        if (!worldMetadataElement && !worldTilesElement) {
-            // Fallback to old single element for backward compatibility
-            const element = document.getElementById(elementId);
-            if (!element || !element.textContent) {
-                throw new Error(`World data element '${elementId}' not found or empty`);
-            }
-            
-                const data = JSON.parse(element.textContent);
-                this.loadFromData(data);
-                return;
+        // Parse world metadata
+        let worldMetadata = null;
+        if (worldMetadataElement.textContent) {
+            worldMetadata = JSON.parse(worldMetadataElement.textContent);
         }
         
-        if (!worldMetadataElement || !worldTilesElement) {
-            throw new Error('Missing required world data elements (both world-data-json and world-tiles-data-json are needed)');
+        // Parse world tiles/units data
+        let worldTilesData = null;
+        if (worldTilesElement.textContent) {
+            worldTilesData = JSON.parse(worldTilesElement.textContent);
         }
         
-            // Parse world metadata
-            let worldMetadata = null;
-            if (worldMetadataElement.textContent) {
-                worldMetadata = JSON.parse(worldMetadataElement.textContent);
-            }
+        if (!worldMetadata || !worldTilesData) {
+            throw new Error('Failed to parse world metadata or tiles data');
+        }
+        // Combine into format expected by loadFromData()
+        const combinedData = {
+            // World metadata
+            name: worldMetadata.name || 'Untitled World',
+            Name: worldMetadata.name || 'Untitled World', // Both for compatibility
+            id: worldMetadata.id,
             
-            // Parse world tiles/units data
-            let worldTilesData = null;
-            if (worldTilesElement.textContent) {
-                worldTilesData = JSON.parse(worldTilesElement.textContent);
-            }
+            // Calculate dimensions from tiles if present
+            width: 40,  // Default
+            height: 40, // Default
             
-            if (worldMetadata && worldTilesData) {
-                // Combine into format expected by loadFromData()
-                const combinedData = {
-                    // World metadata
-                    name: worldMetadata.name || 'Untitled World',
-                    Name: worldMetadata.name || 'Untitled World', // Both for compatibility
-                    id: worldMetadata.id,
-                    
-                    // Calculate dimensions from tiles if present
-                    width: 40,  // Default
-                    height: 40, // Default
-                    
-                    // World tiles and units
-                    tiles: worldTilesData.tiles || [],
-                    units: worldTilesData.units || []
-                };
-                
-                // Calculate actual dimensions from tile bounds
-                if (combinedData.tiles && combinedData.tiles.length > 0) {
-                    let maxQ = 0, maxR = 0, minQ = 0, minR = 0;
-                    combinedData.tiles.forEach((tile: any) => {
-                        if (tile.q > maxQ) maxQ = tile.q;
-                        if (tile.q < minQ) minQ = tile.q;
-                        if (tile.r > maxR) maxR = tile.r;
-                        if (tile.r < minR) minR = tile.r;
-                    });
-                    combinedData.width = maxQ - minQ + 1;
-                    combinedData.height = maxR - minR + 1;
-                }
-                
-                this.loadFromData(combinedData);
-            } else {
-                throw new Error('Failed to parse world metadata or tiles data');
-            }
+            // World tiles and units
+            tiles: worldTilesData.tiles || [],
+            units: worldTilesData.units || []
+        };
+        
+        // Calculate actual dimensions from tile bounds
+        if (combinedData.tiles && combinedData.tiles.length > 0) {
+            let maxQ = 0, maxR = 0, minQ = 0, minR = 0;
+            combinedData.tiles.forEach((tile: any) => {
+                if (tile.q > maxQ) maxQ = tile.q;
+                if (tile.q < minQ) minQ = tile.q;
+                if (tile.r > maxR) maxR = tile.r;
+                if (tile.r < minR) minR = tile.r;
+            });
+            combinedData.width = maxQ - minQ + 1;
+            combinedData.height = maxR - minR + 1;
+        }
+        
+        return this.loadFromData(combinedData);
     }
     
-    public loadFromData(data: any): void {
+    public loadFromData(data: any): World {
         if (!data) {
             throw new Error('No world data provided');
         }
@@ -714,6 +692,14 @@ export class World {
         }
         
         this.hasUnsavedChanges = false;
+        
+        this.emitStateChange(WorldEventType.WORLD_LOADED, {
+            worldId: this.worldId,
+            isNewWorld: this.isNewWorld,
+            tileCount: this.getTileCount(),
+            unitCount: this.getUnitCount()
+        } as WorldLoadedEventData);
+        return this
     }
     
     // Serialization methods - now matches backend array format

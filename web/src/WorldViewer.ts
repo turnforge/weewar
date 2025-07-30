@@ -20,7 +20,7 @@ import { LCMComponent } from '../lib/LCMComponent';
  */
 export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> extends BaseComponent implements LCMComponent {
     protected scene: TScene | null = null;
-    private loadedWorldData: WorldDataLoadedPayload | null;
+    private world: World | null = null; // Store canonical World object
     private viewerContainer: HTMLElement | null;
     
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
@@ -44,7 +44,7 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
             this.scene = null;
         }
         
-        this.loadedWorldData = null;
+        this.world = null;
         this.viewerContainer = null;
     }
     
@@ -85,26 +85,22 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
         console.log('WorldViewer: WORLD_VIEWER_READY event emitted');
         
         // Load world data if we have it
-        if (this.loadedWorldData) {
+        if (this.world) {
             await this.loadWorldIntoScene();
         }
     }
     
     /**
-     * Handle world data loaded event
+     * Handle world data loaded event (deprecated - World object should be passed directly)
      */
     private handleWorldDataLoaded(payload: EventPayload<WorldDataLoadedPayload>): void {
         this.log(`Received world data for world: ${payload.data.worldId}`);
-        this.loadedWorldData = payload.data;
-        
-        // Load into Phaser if scene is ready
-        if (this.scene && this.scene.getIsInitialized()) {
-            this.loadWorldIntoScene();
-        }
+        // This is now deprecated - World object should be passed directly via loadWorld()
+        console.warn('WorldViewer: handleWorldDataLoaded is deprecated, use loadWorld(world) instead');
     }
     
     /**
-     * Load world data into the PhaserWorldScene
+     * Load World object into the PhaserWorldScene
      */
     private async loadWorldIntoScene(): Promise<void> {
         if (!this.scene || !this.scene.getIsInitialized()) {
@@ -112,40 +108,22 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
             return;
         }
         
-        if (!this.loadedWorldData) {
-            this.log('No world data available to load');
-            return;
+        if (!this.world) {
+            throw new Error('No World object available to load');
         }
         
-        this.log('Loading world data into Phaser scene');
+        this.log('Loading World object into Phaser scene');
         
-        // This method will be called after loadWorld() sets up the world data properly
-        // For now, we need to reconstruct the World from loadedWorldData
-        // TODO: This is a bit awkward - we should refactor to avoid this conversion
-        console.log('WorldViewer: loadWorldIntoScene called but needs world instance');
-    }
-    
-    /**
-     * Public API for loading world data
-     */
-    public async loadWorld(worldData: any): Promise<void> {
-        if (!worldData) {
-            throw new Error('No world data provided');
-        }
+        // Load the canonical World object directly into Phaser
+        await this.scene.loadWorldData(this.world);
         
-        this.log('Loading world data');
+        // Emit stats for other components
+        const allTiles = this.world.getAllTiles();
+        const allUnits = this.world.getAllUnits();
+        const bounds = this.world.getBounds();
         
-        // Process world data
-        const world = World.deserialize(this.eventBus, worldData);
-        const allTiles = world.getAllTiles();
-        const allUnits = world.getAllUnits();
-        
-        // Calculate bounds and stats
-        const bounds = world.getBounds();
-        
-        // Store world data
-        this.loadedWorldData = {
-            worldId: worldData.id || 'unknown',
+        const worldStats = {
+            worldId: this.world.id || 'unknown',
             totalTiles: allTiles.length,
             totalUnits: allUnits.length,
             bounds: bounds ? {
@@ -157,13 +135,22 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
             terrainCounts: this.calculateTerrainCounts(allTiles)
         };
         
+        this.emit(WorldEventTypes.WORLD_DATA_LOADED, worldStats, this, this);
+    }
+    
+    /**
+     * Public API for loading canonical World object
+     */
+    public async loadWorld(world: World): Promise<void> {
+        this.log('Loading canonical World object');
+        
+        // Store the canonical World object
+        this.world = world;
+        
         // Load into Phaser if ready
         if (this.scene && this.scene.getIsInitialized()) {
-            await this.scene.loadWorldData(world);
+            await this.loadWorldIntoScene();
         }
-        
-        // Emit data loaded event for other components
-        this.emit(WorldEventTypes.WORLD_DATA_LOADED, this.loadedWorldData, this, this);
     }
     
     /**
@@ -304,7 +291,13 @@ export class WorldViewer<TScene extends PhaserWorldScene = PhaserWorldScene> ext
      * Phase 3: Activate component - Initialize Phaser here
      */
     async activate(): Promise<void> {
-        console.log('WorldViewer: activate() - Phase 3 - Initializing Phaser');
+        console.log('WorldViewer: activate() - Phase 3 - Initializing Phaser, current scene:', !!this.scene);
+        
+        // Check if already initialized
+        if (this.scene) {
+            throw new Error('WorldViewer: Already activated and scene exists, skipping');
+            return;
+        }
         
         // Subscribe to world data events
         this.subscribe<WorldDataLoadedPayload>(WorldEventTypes.WORLD_DATA_LOADED, this, (payload) => {

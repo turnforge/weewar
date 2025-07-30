@@ -134,11 +134,16 @@ export class LifecycleController {
      */
     protected async activate(): Promise<void> {
         // This is guaranteed to be in order of levels
+        const visited = new Set<LCMComponent>();
         for (let level = 0;level < this.componentsByLevel.length; level++) {
             const promises = new Array<Promise<void>>()
             const levelComps = this.componentsByLevel[level]
-            console.log("Clearing components in level: ", level)
+            console.log("Activating components in level: ", level)
             for (const comp of levelComps) {
+                if (visited.has(comp)) {
+                  throw new Error("Comp already visited")
+                }
+                visited.add(comp)
                 this.emitEvent(LifecycleEventTypes.ACTIVATION_STARTED , comp, 0)
                 const result = comp.activate()
                 promises.push(Promise.resolve(result).then(() => {

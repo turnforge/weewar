@@ -55,14 +55,31 @@ this.rootElement.style.height = '500px';
 // Use CSS classes: w-full h-96 min-h-[500px]
 ```
 
-### 4. Component Lifecycle Management
+### 4. LCMComponent Lifecycle Management
 
-**All components must follow the standard lifecycle:**
+**All components must follow the 3-phase LCMComponent lifecycle:**
 
-1. **Initialize**: Set up component state and dependencies
-2. **Hydrate**: Bind to existing DOM (for HTMX scenarios)
-3. **Ready**: Component is functional and can respond to events
-4. **Destroy**: Clean up resources, unsubscribe from events
+1. **performLocalInit()**: EventBus subscriptions, DOM setup, and child component discovery (breadth-first)
+2. **setupDependencies()**: Dependency injection and validation 
+3. **activate()**: Final initialization and coordination with other components
+4. **deactivate()**: Clean up resources, unsubscribe from events
+
+**Critical EventBus Subscription Timing**: EventBus subscriptions must happen **first** in performLocalInit(), before creating child components. This ensures that when children emit events immediately during their construction, parent components are already subscribed and ready to receive them.
+
+```typescript
+performLocalInit(): LCMComponent[] {
+    // 1. FIRST: Subscribe to events before creating children
+    this.subscribe('child-ready', this, this.handleChildReady);
+    
+    // 2. THEN: Create child components (they can emit events immediately)
+    const child = new ChildComponent(rootElement, eventBus);
+    
+    // 3. FINALLY: Return children for lifecycle management
+    return [child];
+}
+```
+
+This lifecycle ensures proper initialization order and eliminates race conditions through synchronization barriers.
 
 ### 5. Event-Driven Communication
 
@@ -113,69 +130,83 @@ otherComponent.updateData(worldData);
 
 ## Implementation Guidelines
 
-### Simplified Component Pattern
+### LCMComponent Lifecycle Pattern
 
-Our architecture uses a clean constructor pattern that eliminates initialization complexity:
+All components implement the 3-phase LCMComponent lifecycle for proper initialization order:
 
 ```typescript
-export class MyComponent extends BaseComponent {
-    // 1. Simple constructor - parent ensures root element exists
+export class MyComponent extends BaseComponent implements LCMComponent {
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('my-component', rootElement, eventBus, debugMode);
-        // Component automatically calls initializeComponent() and bindToDOM()
+        // Note: Lifecycle methods are called by LifecycleController, not constructor
     }
     
-    // 2. Component-specific initialization (called once during construction)
-    protected initializeComponent(): void {
-        // Set up event subscriptions, component state
-        this.subscribe(EventTypes.DATA_LOADED, (payload) => {
-            this.handleDataLoaded(payload.data);
-        });
-    }
-    
-    // 3. Bind to DOM elements (called during construction and after content updates)
-    protected bindToDOM(): void {
-        // Find or create DOM elements, set up event handlers
+    // Phase 1: Subscribe to events FIRST, then create children
+    performLocalInit(): LCMComponent[] {
+        // 1. CRITICAL: Subscribe to events before creating children
+        this.subscribe(EventTypes.CHILD_READY, this, this.handleChildReady);
+        this.subscribe(EventTypes.DATA_LOADED, this, this.handleDataLoaded);
+        
+        // 2. Set up DOM elements
         this.myButton = this.findElement('.my-button') || this.createButton();
-        this.myButton.addEventListener('click', () => this.handleClick());
+        
+        // 3. Create child components (they can emit events immediately)
+        const child = new ChildComponent(childRoot, this.eventBus);
+        
+        // 4. Return children for lifecycle management
+        return [child];
     }
     
-    // 4. Handle dynamic content updates (for HTMX scenarios)
-    public contentUpdated(newHTML: string): void {
-        // Base class handles innerHTML update and calls bindToDOM()
+    // Phase 2: Inject dependencies from other components
+    setupDependencies(): void {
+        // Set up dependencies from other components if needed
+        // Example: this.dataService = serviceRegistry.get('data-service');
     }
     
-    // 5. Component-specific cleanup
+    // Phase 3: Final activation after all components are ready
+    activate(): void {
+        // Set up DOM event handlers
+        this.myButton?.addEventListener('click', () => this.handleClick());
+        
+        // Any final coordination with other components
+        this.emit(EventTypes.COMPONENT_READY, { componentId: this.componentId }, this, this);
+    }
+    
+    // Cleanup
+    deactivate(): void {
+        this.destroy();
+    }
+    
+    // Component-specific cleanup
     protected destroyComponent(): void {
-        // Component-specific cleanup
         this.mySpecificCleanup();
-    }
-    
-    // 6. Helper methods for DOM element creation
-    private createButton(): HTMLElement {
-        const button = document.createElement('button');
-        button.className = 'my-button';
-        button.textContent = 'Click me';
-        this.rootElement.appendChild(button);
-        return button;
     }
 }
 ```
 
-### Parent Orchestration Pattern
+### Parent Orchestration Pattern with LifecycleController
 
 ```typescript
-export class ParentPage extends BasePage {
+export class ParentPage extends BasePage implements LCMComponent {
     private myComponent: MyComponent | null = null;
     
-    private initializeComponents(): void {
-        // Parent ensures root element exists
-        const componentRoot = this.ensureElement('[data-component="my-component"]', 'fallback-id');
+    // Phase 1: Subscribe to events BEFORE creating children
+    performLocalInit(): LCMComponent[] {
+        // 1. CRITICAL: Subscribe to child events first
+        this.subscribe('child-ready', this, this.handleChildReady);
         
-        // Simple component creation
+        // 2. Create child components (they can emit events immediately)
+        const componentRoot = this.ensureElement('[data-component="my-component"]', 'fallback-id');
         this.myComponent = new MyComponent(componentRoot, this.eventBus, true);
         
-        // Component handles everything else automatically
+        // 3. Return children for lifecycle management
+        return this.myComponent ? [this.myComponent] : [];
+    }
+    
+    // Phase 3: Final page activation
+    activate(): void {
+        super.activate(); // Bind base page events
+        // Any additional page-specific coordination
     }
     
     private ensureElement(selector: string, fallbackId: string): HTMLElement {
@@ -184,11 +215,18 @@ export class ParentPage extends BasePage {
             element = document.createElement('div');
             element.id = fallbackId;
             element.className = 'w-full h-full';
-            this.findContainer().appendChild(element);
+            document.body.appendChild(element);
         }
         return element;
     }
 }
+
+// Initialize with LifecycleController for proper coordination
+document.addEventListener('DOMContentLoaded', async () => {
+    const page = new ParentPage('parent-page');
+    const lifecycleController = new LifecycleController(page.eventBus);
+    await lifecycleController.initializeFromRoot(page);
+});
 ```
 
 ### Event Communication
@@ -465,7 +503,21 @@ eventBus.subscribe('ready', handler); // Ready to receive
 const component = new Component(); // Emits 'ready' event → handler called
 ```
 
-**Pattern**: Always subscribe to events BEFORE creating components that might emit them during construction.
+**LCMComponent Pattern**: In performLocalInit(), ALWAYS subscribe to events before creating child components:
+
+```typescript
+performLocalInit(): LCMComponent[] {
+    // 1. FIRST: Subscribe to events (fire and forget mechanism)
+    this.subscribe('child-ready', this, this.handleChildReady);
+    
+    // 2. THEN: Create children who can emit immediately
+    const child = new ChildComponent(root, eventBus);
+    
+    return [child];
+}
+```
+
+**Key Insight**: EventBus is a "fire and forget" mechanism, not a callback approach. Subscriptions must be in place before events are fired.
 
 ### 3. WebGL/Canvas Initialization Timing
 
@@ -574,12 +626,13 @@ protected bindToDOM(): void {
 ## Updated Best Practices
 
 1. **No explicit class field initializers** for constructor-set fields
-2. **Subscribe before create** - always register event handlers before creating components
-3. **Separate "initialized" from "ready"** - graphics libraries need settling time
-4. **Use setTimeout(fn, 0-10ms)** for WebGL context readiness, not longer delays
-5. **State → Subscribe → Create** - strict initialization order
-6. **Async in handlers, sync EventBus** - keep event system simple
-7. **Debug timing issues** with comprehensive logging
-8. **Test race conditions** by varying initialization order
+2. **Subscribe before create** - in performLocalInit(), ALWAYS subscribe to events before creating child components
+3. **EventBus is fire-and-forget** - subscriptions must be in place before events are emitted
+4. **Separate "initialized" from "ready"** - graphics libraries need settling time
+5. **Use setTimeout(fn, 0-10ms)** for WebGL context readiness, not longer delays
+6. **performLocalInit order**: Subscribe → DOM setup → Create children → Return children
+7. **Async in handlers, sync EventBus** - keep event system simple
+8. **Debug timing issues** with comprehensive logging
+9. **Test race conditions** by varying initialization order
 
 These patterns prevent timing-related bugs and ensure components work reliably across different execution environments and load conditions.

@@ -4,22 +4,23 @@
  */
 
 export interface EventPayload<T = any> {
-    // The entity that emitted the event.
-    emitter: any;
-
-    // The target entity that this event relates to.
-    target: any
+    // The target/subject entity that this event relates to.
+    subject: any
 
     timestamp: number;
 
     data: T;
+
+    // The entity that emitted the event.
+    emitter: any;
 }
 
 export type EventHandler<T = any> = (payload: EventPayload<T>) => void;
 
 interface EventSubscription {
+    name: string; // A way to dedup subscription to avoid getting the same event twice
     handler: EventHandler;
-    target: any;
+    subject: any;
 }
 
 /**
@@ -42,11 +43,12 @@ export class EventBus {
      * Subscribe to an event type
      * @param eventType - The event type to listen for
      * @param handler - Function to call when event is fired
-     * @param target - Filter by target entity for subscribing events from (after checking for eventType)
+     * @param subject - Filter by subject entity for subscribing events from (after checking for eventType)
      */
     public subscribe<T = any>(
+        name: string,
         eventTypeOrTypes: string | string[], 
-        target: any,
+        subject: any,
         handler: EventHandler<T>, 
     ): () => void {
         if (typeof(eventTypeOrTypes) === "string") {
@@ -57,7 +59,7 @@ export class EventBus {
               this.subscribers.set(eventType, []);
           }
           
-          const subscription: EventSubscription = { handler, target };
+          const subscription: EventSubscription = { name, handler, subject };
           this.subscribers.get(eventType)!.push(subscription);
           
           if (this.debugMode) {
@@ -67,7 +69,7 @@ export class EventBus {
         
         // Return unsubscribe function
         return () => {
-          this.unsubscribe(eventTypeOrTypes as string[], target, handler);
+          this.unsubscribe(eventTypeOrTypes as string[], subject , handler);
         }
     }
     
@@ -76,7 +78,7 @@ export class EventBus {
      */
     public unsubscribe<T = any>(
         eventTypeOrTypes: (string|string[]), 
-        target: any,
+        subject: any,
         handler: EventHandler<T>
     ): void {
         if (typeof(eventTypeOrTypes) === "string") {
@@ -87,13 +89,13 @@ export class EventBus {
             if (!subscriptions) return;
             
             const index = subscriptions.findIndex(
-                sub => sub.target === target && sub.handler === handler
+                sub => sub.subject === subject && sub.handler === handler
             );
             
             if (index !== -1) {
                 subscriptions.splice(index, 1);
                 if (this.debugMode) {
-                    console.log(`[EventBus] '${target}' unsubscribed from '${eventType}'`);
+                    console.log(`[EventBus] '${subject}' unsubscribed from '${eventType}'`);
                 }
             }
             
@@ -108,10 +110,10 @@ export class EventBus {
      * Emit an event to all subscribers (except the source)
      * @param eventType - The event type to emit
      * @param data - The event data payload
-     * @param target - The target entity that this event relates to.
+     * @param subject - The subject entity that this event relates to.
      * @param emitter - The entity that emitted the event.
      */
-    public emit<T = any>(eventType: string, data: T, target: any, emitter: any): void {
+    public emit<T = any>(eventType: string, data: T, subject: any, emitter: any): void {
         const subscriptions = this.subscribers.get(eventType);
         if (!subscriptions || subscriptions.length === 0) {
             if (this.debugMode) {
@@ -122,7 +124,7 @@ export class EventBus {
         
         const payload: EventPayload<T> = {
             emitter: emitter,
-            target: target,
+            subject: subject,
             timestamp: Date.now(),
             data
         };
@@ -137,9 +139,9 @@ export class EventBus {
         // Call each handler with error isolation
         subscriptions.forEach(subscription => {
             // Source exclusion - don't send event back to the source or the emitter
-            if (subscription.target === emitter || subscription.target === target) {
+            if (subscription.subject != null && (subscription.subject === emitter || subscription.subject === subject)) {
                 if (this.debugMode) {
-                    console.log(`[EventBus] Skipping target '${target}'`);
+                    console.log(`[EventBus] Skipping subject '${subject}'`);
                 }
                 return;
             }
@@ -151,7 +153,7 @@ export class EventBus {
                 errorCount++;
                 console.error(
                     `[EventBus] Error in event handler for '${eventType}' ` +
-                    `in target '${subscription.target}':`, 
+                    `in subject '${subscription.subject}':`, 
                     error
                 );
                 // Continue with other handlers - error isolation

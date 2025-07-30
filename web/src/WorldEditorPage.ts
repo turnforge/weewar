@@ -51,18 +51,6 @@ class WorldEditorPage extends BasePage {
     // UI state  
     private hasPendingWorldDataLoad: boolean = false;
     
-    /**
-     * Fallback initialization if lifecycle controller fails
-     */
-    private fallbackInitialization(): void {
-        console.warn('Using fallback initialization method');
-        this.initializeSpecificComponents();
-        this.initializeDockview();
-        this.bindSpecificEvents();
-        this.initializeKeyboardShortcuts();
-        this.setupUnsavedChangesWarning();
-    }
-    
     // LCMComponent implementation
     
     /**
@@ -71,6 +59,8 @@ class WorldEditorPage extends BasePage {
     public performLocalInit(): LCMComponent[] {
         this.pageState = new WorldEditorPageState(this.eventBus);
         this.subscribeToEditorEvents();
+
+        this.initializeSpecificComponents();
 
         console.log('WorldEditorPage: Starting DOM initialization phase');
         
@@ -143,6 +133,8 @@ class WorldEditorPage extends BasePage {
         
         childComponents.push(this.phaserEditorComponent);
         console.log('WorldEditorPage: Created PhaserEditorComponent child component using template');
+        // Initialize dockview now that all child components are ready
+        this.initializeDockview();
         
         console.log(`WorldEditorPage: DOM initialization complete, discovered ${childComponents.length} child components`);
         return childComponents;
@@ -176,7 +168,9 @@ class WorldEditorPage extends BasePage {
     
     private initializeNewWorld(): void {
         // Try to load template world data from hidden element first
-        this.world!.loadFromElement('world-data-json');
+        const worldMetadataElement = document.getElementById('world-data-json');
+        const worldTilesElement = document.getElementById('world-tiles-data-json');
+        this.world = new World(this.eventBus).loadFromElement(worldMetadataElement!, worldTilesElement!);
         this.hasPendingWorldDataLoad = true;
         
         this.updateEditorStatus('New World');
@@ -184,7 +178,10 @@ class WorldEditorPage extends BasePage {
 
     private async loadExistingWorld(worldId: string): Promise<void> {
         try {
-            await this.world!.load(worldId);
+            const worldMetadataElement = document.getElementById('world-data-json');
+            const worldTilesElement = document.getElementById('world-tiles-data-json');
+            this.world = new World(this.eventBus).loadFromElement(worldMetadataElement!, worldTilesElement!);
+            // await this.world!.load(worldId);
             this.hasPendingWorldDataLoad = true;
         } catch (error) {
             console.error('Failed to load world:', error);
@@ -215,9 +212,6 @@ class WorldEditorPage extends BasePage {
         
         // Set cross-component dependencies now that all components are created
         this.setupCrossComponentDependencies();
-        
-        // Initialize dockview now that all child components are ready
-        this.initializeDockview();
         
         // Update UI state
         this.updateEditorStatus('Ready');
@@ -315,9 +309,6 @@ class WorldEditorPage extends BasePage {
         // World ID and new world state are now handled by the World instance
 
         this.editorOutput = document.getElementById('editor-output');
-        
-        // WorldEditorPage manages its own children through its performLocalInit override
-        // Return empty array as child components are handled by LCMComponent implementation
         return [];
     }
 
@@ -1475,72 +1466,7 @@ class WorldEditorPage extends BasePage {
     // Phaser panel methods
     // OLD METHOD REMOVED: initializePhaserPanel - now handled by PhaserEditorComponent
     
-    
-    // EditorToolsPanel methods
-    private async initializeEditorToolsPanelLifecycle(container: HTMLElement): Promise<void> {
-            this.logToConsole('Initializing EditorToolsPanel with lifecycle...');
-            
-            // Create EditorToolsPanel component
-            this.editorToolsPanel = new EditorToolsPanel(container, this.eventBus, true);
-            
-            // Phase 1: Initialize DOM
-            await this.editorToolsPanel.performLocalInit();
-            
-            // Phase 2: Set dependencies directly using explicit setters
-            this.editorToolsPanel.setPageState(this.pageState);
-            await this.editorToolsPanel.setupDependencies();
-            
-            // Phase 3: Activate component
-            await this.editorToolsPanel.activate();
-            
-            this.logToConsole('EditorToolsPanel initialized with lifecycle architecture');
-    }
-    
-    // Legacy method for backward compatibility
-    private initializeEditorToolsPanel(container: HTMLElement): void {
-            this.logToConsole('Initializing EditorToolsPanel...');
-            
-            // Create EditorToolsPanel component
-            this.editorToolsPanel = new EditorToolsPanel(container, this.eventBus, true);
-            
-            // Inject page state so EditorToolsPanel can generate state changes
-            this.editorToolsPanel.setPageState(this.pageState);
-            
-            this.logToConsole('EditorToolsPanel initialized with page state');
-    }
-    
-    // TileStats panel methods
-    private async initializeTileStatsPanelLifecycle(container: HTMLElement): Promise<void> {
-            this.logToConsole('Initializing TileStatsPanel with lifecycle...');
-            
-            // Create TileStatsPanel component
-            this.tileStatsPanel = new TileStatsPanel(container, this.eventBus, true);
-            
-            // Phase 1: Initialize DOM
-            await this.tileStatsPanel.performLocalInit();
-            
-            // Phase 2: Set dependencies directly using explicit setters
-            if (this.world) {
-                this.tileStatsPanel.setWorld(this.world);
-            } else {
-                throw new Error('World is not available for TileStatsPanel');
-            }
-            await this.tileStatsPanel.setupDependencies();
-            
-            // Phase 3: Activate component
-            await this.tileStatsPanel.activate();
-            
-            this.logToConsole('TileStatsPanel initialized with lifecycle architecture');
-    }
-    
-    // Legacy method for backward compatibility - now uses lifecycle internally
-    private initializeTileStatsPanel(container: HTMLElement): void {
-        // Just call the lifecycle method
-        this.initializeTileStatsPanelLifecycle(container).catch(error => {
-            this.logToConsole(`Failed to initialize TileStats panel: ${error}`);
-        });
-    }
-    
+        
     private refreshTileStats(): void {
         if (!this.tileStatsPanel || !this.tileStatsPanel.getIsInitialized()) {
             return;

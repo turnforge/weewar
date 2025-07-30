@@ -30,8 +30,8 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             return [];
         }
 
-        this.log('Binding WorldStatsPanel to DOM using template');
-        this.bindToTemplate();
+        this.log('Binding WorldStatsPanel to DOM');
+        this.validateDOMStructure();
         this.isUIBound = true;
         this.log('WorldStatsPanel bound to DOM successfully');
         
@@ -75,19 +75,22 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
     }
 
     /**
-     * Bind component to the template from WorldEditorPage.html
+     * Validate that the required DOM structure exists within rootElement
      */
-    private bindToTemplate(): void {
-        const template = document.getElementById('worldstats-panel-template');
-        if (!template) {
-            throw new Error('worldstats-panel-template not found. Make sure WorldEditorPage.html template is included.');
+    private validateDOMStructure(): void {
+        // Check for required sections within rootElement only
+        const basicSection = this.findElement('[data-stat-section="basic"]');
+        const terrainSection = this.findElement('[data-stat-section="terrain"]');
+        
+        if (!basicSection) {
+            throw new Error('WorldStatsPanel: [data-stat-section="basic"] element not found within rootElement');
         }
-
-        // Use the template directly instead of cloning
-        const templateContent = template.innerHTML;
-        this.rootElement.innerHTML = templateContent;
-
-        this.log('Template bound successfully');
+        
+        if (!terrainSection) {
+            throw new Error('WorldStatsPanel: [data-stat-section="terrain"] element not found within rootElement');
+        }
+        
+        this.log('DOM structure validated successfully');
     }
     
     protected destroyComponent(): void {

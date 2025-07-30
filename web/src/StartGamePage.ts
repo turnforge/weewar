@@ -73,31 +73,6 @@ class StartGamePage extends BasePage implements LCMComponent {
         
         console.log('StartGamePage: Components created');
     }
-    
-    /**
-     * Ensure an element exists, create if missing
-     */
-    private ensureElement(selector: string, fallbackId: string): HTMLElement {
-        let element = document.querySelector(selector) as HTMLElement;
-        if (!element) {
-            console.warn(`Element not found: ${selector}, creating fallback`);
-            element = document.createElement('div');
-            element.id = fallbackId;
-            element.className = 'w-full h-full';
-            const mainContainer = document.querySelector('main') || document.body;
-            mainContainer.appendChild(element);
-        }
-        return element;
-    }
-
-    /**
-     * Bind page-specific events (required by BasePage)
-     * This method is called by BasePage constructor, but we're using external LifecycleController
-     * so we make this a no-op and handle event binding in LCMComponent.activate()
-     */
-    protected bindSpecificEvents(): void {
-        console.log('StartGamePage: bindSpecificEvents() called by BasePage - deferred to activate() phase');
-    }
 
     /**
      * Internal method to bind page-specific events (called from activate() phase)

@@ -10,39 +10,35 @@ import { LCMComponent } from './LCMComponent';
  * Implements proper LCMComponent lifecycle management for pages
  */
 export abstract class BasePage extends BaseComponent {
-    protected themeManager: typeof ThemeManager | null = null;
-    protected modal: Modal | null = null;
-    protected toastManager: ToastManager | null = null;
+    protected themeManager: typeof ThemeManager;
+    protected modal: Modal;
+    protected toastManager: ToastManager
 
-    protected themeToggleButton: HTMLButtonElement | null = null;
-    protected themeToggleIcon: HTMLElement | null = null;
+    protected themeToggleButton: HTMLButtonElement;
+    protected themeToggleIcon: HTMLElement;
 
     // Constructor now just uses document as the rootElement
     constructor(public readonly componentId: string, eventBus: EventBus | null = null, public readonly debugMode: boolean = false) {
         // Mark as component in DOM for debugging
         super(componentId, document.body, eventBus, debugMode)
+
+        this.initializeBaseComponents();
+        
+        // Bind base events first
+        this.bindBaseEvents();
     }
 
     // LCMComponent Phase 1: Initialize page structure and discover child components
     public override performLocalInit(): LCMComponent[] {
         this.log('BasePage: Starting local initialization');
         
-        // Initialize base components first
-        this.initializeBaseComponents();
-        
         // Then initialize page-specific components and discover children
-        const childComponents = this.initializeSpecificComponents();
-        
-        this.log('BasePage: Local initialization complete');
-        return childComponents;
+        return this.initializeSpecificComponents();
     }
     
     // LCMComponent Phase 3: Activate the page (bind events after all components are ready)
     public override activate(): void {
         this.log('BasePage: Activating page');
-        
-        // Bind base events first
-        this.bindBaseEvents();
         
         // Then bind page-specific events
         this.bindSpecificEvents();
@@ -61,7 +57,7 @@ export abstract class BasePage extends BaseComponent {
 
         // Get theme toggle elements
         this.themeToggleButton = document.getElementById('theme-toggle-button') as HTMLButtonElement;
-        this.themeToggleIcon = document.getElementById('theme-toggle-icon');
+        this.themeToggleIcon = document.getElementById('theme-toggle-icon')!;
 
         if (!this.themeToggleButton || !this.themeToggleIcon) {
             console.warn("Theme toggle button or icon element not found in Header.");
@@ -145,12 +141,12 @@ export abstract class BasePage extends BaseComponent {
      * Abstract method that subclasses must implement to initialize their specific components
      * Should return any child components that need lifecycle management
      */
-    protected abstract initializeSpecificComponents(): LCMComponent[];
+    protected initializeSpecificComponents(): LCMComponent[] { return []; }
 
     /**
      * Abstract method that subclasses must implement to bind their specific events
      */
-    protected abstract bindSpecificEvents(): void;
+    protected bindSpecificEvents(): void {}
 
     /**
      * Component-specific cleanup logic (required by BaseComponent)
@@ -159,9 +155,33 @@ export abstract class BasePage extends BaseComponent {
         this.log('BasePage: Cleaning up base page components');
         
         // Clean up base components
-        this.modal = null;
-        this.toastManager = null;
-        this.themeToggleButton = null;
-        this.themeToggleIcon = null;
+        this.modal = null as any;
+        this.toastManager = null as any;
+        this.themeToggleButton = null as any;
+        this.themeToggleIcon = null as any;
+    }
+    
+    /**
+     * Ensure an element exists, create if missing
+     * This is acceptable for page-level orchestration to find component root elements
+     */
+    protected ensureElement(selector: string, fallbackId: string): HTMLElement {
+        let element = document.querySelector(selector) as HTMLElement;
+        if (!element) {
+            console.warn(`Element not found: ${selector}, creating fallback`);
+            element = document.createElement('div');
+            element.id = fallbackId;
+            element.className = 'w-full h-full';
+            // Fallback should be more specific than just body
+            const mainContainer = document.querySelector('main') || document.body;
+            mainContainer.appendChild(element);
+        }
+        
+        // Ensure element has an ID for Phaser container
+        if (!element.id) {
+            element.id = fallbackId;
+        }
+        
+        return element;
     }
 }

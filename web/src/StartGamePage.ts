@@ -51,7 +51,7 @@ class StartGamePage extends BasePage implements LCMComponent {
     private subscribeToWorldViewerEvents(): void {
         // Subscribe to WorldViewer ready event BEFORE creating the component
             console.log('StartGamePage: Subscribing to world-viewer-ready event');
-            this.eventBus.subscribe('world-viewer-ready', () => {
+            this.eventBus.subscribe('world-viewer-ready', this.worldViewer, () => {
                 console.log('StartGamePage: WorldViewer is ready, loading world data...');
                 if (this.currentWorldId) {
                   // Give Phaser time to fully initialize webgl context and scene
@@ -59,7 +59,7 @@ class StartGamePage extends BasePage implements LCMComponent {
                     await this.loadWorldData()
                   }, 10)
                 }
-            }, 'start-game-page');
+            });
     }
 
     /**

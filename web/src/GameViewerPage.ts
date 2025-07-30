@@ -7,6 +7,7 @@ import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
+import { WorldEventTypes } from './events';
 
 /**
  * Game Viewer Page - Interactive game play interface
@@ -90,14 +91,14 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 
     /**
-     * Subscribe to WorldViewer and GameState events before component creation
+     * Subscribe to GameState events
      */
-    private subscribeToWorldViewerEvents(): void {
-        // Subscribe BEFORE creating WorldViewer to catch initialization events
-        this.eventBus.subscribe('world-viewer-ready', (payload) => {
-            console.log('GameViewerPage: WorldViewer ready event received', payload);
+    private subscribeToGameStateEvents(): void {
+        // GameViewer ready event - set up interaction callbacks and load world
+        this.subscribe('game-viewer-ready', this, (payload) => {
+            console.log('GameViewerPage: GameViewer ready event received', payload);
             
-            // Now that WorldViewer scene is ready, set up the interaction callbacks
+            // Now that GameViewer scene is ready, set up the interaction callbacks
             if (this.worldViewer) {
                 console.log('GameViewerPage: Setting interaction callbacks after scene ready');
                 this.worldViewer.setInteractionCallbacks(
@@ -117,14 +118,14 @@ class GameViewerPage extends BasePage implements LCMComponent {
             } else {
                 console.warn('GameViewerPage: No currentGameId found!');
             }
-        }, 'game-viewer-page');
+        });
 
         // GameState notification events (for system coordination, not user interaction responses)
-        this.eventBus.subscribe('wasm-loaded', (payload) => {
+        this.subscribe('wasm-loaded', this, (payload) => {
             console.log('GameViewerPage: WASM loaded successfully');
-        }, 'game-viewer-page');
+        });
 
-        this.eventBus.subscribe('game-loaded', (payload) => {
+        this.subscribe('game-loaded', this, (payload) => {
             console.log('GameViewerPage: Game loaded from page data', payload.data);
             // Update UI with the loaded game state
             if (this.gameState) {
@@ -132,29 +133,29 @@ class GameViewerPage extends BasePage implements LCMComponent {
                 this.updateGameUIFromState(this.convertGameStateToLegacyFormat(gameData));
                 this.logGameEvent(`Game loaded: ${gameData.gameId}`);
             }
-        }, 'game-viewer-page');
+        });
 
-        this.eventBus.subscribe('game-created', (payload) => {
+        this.subscribe('game-created', this, (payload) => {
             const gameData: GameCreateData = payload.data;
             console.log('GameViewerPage: Game created notification', gameData);
             // Game UI already updated synchronously, this is just for logging/coordination
-        }, 'game-viewer-page');
+        });
 
-        this.eventBus.subscribe('unit-moved', (payload) => {
+        this.subscribe('unit-moved', this, (payload) => {
             console.log('GameViewerPage: Unit moved notification', payload.data);
             // Could trigger animations, sound effects, etc.
-        }, 'game-viewer-page');
+        });
 
-        this.eventBus.subscribe('unit-attacked', (payload) => {
+        this.subscribe('unit-attacked', this, (payload) => {
             console.log('GameViewerPage: Unit attacked notification', payload.data);
             // Could trigger combat animations, sound effects, etc.
-        }, 'game-viewer-page');
+        });
 
-        this.eventBus.subscribe('turn-ended', (payload) => {
+        this.subscribe('turn-ended', this, (payload) => {
             const gameData: GameCreateData = payload.data;
             console.log('GameViewerPage: Turn ended notification', gameData);
             // Could trigger end-of-turn animations, notifications, etc.
-        }, 'game-viewer-page');
+        });
     }
 
     /**
@@ -203,7 +204,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }
 
         // Deserialize world for the WorldViewer component
-        this.world = World.deserialize(gameState.world_data);
+        this.world = World.deserialize(this.eventBus, gameState.world_data);
         
         // Load world into viewer
         if (this.worldViewer) {
@@ -812,7 +813,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
         console.log('GameViewerPage: performLocalInit() - Phase 1');
         
         // Subscribe to events BEFORE creating components
-        this.subscribeToWorldViewerEvents();
+        this.subscribeToGameStateEvents();
         
         // Create child components
         this.createWorldViewerComponent();
@@ -854,19 +855,8 @@ class GameViewerPage extends BasePage implements LCMComponent {
         // Bind events now that all components are ready
         this.bindGameSpecificEvents();
 
-        // Note: Interaction callbacks are set in world-viewer-ready event handler
-        // after the PhaserGameScene is actually created and ready
-        
-        // Wait for world viewer to be ready, then load world and initialize game
-        if (this.currentGameId) {
-            console.log('GameViewerPage: WorldId found, loading world and initializing game...');
-            // Small delay to ensure WorldViewer is fully ready
-            setTimeout(async () => {
-                await this.loadWorldAndInitializeGame();
-            }, 50);
-        } else {
-            console.warn('GameViewerPage: No currentGameId found!');
-        }
+        // Note: Interaction callbacks and world loading are handled in the 
+        // game-viewer-ready event handler after the PhaserGameScene is actually created and ready
         
         console.log('GameViewerPage: activation complete');
     }

@@ -33,6 +33,12 @@ export class GameViewer extends WorldViewer<PhaserGameScene> {
         
         // GameViewer-specific setup can go here if needed
         console.log('GameViewer: Phaser scene initialized and ready for game interactions');
+        
+        // Emit a GameViewer-specific ready event for the parent page
+        this.emit('game-viewer-ready', {
+            componentId: this.componentId,
+            success: true
+        }, this, this);
     }
 
     /**

@@ -1,26 +1,20 @@
 /**
- * Type-safe event system for component communication
- * Provides error isolation and prevents circular event propagation
+ * Simple event system for component communication
+ * Provides error isolation and idempotent subscriptions
  */
 
-export interface EventPayload<T = any> {
-    // The target/subject entity that this event relates to.
-    subject: any
-
-    timestamp: number;
-
-    data: T;
-
-    // The entity that emitted the event.
-    emitter: any;
-}
-
-export type EventHandler<T = any> = (payload: EventPayload<T>) => void;
-
-interface EventSubscription {
-    name: string; // A way to dedup subscription to avoid getting the same event twice
-    handler: EventHandler;
-    subject: any;
+/**
+ * Interface for components that want to receive events via the EventBus
+ */
+export interface EventSubscriber {
+    /**
+     * Handle incoming events from the EventBus
+     * @param eventType - The type of event being handled
+     * @param data - The event data payload
+     * @param target - The target/subject entity (what the event is about)
+     * @param emitter - The entity that emitted the event
+     */
+    handleBusEvent(eventType: string, data: any, target: any, emitter: any): void;
 }
 
 /**
@@ -32,7 +26,7 @@ interface EventSubscription {
  * - Debug logging for troubleshooting
  */
 export class EventBus {
-    private subscribers: Map<string, EventSubscription[]> = new Map();
+    private subscribers: Map<string, Set<EventSubscriber>> = new Map();
     private debugMode: boolean = false;
     
     constructor(debugMode: boolean = false) {
@@ -40,120 +34,81 @@ export class EventBus {
     }
     
     /**
-     * Subscribe to an event type
-     * @param eventType - The event type to listen for
-     * @param handler - Function to call when event is fired
-     * @param subject - Filter by subject entity for subscribing events from (after checking for eventType)
+     * Add a subscription using the EventSubscriber pattern
+     * Provides automatic idempotency - same subscriber object won't be added twice
      */
-    public subscribe<T = any>(
-        name: string,
-        eventTypeOrTypes: string | string[], 
-        subject: any,
-        handler: EventHandler<T>, 
-    ): () => void {
-        if (typeof(eventTypeOrTypes) === "string") {
-          eventTypeOrTypes = [eventTypeOrTypes]
-        }
-        for (const eventType of eventTypeOrTypes as string[]) {
-          if (!this.subscribers.has(eventType)) {
-              this.subscribers.set(eventType, []);
-          }
-          
-          const subscription: EventSubscription = { name, handler, subject };
-          this.subscribers.get(eventType)!.push(subscription);
-          
-          if (this.debugMode) {
-              console.log(`[EventBus] subscribed to '${eventType}'`);
-          }
+    public addSubscription(eventType: string, target: any, subscriber: EventSubscriber): void {
+        if (!this.subscribers.has(eventType)) {
+            this.subscribers.set(eventType, new Set());
         }
         
-        // Return unsubscribe function
-        return () => {
-          this.unsubscribe(eventTypeOrTypes as string[], subject , handler);
+        const subscribers = this.subscribers.get(eventType)!;
+        const wasAdded = !subscribers.has(subscriber);
+        
+        if (wasAdded) {
+            subscribers.add(subscriber);
+            if (this.debugMode) {
+                console.log(`[EventBus] Added subscription to '${eventType}' for ${subscriber.constructor.name}`);
+            }
+        } else if (this.debugMode) {
+            console.log(`[EventBus] Subscription already exists for '${eventType}' and ${subscriber.constructor.name}`);
         }
     }
     
     /**
-     * Unsubscribe from an event type
+     * Remove a subscription using the EventSubscriber pattern
      */
-    public unsubscribe<T = any>(
-        eventTypeOrTypes: (string|string[]), 
-        subject: any,
-        handler: EventHandler<T>
-    ): void {
-        if (typeof(eventTypeOrTypes) === "string") {
-          eventTypeOrTypes = [eventTypeOrTypes]
-        }
-        for (const eventType of eventTypeOrTypes) {
-            const subscriptions = this.subscribers.get(eventType);
-            if (!subscriptions) return;
+    public removeSubscription(eventType: string, target: any, subscriber: EventSubscriber): void {
+        const subscribers = this.subscribers.get(eventType);
+        
+        if (subscribers) {
+            const wasRemoved = subscribers.delete(subscriber);
             
-            const index = subscriptions.findIndex(
-                sub => sub.subject === subject && sub.handler === handler
-            );
-            
-            if (index !== -1) {
-                subscriptions.splice(index, 1);
-                if (this.debugMode) {
-                    console.log(`[EventBus] '${subject}' unsubscribed from '${eventType}'`);
-                }
+            if (this.debugMode && wasRemoved) {
+                console.log(`[EventBus] Removed subscription from '${eventType}' for ${subscriber.constructor.name}`);
             }
             
-            // Clean up empty event types
-            if (subscriptions.length === 0) {
+            // Clean up empty subscription sets
+            if (subscribers.size === 0) {
                 this.subscribers.delete(eventType);
             }
         }
     }
     
     /**
-     * Emit an event to all subscribers (except the source)
+     * Emit an event to all subscribers
      * @param eventType - The event type to emit
      * @param data - The event data payload
-     * @param subject - The subject entity that this event relates to.
-     * @param emitter - The entity that emitted the event.
+     * @param target - The target/subject entity that this event relates to
+     * @param emitter - The entity that emitted the event
      */
-    public emit<T = any>(eventType: string, data: T, subject: any, emitter: any): void {
-        const subscriptions = this.subscribers.get(eventType);
-        if (!subscriptions || subscriptions.length === 0) {
+    public emit<T = any>(eventType: string, data: T, target: any, emitter: any): void {
+        const subscribers = this.subscribers.get(eventType);
+        
+        if (!subscribers || subscribers.size === 0) {
             if (this.debugMode) {
                 console.log(`[EventBus] No subscribers for event '${eventType}'`);
             }
             return;
         }
         
-        const payload: EventPayload<T> = {
-            emitter: emitter,
-            subject: subject,
-            timestamp: Date.now(),
-            data
-        };
-        
         if (this.debugMode) {
-            console.log(`[EventBus] Emitting '${eventType}' from '${emitter}' to ${subscriptions.length} subscribers`);
+            console.log(`[EventBus] Emitting '${eventType}' to ${subscribers.size} subscribers`);
         }
         
         let successCount = 0;
         let errorCount = 0;
         
-        // Call each handler with error isolation
-        subscriptions.forEach(subscription => {
-            // Source exclusion - don't send event back to the source or the emitter
-            if (subscription.subject != null && (subscription.subject === emitter || subscription.subject === subject)) {
-                if (this.debugMode) {
-                    console.log(`[EventBus] Skipping subject '${subject}'`);
-                }
-                return;
-            }
-
+        // Call EventSubscriber handlers with error isolation
+        subscribers.forEach(subscriber => {
             try {
-                subscription.handler(payload);
+                subscriber.handleBusEvent(eventType, data, target, emitter);
                 successCount++;
             } catch (error) {
                 errorCount++;
                 console.error(
-                    `[EventBus] Error in event handler for '${eventType}' ` +
-                    `in subject '${subscription.subject}':`, 
+                    `[EventBus] Error in EventSubscriber handler for '${eventType}' ` +
+                    `in subscriber '${subscriber.constructor.name}':`, 
                     error
                 );
                 // Continue with other handlers - error isolation
@@ -179,7 +134,7 @@ export class EventBus {
      * Get subscriber count for an event type
      */
     public getSubscriberCount(eventType: string): number {
-        return this.subscribers.get(eventType)?.length || 0;
+        return this.subscribers.get(eventType)?.size || 0;
     }
     
     /**

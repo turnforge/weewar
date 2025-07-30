@@ -1,4 +1,4 @@
-import { EventBus, EventHandler, ComponentEventTypes } from './EventBus';
+import { EventBus, EventSubscriber, ComponentEventTypes } from './EventBus';
 import { LCMComponent } from './LCMComponent';
 
 /**

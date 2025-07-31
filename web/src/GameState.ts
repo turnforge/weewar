@@ -2,7 +2,7 @@ import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar_v1_servicesClient.client';
 import { ProcessMovesRequest, ProcessMovesResponse, ProcessMovesRequestSchema, GetGameRequest, GetGameRequestSchema, GetGameStateRequest, GetGameStateRequestSchema } from '../gen/weewar/v1/games_pb';
-import { GameMove, WorldChange, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema, TerrainDefinition, UnitDefinition, GameState as ProtoGameState, GameStateSchema as ProtoGameStateSchema, Game as ProtoGame, GameSchema as ProtoGameSchema } from '../gen/weewar/v1/models_pb';
+import { GameMove, WorldChange, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema, GameState as ProtoGameState, GameStateSchema as ProtoGameStateSchema, Game as ProtoGame, GameSchema as ProtoGameSchema } from '../gen/weewar/v1/models_pb';
 import { create } from '@bufbuild/protobuf';
 import { World } from './World';
 
@@ -14,32 +14,6 @@ export interface UnitSelectionData {
     unit: any;
     movableCoords: Array<{ coord: { Q: number; R: number }; cost: number }>;
     attackableCoords: Array<{ Q: number; R: number }>;
-}
-
-/**
- * Terrain stats class combining TerrainDefinition with tile coordinate data
- * Extends the generated TerrainDefinition with position information
- */
-export class TerrainStats {
-    public readonly terrainDefinition: TerrainDefinition;
-    public readonly q: number;
-    public readonly r: number;
-    public readonly player: number;
-
-    constructor(terrainDefinition: TerrainDefinition, q: number, r: number, player: number = 0) {
-        this.terrainDefinition = terrainDefinition;
-        this.q = q;
-        this.r = r;
-        this.player = player;
-    }
-
-    // Convenience getters that delegate to TerrainDefinition
-    get id(): number { return this.terrainDefinition.id; }
-    get name(): string { return this.terrainDefinition.name; }
-    get baseMoveCost(): number { return this.terrainDefinition.baseMoveCost; }
-    get defenseBonus(): number { return this.terrainDefinition.defenseBonus; }
-    get type(): number { return this.terrainDefinition.type; }
-    get description(): string { return this.terrainDefinition.description; }
 }
 
 /**
@@ -64,10 +38,6 @@ export class GameState extends BaseComponent {
     // Source of truth is WASM, this is just a performance cache
     private cachedGame: ProtoGame;
     private cachedGameState: ProtoGameState;
-    
-    // Cached rules engine data (loaded from page JSON)
-    private terrainDefinitions: { [id: number]: TerrainDefinition } = {};
-    private unitDefinitions: { [id: number]: UnitDefinition } = {};
 
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('game-state', rootElement, eventBus, debugMode);
@@ -90,9 +60,6 @@ export class GameState extends BaseComponent {
             currentPlayer: 0,
             turnCounter: 1,
         });
-        
-        // Load rules engine data from page
-        this.loadRulesEngineData();
     }
 
     protected initializeComponent(): void {
@@ -108,27 +75,6 @@ export class GameState extends BaseComponent {
     }
 
     /**
-     * Load rules engine data from embedded JSON in page
-     */
-    private loadRulesEngineData(): void {
-        // Load terrain definitions
-        const terrainElement = document.getElementById('terrain-data-json');
-        if (terrainElement && terrainElement.textContent) {
-            const terrainData = JSON.parse(terrainElement.textContent);
-            this.terrainDefinitions = terrainData;
-            this.log('Loaded terrain definitions:', { count: Object.keys(this.terrainDefinitions).length });
-        }
-
-        // Load unit definitions  
-        const unitElement = document.getElementById('unit-data-json');
-        if (unitElement && unitElement.textContent) {
-            const unitData = JSON.parse(unitElement.textContent);
-            this.unitDefinitions = unitData;
-            this.log('Loaded unit definitions:', { count: Object.keys(this.unitDefinitions).length });
-        }
-    }
-
-    /**
      * Load the WASM module using generated client
      */
     private async loadWASMModule(): Promise<void> {
@@ -136,10 +82,35 @@ export class GameState extends BaseComponent {
     
         await this.client.loadWasm('/static/wasm/weewar-cli.wasm');
         
+        // Wait for Go-exported functions to be available on window.weewar
+        await this.waitForGoFunctions();
+        
         this.wasmLoaded = true;
 
         this.log('WASM module loaded successfully via generated client');
         this.emit('wasm-loaded', { success: true }, this);
+    }
+    
+    /**
+     * Wait for Go-exported functions to be available on window.weewar
+     */
+    private async waitForGoFunctions(): Promise<void> {
+        const maxWaitTime = 10000; // 10 seconds
+        const checkInterval = 100; // 100ms
+        let elapsed = 0;
+        
+        while (elapsed < maxWaitTime) {
+            const weewar = (window as any).weewar;
+            if (weewar && weewar.loadGameData) {
+                this.log('Go functions are now available on window.weewar');
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, checkInterval));
+            elapsed += checkInterval;
+        }
+        
+        throw new Error('Timeout waiting for Go-exported functions to be available');
     }
 
     /**
@@ -181,13 +152,6 @@ export class GameState extends BaseComponent {
      */
     public getGameId(): string {
         return this.cachedGameState.gameId;
-    }
-    
-    /**
-     * Get the shared world object (used by all UI components)
-     */
-    public getWorld(): World {
-        return this.world;
     }
 
     /**
@@ -438,6 +402,11 @@ export class GameState extends BaseComponent {
             throw new Error('No game data found in page elements');
         }
         
+        // Debug: Log the actual content to understand what we're getting
+        this.log('Raw game data from page:', gameElement.textContent?.substring(0, 100) + '...');
+        this.log('Raw game state from page:', (gameStateElement?.textContent || 'null').substring(0, 100) + '...');
+        this.log('Raw history from page:', (historyElement?.textContent || 'null').substring(0, 100) + '...');
+        
         // Convert JSON strings to Uint8Array for WASM
         const gameBytes = new TextEncoder().encode(gameElement.textContent);
         const gameStateBytes = new TextEncoder().encode(
@@ -451,8 +420,14 @@ export class GameState extends BaseComponent {
                 : '{"gameId":"","groups":[]}'
         );
         
-        // Call WASM loadGameData function
-        const wasmResult = (window as any).weewar.loadGameData(gameBytes, gameStateBytes, historyBytes);
+        // Call WASM loadGameData function - check if it exists first
+        const weewar = (window as any).weewar;
+        if (!weewar || !weewar.loadGameData) {
+            throw new Error('WASM loadGameData function not available. WASM module may not be fully loaded.');
+        }
+        
+        this.log('Calling WASM loadGameData with game data bytes');
+        const wasmResult = weewar.loadGameData(gameBytes, gameStateBytes, historyBytes);
         
         if (!wasmResult.success) {
             throw new Error(`WASM load failed: ${wasmResult.error}`);
@@ -471,7 +446,8 @@ export class GameState extends BaseComponent {
         const client = await this.ensureWASMLoaded();
         
         // Get game data from WASM to extract game ID and world data
-        const gameResponse = await client.gamesService.getGame(create(GetGameRequestSchema, { id: '' }));
+        const req = create(GetGameRequestSchema, { id: 'test' })
+        const gameResponse = await client.gamesService.getGame(req);
         
         if (!gameResponse.game || !gameResponse.state) {
             throw new Error('No game data returned from WASM');
@@ -523,6 +499,14 @@ export class GameState extends BaseComponent {
     }
 
     /**
+     * Get the World object for UI rendering
+     * GameState owns the World, other components should access it via this getter
+     */
+    public getWorld(): World {
+        return this.world;
+    }
+
+    /**
      * Legacy method for compatibility with GameViewerPage
      * Creates a MoveUnit action and processes it
      */
@@ -544,37 +528,6 @@ export class GameState extends BaseComponent {
         
         const attackAction = GameState.createAttackUnitAction(attackerQ, attackerR, defenderQ, defenderR, currentPlayer);
         await this.processMoves([attackAction]);
-    }
-
-    /**
-     * Get terrain stats for a tile at the specified coordinates
-     * Combines World tile data with TerrainDefinition from rules engine
-     */
-    public async getTerrainStatsAt(q: number, r: number): Promise<TerrainStats | null> {
-        // Find the tile at coordinates (q, r)
-        const tile = this.world.getTileAt(q, r)
-        if (!tile) {
-            this.log(`No tile found at coordinates (${q}, ${r})`);
-            return null;
-        }
-
-        // Look up the TerrainDefinition using the tile's tileType
-        const terrainDefinition = this.terrainDefinitions[tile.tileType];
-        if (!terrainDefinition) {
-            this.log(`No terrain definition found for tile type ${tile.tileType}`);
-            return null;
-        }
-
-        // Create and return TerrainStats instance
-        const terrainStats = new TerrainStats(terrainDefinition, q, r, tile.player);
-        this.log(`Created terrain stats for tile at (${q}, ${r}):`, {
-            name: terrainStats.name,
-            type: terrainStats.type,
-            baseMoveCost: terrainStats.baseMoveCost,
-            defenseBonus: terrainStats.defenseBonus
-        });
-
-        return terrainStats;
     }
 
     /**

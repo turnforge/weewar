@@ -35,8 +35,16 @@ func main() {
 	// Register the JavaScript API using generated exports
 	exports.RegisterAPI()
 
-	// Expose additional load method for initializing singleton data from frontend
-	js.Global().Get("weewar").Set("loadGameData", js.FuncOf(func(this js.Value, args []js.Value) any {
+	// Add our custom loadGameData function to the existing weewar object created by RegisterAPI()
+	weewarObj := js.Global().Get("weewar")
+	if !weewarObj.Truthy() {
+		fmt.Println("Warning: weewar object not found after RegisterAPI(), creating it")
+		weewarObj = js.ValueOf(map[string]any{})
+		js.Global().Set("weewar", weewarObj)
+	}
+
+	fmt.Println("Adding loadGameData function to existing weewar object")
+	weewarObj.Set("loadGameData", js.FuncOf(func(this js.Value, args []js.Value) any {
 		if len(args) != 3 {
 			return map[string]any{
 				"success": false,

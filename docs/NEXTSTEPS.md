@@ -367,6 +367,40 @@
 
 ## Current Development Focus
 
+### Phase 14: RulesTable Architecture & Proto Migration ✅ COMPLETED
+**Completed Phase**: Shared RulesTable and Proto Migration Planning
+**Status**: RulesTable refactor complete, proto migration planned  
+**Achievement**: Centralized rules management with proto migration strategy for data alignment
+
+#### RulesTable Architecture Implementation ✅ COMPLETED
+- **Shared RulesTable Class**: Centralized rules engine data management in TypeScript
+- **GameViewerPage Integration**: Updated to use RulesTable instance for terrain stats
+- **TerrainStatsPanel Refactor**: Fixed TypeScript errors, uses RulesTable methods for unit definitions
+- **Component Coordination**: TerrainStatsPanel template directly included in GameViewerPage.html
+- **Performance Optimization**: Rules data loaded once and shared across components
+- **Architecture Cleanup**: Eliminated scattered RulesEngine creation pattern
+
+#### Technical Implementation Benefits ✅ COMPLETED
+- **Single Source of Truth**: All terrain/unit/movement rules managed by shared RulesTable instance  
+- **Better Performance**: Rules data loaded once instead of recreated multiple times
+- **Cleaner Architecture**: Removed duplicated rules engine creation throughout codebase
+- **Consistent Data Access**: All components access rules data through same interface
+- **Maintainability**: Centralized rules logic easier to debug, test, and extend
+
+#### Proto Migration Strategy (PENDING IMPLEMENTATION)
+**Identified Issue**: JSON marshaling mismatch between Go structs (Capital case) and TypeScript proto definitions (camelCase)
+**Root Cause Analysis**: 
+- Go rules engine uses custom structs (`TerrainData`, `UnitData`) with Capital case field names
+- Proto definitions exist for same concepts (`TerrainDefinition`, `UnitDefinition`) with camelCase
+- JSON marshaling uses Go structs → Capital case, TypeScript expects proto format → camelCase
+- **Result**: Duplication and serialization alignment issues
+
+**Proposed Solution**: Use Proto Definitions Everywhere
+- Update Go rules engine to use proto definitions instead of custom structs
+- Update `LoadRulesEngineFromJSON` to return proto objects
+- Update marshaling methods to use protojson for consistent serialization
+- **Benefits**: Single source of truth, automatic alignment, no duplication
+
 ### Phase 13: WASM-Centric GameState Architecture ✅ COMPLETED
 **Completed Phase**: Revolutionary GameState architecture with WASM singletons and local caching
 **Status**: Complete architectural transformation eliminating frontend state persistence

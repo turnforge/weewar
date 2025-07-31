@@ -9,6 +9,11 @@ export const WorldEventTypes = {
     WORLD_VIEWER_ERROR: 'world-viewer-error',
 } as const;
 
+export const GameEventTypes = {
+    GAME_DATA_LOADED: 'game-data-loaded',
+    GAME_DATA_ERROR: 'game-data-error', 
+} as const;
+
 // Editor-specific event types for WorldEditorPage components
 export const EditorEventTypes = {
     // Editor state events

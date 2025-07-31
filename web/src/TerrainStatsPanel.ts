@@ -2,32 +2,7 @@ import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
 import { TERRAIN_NAMES } from './ColorsAndNames';
-
-/**
- * Terrain information for a specific tile
- */
-export interface TerrainInfo {
-    name: string;
-    tileType: number;
-    movementCost: number;
-    defenseBonus: number;
-    description: string;
-    q: number;
-    r: number;
-    player?: number;
-}
-
-/**
- * Rules engine data structures (matching Go structs)
- */
-interface TerrainData {
-    ID: number;
-    Name: string;
-    BaseMoveCost: number;
-    DefenseBonus: number;
-    Type: number;
-    Description?: string;
-}
+import { TerrainStats , RulesTable } from './RulesTable';
 
 interface UnitData {
     ID: number;
@@ -36,10 +11,6 @@ interface UnitData {
     AttackRange: number;
     Health: number;
     Properties: string[];
-}
-
-interface MovementMatrix {
-    Costs: { [unitID: number]: { [terrainID: number]: number } };
 }
 
 /**
@@ -59,15 +30,12 @@ interface MovementMatrix {
 export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     private isUIBound = false;
     private isActivated = false;
-    private currentTerrain: TerrainInfo | null = null;
-    
-    // Rules engine data (loaded from page)
-    private terrainData: { [id: number]: TerrainData } = {};
-    private unitData: { [id: number]: UnitData } = {};
-    private movementMatrix: MovementMatrix | null = null;
+    private currentTerrain: TerrainStats | null = null;
+    public rulesTable: RulesTable
 
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('terrain-stats-panel', rootElement, eventBus, debugMode);
+        this.rulesTable = new RulesTable()
     }
 
     // LCMComponent Phase 1: Initialize DOM structure
@@ -78,7 +46,6 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         }
 
         this.log('Binding TerrainStatsPanel to DOM using template');
-        this.loadRulesEngineData();
         this.isUIBound = true;
         this.log('TerrainStatsPanel bound to DOM successfully');
         
@@ -112,41 +79,15 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     }
 
     /**
-     * Load rules engine data from embedded JSON in page
-     */
-    private loadRulesEngineData(): void {
-        // Load terrain data
-        const terrainElement = document.getElementById('terrain-data-json');
-        if (terrainElement && terrainElement.textContent) {
-            this.terrainData = JSON.parse(terrainElement.textContent);
-            this.log('Loaded terrain data:', { count: Object.keys(this.terrainData).length });
-        }
-
-        // Load unit data
-        const unitElement = document.getElementById('unit-data-json');
-        if (unitElement && unitElement.textContent) {
-            this.unitData = JSON.parse(unitElement.textContent);
-            this.log('Loaded unit data:', { count: Object.keys(this.unitData).length });
-        }
-
-        // Load movement matrix
-        const movementElement = document.getElementById('movement-matrix-json');
-        if (movementElement && movementElement.textContent) {
-            this.movementMatrix = JSON.parse(movementElement.textContent);
-            this.log('Loaded movement matrix with', { unitTypes: Object.keys(this.movementMatrix?.Costs || {}).length });
-        }
-    }
-
-    /**
      * Update the panel with information about a selected terrain tile
      */
-    public updateTerrainInfo(terrainInfo: TerrainInfo): void {
+    public updateTerrainStats(terrainStats: TerrainStats): void {
         if (!this.isActivated) {
             throw new Error('Component not activated, cannot update terrain info');
         }
 
-        this.currentTerrain = terrainInfo;
-        this.log('Updating terrain info for tile:', terrainInfo);
+        this.currentTerrain = terrainStats;
+        this.log('Updating terrain info for tile:', terrainStats);
 
         // Hide no-selection state and show terrain details
         const noSelectionDiv = this.findElement('#no-terrain-selected');
@@ -154,32 +95,29 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         
         if (noSelectionDiv) noSelectionDiv.classList.add('hidden');
         if (terrainDetailsDiv) terrainDetailsDiv.classList.remove('hidden');
-
-        // Get terrain data from rules engine
-        const rulesTerrainData = this.terrainData[terrainInfo.tileType];
         
         // Update terrain header information
-        this.updateTerrainHeader(terrainInfo, rulesTerrainData);
+        this.updateTerrainHeader(terrainStats);
         
         // Update movement cost (use rules engine data if available)
-        const movementCost = rulesTerrainData?.BaseMoveCost || terrainInfo.movementCost;
+        const movementCost = terrainStats.baseMoveCost;
         this.updateMovementCost(movementCost);
         
         // Update defense bonus (use rules engine data if available)
-        const defenseBonus = rulesTerrainData?.DefenseBonus || terrainInfo.defenseBonus;
+        const defenseBonus = terrainStats.defenseBonus;
         this.updateDefenseBonus(defenseBonus);
         
         // Update player ownership if applicable
-        this.updatePlayerOwnership(terrainInfo.player);
+        this.updatePlayerOwnership(terrainStats.player);
         
         // Update terrain properties using rules engine data
-        this.updateTerrainProperties(terrainInfo, rulesTerrainData);
+        this.updateTerrainProperties(terrainStats);
     }
 
     /**
      * Clear terrain selection and show empty state
      */
-    public clearTerrainInfo(): void {
+    public clearTerrainStats(): void {
         if (!this.isActivated) {
             return;
         }
@@ -198,30 +136,30 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     /**
      * Update the terrain header (icon, name, coordinates, description)
      */
-    private updateTerrainHeader(terrainInfo: TerrainInfo, rulesData?: TerrainData): void {
+    private updateTerrainHeader(terrainStats: TerrainStats): void {
         const iconElement = this.findElement('#terrain-icon');
         const nameElement = this.findElement('#terrain-name');
         const coordsElement = this.findElement('#terrain-coordinates');
         const descElement = this.findElement('#terrain-description');
 
         if (iconElement) {
-            const terrainData = TERRAIN_NAMES[terrainInfo.tileType] || { icon: '🎨' };
+            const terrainData = TERRAIN_NAMES[terrainStats.id] || { icon: '🎨' };
             iconElement.textContent = terrainData.icon;
         }
 
         if (nameElement) {
-            // Use rules engine name if available, fallback to terrainInfo name
-            const displayName = rulesData?.Name || terrainInfo.name;
+            // Use rules engine name if available, fallback to terrainStats name
+            const displayName = terrainStats.name;
             nameElement.textContent = displayName;
         }
 
         if (coordsElement) {
-            coordsElement.textContent = `(${terrainInfo.q}, ${terrainInfo.r})`;
+            coordsElement.textContent = `(${terrainStats.q}, ${terrainStats.r})`;
         }
 
         if (descElement) {
-            // Use rules engine description if available, fallback to terrainInfo description
-            const description = rulesData?.Description || terrainInfo.description;
+            // Use rules engine description if available, fallback to terrainStats description
+            const description = terrainStats.description;
             descElement.textContent = description;
         }
     }
@@ -265,7 +203,7 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     /**
      * Update terrain properties list using rules engine data
      */
-    private updateTerrainProperties(terrainInfo: TerrainInfo, rulesData?: TerrainData): void {
+    private updateTerrainProperties(terrainStats: TerrainStats): void {
         const propertiesList = this.findElement('#properties-list');
         if (!propertiesList) return;
 
@@ -274,44 +212,46 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         // Add basic properties
         properties.push({
             name: 'Type ID',
-            value: terrainInfo.tileType.toString()
+            value: terrainStats.id.toString()
         });
 
         properties.push({
             name: 'Hex Coordinate',
-            value: `Q:${terrainInfo.q}, R:${terrainInfo.r}`
+            value: `Q:${terrainStats.q}, R:${terrainStats.r}`
         });
 
         // Add rules engine data if available
-        if (rulesData) {
+        if (terrainStats) {
             properties.push({
                 name: 'Base Move Cost',
-                value: rulesData.BaseMoveCost.toFixed(1)
+                value: terrainStats.baseMoveCost.toFixed(1)
             });
 
-            if (rulesData.DefenseBonus !== 0) {
-                const sign = rulesData.DefenseBonus >= 0 ? '+' : '';
+            if (terrainStats.defenseBonus !== 0) {
+                const sign = terrainStats.defenseBonus >= 0 ? '+' : '';
                 properties.push({
                     name: 'Defense Bonus',
-                    value: `${sign}${(rulesData.DefenseBonus * 100).toFixed(0)}%`
+                    value: `${sign}${(terrainStats.defenseBonus * 100).toFixed(0)}%`
                 });
             }
 
             properties.push({
                 name: 'Terrain Type',
-                value: rulesData.Type.toString()
+                value: terrainStats.type.toString()
             });
         }
 
         // Add movement costs for different unit types if available
-        if (this.movementMatrix && this.movementMatrix.Costs) {
+        const mm = this.rulesTable.movementMatrix
+        if (mm && mm.costs) {
             const unitMovements: string[] = [];
             
             // Show movement costs for first few unit types as examples
-            Object.entries(this.movementMatrix.Costs).slice(0, 3).forEach(([unitId, terrainCosts]) => {
-                const cost = terrainCosts[terrainInfo.tileType];
+            Object.entries(mm.costs).slice(0, 3).forEach(([unitId, terrainCosts]) => {
+                const cost = (terrainCosts as any)[terrainStats.id];
                 if (cost !== undefined) {
-                    const unitName = this.unitData[parseInt(unitId)]?.Name || `Unit ${unitId}`;
+                    const unitDef = this.rulesTable.getUnitDefinition(parseInt(unitId));
+                    const unitName = unitDef?.name || `Unit ${unitId}`;
                     unitMovements.push(`${unitName}: ${cost.toFixed(1)}`);
                 }
             });
@@ -341,7 +281,7 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     /**
      * Get current terrain info (for external access)
      */
-    public getCurrentTerrain(): TerrainInfo | null {
+    public getCurrentTerrain(): TerrainStats | null {
         return this.currentTerrain;
     }
 
@@ -355,8 +295,8 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     /**
      * Get terrain data from rules engine (for external access)
      */
-    public getTerrainData(tileType: number): TerrainData | null {
-        return this.terrainData[tileType] || null;
+    public getTerrainData(tileType: number): TerrainStats | null {
+        return this.rulesTable.getTerrainStatsAt(tileType, 0);
     }
 
     protected destroyComponent(): void {

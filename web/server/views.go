@@ -15,6 +15,8 @@ import (
 	oa "github.com/panyam/oneauth"
 	tmplr "github.com/panyam/templar"
 	svc "github.com/panyam/turnengine/games/weewar/services"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 const TEMPLATES_FOLDER = "./web/templates"
@@ -92,7 +94,16 @@ func NewRootViewsHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *Roo
 			if v == nil {
 				return template.JS("null")
 			}
-			// Regular JSON marshaling for all types (protojson.Marshal is not needed for template output)
+			// Use protojson.Marshal for protobuf types, regular json.Marshal for others
+			// Check if it's a protobuf message using proto.Message interface
+			if msg, ok := v.(proto.Message); ok {
+				jsonBytes, err := protojson.Marshal(msg)
+				if err == nil {
+					return template.JS(jsonBytes)
+				}
+				log.Printf("Error marshaling protobuf to JSON: %v", err)
+			}
+			// Fall back to regular JSON marshaling for non-protobuf types
 			jsonBytes, err := json.Marshal(v)
 			if err != nil {
 				log.Printf("Error marshaling to JSON: %v", err)

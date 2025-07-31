@@ -11,7 +11,7 @@ import (
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var WORLDS_STORAGE_DIR = weewar.DevDataPath("storage/worlds")
+var WORLDS_STORAGE_DIR = ""
 
 // FSWorldsServiceImpl implements the FSWorldsService gRPC interface
 type FSWorldsServiceImpl struct {
@@ -21,6 +21,9 @@ type FSWorldsServiceImpl struct {
 
 // NewFSWorldsService creates a new FSWorldsService implementation
 func NewFSWorldsService() *FSWorldsServiceImpl {
+	if WORLDS_STORAGE_DIR == "" {
+		WORLDS_STORAGE_DIR = weewar.DevDataPath("storage/worlds")
+	}
 	service := &FSWorldsServiceImpl{storage: NewFileStorage(WORLDS_STORAGE_DIR)}
 	return service
 }

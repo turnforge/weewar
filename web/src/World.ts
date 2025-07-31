@@ -8,7 +8,8 @@ import {
     TileSchema,
     UnitSchema,
     WorldDataSchema,
-    WorldSchema
+    WorldSchema,
+    TerrainDefinition, UnitDefinition, 
 } from '../gen/weewar/v1/models_pb';
 import { 
     UpdateWorldRequest,

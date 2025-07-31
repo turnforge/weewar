@@ -1,4 +1,4 @@
-import { BasePage } from '../lib/BasePage';
+ import { BasePage } from '../lib/BasePage';
 import { EventBus } from '../lib/EventBus';
 import { GameViewer } from './GameViewer';
 import { Unit, Tile, World } from './World';
@@ -8,7 +8,8 @@ import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
-import { WorldEventTypes } from './events';
+import { GameEventTypes, WorldEventTypes } from './events';
+import { RulesTable, TerrainStats } from './RulesTable';
 
 /**
  * Game Viewer Page - Interactive game play interface
@@ -21,10 +22,10 @@ import { WorldEventTypes } from './events';
  */
 class GameViewerPage extends BasePage implements LCMComponent {
     private currentGameId: string | null;
-    private world: World
     private worldViewer: GameViewer
     private gameState: GameState
     private terrainStatsPanel: TerrainStatsPanel
+    private rulesTable: RulesTable
     
     // Game configuration accessed directly from WASM-cached Game proto
     
@@ -43,7 +44,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
         console.log('GameViewerPage: performLocalInit() - Phase 1');
 
         // Load game config first
-        this.loadGameConfiguration(); // Load game config here since constructor calls this
+        this.loadGameConfiguration();
+        
+        // Create shared RulesTable instance
+        this.rulesTable = new RulesTable();
         
         // Subscribe to events BEFORE creating components
         this.subscribeToGameStateEvents();
@@ -55,11 +59,25 @@ class GameViewerPage extends BasePage implements LCMComponent {
         this.updateGameStatus('Game Loading...');
         this.initializeGameLog();
         
+        // Start WASM and game data loading early (parallel to WorldViewer initialization)
+        if (this.currentGameId) {
+            console.log('GameViewerPage: Starting early WASM initialization for gameId:', this.currentGameId);
+            this.initializeGameWithWASM().then(() => {
+                console.log('GameViewerPage: WASM initialization completed');
+                // Emit event to indicate game data is ready
+                this.eventBus.emit(GameEventTypes.GAME_DATA_LOADED, { gameId: this.currentGameId }, this, this);
+            }).catch(error => {
+                console.error('GameViewerPage: WASM initialization failed:', error);
+                this.updateGameStatus('WASM initialization failed');
+            });
+        }
+        
         console.log('GameViewerPage: DOM initialized, returning child components');
 
         console.assert(this.worldViewer != null, "World viewer could not be created")
         console.assert(this.gameState != null, "gameState could not be created")
         console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
+        console.assert(this.rulesTable != null, "rulesTable could not be created")
         
         // Return child components for lifecycle management
         return [
@@ -96,8 +114,11 @@ class GameViewerPage extends BasePage implements LCMComponent {
             this.terrainStatsPanel.destroy();
             this.terrainStatsPanel = null as any;
         }
+
+        if (this.rulesTable) {
+            this.rulesTable = null as any;
+        }
         
-        this.world = null as any;
         this.currentGameId = null;
         this.selectedUnit = null;
         this.gameLog = [];
@@ -122,6 +143,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
         // GameViewer ready event - set up interaction callbacks and load world
         this.addSubscription(WorldEventTypes.WORLD_VIEWER_READY, this);
         
+        // Game data ready event - WASM and game data loaded
+        this.addSubscription(GameEventTypes.GAME_DATA_LOADED, this);
+        
         // GameState notification events (for system coordination, not user interaction responses)
         this.addSubscription('game-loaded', this);
         this.addSubscription('game-created', this);
@@ -129,6 +153,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
         this.addSubscription('unit-attacked', this);
         this.addSubscription('turn-ended', this);
     }
+
+    // State tracking for initialization
+    private worldViewerReady = false;
+    private gameDataReady = false;
 
     /**
      * Handle events from the EventBus
@@ -138,7 +166,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
             case WorldEventTypes.WORLD_VIEWER_READY:
                 console.log('GameViewerPage: GameViewer ready event received', data);
                 
-                // Now that GameViewer scene is ready, set up the interaction callbacks
+                this.worldViewerReady = true;
+                
+                // Set up interaction callbacks when viewer is ready
                 if (this.worldViewer) {
                     console.log('GameViewerPage: Setting interaction callbacks after scene ready');
                     this.worldViewer.setInteractionCallbacks(
@@ -148,16 +178,17 @@ class GameViewerPage extends BasePage implements LCMComponent {
                     console.log('GameViewerPage: Interaction callbacks set after scene ready');
                 }
                 
-                if (this.currentGameId) {
-                    console.log('GameViewerPage: WorldId found, proceeding to load world:', this.currentGameId);
-                    // WebGL context timing - wait for next event loop tick
-                    setTimeout(async () => {
-                        console.log('GameViewerPage: Starting loadWorldAndInitializeGame...');
-                        await this.loadWorldAndInitializeGame();
-                    }, 10);
-                } else {
-                    console.warn('GameViewerPage: No currentGameId found!');
-                }
+                // Check if both viewer and game data are ready
+                this.checkAndLoadWorldIntoViewer();
+                break;
+            
+            case GameEventTypes.GAME_DATA_LOADED:
+                console.log('GameViewerPage: Game data ready event received', data);
+                
+                this.gameDataReady = true;
+                
+                // Check if both viewer and game data are ready
+                this.checkAndLoadWorldIntoViewer();
                 break;
             
             case 'game-loaded':
@@ -224,48 +255,48 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 
     /**
-     * Load world data and initialize game
+     * Check if both WorldViewer and game data are ready, then load world into viewer
      */
-    private async loadWorldAndInitializeGame(): Promise<void> {
-        console.log('Loading world and initializing game...');
-
-        // Load game data from hidden elements
-        const gameDataResult = this.loadGameDataFromElements();
-        if (!gameDataResult) {
-            throw new Error('No game data found');
-        }
-        
-        const { game, gameState, gameHistory } = gameDataResult;
-        
-        if (!gameState) {
-            throw new Error('No game state data found in game');
+    private async checkAndLoadWorldIntoViewer(): Promise<void> {
+        if (!this.worldViewerReady || !this.gameDataReady) {
+            console.log('GameViewerPage: Waiting for both viewer and game data to be ready', {
+                worldViewerReady: this.worldViewerReady,
+                gameDataReady: this.gameDataReady
+            });
+            return;
         }
 
-        // Deserialize world for the WorldViewer component
-        this.world = World.deserialize(this.eventBus, gameState.world_data);
+        console.log('GameViewerPage: Both WorldViewer and game data are ready, loading world into viewer');
         
-        // Load world into viewer
-        if (this.worldViewer) {
-            await this.worldViewer.loadWorld(this.world);
-            this.showToast('Success', `Game loaded: ${game.name || this.world.getName() || 'Untitled'}`, 'success');
-        }
-
-        // Initialize game using WASM
-        console.log('About to initialize game with WASM...');
         try {
-            await this.initializeGameWithWASM();
-            console.log('WASM initialization completed successfully');
+            // Get the World object from GameState (GameState owns it now)
+            const world = this.gameState.getWorld();
+            const game = this.gameState.getGame();
+            
+            // Load world into viewer
+            if (this.worldViewer && world) {
+                await this.worldViewer.loadWorld(world);
+                this.showToast('Success', `Game loaded: ${game.name || world.getName() || 'Untitled'}`, 'success');
+                
+                // Update UI with loaded game state
+                const gameState = this.gameState.getGameState();
+                this.updateGameUIFromState(gameState);
+                this.logGameEvent(`Game loaded: ${gameState.gameId}`);
+                
+                console.log('GameViewerPage: World successfully loaded into viewer');
+            } else {
+                throw new Error('WorldViewer or World not available');
+            }
         } catch (error) {
-            console.error('WASM initialization failed, but continuing with world display:', error);
-            // Continue without WASM for now - still show the map
-            this.updateGameStatus('Map loaded - WASM initialization failed');
+            console.error('GameViewerPage: Failed to load world into viewer:', error);
+            this.updateGameStatus('Failed to load world');
+            this.showToast('Error', 'Failed to load world', 'error');
         }
-        
-        // Update UI will be handled by GameState events
     }
 
     /**
      * Initialize game using WASM game engine
+     * This now handles both WASM loading and World creation in GameState
      */
     private async initializeGameWithWASM(): Promise<void> {
         if (!this.gameState) {
@@ -275,10 +306,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
         // Wait for WASM to be ready (only async part)
         await this.gameState.waitUntilReady();
         
-        // Load game data into WASM singletons - this is the new WASM-centric approach
+        // Load game data into WASM singletons and create World object in GameState
         await this.gameState.loadGameDataToWasm();
         
-        console.log('Game initialized with WASM engine - data loaded into WASM singletons');
+        console.log('Game initialized with WASM engine - data loaded into WASM singletons and World created');
     }
 
     /**
@@ -329,81 +360,6 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }
     }
 
-    /**
-     * Load game data from hidden JSON elements (Game, GameState, GameHistory)
-     */
-    private loadGameDataFromElements(): { game: any; gameState: any; gameHistory: any; worldData: any } | null {
-        // Load Game data
-        const gameElement = document.getElementById('game.data-json');
-        let gameData = null;
-        if (gameElement && gameElement.textContent && gameElement.textContent.trim() !== 'null') {
-            gameData = JSON.parse(gameElement.textContent);
-            console.log('GameViewerPage: Loaded game data:', gameData);
-        }
-        
-        // Load GameState data
-        const gameStateElement = document.getElementById('game-state-data-json');
-        let gameStateData = null;
-        if (gameStateElement && gameStateElement.textContent && gameStateElement.textContent.trim() !== 'null') {
-            gameStateData = JSON.parse(gameStateElement.textContent);
-            console.log('GameViewerPage: Loaded game state data:', gameStateData);
-        }
-        
-        // Load GameHistory data
-        const gameHistoryElement = document.getElementById('game-history-data-json');
-        let gameHistoryData = null;
-        if (gameHistoryElement && gameHistoryElement.textContent && gameHistoryElement.textContent.trim() !== 'null') {
-            gameHistoryData = JSON.parse(gameHistoryElement.textContent);
-            console.log('GameViewerPage: Loaded game history data:', gameHistoryData);
-        }
-        
-        // Extract world data from Game for backward compatibility with WorldViewer
-        let worldData = null;
-        if (gameData && gameData.world) {
-            // Combine World metadata with WorldData for the WorldViewer component
-            worldData = {
-                name: gameData.world.name || 'Untitled Game',
-                Name: gameData.world.name || 'Untitled Game',
-                id: gameData.world.id,
-                width: 40,  // Default
-                height: 40, // Default
-                tiles: gameData.world.worldData?.tiles || [],
-                units: gameData.world.worldData?.units || []
-            };
-            
-            // Calculate actual dimensions from tile bounds
-            if (worldData.tiles && worldData.tiles.length > 0) {
-                let maxQ = 0, maxR = 0, minQ = 0, minR = 0;
-                worldData.tiles.forEach((tile: any) => {
-                    if (tile.q > maxQ) maxQ = tile.q;
-                    if (tile.q < minQ) minQ = tile.q;
-                    if (tile.r > maxR) maxR = tile.r;
-                    if (tile.r < minR) minR = tile.r;
-                });
-                worldData.width = maxQ - minQ + 1;
-                worldData.height = maxR - minR + 1;
-            }
-            
-            console.log('GameViewerPage: Extracted world data for WorldViewer:', {
-                name: worldData.name,
-                tiles: worldData.tiles.length,
-                units: worldData.units.length,
-                dimensions: `${worldData.width}x${worldData.height}`
-            });
-        }
-        
-        if (!gameData) {
-            console.error('GameViewerPage: No game data found');
-            return null;
-        }
-        
-        return {
-            game: gameData,
-            gameState: gameStateData,
-            gameHistory: gameHistoryData,
-            worldData: worldData
-        };
-    }
 
 
     /**
@@ -545,26 +501,24 @@ class GameViewerPage extends BasePage implements LCMComponent {
             return false; // Suppress event emission
         }
 
-        // Get terrain info from WASM via ui.go (async)
-        this.gameState?.getTerrainStatsAt(q, r).then(terrainStats => {
-            if (terrainStats != null) {
-            console.log('[GameViewerPage] Retrieved terrain stats:', terrainStats);
-            
-            // Update terrain stats panel with the data
-            this.terrainStatsPanel?.updateTerrainInfo({
-                name: terrainStats.name || 'Unknown Terrain',
-                tileType: terrainStats.type || 0,
-                movementCost: terrainStats.baseMoveCost || 1.0,
-                defenseBonus: terrainStats.defenseBonus || 0.0,
-                description: terrainStats.description || 'No description available',
-                q: q,
-                r: r,
-                player: terrainStats.player
-            });
+        // Get terrain info using RulesTable
+        const world = this.gameState?.getWorld();
+        if (world) {
+            const tile = world.getTileAt(q, r);
+            if (tile) {
+                const terrainStats = this.rulesTable.getTerrainStatsAt(tile.tileType, tile.player);
+                if (terrainStats) {
+                    // Update with actual coordinates
+                    const terrainStatsWithCoords = new TerrainStats(
+                        terrainStats.terrainDefinition, 
+                        q, 
+                        r, 
+                        tile.player
+                    );
+                    this.terrainStatsPanel.updateTerrainStats(terrainStatsWithCoords);
+                }
             }
-        }).catch(error => {
-            console.error('Failed to get terrain stats:', error);
-        });
+        }
         
         return false; // We handled it completely, suppress event emission
     };
@@ -755,11 +709,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gameViewerPage = new GameViewerPage("GameViewerPage");
     
     // Create lifecycle controller with debug logging
-    const lifecycleController = new LifecycleController(gameViewerPage.eventBus, {
-        enableDebugLogging: true,
-        phaseTimeoutMs: 15000, // Increased timeout for WASM loading
-        continueOnError: false // Fail fast for debugging
-    });
+    const lifecycleController = new LifecycleController(gameViewerPage.eventBus, LifecycleController.DefaultConfig);
     
     // Start breadth-first initialization
     await lifecycleController.initializeFromRoot(gameViewerPage);

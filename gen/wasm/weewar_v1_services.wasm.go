@@ -133,8 +133,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceCreateGame(this js
 	}
 
 	// Parse request
-	var req *weewarv1.CreateGameRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.CreateGameRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -173,8 +174,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGames(this js.V
 	}
 
 	// Parse request
-	var req *weewarv1.GetGamesRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetGamesRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -213,8 +215,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceListGames(this js.
 	}
 
 	// Parse request
-	var req *weewarv1.ListGamesRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.ListGamesRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -253,8 +256,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGame(this js.Va
 	}
 
 	// Parse request
-	var req *weewarv1.GetGameRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetGameRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -293,8 +297,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceDeleteGame(this js
 	}
 
 	// Parse request
-	var req *weewarv1.DeleteGameRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.DeleteGameRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -333,8 +338,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceUpdateGame(this js
 	}
 
 	// Parse request
-	var req *weewarv1.UpdateGameRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.UpdateGameRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -373,8 +379,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGameState(this 
 	}
 
 	// Parse request
-	var req *weewarv1.GetGameStateRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetGameStateRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -413,8 +420,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceListMoves(this js.
 	}
 
 	// Parse request
-	var req *weewarv1.ListMovesRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.ListMovesRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -453,8 +461,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceProcessMoves(this 
 	}
 
 	// Parse request
-	var req *weewarv1.ProcessMovesRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.ProcessMovesRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -493,8 +502,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetMovementOptions
 	}
 
 	// Parse request
-	var req *weewarv1.GetMovementOptionsRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetMovementOptionsRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -533,8 +543,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetAttackOptions(t
 	}
 
 	// Parse request
-	var req *weewarv1.GetAttackOptionsRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetAttackOptionsRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -573,8 +584,9 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceCanSelectUnit(this
 	}
 
 	// Parse request
-	var req *weewarv1.CanSelectUnitRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.CanSelectUnitRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -613,8 +625,9 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceCreateUser(this js
 	}
 
 	// Parse request
-	var req *weewarv1.CreateUserRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.CreateUserRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -653,8 +666,9 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceGetUsers(this js.V
 	}
 
 	// Parse request
-	var req *weewarv1.GetUsersRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetUsersRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -693,8 +707,9 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceListUsers(this js.
 	}
 
 	// Parse request
-	var req *weewarv1.ListUsersRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.ListUsersRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -733,8 +748,9 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceGetUser(this js.Va
 	}
 
 	// Parse request
-	var req *weewarv1.GetUserRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetUserRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -773,8 +789,9 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceDeleteUser(this js
 	}
 
 	// Parse request
-	var req *weewarv1.DeleteUserRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.DeleteUserRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -813,8 +830,9 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceUpdateUser(this js
 	}
 
 	// Parse request
-	var req *weewarv1.UpdateUserRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.UpdateUserRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -853,8 +871,9 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceCreateWorld(this 
 	}
 
 	// Parse request
-	var req *weewarv1.CreateWorldRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.CreateWorldRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -893,8 +912,9 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceGetWorlds(this js
 	}
 
 	// Parse request
-	var req *weewarv1.GetWorldsRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetWorldsRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -933,8 +953,9 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceListWorlds(this j
 	}
 
 	// Parse request
-	var req *weewarv1.ListWorldsRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.ListWorldsRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -973,8 +994,9 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceGetWorld(this js.
 	}
 
 	// Parse request
-	var req *weewarv1.GetWorldRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.GetWorldRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -1013,8 +1035,9 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceDeleteWorld(this 
 	}
 
 	// Parse request
-	var req *weewarv1.DeleteWorldRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.DeleteWorldRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
@@ -1053,8 +1076,9 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceUpdateWorld(this 
 	}
 
 	// Parse request
-	var req *weewarv1.UpdateWorldRequest
-	if err := protojson.Unmarshal([]byte(requestJSON), req); err != nil {
+	req := &weewarv1.UpdateWorldRequest{}
+	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 

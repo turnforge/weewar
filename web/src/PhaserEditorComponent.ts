@@ -123,116 +123,94 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         this.log('Subscribing to EventBus events');
         
         // Subscribe to reference image events from ReferenceImagePanel
-        this.subscribe<ReferenceImageLoadedPayload>(
-            EditorEventTypes.REFERENCE_IMAGE_LOADED,
-            this,
-            (payload) => {
-                this.handleReferenceImageLoaded(payload.data);
-            }
-        );
+        this.addSubscription(EditorEventTypes.REFERENCE_IMAGE_LOADED, this);
         
         // Subscribe to grid visibility events from WorldEditorPage
-        this.subscribe<GridSetVisibilityPayload>(
-            EditorEventTypes.GRID_SET_VISIBILITY,
-            this,
-            (payload) => {
-                this.handleGridSetVisibility(payload.data);
-            }
-        );
+        this.addSubscription(EditorEventTypes.GRID_SET_VISIBILITY, this);
         
         // Subscribe to coordinates visibility events from WorldEditorPage
-        this.subscribe<CoordinatesSetVisibilityPayload>(
-            EditorEventTypes.COORDINATES_SET_VISIBILITY,
-            this,
-            (payload) => {
-                this.handleCoordinatesSetVisibility(payload.data);
-            }
-        );
+        this.addSubscription(EditorEventTypes.COORDINATES_SET_VISIBILITY, this);
         
         // Subscribe to reference image control events from ReferenceImagePanel
-        this.subscribe<ReferenceSetModePayload>(
-            EditorEventTypes.REFERENCE_SET_MODE,
-            this,
-            (payload) => {
-                this.handleReferenceSetMode(payload.data);
-            }
-        );
-        
-        this.subscribe<ReferenceSetAlphaPayload>(
-            EditorEventTypes.REFERENCE_SET_ALPHA,
-            this,
-            (payload) => {
-                this.handleReferenceSetAlpha(payload.data);
-            }
-        );
-        
-        this.subscribe<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION,
-            this,
-            (payload) => {
-                this.handleReferenceSetPosition(payload.data);
-            }
-        );
-        
-        this.subscribe<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE,
-            this,
-            (payload) => {
-                this.handleReferenceSetScale(payload.data);
-            }
-        );
-        
-        this.subscribe(
-            EditorEventTypes.REFERENCE_CLEAR,
-            this,
-            () => {
-                this.handleReferenceClear();
-            }
-        );
+        this.addSubscription(EditorEventTypes.REFERENCE_SET_MODE, this);
+        this.addSubscription(EditorEventTypes.REFERENCE_SET_ALPHA, this);
+        this.addSubscription(EditorEventTypes.REFERENCE_SET_POSITION, this);
+        this.addSubscription(EditorEventTypes.REFERENCE_SET_SCALE, this);
+        this.addSubscription(EditorEventTypes.REFERENCE_CLEAR, this);
         
         // Subscribe to tool state changes via EventBus
-        this.subscribe(
-            PageStateEventType.TOOL_STATE_CHANGED,
-            this,
-            (eventData) => {
-                this.handleToolStateChanged(eventData);
-            }
-        );
+        this.addSubscription(PageStateEventType.TOOL_STATE_CHANGED, this);
         
         // Subscribe to World events via EventBus
-        this.subscribe(
-            WorldEventType.WORLD_LOADED,
-            this,
-            (eventData) => {
-                this.handleWorldLoaded(eventData.data);
-            }
-        );
-        
-        this.subscribe(
-            WorldEventType.TILES_CHANGED,
-            this,
-            (eventData) => {
-                this.handleTilesChanged(eventData.data);
-            }
-        );
-        
-        this.subscribe(
-            WorldEventType.UNITS_CHANGED,
-            this,
-            (eventData) => {
-                this.handleUnitsChanged(eventData.data);
-            }
-        );
-        
-        this.subscribe(
-            WorldEventType.WORLD_CLEARED,
-            this,
-            () => {
-                this.handleWorldCleared();
-            }
-        );
+        this.addSubscription(WorldEventType.WORLD_LOADED, this);
+        this.addSubscription(WorldEventType.TILES_CHANGED, this);
+        this.addSubscription(WorldEventType.UNITS_CHANGED, this);
+        this.addSubscription(WorldEventType.WORLD_CLEARED, this);
         
         this.log('EventBus subscriptions complete');
+    }
+
+    /**
+     * Handle events from the EventBus
+     */
+    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
+        switch(eventType) {
+            case EditorEventTypes.REFERENCE_IMAGE_LOADED:
+                this.handleReferenceImageLoaded(data);
+                break;
+            
+            case EditorEventTypes.GRID_SET_VISIBILITY:
+                this.handleGridSetVisibility(data);
+                break;
+            
+            case EditorEventTypes.COORDINATES_SET_VISIBILITY:
+                this.handleCoordinatesSetVisibility(data);
+                break;
+            
+            case EditorEventTypes.REFERENCE_SET_MODE:
+                this.handleReferenceSetMode(data);
+                break;
+            
+            case EditorEventTypes.REFERENCE_SET_ALPHA:
+                this.handleReferenceSetAlpha(data);
+                break;
+            
+            case EditorEventTypes.REFERENCE_SET_POSITION:
+                this.handleReferenceSetPosition(data);
+                break;
+            
+            case EditorEventTypes.REFERENCE_SET_SCALE:
+                this.handleReferenceSetScale(data);
+                break;
+            
+            case EditorEventTypes.REFERENCE_CLEAR:
+                this.handleReferenceClear();
+                break;
+            
+            case PageStateEventType.TOOL_STATE_CHANGED:
+                this.handleToolStateChanged(data);
+                break;
+            
+            case WorldEventType.WORLD_LOADED:
+                this.handleWorldLoaded(data);
+                break;
+            
+            case WorldEventType.TILES_CHANGED:
+                this.handleTilesChanged(data);
+                break;
+            
+            case WorldEventType.UNITS_CHANGED:
+                this.handleUnitsChanged(data);
+                break;
+            
+            case WorldEventType.WORLD_CLEARED:
+                this.handleWorldCleared();
+                break;
+            
+            default:
+                // Call parent implementation for unhandled events
+                super.handleBusEvent(eventType, data, target, emitter);
+        }
     }
     
     protected destroyComponent(): void {

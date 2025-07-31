@@ -53,9 +53,6 @@ export class LifecycleController {
     public async initializeFromRoot(rootComponent: LCMComponent): Promise<void> {
         this.log('Starting component tree initialization');
         
-        // Phase 0: Discovery - Find all components in the tree
-        await this.performLocalInit(rootComponent);
-        
         // Phase 1 - Performance post-load setup where each parent will have the change
         // to set dependencies on its children (either to its siblings or to itself).
         await this.performLocalInit(rootComponent);
@@ -76,9 +73,14 @@ export class LifecycleController {
         const visited = new Set<LCMComponent>();
         let queue = [rootComponent] as LCMComponent[]
         
+        this.log("Starting performLocalInit, Levels: ", this.componentsByLevel.length)
+        if (this.componentsByLevel.length > 0) {
+          throw new Error("Already done")
+        }
         for (let level = 0; queue.length > 0; level ++) {
             const newqueue = [] as LCMComponent[];
             const promises = new Array<Promise<LCMComponent[]>>()
+            this.componentsByLevel.push(queue)
             for (let i = 0;i < queue.length;i++) {
                 const component = queue[i]
 
@@ -89,10 +91,6 @@ export class LifecycleController {
                         `discovered as child of multiple parents at level ${level}. ` +
                         `Component hierarchies must form a tree structure where each component has exactly one parent.`
                     );
-                }
-                
-                if (newqueue.length == 0) {
-                  this.componentsByLevel.push(newqueue)
                 }
 
                 this.emitEvent(LifecycleEventTypes.LOCAL_INIT_STARTED, component, level)
@@ -113,6 +111,7 @@ export class LifecycleController {
             }
             queue = newqueue
         }
+        this.log("Finished performLocalInit, Levels: ", this.componentsByLevel.length)
     }
 
     /**

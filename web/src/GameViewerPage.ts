@@ -95,67 +95,85 @@ class GameViewerPage extends BasePage implements LCMComponent {
      */
     private subscribeToGameStateEvents(): void {
         // GameViewer ready event - set up interaction callbacks and load world
-        this.subscribe('game-viewer-ready', this, (payload) => {
-            console.log('GameViewerPage: GameViewer ready event received', payload);
-            
-            // Now that GameViewer scene is ready, set up the interaction callbacks
-            if (this.worldViewer) {
-                console.log('GameViewerPage: Setting interaction callbacks after scene ready');
-                this.worldViewer.setInteractionCallbacks(
-                    this.onTileClicked,
-                    this.onUnitClicked
-                );
-                console.log('GameViewerPage: Interaction callbacks set after scene ready');
-            }
-            
-            if (this.currentGameId) {
-                console.log('GameViewerPage: WorldId found, proceeding to load world:', this.currentGameId);
-                // WebGL context timing - wait for next event loop tick
-                setTimeout(async () => {
-                    console.log('GameViewerPage: Starting loadWorldAndInitializeGame...');
-                    await this.loadWorldAndInitializeGame();
-                }, 10);
-            } else {
-                console.warn('GameViewerPage: No currentGameId found!');
-            }
-        });
-
+        this.addSubscription('game-viewer-ready', this);
+        
         // GameState notification events (for system coordination, not user interaction responses)
-        this.subscribe('wasm-loaded', this, (payload) => {
-            console.log('GameViewerPage: WASM loaded successfully');
-        });
+        this.addSubscription('wasm-loaded', this);
+        this.addSubscription('game-loaded', this);
+        this.addSubscription('game-created', this);
+        this.addSubscription('unit-moved', this);
+        this.addSubscription('unit-attacked', this);
+        this.addSubscription('turn-ended', this);
+    }
 
-        this.subscribe('game-loaded', this, (payload) => {
-            console.log('GameViewerPage: Game loaded from page data', payload.data);
-            // Update UI with the loaded game state
-            if (this.gameState) {
-                const gameData = this.gameState.getGameData();
-                this.updateGameUIFromState(this.convertGameStateToLegacyFormat(gameData));
-                this.logGameEvent(`Game loaded: ${gameData.gameId}`);
-            }
-        });
-
-        this.subscribe('game-created', this, (payload) => {
-            const gameData: GameCreateData = payload.data;
-            console.log('GameViewerPage: Game created notification', gameData);
-            // Game UI already updated synchronously, this is just for logging/coordination
-        });
-
-        this.subscribe('unit-moved', this, (payload) => {
-            console.log('GameViewerPage: Unit moved notification', payload.data);
-            // Could trigger animations, sound effects, etc.
-        });
-
-        this.subscribe('unit-attacked', this, (payload) => {
-            console.log('GameViewerPage: Unit attacked notification', payload.data);
-            // Could trigger combat animations, sound effects, etc.
-        });
-
-        this.subscribe('turn-ended', this, (payload) => {
-            const gameData: GameCreateData = payload.data;
-            console.log('GameViewerPage: Turn ended notification', gameData);
-            // Could trigger end-of-turn animations, notifications, etc.
-        });
+    /**
+     * Handle events from the EventBus
+     */
+    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
+        switch(eventType) {
+            case 'game-viewer-ready':
+                console.log('GameViewerPage: GameViewer ready event received', data);
+                
+                // Now that GameViewer scene is ready, set up the interaction callbacks
+                if (this.worldViewer) {
+                    console.log('GameViewerPage: Setting interaction callbacks after scene ready');
+                    this.worldViewer.setInteractionCallbacks(
+                        this.onTileClicked,
+                        this.onUnitClicked
+                    );
+                    console.log('GameViewerPage: Interaction callbacks set after scene ready');
+                }
+                
+                if (this.currentGameId) {
+                    console.log('GameViewerPage: WorldId found, proceeding to load world:', this.currentGameId);
+                    // WebGL context timing - wait for next event loop tick
+                    setTimeout(async () => {
+                        console.log('GameViewerPage: Starting loadWorldAndInitializeGame...');
+                        await this.loadWorldAndInitializeGame();
+                    }, 10);
+                } else {
+                    console.warn('GameViewerPage: No currentGameId found!');
+                }
+                break;
+            
+            case 'wasm-loaded':
+                console.log('GameViewerPage: WASM loaded successfully');
+                break;
+            
+            case 'game-loaded':
+                console.log('GameViewerPage: Game loaded from page data', data);
+                // Update UI with the loaded game state
+                if (this.gameState) {
+                    const gameData = this.gameState.getGameData();
+                    this.updateGameUIFromState(this.convertGameStateToLegacyFormat(gameData));
+                    this.logGameEvent(`Game loaded: ${gameData.gameId}`);
+                }
+                break;
+            
+            case 'game-created':
+                console.log('GameViewerPage: Game created notification', data);
+                // Game UI already updated synchronously, this is just for logging/coordination
+                break;
+            
+            case 'unit-moved':
+                console.log('GameViewerPage: Unit moved notification', data);
+                // Could trigger animations, sound effects, etc.
+                break;
+            
+            case 'unit-attacked':
+                console.log('GameViewerPage: Unit attacked notification', data);
+                // Could trigger combat animations, sound effects, etc.
+                break;
+            
+            case 'turn-ended':
+                console.log('GameViewerPage: Turn ended notification', data);
+                // Could trigger end-of-turn animations, notifications, etc.
+                break;
+            
+            default:
+                // Call parent implementation for unhandled events
+                super.handleBusEvent(eventType, data, target, emitter);
+        }
     }
 
     /**

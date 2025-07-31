@@ -116,28 +116,31 @@ export class ReferenceImagePanel extends BaseComponent {
      */
     private subscribeToReferenceEvents(): void {
         // Subscribe to scale changes from direct Phaser interaction
-        this.subscribe<ReferenceScaleChangedPayload>(
-            EditorEventTypes.REFERENCE_SCALE_CHANGED,
-            this,
-            (payload) => {
-                // Only handle events NOT originating from this component to prevent loops
-                console.assert(payload.emitter != this, "We are getting back our own message")
-                this.handleReferenceScaleChanged(payload.data);
-            }
-        );
+        this.addSubscription(EditorEventTypes.REFERENCE_SCALE_CHANGED, this);
         
         // Subscribe to state changes from direct Phaser interaction
-        this.subscribe<ReferenceStateChangedPayload>(
-            EditorEventTypes.REFERENCE_STATE_CHANGED,
-            this,
-            (payload) => {
-                // Only handle events NOT originating from this component to prevent loops
-                console.assert(payload.emitter != this, "We are getting back our own message")
-                this.handleReferenceStateChanged(payload.data);
-            }
-        );
+        this.addSubscription(EditorEventTypes.REFERENCE_STATE_CHANGED, this);
         
-        this.log('Subscribed to reference image EventBus events (excluding self-originated events)');
+        this.log('Subscribed to reference image EventBus events');
+    }
+
+    /**
+     * Handle events from the EventBus
+     */
+    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
+        switch(eventType) {
+            case EditorEventTypes.REFERENCE_SCALE_CHANGED:
+                this.handleReferenceScaleChanged(data);
+                break;
+            
+            case EditorEventTypes.REFERENCE_STATE_CHANGED:
+                this.handleReferenceStateChanged(data);
+                break;
+            
+            default:
+                // Call parent implementation for unhandled events
+                super.handleBusEvent(eventType, data, target, emitter);
+        }
     }
     
     /**

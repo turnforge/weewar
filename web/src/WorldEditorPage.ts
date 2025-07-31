@@ -277,29 +277,59 @@ class WorldEditorPage extends BasePage {
         console.log('WorldEditorPage: Subscribing to editor events');
 
         // Subscribe to World events via EventBus
-        this.subscribe(WorldEventType.WORLD_LOADED, this, (data: any) => { this.handleWorldLoaded(data); });
-        this.subscribe(WorldEventType.WORLD_SAVED, this, (data: any) => { this.handleWorldSaved(data); });
-        this.subscribe(WorldEventType.TILES_CHANGED, this, () => { this.handleWorldDataChanged(); });
-        this.subscribe(WorldEventType.UNITS_CHANGED, this, () => { this.handleWorldDataChanged(); });
-        this.subscribe(WorldEventType.WORLD_CLEARED, this, () => { this.handleWorldDataChanged(); });
-        this.subscribe(WorldEventType.WORLD_METADATA_CHANGED, this, () => { this.handleWorldDataChanged(); });
+        this.addSubscription(WorldEventType.WORLD_LOADED, this);
+        this.addSubscription(WorldEventType.WORLD_SAVED, this);
+        this.addSubscription(WorldEventType.TILES_CHANGED, this);
+        this.addSubscription(WorldEventType.UNITS_CHANGED, this);
+        this.addSubscription(WorldEventType.WORLD_CLEARED, this);
+        this.addSubscription(WorldEventType.WORLD_METADATA_CHANGED, this);
         
         // Note: Tool state changes now handled via PageState Observer pattern
         // EditorToolsPanel directly updates pageState, which notifies observers
         
         // Subscribe to tile clicks from Phaser
-        this.eventBus.subscribe<TileClickedPayload>(EditorEventTypes.TILE_CLICKED, this, (payload) => {
-            this.handlePhaserTileClick(payload.data.q, payload.data.r);
-        });
+        this.addSubscription(EditorEventTypes.TILE_CLICKED, this);
         
         // Subscribe to Phaser ready event
-        this.eventBus.subscribe(EditorEventTypes.PHASER_READY, this, () => {
-            this.handlePhaserReady();
-        });
+        this.addSubscription(EditorEventTypes.PHASER_READY, this);
         
         // World changes are automatically tracked by World class via Observer pattern
         
         console.log('WorldEditorPage: Editor event subscriptions complete');
+    }
+
+    /**
+     * Handle events from the EventBus
+     */
+    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
+        switch(eventType) {
+            case WorldEventType.WORLD_LOADED:
+                this.handleWorldLoaded(data);
+                break;
+            
+            case WorldEventType.WORLD_SAVED:
+                this.handleWorldSaved(data);
+                break;
+            
+            case WorldEventType.TILES_CHANGED:
+            case WorldEventType.UNITS_CHANGED:
+            case WorldEventType.WORLD_CLEARED:
+            case WorldEventType.WORLD_METADATA_CHANGED:
+                this.handleWorldDataChanged();
+                break;
+            
+            case EditorEventTypes.TILE_CLICKED:
+                this.handlePhaserTileClick(data.q, data.r);
+                break;
+            
+            case EditorEventTypes.PHASER_READY:
+                this.handlePhaserReady();
+                break;
+            
+            default:
+                // Call parent implementation for unhandled events
+                super.handleBusEvent(eventType, data, target, emitter);
+        }
     }
 
     protected initializeSpecificComponents(): LCMComponent[] {

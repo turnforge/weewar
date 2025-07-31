@@ -617,6 +617,267 @@ func (x *Unit) GetTurnCounter() int32 {
 	return 0
 }
 
+// Rules engine terrain definition
+type TerrainDefinition struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                            // Terrain type ID
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                         // Display name (e.g., "Grass", "Mountain")
+	BaseMoveCost  float64                `protobuf:"fixed64,3,opt,name=base_move_cost,json=baseMoveCost,proto3" json:"base_move_cost,omitempty"` // Base movement cost
+	DefenseBonus  float64                `protobuf:"fixed64,4,opt,name=defense_bonus,json=defenseBonus,proto3" json:"defense_bonus,omitempty"`   // Defense bonus multiplier (0.0 to 1.0)
+	Type          int32                  `protobuf:"varint,5,opt,name=type,proto3" json:"type,omitempty"`                                        // Terrain category type
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`                           // Human-readable description
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TerrainDefinition) Reset() {
+	*x = TerrainDefinition{}
+	mi := &file_weewar_v1_models_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TerrainDefinition) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TerrainDefinition) ProtoMessage() {}
+
+func (x *TerrainDefinition) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TerrainDefinition.ProtoReflect.Descriptor instead.
+func (*TerrainDefinition) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *TerrainDefinition) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *TerrainDefinition) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *TerrainDefinition) GetBaseMoveCost() float64 {
+	if x != nil {
+		return x.BaseMoveCost
+	}
+	return 0
+}
+
+func (x *TerrainDefinition) GetDefenseBonus() float64 {
+	if x != nil {
+		return x.DefenseBonus
+	}
+	return 0
+}
+
+func (x *TerrainDefinition) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *TerrainDefinition) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+// Rules engine unit definition
+type UnitDefinition struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                               // Unit type ID
+	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                            // Display name (e.g., "Infantry", "Tank")
+	MovementPoints int32                  `protobuf:"varint,3,opt,name=movement_points,json=movementPoints,proto3" json:"movement_points,omitempty"` // Maximum movement per turn
+	AttackRange    int32                  `protobuf:"varint,4,opt,name=attack_range,json=attackRange,proto3" json:"attack_range,omitempty"`          // Attack range in tiles
+	Health         int32                  `protobuf:"varint,5,opt,name=health,proto3" json:"health,omitempty"`                                       // Maximum health points
+	Properties     []string               `protobuf:"bytes,6,rep,name=properties,proto3" json:"properties,omitempty"`                                // Special properties/abilities
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *UnitDefinition) Reset() {
+	*x = UnitDefinition{}
+	mi := &file_weewar_v1_models_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnitDefinition) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnitDefinition) ProtoMessage() {}
+
+func (x *UnitDefinition) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnitDefinition.ProtoReflect.Descriptor instead.
+func (*UnitDefinition) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UnitDefinition) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UnitDefinition) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UnitDefinition) GetMovementPoints() int32 {
+	if x != nil {
+		return x.MovementPoints
+	}
+	return 0
+}
+
+func (x *UnitDefinition) GetAttackRange() int32 {
+	if x != nil {
+		return x.AttackRange
+	}
+	return 0
+}
+
+func (x *UnitDefinition) GetHealth() int32 {
+	if x != nil {
+		return x.Health
+	}
+	return 0
+}
+
+func (x *UnitDefinition) GetProperties() []string {
+	if x != nil {
+		return x.Properties
+	}
+	return nil
+}
+
+// Movement cost matrix for unit types on terrain types
+type MovementMatrix struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Map of unit_id -> (terrain_id -> movement_cost)
+	Costs         map[int32]*TerrainCostMap `protobuf:"bytes,1,rep,name=costs,proto3" json:"costs,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MovementMatrix) Reset() {
+	*x = MovementMatrix{}
+	mi := &file_weewar_v1_models_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MovementMatrix) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MovementMatrix) ProtoMessage() {}
+
+func (x *MovementMatrix) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MovementMatrix.ProtoReflect.Descriptor instead.
+func (*MovementMatrix) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *MovementMatrix) GetCosts() map[int32]*TerrainCostMap {
+	if x != nil {
+		return x.Costs
+	}
+	return nil
+}
+
+type TerrainCostMap struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Map of terrain_id -> movement_cost
+	TerrainCosts  map[int32]float64 `protobuf:"bytes,1,rep,name=terrain_costs,json=terrainCosts,proto3" json:"terrain_costs,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"fixed64,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TerrainCostMap) Reset() {
+	*x = TerrainCostMap{}
+	mi := &file_weewar_v1_models_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TerrainCostMap) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TerrainCostMap) ProtoMessage() {}
+
+func (x *TerrainCostMap) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TerrainCostMap.ProtoReflect.Descriptor instead.
+func (*TerrainCostMap) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *TerrainCostMap) GetTerrainCosts() map[int32]float64 {
+	if x != nil {
+		return x.TerrainCosts
+	}
+	return nil
+}
+
 // Describes a game and its metadata
 type Game struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
@@ -646,7 +907,7 @@ type Game struct {
 
 func (x *Game) Reset() {
 	*x = Game{}
-	mi := &file_weewar_v1_models_proto_msgTypes[7]
+	mi := &file_weewar_v1_models_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -658,7 +919,7 @@ func (x *Game) String() string {
 func (*Game) ProtoMessage() {}
 
 func (x *Game) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[7]
+	mi := &file_weewar_v1_models_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -671,7 +932,7 @@ func (x *Game) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Game.ProtoReflect.Descriptor instead.
 func (*Game) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{7}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Game) GetCreatedAt() *timestamppb.Timestamp {
@@ -763,7 +1024,7 @@ type GameConfiguration struct {
 
 func (x *GameConfiguration) Reset() {
 	*x = GameConfiguration{}
-	mi := &file_weewar_v1_models_proto_msgTypes[8]
+	mi := &file_weewar_v1_models_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -775,7 +1036,7 @@ func (x *GameConfiguration) String() string {
 func (*GameConfiguration) ProtoMessage() {}
 
 func (x *GameConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[8]
+	mi := &file_weewar_v1_models_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -788,7 +1049,7 @@ func (x *GameConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameConfiguration.ProtoReflect.Descriptor instead.
 func (*GameConfiguration) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{8}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GameConfiguration) GetPlayers() []*GamePlayer {
@@ -821,7 +1082,7 @@ type GamePlayer struct {
 
 func (x *GamePlayer) Reset() {
 	*x = GamePlayer{}
-	mi := &file_weewar_v1_models_proto_msgTypes[9]
+	mi := &file_weewar_v1_models_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -833,7 +1094,7 @@ func (x *GamePlayer) String() string {
 func (*GamePlayer) ProtoMessage() {}
 
 func (x *GamePlayer) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[9]
+	mi := &file_weewar_v1_models_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -846,7 +1107,7 @@ func (x *GamePlayer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GamePlayer.ProtoReflect.Descriptor instead.
 func (*GamePlayer) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{9}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GamePlayer) GetPlayerId() int32 {
@@ -893,7 +1154,7 @@ type GameSettings struct {
 
 func (x *GameSettings) Reset() {
 	*x = GameSettings{}
-	mi := &file_weewar_v1_models_proto_msgTypes[10]
+	mi := &file_weewar_v1_models_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -905,7 +1166,7 @@ func (x *GameSettings) String() string {
 func (*GameSettings) ProtoMessage() {}
 
 func (x *GameSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[10]
+	mi := &file_weewar_v1_models_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -918,7 +1179,7 @@ func (x *GameSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameSettings.ProtoReflect.Descriptor instead.
 func (*GameSettings) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{10}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GameSettings) GetAllowedUnits() []int32 {
@@ -963,7 +1224,7 @@ type GameState struct {
 
 func (x *GameState) Reset() {
 	*x = GameState{}
-	mi := &file_weewar_v1_models_proto_msgTypes[11]
+	mi := &file_weewar_v1_models_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -975,7 +1236,7 @@ func (x *GameState) String() string {
 func (*GameState) ProtoMessage() {}
 
 func (x *GameState) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[11]
+	mi := &file_weewar_v1_models_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -988,7 +1249,7 @@ func (x *GameState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameState.ProtoReflect.Descriptor instead.
 func (*GameState) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{11}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GameState) GetUpdatedAt() *timestamppb.Timestamp {
@@ -1025,7 +1286,7 @@ type GameMoveHistory struct {
 
 func (x *GameMoveHistory) Reset() {
 	*x = GameMoveHistory{}
-	mi := &file_weewar_v1_models_proto_msgTypes[12]
+	mi := &file_weewar_v1_models_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1037,7 +1298,7 @@ func (x *GameMoveHistory) String() string {
 func (*GameMoveHistory) ProtoMessage() {}
 
 func (x *GameMoveHistory) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[12]
+	mi := &file_weewar_v1_models_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1050,7 +1311,7 @@ func (x *GameMoveHistory) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameMoveHistory.ProtoReflect.Descriptor instead.
 func (*GameMoveHistory) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{12}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GameMoveHistory) GetGameId() string {
@@ -1085,7 +1346,7 @@ type GameMoveGroup struct {
 
 func (x *GameMoveGroup) Reset() {
 	*x = GameMoveGroup{}
-	mi := &file_weewar_v1_models_proto_msgTypes[13]
+	mi := &file_weewar_v1_models_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1097,7 +1358,7 @@ func (x *GameMoveGroup) String() string {
 func (*GameMoveGroup) ProtoMessage() {}
 
 func (x *GameMoveGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[13]
+	mi := &file_weewar_v1_models_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1110,7 +1371,7 @@ func (x *GameMoveGroup) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameMoveGroup.ProtoReflect.Descriptor instead.
 func (*GameMoveGroup) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{13}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GameMoveGroup) GetStartedAt() *timestamppb.Timestamp {
@@ -1162,7 +1423,7 @@ type GameMove struct {
 
 func (x *GameMove) Reset() {
 	*x = GameMove{}
-	mi := &file_weewar_v1_models_proto_msgTypes[14]
+	mi := &file_weewar_v1_models_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1174,7 +1435,7 @@ func (x *GameMove) String() string {
 func (*GameMove) ProtoMessage() {}
 
 func (x *GameMove) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[14]
+	mi := &file_weewar_v1_models_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1187,7 +1448,7 @@ func (x *GameMove) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameMove.ProtoReflect.Descriptor instead.
 func (*GameMove) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{14}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GameMove) GetPlayer() int32 {
@@ -1285,7 +1546,7 @@ type GameMoveResult struct {
 
 func (x *GameMoveResult) Reset() {
 	*x = GameMoveResult{}
-	mi := &file_weewar_v1_models_proto_msgTypes[15]
+	mi := &file_weewar_v1_models_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1297,7 +1558,7 @@ func (x *GameMoveResult) String() string {
 func (*GameMoveResult) ProtoMessage() {}
 
 func (x *GameMoveResult) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[15]
+	mi := &file_weewar_v1_models_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1310,7 +1571,7 @@ func (x *GameMoveResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameMoveResult.ProtoReflect.Descriptor instead.
 func (*GameMoveResult) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{15}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GameMoveResult) GetIsPermanent() bool {
@@ -1348,7 +1609,7 @@ type MoveUnitAction struct {
 
 func (x *MoveUnitAction) Reset() {
 	*x = MoveUnitAction{}
-	mi := &file_weewar_v1_models_proto_msgTypes[16]
+	mi := &file_weewar_v1_models_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1360,7 +1621,7 @@ func (x *MoveUnitAction) String() string {
 func (*MoveUnitAction) ProtoMessage() {}
 
 func (x *MoveUnitAction) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[16]
+	mi := &file_weewar_v1_models_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1373,7 +1634,7 @@ func (x *MoveUnitAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MoveUnitAction.ProtoReflect.Descriptor instead.
 func (*MoveUnitAction) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{16}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *MoveUnitAction) GetFromQ() int32 {
@@ -1418,7 +1679,7 @@ type AttackUnitAction struct {
 
 func (x *AttackUnitAction) Reset() {
 	*x = AttackUnitAction{}
-	mi := &file_weewar_v1_models_proto_msgTypes[17]
+	mi := &file_weewar_v1_models_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1430,7 +1691,7 @@ func (x *AttackUnitAction) String() string {
 func (*AttackUnitAction) ProtoMessage() {}
 
 func (x *AttackUnitAction) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[17]
+	mi := &file_weewar_v1_models_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1443,7 +1704,7 @@ func (x *AttackUnitAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AttackUnitAction.ProtoReflect.Descriptor instead.
 func (*AttackUnitAction) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{17}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *AttackUnitAction) GetAttackerQ() int32 {
@@ -1484,7 +1745,7 @@ type EndTurnAction struct {
 
 func (x *EndTurnAction) Reset() {
 	*x = EndTurnAction{}
-	mi := &file_weewar_v1_models_proto_msgTypes[18]
+	mi := &file_weewar_v1_models_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1496,7 +1757,7 @@ func (x *EndTurnAction) String() string {
 func (*EndTurnAction) ProtoMessage() {}
 
 func (x *EndTurnAction) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[18]
+	mi := &file_weewar_v1_models_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1509,7 +1770,7 @@ func (x *EndTurnAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndTurnAction.ProtoReflect.Descriptor instead.
 func (*EndTurnAction) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{18}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{22}
 }
 
 // *
@@ -1531,7 +1792,7 @@ type WorldChange struct {
 
 func (x *WorldChange) Reset() {
 	*x = WorldChange{}
-	mi := &file_weewar_v1_models_proto_msgTypes[19]
+	mi := &file_weewar_v1_models_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1543,7 +1804,7 @@ func (x *WorldChange) String() string {
 func (*WorldChange) ProtoMessage() {}
 
 func (x *WorldChange) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[19]
+	mi := &file_weewar_v1_models_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1556,7 +1817,7 @@ func (x *WorldChange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorldChange.ProtoReflect.Descriptor instead.
 func (*WorldChange) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{19}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *WorldChange) GetChangeType() isWorldChange_ChangeType {
@@ -1644,7 +1905,7 @@ type UnitMovedChange struct {
 
 func (x *UnitMovedChange) Reset() {
 	*x = UnitMovedChange{}
-	mi := &file_weewar_v1_models_proto_msgTypes[20]
+	mi := &file_weewar_v1_models_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1656,7 +1917,7 @@ func (x *UnitMovedChange) String() string {
 func (*UnitMovedChange) ProtoMessage() {}
 
 func (x *UnitMovedChange) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[20]
+	mi := &file_weewar_v1_models_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1669,7 +1930,7 @@ func (x *UnitMovedChange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnitMovedChange.ProtoReflect.Descriptor instead.
 func (*UnitMovedChange) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{20}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *UnitMovedChange) GetFromQ() int32 {
@@ -1714,7 +1975,7 @@ type UnitDamagedChange struct {
 
 func (x *UnitDamagedChange) Reset() {
 	*x = UnitDamagedChange{}
-	mi := &file_weewar_v1_models_proto_msgTypes[21]
+	mi := &file_weewar_v1_models_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1726,7 +1987,7 @@ func (x *UnitDamagedChange) String() string {
 func (*UnitDamagedChange) ProtoMessage() {}
 
 func (x *UnitDamagedChange) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[21]
+	mi := &file_weewar_v1_models_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1739,7 +2000,7 @@ func (x *UnitDamagedChange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnitDamagedChange.ProtoReflect.Descriptor instead.
 func (*UnitDamagedChange) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{21}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *UnitDamagedChange) GetPreviousHealth() int32 {
@@ -1784,7 +2045,7 @@ type UnitKilledChange struct {
 
 func (x *UnitKilledChange) Reset() {
 	*x = UnitKilledChange{}
-	mi := &file_weewar_v1_models_proto_msgTypes[22]
+	mi := &file_weewar_v1_models_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1796,7 +2057,7 @@ func (x *UnitKilledChange) String() string {
 func (*UnitKilledChange) ProtoMessage() {}
 
 func (x *UnitKilledChange) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[22]
+	mi := &file_weewar_v1_models_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1809,7 +2070,7 @@ func (x *UnitKilledChange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnitKilledChange.ProtoReflect.Descriptor instead.
 func (*UnitKilledChange) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{22}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *UnitKilledChange) GetPlayer() int32 {
@@ -1854,7 +2115,7 @@ type PlayerChangedChange struct {
 
 func (x *PlayerChangedChange) Reset() {
 	*x = PlayerChangedChange{}
-	mi := &file_weewar_v1_models_proto_msgTypes[23]
+	mi := &file_weewar_v1_models_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1866,7 +2127,7 @@ func (x *PlayerChangedChange) String() string {
 func (*PlayerChangedChange) ProtoMessage() {}
 
 func (x *PlayerChangedChange) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_proto_msgTypes[23]
+	mi := &file_weewar_v1_models_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1879,7 +2140,7 @@ func (x *PlayerChangedChange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerChangedChange.ProtoReflect.Descriptor instead.
 func (*PlayerChangedChange) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_proto_rawDescGZIP(), []int{23}
+	return file_weewar_v1_models_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *PlayerChangedChange) GetPreviousPlayer() int32 {
@@ -1972,7 +2233,34 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\tunit_type\x18\x04 \x01(\x05R\bunitType\x12)\n" +
 	"\x10available_health\x18\x05 \x01(\x05R\x0favailableHealth\x12#\n" +
 	"\rdistance_left\x18\x06 \x01(\x05R\fdistanceLeft\x12!\n" +
-	"\fturn_counter\x18\a \x01(\x05R\vturnCounter\"\x83\x03\n" +
+	"\fturn_counter\x18\a \x01(\x05R\vturnCounter\"\xb8\x01\n" +
+	"\x11TerrainDefinition\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12$\n" +
+	"\x0ebase_move_cost\x18\x03 \x01(\x01R\fbaseMoveCost\x12#\n" +
+	"\rdefense_bonus\x18\x04 \x01(\x01R\fdefenseBonus\x12\x12\n" +
+	"\x04type\x18\x05 \x01(\x05R\x04type\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"\xb8\x01\n" +
+	"\x0eUnitDefinition\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12'\n" +
+	"\x0fmovement_points\x18\x03 \x01(\x05R\x0emovementPoints\x12!\n" +
+	"\fattack_range\x18\x04 \x01(\x05R\vattackRange\x12\x16\n" +
+	"\x06health\x18\x05 \x01(\x05R\x06health\x12\x1e\n" +
+	"\n" +
+	"properties\x18\x06 \x03(\tR\n" +
+	"properties\"\xa1\x01\n" +
+	"\x0eMovementMatrix\x12:\n" +
+	"\x05costs\x18\x01 \x03(\v2$.weewar.v1.MovementMatrix.CostsEntryR\x05costs\x1aS\n" +
+	"\n" +
+	"CostsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x05R\x03key\x12/\n" +
+	"\x05value\x18\x02 \x01(\v2\x19.weewar.v1.TerrainCostMapR\x05value:\x028\x01\"\xa3\x01\n" +
+	"\x0eTerrainCostMap\x12P\n" +
+	"\rterrain_costs\x18\x01 \x03(\v2+.weewar.v1.TerrainCostMap.TerrainCostsEntryR\fterrainCosts\x1a?\n" +
+	"\x11TerrainCostsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x01R\x05value:\x028\x01\"\x83\x03\n" +
 	"\x04Game\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -2094,7 +2382,7 @@ func file_weewar_v1_models_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_models_proto_rawDescData
 }
 
-var file_weewar_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_weewar_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_weewar_v1_models_proto_goTypes = []any{
 	(*User)(nil),                  // 0: weewar.v1.User
 	(*Pagination)(nil),            // 1: weewar.v1.Pagination
@@ -2103,59 +2391,68 @@ var file_weewar_v1_models_proto_goTypes = []any{
 	(*WorldData)(nil),             // 4: weewar.v1.WorldData
 	(*Tile)(nil),                  // 5: weewar.v1.Tile
 	(*Unit)(nil),                  // 6: weewar.v1.Unit
-	(*Game)(nil),                  // 7: weewar.v1.Game
-	(*GameConfiguration)(nil),     // 8: weewar.v1.GameConfiguration
-	(*GamePlayer)(nil),            // 9: weewar.v1.GamePlayer
-	(*GameSettings)(nil),          // 10: weewar.v1.GameSettings
-	(*GameState)(nil),             // 11: weewar.v1.GameState
-	(*GameMoveHistory)(nil),       // 12: weewar.v1.GameMoveHistory
-	(*GameMoveGroup)(nil),         // 13: weewar.v1.GameMoveGroup
-	(*GameMove)(nil),              // 14: weewar.v1.GameMove
-	(*GameMoveResult)(nil),        // 15: weewar.v1.GameMoveResult
-	(*MoveUnitAction)(nil),        // 16: weewar.v1.MoveUnitAction
-	(*AttackUnitAction)(nil),      // 17: weewar.v1.AttackUnitAction
-	(*EndTurnAction)(nil),         // 18: weewar.v1.EndTurnAction
-	(*WorldChange)(nil),           // 19: weewar.v1.WorldChange
-	(*UnitMovedChange)(nil),       // 20: weewar.v1.UnitMovedChange
-	(*UnitDamagedChange)(nil),     // 21: weewar.v1.UnitDamagedChange
-	(*UnitKilledChange)(nil),      // 22: weewar.v1.UnitKilledChange
-	(*PlayerChangedChange)(nil),   // 23: weewar.v1.PlayerChangedChange
-	(*timestamppb.Timestamp)(nil), // 24: google.protobuf.Timestamp
+	(*TerrainDefinition)(nil),     // 7: weewar.v1.TerrainDefinition
+	(*UnitDefinition)(nil),        // 8: weewar.v1.UnitDefinition
+	(*MovementMatrix)(nil),        // 9: weewar.v1.MovementMatrix
+	(*TerrainCostMap)(nil),        // 10: weewar.v1.TerrainCostMap
+	(*Game)(nil),                  // 11: weewar.v1.Game
+	(*GameConfiguration)(nil),     // 12: weewar.v1.GameConfiguration
+	(*GamePlayer)(nil),            // 13: weewar.v1.GamePlayer
+	(*GameSettings)(nil),          // 14: weewar.v1.GameSettings
+	(*GameState)(nil),             // 15: weewar.v1.GameState
+	(*GameMoveHistory)(nil),       // 16: weewar.v1.GameMoveHistory
+	(*GameMoveGroup)(nil),         // 17: weewar.v1.GameMoveGroup
+	(*GameMove)(nil),              // 18: weewar.v1.GameMove
+	(*GameMoveResult)(nil),        // 19: weewar.v1.GameMoveResult
+	(*MoveUnitAction)(nil),        // 20: weewar.v1.MoveUnitAction
+	(*AttackUnitAction)(nil),      // 21: weewar.v1.AttackUnitAction
+	(*EndTurnAction)(nil),         // 22: weewar.v1.EndTurnAction
+	(*WorldChange)(nil),           // 23: weewar.v1.WorldChange
+	(*UnitMovedChange)(nil),       // 24: weewar.v1.UnitMovedChange
+	(*UnitDamagedChange)(nil),     // 25: weewar.v1.UnitDamagedChange
+	(*UnitKilledChange)(nil),      // 26: weewar.v1.UnitKilledChange
+	(*PlayerChangedChange)(nil),   // 27: weewar.v1.PlayerChangedChange
+	nil,                           // 28: weewar.v1.MovementMatrix.CostsEntry
+	nil,                           // 29: weewar.v1.TerrainCostMap.TerrainCostsEntry
+	(*timestamppb.Timestamp)(nil), // 30: google.protobuf.Timestamp
 }
 var file_weewar_v1_models_proto_depIdxs = []int32{
-	24, // 0: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	24, // 1: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	24, // 2: weewar.v1.World.created_at:type_name -> google.protobuf.Timestamp
-	24, // 3: weewar.v1.World.updated_at:type_name -> google.protobuf.Timestamp
+	30, // 0: weewar.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	30, // 1: weewar.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	30, // 2: weewar.v1.World.created_at:type_name -> google.protobuf.Timestamp
+	30, // 3: weewar.v1.World.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 4: weewar.v1.World.world_data:type_name -> weewar.v1.WorldData
 	5,  // 5: weewar.v1.WorldData.tiles:type_name -> weewar.v1.Tile
 	6,  // 6: weewar.v1.WorldData.units:type_name -> weewar.v1.Unit
-	24, // 7: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
-	24, // 8: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
-	8,  // 9: weewar.v1.Game.config:type_name -> weewar.v1.GameConfiguration
-	9,  // 10: weewar.v1.GameConfiguration.players:type_name -> weewar.v1.GamePlayer
-	10, // 11: weewar.v1.GameConfiguration.settings:type_name -> weewar.v1.GameSettings
-	24, // 12: weewar.v1.GameState.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 13: weewar.v1.GameState.world_data:type_name -> weewar.v1.WorldData
-	13, // 14: weewar.v1.GameMoveHistory.groups:type_name -> weewar.v1.GameMoveGroup
-	24, // 15: weewar.v1.GameMoveGroup.started_at:type_name -> google.protobuf.Timestamp
-	24, // 16: weewar.v1.GameMoveGroup.ended_at:type_name -> google.protobuf.Timestamp
-	14, // 17: weewar.v1.GameMoveGroup.moves:type_name -> weewar.v1.GameMove
-	15, // 18: weewar.v1.GameMoveGroup.move_results:type_name -> weewar.v1.GameMoveResult
-	24, // 19: weewar.v1.GameMove.timestamp:type_name -> google.protobuf.Timestamp
-	16, // 20: weewar.v1.GameMove.move_unit:type_name -> weewar.v1.MoveUnitAction
-	17, // 21: weewar.v1.GameMove.attack_unit:type_name -> weewar.v1.AttackUnitAction
-	18, // 22: weewar.v1.GameMove.end_turn:type_name -> weewar.v1.EndTurnAction
-	19, // 23: weewar.v1.GameMoveResult.changes:type_name -> weewar.v1.WorldChange
-	20, // 24: weewar.v1.WorldChange.unit_moved:type_name -> weewar.v1.UnitMovedChange
-	21, // 25: weewar.v1.WorldChange.unit_damaged:type_name -> weewar.v1.UnitDamagedChange
-	22, // 26: weewar.v1.WorldChange.unit_killed:type_name -> weewar.v1.UnitKilledChange
-	23, // 27: weewar.v1.WorldChange.player_changed:type_name -> weewar.v1.PlayerChangedChange
-	28, // [28:28] is the sub-list for method output_type
-	28, // [28:28] is the sub-list for method input_type
-	28, // [28:28] is the sub-list for extension type_name
-	28, // [28:28] is the sub-list for extension extendee
-	0,  // [0:28] is the sub-list for field type_name
+	28, // 7: weewar.v1.MovementMatrix.costs:type_name -> weewar.v1.MovementMatrix.CostsEntry
+	29, // 8: weewar.v1.TerrainCostMap.terrain_costs:type_name -> weewar.v1.TerrainCostMap.TerrainCostsEntry
+	30, // 9: weewar.v1.Game.created_at:type_name -> google.protobuf.Timestamp
+	30, // 10: weewar.v1.Game.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 11: weewar.v1.Game.config:type_name -> weewar.v1.GameConfiguration
+	13, // 12: weewar.v1.GameConfiguration.players:type_name -> weewar.v1.GamePlayer
+	14, // 13: weewar.v1.GameConfiguration.settings:type_name -> weewar.v1.GameSettings
+	30, // 14: weewar.v1.GameState.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 15: weewar.v1.GameState.world_data:type_name -> weewar.v1.WorldData
+	17, // 16: weewar.v1.GameMoveHistory.groups:type_name -> weewar.v1.GameMoveGroup
+	30, // 17: weewar.v1.GameMoveGroup.started_at:type_name -> google.protobuf.Timestamp
+	30, // 18: weewar.v1.GameMoveGroup.ended_at:type_name -> google.protobuf.Timestamp
+	18, // 19: weewar.v1.GameMoveGroup.moves:type_name -> weewar.v1.GameMove
+	19, // 20: weewar.v1.GameMoveGroup.move_results:type_name -> weewar.v1.GameMoveResult
+	30, // 21: weewar.v1.GameMove.timestamp:type_name -> google.protobuf.Timestamp
+	20, // 22: weewar.v1.GameMove.move_unit:type_name -> weewar.v1.MoveUnitAction
+	21, // 23: weewar.v1.GameMove.attack_unit:type_name -> weewar.v1.AttackUnitAction
+	22, // 24: weewar.v1.GameMove.end_turn:type_name -> weewar.v1.EndTurnAction
+	23, // 25: weewar.v1.GameMoveResult.changes:type_name -> weewar.v1.WorldChange
+	24, // 26: weewar.v1.WorldChange.unit_moved:type_name -> weewar.v1.UnitMovedChange
+	25, // 27: weewar.v1.WorldChange.unit_damaged:type_name -> weewar.v1.UnitDamagedChange
+	26, // 28: weewar.v1.WorldChange.unit_killed:type_name -> weewar.v1.UnitKilledChange
+	27, // 29: weewar.v1.WorldChange.player_changed:type_name -> weewar.v1.PlayerChangedChange
+	10, // 30: weewar.v1.MovementMatrix.CostsEntry.value:type_name -> weewar.v1.TerrainCostMap
+	31, // [31:31] is the sub-list for method output_type
+	31, // [31:31] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_models_proto_init() }
@@ -2163,12 +2460,12 @@ func file_weewar_v1_models_proto_init() {
 	if File_weewar_v1_models_proto != nil {
 		return
 	}
-	file_weewar_v1_models_proto_msgTypes[14].OneofWrappers = []any{
+	file_weewar_v1_models_proto_msgTypes[18].OneofWrappers = []any{
 		(*GameMove_MoveUnit)(nil),
 		(*GameMove_AttackUnit)(nil),
 		(*GameMove_EndTurn)(nil),
 	}
-	file_weewar_v1_models_proto_msgTypes[19].OneofWrappers = []any{
+	file_weewar_v1_models_proto_msgTypes[23].OneofWrappers = []any{
 		(*WorldChange_UnitMoved)(nil),
 		(*WorldChange_UnitDamaged)(nil),
 		(*WorldChange_UnitKilled)(nil),
@@ -2180,7 +2477,7 @@ func file_weewar_v1_models_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_models_proto_rawDesc), len(file_weewar_v1_models_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

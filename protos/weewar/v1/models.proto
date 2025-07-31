@@ -132,6 +132,39 @@ message Unit {
   int32 turn_counter = 7;     // Which turn this unit was created/last acted
 }
 
+///////// Rules Engine Definitions
+
+// Rules engine terrain definition
+message TerrainDefinition {
+  int32 id = 1;                  // Terrain type ID
+  string name = 2;               // Display name (e.g., "Grass", "Mountain")  
+  double base_move_cost = 3;     // Base movement cost
+  double defense_bonus = 4;      // Defense bonus multiplier (0.0 to 1.0)
+  int32 type = 5;               // Terrain category type
+  string description = 6;        // Human-readable description
+}
+
+// Rules engine unit definition  
+message UnitDefinition {
+  int32 id = 1;                  // Unit type ID
+  string name = 2;               // Display name (e.g., "Infantry", "Tank")
+  int32 movement_points = 3;     // Maximum movement per turn
+  int32 attack_range = 4;        // Attack range in tiles
+  int32 health = 5;             // Maximum health points
+  repeated string properties = 6; // Special properties/abilities
+}
+
+// Movement cost matrix for unit types on terrain types
+message MovementMatrix {
+  // Map of unit_id -> (terrain_id -> movement_cost)
+  map<int32, TerrainCostMap> costs = 1;
+}
+
+message TerrainCostMap {
+  // Map of terrain_id -> movement_cost  
+  map<int32, double> terrain_costs = 1;
+}
+
 ///////// Game related models
 
 // Describes a game and its metadata

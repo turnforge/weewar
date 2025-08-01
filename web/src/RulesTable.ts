@@ -20,10 +20,10 @@ export class TerrainStats {
     }
 
     // Convenience getters that delegate to TerrainDefinition
-    get id(): number { return this.terrainDefinition.ID; }
-    get name(): string { return this.terrainDefinition.Name; }
-    get baseMoveCost(): number { return this.terrainDefinition.BaseMoveCost; }
-    get defenseBonus(): number { return this.terrainDefinition.DefenseBonus; }
+    get id(): number { return this.terrainDefinition.id; }
+    get name(): string { return this.terrainDefinition.name; }
+    get baseMoveCost(): number { return this.terrainDefinition.baseMoveCost; }
+    get defenseBonus(): number { return this.terrainDefinition.defenseBonus; }
     get type(): number { return this.terrainDefinition.type; }
     get description(): string { return this.terrainDefinition.description; }
 }

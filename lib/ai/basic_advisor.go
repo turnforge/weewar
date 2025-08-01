@@ -10,6 +10,8 @@ import (
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
+var CoordFromInt32 = weewar.CoordFromInt32
+
 // =============================================================================
 // Basic AI Advisor Implementation
 // =============================================================================
@@ -93,7 +95,7 @@ func (ba *BasicAIAdvisor) SuggestMoves(game *weewar.Game, playerID int, options 
 }
 
 // EvaluatePosition returns comprehensive position analysis
-func (ba *BasicAIAdvisor) EvaluatePosition(game *weewar.Game, playerID int) (*PositionEvaluation, error) {
+func (ba *BasicAIAdvisor) EvaluatePosition(game *weewar.Game, playerID int32) (*PositionEvaluation, error) {
 	if game == nil {
 		return nil, fmt.Errorf("game cannot be nil")
 	}
@@ -102,7 +104,7 @@ func (ba *BasicAIAdvisor) EvaluatePosition(game *weewar.Game, playerID int) (*Po
 }
 
 // GetThreats identifies immediate threats to the player
-func (ba *BasicAIAdvisor) GetThreats(game *weewar.Game, playerID int) ([]Threat, error) {
+func (ba *BasicAIAdvisor) GetThreats(game *weewar.Game, playerID int32) ([]Threat, error) {
 	if game == nil {
 		return nil, fmt.Errorf("game cannot be nil")
 	}
@@ -111,7 +113,7 @@ func (ba *BasicAIAdvisor) GetThreats(game *weewar.Game, playerID int) ([]Threat,
 }
 
 // GetOpportunities identifies attack and advancement opportunities
-func (ba *BasicAIAdvisor) GetOpportunities(game *weewar.Game, playerID int) ([]Opportunity, error) {
+func (ba *BasicAIAdvisor) GetOpportunities(game *weewar.Game, playerID int32) ([]Opportunity, error) {
 	if game == nil {
 		return nil, fmt.Errorf("game cannot be nil")
 	}
@@ -153,11 +155,11 @@ func (ba *BasicAIAdvisor) configurePersonality(personality AIPersonality) {
 // =============================================================================
 
 // generateAllValidMoves creates all possible moves for the current player
-func (ba *BasicAIAdvisor) generateAllValidMoves(game *weewar.Game, playerID int) ([]*MoveProposal, error) {
+func (ba *BasicAIAdvisor) generateAllValidMoves(game *weewar.Game, playerID int32) ([]*MoveProposal, error) {
 	moves := make([]*MoveProposal, 0)
 
 	// Get all units for the player
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 
 	for _, unit := range playerUnits {
 		// Generate movement moves
@@ -220,10 +222,10 @@ func (ba *BasicAIAdvisor) generateAttackMoves(game *weewar.Game, unit *v1.Unit) 
 // =============================================================================
 
 // identifyThreats analyzes the game state for threats to the player
-func (ba *BasicAIAdvisor) identifyThreats(game *weewar.Game, playerID int) ([]Threat, error) {
+func (ba *BasicAIAdvisor) identifyThreats(game *weewar.Game, playerID int32) ([]Threat, error) {
 	threats := make([]Threat, 0)
 
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 
 	// Check each player unit for potential threats
 	for _, unit := range playerUnits {
@@ -236,7 +238,7 @@ func (ba *BasicAIAdvisor) identifyThreats(game *weewar.Game, playerID int) ([]Th
 }
 
 // findEnemyThreats finds enemy units that can threaten the given unit
-func (ba *BasicAIAdvisor) findEnemyThreats(game *weewar.Game, targetUnit *v1.Unit, playerID int) []Threat {
+func (ba *BasicAIAdvisor) findEnemyThreats(game *weewar.Game, targetUnit *v1.Unit, playerID int32) []Threat {
 	threats := make([]Threat, 0)
 
 	// Check all enemy players
@@ -245,13 +247,13 @@ func (ba *BasicAIAdvisor) findEnemyThreats(game *weewar.Game, targetUnit *v1.Uni
 			continue // Skip own units
 		}
 
-		enemyUnits := game.GetUnitsForPlayer(pid)
+		enemyUnits := game.GetUnitsForPlayer(int(pid))
 		for _, enemyUnit := range enemyUnits {
 			// Check if this enemy unit can attack the target unit
 			// TODO: Use game.CanAttackUnit(enemyUnit, targetUnit)
 			if ba.canUnitAttackTarget(game, enemyUnit, targetUnit) {
 				threat := Threat{
-					Position:    enemyUnit.Coord,
+					Position:    weewar.UnitGetCoord(enemyUnit),
 					ThreatLevel: ba.calculateThreatLevel(enemyUnit, targetUnit),
 					ThreatType:  ThreatDirectAttack,
 					TargetUnit:  targetUnit,
@@ -269,10 +271,10 @@ func (ba *BasicAIAdvisor) findEnemyThreats(game *weewar.Game, targetUnit *v1.Uni
 }
 
 // identifyOpportunities analyzes the game state for opportunities to exploit
-func (ba *BasicAIAdvisor) identifyOpportunities(game *weewar.Game, playerID int) ([]Opportunity, error) {
+func (ba *BasicAIAdvisor) identifyOpportunities(game *weewar.Game, playerID int32) ([]Opportunity, error) {
 	opportunities := make([]Opportunity, 0)
 
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 
 	// Check each player unit for opportunities
 	for _, unit := range playerUnits {
@@ -289,7 +291,7 @@ func (ba *BasicAIAdvisor) identifyOpportunities(game *weewar.Game, playerID int)
 }
 
 // findAttackOpportunities finds weak enemy units that can be attacked
-func (ba *BasicAIAdvisor) findAttackOpportunities(game *weewar.Game, attackerUnit *v1.Unit, playerID int) []Opportunity {
+func (ba *BasicAIAdvisor) findAttackOpportunities(game *weewar.Game, attackerUnit *v1.Unit, playerID int32) []Opportunity {
 	opportunities := make([]Opportunity, 0)
 
 	// Check all enemy players
@@ -298,7 +300,7 @@ func (ba *BasicAIAdvisor) findAttackOpportunities(game *weewar.Game, attackerUni
 			continue
 		}
 
-		enemyUnits := game.GetUnitsForPlayer(pid)
+		enemyUnits := game.GetUnitsForPlayer(int(pid))
 		for _, enemyUnit := range enemyUnits {
 			// Check if we can attack this enemy unit
 			if ba.canUnitAttackTarget(game, attackerUnit, enemyUnit) {
@@ -306,7 +308,7 @@ func (ba *BasicAIAdvisor) findAttackOpportunities(game *weewar.Game, attackerUni
 
 				if opportunityValue > 0.3 { // Only consider good opportunities
 					opportunity := Opportunity{
-						Position:        enemyUnit.Coord,
+						Position:        CoordFromInt32(enemyUnit.Q, enemyUnit.R),
 						OpportunityType: OpportunityWeakUnit,
 						Value:           opportunityValue,
 						RequiredUnit:    attackerUnit,
@@ -326,7 +328,7 @@ func (ba *BasicAIAdvisor) findAttackOpportunities(game *weewar.Game, attackerUni
 }
 
 // findCaptureOpportunities finds bases or cities that can be captured
-func (ba *BasicAIAdvisor) findCaptureOpportunities(game *weewar.Game, unit *v1.Unit, playerID int) []Opportunity {
+func (ba *BasicAIAdvisor) findCaptureOpportunities(game *weewar.Game, unit *v1.Unit, playerID int32) []Opportunity {
 	opportunities := make([]Opportunity, 0)
 
 	// TODO: Implement base/city capture opportunity detection

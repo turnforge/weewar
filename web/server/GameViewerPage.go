@@ -3,8 +3,11 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+
+	"google.golang.org/protobuf/encoding/protojson"
 
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
@@ -72,9 +75,19 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 // GetTerrainDataJSON returns terrain data from rules engine as JSON string
 func (p *GameViewerPage) GetTerrainDataJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	terrainData, err := json.Marshal(rulesEngine.Terrains)
-	// fmt.Println("RuleEngine: ", rulesEngine)
-	// fmt.Println("TerrainData: ", terrainData)
+	
+	// Marshal each terrain definition using protojson for consistent camelCase
+	terrainMap := make(map[string]json.RawMessage)
+	for id, terrain := range rulesEngine.Terrains {
+		terrainJSON, err := protojson.Marshal(terrain)
+		if err != nil {
+			log.Printf("Error marshaling terrain %d: %v", id, err)
+			continue
+		}
+		terrainMap[fmt.Sprintf("%d", id)] = json.RawMessage(terrainJSON)
+	}
+	
+	terrainData, err := json.Marshal(terrainMap)
 	if err != nil {
 		log.Printf("Error marshaling terrain data: %v", err)
 		return "{}"
@@ -85,7 +98,19 @@ func (p *GameViewerPage) GetTerrainDataJSON() string {
 // GetUnitDataJSON returns unit data from rules engine as JSON string
 func (p *GameViewerPage) GetUnitDataJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	unitData, err := json.Marshal(rulesEngine.Units)
+	
+	// Marshal each unit definition using protojson for consistent camelCase
+	unitMap := make(map[string]json.RawMessage)
+	for id, unit := range rulesEngine.Units {
+		unitJSON, err := protojson.Marshal(unit)
+		if err != nil {
+			log.Printf("Error marshaling unit %d: %v", id, err)
+			continue
+		}
+		unitMap[fmt.Sprintf("%d", id)] = json.RawMessage(unitJSON)
+	}
+	
+	unitData, err := json.Marshal(unitMap)
 	if err != nil {
 		log.Printf("Error marshaling unit data: %v", err)
 		return "{}"
@@ -96,7 +121,9 @@ func (p *GameViewerPage) GetUnitDataJSON() string {
 // GetMovementMatrixJSON returns movement cost matrix as JSON string
 func (p *GameViewerPage) GetMovementMatrixJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	movementData, err := json.Marshal(rulesEngine.MovementMatrix)
+	
+	// Use protojson for consistent camelCase field names
+	movementData, err := protojson.Marshal(rulesEngine.MovementMatrix)
 	if err != nil {
 		log.Printf("Error marshaling movement matrix: %v", err)
 		return "{}"

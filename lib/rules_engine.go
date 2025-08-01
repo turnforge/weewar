@@ -12,22 +12,18 @@ import (
 // Rules Engine - Extends existing types with data-driven rules
 // =============================================================================
 
-// RulesEngine provides data-driven game rules working with existing types
+// RulesEngine provides data-driven game rules using proto definitions
 type RulesEngine struct {
-	// Core data maps (extends existing unitDataprivateMap pattern)
-	Units    map[int32]*UnitData    `json:"units"`
-	Terrains map[int32]*TerrainData `json:"terrains"`
+	// Core data maps using proto types for consistency
+	Units    map[int32]*v1.UnitDefinition    `json:"units"`
+	Terrains map[int32]*v1.TerrainDefinition `json:"terrains"`
 
-	// Canonical rule matrices
-	MovementMatrix *MovementMatrix `json:"movementMatrix"`
-	AttackMatrix   *AttackMatrix   `json:"attackMatrix"`
+	// Canonical rule matrices using proto types
+	MovementMatrix *v1.MovementMatrix `json:"movementMatrix"`
+	AttackMatrix   *AttackMatrix      `json:"attackMatrix"` // TODO: Convert to proto type
 }
 
-// MovementMatrix defines movement costs between unit types and terrain types using IDs
-type MovementMatrix struct {
-	// costs[unitID][terrainID] = movement cost
-	Costs map[int32]map[int32]float64 `json:"costs"`
-}
+// MovementMatrix is now defined in protos/weewar/v1/models.proto
 
 // AttackMatrix defines combat outcomes between unit types using IDs
 type AttackMatrix struct {
@@ -42,9 +38,9 @@ type AttackMatrix struct {
 // NewRulesEngine creates a new rules engine instance
 func NewRulesEngine() *RulesEngine {
 	return &RulesEngine{
-		Units:          make(map[int32]*UnitData),
-		Terrains:       make(map[int32]*TerrainData),
-		MovementMatrix: &MovementMatrix{Costs: make(map[int32]map[int32]float64)},
+		Units:          make(map[int32]*v1.UnitDefinition),
+		Terrains:       make(map[int32]*v1.TerrainDefinition),
+		MovementMatrix: &v1.MovementMatrix{Costs: make(map[int32]*v1.TerrainCostMap)},
 		AttackMatrix:   &AttackMatrix{Attacks: make(map[int32]map[int32]*DamageDistribution)},
 	}
 }
@@ -54,7 +50,7 @@ func NewRulesEngine() *RulesEngine {
 // =============================================================================
 
 // GetUnitData returns unit data by ID (enhanced version of existing function)
-func (re *RulesEngine) GetUnitData(unitID int32) (*UnitData, error) {
+func (re *RulesEngine) GetUnitData(unitID int32) (*v1.UnitDefinition, error) {
 	unit, exists := re.Units[unitID]
 	if !exists {
 		return nil, fmt.Errorf("unit ID %d not found", unitID)
@@ -64,7 +60,7 @@ func (re *RulesEngine) GetUnitData(unitID int32) (*UnitData, error) {
 }
 
 // GetTerrainData returns terrain data by ID
-func (re *RulesEngine) GetTerrainData(terrainID int32) (*TerrainData, error) {
+func (re *RulesEngine) GetTerrainData(terrainID int32) (*v1.TerrainDefinition, error) {
 	terrain, exists := re.Terrains[terrainID]
 	if !exists {
 		return nil, fmt.Errorf("terrain ID %d not found", terrainID)
@@ -78,7 +74,7 @@ func (re *RulesEngine) GetTerrainData(terrainID int32) (*TerrainData, error) {
 func (re *RulesEngine) getUnitTerrainCost(unitID, terrainID int32) (float64, error) {
 	// First, try unit-specific movement cost from matrix
 	if unitCosts, exists := re.MovementMatrix.Costs[unitID]; exists {
-		if cost, exists := unitCosts[terrainID]; exists {
+		if cost, exists := unitCosts.TerrainCosts[terrainID]; exists {
 			return cost, nil
 		}
 	}
@@ -430,7 +426,7 @@ func (re *RulesEngine) GetAttackOptions(world *World, unit *v1.Unit) ([]AxialCoo
 				continue // Skip self
 			}
 
-			targetCoord := AxialCoord{Q: unitCoord.Q + dQ, R: unitCoord.R + dR}
+			targetCoord := AxialCoord{Q: unitCoord.Q + int(dQ), R: unitCoord.R + int(dR)}
 
 			// Check if there's an enemy unit at this position (attack rule: only enemy units)
 			tile := world.TileAt(targetCoord)
@@ -480,46 +476,11 @@ func (re *RulesEngine) CanUnitAttackTarget(attacker *v1.Unit, target *v1.Unit) (
 		return false, err
 	}
 
-	return distance <= unitData.AttackRange, nil
+	return distance <= int(unitData.AttackRange), nil
 }
 
-// Default sample terrain data
-var DefaultTerrainData = []TerrainData{
-	{0, "Clear", 1, 0, TerrainNature, nil},             // Default fallback
-	{1, "Land Base", 2, 20, TerrainPlayer, nil},        // Player base
-	{2, "Naval Base", 2, 20, TerrainPlayer, nil},       // Naval base
-	{3, "Airport Base", 2, 20, TerrainPlayer, nil},     // Airport base
-	{4, "Desert", 1, 0, TerrainNature, nil},            // Desert terrain
-	{5, "Grass", 1, 0, TerrainNature, nil},             // Grass terrain
-	{6, "Hospital", 1, 15, TerrainPlayer, nil},         // Hospital
-	{7, "Mountains", 2, 10, TerrainNature, nil},        // Mountain terrain
-	{8, "Swamp", 2, 5, TerrainNature, nil},             // Swamp terrain
-	{9, "Forest", 1, 5, TerrainNature, nil},            // Forest terrain
-	{10, "Water (Regular)", 2, 0, TerrainNature, nil},  // Regular water
-	{12, "Lava", 4, 0, TerrainNature, nil},             // Lava terrain
-	{14, "Water (Shallow)", 2, 0, TerrainNature, nil},  // Shallow water
-	{15, "Water (Deep)", 2, 0, TerrainNature, nil},     // Deep water
-	{16, "Missile Silo", 2, 15, TerrainPlayer, nil},    // Missile silo
-	{17, "Bridge (Regular)", 1, 0, TerrainNature, nil}, // Regular bridge
-	{18, "Bridge (Shallow)", 1, 0, TerrainNature, nil}, // Shallow bridge
-	{19, "Bridge (Deep)", 1, 0, TerrainNature, nil},    // Deep bridge
-	{20, "Mines", 1, 10, TerrainPlayer, nil},           // Mines
-	{21, "City", 1, 15, TerrainPlayer, nil},            // City
-	{22, "Road", 1, -5, TerrainNature, nil},            // Road (movement bonus)
-	{23, "Water (Rocky)", 2, 0, TerrainNature, nil},    // Rocky water
-	{25, "Guard Tower", 2, 25, TerrainPlayer, nil},     // Guard tower
-	{26, "Snow", 2, 5, TerrainNature, nil},             // Snow terrain
-}
-
-// GetTerrainData returns terrain data for the given type
-func GetTerrainData(terrainType int32) *TerrainData {
-	for i := range DefaultTerrainData {
-		if DefaultTerrainData[i].ID == terrainType {
-			return &DefaultTerrainData[i]
-		}
-	}
-	return &DefaultTerrainData[0] // Default to unknown
-}
+// Note: Default terrain data has been migrated to proto definitions.
+// Use LoadRulesEngineFromJSON to load terrain definitions from proto-based data.
 
 var (
 	defaultRulesEngine *RulesEngine

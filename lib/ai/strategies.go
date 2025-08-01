@@ -7,6 +7,7 @@ import (
 	"sort"
 	"time"
 
+	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
@@ -87,7 +88,7 @@ func (es *EasyStrategy) SuggestMoves(game *weewar.Game, playerID int, options *A
 func (es *EasyStrategy) generateAllMoves(game *weewar.Game, playerID int) ([]*MoveProposal, error) {
 	moves := make([]*MoveProposal, 0)
 
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 	for _, unit := range playerUnits {
 		// Generate basic movement and attack moves
 		unitMoves := es.generateUnitMoves(game, unit)
@@ -105,7 +106,7 @@ func (es *EasyStrategy) generateAllMoves(game *weewar.Game, playerID int) ([]*Mo
 	return moves, nil
 }
 
-func (es *EasyStrategy) generateUnitMoves(game *weewar.Game, unit *weewar.Unit) []*MoveProposal {
+func (es *EasyStrategy) generateUnitMoves(game *weewar.Game, unit *v1.Unit) []*MoveProposal {
 	moves := make([]*MoveProposal, 0)
 
 	// TODO: Integrate with actual game movement/attack systems
@@ -550,7 +551,7 @@ func (es *ExpertStrategy) minimaxRoot(game *weewar.Game, playerID int, moves []*
 	return bestMove, bestScore
 }
 
-func (es *ExpertStrategy) minimax(game *weewar.Game, depth int, alpha, beta float64, maximizing bool, playerID int) float64 {
+func (es *ExpertStrategy) minimax(game *weewar.Game, depth int, alpha, beta float64, maximizing bool, playerID int32) float64 {
 	// Base case: depth reached or game over
 	if depth == 0 || game.Status != weewar.GameStatusPlaying {
 		evaluation := es.evaluator.EvaluatePosition(game, playerID)

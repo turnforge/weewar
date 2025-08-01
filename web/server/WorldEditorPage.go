@@ -31,7 +31,7 @@ type TerrainType struct {
 }
 
 type UnitType struct {
-	ID          int    `json:"id"`
+	ID          int32  `json:"id"`
 	Name        string `json:"name"`
 	IconDataURL string `json:"iconDataURL"`
 }
@@ -80,27 +80,35 @@ func (v *WorldEditorPage) SetupDefaults() {
 
 	// No longer need hardcoded world - terrain type is now in TerrainData struct
 
+	rulesEngine := weewar.DefaultRulesEngine()
 	for i := int32(0); i <= 26; i++ {
-		terrainData := weewar.GetTerrainData(i)
-		if terrainData != nil {
+		terrainData, err := rulesEngine.GetTerrainData(i)
+		if err == nil && terrainData != nil {
 			// Use web-accessible static URL path for the tile asset
 			iconDataURL := fmt.Sprintf("/static/assets/v1/Tiles/%d/0.png", i)
 
 			terrain := TerrainType{
 				TerrainData: weewar.TerrainData{
-					ID:           terrainData.ID,
+					ID:           terrainData.Id,                       // int32 to int32
 					Name:         terrainData.Name,
-					BaseMoveCost: terrainData.BaseMoveCost,
-					DefenseBonus: terrainData.DefenseBonus,
+					BaseMoveCost: float64(terrainData.BaseMoveCost),    // int32 to float64
+					DefenseBonus: float64(terrainData.DefenseBonus),    // int32 to float64
 				},
 				IconDataURL:     iconDataURL,
-				HasPlayerColors: terrainData.Type == weewar.TerrainPlayer,
+				HasPlayerColors: false, // TODO: Add terrain type info to proto or use heuristic
 			}
 
-			if terrainData.Type == weewar.TerrainPlayer {
+			// Use heuristic to determine terrain type based on ID
+			// TODO: Add terrain type field to proto definition
+			isPlayerTerrain := terrainData.Id == 1 || terrainData.Id == 2 || terrainData.Id == 3 || 
+				terrainData.Id == 6 || terrainData.Id == 16 || terrainData.Id == 20 || 
+				terrainData.Id == 21 || terrainData.Id == 25 // Base, Hospital, Silo, Mines, City, Tower
+			
+			if isPlayerTerrain {
+				terrain.HasPlayerColors = true
 				v.CityTerrains = append(v.CityTerrains, terrain)
 				// log.Println("Appending City Terrains: ", terrain)
-			} else if terrainData.ID != 0 { // Skip Clear (ID 0) since we have a dedicated button
+			} else if terrainData.Id != 0 { // Skip Clear (ID 0) since we have a dedicated button
 				v.NatureTerrains = append(v.NatureTerrains, terrain)
 				// log.Println("Appending Nature Terrains: ", terrain)
 			}
@@ -134,7 +142,7 @@ func (v *WorldEditorPage) SetupDefaults() {
 			iconDataURL := fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
 
 			v.UnitTypes = append(v.UnitTypes, UnitType{
-				ID:          unitData.ID,
+				ID:          int32(unitData.ID),
 				Name:        unitData.Name,
 				IconDataURL: iconDataURL,
 			})

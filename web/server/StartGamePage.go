@@ -88,7 +88,7 @@ func (p *StartGamePage) loadUnitTypes() {
 				iconDataURL := fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
 
 				p.UnitTypes = append(p.UnitTypes, UnitType{
-					ID:          unitData.ID,
+					ID:          unitData.Id,
 					Name:        unitData.Name,
 					IconDataURL: iconDataURL,
 				})
@@ -103,7 +103,7 @@ func (p *StartGamePage) loadUnitTypes() {
 				iconDataURL := fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
 
 				p.UnitTypes = append(p.UnitTypes, UnitType{
-					ID:          unitData.ID,
+					ID:          int32(unitData.ID),
 					Name:        unitData.Name,
 					IconDataURL: iconDataURL,
 				})

@@ -178,13 +178,13 @@ func (pe *PositionEvaluator) evaluateMaterial(game *weewar.Game, playerID int32)
 }
 
 func (pe *PositionEvaluator) evaluateUnitValue(game *weewar.Game, playerID int32) float64 {
-	// playerUnits := game.GetUnitsForPlayer(playerID)
+	// playerUnits := game.GetUnitsForPlayer(int(playerID))
 	playerValue := 0.0
 	totalValue := 0.0
 
 	// Calculate total unit values for all players
 	for pid := range game.World.PlayerCount() {
-		units := game.GetUnitsForPlayer(pid)
+		units := game.GetUnitsForPlayer(int(pid))
 		for _, unit := range units {
 			unitCost := pe.getUnitCost(unit.UnitType)
 			if pid == playerID {
@@ -202,7 +202,7 @@ func (pe *PositionEvaluator) evaluateUnitValue(game *weewar.Game, playerID int32
 }
 
 func (pe *PositionEvaluator) evaluateUnitHealth(game *weewar.Game, playerID int32) float64 {
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 	totalHealthScore := 0.0
 	totalValue := 0.0
 
@@ -222,7 +222,7 @@ func (pe *PositionEvaluator) evaluateUnitHealth(game *weewar.Game, playerID int3
 }
 
 func (pe *PositionEvaluator) evaluateUnitPositioning(game *weewar.Game, playerID int32) float64 {
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 	totalPositionalScore := 0.0
 
 	for _, unit := range playerUnits {
@@ -266,7 +266,7 @@ func (pe *PositionEvaluator) evaluateBaseControl(game *weewar.Game, playerID int
 		for _, terrain := range game.World.TilesByCoord() {
 			if pe.isProductionBase(terrain.TileType) {
 				totalBases++
-				if pe.isControlledByPlayer(terrain.Coord, playerID, game) {
+				if pe.isControlledByPlayer(weewar.TileGetCoord(terrain), playerID, game) {
 					controlledBases++
 				}
 			}
@@ -288,7 +288,7 @@ func (pe *PositionEvaluator) evaluateIncomeControl(game *weewar.Game, playerID i
 		for _, terrain := range game.World.TilesByCoord() {
 			if pe.isIncomeBuilding(terrain.TileType) {
 				totalCities++
-				if pe.isControlledByPlayer(terrain.Coord, playerID, game) {
+				if pe.isControlledByPlayer(weewar.TileGetCoord(terrain), playerID, game) {
 					controlledCities++
 				}
 			}
@@ -381,7 +381,7 @@ func (pe *PositionEvaluator) evaluateStrategic(game *weewar.Game, playerID int32
 }
 
 func (pe *PositionEvaluator) evaluateMobility(game *weewar.Game, playerID int32) float64 {
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 	totalMobility := 0.0
 
 	for _, unit := range playerUnits {
@@ -403,7 +403,7 @@ func (pe *PositionEvaluator) evaluateMobility(game *weewar.Game, playerID int32)
 }
 
 func (pe *PositionEvaluator) evaluateSupportNetwork(game *weewar.Game, playerID int32) float64 {
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 	supportScore := 0.0
 
 	for _, unit := range playerUnits {
@@ -427,11 +427,13 @@ func (pe *PositionEvaluator) getUnitCost(unitTypeID int32) float64 {
 	if err != nil {
 		panic(err)
 	}
-	return float64(unitData.BaseStats.Cost)
+	// Use health as a proxy for unit cost (higher health = more expensive units)
+	// TODO: Add cost field to UnitDefinition proto or load from separate data source
+	return float64(unitData.Health)
 }
 
 func (pe *PositionEvaluator) getTotalUnitValue(game *weewar.Game, playerID int32) float64 {
-	units := game.GetUnitsForPlayer(playerID)
+	units := game.GetUnitsForPlayer(int(playerID))
 	total := 0.0
 
 	for _, unit := range units {
@@ -446,7 +448,7 @@ func (pe *PositionEvaluator) evaluateUnitPosition(unit *v1.Unit, game *weewar.Ga
 
 	// Terrain defensive bonus
 	if game.World != nil {
-		if unitAt := game.World.UnitAt(unit.Coord); unitAt != nil && pe.rulesEngine != nil {
+		if unitAt := game.World.UnitAt(weewar.UnitGetCoord(unit)); unitAt != nil && pe.rulesEngine != nil {
 			if terrainData, err := pe.rulesEngine.GetTerrainData(unitAt.UnitType); err == nil {
 				positionScore += terrainData.DefenseBonus * 0.3
 			}
@@ -454,7 +456,7 @@ func (pe *PositionEvaluator) evaluateUnitPosition(unit *v1.Unit, game *weewar.Ga
 	}
 
 	// Strategic location value (proximity to objectives)
-	positionScore += pe.getStrategicLocationValue(unit.Coord, game) * 0.7
+	positionScore += pe.getStrategicLocationValue(weewar.UnitGetCoord(unit), game) * 0.7
 
 	return math.Min(positionScore, 1.0)
 }
@@ -467,11 +469,11 @@ func (pe *PositionEvaluator) getStrategicLocationValue(pos weewar.AxialCoord, ga
 
 func (pe *PositionEvaluator) countNearbyAllies(unit *v1.Unit, game *weewar.Game, playerID int32) int {
 	count := 0
-	playerUnits := game.GetUnitsForPlayer(playerID)
+	playerUnits := game.GetUnitsForPlayer(int(playerID))
 
 	for _, ally := range playerUnits {
-		if ally.Coord != unit.Coord {
-			distance := pe.calculateDistance(unit.Coord, ally.Coord)
+		if weewar.UnitGetCoord(ally) != weewar.UnitGetCoord(unit) {
+			distance := pe.calculateDistance(weewar.UnitGetCoord(unit), weewar.UnitGetCoord(ally))
 			if distance <= 2.0 { // Within 2 hexes
 				count++
 			}

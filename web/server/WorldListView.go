@@ -22,7 +22,11 @@ func (p *WorldListView) Load(r *http.Request, w http.ResponseWriter, vc *ViewCon
 	// otherwise those will be passed in
 	_, _ = p.Paginator.Load(r, w, vc)
 
-	client, _ := vc.ClientMgr.GetWorldsSvcClient()
+	client, err := vc.ClientMgr.GetWorldsSvcClient()
+	if err != nil {
+		log.Printf("Error getting worlds service client: %v", err)
+		return err, false
+	}
 
 	req := protos.ListWorldsRequest{
 		Pagination: &protos.Pagination{

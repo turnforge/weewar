@@ -1,7 +1,7 @@
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar_v1_servicesClient.client';
-import { ProcessMovesRequest, ProcessMovesResponse, ProcessMovesRequestSchema, GetGameRequest, GetGameRequestSchema, GetGameStateRequest, GetGameStateRequestSchema } from '../gen/weewar/v1/games_pb';
+import { ProcessMovesRequest, ProcessMovesResponse, ProcessMovesRequestSchema, GetGameRequest, GetGameRequestSchema, GetGameStateRequest, GetGameStateRequestSchema, CanSelectUnitRequest, CanSelectUnitRequestSchema, GetMovementOptionsRequest, GetMovementOptionsRequestSchema, GetAttackOptionsRequest, GetAttackOptionsRequestSchema } from '../gen/weewar/v1/games_pb';
 import { GameMove, WorldChange, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema, GameState as ProtoGameState, GameStateSchema as ProtoGameStateSchema, Game as ProtoGame, GameSchema as ProtoGameSchema } from '../gen/weewar/v1/models_pb';
 import { create } from '@bufbuild/protobuf';
 import { World } from './World';
@@ -537,19 +537,55 @@ export class GameState extends BaseComponent {
     public async canSelectUnit(q: number, r: number, playerId: number): Promise<boolean> {
         const client = await this.ensureWASMLoaded();
         
-        // TODO: Implement using gamesService.canSelectUnit
-        this.log('canSelectUnit called - needs implementation');
-        return false;
+        try {
+            const gameId = this.cachedGame?.id;
+            if (!gameId) {
+                this.log('No game ID available for canSelectUnit');
+                return false;
+            }
+
+            const request = create(CanSelectUnitRequestSchema, {
+                gameId: gameId,
+                q: q,
+                r: r
+            });
+
+            const response = await client.gamesService.canSelectUnit(request);
+            
+            this.log(`canSelectUnit(${q}, ${r}): ${response.canSelect}${response.reason ? ` - ${response.reason}` : ''}`);
+            return response.canSelect;
+        } catch (error) {
+            this.log(`Error in canSelectUnit: ${error}`);
+            return false;
+        }
     }
 
     /**
      * Legacy method for compatibility with GameViewerPage
-     * TODO: Implement using local world access
+     * Returns unit info at the specified position if there is one
      */
     public async getTileInfo(q: number, r: number): Promise<any> {
-        // TODO: Access world data directly
-        this.log('getTileInfo called - needs implementation');
-        return null;
+        try {
+            // Get unit info from the world data
+            const unit = this.world.getUnitAt(q, r);
+            if (unit) {
+                this.log(`getTileInfo(${q}, ${r}): Unit player=${unit.player}, type=${unit.unitType}`);
+                return {
+                    hasUnit: true,
+                    player: unit.player,
+                    unitType: unit.unitType,
+                    // Add other unit properties as needed
+                };
+            } else {
+                this.log(`getTileInfo(${q}, ${r}): No unit found`);
+                return {
+                    hasUnit: false
+                };
+            }
+        } catch (error) {
+            this.log(`Error in getTileInfo: ${error}`);
+            return null;
+        }
     }
 
     /**
@@ -559,9 +595,27 @@ export class GameState extends BaseComponent {
     public async getMovementOptions(q: number, r: number, playerId: number): Promise<any[]> {
         const client = await this.ensureWASMLoaded();
         
-        // TODO: Implement using gamesService.getMovementOptions
-        this.log('getMovementOptions called - needs implementation');
-        return [];
+        try {
+            const gameId = this.cachedGame?.id;
+            if (!gameId) {
+                this.log('No game ID available for getMovementOptions');
+                return [];
+            }
+
+            const request = create(GetMovementOptionsRequestSchema, {
+                gameId: gameId,
+                q: q,
+                r: r
+            });
+
+            const response = await client.gamesService.getMovementOptions(request);
+            
+            this.log(`getMovementOptions(${q}, ${r}): ${response.options?.length || 0} options`);
+            return response.options || [];
+        } catch (error) {
+            this.log(`Error in getMovementOptions: ${error}`);
+            return [];
+        }
     }
 
     /**
@@ -571,9 +625,27 @@ export class GameState extends BaseComponent {
     public async getAttackOptions(q: number, r: number, playerId: number): Promise<any[]> {
         const client = await this.ensureWASMLoaded();
         
-        // TODO: Implement using gamesService.getAttackOptions
-        this.log('getAttackOptions called - needs implementation');
-        return [];
+        try {
+            const gameId = this.cachedGame?.id;
+            if (!gameId) {
+                this.log('No game ID available for getAttackOptions');
+                return [];
+            }
+
+            const request = create(GetAttackOptionsRequestSchema, {
+                gameId: gameId,
+                q: q,
+                r: r
+            });
+
+            const response = await client.gamesService.getAttackOptions(request);
+            
+            this.log(`getAttackOptions(${q}, ${r}): ${response.options?.length || 0} options`);
+            return response.options || [];
+        } catch (error) {
+            this.log(`Error in getAttackOptions: ${error}`);
+            return [];
+        }
     }
 
     /**

@@ -168,147 +168,6 @@
         ]
       }
     },
-    "/v1/games/{gameId}/attack/{q}/{r}": {
-      "get": {
-        "operationId": "GamesService_GetAttackOptions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetAttackOptionsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "gameId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "q",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "r",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "GamesService"
-        ]
-      }
-    },
-    "/v1/games/{gameId}/can-select/{q}/{r}": {
-      "get": {
-        "operationId": "GamesService_CanSelectUnit",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1CanSelectUnitResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "gameId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "q",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "r",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "playerId",
-            "description": "which player is trying to select",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "GamesService"
-        ]
-      }
-    },
-    "/v1/games/{gameId}/movement/{q}/{r}": {
-      "get": {
-        "summary": "Game interaction methods for UI components",
-        "operationId": "GamesService_GetMovementOptions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetMovementOptionsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "gameId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "q",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "r",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "format": "int32"
-          }
-        ],
-        "tags": [
-          "GamesService"
-        ]
-      }
-    },
     "/v1/games/{gameId}/moves": {
       "get": {
         "summary": "List the moves for a game",
@@ -398,6 +257,50 @@
               },
               "description": "*\nRequest to add moves to a game\nThe model is that a game in each \"tick\" can handle multiple moves (by possibly various players).\nIt is upto the move manager/processor in the game to ensure the \"transaction\" of moves is handled\natomically.\n\nFor example we may have 3 moves where first two units are moved to a common location\nand then they attack another unit.  Here If we treat it as a single unit attacking it\nwill have different outcomes than a \"combined\" attack."
             }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
+    "/v1/games/{gameId}/options/{q}/{r}": {
+      "get": {
+        "operationId": "GamesService_GetOptionsAt",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetOptionsAtResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "q",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "r",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -1149,6 +1052,15 @@
           "type": "integer",
           "format": "int32"
         },
+        "targetUnitType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Target unit type and health"
+        },
+        "targetUnitHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
         "canAttack": {
           "type": "boolean"
         },
@@ -1182,27 +1094,45 @@
       },
       "title": "*\nAttack with one unit against another"
     },
-    "v1CanSelectUnitResponse": {
+    "v1BuildUnitOption": {
       "type": "object",
       "properties": {
-        "canSelect": {
-          "type": "boolean"
-        },
-        "reason": {
-          "type": "string",
-          "title": "explanation if can_select is false"
-        },
-        "currentPlayer": {
+        "q": {
           "type": "integer",
-          "format": "int32",
-          "title": "debug: current player in game"
+          "format": "int32"
         },
-        "gameInitialized": {
-          "type": "boolean",
-          "title": "debug: whether game is properly initialized"
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tileType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "buildCost": {
+          "type": "integer",
+          "format": "int32"
         }
       },
-      "title": "*\nResponse indicating if unit can be selected"
+      "title": "*\nAn option to build a unit (at a city tile)"
+    },
+    "v1CaptureBuildingOption": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tileType": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nA move where a unit can capture a building"
     },
     "v1CreateGameRequest": {
       "type": "object",
@@ -1311,6 +1241,11 @@
       "type": "object",
       "description": "No additional fields needed",
       "title": "*\nEnd current player's turn"
+    },
+    "v1EndTurnOption": {
+      "type": "object",
+      "description": "Empty - just indicates end turn is available",
+      "title": "*\nOption to end the current turn"
     },
     "v1Game": {
       "type": "object",
@@ -1483,6 +1418,27 @@
       },
       "title": "*\nRepresents the result of executing a move"
     },
+    "v1GameOption": {
+      "type": "object",
+      "properties": {
+        "move": {
+          "$ref": "#/definitions/v1MoveOption"
+        },
+        "attack": {
+          "$ref": "#/definitions/v1AttackOption"
+        },
+        "endTurn": {
+          "$ref": "#/definitions/v1EndTurnOption"
+        },
+        "build": {
+          "$ref": "#/definitions/v1BuildUnitOption"
+        },
+        "capture": {
+          "$ref": "#/definitions/v1CaptureBuildingOption"
+        }
+      },
+      "title": "*\nA single game option available at a position"
+    },
     "v1GamePlayer": {
       "type": "object",
       "properties": {
@@ -1561,19 +1517,6 @@
       },
       "title": "Holds the game's Active/Current state (eg world state)"
     },
-    "v1GetAttackOptionsResponse": {
-      "type": "object",
-      "properties": {
-        "options": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1AttackOption"
-          }
-        }
-      },
-      "title": "*\nResponse with attack options for a unit"
-    },
     "v1GetGameResponse": {
       "type": "object",
       "properties": {
@@ -1609,18 +1552,27 @@
       },
       "title": "*\nGame batch-get response"
     },
-    "v1GetMovementOptionsResponse": {
+    "v1GetOptionsAtResponse": {
       "type": "object",
       "properties": {
         "options": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1MovementOption"
+            "$ref": "#/definitions/v1GameOption"
           }
+        },
+        "currentPlayer": {
+          "type": "integer",
+          "format": "int32",
+          "title": "debug: current player in game"
+        },
+        "gameInitialized": {
+          "type": "boolean",
+          "title": "debug: whether game is properly initialized"
         }
       },
-      "title": "*\nResponse with movement options for a unit"
+      "title": "*\nResponse with all available options at a position"
     },
     "v1GetUserResponse": {
       "type": "object",
@@ -1727,6 +1679,24 @@
         }
       }
     },
+    "v1MoveOption": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "movementCost": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "*\nOption to move to a specific coordinate"
+    },
     "v1MoveUnitAction": {
       "type": "object",
       "properties": {
@@ -1748,27 +1718,6 @@
         }
       },
       "title": "*\nMove unit from one position to another"
-    },
-    "v1MovementOption": {
-      "type": "object",
-      "properties": {
-        "q": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "r": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "movementCost": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "isValid": {
-          "type": "boolean"
-        }
-      },
-      "title": "*\nA possible movement destination with cost"
     },
     "v1Pagination": {
       "type": "object",

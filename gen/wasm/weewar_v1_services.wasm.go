@@ -57,14 +57,8 @@ func (exports *Weewar_v1_servicesServicesExports) RegisterAPI() {
 			"processMoves": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gamesServiceProcessMoves(this, args)
 			}),
-			"getMovementOptions": js.FuncOf(func(this js.Value, args []js.Value) any {
-				return exports.gamesServiceGetMovementOptions(this, args)
-			}),
-			"getAttackOptions": js.FuncOf(func(this js.Value, args []js.Value) any {
-				return exports.gamesServiceGetAttackOptions(this, args)
-			}),
-			"canSelectUnit": js.FuncOf(func(this js.Value, args []js.Value) any {
-				return exports.gamesServiceCanSelectUnit(this, args)
+			"getOptionsAt": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gamesServiceGetOptionsAt(this, args)
 			}),
 		},
 		"usersService": map[string]interface{}{
@@ -486,8 +480,8 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceProcessMoves(this 
 	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
-// gamesServiceGetMovementOptions handles the GetMovementOptions method for GamesService
-func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetMovementOptions(this js.Value, args []js.Value) any {
+// gamesServiceGetOptionsAt handles the GetOptionsAt method for GamesService
+func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetOptionsAt(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
 		return createJSResponse(false, "GamesService not initialized", nil)
 	}
@@ -502,7 +496,7 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetMovementOptions
 	}
 
 	// Parse request
-	req := &weewarv1.GetMovementOptionsRequest{}
+	req := &weewarv1.GetOptionsAtRequest{}
 	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
@@ -513,89 +507,7 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetMovementOptions
 	defer cancel()
 
 	// Call service method
-	resp, err := exports.GamesService.GetMovementOptions(ctx, req)
-	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
-	}
-
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
-	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
-	}
-
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
-}
-
-// gamesServiceGetAttackOptions handles the GetAttackOptions method for GamesService
-func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetAttackOptions(this js.Value, args []js.Value) any {
-	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
-	}
-
-	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
-	}
-
-	requestJSON := args[0].String()
-	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
-	}
-
-	// Parse request
-	req := &weewarv1.GetAttackOptionsRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
-	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
-	}
-
-	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Call service method
-	resp, err := exports.GamesService.GetAttackOptions(ctx, req)
-	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
-	}
-
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
-	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
-	}
-
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
-}
-
-// gamesServiceCanSelectUnit handles the CanSelectUnit method for GamesService
-func (exports *Weewar_v1_servicesServicesExports) gamesServiceCanSelectUnit(this js.Value, args []js.Value) any {
-	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
-	}
-
-	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
-	}
-
-	requestJSON := args[0].String()
-	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
-	}
-
-	// Parse request
-	req := &weewarv1.CanSelectUnitRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
-	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
-	}
-
-	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Call service method
-	resp, err := exports.GamesService.CanSelectUnit(ctx, req)
+	resp, err := exports.GamesService.GetOptionsAt(ctx, req)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

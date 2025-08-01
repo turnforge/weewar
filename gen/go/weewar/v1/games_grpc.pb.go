@@ -19,18 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GamesService_CreateGame_FullMethodName         = "/weewar.v1.GamesService/CreateGame"
-	GamesService_GetGames_FullMethodName           = "/weewar.v1.GamesService/GetGames"
-	GamesService_ListGames_FullMethodName          = "/weewar.v1.GamesService/ListGames"
-	GamesService_GetGame_FullMethodName            = "/weewar.v1.GamesService/GetGame"
-	GamesService_DeleteGame_FullMethodName         = "/weewar.v1.GamesService/DeleteGame"
-	GamesService_UpdateGame_FullMethodName         = "/weewar.v1.GamesService/UpdateGame"
-	GamesService_GetGameState_FullMethodName       = "/weewar.v1.GamesService/GetGameState"
-	GamesService_ListMoves_FullMethodName          = "/weewar.v1.GamesService/ListMoves"
-	GamesService_ProcessMoves_FullMethodName       = "/weewar.v1.GamesService/ProcessMoves"
-	GamesService_GetMovementOptions_FullMethodName = "/weewar.v1.GamesService/GetMovementOptions"
-	GamesService_GetAttackOptions_FullMethodName   = "/weewar.v1.GamesService/GetAttackOptions"
-	GamesService_CanSelectUnit_FullMethodName      = "/weewar.v1.GamesService/CanSelectUnit"
+	GamesService_CreateGame_FullMethodName   = "/weewar.v1.GamesService/CreateGame"
+	GamesService_GetGames_FullMethodName     = "/weewar.v1.GamesService/GetGames"
+	GamesService_ListGames_FullMethodName    = "/weewar.v1.GamesService/ListGames"
+	GamesService_GetGame_FullMethodName      = "/weewar.v1.GamesService/GetGame"
+	GamesService_DeleteGame_FullMethodName   = "/weewar.v1.GamesService/DeleteGame"
+	GamesService_UpdateGame_FullMethodName   = "/weewar.v1.GamesService/UpdateGame"
+	GamesService_GetGameState_FullMethodName = "/weewar.v1.GamesService/GetGameState"
+	GamesService_ListMoves_FullMethodName    = "/weewar.v1.GamesService/ListMoves"
+	GamesService_ProcessMoves_FullMethodName = "/weewar.v1.GamesService/ProcessMoves"
+	GamesService_GetOptionsAt_FullMethodName = "/weewar.v1.GamesService/GetOptionsAt"
 )
 
 // GamesServiceClient is the client API for GamesService service.
@@ -59,10 +57,7 @@ type GamesServiceClient interface {
 	// List the moves for a game
 	ListMoves(ctx context.Context, in *ListMovesRequest, opts ...grpc.CallOption) (*ListMovesResponse, error)
 	ProcessMoves(ctx context.Context, in *ProcessMovesRequest, opts ...grpc.CallOption) (*ProcessMovesResponse, error)
-	// Game interaction methods for UI components
-	GetMovementOptions(ctx context.Context, in *GetMovementOptionsRequest, opts ...grpc.CallOption) (*GetMovementOptionsResponse, error)
-	GetAttackOptions(ctx context.Context, in *GetAttackOptionsRequest, opts ...grpc.CallOption) (*GetAttackOptionsResponse, error)
-	CanSelectUnit(ctx context.Context, in *CanSelectUnitRequest, opts ...grpc.CallOption) (*CanSelectUnitResponse, error)
+	GetOptionsAt(ctx context.Context, in *GetOptionsAtRequest, opts ...grpc.CallOption) (*GetOptionsAtResponse, error)
 }
 
 type gamesServiceClient struct {
@@ -163,30 +158,10 @@ func (c *gamesServiceClient) ProcessMoves(ctx context.Context, in *ProcessMovesR
 	return out, nil
 }
 
-func (c *gamesServiceClient) GetMovementOptions(ctx context.Context, in *GetMovementOptionsRequest, opts ...grpc.CallOption) (*GetMovementOptionsResponse, error) {
+func (c *gamesServiceClient) GetOptionsAt(ctx context.Context, in *GetOptionsAtRequest, opts ...grpc.CallOption) (*GetOptionsAtResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMovementOptionsResponse)
-	err := c.cc.Invoke(ctx, GamesService_GetMovementOptions_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gamesServiceClient) GetAttackOptions(ctx context.Context, in *GetAttackOptionsRequest, opts ...grpc.CallOption) (*GetAttackOptionsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetAttackOptionsResponse)
-	err := c.cc.Invoke(ctx, GamesService_GetAttackOptions_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gamesServiceClient) CanSelectUnit(ctx context.Context, in *CanSelectUnitRequest, opts ...grpc.CallOption) (*CanSelectUnitResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CanSelectUnitResponse)
-	err := c.cc.Invoke(ctx, GamesService_CanSelectUnit_FullMethodName, in, out, cOpts...)
+	out := new(GetOptionsAtResponse)
+	err := c.cc.Invoke(ctx, GamesService_GetOptionsAt_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -219,10 +194,7 @@ type GamesServiceServer interface {
 	// List the moves for a game
 	ListMoves(context.Context, *ListMovesRequest) (*ListMovesResponse, error)
 	ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error)
-	// Game interaction methods for UI components
-	GetMovementOptions(context.Context, *GetMovementOptionsRequest) (*GetMovementOptionsResponse, error)
-	GetAttackOptions(context.Context, *GetAttackOptionsRequest) (*GetAttackOptionsResponse, error)
-	CanSelectUnit(context.Context, *CanSelectUnitRequest) (*CanSelectUnitResponse, error)
+	GetOptionsAt(context.Context, *GetOptionsAtRequest) (*GetOptionsAtResponse, error)
 }
 
 // UnimplementedGamesServiceServer should be embedded to have
@@ -259,14 +231,8 @@ func (UnimplementedGamesServiceServer) ListMoves(context.Context, *ListMovesRequ
 func (UnimplementedGamesServiceServer) ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProcessMoves not implemented")
 }
-func (UnimplementedGamesServiceServer) GetMovementOptions(context.Context, *GetMovementOptionsRequest) (*GetMovementOptionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMovementOptions not implemented")
-}
-func (UnimplementedGamesServiceServer) GetAttackOptions(context.Context, *GetAttackOptionsRequest) (*GetAttackOptionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAttackOptions not implemented")
-}
-func (UnimplementedGamesServiceServer) CanSelectUnit(context.Context, *CanSelectUnitRequest) (*CanSelectUnitResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CanSelectUnit not implemented")
+func (UnimplementedGamesServiceServer) GetOptionsAt(context.Context, *GetOptionsAtRequest) (*GetOptionsAtResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOptionsAt not implemented")
 }
 func (UnimplementedGamesServiceServer) testEmbeddedByValue() {}
 
@@ -450,56 +416,20 @@ func _GamesService_ProcessMoves_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GamesService_GetMovementOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMovementOptionsRequest)
+func _GamesService_GetOptionsAt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOptionsAtRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GamesServiceServer).GetMovementOptions(ctx, in)
+		return srv.(GamesServiceServer).GetOptionsAt(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GamesService_GetMovementOptions_FullMethodName,
+		FullMethod: GamesService_GetOptionsAt_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GamesServiceServer).GetMovementOptions(ctx, req.(*GetMovementOptionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GamesService_GetAttackOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAttackOptionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GamesServiceServer).GetAttackOptions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GamesService_GetAttackOptions_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GamesServiceServer).GetAttackOptions(ctx, req.(*GetAttackOptionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GamesService_CanSelectUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CanSelectUnitRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GamesServiceServer).CanSelectUnit(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GamesService_CanSelectUnit_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GamesServiceServer).CanSelectUnit(ctx, req.(*CanSelectUnitRequest))
+		return srv.(GamesServiceServer).GetOptionsAt(ctx, req.(*GetOptionsAtRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -548,16 +478,8 @@ var GamesService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GamesService_ProcessMoves_Handler,
 		},
 		{
-			MethodName: "GetMovementOptions",
-			Handler:    _GamesService_GetMovementOptions_Handler,
-		},
-		{
-			MethodName: "GetAttackOptions",
-			Handler:    _GamesService_GetAttackOptions_Handler,
-		},
-		{
-			MethodName: "CanSelectUnit",
-			Handler:    _GamesService_CanSelectUnit_Handler,
+			MethodName: "GetOptionsAt",
+			Handler:    _GamesService_GetOptionsAt_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

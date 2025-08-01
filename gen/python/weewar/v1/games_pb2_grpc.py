@@ -60,20 +60,10 @@ class GamesServiceStub(object):
                 request_serializer=weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.SerializeToString,
                 response_deserializer=weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.FromString,
                 _registered_method=True)
-        self.GetMovementOptions = channel.unary_unary(
-                '/weewar.v1.GamesService/GetMovementOptions',
-                request_serializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsRequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsResponse.FromString,
-                _registered_method=True)
-        self.GetAttackOptions = channel.unary_unary(
-                '/weewar.v1.GamesService/GetAttackOptions',
-                request_serializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsRequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsResponse.FromString,
-                _registered_method=True)
-        self.CanSelectUnit = channel.unary_unary(
-                '/weewar.v1.GamesService/CanSelectUnit',
-                request_serializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitRequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitResponse.FromString,
+        self.GetOptionsAt = channel.unary_unary(
+                '/weewar.v1.GamesService/GetOptionsAt',
+                request_serializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtResponse.FromString,
                 _registered_method=True)
 
 
@@ -146,20 +136,7 @@ class GamesServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetMovementOptions(self, request, context):
-        """Game interaction methods for UI components
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetAttackOptions(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def CanSelectUnit(self, request, context):
+    def GetOptionsAt(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -213,20 +190,10 @@ def add_GamesServiceServicer_to_server(servicer, server):
                     request_deserializer=weewar_dot_v1_dot_games__pb2.ProcessMovesRequest.FromString,
                     response_serializer=weewar_dot_v1_dot_games__pb2.ProcessMovesResponse.SerializeToString,
             ),
-            'GetMovementOptions': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetMovementOptions,
-                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsRequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_games__pb2.GetMovementOptionsResponse.SerializeToString,
-            ),
-            'GetAttackOptions': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetAttackOptions,
-                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsRequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_games__pb2.GetAttackOptionsResponse.SerializeToString,
-            ),
-            'CanSelectUnit': grpc.unary_unary_rpc_method_handler(
-                    servicer.CanSelectUnit,
-                    request_deserializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitRequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_games__pb2.CanSelectUnitResponse.SerializeToString,
+            'GetOptionsAt': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetOptionsAt,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -484,7 +451,7 @@ class GamesService(object):
             _registered_method=True)
 
     @staticmethod
-    def GetMovementOptions(request,
+    def GetOptionsAt(request,
             target,
             options=(),
             channel_credentials=None,
@@ -497,63 +464,9 @@ class GamesService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/weewar.v1.GamesService/GetMovementOptions',
-            weewar_dot_v1_dot_games__pb2.GetMovementOptionsRequest.SerializeToString,
-            weewar_dot_v1_dot_games__pb2.GetMovementOptionsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetAttackOptions(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/weewar.v1.GamesService/GetAttackOptions',
-            weewar_dot_v1_dot_games__pb2.GetAttackOptionsRequest.SerializeToString,
-            weewar_dot_v1_dot_games__pb2.GetAttackOptionsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def CanSelectUnit(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/weewar.v1.GamesService/CanSelectUnit',
-            weewar_dot_v1_dot_games__pb2.CanSelectUnitRequest.SerializeToString,
-            weewar_dot_v1_dot_games__pb2.CanSelectUnitResponse.FromString,
+            '/weewar.v1.GamesService/GetOptionsAt',
+            weewar_dot_v1_dot_games__pb2.GetOptionsAtRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.GetOptionsAtResponse.FromString,
             options,
             channel_credentials,
             insecure,

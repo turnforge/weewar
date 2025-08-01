@@ -84,22 +84,9 @@ service GamesService {
     };
   }
 
-  // Game interaction methods for UI components
-  rpc GetMovementOptions(GetMovementOptionsRequest) returns (GetMovementOptionsResponse) {
+  rpc GetOptionsAt(GetOptionsAtRequest) returns (GetOptionsAtResponse) {
     option (google.api.http) = {
-      get: "/v1/games/{game_id}/movement/{q}/{r}"
-    };
-  }
-
-  rpc GetAttackOptions(GetAttackOptionsRequest) returns (GetAttackOptionsResponse) {
-    option (google.api.http) = {
-      get: "/v1/games/{game_id}/attack/{q}/{r}"
-    };
-  }
-
-  rpc CanSelectUnit(CanSelectUnitRequest) returns (CanSelectUnitResponse) {
-    option (google.api.http) = {
-      get: "/v1/games/{game_id}/can-select/{q}/{r}"
+      get: "/v1/games/{game_id}/options/{q}/{r}"
     };
   }
 }
@@ -352,45 +339,50 @@ message ListMovesResponse {
 // =============================================================================
 
 /**
- * Request to get movement options for a unit at a position
+ * Request to get all available options at a position
  */
-message GetMovementOptionsRequest {
+message GetOptionsAtRequest {
   string game_id = 1;
   int32 q = 2;
   int32 r = 3;
 }
 
 /**
- * Response with movement options for a unit
+ * Response with all available options at a position
  */
-message GetMovementOptionsResponse {
-  repeated MovementOption options = 1;
+message GetOptionsAtResponse {
+  repeated GameOption options = 1;
+  int32 current_player = 2; // debug: current player in game
+  bool game_initialized = 3; // debug: whether game is properly initialized
 }
 
 /**
- * A possible movement destination with cost
+ * A single game option available at a position
  */
-message MovementOption {
+message GameOption {
+  oneof option_type {
+    MoveOption move = 1;
+    AttackOption attack = 2;
+    EndTurnOption end_turn = 3;
+    BuildUnitOption build = 4;
+    CaptureBuildingOption  capture = 5;
+  }
+}
+
+/**
+ * Option to end the current turn
+ */
+message EndTurnOption {
+  // Empty - just indicates end turn is available
+}
+
+/**
+ * Option to move to a specific coordinate
+ */
+message MoveOption {
   int32 q = 1;
   int32 r = 2;
   int32 movement_cost = 3;
-  bool is_valid = 4;
-}
-
-/**
- * Request to get attack options for a unit at a position
- */
-message GetAttackOptionsRequest {
-  string game_id = 1;
-  int32 q = 2;
-  int32 r = 3;
-}
-
-/**
- * Response with attack options for a unit
- */
-message GetAttackOptionsResponse {
-  repeated AttackOption options = 1;
 }
 
 /**
@@ -399,26 +391,28 @@ message GetAttackOptionsResponse {
 message AttackOption {
   int32 q = 1;
   int32 r = 2;
-  bool can_attack = 3;
-  int32 damage_estimate = 4; // Estimated damage this attack would deal
+  // Target unit type and health
+  int32 target_unit_type = 3;
+  int32 target_unit_health = 4;
+  bool can_attack = 5;
+  int32 damage_estimate = 6; // Estimated damage this attack would deal
 }
 
 /**
- * Request to check if a unit can be selected
+ * An option to build a unit (at a city tile)
  */
-message CanSelectUnitRequest {
-  string game_id = 1;
-  int32 q = 2;
-  int32 r = 3;
-  int32 player_id = 4; // which player is trying to select
+message BuildUnitOption {
+  int32 q = 1;
+  int32 r = 2;
+  int32 tile_type = 3;
+  int32 build_cost = 4;
 }
 
 /**
- * Response indicating if unit can be selected
+ * A move where a unit can capture a building
  */
-message CanSelectUnitResponse {
-  bool can_select = 1;
-  string reason = 2; // explanation if can_select is false
-  int32 current_player = 3; // debug: current player in game
-  bool game_initialized = 4; // debug: whether game is properly initialized
+message CaptureBuildingOption {
+  int32 q = 1;
+  int32 r = 2;
+  int32 tile_type = 3;
 }

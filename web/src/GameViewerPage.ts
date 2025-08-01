@@ -147,8 +147,6 @@ class GameViewerPage extends BasePage implements LCMComponent {
         this.addSubscription(GameEventTypes.GAME_DATA_LOADED, this);
         
         // GameState notification events (for system coordination, not user interaction responses)
-        this.addSubscription('game-loaded', this);
-        this.addSubscription('game-created', this);
         this.addSubscription('unit-moved', this);
         this.addSubscription('unit-attacked', this);
         this.addSubscription('turn-ended', this);
@@ -189,21 +187,6 @@ class GameViewerPage extends BasePage implements LCMComponent {
                 
                 // Check if both viewer and game data are ready
                 this.checkAndLoadWorldIntoViewer();
-                break;
-            
-            case 'game-loaded':
-                console.log('GameViewerPage: Game loaded from page data', data);
-                // Update UI with the loaded game state
-                if (this.gameState) {
-                    const gameState = this.gameState.getGameState();
-                    this.updateGameUIFromState(gameState);
-                    this.logGameEvent(`Game loaded: ${gameState.gameId}`);
-                }
-                break;
-            
-            case 'game-created':
-                console.log('GameViewerPage: Game created notification', data);
-                // Game UI already updated synchronously, this is just for logging/coordination
                 break;
             
             case 'unit-moved':
@@ -540,9 +523,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
             console.log(`[GameViewerPage] Options at (${q}, ${r}):`, response);
             
             const options = response.options || [];
-            const hasMovementOptions = options.some((opt: any) => opt.optionType?.case === 'move');
-            const hasAttackOptions = options.some((opt: any) => opt.optionType?.case === 'attack');
-            const hasOnlyEndTurn = options.length === 1 && options[0].optionType?.case === 'endTurn';
+            const hasMovementOptions = options.some((opt: any) => opt.move !== undefined);
+            const hasAttackOptions = options.some((opt: any) => opt.attack !== undefined);
+            const hasOnlyEndTurn = options.length === 1 && options[0].endTurn !== undefined;
             
             if (hasMovementOptions || hasAttackOptions) {
                 // This unit has actionable options - select it
@@ -589,21 +572,29 @@ class GameViewerPage extends BasePage implements LCMComponent {
      */
     private processUnitSelection(q: number, r: number, options: any[]): void {
         // Extract movement and attack options from the unified options
-        const movementOptions = options.filter(opt => opt.optionType?.case === 'move');
-        const attackOptions = options.filter(opt => opt.optionType?.case === 'attack');
+        // Note: protobuf oneof fields become direct properties (e.g., option.move, option.attack)
+        const movementOptions = options.filter(opt => opt.move !== undefined);
+        const attackOptions = options.filter(opt => opt.attack !== undefined);
         
         console.log(`[GameViewerPage] Unit selected: ${movementOptions.length} moves, ${attackOptions.length} attacks available`);
         
         // Convert to coordinate arrays for highlighting
         const movableCoords = movementOptions.map((option: any) => ({
-            q: option.optionType.value.q,
-            r: option.optionType.value.r
+            q: option.move.q,
+            r: option.move.r
         }));
         
         const attackableCoords = attackOptions.map((option: any) => ({
-            q: option.optionType.value.q,
-            r: option.optionType.value.r
+            q: option.attack.q,
+            r: option.attack.r
         }));
+        
+        console.log('[GameViewerPage] Converted coordinates:', {
+            movableCoords,
+            attackableCoords,
+            sampleMoveOption: movementOptions[0],
+            sampleAttackOption: attackOptions[0]
+        });
 
         // Update GameViewer to show highlights using layer-based approach  
         if (this.worldViewer) {
@@ -695,12 +686,8 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 }
 
-// Game configuration is now accessed directly from WASM-cached Game proto object
-
 // Initialize page when DOM is ready using LifecycleController
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM loaded, starting GameViewerPage initialization...');
-    
     // Create page instance (just basic setup)
     const gameViewerPage = new GameViewerPage("GameViewerPage");
     
@@ -709,6 +696,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Start breadth-first initialization
     await lifecycleController.initializeFromRoot(gameViewerPage);
-    
-    console.log('GameViewerPage fully initialized via LifecycleController');
 });

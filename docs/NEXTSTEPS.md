@@ -367,6 +367,40 @@
 
 ## Current Development Focus
 
+### Phase 15: Interactive Unit Movement & Combat Implementation 🎯 NEXT
+**Current Phase**: Complete interactive gameplay with move execution and combat system
+**Status**: Unit selection and highlighting working - need move execution and attack resolution
+**Next Steps**: Implement actual unit movement, combat resolution, and turn management
+
+#### A. Move Execution System (Week 1 - High Priority)
+**Goal**: Execute actual unit movement from highlighted options
+**Current State**: Visual highlights working, need to handle move clicks
+**Implementation Plan**:
+- [ ] **Move Click Detection**: Detect clicks on highlighted movement tiles
+- [ ] **Move Validation**: Validate selected moves against available options
+- [ ] **Move Execution**: Call backend ProcessMoves API to execute validated moves
+- [ ] **Visual Feedback**: Update unit positions and clear highlights after successful moves
+- [ ] **Error Handling**: Display appropriate feedback for invalid or failed moves
+
+#### B. Combat Resolution System (Week 1 - High Priority)
+**Goal**: Execute combat actions from attack highlights
+**Current State**: Attack highlights working, need combat execution
+**Implementation Plan**:
+- [ ] **Attack Click Detection**: Detect clicks on highlighted attack targets
+- [ ] **Combat Validation**: Validate attacks against available attack options
+- [ ] **Combat Execution**: Call ProcessMoves API for attack resolution
+- [ ] **Damage Visualization**: Show combat results and unit health changes
+- [ ] **Unit Removal**: Handle unit destruction and removal from map
+
+#### C. Turn Management Integration (Week 2 - Medium Priority)
+**Goal**: Complete turn flow with proper state management
+**Implementation Plan**:
+- [ ] **Turn End Validation**: Ensure proper turn end conditions
+- [ ] **Player Switching**: Update UI for next player's turn
+- [ ] **Unit Refresh**: Reset unit movement and action points between turns
+- [ ] **Game State Sync**: Keep UI synchronized with backend game state
+- [ ] **Victory Conditions**: Detect and handle game completion
+
 ### Phase 14: RulesTable Architecture & Proto Migration ✅ COMPLETED
 **Completed Phase**: Complete Proto Migration with Rules Engine Integration
 **Status**: Full proto migration completed with terrain data loading working end-to-end  
@@ -603,11 +637,11 @@
 - **Automatic Recording**: All game actions automatically logged without developer intervention preventing missed recordings
 - **Go-Centric Architecture**: All GameLog logic in Go engine maintains consistent architecture where frontend is thin UI layer
 
-### Phase 10: Interactive Web Gameplay ✅ LAYERED OVERLAY SYSTEM COMPLETE
-**Current Phase**: Advanced Layer System Architecture Complete - Ready for Integration  
-**Status**: Comprehensive layered overlay system implemented with multi-coordinate space support
-**Achievement**: Complete layer system architecture with multi-coordinate space event handling and proper z-ordering
-**Progress**: Core architecture files created - ready for checkpoint and integration phase
+### Phase 10: Interactive Web Gameplay ✅ COMPLETED
+**Completed Phase**: Interactive Web Gameplay with Unified API and Visual Highlights  
+**Status**: Complete interactive gameplay system with unified API and proper visual feedback
+**Achievement**: Fixed duplicate click handling, implemented unified getOptionsAt API, and working unit selection highlights
+**Progress**: Production-ready interactive gameplay with proper coordinate extraction and highlight visualization
 
 #### Editor Scene Architecture ✅ COMPLETE
 - ✅ **PhaserEditorScene Creation**: Extends PhaserWorldScene with editor-specific painting, reference images, brush controls
@@ -638,13 +672,13 @@
 - ✅ **Clean Event Handling**: Z-order based event dispatch with proper hit testing and callback management
 - ✅ **Reusable Architecture**: Same layers work across Editor and Game scenes with different configurations
 
-#### Next Development (Week 2) - Layer System Integration
-- [ ] **Integrate LayerManager into PhaserWorldScene**: Replace direct click handling with layer-based event dispatch
-- [ ] **Migrate PhaserGameScene**: Replace Graphics objects with HexHighlightLayer instances  
-- [ ] **Migrate PhaserEditorScene**: Replace reference image system with ReferenceImageLayer
-- [ ] **Update WorldViewer**: Add layer access methods for external control
-- [ ] **Fix GameViewerPage Integration**: Use layer-based approach instead of scene methods
-- [ ] **Test Multi-Layer Interactions**: Verify proper event bubbling and coordinate space handling
+#### Interactive Gameplay Implementation ✅ COMPLETED
+- ✅ **Unified getOptionsAt API**: Single API call replacing 3 separate calls (canSelectUnit, getMovementOptions, getAttackOptions)
+- ✅ **Duplicate Click Handler Fix**: Eliminated duplicate callback invocations between LayerSystem and PhaserGameScene
+- ✅ **Protobuf Oneof Structure Fix**: Corrected coordinate extraction from protobuf oneof fields (option.move.q vs option.optionType.value.q)
+- ✅ **Visual Highlight System**: Working unit selection with green movement highlights and red attack highlights
+- ✅ **Layer System Integration**: LayerManager properly integrated with BaseMapLayer for callback handling
+- ✅ **GameViewerPage Unit Selection**: Complete unit click → getOptionsAt → highlight processing pipeline working
 
 #### Layer System Architecture Implementation ✅ COMPLETED (2025-01-24)
 **Completed**: Comprehensive layered overlay system with multi-coordinate space support

@@ -2,16 +2,6 @@
 
 A modern turn-based strategy game built with Go, featuring hexagonal grid combat, web-based map editor, and CLI gameplay.
 
-## Current Status
-
-🚧 **Active Development** - Major coordinate system refactoring in progress
-
-We are currently migrating from a legacy row/col coordinate system to proper cube coordinates for hexagonal grids. This provides better mathematical foundations and eliminates coordinate conversion bugs.
-
-**Progress**: ~80% complete - Core systems migrated, CLI translation layer in progress
-
-See [COORD_MIGRATION.md](COORD_MIGRATION.md) for detailed progress and technical details.
-
 ## Architecture Overview
 
 WeeWar is built with a clean separation of concerns:

@@ -131,6 +131,7 @@ export class PhaserGameScene extends PhaserWorldScene {
 
     /**
      * Override the base tile click handler to add game-specific logic
+     * Note: We don't call super.onTileClick() because the LayerSystem already handles callbacks
      */
     protected onTileClick(q: number, r: number): void {
         console.log(`[PhaserGameScene] Tile clicked: Q=${q}, R=${r}, Mode=${this.gameMode}`);
@@ -140,7 +141,7 @@ export class PhaserGameScene extends PhaserWorldScene {
             return;
         }
 
-        // Handle different interaction modes first
+        // Handle different interaction modes (game-specific logic only)
         switch (this.gameMode) {
             case 'select':
                 this.handleSelectClick(q, r);
@@ -153,10 +154,11 @@ export class PhaserGameScene extends PhaserWorldScene {
                 break;
         }
 
-        // Call parent's interaction callback system (this is what GameViewerPage connects to)
-        console.log(`[PhaserGameScene] About to call super.onTileClick(${q}, ${r})`);
-        super.onTileClick(q, r);
-        console.log(`[PhaserGameScene] Finished calling super.onTileClick(${q}, ${r})`);
+        // Note: We intentionally don't call super.onTileClick() here because:
+        // 1. The LayerSystem already called the GameViewerPage callbacks via BaseMapLayer
+        // 2. Calling super.onTileClick() would result in duplicate callback invocations
+        // 3. This method is only called as a fallback when LayerSystem doesn't handle the click
+        console.log(`[PhaserGameScene] Game-specific click handling completed`);
     }
 
     /**

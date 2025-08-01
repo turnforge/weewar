@@ -1,0 +1,22 @@
+<!-- templates/GameListingPage.html -->
+{{# include "BasePage.html" #}}
+{{# include "GameList.html" #}}
+
+{{ define "BodySection" }}
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Games</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">Browse and manage your active games</p>
+    </div>
+    
+    <!-- Games List -->
+    {{ template "GameList" .GameListView }}
+</main>
+{{ end }}
+
+{{ define "PostBodySection" }}
+{{ end }}
+
+{{ define "GameListingPage" }}
+{{ template "BasePage" . }}
+{{ end }}

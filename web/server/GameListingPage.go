@@ -22,5 +22,5 @@ func (m *GameListingPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewC
 }
 
 func (m *GameListingPage) Copy() View {
-	return &GameDetailPage{}
+	return &GameListingPage{}
 }

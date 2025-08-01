@@ -41,12 +41,12 @@
                     <option value="title_desc">Title (Z-A)</option>
                 </select>
             </div>
-            <!-- Create New Button (Now a simple link) -->
-            <button id="create-new-game-btn" type="button"
-                 class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 whitespace-nowrap">
+            <!-- Create New Button -->
+            <a href="/games/new" 
+               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 whitespace-nowrap">
                   <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>
                   Create New
-            </button>
+            </a>
         </div>
     </div>
 
@@ -81,7 +81,7 @@
                     {{ range .Games }}
                     <tr id="doc-row-{{ .Id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <a href="/games/{{ .Id }}/edit" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
+                            <a href="/games/{{ .Id }}/view" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
                                 {{ .Name }}
                             </a>
                         </td>

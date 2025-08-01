@@ -425,10 +425,14 @@ class StartGamePage extends BasePage implements LCMComponent {
         // Prepare the request payload matching the updated proto structure
         const activePlayers = this.gameConfig.players.filter(p => p.type !== 'none');
         
+        // Get game name from input field
+        const gameNameInput = document.getElementById('game-name-title') as HTMLInputElement;
+        const gameName = gameNameInput?.value?.trim() || 'New Game';
+
         const gameRequest = {
             game: {
                 world_id: this.currentWorldId,
-                name: `Game from ${this.world?.name || 'World'}`,
+                name: gameName,
                 description: 'Game created from StartGamePage',
                 creator_id: 'default-user', // TODO: Get from authentication
                 tags: [],

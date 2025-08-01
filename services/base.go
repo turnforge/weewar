@@ -185,14 +185,18 @@ func (s *BaseGamesServiceImpl) CanSelectUnit(ctx context.Context, req *v1.CanSel
 	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
 	if err != nil || gameresp.Game == nil {
 		return &v1.CanSelectUnitResponse{
-			CanSelect: false,
-			Reason:    fmt.Sprintf("failed to load game: %v", err),
+			CanSelect:       false,
+			Reason:          fmt.Sprintf("failed to load game: %v", err),
+			CurrentPlayer:   0,
+			GameInitialized: false,
 		}, nil
 	}
 	if gameresp.State == nil {
 		return &v1.CanSelectUnitResponse{
-			CanSelect: false,
-			Reason:    "game state cannot be nil",
+			CanSelect:       false,
+			Reason:          "game state cannot be nil",
+			CurrentPlayer:   0,
+			GameInitialized: false,
 		}, nil
 	}
 
@@ -200,8 +204,10 @@ func (s *BaseGamesServiceImpl) CanSelectUnit(ctx context.Context, req *v1.CanSel
 	rtGame, err := s.Self.GetRuntimeGame(gameresp.Game, gameresp.State)
 	if err != nil {
 		return &v1.CanSelectUnitResponse{
-			CanSelect: false,
-			Reason:    fmt.Sprintf("failed to get runtime game: %v", err),
+			CanSelect:       false,
+			Reason:          fmt.Sprintf("failed to get runtime game: %v", err),
+			CurrentPlayer:   gameresp.State.CurrentPlayer, // Use proto state value
+			GameInitialized: false,
 		}, nil
 	}
 
@@ -210,8 +216,10 @@ func (s *BaseGamesServiceImpl) CanSelectUnit(ctx context.Context, req *v1.CanSel
 	canSelect, reason := dmp.CanSelectUnit(rtGame, req.Q, req.R)
 
 	return &v1.CanSelectUnitResponse{
-		CanSelect: canSelect,
-		Reason:    reason,
+		CanSelect:       canSelect,
+		Reason:          reason,
+		CurrentPlayer:   rtGame.CurrentPlayer,
+		GameInitialized: rtGame != nil && rtGame.World != nil,
 	}, nil
 }
 

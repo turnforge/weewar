@@ -1658,11 +1658,13 @@ func (x *CanSelectUnitRequest) GetPlayerId() int32 {
 // *
 // Response indicating if unit can be selected
 type CanSelectUnitResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CanSelect     bool                   `protobuf:"varint,1,opt,name=can_select,json=canSelect,proto3" json:"can_select,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"` // explanation if can_select is false
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	CanSelect       bool                   `protobuf:"varint,1,opt,name=can_select,json=canSelect,proto3" json:"can_select,omitempty"`
+	Reason          string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`                                           // explanation if can_select is false
+	CurrentPlayer   int32                  `protobuf:"varint,3,opt,name=current_player,json=currentPlayer,proto3" json:"current_player,omitempty"`       // debug: current player in game
+	GameInitialized bool                   `protobuf:"varint,4,opt,name=game_initialized,json=gameInitialized,proto3" json:"game_initialized,omitempty"` // debug: whether game is properly initialized
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CanSelectUnitResponse) Reset() {
@@ -1707,6 +1709,20 @@ func (x *CanSelectUnitResponse) GetReason() string {
 		return x.Reason
 	}
 	return ""
+}
+
+func (x *CanSelectUnitResponse) GetCurrentPlayer() int32 {
+	if x != nil {
+		return x.CurrentPlayer
+	}
+	return 0
+}
+
+func (x *CanSelectUnitResponse) GetGameInitialized() bool {
+	if x != nil {
+		return x.GameInitialized
+	}
+	return false
 }
 
 var File_weewar_v1_games_proto protoreflect.FileDescriptor
@@ -1827,11 +1843,13 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\f\n" +
 	"\x01q\x18\x02 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x03 \x01(\x05R\x01r\x12\x1b\n" +
-	"\tplayer_id\x18\x04 \x01(\x05R\bplayerId\"N\n" +
+	"\tplayer_id\x18\x04 \x01(\x05R\bplayerId\"\xa0\x01\n" +
 	"\x15CanSelectUnitResponse\x12\x1d\n" +
 	"\n" +
 	"can_select\x18\x01 \x01(\bR\tcanSelect\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason2\xce\n" +
+	"\x06reason\x18\x02 \x01(\tR\x06reason\x12%\n" +
+	"\x0ecurrent_player\x18\x03 \x01(\x05R\rcurrentPlayer\x12)\n" +
+	"\x10game_initialized\x18\x04 \x01(\bR\x0fgameInitialized2\xce\n" +
 	"\n" +
 	"\fGamesService\x12_\n" +
 	"\n" +

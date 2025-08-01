@@ -1191,6 +1191,15 @@
         "reason": {
           "type": "string",
           "title": "explanation if can_select is false"
+        },
+        "currentPlayer": {
+          "type": "integer",
+          "format": "int32",
+          "title": "debug: current player in game"
+        },
+        "gameInitialized": {
+          "type": "boolean",
+          "title": "debug: whether game is properly initialized"
         }
       },
       "title": "*\nResponse indicating if unit can be selected"

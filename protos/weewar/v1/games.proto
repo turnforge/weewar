@@ -419,4 +419,6 @@ message CanSelectUnitRequest {
 message CanSelectUnitResponse {
   bool can_select = 1;
   string reason = 2; // explanation if can_select is false
+  int32 current_player = 3; // debug: current player in game
+  bool game_initialized = 4; // debug: whether game is properly initialized
 }

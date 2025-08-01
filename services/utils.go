@@ -72,18 +72,18 @@ func ProtoToRuntimeGame(game *v1.Game, gameState *v1.GameState) (*weewar.Game, e
 		}
 	}
 
-	// Create the runtime game with default rules engine
-	// TODO: Load a proper rules engine or make it configurable
-	rulesEngine := &weewar.RulesEngine{}                  // Default rules engine
+	// Create the runtime game with loaded default rules engine
+	rulesEngine := weewar.DefaultRulesEngine()           // Use loaded default rules engine
 	out, err := weewar.NewGame(world, rulesEngine, 12345) // Default seed
 	if err != nil {
 		return nil, err
 	}
 
 	// Set game state from protobuf data
-	if out != nil {
-		// Map game metadata fields as needed
-		// TODO: Map additional game fields from protobuf if needed
+	if out != nil && gameState != nil {
+		// Set current player and turn counter from GameState
+		out.CurrentPlayer = gameState.CurrentPlayer
+		out.TurnCounter = gameState.TurnCounter
 	}
 
 	return out, nil

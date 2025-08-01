@@ -83,8 +83,10 @@ func (s *FSGamesServiceImpl) CreateGame(ctx context.Context, req *v1.CreateGameR
 
 	// Save a new empty game state and a new move list
 	gs := &v1.GameState{
-		GameId:    req.Game.Id,
-		WorldData: world.WorldData,
+		GameId:        req.Game.Id,
+		CurrentPlayer: 1, // Game starts with player 1
+		TurnCounter:   1, // First turn
+		WorldData:     world.WorldData,
 	}
 	if err := s.storage.SaveArtifact(req.Game.Id, "state", gs); err != nil {
 		log.Printf("Failed to create state for game %s: %v", req.Game.Id, err)
@@ -133,40 +135,6 @@ func (s *FSGamesServiceImpl) GetGame(ctx context.Context, req *v1.GetGameRequest
 	return resp, nil
 }
 
-// GetMovementOptions returns available movement options for a unit
-func (s *FSGamesServiceImpl) GetMovementOptions(ctx context.Context, req *v1.GetMovementOptionsRequest) (resp *v1.GetMovementOptionsResponse, err error) {
-	// TODO: Implement actual movement calculation logic
-	// For now, return mock data
-	resp = &v1.GetMovementOptionsResponse{
-		Options: []*v1.MovementOption{
-			// Mock movement options - replace with actual game logic
-		},
-	}
-	return resp, nil
-}
-
-// GetAttackOptions returns available attack options for a unit
-func (s *FSGamesServiceImpl) GetAttackOptions(ctx context.Context, req *v1.GetAttackOptionsRequest) (resp *v1.GetAttackOptionsResponse, err error) {
-	// TODO: Implement actual attack calculation logic
-	// For now, return mock data
-	resp = &v1.GetAttackOptionsResponse{
-		Options: []*v1.AttackOption{
-			// Mock attack options - replace with actual game logic
-		},
-	}
-	return resp, nil
-}
-
-// CanSelectUnit determines if a unit can be selected by the current player
-func (s *FSGamesServiceImpl) CanSelectUnit(ctx context.Context, req *v1.CanSelectUnitRequest) (resp *v1.CanSelectUnitResponse, err error) {
-	// TODO: Implement actual unit selection logic
-	// For now, return mock data
-	resp = &v1.CanSelectUnitResponse{
-		CanSelect: true, // Mock - replace with actual ownership/turn logic
-		Reason:    "",
-	}
-	return resp, nil
-}
 
 // UpdateGame updates an existing game
 func (s *FSGamesServiceImpl) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest) (resp *v1.UpdateGameResponse, err error) {

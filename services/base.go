@@ -101,6 +101,120 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 	return resp, err
 }
 
+// GetMovementOptions returns all tiles a unit can move to using DefaultMoveProcessor
+func (s *BaseGamesServiceImpl) GetMovementOptions(ctx context.Context, req *v1.GetMovementOptionsRequest) (*v1.GetMovementOptionsResponse, error) {
+	// Load game data using the service implementation
+	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	if err != nil || gameresp.Game == nil {
+		return nil, fmt.Errorf("failed to load game: %w", err)
+	}
+	if gameresp.State == nil {
+		return nil, fmt.Errorf("game state cannot be nil")
+	}
+
+	// Get the runtime game
+	rtGame, err := s.Self.GetRuntimeGame(gameresp.Game, gameresp.State)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get runtime game: %w", err)
+	}
+
+	// Use DefaultMoveProcessor to get movement options with validation
+	var dmp weewar.DefaultMoveProcessor
+	tileOptions, err := dmp.GetMovementOptions(rtGame, req.Q, req.R)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert runtime TileOption to proto MovementOption
+	var movementOptions []*v1.MovementOption
+	for _, option := range tileOptions {
+		movementOptions = append(movementOptions, &v1.MovementOption{
+			Q:            int32(option.Coord.Q),
+			R:            int32(option.Coord.R),
+			MovementCost: int32(option.Cost),
+			IsValid:      true,
+		})
+	}
+
+	return &v1.GetMovementOptionsResponse{
+		Options: movementOptions,
+	}, nil
+}
+
+// GetAttackOptions returns all positions a unit can attack using DefaultMoveProcessor
+func (s *BaseGamesServiceImpl) GetAttackOptions(ctx context.Context, req *v1.GetAttackOptionsRequest) (*v1.GetAttackOptionsResponse, error) {
+	// Load game data using the service implementation
+	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	if err != nil || gameresp.Game == nil {
+		return nil, fmt.Errorf("failed to load game: %w", err)
+	}
+	if gameresp.State == nil {
+		return nil, fmt.Errorf("game state cannot be nil")
+	}
+
+	// Get the runtime game
+	rtGame, err := s.Self.GetRuntimeGame(gameresp.Game, gameresp.State)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get runtime game: %w", err)
+	}
+
+	// Use DefaultMoveProcessor to get attack options with validation
+	var dmp weewar.DefaultMoveProcessor
+	attackCoords, err := dmp.GetAttackOptions(rtGame, req.Q, req.R)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert runtime AxialCoord to proto AttackOption
+	var attackOptions []*v1.AttackOption
+	for _, coord := range attackCoords {
+		attackOptions = append(attackOptions, &v1.AttackOption{
+			Q: int32(coord.Q),
+			R: int32(coord.R),
+		})
+	}
+
+	return &v1.GetAttackOptionsResponse{
+		Options: attackOptions,
+	}, nil
+}
+
+// CanSelectUnit validates if a unit can be selected using DefaultMoveProcessor
+func (s *BaseGamesServiceImpl) CanSelectUnit(ctx context.Context, req *v1.CanSelectUnitRequest) (*v1.CanSelectUnitResponse, error) {
+	// Load game data using the service implementation
+	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	if err != nil || gameresp.Game == nil {
+		return &v1.CanSelectUnitResponse{
+			CanSelect: false,
+			Reason:    fmt.Sprintf("failed to load game: %v", err),
+		}, nil
+	}
+	if gameresp.State == nil {
+		return &v1.CanSelectUnitResponse{
+			CanSelect: false,
+			Reason:    "game state cannot be nil",
+		}, nil
+	}
+
+	// Get the runtime game
+	rtGame, err := s.Self.GetRuntimeGame(gameresp.Game, gameresp.State)
+	if err != nil {
+		return &v1.CanSelectUnitResponse{
+			CanSelect: false,
+			Reason:    fmt.Sprintf("failed to get runtime game: %v", err),
+		}, nil
+	}
+
+	// Use DefaultMoveProcessor to validate unit selection
+	var dmp weewar.DefaultMoveProcessor
+	canSelect, reason := dmp.CanSelectUnit(rtGame, req.Q, req.R)
+
+	return &v1.CanSelectUnitResponse{
+		CanSelect: canSelect,
+		Reason:    reason,
+	}, nil
+}
+
 func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, rtGame *weewar.Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
 	// Apply each change to both runtime game and protobuf data structures
 	for _, moveResult := range changes {

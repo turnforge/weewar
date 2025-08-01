@@ -412,6 +412,54 @@ func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {
 	return g.CanAttackUnit(attacker, defender), nil
 }
 
+// GetMovementOptions returns movement options for unit at given coordinates with full validation
+func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) ([]TileOption, error) {
+	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
+	if unit == nil {
+		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
+	}
+	if unit.Player != game.CurrentPlayer {
+		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+	}
+	if unit.AvailableHealth <= 0 {
+		return nil, fmt.Errorf("unit has no health remaining")
+	}
+	if unit.DistanceLeft <= 0 {
+		return nil, fmt.Errorf("unit has no movement points remaining")
+	}
+	return game.rulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft))
+}
+
+// GetAttackOptions returns attack options for unit at given coordinates with full validation
+func (m *DefaultMoveProcessor) GetAttackOptions(game *Game, q, r int32) ([]AxialCoord, error) {
+	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
+	if unit == nil {
+		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
+	}
+	if unit.Player != game.CurrentPlayer {
+		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+	}
+	if unit.AvailableHealth <= 0 {
+		return nil, fmt.Errorf("unit has no health remaining")
+	}
+	return game.rulesEngine.GetAttackOptions(game.World, unit)
+}
+
+// CanSelectUnit validates if unit at given coordinates can be selected by current player
+func (m *DefaultMoveProcessor) CanSelectUnit(game *Game, q, r int32) (bool, string) {
+	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
+	if unit == nil {
+		return false, fmt.Sprintf("no unit found at position (%d, %d)", q, r)
+	}
+	if unit.Player != game.CurrentPlayer {
+		return false, fmt.Sprintf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+	}
+	if unit.AvailableHealth <= 0 {
+		return false, "unit has no health remaining"
+	}
+	return true, ""
+}
+
 // CanMove validates potential movement using position coordinates
 func (g *Game) CanMove(from, to Position) (bool, error) {
 	unit := g.World.UnitAt(from)

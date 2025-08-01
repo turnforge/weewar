@@ -56,6 +56,10 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 	if resp.Game != nil {
 		p.Game = resp.Game
 		p.Title = "Playing: " + p.Game.Name
+		// Set player count from game configuration
+		if p.Game.Config != nil && p.Game.Config.Players != nil {
+			p.PlayerCount = len(p.Game.Config.Players)
+		}
 	}
 
 	if resp.State != nil {

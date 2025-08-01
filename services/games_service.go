@@ -88,6 +88,24 @@ func (s *FSGamesServiceImpl) CreateGame(ctx context.Context, req *v1.CreateGameR
 		TurnCounter:   1, // First turn
 		WorldData:     world.WorldData,
 	}
+	
+	// Initialize units with default stats from rules engine for new games
+	if gs.WorldData != nil && gs.WorldData.Units != nil {
+		rulesEngine := weewar.DefaultRulesEngine()
+		for _, unit := range gs.WorldData.Units {
+			// Get unit defaults from rules engine
+			unitData, err := rulesEngine.GetUnitData(unit.UnitType)
+			if err != nil {
+				log.Printf("Warning: failed to get unit data for type %d: %v", unit.UnitType, err)
+				continue // Skip this unit but don't fail the entire game creation
+			}
+			
+			// Set default health and movement points for new game
+			unit.AvailableHealth = unitData.Health
+			unit.DistanceLeft = unitData.MovementPoints
+			unit.TurnCounter = gs.TurnCounter
+		}
+	}
 	if err := s.storage.SaveArtifact(req.Game.Id, "state", gs); err != nil {
 		log.Printf("Failed to create state for game %s: %v", req.Game.Id, err)
 	}

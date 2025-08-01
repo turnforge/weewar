@@ -185,9 +185,17 @@ func (n *RootViewsHandler) setupRoutes() {
 
 	n.mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir(STATIC_FOLDER))))
 
-	// Then seutp your "resource" specific endpoints
+	// Then setup your "resource" specific endpoints
 	n.mux.Handle("/games/", http.StripPrefix("/games", n.setupGamesMux()))
 	n.mux.Handle("/worlds/", http.StripPrefix("/worlds", n.setupWorldsMux()))
+	
+	// Handle no-trailing-slash redirects for convenience
+	n.mux.HandleFunc("/games", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/games/", http.StatusMovedPermanently)
+	})
+	n.mux.HandleFunc("/worlds", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/worlds/", http.StatusMovedPermanently)
+	})
 
 	n.mux.HandleFunc("/about", n.ViewRenderer(Copier(&GenericPage{}), "AboutPage"))
 	n.mux.HandleFunc("/contact", n.ViewRenderer(Copier(&GenericPage{}), "ContactUsPage"))

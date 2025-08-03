@@ -4,6 +4,9 @@ import { GameViewer } from './GameViewer';
 import { Unit, Tile, World } from './World';
 import { GameState, UnitSelectionData } from './GameState';
 import { GameState as ProtoGameState, Game as ProtoGame, GameConfiguration as ProtoGameConfiguration } from '../gen/weewar/v1/models_pb';
+import { MoveOption, AttackOption } from '../gen/weewar/v1/games_pb';
+import { GameMove, GameMoveSchema } from '../gen/weewar/v1/models_pb';
+import { create } from '@bufbuild/protobuf';
 import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
@@ -32,6 +35,11 @@ class GameViewerPage extends BasePage implements LCMComponent {
     // UI state
     private selectedUnit: any = null;
     private gameLog: string[] = [];
+    
+    // Move execution state
+    private selectedUnitCoord: { q: number, r: number } | null = null;
+    private availableMovementOptions: MoveOption[] = [];
+    private isProcessingMove: boolean = false;
 
     // =============================================================================
     // LCMComponent Interface Implementation
@@ -173,6 +181,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
                         this.onTileClicked,
                         this.onUnitClicked
                     );
+                    
+                    // Set up movement callback for game-specific move execution
+                    this.worldViewer.setMovementCallback(this.onMovementClicked);
+                    
                     console.log('GameViewerPage: Interaction callbacks set after scene ready');
                 }
                 
@@ -453,14 +465,35 @@ class GameViewerPage extends BasePage implements LCMComponent {
 
     private clearUnitSelection(): void {
         this.selectedUnit = null;
+        this.selectedUnitCoord = null;
+        this.availableMovementOptions = [];
         
         // Hide unit info panel
         const unitInfoPanel = document.getElementById('selected-unit-info');
         if (unitInfoPanel) {
             unitInfoPanel.classList.add('hidden');
         }
-        
-        // TODO: Clear visual selection highlights
+    }
+
+    /**
+     * Clear all highlight layers
+     */
+    private clearAllHighlights(): void {
+        if (this.worldViewer) {
+            const selectionLayer = this.worldViewer.getSelectionHighlightLayer();
+            const movementLayer = this.worldViewer.getMovementHighlightLayer();
+            const attackLayer = this.worldViewer.getAttackHighlightLayer();
+            
+            if (selectionLayer) {
+                selectionLayer.clearSelection();
+            }
+            if (movementLayer) {
+                movementLayer.clearMovementOptions();
+            }
+            if (attackLayer) {
+                attackLayer.clearAttackOptions();
+            }
+        }
     }
 
     /**
@@ -553,6 +586,33 @@ class GameViewerPage extends BasePage implements LCMComponent {
     };
 
     /**
+     * Handle movement clicks - execute actual unit moves
+     * @returns false to suppress event emission (we handle it completely)
+     */
+    private onMovementClicked = (q: number, r: number, moveOption: MoveOption): void => {
+        console.log(`[GameViewerPage] Movement clicked at (${q}, ${r}) with option:`, moveOption);
+
+        if (!this.gameState?.isReady()) {
+            console.warn('[GameViewerPage] Game not ready for movement');
+            return;
+        }
+
+        if (this.isProcessingMove) {
+            console.warn('[GameViewerPage] Already processing a move, ignoring click');
+            this.showToast('Warning', 'Move in progress...', 'warning');
+            return;
+        }
+
+        if (!this.selectedUnitCoord) {
+            console.warn('[GameViewerPage] No unit selected for movement');
+            return;
+        }
+
+        // Execute the move
+        this.executeMove(this.selectedUnitCoord, { q, r }, moveOption);
+    };
+
+    /**
      * Select unit and show movement/attack highlights
      */
     private selectUnitAt(q: number, r: number, options: any[]): void {
@@ -578,22 +638,19 @@ class GameViewerPage extends BasePage implements LCMComponent {
         
         console.log(`[GameViewerPage] Unit selected: ${movementOptions.length} moves, ${attackOptions.length} attacks available`);
         
-        // Convert to coordinate arrays for highlighting
-        const movableCoords = movementOptions.map((option: any) => ({
-            q: option.move.q,
-            r: option.move.r
-        }));
+        // Extract MoveOption and AttackOption objects from the unified options
+        const moveOptionObjects = movementOptions.map((option: any) => option.move);
+        const attackOptionObjects = attackOptions.map((option: any) => option.attack);
         
-        const attackableCoords = attackOptions.map((option: any) => ({
-            q: option.attack.q,
-            r: option.attack.r
-        }));
+        // Store selected unit info and available options for move execution
+        this.selectedUnitCoord = { q, r };
+        this.availableMovementOptions = moveOptionObjects;
         
-        console.log('[GameViewerPage] Converted coordinates:', {
-            movableCoords,
-            attackableCoords,
-            sampleMoveOption: movementOptions[0],
-            sampleAttackOption: attackOptions[0]
+        console.log('[GameViewerPage] Extracted protobuf objects:', {
+            moveOptionObjects,
+            attackOptionObjects,
+            sampleMoveOption: moveOptionObjects[0],
+            sampleAttackOption: attackOptionObjects[0]
         });
 
         // Update GameViewer to show highlights using layer-based approach  
@@ -607,11 +664,12 @@ class GameViewerPage extends BasePage implements LCMComponent {
                 // Select the unit
                 selectionLayer.selectHex(q, r);
                 
-                // Show movement options
-                movementLayer.showMovementOptions(movableCoords);
+                // Show movement options using protobuf MoveOption objects
+                movementLayer.showMovementOptions(moveOptionObjects);
                 
-                // Show attack options  
-                attackLayer.showAttackOptions(attackableCoords);
+                // Show attack options (convert to coordinates for now)
+                const attackCoords = attackOptionObjects.map(attackOpt => ({ q: attackOpt.q, r: attackOpt.r }));
+                attackLayer.showAttackOptions(attackCoords);
                 
                 console.log('[GameViewerPage] Highlights sent to layers');
             } else {
@@ -620,6 +678,59 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }
 
         this.showToast('Success', `Unit selected at (${q}, ${r}) - ${movementOptions.length} moves, ${attackOptions.length} attacks available`, 'success');
+    }
+
+    /**
+     * Execute a unit move using ProcessMoves API
+     */
+    private async executeMove(fromCoord: { q: number, r: number }, toCoord: { q: number, r: number }, moveOption: MoveOption): Promise<void> {
+        console.log(`[GameViewerPage] Executing move from (${fromCoord.q}, ${fromCoord.r}) to (${toCoord.q}, ${toCoord.r})`);
+
+        // Set processing state to prevent concurrent moves
+        this.isProcessingMove = true;
+        this.showToast('Info', 'Processing move...', 'info');
+
+        try {
+            // Use the ready-to-use action from the moveOption
+            if (!moveOption.action) {
+                throw new Error('Move option does not contain action object');
+            }
+
+            const gameMove = create(GameMoveSchema, {
+                player: this.gameState!.getGameState().currentPlayer,
+                moveType: {
+                    case: "moveUnit",
+                    value: moveOption.action
+                }
+            });
+
+            // Call ProcessMoves API
+            const worldChanges = await this.gameState!.processMoves([gameMove]);
+            
+            console.log('[GameViewerPage] Move executed successfully, world changes:', worldChanges);
+
+            // Clear selection and highlights after successful move
+            this.clearUnitSelection();
+            this.clearAllHighlights();
+
+            // Show success feedback
+            this.showToast('Success', `Unit moved to (${toCoord.q}, ${toCoord.r})`, 'success');
+
+            // Update game UI with new state
+            const gameState = this.gameState!.getGameState();
+            this.updateGameUIFromState(gameState);
+
+        } catch (error) {
+            console.error('[GameViewerPage] Move execution failed:', error);
+            
+            // Show error feedback
+            const errorMessage = error instanceof Error ? error.message : 'Move failed';
+            this.showToast('Error', `Move failed: ${errorMessage}`, 'error');
+            
+        } finally {
+            // Always clear processing state
+            this.isProcessingMove = false;
+        }
     }
 
     /**

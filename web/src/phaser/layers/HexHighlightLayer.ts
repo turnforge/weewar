@@ -8,6 +8,7 @@
 import * as Phaser from 'phaser';
 import { BaseLayer, LayerConfig, ClickContext, LayerHitResult } from '../LayerSystem';
 import { hexToPixel } from '../hexUtils';
+import { MoveOption, AttackOption } from '../../../gen/weewar/v1/games_pb';
 
 // =============================================================================
 // Hex Highlight Base Class
@@ -176,9 +177,10 @@ export class SelectionHighlightLayer extends HexHighlightLayer {
  * Shows green highlights for valid movement positions
  */
 export class MovementHighlightLayer extends HexHighlightLayer {
-    private onMoveCallback?: (q: number, r: number) => void;
+    private onMoveCallback?: (q: number, r: number, moveOption: MoveOption) => void;
+    private movementOptions: Map<string, MoveOption> = new Map();
     
-    constructor(scene: Phaser.Scene, tileWidth: number, onMoveCallback?: (q: number, r: number) => void) {
+    constructor(scene: Phaser.Scene, tileWidth: number, onMoveCallback?: (q: number, r: number, moveOption: MoveOption) => void) {
         super(scene, {
             name: 'movement-highlight',
             coordinateSpace: 'hex',
@@ -204,26 +206,37 @@ export class MovementHighlightLayer extends HexHighlightLayer {
     public handleClick(context: ClickContext): boolean {
         console.log(`[MovementHighlightLayer] Movement click at (${context.hexQ}, ${context.hexR})`);
         
-        if (this.onMoveCallback) {
-            this.onMoveCallback(context.hexQ, context.hexR);
+        // Get the move option for this coordinate
+        const coordKey = `${context.hexQ},${context.hexR}`;
+        const moveOption = this.movementOptions.get(coordKey);
+        
+        if (this.onMoveCallback && moveOption) {
+            this.onMoveCallback(context.hexQ, context.hexR, moveOption);
+        } else {
+            console.warn(`[MovementHighlightLayer] No move option found for (${context.hexQ}, ${context.hexR})`);
         }
         
         return true; // Event handled
     }
     
     /**
-     * Show movement options
+     * Show movement options using protobuf MoveOption objects
      */
-    public showMovementOptions(coords: Array<{ q: number; r: number; cost?: number }>): void {
-        console.log(`[MovementHighlightLayer] Showing ${coords.length} movement options`);
+    public showMovementOptions(moveOptions: MoveOption[]): void {
+        console.log(`[MovementHighlightLayer] Showing ${moveOptions.length} movement options`);
         
-        // Clear existing highlights
+        // Clear existing highlights and stored options
         this.clearHighlights();
+        this.movementOptions.clear();
         
-        // Add highlights for each valid movement position
-        coords.forEach(coord => {
+        // Add highlights for each valid movement position and store the MoveOption data
+        moveOptions.forEach(moveOption => {
             // Green highlight with subtle border
-            this.addHighlight(coord.q, coord.r, 0x00FF00, 0.2, 0x00FF00, 2);
+            this.addHighlight(moveOption.q, moveOption.r, 0x00FF00, 0.2, 0x00FF00, 2);
+            
+            // Store the move option for click handling
+            const coordKey = `${moveOption.q},${moveOption.r}`;
+            this.movementOptions.set(coordKey, moveOption);
         });
     }
     
@@ -233,6 +246,15 @@ export class MovementHighlightLayer extends HexHighlightLayer {
     public clearMovementOptions(): void {
         console.log(`[MovementHighlightLayer] Clearing movement options`);
         this.clearHighlights();
+        this.movementOptions.clear();
+    }
+    
+    /**
+     * Get the move option for a specific coordinate (if any)
+     */
+    public getMoveOptionAt(q: number, r: number): MoveOption | undefined {
+        const coordKey = `${q},${r}`;
+        return this.movementOptions.get(coordKey);
     }
 }
 

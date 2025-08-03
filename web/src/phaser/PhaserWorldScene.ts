@@ -17,7 +17,7 @@ export class PhaserWorldScene extends Phaser.Scene {
     protected yIncrement: number = 48; // 3/4 * tileHeight for pointy-topped hexes
     
     // World as single source of truth for game data
-    protected world: World | null = null;
+    public world: World | null = null;
     
     // Visual sprite maps (for rendering only, not game data)
     protected tileSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();

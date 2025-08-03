@@ -36,7 +36,7 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 		return nil, fmt.Errorf("at least one move is required")
 	}
 
-	gameresp, err := s.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
 	if err != nil || gameresp.Game == nil {
 		return nil, err
 	}
@@ -60,6 +60,9 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 	// state has not changed and neither has the Runtime Game object.  Both the
 	// GameState and the Runtime Game are checkpointed at before the moves started
 	var dmp weewar.DefaultMoveProcessor
+	for _, move := range req.Moves {
+		fmt.Print("Found Move: ", move, move.MoveType)
+	}
 	results, err := dmp.ProcessMoves(rtGame, req.Moves)
 	if err != nil {
 		return nil, err
@@ -160,12 +163,21 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 			tileOptions, err := dmp.GetMovementOptions(rtGame, req.Q, req.R)
 			if err == nil {
 				for _, tileOption := range tileOptions {
+					// Create ready-to-use MoveUnitAction
+					moveAction := &v1.MoveUnitAction{
+						FromQ: req.Q,
+						FromR: req.R,
+						ToQ:   int32(tileOption.Coord.Q),
+						ToR:   int32(tileOption.Coord.R),
+					}
+
 					options = append(options, &v1.GameOption{
 						OptionType: &v1.GameOption_Move{
 							Move: &v1.MoveOption{
 								Q:            int32(tileOption.Coord.Q),
 								R:            int32(tileOption.Coord.R),
 								MovementCost: int32(tileOption.Cost),
+								Action:       moveAction,
 							},
 						},
 					})
@@ -184,6 +196,14 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 						// Calculate estimated damage (simplified for now)
 						damageEstimate := int32(50) // TODO: Use proper damage calculation from rules engine
 
+						// Create ready-to-use AttackUnitAction
+						attackAction := &v1.AttackUnitAction{
+							AttackerQ: req.Q,
+							AttackerR: req.R,
+							DefenderQ: int32(coord.Q),
+							DefenderR: int32(coord.R),
+						}
+
 						options = append(options, &v1.GameOption{
 							OptionType: &v1.GameOption_Attack{
 								Attack: &v1.AttackOption{
@@ -193,6 +213,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 									TargetUnitHealth: targetUnit.AvailableHealth,
 									CanAttack:        true,
 									DamageEstimate:   damageEstimate,
+									Action:           attackAction,
 								},
 							},
 						})

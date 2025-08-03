@@ -30,7 +30,6 @@ export class GameState extends BaseComponent {
     private client: Weewar_v1_servicesClient;
     private wasmLoadPromise: Promise<void> | null;
     private wasmLoaded: boolean = false;
-    private gameId: string = '';
     private world: World;
     status: string
     
@@ -42,8 +41,13 @@ export class GameState extends BaseComponent {
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('game-state', rootElement, eventBus, debugMode);
         
-        // Initialize WASM client and loading
-        this.client = new Weewar_v1_servicesClient();
+        // Initialize WASM client with Go compatibility enabled
+        this.client = new Weewar_v1_servicesClient({
+            oneofToJson: 'auto',    // Enable automatic oneof field conversion for Go compatibility (requests)
+            oneofFromJson: 'auto',  // Enable automatic oneof field conversion from Go format (responses)
+            emitDefaults: false,    // Match Go protobuf behavior - don't emit zero values
+            bigIntHandler: (value: bigint) => value.toString() // Convert BigInt to string for JSON
+        });
         this.wasmLoadPromise = this.loadWASMModule();
         
         // Initialize with empty objects (will be populated by loadGameDataToWasm)
@@ -166,7 +170,8 @@ export class GameState extends BaseComponent {
     public async processMoves(moves: GameMove[]): Promise<WorldChange[]> {
         const client = await this.ensureWASMLoaded();
 
-        if (!this.gameId) {
+        const gameId = this.cachedGame.id
+        if (!gameId) {
             throw new Error('Game ID not set. Call setGameId() first.');
         }
 
@@ -174,17 +179,24 @@ export class GameState extends BaseComponent {
 
         // Create request for ProcessMoves service
         const request = create(ProcessMovesRequestSchema, {
-            gameId: this.gameId,
+            gameId: gameId,
             moves: moves
         });
 
         // Call the ProcessMoves service  
         const response: ProcessMovesResponse = await client.gamesService.processMoves(request);
 
-        // Extract world changes from response
-        const worldChanges = response.changes || [];
+        // Extract world changes from move results (each move result contains its own changes)
+        const worldChanges: WorldChange[] = [];
+        for (const moveResult of response.moveResults || []) {
+            worldChanges.push(...(moveResult.changes || []));
+        }
         
-        this.log('Received world changes:', worldChanges);
+        this.log('Received ProcessMoves response:', {
+            moveResultsCount: response.moveResults?.length || 0,
+            totalWorldChanges: worldChanges.length,
+            worldChanges: worldChanges
+        });
 
         // Apply changes to internal state and notify observers
         this.applyWorldChanges(worldChanges);

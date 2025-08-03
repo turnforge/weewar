@@ -38,21 +38,37 @@ func (m *DefaultMoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (r
 // and then they attack another unit.  Here If we treat it as a single unit attacking it
 // will have different outcomes than a "combined" attack.
 func (m *DefaultMoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (results *v1.GameMoveResult, err error) {
+	fmt.Printf("ProcessMove: move.Player=%d, move.MoveType=%T\n", move.Player, move.MoveType)
+	if move.MoveType == nil {
+		return nil, fmt.Errorf("move type is nil")
+	}
+	
 	switch a := move.MoveType.(type) {
 	case *v1.GameMove_MoveUnit:
+		fmt.Printf("Processing MoveUnit: %+v\n", a.MoveUnit)
 		return m.ProcessMoveUnit(game, move, a.MoveUnit)
 	case *v1.GameMove_AttackUnit:
+		fmt.Printf("Processing AttackUnit: %+v\n", a.AttackUnit)
 		return m.ProcessAttackUnit(game, move, a.AttackUnit)
 	case *v1.GameMove_EndTurn:
+		fmt.Printf("Processing EndTurn: %+v\n", a.EndTurn)
 		return m.ProcessEndTurn(game, move, a.EndTurn)
+	default:
+		return nil, fmt.Errorf("unknown move type: %T", move.MoveType)
 	}
-	return nil, nil
 }
 
 // EndTurn advances to next player's turn
 // For now a player can just end turn but in other games there may be some mandatory
 // moves left
 func (m *DefaultMoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.EndTurnAction) (results *v1.GameMoveResult, err error) {
+	// Initialize the result object
+	results = &v1.GameMoveResult{
+		IsPermanent: false,
+		SequenceNum: 0, // TODO: Set proper sequence number
+		Changes:     []*v1.WorldChange{},
+	}
+
 	// Store previous state for GameLog
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	previousPlayer := g.CurrentPlayer
@@ -140,6 +156,13 @@ func (g *Game) IsValidMove(from, to AxialCoord) bool {
 
 // MoveUnit executes unit movement using cube coordinates
 func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction) (result *v1.GameMoveResult, err error) {
+	// Initialize the result object
+	result = &v1.GameMoveResult{
+		IsPermanent: false,
+		SequenceNum: 0, // TODO: Set proper sequence number
+		Changes:     []*v1.WorldChange{},
+	}
+
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	from := CoordFromInt32(action.FromQ, action.FromR)
 	to := CoordFromInt32(action.ToQ, action.ToR)
@@ -203,6 +226,13 @@ func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, actio
 
 // AttackUnit executes combat between units
 func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1.AttackUnitAction) (result *v1.GameMoveResult, err error) {
+	// Initialize the result object
+	result = &v1.GameMoveResult{
+		IsPermanent: true, // Attacks are permanent (cannot be undone)
+		SequenceNum: 0,    // TODO: Set proper sequence number
+		Changes:     []*v1.WorldChange{},
+	}
+
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	attacker := g.World.UnitAt(CoordFromInt32(action.AttackerQ, action.AttackerR))
 	defender := g.World.UnitAt(CoordFromInt32(action.DefenderQ, action.DefenderR))
@@ -219,6 +249,10 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	if !g.CanAttackUnit(attacker, defender) {
 		return nil, fmt.Errorf("attacker cannot attack defender")
 	}
+
+	// Store original health for world changes
+	attackerOriginalHealth := attacker.AvailableHealth
+	defenderOriginalHealth := defender.AvailableHealth
 
 	// Calculate damage using rules engine
 	attackerDamage := 0
@@ -253,90 +287,70 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	defenderKilled := defender.AvailableHealth <= 0
 	attackerKilled := attacker.AvailableHealth <= 0
 
-	// Remove killed units
-	if defenderKilled {
-		g.World.RemoveUnit(defender)
-	}
-	if attackerKilled {
-		g.World.RemoveUnit(attacker)
-	}
-	/*
+	// Add damage changes to world changes
+	if defenderDamage > 0 {
 		change := &v1.WorldChange{
-			ChangeType: &v1.WorldChange_PlayerChanged{
-				PlayerChanged: &v1.PlayerChangedChange{
-					PreviousPlayer: int32(previousPlayer),
-					NewPlayer:      int32(g.CurrentPlayer),
-					PreviousTurn:   int32(previousTurn),
-					NewTurn:        int32(g.TurnCounter),
+			ChangeType: &v1.WorldChange_UnitDamaged{
+				UnitDamaged: &v1.UnitDamagedChange{
+					Q:              action.DefenderQ,
+					R:              action.DefenderR,
+					PreviousHealth: defenderOriginalHealth,
+					NewHealth:      defender.AvailableHealth,
 				},
 			},
 		}
+		result.Changes = append(result.Changes, change)
+	}
 
-			results.Changes = append(results.Changes, change)
+	if attackerDamage > 0 {
+		change := &v1.WorldChange{
+			ChangeType: &v1.WorldChange_UnitDamaged{
+				UnitDamaged: &v1.UnitDamagedChange{
+					Q:              action.AttackerQ,
+					R:              action.AttackerR,
+					PreviousHealth: attackerOriginalHealth,
+					NewHealth:      attacker.AvailableHealth,
+				},
+			},
+		}
+		result.Changes = append(result.Changes, change)
+	}
 
-			// Create combat result
-			result := &CombatResult{
-				AttackerDamage: attackerDamage,
-				DefenderDamage: defenderDamage,
-				AttackerKilled: attackerKilled,
-				DefenderKilled: defenderKilled,
-				AttackerHealth: attacker.AvailableHealth,
-				DefenderHealth: defender.AvailableHealth,
-			}
-	*/
+	// Add kill changes if units were killed
+	if defenderKilled {
+		change := &v1.WorldChange{
+			ChangeType: &v1.WorldChange_UnitKilled{
+				UnitKilled: &v1.UnitKilledChange{
+					Player:   defender.Player,
+					UnitType: defender.UnitType,
+					Q:        action.DefenderQ,
+					R:        action.DefenderR,
+				},
+			},
+		}
+		result.Changes = append(result.Changes, change)
+		g.World.RemoveUnit(defender)
+	}
+
+	if attackerKilled {
+		change := &v1.WorldChange{
+			ChangeType: &v1.WorldChange_UnitKilled{
+				UnitKilled: &v1.UnitKilledChange{
+					Player:   attacker.Player,
+					UnitType: attacker.UnitType,
+					Q:        action.AttackerQ,
+					R:        action.AttackerR,
+				},
+			},
+		}
+		result.Changes = append(result.Changes, change)
+		g.World.RemoveUnit(attacker)
+	}
 
 	// Update timestamp
 	g.LastActionAt = time.Now()
 
-	/*
-		// Add damage changes
-		if defenderDamage > 0 {
-			changes = append(changes, WorldChange{
-				Type:       "unitDamaged",
-				EntityType: "unit",
-				EntityID:   fmt.Sprintf("unit_%d_%d", defender.Player, defender.UnitType),
-				FromState:  map[string]interface{}{"health": defender.AvailableHealth + defenderDamage},
-				ToState:    map[string]interface{}{"health": defender.AvailableHealth},
-			})
-		}
-
-		if attackerDamage > 0 {
-			changes = append(changes, WorldChange{
-				Type:       "unitDamaged",
-				EntityType: "unit",
-				EntityID:   fmt.Sprintf("unit_%d_%d", attacker.Player, attacker.UnitType),
-				FromState:  map[string]interface{}{"health": attacker.AvailableHealth + attackerDamage},
-				ToState:    map[string]interface{}{"health": attacker.AvailableHealth},
-			})
-		}
-
-		// Add kill changes
-		if defenderKilled {
-			changes = append(changes, CreateUnitKilledChange(
-				fmt.Sprintf("unit_%d_%d", defender.Player, defender.UnitType),
-				map[string]interface{}{
-					"player":   defender.Player,
-					"unitType": defender.UnitType,
-					"position": defender.Coord,
-					"health":   defender.AvailableHealth + defenderDamage,
-				},
-			))
-		}
-
-		if attackerKilled {
-			changes = append(changes, CreateUnitKilledChange(
-				fmt.Sprintf("unit_%d_%d", attacker.Player, attacker.UnitType),
-				map[string]interface{}{
-					"player":   attacker.Player,
-					"unitType": attacker.UnitType,
-					"position": attacker.Coord,
-					"health":   attacker.AvailableHealth + attackerDamage,
-				},
-			))
-		}
-	*/
-
-	return nil, nil
+	return result, nil
 }
 
 // CanMoveUnit validates potential movement using cube coordinates

@@ -128,7 +128,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceCreateGame(this js
 
 	// Parse request
 	req := &weewarv1.CreateGameRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -143,8 +146,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceCreateGame(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -169,7 +177,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGames(this js.V
 
 	// Parse request
 	req := &weewarv1.GetGamesRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -184,8 +195,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGames(this js.V
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -210,7 +226,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceListGames(this js.
 
 	// Parse request
 	req := &weewarv1.ListGamesRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -225,8 +244,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceListGames(this js.
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -251,7 +275,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGame(this js.Va
 
 	// Parse request
 	req := &weewarv1.GetGameRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -266,8 +293,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGame(this js.Va
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -292,7 +324,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceDeleteGame(this js
 
 	// Parse request
 	req := &weewarv1.DeleteGameRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -307,8 +342,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceDeleteGame(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -333,7 +373,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceUpdateGame(this js
 
 	// Parse request
 	req := &weewarv1.UpdateGameRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -348,8 +391,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceUpdateGame(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -374,7 +422,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGameState(this 
 
 	// Parse request
 	req := &weewarv1.GetGameStateRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -389,8 +440,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetGameState(this 
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -415,7 +471,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceListMoves(this js.
 
 	// Parse request
 	req := &weewarv1.ListMovesRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -430,8 +489,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceListMoves(this js.
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -456,7 +520,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceProcessMoves(this 
 
 	// Parse request
 	req := &weewarv1.ProcessMovesRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -471,8 +538,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceProcessMoves(this 
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -497,7 +569,10 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetOptionsAt(this 
 
 	// Parse request
 	req := &weewarv1.GetOptionsAtRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -512,8 +587,13 @@ func (exports *Weewar_v1_servicesServicesExports) gamesServiceGetOptionsAt(this 
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -538,7 +618,10 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceCreateUser(this js
 
 	// Parse request
 	req := &weewarv1.CreateUserRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -553,8 +636,13 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceCreateUser(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -579,7 +667,10 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceGetUsers(this js.V
 
 	// Parse request
 	req := &weewarv1.GetUsersRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -594,8 +685,13 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceGetUsers(this js.V
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -620,7 +716,10 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceListUsers(this js.
 
 	// Parse request
 	req := &weewarv1.ListUsersRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -635,8 +734,13 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceListUsers(this js.
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -661,7 +765,10 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceGetUser(this js.Va
 
 	// Parse request
 	req := &weewarv1.GetUserRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -676,8 +783,13 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceGetUser(this js.Va
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -702,7 +814,10 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceDeleteUser(this js
 
 	// Parse request
 	req := &weewarv1.DeleteUserRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -717,8 +832,13 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceDeleteUser(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -743,7 +863,10 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceUpdateUser(this js
 
 	// Parse request
 	req := &weewarv1.UpdateUserRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -758,8 +881,13 @@ func (exports *Weewar_v1_servicesServicesExports) usersServiceUpdateUser(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -784,7 +912,10 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceCreateWorld(this 
 
 	// Parse request
 	req := &weewarv1.CreateWorldRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -799,8 +930,13 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceCreateWorld(this 
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -825,7 +961,10 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceGetWorlds(this js
 
 	// Parse request
 	req := &weewarv1.GetWorldsRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -840,8 +979,13 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceGetWorlds(this js
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -866,7 +1010,10 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceListWorlds(this j
 
 	// Parse request
 	req := &weewarv1.ListWorldsRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -881,8 +1028,13 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceListWorlds(this j
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -907,7 +1059,10 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceGetWorld(this js.
 
 	// Parse request
 	req := &weewarv1.GetWorldRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -922,8 +1077,13 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceGetWorld(this js.
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -948,7 +1108,10 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceDeleteWorld(this 
 
 	// Parse request
 	req := &weewarv1.DeleteWorldRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -963,8 +1126,13 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceDeleteWorld(this 
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
@@ -989,7 +1157,10 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceUpdateWorld(this 
 
 	// Parse request
 	req := &weewarv1.UpdateWorldRequest{}
-	opts := protojson.UnmarshalOptions{DiscardUnknown: true}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
 	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
@@ -1004,8 +1175,13 @@ func (exports *Weewar_v1_servicesServicesExports) worldsServiceUpdateWorld(this 
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
-	// Marshal response
-	responseJSON, err := protojson.Marshal(resp)
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}

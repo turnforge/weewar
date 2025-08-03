@@ -10,6 +10,7 @@ import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer }
 export interface GameSceneCallbacks {
     onTileClicked?: (q: number, r: number) => void;
     onUnitClicked?: (q: number, r: number) => void;
+    onMovementClicked?: (q: number, r: number, moveOption: any) => void;
 }
 
 /**
@@ -89,7 +90,7 @@ export class PhaserGameScene extends PhaserWorldScene {
         this.movementHighlightLayer = new MovementHighlightLayer(
             this, 
             this.tileWidth,
-            (q: number, r: number) => this.handleMovementClick(q, r)
+            (q: number, r: number, moveOption: any) => this.handleMovementClick(q, r, moveOption)
         );
         layerManager.addLayer(this.movementHighlightLayer);
         
@@ -107,18 +108,15 @@ export class PhaserGameScene extends PhaserWorldScene {
     /**
      * Handle clicks on movement highlights
      */
-    private handleMovementClick(q: number, r: number): void {
-        console.log(`[PhaserGameScene] Movement click at (${q}, ${r})`);
+    private handleMovementClick(q: number, r: number, moveOption: any): void {
+        console.log(`[PhaserGameScene] Movement click at (${q}, ${r}) with move option:`, moveOption);
         
-        if (this.selectedUnit && this.gameMode === 'select' || this.gameMode === 'move') {
-            // Emit move command to external handler
-            if (this.callbacks.onTileClicked) {
-                this.callbacks.onTileClicked(q, r);
-            }
-            
-            // Clear selection after move attempt
-            this.clearSelection();
+        // Route movement clicks to a dedicated move callback instead of general tile click
+        if (this.callbacks.onMovementClicked) {
+            this.callbacks.onMovementClicked(q, r, moveOption);
         }
+        
+        // Note: Don't clear selection here - let the GameViewerPage handle that after move execution
     }
 
     /**
@@ -317,7 +315,9 @@ export class PhaserGameScene extends PhaserWorldScene {
 
         // Update visuals
         this.highlightSelectedUnit(q, r);
-        this.showMovementOptions(movableCoords);
+        // Convert coordinate objects to MoveOption-like objects for compatibility
+        const moveOptions = movableCoords.map(coord => ({ q: coord.q, r: coord.r, movementCost: 1 }));
+        this.showMovementOptions(moveOptions);
         this.showAttackOptions(attackableCoords);
     }
 
@@ -382,12 +382,12 @@ export class PhaserGameScene extends PhaserWorldScene {
     }
 
     /**
-     * Show movement options as green highlights
+     * Show movement options as green highlights using MoveOption objects
      */
-    private showMovementOptions(movableCoords: Array<{ q: number; r: number }>): void {
+    private showMovementOptions(moveOptions: any[]): void {
         if (this.movementHighlightLayer) {
-            this.movementHighlightLayer.showMovementOptions(movableCoords);
-            console.log(`[PhaserGameScene] Showing ${movableCoords.length} movement options`);
+            this.movementHighlightLayer.showMovementOptions(moveOptions);
+            console.log(`[PhaserGameScene] Showing ${moveOptions.length} movement options`);
         } else {
             console.warn('[PhaserGameScene] Movement highlight layer not available');
         }

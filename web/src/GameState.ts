@@ -348,13 +348,7 @@ export class GameState extends BaseComponent {
             toR: toR
         });
 
-        return GameMove.from({
-            player: playerId,
-            moveType: {
-                case: 'moveUnit',
-                value: moveAction
-            }
-        });
+        return GameMove.from({ player: playerId, moveUnit: moveAction, });
     }
 
     /**
@@ -368,13 +362,7 @@ export class GameState extends BaseComponent {
             defenderR: defenderR
         });
 
-        return GameMove.from({
-            player: playerId,
-            moveType: {
-                case: 'attackUnit',
-                value: attackAction
-            }
-        });
+        return GameMove.from({ player: playerId, attackUnit: attackAction });
     }
 
     /**
@@ -382,14 +370,7 @@ export class GameState extends BaseComponent {
      */
     public static createEndTurnAction(playerId: number): GameMove {
         const endTurnAction = EndTurnAction.from({});
-
-        return GameMove.from({
-            player: playerId,
-            moveType: {
-                case: 'endTurn',
-                value: endTurnAction
-            }
-        });
+        return GameMove.from({ player: playerId, endTurn: endTurnAction });
     }
 
     /**

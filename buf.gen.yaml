@@ -28,12 +28,11 @@ plugins:
     include_imports: true
     # Add more plugin options here
     opt: target=ts
+
   # WASM services (server-side deployment)
   - local: protoc-gen-go-wasmjs
     out: ./gen/wasm
     opt:
-      - ts_generator=protoc-gen-es
-      - ts_import_path=../../web/gen  # Relative to ./gen/wasm
       - js_structure=namespaced
       - js_namespace=weewar
       - generate_typescript=false  # Only generate WASM
@@ -42,8 +41,6 @@ plugins:
   - local: protoc-gen-go-wasmjs
     out: ./web/gen/wasm-clients
     opt:
-      - ts_generator=protoc-gen-es
-      - ts_import_path=../../gen  # Relative to ./web/gen/wasm-clients
       - js_structure=namespaced
       - js_namespace=weewar
       - generate_wasm=false  # Only generate TypeScript

@@ -1,8 +1,7 @@
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar_v1_servicesClient.client';
-import { ProcessMovesRequest, ProcessMovesResponse, ProcessMovesRequestSchema, GetGameRequest, GetGameRequestSchema, GetGameStateRequest, GetGameStateRequestSchema, GetOptionsAtRequest, GetOptionsAtRequestSchema } from '../gen/weewar/v1/games_pb';
-import { GameMove, WorldChange, GameMoveSchema, MoveUnitAction, MoveUnitActionSchema, AttackUnitAction, AttackUnitActionSchema, EndTurnAction, EndTurnActionSchema, GameState as ProtoGameState, GameStateSchema as ProtoGameStateSchema, Game as ProtoGame, GameSchema as ProtoGameSchema } from '../gen/weewar/v1/models_pb';
+import { ProcessMovesRequest, ProcessMovesResponse, GetGameRequest, GetGameStateRequest, GetOptionsAtRequest, GameMove, WorldChange, MoveUnitAction, AttackUnitAction, EndTurnAction, GameState as ProtoGameState, Game as ProtoGame } from '../gen/wasm-clients/weewar/v1/models'
 import { create } from '@bufbuild/protobuf';
 import { World } from './World';
 
@@ -42,24 +41,19 @@ export class GameState extends BaseComponent {
         super('game-state', rootElement, eventBus, debugMode);
         
         // Initialize WASM client with Go compatibility enabled
-        this.client = new Weewar_v1_servicesClient({
-            oneofToJson: 'auto',    // Enable automatic oneof field conversion for Go compatibility (requests)
-            oneofFromJson: 'auto',  // Enable automatic oneof field conversion from Go format (responses)
-            emitDefaults: false,    // Match Go protobuf behavior - don't emit zero values
-            bigIntHandler: (value: bigint) => value.toString() // Convert BigInt to string for JSON
-        });
+        this.client = new Weewar_v1_servicesClient();
         this.wasmLoadPromise = this.loadWASMModule();
         
         // Initialize with empty objects (will be populated by loadGameDataToWasm)
         this.world = new World(eventBus, 'Loading...');
         this.status = 'loading'
-        this.cachedGame = create(ProtoGameSchema, {
+        this.cachedGame = ProtoGame.from({
             id: '',
             name: 'Loading...',
             creatorId: '',
             worldId: ''
         });
-        this.cachedGameState = create(ProtoGameStateSchema, {
+        this.cachedGameState = ProtoGameState.from({
             gameId: '',
             currentPlayer: 0,
             turnCounter: 1,
@@ -178,7 +172,7 @@ export class GameState extends BaseComponent {
         this.log('Processing moves:', moves);
 
         // Create request for ProcessMoves service
-        const request = create(ProcessMovesRequestSchema, {
+        const request = ProcessMovesRequest.from({
             gameId: gameId,
             moves: moves
         });
@@ -214,33 +208,33 @@ export class GameState extends BaseComponent {
 
         // Process each world change and update both World object and cached GameState
         for (const change of changes) {
-            if (change.changeType.case === 'unitMoved') {
-                this.applyUnitMovedToWorld(change.changeType.value);
+            if (change.unitMoved) {
+                this.applyUnitMovedToWorld(change.unitMoved);
                 worldUpdated = true;
-                this.log('Applied unit move to World object:', change.changeType.value);
+                this.log('Applied unit move to World object:', change.unitMoved);
             }
 
-            if (change.changeType.case === 'unitDamaged') {
-                this.applyUnitDamagedToWorld(change.changeType.value);
+            if (change.unitDamaged) {
+                this.applyUnitDamagedToWorld(change.unitDamaged);
                 worldUpdated = true;
-                this.log('Applied unit damage to World object:', change.changeType.value);
+                this.log('Applied unit damage to World object:', change.unitDamaged);
             }
 
-            if (change.changeType.case === 'unitKilled') {
-                this.applyUnitKilledToWorld(change.changeType.value);
+            if (change.unitKilled) {
+                this.applyUnitKilledToWorld(change.unitKilled);
                 worldUpdated = true;
-                this.log('Applied unit death to World object:', change.changeType.value);
+                this.log('Applied unit death to World object:', change.unitKilled);
             }
             
             // Update cached GameState for player changes
-            if (change.changeType.case === 'playerChanged') {
-                this.cachedGameState = create(ProtoGameStateSchema, {
+            if (change.playerChanged) {
+                this.cachedGameState = ProtoGameState.from({
                     ...this.cachedGameState,
-                    currentPlayer: change.changeType.value.newPlayer,
-                    turnCounter: change.changeType.value.newTurn
+                    currentPlayer: change.playerChanged.newPlayer,
+                    turnCounter: change.playerChanged.newTurn
                 });
                 gameStateUpdated = true;
-                this.log('Updated cached GameState for player change:', change.changeType.value);
+                this.log('Updated cached GameState for player change:', change.playerChanged);
             }
         }
 
@@ -310,34 +304,34 @@ export class GameState extends BaseComponent {
 
         // Emit granular events for specific UI components
         for (const change of changes) {
-            if (change.changeType.case === 'playerChanged') {
+            if (change.playerChanged) {
                 this.emit('turn-ended', {
-                    previousPlayer: change.changeType.value.previousPlayer,
-                    currentPlayer: change.changeType.value.newPlayer,
-                    turnCounter: change.changeType.value.newTurn
+                    previousPlayer: change.playerChanged.previousPlayer,
+                    currentPlayer: change.playerChanged.newPlayer,
+                    turnCounter: change.playerChanged.newTurn
                 }, this);
             }
 
-            if (change.changeType.case === 'unitMoved') {
+            if (change.unitMoved) {
                 this.emit('unit-moved', {
-                    from: { q: change.changeType.value.fromQ, r: change.changeType.value.fromR },
-                    to: { q: change.changeType.value.toQ, r: change.changeType.value.toR }
+                    from: { q: change.unitMoved.fromQ, r: change.unitMoved.fromR },
+                    to: { q: change.unitMoved.toQ, r: change.unitMoved.toR }
                 }, this);
             }
 
-            if (change.changeType.case === 'unitDamaged') {
+            if (change.unitDamaged) {
                 this.emit('unit-damaged', {
-                    position: { q: change.changeType.value.q, r: change.changeType.value.r },
-                    previousHealth: change.changeType.value.previousHealth,
-                    newHealth: change.changeType.value.newHealth
+                    position: { q: change.unitDamaged.q, r: change.unitDamaged.r },
+                    previousHealth: change.unitDamaged.previousHealth,
+                    newHealth: change.unitDamaged.newHealth
                 }, this);
             }
 
-            if (change.changeType.case === 'unitKilled') {
+            if (change.unitKilled) {
                 this.emit('unit-killed', {
-                    position: { q: change.changeType.value.q, r: change.changeType.value.r },
-                    player: change.changeType.value.player,
-                    unitType: change.changeType.value.unitType
+                    position: { q: change.unitKilled.q, r: change.unitKilled.r },
+                    player: change.unitKilled.player,
+                    unitType: change.unitKilled.unitType
                 }, this);
             }
         }
@@ -347,14 +341,14 @@ export class GameState extends BaseComponent {
      * Helper function to create GameMove for unit movement
      */
     public static createMoveUnitAction(fromQ: number, fromR: number, toQ: number, toR: number, playerId: number): GameMove {
-        const moveAction = create(MoveUnitActionSchema, {
+        const moveAction = MoveUnitAction.from({
             fromQ: fromQ,
             fromR: fromR,
             toQ: toQ,
             toR: toR
         });
 
-        return create(GameMoveSchema, {
+        return GameMove.from({
             player: playerId,
             moveType: {
                 case: 'moveUnit',
@@ -367,14 +361,14 @@ export class GameState extends BaseComponent {
      * Helper function to create GameMove for unit attack
      */
     public static createAttackUnitAction(attackerQ: number, attackerR: number, defenderQ: number, defenderR: number, playerId: number): GameMove {
-        const attackAction = create(AttackUnitActionSchema, {
+        const attackAction = AttackUnitAction.from({
             attackerQ: attackerQ,
             attackerR: attackerR,
             defenderQ: defenderQ,
             defenderR: defenderR
         });
 
-        return create(GameMoveSchema, {
+        return GameMove.from({
             player: playerId,
             moveType: {
                 case: 'attackUnit',
@@ -387,9 +381,9 @@ export class GameState extends BaseComponent {
      * Helper function to create GameMove for end turn
      */
     public static createEndTurnAction(playerId: number): GameMove {
-        const endTurnAction = create(EndTurnActionSchema, {});
+        const endTurnAction = EndTurnAction.from({});
 
-        return create(GameMoveSchema, {
+        return GameMove.from({
             player: playerId,
             moveType: {
                 case: 'endTurn',
@@ -458,7 +452,7 @@ export class GameState extends BaseComponent {
         const client = await this.ensureWASMLoaded();
         
         // Get game data from WASM to extract game ID and world data
-        const req = create(GetGameRequestSchema, { id: 'test' })
+        const req = GetGameRequest.from({ id: 'test' })
         const gameResponse = await client.gamesService.getGame(req);
         
         if (!gameResponse.game || !gameResponse.state) {
@@ -586,7 +580,7 @@ export class GameState extends BaseComponent {
                 return { options: [], currentPlayer: 0, gameInitialized: false };
             }
 
-            const request = create(GetOptionsAtRequestSchema, {
+            const request = GetOptionsAtRequest.from({
                 gameId: gameId,
                 q: q,
                 r: r

@@ -48,6 +48,39 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 
 ## ✅ Phase 3: Map Editor Implementation (Completed January 2025)
 **Status**: Completed  
+
+### Visual Map Editor ✅
+- [x] Canvas-based map editor with Phaser.js integration
+- [x] Hexagonal grid rendering with proper hex math
+- [x] Interactive tile and unit placement
+- [x] Real-time visual feedback and layer management
+- [x] Complete asset integration (tiles, units, sprites)
+
+## ✅ Phase 4: Interactive Gameplay System (Completed August 2025)
+**Status**: MAJOR MILESTONE COMPLETED  
+**Timeline**: August 2025
+
+### Core Gameplay Loop ✅
+- [x] **Unit Movement Pipeline**: Complete click-to-move functionality with server validation
+- [x] **Visual Game Interface**: Phaser.js game viewer with hex grid and sprites
+- [x] **Move Execution**: ProcessMoves API integration with real-time visual updates
+- [x] **State Management**: GameState controller with event-driven architecture
+- [x] **Server Persistence**: SingletonGame maintains unit positions across moves
+
+### WASM Client Architecture Revolution ✅
+- [x] **90% Code Reduction**: Migrated from 374-line manual WASM to ~20-line generated client
+- [x] **Type Safety**: Generated TypeScript interfaces with auto-conversion capabilities
+- [x] **Direct Property Access**: Eliminated oneof complexity (`change.unitMoved` vs `change.changeType.case`)
+- [x] **Action Object Pattern**: Server provides ready-to-use action objects, zero client reconstruction
+- [x] **Service Reuse**: Same implementations work across HTTP, gRPC, and WASM transports
+- [x] **Auto-Generation**: API changes automatically propagate to Go and TypeScript
+
+### Technical Achievements ✅
+- [x] **Event System**: GameState → GameViewer → Phaser update pipeline with granular events
+- [x] **Highlight System**: Visual feedback for movement options and unit selection  
+- [x] **Error Resolution**: Fixed BigInt serialization, oneof field handling, nil pointer issues
+- [x] **Build Pipeline**: Successful TypeScript compilation with zero errors
+- [x] **Protobuf Integration**: Seamless protobuf-es to Go protobuf serialization compatibility  
 **Timeline**: Completed 2025-01-17
 
 ### WASM-Based Editor ✅

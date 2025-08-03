@@ -19,6 +19,8 @@ test:
 	cd cmd/weewar-cli && go test ./...
 
 buf:
+	rm -Rf gen 
+	rm -Rf web/gen
 	buf generate
 
 cli:

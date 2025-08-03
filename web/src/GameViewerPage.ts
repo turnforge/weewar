@@ -3,9 +3,8 @@ import { EventBus } from '../lib/EventBus';
 import { GameViewer } from './GameViewer';
 import { Unit, Tile, World } from './World';
 import { GameState, UnitSelectionData } from './GameState';
-import { GameState as ProtoGameState, Game as ProtoGame, GameConfiguration as ProtoGameConfiguration } from '../gen/weewar/v1/models_pb';
-import { MoveOption, AttackOption } from '../gen/weewar/v1/games_pb';
-import { GameMove, GameMoveSchema } from '../gen/weewar/v1/models_pb';
+import { GameState as ProtoGameState, Game as ProtoGame, GameConfiguration as ProtoGameConfiguration, MoveOption, AttackOption, GameMove } from '../gen/wasm-clients/weewar/v1/models';
+import { WeewarV1Deserializer } from '../gen/wasm-clients/weewar/v1/deserializer';
 import { create } from '@bufbuild/protobuf';
 import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
@@ -696,13 +695,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
                 throw new Error('Move option does not contain action object');
             }
 
-            const gameMove = create(GameMoveSchema, {
+            const gameMove= GameMove.from({
                 player: this.gameState!.getGameState().currentPlayer,
-                moveType: {
-                    case: "moveUnit",
-                    value: moveOption.action
-                }
-            });
+                moveUnit: moveOption.action,
+            })!;
 
             // Call ProcessMoves API
             const worldChanges = await this.gameState!.processMoves([gameMove]);

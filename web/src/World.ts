@@ -3,20 +3,12 @@ import { HexCoord } from './phaser/hexUtils';
 import { 
     World as ProtoWorld, 
     WorldData as ProtoWorldData, 
-    Tile as ProtoTile, 
-    Unit as ProtoUnit,
-    TileSchema,
-    UnitSchema,
-    WorldDataSchema,
-    WorldSchema,
+    Tile, 
+    Unit,
     TerrainDefinition, UnitDefinition, 
-} from '../gen/weewar/v1/models_pb';
-import { 
     UpdateWorldRequest,
     CreateWorldRequest,
-    UpdateWorldRequestSchema,
-    CreateWorldRequestSchema
-} from '../gen/weewar/v1/worlds_pb';
+} from '../gen/wasm-clients/weewar/v1/models'
 import { create, toJson } from '@bufbuild/protobuf';
 
 export interface WorldEvent {
@@ -33,19 +25,8 @@ export enum WorldEventType {
     WORLD_METADATA_CHANGED = 'world-metadata-changed'
 }
 
-export class Tile {
-  q: number;
-  r: number;
-  tileType: number;
-  player: number;
-}
-
-export class Unit {
-  q: number;
-  r: number;
-  unitType: number;
-  player: number;
-}
+// Using proto-generated Tile and Unit types directly
+export { Tile, Unit };
 
 // Batch event data types
 export interface TileChange {
@@ -276,7 +257,7 @@ export class World {
     
     public setTileAt(q: number, r: number, tileType: number, player: number): void {
         const key = `${q},${r}`;
-        const tile: Tile = { q, r, tileType, player };
+        const tile = Tile.from({ q, r, tileType, player });
         this.tiles[key] = tile;
         this.addTileChange(q, r, tile);
     }
@@ -292,19 +273,7 @@ export class World {
     }
     
     public getAllTiles(): Array<Tile> {
-        const result: Array<Tile> = [];
-        
-        Object.entries(this.tiles).forEach(([key, tileData]) => {
-            const [q, r] = key.split(',').map(Number);
-            result.push({
-                q,
-                r,
-                tileType: tileData.tileType,
-                player: tileData.player
-            });
-        });
-        
-        return result;
+        return Object.values(this.tiles);
     }
     
     public clearAllTiles(): void {
@@ -345,7 +314,7 @@ export class World {
         
         // Different unit type/player or no existing unit - place/replace the unit
         const key = `${q},${r}`;
-        const unit: Unit = { q, r, unitType, player };
+        const unit = Unit.from({ q, r, unitType, player });
         this.units[key] = unit;
         this.addUnitChange(q, r, unit);
     }
@@ -365,12 +334,12 @@ export class World {
         
         Object.entries(this.units).forEach(([key, unitData]) => {
             const [q, r] = key.split(',').map(Number);
-            result.push({
+            result.push(Unit.from({
                 q,
                 r,
                 unitType: unitData.unitType,
                 player: unitData.player
-            });
+            }));
         });
         
         return result;
@@ -455,29 +424,11 @@ export class World {
     // Self-contained persistence methods
     public async save(): Promise<SaveResult> {
         // Transform TypeScript World data into protobuf-compatible format
-        const tiles: Array<ProtoTile> = Object.values(this.tiles).map(tile => 
-            create(TileSchema, {
-                q: tile.q,
-                r: tile.r,
-                tileType: tile.tileType,
-                player: tile.player
-            })
-        );
-        
-        const units: Array<ProtoUnit> = Object.values(this.units).map(unit => 
-            create(UnitSchema, {
-                q: unit.q,
-                r: unit.r,
-                player: unit.player,
-                unitType: unit.unitType,
-                availableHealth: (unit as any).available_health || 100,
-                distanceLeft: (unit as any).distance_left || 0,
-                turnCounter: (unit as any).turn_counter || 0
-            })
-        );
+        const tiles: Array<Tile> = Object.values(this.tiles)
+        const units: Array<Unit> = Object.values(this.units)
 
         // Build World metadata (separate from WorldData)
-        const worldMetadata: ProtoWorld = create(WorldSchema, {
+        const worldMetadata: ProtoWorld = ProtoWorld.from({
             id: this.worldId || undefined,
             name: this.metadata.name || 'Untitled World',
             description: '',
@@ -487,7 +438,7 @@ export class World {
         });
 
         // Build WorldData (tiles and units)
-        const worldData: ProtoWorldData = create(WorldDataSchema, {
+        const worldData: ProtoWorldData = ProtoWorldData.from({
             tiles: tiles,
             units: units
         });
@@ -499,7 +450,7 @@ export class World {
 
         if (this.isNewWorld) {
             // CreateWorldRequest
-            request = create(CreateWorldRequestSchema, {
+            request = CreateWorldRequest.from({
                 world: worldMetadata,
                 worldData: worldData
             });
@@ -507,8 +458,8 @@ export class World {
             method = 'POST';
         } else {
             // UpdateWorldRequest  
-            request = create(UpdateWorldRequestSchema, {
-                world: create(WorldSchema, {
+            request = UpdateWorldRequest.from({
+                world: ProtoWorld.from({
                     ...worldMetadata,
                     id: this.worldId!
                 }),
@@ -521,10 +472,7 @@ export class World {
         }
 
         // Convert protobuf request to JSON for HTTP call
-        const requestJson = toJson(
-            this.isNewWorld ? CreateWorldRequestSchema : UpdateWorldRequestSchema, 
-            request
-        );
+        const requestJson = this.isNewWorld ? CreateWorldRequest.from(request): UpdateWorldRequest.from(request);
 
         const response = await fetch(url, {
             method,
@@ -668,7 +616,7 @@ export class World {
                 return; // Skip invalid unit
             }
             
-            const unit: Unit = { q, r, unitType, player };
+            const unit: Unit = Unit.from({ q, r, unitType, player });
             this.units[key] = unit;
             unitChanges.push({ q, r, unit });
         });

@@ -22,11 +22,17 @@ export class PhaserWorldScene extends Phaser.Scene {
     // Visual sprite maps (for rendering only, not game data)
     protected tileSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
     protected unitSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
+    protected unitLabels: Map<string, { healthText: Phaser.GameObjects.Text, distanceText?: Phaser.GameObjects.Text }> = new Map();
     protected gridGraphics: Phaser.GameObjects.Graphics | null = null;
     protected coordinateTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     
     protected showGrid: boolean = false;
     protected showCoordinates: boolean = false;
+    
+    // Unit label settings
+    protected showUnitHealth: boolean = true;
+    protected showUnitDistance: boolean = false;
+    protected selectedUnitCoord: { q: number, r: number } | null = null;
     
     // Theme management - initialize with current theme state
     protected isDarkTheme: boolean = document.documentElement.classList.contains('dark');
@@ -348,6 +354,9 @@ export class PhaserWorldScene extends Phaser.Scene {
         this.input.on('wheel', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[], deltaX: number, deltaY: number) => {
             const camera = this.cameras.main;
             const oldZoom = camera.zoom;
+            const oldScrollX = camera.scrollX;
+            const oldScrollY = camera.scrollY;
+            
             const zoomFactor = deltaY > 0 ? 1 - this.zoomSpeed : 1 + this.zoomSpeed;
             const newZoom = Phaser.Math.Clamp(oldZoom * zoomFactor, 0.1, 3);
             
@@ -364,6 +373,24 @@ export class PhaserWorldScene extends Phaser.Scene {
             
             camera.scrollX = newScrollX;
             camera.scrollY = newScrollY;
+            
+            // Emit camera events for zoom and position changes
+            if (oldZoom !== camera.zoom) {
+                this.events.emit('camera-zoomed', { 
+                    zoom: camera.zoom, 
+                    oldZoom: oldZoom,
+                    deltaZoom: camera.zoom - oldZoom
+                });
+            }
+            
+            if (oldScrollX !== camera.scrollX || oldScrollY !== camera.scrollY) {
+                this.events.emit('camera-moved', { 
+                    scrollX: camera.scrollX, 
+                    scrollY: camera.scrollY,
+                    deltaX: camera.scrollX - oldScrollX,
+                    deltaY: camera.scrollY - oldScrollY
+                });
+            }
         });
     }
     
@@ -443,9 +470,24 @@ export class PhaserWorldScene extends Phaser.Scene {
                     this.hasDragged = true;
                 }
                 
+                // Capture camera state before pan
+                const camera = this.cameras.main;
+                const oldScrollX = camera.scrollX;
+                const oldScrollY = camera.scrollY;
+                
                 // Pan camera
-                this.cameras.main.scrollX -= deltaX / this.cameras.main.zoom;
-                this.cameras.main.scrollY -= deltaY / this.cameras.main.zoom;
+                camera.scrollX -= deltaX / camera.zoom;
+                camera.scrollY -= deltaY / camera.zoom;
+                
+                // Emit camera moved event if position changed
+                if (oldScrollX !== camera.scrollX || oldScrollY !== camera.scrollY) {
+                    this.events.emit('camera-moved', { 
+                        scrollX: camera.scrollX, 
+                        scrollY: camera.scrollY,
+                        deltaX: camera.scrollX - oldScrollX,
+                        deltaY: camera.scrollY - oldScrollY
+                    });
+                }
                 
                 this.lastPointerPosition = { x: pointer.x, y: pointer.y };
             }
@@ -453,10 +495,14 @@ export class PhaserWorldScene extends Phaser.Scene {
     }
     
     update() {
+        // Capture camera state before potential changes
+        const camera = this.cameras.main;
+        const oldScrollX = camera.scrollX;
+        const oldScrollY = camera.scrollY;
+        const oldZoom = camera.zoom;
+        
         // Handle camera movement with keyboard only if not in input context
         if (!this.isInInputContext()) {
-            const camera = this.cameras.main;
-            
             if (this.cursors?.left.isDown || this.wasdKeys?.A.isDown) {
                 camera.scrollX -= this.panSpeed * (1 / camera.zoom);
             }
@@ -469,6 +515,27 @@ export class PhaserWorldScene extends Phaser.Scene {
             if (this.cursors?.down.isDown || this.wasdKeys?.S.isDown) {
                 camera.scrollY += this.panSpeed * (1 / camera.zoom);
             }
+        }
+        
+        // Check if camera position or zoom changed and emit events
+        const positionChanged = (oldScrollX !== camera.scrollX || oldScrollY !== camera.scrollY);
+        const zoomChanged = (oldZoom !== camera.zoom);
+        
+        if (positionChanged) {
+            this.events.emit('camera-moved', { 
+                scrollX: camera.scrollX, 
+                scrollY: camera.scrollY,
+                deltaX: camera.scrollX - oldScrollX,
+                deltaY: camera.scrollY - oldScrollY
+            });
+        }
+        
+        if (zoomChanged) {
+            this.events.emit('camera-zoomed', { 
+                zoom: camera.zoom, 
+                oldZoom: oldZoom,
+                deltaZoom: camera.zoom - oldZoom
+            });
         }
         
         // Update grid and coordinates when camera moves or zooms
@@ -571,10 +638,11 @@ export class PhaserWorldScene extends Phaser.Scene {
         
         console.log(`[PhaserWorldScene] setUnit called: q=${q}, r=${r}, unitType=${unitType}, color=${color}`);
         
-        // Remove existing unit if it exists
+        // Remove existing unit and labels if they exist
         if (this.unitSprites.has(key)) {
             this.unitSprites.get(key)?.destroy();
         }
+        this.removeUnitLabels(key);
         
         // Create new unit sprite
         const textureKey = `unit_${unitType}_${color}`;
@@ -601,6 +669,9 @@ export class PhaserWorldScene extends Phaser.Scene {
                 console.error(`[PhaserWorldScene] Fallback unit texture also not found: ${fallbackKey}`);
             }
         }
+        
+        // Create unit labels
+        this.createUnitLabels(unit, position);
     }
     
     public removeUnit(q: number, r: number) {
@@ -610,11 +681,93 @@ export class PhaserWorldScene extends Phaser.Scene {
             this.unitSprites.get(key)?.destroy();
             this.unitSprites.delete(key);
         }
+        
+        this.removeUnitLabels(key);
+    }
+    
+    /**
+     * Create health and distance labels for a unit
+     */
+    private createUnitLabels(unit: Unit, position: { x: number, y: number }): void {
+        const key = `${unit.q},${unit.r}`;
+        const labels: { healthText: Phaser.GameObjects.Text, distanceText?: Phaser.GameObjects.Text } = {
+            healthText: null as any
+        };
+        
+        // Create health label if enabled
+        if (this.showUnitHealth) {
+            const health = unit.availableHealth || 100;
+            const healthText = this.add.text(position.x, position.y - 40, health.toString(), {
+                fontSize: '12px',
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 2,
+                fontFamily: 'Arial'
+            });
+            healthText.setOrigin(0.5, 0.5);
+            healthText.setDepth(15); // Above units
+            labels.healthText = healthText;
+        }
+        
+        // Create distance label if enabled and there's a selected unit
+        if (this.showUnitDistance && this.selectedUnitCoord) {
+            const distance = this.calculateHexDistance(
+                unit.q, unit.r,
+                this.selectedUnitCoord.q, this.selectedUnitCoord.r
+            );
+            
+            const distanceText = this.add.text(position.x, position.y - 55, distance.toString(), {
+                fontSize: '10px',
+                color: '#00aaff',
+                stroke: '#000000',
+                strokeThickness: 2,
+                fontFamily: 'Arial'
+            });
+            distanceText.setOrigin(0.5, 0.5);
+            distanceText.setDepth(15); // Above units
+            labels.distanceText = distanceText;
+        }
+        
+        this.unitLabels.set(key, labels);
+    }
+    
+    /**
+     * Remove unit labels
+     */
+    private removeUnitLabels(key: string): void {
+        const labels = this.unitLabels.get(key);
+        if (labels) {
+            if (labels.healthText) {
+                labels.healthText.destroy();
+            }
+            if (labels.distanceText) {
+                labels.distanceText.destroy();
+            }
+            this.unitLabels.delete(key);
+        }
+    }
+    
+    /**
+     * Calculate hex distance between two coordinates
+     */
+    private calculateHexDistance(q1: number, r1: number, q2: number, r2: number): number {
+        // Convert axial coordinates to cube coordinates for distance calculation
+        const s1 = -q1 - r1;
+        const s2 = -q2 - r2;
+        
+        return Math.max(Math.abs(q1 - q2), Math.abs(r1 - r2), Math.abs(s1 - s2));
     }
     
     public clearAllUnits() {
         this.unitSprites.forEach(unit => unit.destroy());
         this.unitSprites.clear();
+        
+        // Clear all unit labels
+        this.unitLabels.forEach(labels => {
+            if (labels.healthText) labels.healthText.destroy();
+            if (labels.distanceText) labels.distanceText.destroy();
+        });
+        this.unitLabels.clear();
     }
     
     public setShowGrid(show: boolean) {
@@ -630,6 +783,42 @@ export class PhaserWorldScene extends Phaser.Scene {
     public setTheme(isDark: boolean) {
         this.isDarkTheme = isDark;
         this.updateTheme();
+    }
+    
+    /**
+     * Set unit health label visibility
+     */
+    public setShowUnitHealth(show: boolean) {
+        this.showUnitHealth = show;
+        this.refreshAllUnitLabels();
+    }
+    
+    /**
+     * Set unit distance label visibility and selected unit
+     */
+    public setShowUnitDistance(show: boolean, selectedUnitCoord?: { q: number, r: number }) {
+        this.showUnitDistance = show;
+        this.selectedUnitCoord = selectedUnitCoord || null;
+        this.refreshAllUnitLabels();
+    }
+    
+    /**
+     * Refresh all unit labels (useful when settings change)
+     */
+    private refreshAllUnitLabels(): void {
+        if (!this.world) return;
+        
+        // Recreate labels for all units
+        for (const unit of this.world.getAllUnits()) {
+            const key = `${unit.q},${unit.r}`;
+            const position = hexToPixel(unit.q, unit.r);
+            
+            // Remove existing labels
+            this.removeUnitLabels(key);
+            
+            // Create new labels with current settings
+            this.createUnitLabels(unit, position);
+        }
     }
     
     private updateTheme() {
@@ -1027,12 +1216,12 @@ export class PhaserWorldScene extends Phaser.Scene {
             const match = textureKey.match(/unit_(\d+)_(\d+)/);
             
             if (match) {
-                unitsData.push({
+                unitsData.push(Unit.from({
                     q,
                     r,
                     unitType: parseInt(match[1]),
                     player: parseInt(match[2])
-                });
+                }));
             }
         });
         

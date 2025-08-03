@@ -319,6 +319,9 @@ export class PhaserGameScene extends PhaserWorldScene {
         const moveOptions = movableCoords.map(coord => ({ q: coord.q, r: coord.r, movementCost: 1 }));
         this.showMovementOptions(moveOptions);
         this.showAttackOptions(attackableCoords);
+        
+        // Enable distance labels for the selected unit
+        this.setShowUnitDistance(true, { q, r });
     }
 
     /**
@@ -341,6 +344,9 @@ export class PhaserGameScene extends PhaserWorldScene {
         if (this.attackHighlightLayer) {
             this.attackHighlightLayer.clearAttackOptions();
         }
+        
+        // Disable distance labels
+        this.setShowUnitDistance(false);
         
         // Return to select mode
         this.setGameMode('select');

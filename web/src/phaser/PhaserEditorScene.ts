@@ -318,7 +318,7 @@ export class PhaserEditorScene extends PhaserWorldScene {
             { q: -1, r: -1, unitType: 2, player: 2 }, // Tank
         ];
 
-        testUnits.forEach(unit => this.setUnit(unit));
+        testUnits.forEach(unit => this.setUnit(Unit.from(unit)));
         
         console.log('[PhaserEditorScene] Test pattern created');
     }

@@ -79,6 +79,12 @@ func (w *WasmGamesServiceImpl) GetGame(ctx context.Context, req *v1.GetGameReque
 	}, nil
 }
 
+func (w *WasmGamesServiceImpl) GetGameState(ctx context.Context, req *v1.GetGameStateRequest) (*v1.GetGameStateResponse, error) {
+	return &v1.GetGameStateResponse{
+		State: w.SingletonGameState,
+	}, nil
+}
+
 func (w *WasmGamesServiceImpl) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest) (*v1.UpdateGameResponse, error) {
 	fmt.Printf("UpdateGame: Called - this will invalidate RuntimeGame cache!\n")
 	fmt.Printf("UpdateGame: NewGame provided: %t\n", req.NewGame != nil)

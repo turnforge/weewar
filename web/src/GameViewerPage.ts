@@ -26,6 +26,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
     private currentGameId: string | null;
     private worldViewer: GameViewer
     private gameState: GameState
+    private world: World  // ✅ Shared World component
     private terrainStatsPanel: TerrainStatsPanel
     private rulesTable: RulesTable
     
@@ -77,13 +78,14 @@ class GameViewerPage extends BasePage implements LCMComponent {
 
         console.assert(this.worldViewer != null, "World viewer could not be created")
         console.assert(this.gameState != null, "gameState could not be created")
+        console.assert(this.world != null, "World could not be created")
         console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
         console.assert(this.rulesTable != null, "rulesTable could not be created")
         
         // Return child components for lifecycle management
+        // Note: World and GameState don't extend BaseComponent, so not included in lifecycle
         return [
             this.worldViewer,
-            this.gameState,
             this.terrainStatsPanel,
         ]
     }
@@ -103,7 +105,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }
         
         if (this.gameState) {
-            this.gameState.destroy();
+            // GameState no longer has destroy method (not a BaseComponent)
             this.gameState = null as any;
         }
 
@@ -200,9 +202,12 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 
     /**
-     * Create WorldViewer and GameState component instances
+     * Create WorldViewer, World, and GameState component instances
      */
     private createComponents(): void {
+        // ✅ Create shared World component first (subscribes first to server-changes)
+        this.world = new World(this.eventBus, 'Game World');
+
         const worldViewerContainer = document.getElementById('phaser-viewer-container');
         if (!worldViewerContainer) {
             throw new Error('GameViewerPage: phaser-viewer-container not found');
@@ -210,11 +215,8 @@ class GameViewerPage extends BasePage implements LCMComponent {
         // Pass element directly (not string ID) as per UI_DESIGN_PRINCIPLES.md
         this.worldViewer = new GameViewer(worldViewerContainer, this.eventBus, true);
 
-        // Create GameState component (no specific container needed)
-        const gameStateContainer = document.createElement('div');
-        gameStateContainer.style.display = 'none'; // Hidden data component
-        document.body.appendChild(gameStateContainer);
-        this.gameState = new GameState(gameStateContainer, this.eventBus, true);
+        // ✅ Create GameState with direct EventBus connection (no DOM element needed)
+        this.gameState = new GameState(this.eventBus);
 
         // Create TerrainStatsPanel component
         const terrainStatsContainer = document.getElementById('terrain-stats-container');
@@ -237,17 +239,21 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }
         
         try {
-            // Get the World object from GameState (GameState owns it now)
-            const world = this.gameState.getWorld();
-            const game = this.gameState.getGame();
+            // ✅ Get world data from WASM and load into shared World component
+            const worldData = await this.gameState.getWorldData();
+            const game = await this.gameState.getCurrentGame();
             
-            // Load world into viewer
-            if (this.worldViewer && world) {
-                await this.worldViewer.loadWorld(world);
-                this.showToast('Success', `Game loaded: ${game.name || world.getName() || 'Untitled'}`, 'success');
+            // Load data into shared World component
+            this.world.loadTilesAndUnits(worldData.tiles || [], worldData.units || []);
+            this.world.setName(game.name || 'Untitled Game');
+            
+            // Load world into viewer using shared World
+            if (this.worldViewer && this.world) {
+                await this.worldViewer.loadWorld(this.world);
+                this.showToast('Success', `Game loaded: ${game.name || this.world.getName() || 'Untitled'}`, 'success');
                 
                 // Update UI with loaded game state
-                const gameState = this.gameState.getGameState();
+                const gameState = await this.gameState.getCurrentGameState();
                 this.updateGameUIFromState(gameState);
                 this.logGameEvent(`Game loaded: ${gameState.gameId}`);
             } else {
@@ -276,10 +282,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
         await this.gameState.loadGameDataToWasm();
         
         // Refresh unit labels in Phaser scene with the loaded World data
-        const world = this.gameState.getWorld();
         const worldScene = this.worldViewer?.getScene();
-        if (worldScene && world) {
-            worldScene.refreshUnitLabels(world);
+        if (worldScene && this.world) {
+            worldScene.refreshUnitLabels(this.world);
         }
     }
 
@@ -341,16 +346,20 @@ class GameViewerPage extends BasePage implements LCMComponent {
             return;
         }
         
-        // Async WASM call
-        await this.gameState.endTurn(this.gameState.getGameState().currentPlayer);
+        // ✅ Use GameState metadata
+        const currentPlayer = this.gameState.getCurrentPlayer();
+        await this.gameState.endTurn(currentPlayer);
         
-        // Get updated game state and update UI
-        const gameState = this.gameState.getGameState();
-        this.updateGameUIFromState(gameState);
+        // ✅ Use GameState metadata for UI updates
+        const newPlayer = this.gameState.getCurrentPlayer();
+        const turnCounter = this.gameState.getTurnCounter();
+        
+        this.updateGameStatus(`Ready - Player ${newPlayer}'s Turn`, newPlayer);
+        this.updateTurnCounter(turnCounter);
         this.clearUnitSelection();
         
-        this.logGameEvent(`Player ${gameState.currentPlayer}'s turn begins`);
-        this.showToast('Info', `Player ${gameState.currentPlayer}'s turn`, 'info');
+        this.logGameEvent(`Player ${newPlayer}'s turn begins`);
+        this.showToast('Info', `Player ${newPlayer}'s turn`, 'info');
     }
 
     private undoMove(): void {
@@ -381,11 +390,11 @@ class GameViewerPage extends BasePage implements LCMComponent {
             return;
         }
 
-        // Synchronous WASM call
-        const gameData = this.gameState.getGameState();
+        // ✅ Use GameState metadata
+        const currentPlayer = this.gameState.getCurrentPlayer();
         
         // TODO: Highlight all player units and center camera
-        this.showToast('Info', `Showing all Player ${gameData.currentPlayer} units`, 'info');
+        this.showToast('Info', `Showing all Player ${currentPlayer} units`, 'info');
     }
 
     private centerOnAction(): void {
@@ -481,10 +490,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
             return false; // Suppress event emission
         }
 
-        // Get terrain info using RulesTable
-        const world = this.gameState?.getWorld();
-        if (world) {
-            const tile = world.getTileAt(q, r);
+        // ✅ Get terrain info using shared World (fast query)
+        if (this.world) {
+            const tile = this.world.getTileAt(q, r);
             if (tile) {
                 const terrainStats = this.rulesTable.getTerrainStatsAt(tile.tileType, tile.player);
                 if (terrainStats) {
@@ -516,10 +524,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }
 
         // Handle async unit interaction using unified getOptionsAt
-        this.gameState.getOptionsAt(q, r).then(response => {
-            const currentGameState = this.gameState.getGameState();
-            const world = this.gameState.getWorld();
-            const unit = world?.getUnitAt(q, r);
+        this.gameState.getOptionsAt(q, r).then(async response => {
+            // ✅ Use shared World for fast unit query
+            const unit = this.world?.getUnitAt(q, r);
             
             const options = response.options || [];
             
@@ -533,27 +540,27 @@ class GameViewerPage extends BasePage implements LCMComponent {
             } else if (hasOnlyEndTurn) {
                 // This position only has endTurn option - could be empty tile, enemy unit, or friendly unit with no actions
                 
-                // Get basic tile info to determine what's actually there
-                this.gameState?.getTileInfo(q, r).then(tileInfo => {
-                    if (tileInfo?.hasUnit) {
-                        // There is a unit - check if it belongs to current player
-                        const world = this.gameState.getWorld();
-                        const unit = world?.getUnitAt(q, r);
-                        const currentPlayer = this.gameState.getGameState().currentPlayer;
+                // ✅ Use shared World for fast queries
+                const tileUnit = this.world?.getUnitAt(q, r);
+                
+                if (tileUnit) {
+                    // Get current player to check ownership
+                    this.gameState.getCurrentGameState().then(gameState => {
+                        const currentPlayer = gameState.currentPlayer;
                         
-                        if (unit && unit.player === currentPlayer) {
+                        if (tileUnit.player === currentPlayer) {
                             // This is our unit but it has no available actions
                             this.showToast('Info', `No actions available for unit at (${q}, ${r})`, 'info');
                         } else {
                             // This is an enemy unit
                             this.showToast('Info', `Enemy unit at (${q}, ${r})`, 'info');
                         }
-                    } else {
-                        this.showToast('Info', `Empty tile at (${q}, ${r})`, 'info');
-                    }
-                }).catch(error => {
-                    console.error('Failed to get tile info:', error);
-                });
+                    }).catch(error => {
+                        console.error('Failed to get current game state:', error);
+                    });
+                } else {
+                    this.showToast('Info', `Empty tile at (${q}, ${r})`, 'info');
+                }
             }
         }).catch(error => {
             console.error('[GameViewerPage] Failed to get options at position:', error);
@@ -673,12 +680,15 @@ class GameViewerPage extends BasePage implements LCMComponent {
                 throw new Error('Move option does not contain action object');
             }
 
+            // ✅ Get current player from move option or query WASM
+            const currentGameState = await this.gameState!.getCurrentGameState();
+            
             const gameMove= GameMove.from({
-                player: this.gameState!.getGameState().currentPlayer,
+                player: currentGameState.currentPlayer,
                 moveUnit: moveOption.action,
             })!;
 
-            // Call ProcessMoves API
+            // ✅ Call ProcessMoves API - this will trigger World updates via EventBus
             const worldChanges = await this.gameState!.processMoves([gameMove]);
             
             console.log('[GameViewerPage] Move executed successfully, world changes:', worldChanges);
@@ -690,9 +700,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
             // Show success feedback
             this.showToast('Success', `Unit moved to (${toCoord.q}, ${toCoord.r})`, 'success');
 
-            // Update game UI with new state
-            const gameState = this.gameState!.getGameState();
-            this.updateGameUIFromState(gameState);
+            // ✅ Update game UI with fresh state from WASM
+            const updatedGameState = await this.gameState!.getCurrentGameState();
+            this.updateGameUIFromState(updatedGameState);
 
         } catch (error) {
             console.error('[GameViewerPage] Move execution failed:', error);
@@ -726,9 +736,13 @@ class GameViewerPage extends BasePage implements LCMComponent {
         this.updateGameStatus(`Ready - Player ${gameState.currentPlayer}'s Turn`, gameState.currentPlayer);
         
         // Update turn counter
+        this.updateTurnCounter(gameState.turnCounter);
+    }
+    
+    private updateTurnCounter(turnCounter: number): void {
         const turnElement = document.getElementById('turn-counter');
         if (turnElement) {
-            turnElement.textContent = `Turn ${gameState.turnCounter}`;
+            turnElement.textContent = `Turn ${turnCounter}`;
         }
     }
 

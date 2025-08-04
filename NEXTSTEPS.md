@@ -4,25 +4,24 @@
 
 ### ✅ Recently Completed (Current Session)
 
-**Core Unit Movement System - FULLY FUNCTIONAL** 
-- **Unit Selection**: Click units to see movement/attack options with highlights
-- **Move Execution**: Click highlighted tiles to execute moves via ProcessMoves API
-- **Visual Updates**: Units move in real-time in Phaser scene
-- **Server State**: SingletonGame correctly persists moved unit positions
-- **Event System**: Complete GameState → GameViewer → Phaser update pipeline
+**EventBus Architecture Refactor - COMPLETED**
+- **GameState Simplification**: Reduced from cached state manager to lightweight WASM wrapper
+- **World as Change Coordinator**: World subscribes to server-changes and coordinates updates
+- **EventBus Flow**: Clean server-changes → world-updated event pipeline
+- **Metadata Management**: GameState maintains currentPlayer/turnCounter from game changes
+- **Initial Data Loading**: Pre-elements data properly loaded into WASM and extracted as metadata
 
-**WASM Client Migration - COMPLETED**
-- **New Generation System**: Migrated from complex protobuf-es client to simplified WASM client
-- **Simplified APIs**: Using `any` types and `.from()` factory methods instead of complex type conversions
-- **Direct Property Access**: `change.unitMoved` instead of `change.changeType.case === 'unitMoved'`
-- **Cleaner Code**: Removed all oneof conversion complexity - much more maintainable
-
-**Technical Foundations - SOLID**
-- **Protobuf Definitions**: Enhanced with ready-to-use action objects in MoveOption/AttackOption
-- **Server-Side**: GetOptionsAt populates action objects, eliminating client-side reconstruction
-- **Error Resolution**: Fixed BigInt serialization, nil pointer dereferences, oneof field handling
+**Previous Achievements - SOLID FOUNDATION**
+- **Core Unit Movement System**: Click units → see options → execute moves → visual updates
+- **WASM Client Migration**: Simplified APIs with direct property access (`change.unitMoved`)
+- **Technical Foundations**: Protobuf definitions, server-side action objects, error resolution
 
 ### 🔄 In Progress / Next Sprint
+
+**Architecture Validation & Testing**
+- [ ] **End-to-End Testing**: Test the new EventBus architecture with actual gameplay
+- [ ] **Load Testing**: Verify initial data loading from pre-elements works correctly
+- [ ] **Change Coordination**: Validate World updates are properly distributed to GameViewer
 
 **UI Polish & User Experience**
 - [ ] **UnitLabelManager**: HTML overlays showing unit health/distance on hex tiles

@@ -17,47 +17,63 @@ export class GameViewer extends WorldViewer<PhaserGameScene> {
     }
 
     /**
-     * Phase 3: Activate component - Subscribe to GameState events
+     * Phase 3: Activate component - Subscribe to World events
      */
     async activate(): Promise<void> {
         // Call parent activation first
         await super.activate();
         
-        // Subscribe to GameState world change events
-        this.addSubscription('world-changed', null);
-        this.addSubscription('unit-moved', null);
-        this.addSubscription('unit-damaged', null);
-        this.addSubscription('unit-killed', null);
+        // ✅ Subscribe to World's coordinated update events
+        this.addSubscription('world-updated', null);
     }
 
     /**
-     * Handle events from the EventBus (including GameState events)
+     * Handle events from the EventBus (World-coordinated events)
      */
     public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
         switch(eventType) {
-            case 'world-changed':
-                console.log('GameViewer: Received world-changed event', data);
-                this.handleWorldChanged(data);
-                break;
-            
-            case 'unit-moved':
-                console.log('GameViewer: Received unit-moved event', data);
-                this.handleUnitMoved(data);
-                break;
-            
-            case 'unit-damaged':
-                console.log('GameViewer: Received unit-damaged event', data);
-                this.handleUnitDamaged(data);
-                break;
-            
-            case 'unit-killed':
-                console.log('GameViewer: Received unit-killed event', data);
-                this.handleUnitKilled(data);
+            case 'world-updated':
+                console.log('GameViewer: Received world-updated event', data);
+                this.handleWorldUpdated(data);
                 break;
             
             default:
                 // Call parent implementation for unhandled events
                 super.handleBusEvent(eventType, data, target, emitter);
+        }
+    }
+
+    /**
+     * Handle world-updated events from World component
+     * World has already updated its data, now update visual sprites
+     */
+    private handleWorldUpdated(data: { changes: any[], world: any }): void {
+        const { changes } = data;
+        
+        // Process each change to update visual elements
+        for (const change of changes) {
+            if (change.unitMoved) {
+                this.handleUnitMoved({
+                    from: { q: change.unitMoved.previousUnit?.q || 0, r: change.unitMoved.previousUnit?.r || 0 },
+                    to: { q: change.unitMoved.updatedUnit?.q || 0, r: change.unitMoved.updatedUnit?.r || 0 }
+                });
+            }
+            
+            if (change.unitDamaged) {
+                this.handleUnitDamaged({
+                    position: { q: change.unitDamaged.updatedUnit?.q || 0, r: change.unitDamaged.updatedUnit?.r || 0 },
+                    previousHealth: change.unitDamaged.previousUnit?.availableHealth || 0,
+                    newHealth: change.unitDamaged.updatedUnit?.availableHealth || 0
+                });
+            }
+            
+            if (change.unitKilled) {
+                this.handleUnitKilled({
+                    position: { q: change.unitKilled.previousUnit?.q || 0, r: change.unitKilled.previousUnit?.r || 0 },
+                    player: change.unitKilled.previousUnit?.player || 0,
+                    unitType: change.unitKilled.previousUnit?.unitType || 0
+                });
+            }
         }
     }
 

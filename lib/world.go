@@ -108,6 +108,10 @@ func (w *World) TilesByCoord() iter.Seq2[AxialCoord, *v1.Tile] {
 	}
 }
 
+func (w *World) NumUnits() int32 {
+	return int32(len(w.unitsByCoord))
+}
+
 func (w *World) UnitsByCoord() iter.Seq2[AxialCoord, *v1.Unit] {
 	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
 	// or conversely iterate parent and only return parent's K,V value if it is not in this layer

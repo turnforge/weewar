@@ -1,4 +1,4 @@
-# Web Module Architecture (v7.0)
+# Web Module Architecture (v8.0)
 
 ## Overview
 
@@ -153,56 +153,112 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 ```
 
-### 5. Phaser Integration Patterns
+### 5. Phaser Integration Patterns (Unified Architecture)
 
-#### WorldViewer Pattern (Read-Only)
+After extensive refactoring in v8.0, we consolidated Phaser integration around a **unified scene-based architecture** that eliminates unnecessary wrapper layers while maintaining proper container management.
+
+#### PhaserWorldScene - Core Phaser Integration
 ```typescript
-export class WorldViewer extends BaseComponent implements LCMComponent {
-    // Phase 1: Setup DOM container
-    performLocalInit(): LCMComponent[] {
-        this.viewerContainer = this.findElement('#phaser-viewer-container');
-        return []; // No children
+export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
+    constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+        super('phaser-world-scene');
+        this.containerElement = containerElement;  // Direct container reference
+        this.eventBus = eventBus;
+        this.debugMode = debugMode;
     }
     
-    // Phase 3: Initialize Phaser when ready
-    async activate(): Promise<void> {
-        await this.initializePhaserScene();
-        this.emit(WorldEventTypes.WORLD_VIEWER_READY, {}, this, this);
-    }
-    
-    // Public API for loading World objects
-    public async loadWorld(world: World): Promise<void> {
-        this.world = world;
-        if (this.scene && this.scene.getIsInitialized()) {
-            await this.loadWorldIntoScene();
+    // LCMComponent lifecycle
+    async performLocalInit(): Promise<LCMComponent[]> {
+        // Validate container and setup
+        if (!this.containerElement) {
+            throw new Error('PhaserWorldScene: Container element is required');
         }
+        await this.initializePhaser();
+        return []; // Leaf component
+    }
+    
+    // Phaser configuration for proper container targeting
+    private async initializePhaser(): Promise<void> {
+        const config: Phaser.Types.Core.GameConfig = {
+            type: Phaser.AUTO,
+            parent: this.containerElement.id || this.containerElement,  // Proper parent targeting
+            width: width,
+            height: height,
+            backgroundColor: '#2c3e50',
+            scene: this,
+            scale: {
+                mode: Phaser.Scale.FIT,           // Fixed: was RESIZE (caused infinite growth)
+                width: width,
+                height: height,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        };
+        this.phaserGame = new Phaser.Game(config);
     }
 }
 ```
 
-#### PhaserEditorComponent Pattern (Interactive)
+#### PhaserEditorScene - Editor Extension
 ```typescript
-export class PhaserEditorComponent extends BaseComponent implements LCMComponent {
-    // Dependencies injected in Phase 2
-    public setPageState(pageState: WorldEditorPageState): void { /* ... */ }
-    public setWorld(world: World): void { /* ... */ }
+export class PhaserEditorScene extends PhaserWorldScene {
+    // Editor-specific functionality built on PhaserWorldScene foundation
+    // Includes: reference images, terrain painting, brush tools, world generation
     
-    // Phase 3: Initialize Phaser editor
-    async activate(): Promise<void> {
-        await this.initializePhaserEditor();
-        this.emit(EditorEventTypes.PHASER_READY, {}, this, this);
+    constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+        super(containerElement, eventBus, debugMode);
     }
     
-    // Handle events from EventBus (World changes)
-    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
-        switch(eventType) {
-            case WorldEventType.TILES_CHANGED:
-                this.updatePhaserTiles(data.changes);
-                break;
-        }
-    }
+    // Higher-level API methods for editor functionality
+    public async setTerrain(terrain: number): Promise<void> { /* painting tools */ }
+    public async setTilesData(tiles: Array<Tile>): Promise<void> { /* world loading */ }
+    public fillAllTerrain(terrain: number, color: number = 0): void { /* world generation */ }
 }
 ```
+
+#### Container Management - Critical Fix
+**Problem Identified**: Canvas being created as sibling instead of child of intended container
+
+**Root Cause**: Pages were passing wrong container elements to PhaserWorldScene:
+```typescript
+// WRONG: Passing outer wrapper container
+const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
+this.worldScene = new PhaserWorldScene(worldViewerRoot, this.eventBus, true);
+
+// CORRECT: Passing actual Phaser canvas container  
+const phaserContainer = this.ensureElement('#phaser-viewer-container', 'phaser-viewer-container');
+this.worldScene = new PhaserWorldScene(phaserContainer, this.eventBus, true);
+```
+
+**Container Hierarchy**:
+```html
+<div data-component="world-viewer">     <!-- Outer component wrapper -->
+  <div class="p-4 border-b">...</div>   <!-- Component header -->
+  <div id="phaser-viewer-container">    <!-- Actual Phaser container (CORRECT TARGET) -->
+    <!-- Canvas renders here -->
+  </div>
+</div>
+```
+
+#### Wrapper Elimination (v8.0 Major Refactor)
+Eliminated unnecessary wrapper layers in editor architecture:
+
+**Before** (v7.0):
+```
+PhaserEditorComponent → PhaserWorldEditor → PhaserEditorScene
+                     (wrapper)        (wrapper)    (actual scene)
+```
+
+**After** (v8.0):
+```
+PhaserEditorComponent → PhaserEditorScene
+                     (component)    (unified scene)
+```
+
+**Benefits**:
+- **Reduced Complexity**: Fewer abstraction layers to debug
+- **Better Performance**: Direct method calls instead of wrapper forwarding  
+- **Cleaner API**: Consistent interface between viewer and editor
+- **Easier Maintenance**: Single point of truth for Phaser functionality
 
 ## Key Architectural Decisions
 
@@ -440,12 +496,13 @@ World changes → World emits event → PhaserComponent receives → Updates Pha
 
 ## Migration from Previous Versions
 
-### Key Changes from v6.0
-1. **LCMComponent Implementation**: All components now implement four-phase lifecycle
-2. **EventSubscriber Pattern**: Replaced callback-based with interface-based subscriptions
-3. **World-Centric Data**: All game data flows through World class observer pattern
-4. **Breadth-First Initialization**: LifecycleController manages component coordination
-5. **Consistent API**: WorldViewer and PhaserEditorComponent both use `loadWorld(world)` method
+### Key Changes from v7.0 to v8.0
+1. **Wrapper Elimination**: Removed PhaserWorldEditor and PhaserPanel wrapper classes
+2. **Unified Phaser Architecture**: PhaserWorldScene as base, PhaserEditorScene as extension
+3. **Container Management Fix**: Pages now target correct Phaser containers instead of outer wrappers
+4. **Scale Mode Fix**: Changed from RESIZE to FIT mode to prevent infinite canvas growth
+5. **Method Signature Alignment**: Fixed TypeScript compatibility between components and scenes
+6. **Constructor Simplification**: Streamlined LCMComponent initialization in Phaser scenes
 
 ### Breaking Changes
 - **Event Subscriptions**: Must implement `handleBusEvent()` instead of callbacks

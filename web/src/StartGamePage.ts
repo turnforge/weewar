@@ -46,8 +46,7 @@ class StartGamePage extends BasePage implements LCMComponent {
 
         this.loadWorldData()
         
-        // Subscribe to events BEFORE creating components
-        this.subscribeToWorldViewerEvents();
+        // Subscribe to events BEFORE creating components - None here
         
         // Create child components
         this.createComponents();
@@ -62,24 +61,8 @@ class StartGamePage extends BasePage implements LCMComponent {
     async activate(): Promise<void> {
         // Bind events now that all components are ready
         this.bindPageSpecificEvents();
-    }
-
-    /**
-     * Handle incoming events from the EventBus
-     */
-    public handleBusEvent(eventType: string, data: any, subject: any, emitter: any): void {
-        switch(eventType) {
-            case WorldEventTypes.WORLD_VIEWER_READY:
-                if (this.currentWorldId) {
-                    this.worldScene.loadWorld(this.world);
-                    this.showToast('Success', 'World loaded successfully', 'success');
-                }
-                break;
-                
-            default:
-                // Call parent implementation for unhandled events
-                super.handleBusEvent(eventType, data, subject, emitter);
-        }
+        this.worldScene.loadWorld(this.world);
+        this.showToast('Success', 'World loaded successfully', 'success');
     }
 
     /**
@@ -91,22 +74,14 @@ class StartGamePage extends BasePage implements LCMComponent {
         
         this.destroy();
     }
-    
-    /**
-     * Subscribe to WorldViewer events before component creation
-     */
-    private subscribeToWorldViewerEvents(): void {
-        // Subscribe to WorldViewer ready event BEFORE creating the component
-        this.addSubscription(WorldEventTypes.WORLD_VIEWER_READY, null);
-    }
 
     /**
      * Create PhaserWorldScene component instance
      */
     private createComponents(): void {
         // Create PhaserWorldScene component for preview
-        const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
-        this.worldScene = new PhaserWorldScene(worldViewerRoot, this.eventBus, true);
+        const phaserContainer = this.ensureElement('#phaser-viewer-container', 'phaser-viewer-container');
+        this.worldScene = new PhaserWorldScene(phaserContainer, this.eventBus, true);
     }
 
     /**

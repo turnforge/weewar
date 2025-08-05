@@ -17,8 +17,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     // Phaser game instance (self-contained) - renamed to avoid conflict with Phaser's game property
     private phaserGame: Phaser.Game | null = null;
     private isInitialized: boolean = false;
-    private initializePromise: Promise<void> | null = null;
-    private initializeResolver: (() => void) | null = null;
 
     protected tileWidth: number = 64;
     protected tileHeight: number = 64;
@@ -67,7 +65,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private terrainsLoaded: boolean = false;
     private unitsLoaded: boolean = false;
     private sceneReadyCallback: (() => void) | null = null;
-    private assetsReadyPromise: Promise<void> | null = null;
+    private assetsReadyPromise: Promise<void>;
     private assetsReadyResolver: (() => void) | null = null;
 
     constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
@@ -91,6 +89,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         if (this.debugMode) {
             console.log('[PhaserWorldScene] DOM validation complete');
         }
+        await this.initializePhaser();
         return []; // Leaf component - no children
     }
     
@@ -98,18 +97,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     setupDependencies(): void {}
 
     // Phase 3: Activate component - Initialize Phaser here
-    async activate(): Promise<void> {
-        if (this.debugMode) {
-            console.log('[PhaserWorldScene] Activating and initializing Phaser');
-        }
-        await this.initializePhaser();
-        if (this.debugMode) {
-            console.log('[PhaserWorldScene] Activation complete');
-        }
-        
-        // Emit ready event when fully activated
-        this.eventBus.emit(WorldEventTypes.WORLD_VIEWER_READY, {}, this, this);
-    }
+    async activate(): Promise<void> {}
 
     // Cleanup phase
     deactivate(): void {
@@ -136,14 +124,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             return;
         }
 
-        if (this.initializePromise) {
-            return this.initializePromise;
-        }
-
-        this.initializePromise = new Promise<void>((resolve) => {
-            this.initializeResolver = resolve;
-        });
-
         // Get container dimensions from template-styled element
         const containerWidth = this.containerElement.clientWidth || 800;
         const containerHeight = this.containerElement.clientHeight || 600;
@@ -152,15 +132,16 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
 
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
-            parent: this.containerElement,
+            parent: this.containerElement.id || this.containerElement,
             width: width,
             height: height,
             backgroundColor: '#2c3e50',
             scene: this, // Use this scene instance directly
             scale: {
-                mode: Phaser.Scale.RESIZE,
+                mode: Phaser.Scale.FIT,
                 width: width,
-                height: height
+                height: height,
+                autoCenter: Phaser.Scale.CENTER_BOTH
             },
             physics: {
                 default: 'arcade',
@@ -179,8 +160,12 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         };
 
         this.phaserGame = new Phaser.Game(config);
-            
-        return this.initializePromise;
+        this.isInitialized = true;
+
+        // Set up assets ready promise
+        this.assetsReadyPromise = new Promise<void>((resolve) => {
+            this.assetsReadyResolver = resolve;
+        });
     }
 
     /**
@@ -207,8 +192,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         }
         
         this.isInitialized = false;
-        this.initializePromise = null;
-        this.initializeResolver = null;
         this.world = null;
     }
 
@@ -221,11 +204,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }
     
     preload() {
-        // Set up assets ready promise
-        this.assetsReadyPromise = new Promise<void>((resolve) => {
-            this.assetsReadyResolver = resolve;
-        });
-        
         // Track when all assets are loaded
         this.load.on('complete', () => {
             this.terrainsLoaded = true;
@@ -267,10 +245,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         
         // Mark as initialized and resolve promise
         this.isInitialized = true;
-        if (this.initializeResolver) {
-            this.initializeResolver();
-            this.initializeResolver = null;
-        }
         
         // Trigger scene ready callback if set
         if (this.sceneReadyCallback) {
@@ -833,6 +807,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }
     
     private updateTheme() {
+        if (!this.cameras?.main) return ;
         // Update camera background color based on theme
         const backgroundColor = this.isDarkTheme ? 0x1f2937 : 0xf3f4f6; // gray-800 : gray-100
         this.cameras.main.setBackgroundColor(backgroundColor);

@@ -67,6 +67,7 @@ export class LifecycleController {
     private async performLocalInit(rootComponent: LCMComponent): Promise<void> {
         const visited = new Set<LCMComponent>();
         let queue = [rootComponent] as LCMComponent[]
+        this.allComponents = [rootComponent]
         
         if (this.componentsByLevel.length > 0) {
           throw new Error("Already done")

@@ -3,7 +3,7 @@
 ## Purpose
 The web module provides a modern web interface for the WeeWar turn-based strategy game, featuring a professional world editor, readonly world viewer, and comprehensive game management system.
 
-## Current Architecture (v7.0)
+## Current Architecture (v8.0)
 
 ### LCMComponent Lifecycle Architecture with EventSubscriber Pattern
 - **4-Phase Lifecycle Management**: performLocalInit() → setupDependencies() → activate() → deactivate()
@@ -47,22 +47,29 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Error Isolation**: Component failures don't cascade through synchronization barriers
 - **Race Condition Prevention**: Synchronization barriers eliminate timing dependencies
 
-### Recent Achievements (Session 2025-01-31)
+### Recent Achievements (Session 2025-08-05)
 
-#### LCMComponent Architecture Implementation (v7.0)
-- **Full LCMComponent Implementation**: All pages and components now implement 4-phase lifecycle
-- **EventSubscriber Pattern Migration**: Replaced callback-based subscriptions with type-safe handleBusEvent() interface
-- **LifecycleController Integration**: All pages use breadth-first initialization with synchronization barriers
-- **World Object Consistency**: Fixed WorldViewer/PhaserEditorComponent to use World objects instead of raw data
-- **TypeScript Error Resolution**: Eliminated all frontend build errors through consistent API patterns
-- **Component Coordination**: Proper event timing with subscribe-before-create pattern throughout codebase
+#### Phaser Architecture Unification (v8.0)
+- **Wrapper Elimination**: Removed PhaserWorldEditor and PhaserPanel unnecessary wrapper classes
+- **Unified Scene Architecture**: PhaserWorldScene as base class, PhaserEditorScene as editor extension
+- **Container Management Fix**: Resolved canvas placement issues - canvas now properly renders inside target containers
+- **Scale Mode Optimization**: Fixed infinite canvas growth by switching from RESIZE to FIT scale mode
+- **Method Signature Alignment**: Resolved TypeScript compatibility issues between components and scenes
+- **Constructor Cleanup**: Streamlined LCMComponent initialization in Phaser scene classes
 
-#### Architecture Benefits Realized
-- **Race Condition Elimination**: No more timing issues between component initialization
-- **Event Handling Consistency**: All components use same EventSubscriber pattern
-- **World Data Loading**: Consistent loadWorld(world) API across all Phaser components
-- **Error Isolation**: Component failures contained through synchronization barriers
-- **Type Safety**: handleBusEvent() interface prevents runtime event handling errors
+#### Critical Bug Fixes
+- **Canvas Container Issue**: Fixed canvas being created as sibling instead of child of intended container
+- **Root Cause Analysis**: Pages were passing outer wrapper containers instead of actual Phaser containers
+- **Proper Container Targeting**: Updated WorldViewerPage to target `#phaser-viewer-container` directly
+- **Phaser Configuration**: Improved parent element targeting with `containerElement.id || containerElement`
+- **Scale Mode Stability**: Changed from problematic RESIZE mode to stable FIT mode with autoCenter
+
+#### Architecture Simplification Benefits
+- **Reduced Complexity**: Eliminated multiple abstraction layers (PhaserEditorComponent → PhaserEditorScene direct)
+- **Better Performance**: Direct method calls instead of wrapper forwarding through eliminated layers
+- **Cleaner API**: Consistent interface patterns between viewer and editor components
+- **Easier Debugging**: Fewer layers to trace through when investigating issues
+- **Maintainability**: Single point of truth for Phaser functionality instead of scattered wrappers
 
 #### Component Architecture Cleanup and Technical Debt Reduction (v5.2)
 - Comprehensive cleanup of WorldEditorPage with dead code elimination
@@ -171,8 +178,8 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Layout**: DockView for professional panel management
 
 ## Status
-**Current Version**: 7.0 (LCMComponent Architecture Implementation)  
-**Status**: Production-ready with full LCMComponent lifecycle and EventSubscriber pattern  
+**Current Version**: 8.0 (Phaser Architecture Unification)  
+**Status**: Production-ready with unified Phaser scene architecture and container management fixes  
 **Build Status**: Clean compilation with all TypeScript errors resolved  
-**Architecture**: Breadth-first initialization with synchronization barriers and race condition elimination  
-**Next Milestone**: Performance optimization and advanced component features
+**Architecture**: Simplified wrapper-free Phaser integration with proper container targeting  
+**Next Milestone**: Additional container fixes for other pages and performance optimization

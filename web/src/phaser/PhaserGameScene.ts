@@ -46,7 +46,7 @@ export class PhaserGameScene extends PhaserWorldScene {
     constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super(containerElement, eventBus, debugMode);
         // Override the scene key for this specific scene type
-        this.scene.settings.key = 'PhaserGameScene';
+        // this.scene.settings.key = 'PhaserGameScene';
     }
 
     /**

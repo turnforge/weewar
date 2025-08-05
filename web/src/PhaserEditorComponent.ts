@@ -2,7 +2,7 @@ import { BaseComponent } from '../lib/Component';
 import { LCMComponent } from '../lib/LCMComponent';
 import { EventBus } from '../lib/EventBus';
 import { EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload, ReferenceImageLoadedPayload, GridSetVisibilityPayload, CoordinatesSetVisibilityPayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload } from './events';
-import { PhaserWorldEditor } from './phaser/PhaserWorldEditor';
+import { PhaserEditorScene } from './phaser/PhaserEditorScene';
 import { WorldEditorPageState, PageStateEventType } from './WorldEditorPageState';
 import { Unit, Tile, World, WorldEventType, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from './World';
 
@@ -25,7 +25,7 @@ import { Unit, Tile, World, WorldEventType, TilesChangedEventData, UnitsChangedE
  * - Direct DOM manipulation outside of phaser-container
  */
 export class PhaserEditorComponent extends BaseComponent implements LCMComponent {
-    private phaserEditor: PhaserWorldEditor;
+    private editorScene: PhaserEditorScene;
     private isInitialized: boolean = false;
     
     // Dependencies (injected in phase 2)
@@ -122,7 +122,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         this.world = world;
         
         // Load into Phaser if ready
-        if (this.phaserEditor && this.isInitialized) {
+        if (this.editorScene && this.isInitialized) {
             await this.loadWorldIntoEditor();
         }
     }
@@ -131,7 +131,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Load the current World object into the Phaser editor scene
      */
     private async loadWorldIntoEditor(): Promise<void> {
-        if (!this.phaserEditor || !this.isInitialized || !this.world) {
+        if (!this.editorScene || !this.isInitialized || !this.world) {
             this.log('Phaser editor not ready or no world data, deferring world load');
             return;
         }
@@ -257,9 +257,9 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         this.log('Destroying PhaserEditorComponent');
         
         // Destroy Phaser editor
-        if (this.phaserEditor) {
-            this.phaserEditor.destroy();
-            this.phaserEditor = null as any;
+        if (this.editorScene) {
+            this.editorScene.destroy();
+            this.editorScene = null as any;
         }
         
         // Remove Phaser container
@@ -304,7 +304,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         let phaserContainer = this.findElement('#editor-canvas-container');
         
         if (phaserContainer) {
-            // Rename the existing container to phaser-container for PhaserWorldEditor
+            // Rename the existing container to phaser-container for PhaserEditorScene
             phaserContainer.id = 'phaser-container';
             this.log('Using existing editor-canvas-container as phaser-container');
         } else {
@@ -359,15 +359,20 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         // Wait for container to have dimensions before initializing Phaser
         await this.waitForContainerVisible(containerElement);
         
-        // Create Phaser editor instance with the element directly
-        this.phaserEditor = new PhaserWorldEditor(containerElement);
+        // Create Phaser editor scene instance directly with the element
+        this.editorScene = new PhaserEditorScene(containerElement, this.eventBus, this.debugMode);
+        
+        // Initialize the scene using LCMComponent lifecycle
+        await this.editorScene.performLocalInit();
+        this.editorScene.setupDependencies();
+        await this.editorScene.activate();
         
         // Set up event handlers
         await this.setupPhaserEventHandlers();
         
         // Apply current theme
         const isDarkMode = document.documentElement.classList.contains('dark');
-        this.phaserEditor.setTheme(isDarkMode);
+        this.editorScene.setTheme(isDarkMode);
         
         this.isInitialized = true;
         this.log('Phaser editor initialized successfully');
@@ -380,13 +385,11 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Set up event handlers for Phaser editor
      */
     private async setupPhaserEventHandlers(): Promise<void> {
-        if (!this.phaserEditor) return;
+        if (!this.editorScene) return;
         
-        // Wait for the scene to be ready and set up layer callbacks
-        const scene = await this.phaserEditor.waitForSceneReady();
-        
+        // Scene should be ready after activate() call
         // Set up unified scene click callback for editor functionality
-        scene.sceneClickedCallback = (context: any, layer: string, extra?: any) => {
+        this.editorScene.sceneClickedCallback = (context: any, layer: string, extra?: any) => {
             const { hexQ: q, hexR: r, tile, unit } = context;
             this.log(`Scene clicked at Q=${q}, R=${r} on layer '${layer}'`, { tile, unit });
             
@@ -395,13 +398,13 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         };
         
         // Handle world changes
-        this.phaserEditor.onWorldChange(() => {
+        this.editorScene.onWorldChange(() => {
             this.log('World changed in Phaser');
             this.emit(EditorEventTypes.WORLD_CHANGED, {}, this, this);
         });
         
         // Handle reference scale changes
-        this.phaserEditor.onReferenceScaleChange((x: number, y: number) => {
+        this.editorScene.onReferenceScaleChange((x: number, y: number) => {
             this.emit(EditorEventTypes.REFERENCE_SCALE_CHANGED, { scaleX: x, scaleY: y }, this, this);
         });
         
@@ -412,7 +415,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle tool state changes from PageState
      */
     private handleToolStateChanged(eventData: any): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             return;
         }
         
@@ -421,21 +424,21 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         
         // Update Phaser editor settings based on tool state
         if (toolState.selectedTerrain !== undefined) {
-            this.phaserEditor.setTerrain(toolState.selectedTerrain).catch(error => {
+            this.editorScene.setTerrain(toolState.selectedTerrain).catch(error => {
                 console.error('[PhaserEditorComponent] Failed to set terrain:', error);
             });
             this.log(`Updated Phaser terrain to: ${toolState.selectedTerrain}`);
         }
         
         if (toolState.selectedPlayer !== undefined) {
-            this.phaserEditor.setColor(toolState.selectedPlayer).catch(error => {
+            this.editorScene.setColor(toolState.selectedPlayer).catch(error => {
                 console.error('[PhaserEditorComponent] Failed to set player:', error);
             });
             this.log(`Updated Phaser player to: ${toolState.selectedPlayer}`);
         }
         
         if (toolState.brushSize !== undefined) {
-            this.phaserEditor.setBrushSize(toolState.brushSize);
+            this.editorScene.setBrushSize(toolState.brushSize);
             this.log(`Updated Phaser brush size to: ${toolState.brushSize}`);
         }
     }
@@ -444,7 +447,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle World event handlers
      */
     private handleWorldLoaded(data: WorldLoadedEventData): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             return;
         }
         
@@ -452,16 +455,16 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         
         // Load tile data from World into Phaser
         if (this.world) {
-            this.phaserEditor?.setTilesData(this.world.getAllTiles());
+            this.editorScene?.setTilesData(this.world.getAllTiles());
             
             const unitsData = this.world.getAllUnits();
             // Load units into Phaser (if we add this method later)
-            // this.phaserEditor?.setUnitsData(unitsData);
+            // this.editorScene?.setUnitsData(unitsData);
         }
     }
     
     private handleTilesChanged(data: TilesChangedEventData): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             return;
         }
         
@@ -470,16 +473,16 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         // Update individual tiles in Phaser based on World changes
         for (const change of data.changes) {
             if (change.tile) {
-                this.phaserEditor?.setTile(change.tile, 0); // No brush size for individual updates
+                this.editorScene?.setTile(change.tile); // No brush size for individual updates
             } else {
                 // Tile was removed
-                this.phaserEditor?.removeTile(change.q, change.r);
+                this.editorScene?.removeTile(change.q, change.r);
             }
         }
     }
     
     private handleUnitsChanged(data: UnitsChangedEventData): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             return;
         }
         
@@ -488,34 +491,34 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         // Update individual units in Phaser based on World changes
         for (const change of data.changes) {
             if (change.unit) {
-                this.phaserEditor?.setUnit(change.unit)
+                this.editorScene?.setUnit(change.unit)
             } else {
                 // Unit was removed
-                this.phaserEditor?.removeUnit(change.q, change.r);
+                this.editorScene?.removeUnit(change.q, change.r);
             }
         }
     }
     
     private handleWorldCleared(): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             return;
         }
         
         this.log('World cleared, clearing Phaser display');
-        this.phaserEditor.clearAllTiles();
-        this.phaserEditor.clearAllUnits();
+        this.editorScene.clearAllTiles();
+        this.editorScene.clearAllUnits();
     }
     
     /**
      * Handle grid visibility set event from WorldEditorPage
      */
     private handleGridSetVisibility(data: GridSetVisibilityPayload): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot set grid visibility');
             return;
         }
         
-        this.phaserEditor.setShowGrid(data.show);
+        this.editorScene.setShowGrid(data.show);
         this.log(`Grid visibility set to: ${data.show}`);
     }
     
@@ -523,12 +526,12 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle coordinates visibility set event from WorldEditorPage
      */
     private handleCoordinatesSetVisibility(data: CoordinatesSetVisibilityPayload): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot set coordinates visibility');
             return;
         }
         
-        this.phaserEditor.setShowCoordinates(data.show);
+        this.editorScene.setShowCoordinates(data.show);
         this.log(`Coordinates visibility set to: ${data.show}`);
     }
     
@@ -536,12 +539,12 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle reference image mode set event from ReferenceImagePanel
      */
     private handleReferenceSetMode(data: ReferenceSetModePayload): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot set reference mode');
             return;
         }
         
-        this.phaserEditor.setReferenceMode(data.mode);
+        this.editorScene.setReferenceMode(data.mode);
         this.log(`Reference mode set to: ${data.mode}`);
     }
     
@@ -549,12 +552,12 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle reference image alpha set event from ReferenceImagePanel
      */
     private handleReferenceSetAlpha(data: ReferenceSetAlphaPayload): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot set reference alpha');
             return;
         }
         
-        this.phaserEditor.setReferenceAlpha(data.alpha);
+        this.editorScene.setReferenceAlpha(data.alpha);
         this.log(`Reference alpha set to: ${data.alpha}`);
     }
     
@@ -562,12 +565,12 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle reference image position set event from ReferenceImagePanel
      */
     private handleReferenceSetPosition(data: ReferenceSetPositionPayload): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot set reference position');
             return;
         }
         
-        this.phaserEditor.setReferencePosition(data.x, data.y);
+        this.editorScene.setReferencePosition(data.x, data.y);
         this.log(`Reference position set to: (${data.x}, ${data.y})`);
     }
     
@@ -575,12 +578,12 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle reference image scale set event from ReferenceImagePanel
      */
     private handleReferenceSetScale(data: ReferenceSetScalePayload): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot set reference scale');
             return;
         }
         
-        this.phaserEditor.setReferenceScale(data.scaleX, data.scaleY);
+        this.editorScene.setReferenceScale(data.scaleX, data.scaleY);
         this.log(`Reference scale set to: (${data.scaleX}, ${data.scaleY})`);
     }
     
@@ -588,12 +591,12 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle reference image clear event from ReferenceImagePanel
      */
     private handleReferenceClear(): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot clear reference image');
             return;
         }
         
-        this.phaserEditor.clearReferenceImage();
+        this.editorScene.clearReferenceImage();
         this.log('Reference image cleared');
     }
     
@@ -603,7 +606,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     private async handleReferenceImageLoaded(data: ReferenceImageLoadedPayload): Promise<void> {
         this.log(`Reference image loaded: ${data.width}x${data.height} from ${data.source}`);
         
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             this.log('Phaser not ready, cannot load reference image');
             return;
         }
@@ -614,7 +617,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         const file = new File([blob], `reference-${data.source}`, { type: blob.type });
         
         // Load the reference image into Phaser using the existing file method
-        const result = await this.phaserEditor.loadReferenceFromFile(file);
+        const result = await this.editorScene.loadReferenceFromFile(file);
         if (result) {
             this.log(`Reference image loaded into Phaser from ${data.source}`);
         } else {
@@ -640,7 +643,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Handle tile clicks for painting
      */
     private handleTileClick(q: number, r: number): void {
-        if (!this.phaserEditor || !this.isInitialized) {
+        if (!this.editorScene || !this.isInitialized) {
             return;
         }
         
@@ -747,8 +750,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Set theme for the editor
      */
     public setTheme(isDark: boolean): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setTheme(isDark);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setTheme(isDark);
             this.log(`Theme set to: ${isDark ? 'dark' : 'light'}`);
         }
     }
@@ -757,8 +760,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Set grid visibility
      */
     public setShowGrid(show: boolean): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setShowGrid(show);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setShowGrid(show);
             this.log(`Grid visibility set to: ${show}`);
         }
     }
@@ -767,8 +770,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Set coordinate visibility
      */
     public setShowCoordinates(show: boolean): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setShowCoordinates(show);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setShowCoordinates(show);
             this.log(`Coordinate visibility set to: ${show}`);
         }
     }
@@ -777,8 +780,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Load world tiles data
      */
     public async setTilesData(tiles: Array<Tile>): Promise<void> {
-        if (this.phaserEditor && this.isInitialized) {
-            await this.phaserEditor.setTilesData(tiles);
+        if (this.editorScene && this.isInitialized) {
+            await this.editorScene.setTilesData(tiles);
             this.log(`Loaded ${tiles.length} tiles into Phaser`);
         }
     }
@@ -787,8 +790,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Paint a unit at specific coordinates
      */
     public setUnit(unit: Unit): boolean {
-        if (this.phaserEditor && this.isInitialized) {
-              this.phaserEditor.setUnit(unit);
+        if (this.editorScene && this.isInitialized) {
+              this.editorScene.setUnit(unit);
               this.log(`Painted unit ${unit.unitType} (player ${unit.player}) at Q=${unit.q}, R=${unit.r}`);
               return true;
         }
@@ -799,8 +802,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Get viewport center for world generation
      */
     public getViewportCenter(): { q: number; r: number } {
-        if (this.phaserEditor && this.isInitialized) {
-            return this.phaserEditor.getViewportCenter();
+        if (this.editorScene && this.isInitialized) {
+            return this.editorScene.getViewportCenter();
         }
         return { q: 0, r: 0 };
     }
@@ -809,8 +812,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Center camera on specific coordinates
      */
     public centerCamera(q: number = 0, r: number = 0): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.centerCamera(q, r);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.centerCamera(q, r);
             this.log(`Camera centered on Q=${q}, R=${r}`);
         }
     }
@@ -819,55 +822,55 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * World generation methods
      */
     public fillAllTerrain(terrain: number, color: number = 0): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.fillAllTerrain(terrain, color);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.fillAllTerrain(terrain, color);
             this.log(`Filled all terrain with type ${terrain}`);
         }
     }
     
     public randomizeTerrain(): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.randomizeTerrain();
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.randomizeTerrain();
             this.log('Terrain randomized');
         }
     }
     
     public createIslandPattern(centerQ: number, centerR: number, radius: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.createIslandPattern(centerQ, centerR, radius);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.createIslandPattern(centerQ, centerR, radius);
             this.log(`Created island pattern at Q=${centerQ}, R=${centerR} with radius ${radius}`);
         }
     }
     
     public clearAllTiles(): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.clearAllTiles();
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.clearAllTiles();
             this.log('All tiles cleared');
         }
     }
     
     public clearAllUnits(): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.clearAllUnits();
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.clearAllUnits();
             this.log('All units cleared');
         }
     }
     
     public setTile(tile: Tile, brushSize: number = 0): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setTile(tile, brushSize);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setTile(tile, brushSize);
         }
     }
     
     public removeTile(q: number, r: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.removeTile(q, r);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.removeTile(q, r);
         }
     }
     
     public removeUnit(q: number, r: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.removeUnit(q, r);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.removeUnit(q, r);
         }
     }
     
@@ -875,8 +878,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Reference image methods
      */
     public async loadReferenceFromClipboard(): Promise<boolean> {
-        if (this.phaserEditor && this.isInitialized) {
-            const result = await this.phaserEditor.loadReferenceFromClipboard();
+        if (this.editorScene && this.isInitialized) {
+            const result = await this.editorScene.loadReferenceFromClipboard();
             this.log(result ? 'Reference image loaded from clipboard' : 'No image found in clipboard');
             return result;
         }
@@ -884,8 +887,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     }
     
     public async loadReferenceFromFile(file: File): Promise<boolean> {
-        if (this.phaserEditor && this.isInitialized) {
-            const result = await this.phaserEditor.loadReferenceFromFile(file);
+        if (this.editorScene && this.isInitialized) {
+            const result = await this.editorScene.loadReferenceFromFile(file);
             this.log(result ? `Reference image loaded from file: ${file.name}` : 'Failed to load file');
             return result;
         }
@@ -893,37 +896,37 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     }
     
     public setReferenceMode(mode: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setReferenceMode(mode);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setReferenceMode(mode);
             const modeNames = ['hidden', 'background', 'overlay'];
             this.log(`Reference mode set to: ${modeNames[mode] || mode}`);
         }
     }
     
     public setReferenceAlpha(alpha: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setReferenceAlpha(alpha);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setReferenceAlpha(alpha);
             this.log(`Reference alpha set to: ${alpha}`);
         }
     }
     
     public setReferencePosition(x: number, y: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setReferencePosition(x, y);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setReferencePosition(x, y);
             this.log(`Reference position set to: (${x}, ${y})`);
         }
     }
     
     public setReferenceScale(x: number, y: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setReferenceScale(x, y);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setReferenceScale(x, y);
             this.log(`Reference scale set to: (${x}, ${y})`);
         }
     }
     
     public setReferenceScaleFromTopLeft(x: number, y: number): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.setReferenceScaleFromTopLeft(x, y);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.setReferenceScaleFromTopLeft(x, y);
             this.log(`Reference scale set from top-left to: (${x}, ${y})`);
         }
     }
@@ -935,15 +938,15 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         scale: { x: number; y: number };
         hasImage: boolean;
     } | null {
-        if (this.phaserEditor && this.isInitialized) {
-            return this.phaserEditor.getReferenceState();
+        if (this.editorScene && this.isInitialized) {
+            return this.editorScene.getReferenceState();
         }
         return null;
     }
     
     public clearReferenceImage(): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.clearReferenceImage();
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.clearReferenceImage();
             this.log('Reference image cleared');
         }
     }
@@ -952,8 +955,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Set callback for when Phaser scene is ready
      */
     public onSceneReady(callback: () => void): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.onSceneReady(callback);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.onSceneReady(callback);
         } else {
             this.log('Cannot set scene ready callback - Phaser not initialized');
         }
@@ -963,8 +966,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Register world change callback
      */
     public onWorldChange(callback: () => void): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.onWorldChange(callback);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.onWorldChange(callback);
         }
     }
     
@@ -972,8 +975,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Register reference scale change callback
      */
     public onReferenceScaleChange(callback: (x: number, y: number) => void): void {
-        if (this.phaserEditor && this.isInitialized) {
-            this.phaserEditor.onReferenceScaleChange(callback);
+        if (this.editorScene && this.isInitialized) {
+            this.editorScene.onReferenceScaleChange(callback);
         }
     }
 }

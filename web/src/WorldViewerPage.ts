@@ -42,8 +42,7 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         const worldTilesElement = document.getElementById('world-tiles-data-json');
         this.world = new World(this.eventBus).loadFromElement(worldMetadataElement!, worldTilesElement!);
         
-        // 2. THEN: Subscribe to events BEFORE creating components
-        this.subscribeToWorldViewerEvents();
+        // 2. THEN: Subscribe to events BEFORE creating components - None yet
         
         // 3. FINALLY: Create child components
         this.createComponents();
@@ -56,11 +55,23 @@ class WorldViewerPage extends BasePage implements LCMComponent {
     }
 
     /**
+     * Phase 2: Inject dependencies
+     */
+    setupDependencies(): void {
+        // Set up scene click callback now that worldScene is initialized
+        this.worldScene.sceneClickedCallback = () => {
+          console.log("here...")
+        }
+    }
+
+    /**
      * Phase 3: Activate component when all dependencies are ready
      */
     async activate(): Promise<void> {
         // Bind events now that all components are ready
         this.bindPageSpecificEvents();
+        this.worldScene.loadWorld(this.world);
+        this.showToast('Success', 'World loaded successfully', 'success');
     }
 
     /**
@@ -72,39 +83,14 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         
         this.destroy();
     }
-    
-    /**
-     * Subscribe to WorldViewer events before component creation
-     */
-    private subscribeToWorldViewerEvents(): void {
-        // Subscribe to WorldViewer ready event BEFORE creating the component
-        this.addSubscription(WorldEventTypes.WORLD_VIEWER_READY, null);
-    }
-    
-    /**
-     * Handle incoming events from the EventBus
-     */
-    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
-        switch(eventType) {
-            case WorldEventTypes.WORLD_VIEWER_READY:
-                // Pass the canonical World object directly
-                this.worldScene.loadWorld(this.world);
-                this.showToast('Success', 'World loaded successfully', 'success');
-                break;
-                
-            default:
-                // Call parent implementation for unhandled events
-                super.handleBusEvent(eventType, data, target, emitter);
-        }
-    }
 
     /**
      * Create PhaserWorldScene and WorldStatsPanel component instances
      */
     private createComponents(): void {
-        // Create PhaserWorldScene component
-        const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
-        this.worldScene = new PhaserWorldScene(worldViewerRoot, this.eventBus, true);
+        // Create PhaserWorldScene component - use the actual phaser container, not the outer wrapper
+        const phaserContainer = this.ensureElement('#phaser-viewer-container', 'phaser-viewer-container');
+        this.worldScene = new PhaserWorldScene(phaserContainer, this.eventBus, true);
         
         // Create WorldStatsPanel component - pass the content div, not the container with header
         const worldStatsContainer = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');

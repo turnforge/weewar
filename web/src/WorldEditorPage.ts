@@ -499,14 +499,6 @@ class WorldEditorPage extends BasePage {
             resizeInput(); // Initial resize
         }
 
-
-        // NOTE: Terrain/unit button bindings, player selection, and brush size controls 
-        // are now handled by EditorToolsPanel component via EventBus
-
-        // Visual options (grid/coordinates) now bound in bindPhaserPanelEvents
-
-
-
         // Export buttons
         document.querySelectorAll('[data-action="export-game"]').forEach(button => {
             button.addEventListener('click', (e) => {

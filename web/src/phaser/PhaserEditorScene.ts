@@ -1,6 +1,7 @@
 import { PhaserWorldScene } from './PhaserWorldScene';
 import { Unit, Tile, World } from '../World';
 import { EventBus } from '../../lib/EventBus';
+import { hexToPixel, pixelToHex } from './hexUtils';
 
 /**
  * PhaserEditorScene extends PhaserWorldScene with editor-specific functionality.
@@ -36,7 +37,7 @@ export class PhaserEditorScene extends PhaserWorldScene {
     constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super(containerElement, eventBus, debugMode);
         // Override the scene key for this specific scene type
-        this.scene.settings.key = 'PhaserEditorScene';
+        // this.scene.settings.key = 'PhaserEditorScene';
     }
 
     /**
@@ -95,41 +96,6 @@ export class PhaserEditorScene extends PhaserWorldScene {
             this.referenceImage.setAlpha(this.referenceAlpha);
             this.referenceImage.setDepth(-1); // Behind tiles
         });
-    }
-
-    /**
-     * Load reference image from clipboard
-     */
-    public async loadReferenceFromClipboard(): Promise<boolean> {
-            // Read from clipboard
-            const items = await navigator.clipboard.read();
-            
-            for (const item of items) {
-                if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
-                    const imageBlob = await item.getType(item.types.find(type => type.startsWith('image/')) || '');
-                    const imageUrl = URL.createObjectURL(imageBlob);
-                    
-                    this.setReferenceImage(imageUrl);
-                    return true;
-                }
-            }
-            
-            console.warn('[PhaserEditorScene] No image found in clipboard');
-            return false;
-    }
-
-    /**
-     * Load reference image from file
-     */
-    public async loadReferenceFromFile(file: File): Promise<boolean> {
-            if (!file.type.startsWith('image/')) {
-                console.error('[PhaserEditorScene] File is not an image:', file.type);
-                return false;
-            }
-            
-            const imageUrl = URL.createObjectURL(file);
-            this.setReferenceImage(imageUrl);
-            return true;
     }
 
     /**
@@ -297,5 +263,229 @@ export class PhaserEditorScene extends PhaserWorldScene {
         ];
 
         testUnits.forEach(unit => this.setUnit(Unit.from(unit)));
+    }
+
+    // =============================================================================
+    // Higher-level API methods (moved from PhaserWorldEditor)
+    // =============================================================================
+
+    // Event callbacks
+    private onTileClickCallback: ((q: number, r: number) => void) | null = null;
+    private onWorldChangeCallback: (() => void) | null = null;
+    private onReferenceScaleChangeCallback: ((x: number, y: number) => void) | null = null;
+
+    /**
+     * Set terrain type for painting (compatibility with PhaserEditorComponent)
+     */
+    public async setTerrain(terrain: number): Promise<void> {
+        this.setCurrentTerrain(terrain);
+    }
+
+    /**
+     * Set color/player for painting (compatibility with PhaserEditorComponent)
+     */
+    public async setColor(color: number): Promise<void> {
+        this.setCurrentPlayer(color);
+    }
+
+    /**
+     * Set tiles data (load world data) - compatibility method
+     */
+    public async setTilesData(tiles: Array<Tile>): Promise<void> {
+        // Wait for assets to be ready before placing tiles
+        await this.waitForAssetsReady();
+        
+        this.clearAllTiles();
+        
+        tiles.forEach(tile => {
+            this.setTile(tile, 0); // Use 0 brush size for data loading
+        });
+    }
+
+    /**
+     * Get tiles data - compatibility method
+     */
+    public getTilesData(): Array<Tile> {
+        const tilesData: Array<Tile> = [];
+        
+        this.tileSprites.forEach((tile, key) => {
+            const [q, r] = key.split(',').map(Number);
+            // Extract terrain and color from texture key
+            const textureKey = tile.texture.key;
+            const match = textureKey.match(/terrain_(\d+)_(\d+)/);
+            
+            if (match) {
+                tilesData.push({
+                    q,
+                    r,
+                    tileType: parseInt(match[1]),
+                    player: parseInt(match[2])
+                });
+            }
+        });
+        
+        return tilesData;
+    }
+
+    /**
+     * Set callback for tile click events
+     */
+    public onTileClick(callback: (q: number, r: number) => void): void {
+        this.onTileClickCallback = callback;
+    }
+
+    /**
+     * Set callback for world change events
+     */
+    public onWorldChange(callback: () => void): void {
+        this.onWorldChangeCallback = callback;
+    }
+
+    /**
+     * Set callback for reference scale change events
+     */
+    public onReferenceScaleChange(callback: (x: number, y: number) => void): void {
+        this.onReferenceScaleChangeCallback = callback;
+    }
+
+    /**
+     * Get the current viewport center in hex coordinates
+     */
+    public getViewportCenter(): { q: number, r: number } {
+        if (!this.cameras?.main) return { q: 0, r: 0 };
+        
+        const camera = this.cameras.main;
+        
+        // Get the center of the viewport in world coordinates
+        const centerX = camera.scrollX + (camera.width / 2) / camera.zoom;
+        const centerY = camera.scrollY + (camera.height / 2) / camera.zoom;
+        
+        // Convert pixel coordinates to hex coordinates using hexUtils
+        return pixelToHex(centerX, centerY);
+    }
+
+    /**
+     * Center camera on hex coordinates
+     */
+    public centerCamera(q: number = 0, r: number = 0): void {
+        if (!this.cameras?.main) return;
+        
+        // Convert hex coordinates to pixel coordinates using hexUtils
+        const position = hexToPixel(q, r);
+        
+        // Center camera on position
+        this.cameras.main.centerOn(position.x, position.y);
+    }
+
+    /**
+     * Fill all terrain with specified type and color
+     */
+    public fillAllTerrain(terrain: number, color: number = 0): void {
+        // This would need to iterate through all tiles in a reasonable area
+        // For now, implement a simple pattern
+        for (let q = -20; q <= 20; q++) {
+            for (let r = -20; r <= 20; r++) {
+                this.setTile({ q, r, tileType: terrain, player: color });
+            }
+        }
+        
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
+        }
+    }
+
+    /**
+     * Randomize terrain across the map
+     */
+    public randomizeTerrain(): void {
+        const terrainTypes = [5, 6, 7, 8, 9]; // Common terrain types
+        
+        for (let q = -20; q <= 20; q++) {
+            for (let r = -20; r <= 20; r++) {
+                const randomTerrain = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
+                this.setTile({ q, r, tileType: randomTerrain, player: 0 });
+            }
+        }
+        
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
+        }
+    }
+
+    /**
+     * Create island pattern centered at given coordinates
+     */
+    public createIslandPattern(centerQ: number = 0, centerR: number = 0, radius: number = 5): void {
+        // Clear existing
+        this.clearAllTiles();
+        
+        // Create island with water around edges, land in center
+        for (let q = centerQ - radius; q <= centerQ + radius; q++) {
+            for (let r = centerR - radius; r <= centerR + radius; r++) {
+                const distance = Math.max(Math.abs(q - centerQ), Math.abs(r - centerR));
+                
+                if (distance <= radius) {
+                    const terrainType = distance <= radius - 2 ? 5 : 7; // Grass or water
+                    this.setTile({ q, r, tileType: terrainType, player: 0 });
+                }
+            }
+        }
+        
+        if (this.onWorldChangeCallback) {
+            this.onWorldChangeCallback();
+        }
+    }
+
+    /**
+     * Load reference image from file
+     */
+    public async loadReferenceFromFile(file: File): Promise<boolean> {
+        if (!file.type.startsWith('image/')) {
+            console.error('[PhaserEditorScene] File is not an image:', file.type);
+            return false;
+        }
+        const imageUrl = URL.createObjectURL(file);
+        this.setReferenceImage(imageUrl);
+        return true;
+    }
+
+    /**
+     * Load reference image from clipboard
+     */
+    public async loadReferenceFromClipboard(): Promise<boolean> {
+        // Read from clipboard
+        const items = await navigator.clipboard.read();
+        
+        for (const item of items) {
+            if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
+                const imageBlob = await item.getType(item.types.find(type => type.startsWith('image/')) || '');
+                const imageUrl = URL.createObjectURL(imageBlob);
+                
+                this.setReferenceImage(imageUrl);
+                return true;
+            }
+        }
+        
+        console.warn('[PhaserEditorScene] No image found in clipboard');
+        return false;
+    }
+
+    /**
+     * Handle tile click events (called internally)
+     */
+    protected handleTileClickInternal(q: number, r: number): void {
+        if (this.onTileClickCallback) {
+            this.onTileClickCallback(q, r);
+        }
+        
+        // Note: onWorldChangeCallback will be called by specific paint methods when needed
+    }
+
+    /**
+     * Set tile with brush size support - override parent method to match expected signature
+     */
+    public setTile(tile: Tile, brushSize: number = 0): void {
+        // Call parent setTile method which expects just the tile
+        super.setTile(tile);
     }
 }

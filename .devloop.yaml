@@ -22,7 +22,7 @@ rules:
           - "web"
       - action: "include"
         patterns:
-          - "service/**/*.go"
+          - "services/**/*.go"
           - "**/*.go"
           - "go.mod"
           - "go.sum"

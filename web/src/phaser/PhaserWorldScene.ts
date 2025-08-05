@@ -68,6 +68,9 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private assetsReadyPromise: Promise<void>;
     private assetsReadyResolver: (() => void) | null = null;
 
+    // Dynamic resizing
+    private resizeObserver: ResizeObserver | null = null;
+
     constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('phaser-world-scene');
         this.containerElement = containerElement;
@@ -138,10 +141,9 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             backgroundColor: '#2c3e50',
             scene: this, // Use this scene instance directly
             scale: {
-                mode: Phaser.Scale.FIT,
+                mode: Phaser.Scale.RESIZE,
                 width: width,
-                height: height,
-                autoCenter: Phaser.Scale.CENTER_BOTH
+                height: height
             },
             physics: {
                 default: 'arcade',
@@ -166,6 +168,9 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         this.assetsReadyPromise = new Promise<void>((resolve) => {
             this.assetsReadyResolver = resolve;
         });
+
+        // Set up ResizeObserver for dynamic canvas resizing
+        this.setupResizeObserver();
     }
 
     /**
@@ -179,6 +184,16 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
      * Destroy Phaser game instance and clean up
      */
     private destroyPhaser(): void {
+        // Clean up ResizeObserver
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+            
+            if (this.debugMode) {
+                console.log('[PhaserWorldScene] ResizeObserver disconnected');
+            }
+        }
+        
         // Clean up layer system
         if (this.layerManager) {
             this.layerManager.destroy();
@@ -1088,12 +1103,51 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }
 
     /**
-     * Resize the scene
+     * Set up ResizeObserver to automatically resize canvas when container changes
+     */
+    private setupResizeObserver(): void {
+        if (!this.containerElement || !window.ResizeObserver) {
+            if (this.debugMode) {
+                console.warn('[PhaserWorldScene] ResizeObserver not available');
+            }
+            return;
+        }
+
+        this.resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                if (entry.target === this.containerElement) {
+                    // Get the new dimensions
+                    const newWidth = entry.contentRect.width;
+                    const newHeight = entry.contentRect.height;
+                    
+                    // Resize the Phaser canvas to match the new container size
+                    this.resize(newWidth, newHeight);
+                    
+                    // Update grid and coordinates display for new viewport
+                    this.updateGridDisplay();
+                    this.updateCoordinatesDisplay();
+                    
+                    break;
+                }
+            }
+        });
+
+        // Start observing the container element
+        this.resizeObserver.observe(this.containerElement);
+        
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] ResizeObserver set up successfully');
+        }
+    }
+
+    /**
+     * Resize the scene (can be called manually or automatically via ResizeObserver)
      */
     public resize(width?: number, height?: number): void {
         if (this.phaserGame && this.containerElement) {
             const w = width || this.containerElement.clientWidth;
             const h = height || this.containerElement.clientHeight;
+            
             this.phaserGame.scale.resize(w, h);
         }
     }

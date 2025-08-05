@@ -1,6 +1,5 @@
 <!-- templates/HomePage.html -->
 {{# include "BasePage.html" #}}
-{{# include "AppItemList.html" #}}
 
 {{ define "BodySection" }}
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -8,9 +7,11 @@
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome to weewar</h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">Manage your app items below</p>
     </div>
-    
-    <!-- App Items List -->
-    {{ template "AppItemList" .AppItemListView }}
+
+    <h2><a href="/games">Games</a></h2>
+
+    <hr/>
+    <h2><a href="/worlds">Worlds</a></h2>
 </main>
 {{ end }}
 

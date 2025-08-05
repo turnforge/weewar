@@ -102,6 +102,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
     async activate(): Promise<void> {
         // Bind events now that all components are ready
         this.bindGameSpecificEvents();
+        this.checkAndLoadWorldIntoViewer();
     }
 
     public destroy(): void {
@@ -146,7 +147,6 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 
     // State tracking for initialization
-    private gameSceneReady = false;
     private gameDataReady = false;
 
     /**
@@ -154,16 +154,6 @@ class GameViewerPage extends BasePage implements LCMComponent {
      */
     public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
         switch(eventType) {
-            case WorldEventTypes.WORLD_VIEWER_READY:
-                this.gameSceneReady = true;
-                
-                // Set up unified map callback when viewer is ready
-                this.gameScene.sceneClickedCallback = this.onSceneClicked
-                
-                // Check if both viewer and game data are ready
-                this.checkAndLoadWorldIntoViewer();
-                break;
-            
             case GameEventTypes.GAME_DATA_LOADED:
                 this.gameDataReady = true;
                 
@@ -218,9 +208,8 @@ class GameViewerPage extends BasePage implements LCMComponent {
      * Check if both WorldViewer and game data are ready, then load world into viewer
      */
     private async checkAndLoadWorldIntoViewer(): Promise<void> {
-        if (!this.gameSceneReady || !this.gameDataReady) {
+        if (!this.gameDataReady) {
             console.warn('GameViewerPage: Waiting for both viewer and game data to be ready', {
-                gameSceneReady: this.gameSceneReady,
                 gameDataReady: this.gameDataReady
             });
             return;

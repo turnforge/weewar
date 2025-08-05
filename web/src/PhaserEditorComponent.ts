@@ -385,33 +385,14 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         // Wait for the scene to be ready and set up layer callbacks
         const scene = await this.phaserEditor.waitForSceneReady();
         
-        // Set up BaseMapLayer callbacks for editor functionality
-        scene.setInteractionCallbacks(
-            (q: number, r: number) => {
-                this.log(`Tile clicked: Q=${q}, R=${r}`);
-                
-                this.emit<TileClickedPayload>(EditorEventTypes.TILE_CLICKED, {
-                    q: q,
-                    r: r
-                }, this, this);
-                
-                // Handle painting based on current mode
-                this.handleTileClick(q, r);
-                return false; // Don't emit additional events from scene
-            },
-            (q: number, r: number) => {
-                // Handle unit clicks the same as tile clicks in editor
-                this.log(`Unit clicked: Q=${q}, R=${r}`);
-                
-                this.emit<TileClickedPayload>(EditorEventTypes.TILE_CLICKED, {
-                    q: q,
-                    r: r
-                }, this, this);
-                
-                this.handleTileClick(q, r);
-                return false; // Don't emit additional events from scene
-            }
-        );
+        // Set up unified scene click callback for editor functionality
+        scene.sceneClickedCallback = (context: any, layer: string, extra?: any) => {
+            const { hexQ: q, hexR: r, tile, unit } = context;
+            this.log(`Scene clicked at Q=${q}, R=${r} on layer '${layer}'`, { tile, unit });
+            
+            // Handle painting based on current mode (works for both tile and unit clicks)
+            this.handleTileClick(q, r);
+        };
         
         // Handle world changes
         this.phaserEditor.onWorldChange(() => {
@@ -693,37 +674,18 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
                             }
                         }
                     }
-                    // World will emit TILES_CHANGED event, which will update Phaser via onWorldEvent
                 }
                 
                 this.log(`Painted terrain ${toolState.selectedTerrain} (player ${playerId}) at Q=${q}, R=${r} with brush size ${toolState.brushSize}`);
-                
-                // Emit tile painted event for backward compatibility (for components not yet using World events)
-                this.emit<TilePaintedPayload>(EditorEventTypes.TILE_PAINTED, {
-                    q: q,
-                    r: r,
-                    terrainType: toolState.selectedTerrain,
-                    playerColor: playerId,
-                    brushSize: toolState.brushSize
-                }, this, this);
                 break;
                 
             case 'unit':
                 // Update World data (single source of truth)
                 if (this.world) {
                     this.world.setUnitAt(q, r, toolState.selectedUnit, toolState.selectedPlayer);
-                    // World will emit UNITS_CHANGED event, which will update Phaser via onWorldEvent
                 }
                 
                 this.log(`Painted unit ${toolState.selectedUnit} (player ${toolState.selectedPlayer}) at Q=${q}, R=${r}`);
-                
-                // Emit unit placed event for backward compatibility
-                this.emit<UnitPlacedPayload>(EditorEventTypes.UNIT_PLACED, {
-                    q: q,
-                    r: r,
-                    unitType: toolState.selectedUnit,
-                    playerId: toolState.selectedPlayer
-                }, this, this);
                 break;
                 
             case 'clear':
@@ -747,14 +709,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
                             }
                         }
                     }
-                    // World will emit events, which will update Phaser via onWorldEvent
                 }
-                
                 this.log(`Cleared tile and unit at Q=${q}, R=${r} with brush size ${toolState.brushSize}`);
-                
-                // Emit separate events for backward compatibility
-                this.emit<TileClearedPayload>(EditorEventTypes.TILE_CLEARED, { q: q, r: r }, this, this);
-                this.emit<UnitRemovedPayload>(EditorEventTypes.UNIT_REMOVED, { q: q, r: r }, this, this);
                 break;
         }
     }

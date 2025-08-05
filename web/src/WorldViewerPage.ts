@@ -1,6 +1,6 @@
 import { BasePage } from '../lib/BasePage';
 import { EventBus } from '../lib/EventBus';
-import { WorldViewer } from './WorldViewer';
+import { PhaserWorldScene } from './phaser/PhaserWorldScene';
 import { WorldStatsPanel } from './WorldStatsPanel';
 import { World } from './World';
 import { LCMComponent } from '../lib/LCMComponent';
@@ -26,7 +26,7 @@ class WorldViewerPage extends BasePage implements LCMComponent {
     private world: World;
     
     // Component instances
-    private worldViewer: WorldViewer;
+    private worldScene: PhaserWorldScene;
     private worldStatsPanel: WorldStatsPanel;
 
     // =============================================================================
@@ -50,7 +50,7 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         
         // Return child components for lifecycle management
         const childComponents: LCMComponent[] = [];
-        childComponents.push(this.worldViewer!); // Should exist - fail if not
+        childComponents.push(this.worldScene!); // Should exist - fail if not
         childComponents.push(this.worldStatsPanel as any); // Should exist - fail if not
         return childComponents;
     }
@@ -88,7 +88,7 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         switch(eventType) {
             case WorldEventTypes.WORLD_VIEWER_READY:
                 // Pass the canonical World object directly
-                this.worldViewer.loadWorld(this.world);
+                this.worldScene.loadWorld(this.world);
                 this.showToast('Success', 'World loaded successfully', 'success');
                 break;
                 
@@ -99,12 +99,12 @@ class WorldViewerPage extends BasePage implements LCMComponent {
     }
 
     /**
-     * Create WorldViewer and WorldStatsPanel component instances
+     * Create PhaserWorldScene and WorldStatsPanel component instances
      */
     private createComponents(): void {
-        // Create WorldViewer component
+        // Create PhaserWorldScene component
         const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
-        this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
+        this.worldScene = new PhaserWorldScene(worldViewerRoot, this.eventBus, true);
         
         // Create WorldStatsPanel component - pass the content div, not the container with header
         const worldStatsContainer = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');
@@ -148,11 +148,11 @@ class WorldViewerPage extends BasePage implements LCMComponent {
 
     public destroy(): void {
         // Clean up components
-        if (this.worldViewer) {
-            this.worldViewer.destroy();
+        if (this.worldScene) {
+            this.worldScene.destroy();
             // Force set as null.  We are pushing for fail fast on values
             // that should NOT be null
-            this.worldViewer = null as any;
+            this.worldScene = null as any;
         }
         
         if (this.worldStatsPanel) {

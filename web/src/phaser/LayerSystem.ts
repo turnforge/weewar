@@ -46,6 +46,9 @@ export interface ClickContext {
     tile?: Tile | null;
     unit?: Unit | null;
     
+    // Layer that wants to handle this click
+    layer?: string;
+    
     // Metadata
     timestamp: number;
     button: number; // 0=left, 1=middle, 2=right
@@ -65,7 +68,6 @@ export interface Layer {
     
     // Core lifecycle methods
     hitTest(context: ClickContext): LayerHitResult | null;
-    handleClick?(context: ClickContext): boolean;
     handleDrag?(context: ClickContext, deltaX: number, deltaY: number): boolean;
     
     // Display control
@@ -205,9 +207,10 @@ export class LayerManager {
     }
     
     /**
-     * Handle click events with full coordinate context
+     * Perform hit testing and return ClickContext with layer information
+     * Returns null if no layer wants to handle the click
      */
-    public handleClick(pointer: Phaser.Input.Pointer): boolean {
+    public getClickContext(pointer: Phaser.Input.Pointer): ClickContext | null {
         // Create complete context with all coordinate spaces
         const hexCoords = this.pixelToHexFn(pointer.worldX, pointer.worldY);
         const context: ClickContext = {
@@ -229,17 +232,15 @@ export class LayerManager {
         for (const layer of interactiveLayers) {
             const hitResult = layer.hitTest(context);
             
-            if (hitResult === LayerHitResult.CONSUME) {
-                if (layer.handleClick && layer.handleClick(context)) {
-                    return true; // Event handled
-                }
-            } else if (hitResult === LayerHitResult.BLOCK) {
-                return true; // Event blocked but not handled
+            if (hitResult === LayerHitResult.CONSUME || hitResult === LayerHitResult.BLOCK) {
+                // Set the layer that wants to handle it and return context
+                context.layer = layer.name;
+                return context;
             }
             // TRANSPARENT continues to next layer
         }
         
-        return false; // No layer handled the event
+        return null; // No layer wants to handle the click
     }
     
     /**

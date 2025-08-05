@@ -1,6 +1,6 @@
  import { BasePage } from '../lib/BasePage';
 import { EventBus } from '../lib/EventBus';
-import { GameViewer } from './GameViewer';
+import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
 import { GameState, UnitSelectionData } from './GameState';
 import { GameState as ProtoGameState, Game as ProtoGame, GameConfiguration as ProtoGameConfiguration, MoveOption, AttackOption, GameMove } from '../gen/wasm-clients/weewar/v1/models';
@@ -24,7 +24,7 @@ import { RulesTable, TerrainStats } from './RulesTable';
  */
 class GameViewerPage extends BasePage implements LCMComponent {
     private currentGameId: string | null;
-    private worldViewer: GameViewer
+    private gameScene: PhaserGameScene
     private gameState: GameState
     private world: World  // ✅ Shared World component
     private terrainStatsPanel: TerrainStatsPanel
@@ -74,7 +74,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
             this.updateGameStatus('WASM initialization failed');
         });
 
-        console.assert(this.worldViewer != null, "World viewer could not be created")
+        console.assert(this.gameScene != null, "Game scene could not be created")
         console.assert(this.gameState != null, "gameState could not be created")
         console.assert(this.world != null, "World could not be created")
         console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
@@ -83,9 +83,17 @@ class GameViewerPage extends BasePage implements LCMComponent {
         // Return child components for lifecycle management
         // Note: World and GameState don't extend BaseComponent, so not included in lifecycle
         return [
-            this.worldViewer,
+            this.gameScene,
             this.terrainStatsPanel,
         ]
+    }
+
+    /**
+     * Phase 2: Inject dependencies
+     */
+    setupDependencies(): void {
+        // Set up scene click callback now that gameScene is initialized
+        this.gameScene.sceneClickedCallback = this.onSceneClicked;
     }
 
     /**
@@ -97,9 +105,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 
     public destroy(): void {
-        if (this.worldViewer) {
-            this.worldViewer.destroy();
-            this.worldViewer = null as any;
+        if (this.gameScene) {
+            this.gameScene.destroy();
+            this.gameScene = null as any;
         }
         
         if (this.gameState) {
@@ -138,7 +146,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
     }
 
     // State tracking for initialization
-    private worldViewerReady = false;
+    private gameSceneReady = false;
     private gameDataReady = false;
 
     /**
@@ -147,18 +155,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
     public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
         switch(eventType) {
             case WorldEventTypes.WORLD_VIEWER_READY:
-                this.worldViewerReady = true;
+                this.gameSceneReady = true;
                 
-                // Set up interaction callbacks when viewer is ready
-                if (this.worldViewer) {
-                    this.worldViewer.setInteractionCallbacks(
-                        this.onTileClicked,
-                        this.onUnitClicked
-                    );
-                    
-                    // Set up movement callback for game-specific move execution
-                    this.worldViewer.setMovementCallback(this.onMovementClicked);
-                }
+                // Set up unified map callback when viewer is ready
+                this.gameScene.sceneClickedCallback = this.onSceneClicked
                 
                 // Check if both viewer and game data are ready
                 this.checkAndLoadWorldIntoViewer();
@@ -196,12 +196,12 @@ class GameViewerPage extends BasePage implements LCMComponent {
         // ✅ Create shared World component first (subscribes first to server-changes)
         this.world = new World(this.eventBus, 'Game World');
 
-        const worldViewerContainer = document.getElementById('phaser-viewer-container');
-        if (!worldViewerContainer) {
+        const gameViewerContainer = document.getElementById('phaser-viewer-container');
+        if (!gameViewerContainer) {
             throw new Error('GameViewerPage: phaser-viewer-container not found');
         }
-        // Pass element directly (not string ID) as per UI_DESIGN_PRINCIPLES.md
-        this.worldViewer = new GameViewer(worldViewerContainer, this.eventBus, true);
+        // Create PhaserGameScene as LCMComponent with container element
+        this.gameScene = new PhaserGameScene(gameViewerContainer, this.eventBus, true);
 
         // ✅ Create GameState with direct EventBus connection (no DOM element needed)
         this.gameState = new GameState(this.eventBus);
@@ -218,9 +218,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
      * Check if both WorldViewer and game data are ready, then load world into viewer
      */
     private async checkAndLoadWorldIntoViewer(): Promise<void> {
-        if (!this.worldViewerReady || !this.gameDataReady) {
+        if (!this.gameSceneReady || !this.gameDataReady) {
             console.warn('GameViewerPage: Waiting for both viewer and game data to be ready', {
-                worldViewerReady: this.worldViewerReady,
+                gameSceneReady: this.gameSceneReady,
                 gameDataReady: this.gameDataReady
             });
             return;
@@ -236,8 +236,8 @@ class GameViewerPage extends BasePage implements LCMComponent {
             this.world.setName(game.name || 'Untitled Game');
             
             // Load world into viewer using shared World
-            if (this.worldViewer && this.world) {
-                await this.worldViewer.loadWorld(this.world);
+            if (this.gameScene && this.world) {
+                await this.gameScene.loadWorld(this.world);
                 this.showToast('Success', `Game loaded: ${game.name || this.world.getName() || 'Untitled'}`, 'success');
                 
                 // Update UI with loaded game state
@@ -245,7 +245,7 @@ class GameViewerPage extends BasePage implements LCMComponent {
                 this.updateGameUIFromState(gameState);
                 this.logGameEvent(`Game loaded: ${gameState.gameId}`);
             } else {
-                throw new Error('WorldViewer or World not available');
+                throw new Error('GameScene or World not available');
             }
         } catch (error) {
             console.error('GameViewerPage: Failed to load world into viewer:', error);
@@ -270,9 +270,8 @@ class GameViewerPage extends BasePage implements LCMComponent {
         await this.gameState.loadGameDataToWasm();
         
         // Refresh unit labels in Phaser scene with the loaded World data
-        const worldScene = this.worldViewer?.getScene();
-        if (worldScene && this.world) {
-            worldScene.refreshUnitLabels(this.world);
+        if (this.world && this.gameScene) {
+            this.gameScene.refreshUnitLabels(this.world);
         }
     }
 
@@ -442,10 +441,10 @@ class GameViewerPage extends BasePage implements LCMComponent {
      * Clear all highlight layers
      */
     private clearAllHighlights(): void {
-        if (this.worldViewer) {
-            const selectionLayer = this.worldViewer.getSelectionHighlightLayer();
-            const movementLayer = this.worldViewer.getMovementHighlightLayer();
-            const attackLayer = this.worldViewer.getAttackHighlightLayer();
+        if (this.gameScene) {
+            const selectionLayer = this.gameScene.selectionHighlightLayer
+            const movementLayer = this.gameScene.movementHighlightLayer
+            const attackLayer = this.gameScene.attackHighlightLayer
             
             if (selectionLayer) {
                 selectionLayer.clearSelection();
@@ -464,53 +463,50 @@ class GameViewerPage extends BasePage implements LCMComponent {
      */
 
     /**
-     * Handle tile click from PhaserWorldScene - show terrain info in TerrainStatsPanel
-     * @returns false to suppress event emission (we handle it completely)
+     * Unified map click handler - handles all clicks with context about what was clicked
      */
-    private onTileClicked = (q: number, r: number): boolean => {
+    private onSceneClicked = (context: any, layer: string, extra?: any): void => {
         if (!this.gameState?.isReady()) {
-            console.warn('[GameViewerPage] Game not ready for tile clicks');
-            return false; // Suppress event emission
+            console.warn('[GameViewerPage] Game not ready for map clicks');
+            return;
         }
 
-        if (!this.terrainStatsPanel) {
-            console.warn('[GameViewerPage] TerrainStatsPanel not available');
-            return false; // Suppress event emission
-        }
-
-        // ✅ Get terrain info using shared World (fast query)
-        if (this.world) {
-            const tile = this.world.getTileAt(q, r);
-            if (tile) {
-                const terrainStats = this.rulesTable.getTerrainStatsAt(tile.tileType, tile.player);
-                if (terrainStats) {
-                    // Update with actual coordinates
-                    const terrainStatsWithCoords = new TerrainStats(
-                        terrainStats.terrainDefinition, 
-                        q, 
-                        r, 
-                        tile.player
-                    );
-                    this.terrainStatsPanel.updateTerrainStats(terrainStatsWithCoords);
-                }
-            }
-        }
+        const { hexQ: q, hexR: r } = context;
         
-        return false; // We handled it completely, suppress event emission
+        // Get tile and unit data from World using coordinates
+        const tile = this.world?.getTileAt(q, r);
+        const unit = this.world?.getUnitAt(q, r);
+
+        console.log(`[GameViewerPage] Map clicked at (${q}, ${r}) on layer '${layer}'`, { tile, unit, extra });
+
+        switch (layer) {
+            case 'movement-highlight':
+                // Get moveOption from the layer itself
+                let moveOption = null;
+                if (this.gameScene && 'getMovementHighlightLayer' in this.gameScene) {
+                    const movementLayer = (this.gameScene as any).getMovementHighlightLayer();
+                    moveOption = movementLayer?.getMoveOptionAt(q, r);
+                }
+                this.handleMovementClick(q, r, moveOption);
+                break;
+                
+            case 'base-map':
+                if (unit) {
+                    this.handleUnitClick(q, r);
+                } else {
+                    this.handleTileClick(q, r, tile);
+                }
+                break;
+                
+            default:
+                console.log(`[GameViewerPage] Unhandled layer click: ${layer}`);
+        }
     };
 
     /**
-     * Handle unit click from PhaserWorldScene - select unit or show unit info
-     * @returns false to suppress event emission (we handle it completely)
+     * Handle unit clicks - select unit or show unit info
      */
-    private onUnitClicked = (q: number, r: number): boolean => {
-        // console.log(`[GameViewerPage] Unit clicked callback: Q=${q}, R=${r}`);
-
-        if (!this.gameState?.isReady()) {
-            console.warn('[GameViewerPage] Game not ready for unit clicks');
-            return false; // Suppress event emission
-        }
-
+    private handleUnitClick(q: number, r: number): void {
         // Handle async unit interaction using unified getOptionsAt
         this.gameState.getOptionsAt(q, r).then(async response => {
             // ✅ Use shared World for fast unit query
@@ -553,22 +549,12 @@ class GameViewerPage extends BasePage implements LCMComponent {
         }).catch(error => {
             console.error('[GameViewerPage] Failed to get options at position:', error);
         });
-        
-        return false; // Suppress event emission
-    };
+    }
 
     /**
      * Handle movement clicks - execute actual unit moves
-     * @returns false to suppress event emission (we handle it completely)
      */
-    private onMovementClicked = (q: number, r: number, moveOption: MoveOption): void => {
-        // console.log(`[GameViewerPage] Movement clicked at (${q}, ${r}) with option:`, moveOption);
-
-        if (!this.gameState?.isReady()) {
-            console.warn('[GameViewerPage] Game not ready for movement');
-            return;
-        }
-
+    private handleMovementClick(q: number, r: number, moveOption: any): void {
         if (this.isProcessingMove) {
             console.warn('[GameViewerPage] Already processing a move, ignoring click');
             this.showToast('Warning', 'Move in progress...', 'warning');
@@ -582,7 +568,32 @@ class GameViewerPage extends BasePage implements LCMComponent {
 
         // Execute the move
         this.executeMove(this.selectedUnitCoord, { q, r }, moveOption);
-    };
+    }
+
+    /**
+     * Handle tile clicks - show terrain info in TerrainStatsPanel
+     */
+    private handleTileClick(q: number, r: number, tile: any): void {
+        if (!this.terrainStatsPanel) {
+            console.warn('[GameViewerPage] TerrainStatsPanel not available');
+            return;
+        }
+
+        // Show terrain info using shared World
+        if (tile) {
+            const terrainStats = this.rulesTable.getTerrainStatsAt(tile.tileType, tile.player);
+            if (terrainStats) {
+                // Update with actual coordinates
+                const terrainStatsWithCoords = new TerrainStats(
+                    terrainStats.terrainDefinition, 
+                    q, 
+                    r, 
+                    tile.player
+                );
+                this.terrainStatsPanel.updateTerrainStats(terrainStatsWithCoords);
+            }
+        }
+    }
 
     /**
      * Select unit and show movement/attack highlights
@@ -626,11 +637,11 @@ class GameViewerPage extends BasePage implements LCMComponent {
         });
 
         // Update GameViewer to show highlights using layer-based approach  
-        if (this.worldViewer) {
+        if (this.gameScene) {
             // Clear previous selection
-            const selectionLayer = this.worldViewer.getSelectionHighlightLayer();
-            const movementLayer = this.worldViewer.getMovementHighlightLayer();
-            const attackLayer = this.worldViewer.getAttackHighlightLayer();
+            const selectionLayer = this.gameScene.selectionHighlightLayer;
+            const movementLayer = this.gameScene.movementHighlightLayer;
+            const attackLayer = this.gameScene.attackHighlightLayer;
             
             if (selectionLayer && movementLayer && attackLayer) {
                 // Select the unit

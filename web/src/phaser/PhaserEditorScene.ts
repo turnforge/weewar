@@ -1,5 +1,6 @@
 import { PhaserWorldScene } from './PhaserWorldScene';
 import { Unit, Tile, World } from '../World';
+import { EventBus } from '../../lib/EventBus';
 
 /**
  * PhaserEditorScene extends PhaserWorldScene with editor-specific functionality.
@@ -32,8 +33,10 @@ export class PhaserEditorScene extends PhaserWorldScene {
     private brushSize: number = 0; // Single tile
     private editorMode: 'terrain' | 'unit' | 'erase' = 'terrain';
 
-    constructor(config?: string | Phaser.Types.Scenes.SettingsConfig) {
-        super(config || { key: 'PhaserEditorScene' });
+    constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+        super(containerElement, eventBus, debugMode);
+        // Override the scene key for this specific scene type
+        this.scene.settings.key = 'PhaserEditorScene';
     }
 
     /**

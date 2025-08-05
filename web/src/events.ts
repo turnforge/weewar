@@ -27,7 +27,6 @@ export const EditorEventTypes = {
     WORLD_LOADED: 'world-loaded',
     WORLD_SAVED: 'world-saved',
     WORLD_CHANGED: 'world-changed',
-    TILE_CLICKED: 'tile-clicked',
     
     // UI events
     STATS_REFRESH_REQUESTED: 'stats-refresh-requested',
@@ -52,12 +51,6 @@ export const EditorEventTypes = {
     REFERENCE_ALPHA_CHANGED: 'reference-alpha-changed',
     REFERENCE_MODE_CHANGED: 'reference-mode-changed',
     REFERENCE_IMAGE_LOADED: 'reference-image-loaded',
-    
-    // World modification events
-    TILE_PAINTED: 'tile-painted',
-    UNIT_PLACED: 'unit-placed',
-    TILE_CLEARED: 'tile-cleared',
-    UNIT_REMOVED: 'unit-removed',
     
     // Tools events
     TOOLS_UI_UPDATED: 'tools-ui-updated',

@@ -1,6 +1,6 @@
 import { BasePage } from '../lib/BasePage';
 import { EventBus } from '../lib/EventBus';
-import { WorldViewer } from './WorldViewer';
+import { PhaserWorldScene } from './phaser/PhaserWorldScene';
 import { World } from './World';
 import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
@@ -32,7 +32,7 @@ class StartGamePage extends BasePage implements LCMComponent {
     };
     
     // Component instances
-    private worldViewer: WorldViewer
+    private worldScene: PhaserWorldScene
 
     // =============================================================================
     // LCMComponent Interface Implementation
@@ -53,7 +53,7 @@ class StartGamePage extends BasePage implements LCMComponent {
         this.createComponents();
         
         // Return child components for lifecycle management
-        return [this.worldViewer];
+        return [this.worldScene];
     }
 
     /**
@@ -71,7 +71,7 @@ class StartGamePage extends BasePage implements LCMComponent {
         switch(eventType) {
             case WorldEventTypes.WORLD_VIEWER_READY:
                 if (this.currentWorldId) {
-                    this.worldViewer.loadWorld(this.world);
+                    this.worldScene.loadWorld(this.world);
                     this.showToast('Success', 'World loaded successfully', 'success');
                 }
                 break;
@@ -101,12 +101,12 @@ class StartGamePage extends BasePage implements LCMComponent {
     }
 
     /**
-     * Create WorldViewer component instance
+     * Create PhaserWorldScene component instance
      */
     private createComponents(): void {
-        // Create WorldViewer component for preview
+        // Create PhaserWorldScene component for preview
         const worldViewerRoot = this.ensureElement('[data-component="world-viewer"]', 'world-viewer-root');
-        this.worldViewer = new WorldViewer(worldViewerRoot, this.eventBus, true);
+        this.worldScene = new PhaserWorldScene(worldViewerRoot, this.eventBus, true);
     }
 
     /**
@@ -450,9 +450,9 @@ class StartGamePage extends BasePage implements LCMComponent {
 
     public destroy(): void {
         // Clean up components
-        if (this.worldViewer) {
-            this.worldViewer.destroy();
-            this.worldViewer = null as any;
+        if (this.worldScene) {
+            this.worldScene.destroy();
+            this.worldScene = null as any;
         }
         
         // Clean up world data

@@ -8,7 +8,7 @@
 import * as Phaser from 'phaser';
 import { BaseLayer, LayerConfig, ClickContext, LayerHitResult } from '../LayerSystem';
 import { hexToPixel } from '../hexUtils';
-import { MoveOption, AttackOption } from '../../../gen/weewar/v1/games_pb';
+import { MoveOption, AttackOption } from '../../../gen/wasm-clients/weewar/v1/models';
 
 // =============================================================================
 // Hex Highlight Base Class
@@ -174,10 +174,9 @@ export class SelectionHighlightLayer extends HexHighlightLayer {
  * Shows green highlights for valid movement positions
  */
 export class MovementHighlightLayer extends HexHighlightLayer {
-    private onMoveCallback?: (q: number, r: number, moveOption: MoveOption) => void;
     private movementOptions: Map<string, MoveOption> = new Map();
     
-    constructor(scene: Phaser.Scene, tileWidth: number, onMoveCallback?: (q: number, r: number, moveOption: MoveOption) => void) {
+    constructor(scene: Phaser.Scene, tileWidth: number) {
         super(scene, {
             name: 'movement-highlight',
             coordinateSpace: 'hex',
@@ -185,8 +184,6 @@ export class MovementHighlightLayer extends HexHighlightLayer {
             depth: 5, // Below selection, above base map
             tileWidth
         });
-        
-        this.onMoveCallback = onMoveCallback;
     }
     
     public hitTest(context: ClickContext): LayerHitResult | null {
@@ -200,19 +197,6 @@ export class MovementHighlightLayer extends HexHighlightLayer {
         return LayerHitResult.TRANSPARENT;
     }
     
-    public handleClick(context: ClickContext): boolean {
-        // Get the move option for this coordinate
-        const coordKey = `${context.hexQ},${context.hexR}`;
-        const moveOption = this.movementOptions.get(coordKey);
-        
-        if (this.onMoveCallback && moveOption) {
-            this.onMoveCallback(context.hexQ, context.hexR, moveOption);
-        } else {
-            console.warn(`[MovementHighlightLayer] No move option found for (${context.hexQ}, ${context.hexR})`);
-        }
-        
-        return true; // Event handled
-    }
     
     /**
      * Show movement options using protobuf MoveOption objects
@@ -258,9 +242,7 @@ export class MovementHighlightLayer extends HexHighlightLayer {
  * Shows red highlights for valid attack targets
  */
 export class AttackHighlightLayer extends HexHighlightLayer {
-    private onAttackCallback?: (q: number, r: number) => void;
-    
-    constructor(scene: Phaser.Scene, tileWidth: number, onAttackCallback?: (q: number, r: number) => void) {
+    constructor(scene: Phaser.Scene, tileWidth: number) {
         super(scene, {
             name: 'attack-highlight',
             coordinateSpace: 'hex',
@@ -268,8 +250,6 @@ export class AttackHighlightLayer extends HexHighlightLayer {
             depth: 6, // Same level as movement, both are action highlights
             tileWidth
         });
-        
-        this.onAttackCallback = onAttackCallback;
     }
     
     public hitTest(context: ClickContext): LayerHitResult | null {
@@ -283,13 +263,6 @@ export class AttackHighlightLayer extends HexHighlightLayer {
         return LayerHitResult.TRANSPARENT;
     }
     
-    public handleClick(context: ClickContext): boolean {
-        if (this.onAttackCallback) {
-            this.onAttackCallback(context.hexQ, context.hexR);
-        }
-        
-        return true; // Event handled
-    }
     
     /**
      * Show attack options

@@ -226,9 +226,6 @@ class WorldEditorPage extends BasePage {
         // Note: Tool state changes now handled via PageState Observer pattern
         // EditorToolsPanel directly updates pageState, which notifies observers
         
-        // Subscribe to tile clicks from Phaser
-        this.addSubscription(EditorEventTypes.TILE_CLICKED, this);
-        
         // Subscribe to Phaser ready event
         this.addSubscription(EditorEventTypes.PHASER_READY, this);
         
@@ -253,10 +250,6 @@ class WorldEditorPage extends BasePage {
             case WorldEventType.WORLD_CLEARED:
             case WorldEventType.WORLD_METADATA_CHANGED:
                 this.handleWorldDataChanged();
-                break;
-            
-            case EditorEventTypes.TILE_CLICKED:
-                this.handlePhaserTileClick(data.q, data.r);
                 break;
             
             case EditorEventTypes.PHASER_READY:
@@ -2021,19 +2014,6 @@ class WorldEditorPage extends BasePage {
             this.hasPendingWorldDataLoad = false;
             this.refreshTileStats();
         }
-    }
-    
-    private handlePhaserTileClick(q: number, r: number): void {
-            // Update coordinate inputs
-            const rowInput = document.getElementById('paint-row') as HTMLInputElement;
-            const colInput = document.getElementById('paint-col') as HTMLInputElement;
-            
-            if (rowInput) rowInput.value = r.toString();
-            if (colInput) colInput.value = q.toString();
-            
-            // Log the click
-            const currentMode = this.pageState?.getToolState().placementMode || 'terrain';
-            this.logToConsole(`Tile clicked at Q=${q}, R=${r} in ${currentMode} mode`);
     }
 }
 

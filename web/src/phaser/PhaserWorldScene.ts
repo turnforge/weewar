@@ -2,12 +2,20 @@ import * as Phaser from 'phaser';
 import { hexToRowCol, hexToPixel, pixelToHex, HexCoord, PixelCoord } from './hexUtils';
 import { Unit, Tile, World } from '../World';
 import { LayerManager } from './LayerSystem';
-import { BaseMapLayer, MapLayerCallbacks } from './layers/BaseMapLayer';
+import { BaseMapLayer } from './layers/BaseMapLayer';
+import { ClickContext } from './LayerSystem';
+import { LCMComponent } from '../../lib/LCMComponent';
+import { EventBus } from '../../lib/EventBus';
+import { WorldEventTypes } from '../events';
 
-export class PhaserWorldScene extends Phaser.Scene {
+export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
+    // Container element and lifecycle management
+    private containerElement: HTMLElement;
+    private eventBus: EventBus;
+    private debugMode: boolean;
+    
     // Phaser game instance (self-contained) - renamed to avoid conflict with Phaser's game property
     private phaserGame: Phaser.Game | null = null;
-    private containerElement: HTMLElement | null = null;
     private isInitialized: boolean = false;
     private initializePromise: Promise<void> | null = null;
     private initializeResolver: (() => void) | null = null;
@@ -47,9 +55,8 @@ export class PhaserWorldScene extends Phaser.Scene {
     protected layerManager: LayerManager | null = null;
     protected baseMapLayer: BaseMapLayer | null = null;
     
-    // Game interaction callbacks (optional, only used by GameViewerPage)
-    protected tileClickCallback?: ((q: number, r: number) => boolean)
-    protected unitClickCallback?: ((q: number, r: number) => boolean)
+    // Game interaction callback (unified, only used by GameViewerPage)
+    public sceneClickedCallback: (context: ClickContext, layer: string, extra?: any) => void;
     
     // Mouse interaction
     protected isMouseDown: boolean = false;
@@ -62,16 +69,68 @@ export class PhaserWorldScene extends Phaser.Scene {
     private sceneReadyCallback: (() => void) | null = null;
     private assetsReadyPromise: Promise<void> | null = null;
     private assetsReadyResolver: (() => void) | null = null;
+
+    constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+        super('phaser-world-scene');
+        this.containerElement = containerElement;
+        this.eventBus = eventBus;
+        this.debugMode = debugMode;
+    }
+
+    // =========================================================
+    // LCMComponent Interface Implementation
+    // =========================================================
+
+    // Phase 1: Initialize DOM and discover child components
+    async performLocalInit(): Promise<LCMComponent[]> {
+        // Validate container element is ready
+        if (!this.containerElement) {
+            throw new Error('PhaserWorldScene: Container element is required');
+        }
+        
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] DOM validation complete');
+        }
+        return []; // Leaf component - no children
+    }
     
-    constructor(config?: string | Phaser.Types.Scenes.SettingsConfig) {
-        super(config || { key: 'PhaserWorldScene' });
+    // Phase 2: Setup dependencies (not needed for this component)
+    setupDependencies(): void {}
+
+    // Phase 3: Activate component - Initialize Phaser here
+    async activate(): Promise<void> {
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] Activating and initializing Phaser');
+        }
+        await this.initializePhaser();
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] Activation complete');
+        }
+        
+        // Emit ready event when fully activated
+        this.eventBus.emit(WorldEventTypes.WORLD_VIEWER_READY, {}, this, this);
+    }
+
+    // Cleanup phase
+    deactivate(): void {
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] Deactivating');
+        }
+        this.destroyPhaser();
+    }
+    
+    // Public destroy method for LCMComponent compatibility
+    destroy(): void {
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] Destroying component');
+        }
+        this.destroyPhaser();
     }
 
     /**
-     * Initialize the scene with its own Phaser.Game instance
-     * @param containerId - ID of the HTML element to render into
+     * Initialize Phaser with the container element
      */
-    public async initialize(containerId: string): Promise<void> {
+    private async initializePhaser(): Promise<void> {
         if (this.isInitialized) {
             console.warn('[PhaserWorldScene] Already initialized');
             return;
@@ -85,18 +144,7 @@ export class PhaserWorldScene extends Phaser.Scene {
             this.initializeResolver = resolve;
         });
 
-        this.containerElement = document.getElementById(containerId);
-        if (!this.containerElement) {
-            throw new Error(`Container element with ID '${containerId}' not found`);
-        }
-
-        // Ensure container has proper styling for Phaser
-        this.containerElement.style.width = '100%';
-        this.containerElement.style.height = '100%';
-        this.containerElement.style.minWidth = '600px';
-        this.containerElement.style.minHeight = '400px';
-
-        // Get container dimensions
+        // Get container dimensions from template-styled element
         const containerWidth = this.containerElement.clientWidth || 800;
         const containerHeight = this.containerElement.clientHeight || 600;
         const width = Math.max(containerWidth, 400);
@@ -143,9 +191,9 @@ export class PhaserWorldScene extends Phaser.Scene {
     }
 
     /**
-     * Destroy the scene and its Phaser.Game instance
+     * Destroy Phaser game instance and clean up
      */
-    public destroy(): void {
+    private destroyPhaser(): void {
         // Clean up layer system
         if (this.layerManager) {
             this.layerManager.destroy();
@@ -158,12 +206,12 @@ export class PhaserWorldScene extends Phaser.Scene {
             this.phaserGame = null;
         }
         
-        this.containerElement = null;
         this.isInitialized = false;
         this.initializePromise = null;
         this.initializeResolver = null;
         this.world = null;
     }
+
 
     /**
      * Set the World instance as the single source of truth for game data
@@ -171,29 +219,6 @@ export class PhaserWorldScene extends Phaser.Scene {
     public setWorld(world: World): void {
         this.world = world;
     }
-
-    /**
-     * Set interaction callbacks for game-specific functionality
-     * @param tileCallback - Called when tile is clicked, return true to emit event, false to suppress
-     * @param unitCallback - Called when unit is clicked, return true to emit event, false to suppress
-     */
-    public setInteractionCallbacks(
-        tileCallback?: (q: number, r: number) => boolean,
-        unitCallback?: (q: number, r: number) => boolean
-    ): void {
-        this.tileClickCallback = tileCallback
-        this.unitClickCallback = unitCallback
-        
-        // Update base map layer callbacks if available
-        if (this.baseMapLayer) {
-            this.baseMapLayer.setCallbacks({
-                onTileClicked: tileCallback,
-                onUnitClicked: unitCallback,
-                onEmptySpaceClicked: tileCallback
-            });
-        }
-    }
-
     
     preload() {
         // Set up assets ready promise
@@ -381,11 +406,7 @@ export class PhaserWorldScene extends Phaser.Scene {
         );
         
         // Create base map layer for default interactions
-        this.baseMapLayer = new BaseMapLayer(this, {
-            onTileClicked: this.tileClickCallback,
-            onUnitClicked: this.unitClickCallback,
-            onEmptySpaceClicked: this.tileClickCallback
-        });
+        this.baseMapLayer = new BaseMapLayer(this);
         
         // Add base map layer to manager
         this.layerManager.addLayer(this.baseMapLayer);
@@ -405,19 +426,14 @@ export class PhaserWorldScene extends Phaser.Scene {
             if (pointer.button === 0) { // Left click only
                 // Only handle click if we didn't drag
                 if (!this.hasDragged) {
-                    // Use layer system for click handling if available, fallback to direct handling
+                    // Use layer system for hit testing, then send to mapCallback
                     if (this.layerManager) {
-                        const handled = this.layerManager.handleClick(pointer);
-                        if (!handled) {
-                            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                            const hexCoords = pixelToHex(worldPoint.x, worldPoint.y);
-                            this.onTileClick(hexCoords.q, hexCoords.r);
+                        const clickContext = this.layerManager.getClickContext(pointer);
+                        if (clickContext) {  // && this.sceneClickedCallback) {
+                            // For now dont check sceneClickedCallback to be nil to see who exactly is calling this
+                            // without setting it
+                            this.sceneClickedCallback(clickContext, clickContext.layer || 'unknown');
                         }
-                    } else {
-                        // Fallback to direct handling
-                        const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                        const hexCoords = pixelToHex(worldPoint.x, worldPoint.y);
-                        this.onTileClick(hexCoords.q, hexCoords.r);
                     }
                 }
                 
@@ -1004,36 +1020,12 @@ export class PhaserWorldScene extends Phaser.Scene {
         this.updateGridDisplay();
     }
     
-    // Callback for tile clicks (handles both game interaction and editor events)
-    protected onTileClick(q: number, r: number) {
-        // Check if there's a unit at this position first for game interaction
-        if (this.world) {
-            const unit = this.world.getUnitAt(q, r);
-            if (unit && this.unitClickCallback) {
-                const shouldEmit = this.unitClickCallback(q, r);
-                if (!shouldEmit) {
-                    return; // Unit callback handled it and suppressed event
-                }
-            }
-        }
-        
-        // Call tile callback if set
-        if (this.tileClickCallback) {
-            const shouldEmit = this.tileClickCallback(q, r);
-            if (!shouldEmit) {
-                return; // Tile callback handled it and suppressed event
-            }
-        }
-        
-        // Default behavior: emit the tile click event for WorldEditorPage or other listeners
-        this.events.emit('tileClicked', { q, r });
-    }
     
     
     /**
      * Load world data into the scene
      */
-    public async loadWorldData(world: World): Promise<void> {
+    public async loadWorld(world: World): Promise<void> {
         if (!this.isInitialized) {
             throw new Error('[PhaserWorldScene] Scene not initialized. Call initialize() first.');
         }

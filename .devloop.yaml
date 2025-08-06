@@ -22,8 +22,9 @@ rules:
           - "web"
       - action: "include"
         patterns:
+          - "lib/**/*.go"
+          - "cmd/**/*.go"
           - "services/**/*.go"
-          - "**/*.go"
           - "go.mod"
           - "go.sum"
     commands:
@@ -43,6 +44,7 @@ rules:
         patterns:
           - "lib/**/*.go"
           - "cmd/**/*.go"
+          - "services/**/*.go"
           - "go.mod"
           - "go.sum"
     commands:

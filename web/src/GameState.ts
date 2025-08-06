@@ -177,7 +177,7 @@ export class GameState {
      * - End turn actions
      * - Any other game state modifications
      */
-    public async processMoves(moves: GameMove[]): Promise<WorldChange[]> {
+    public async processMoves(moves: GameMove[], validateStates=false): Promise<WorldChange[]> {
         const client = await this.ensureWASMLoaded();
 
         if (!this.gameId) {
@@ -191,6 +191,10 @@ export class GameState {
             gameId: this.gameId,
             moves: moves
         });
+
+        if (validateStates) { // as debug check our state with the server is in sync before making moves
+          await this.ensureInSyncWithServer()
+        }
 
         // Call the ProcessMoves service  
         const response: ProcessMovesResponse = await client.gamesService.processMoves(request);
@@ -209,9 +213,19 @@ export class GameState {
 
         // ✅ Direct EventBus emit for World to coordinate
         this.eventBus.emit('server-changes', { changes: worldChanges }, this, this);
+
+        if (validateStates) { // as debug check our state with the server is in sync AFTER making moves
+          await this.ensureInSyncWithServer()
+        }
         
         // Return changes for any components that still need them
         return worldChanges;
+    }
+
+    protected async ensureInSyncWithServer() {
+      const backendState = this.getCurrentGameState();
+      if backendState.currentPlayer != this.currentPlayer {
+      }
     }
 
     /**

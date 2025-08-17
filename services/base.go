@@ -54,6 +54,13 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 	if err != nil {
 		return nil, err
 	}
+	
+	// TRANSACTIONAL FIX: Create transaction snapshot for move processing
+	// ProcessMoves will operate on the snapshot, ApplyChangeResults will apply to original
+	originalWorld := rtGame.World
+	rtGame.World = originalWorld.Push()  // Create transaction layer
+	fmt.Printf("ProcessMoves: Created transaction snapshot - originalWorld=%p, transactionWorld=%p\n", 
+		originalWorld, rtGame.World)
 
 	// Get the moves validted by the move processor, it is upto the move processor
 	// to decide how "transactional" it wants to be - ie fail after  N moves,
@@ -246,7 +253,13 @@ func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, 
 	fmt.Printf("ApplyChangeResults: ENTRY - changes=%d, rtGame=%t, game=%t, state=%t, history=%t\n", 
 		len(changes), rtGame != nil, game != nil, state != nil, history != nil)
 	
-	// Apply each change to both runtime game and protobuf data structures
+	// TRANSACTIONAL FIX: Temporary rollback to original world for ordered application
+	if parent := rtGame.World.Pop(); parent != nil {
+		fmt.Printf("ApplyChangeResults: Rolling back to parent world for ordered change application\n")
+		rtGame.World = parent  // Switch back to original world
+	}
+	
+	// Apply each change to runtime game (now the original, not the transaction snapshot)
 	for i, moveResult := range changes {
 		fmt.Printf("ApplyChangeResults: Processing moveResult %d with %d changes\n", i, len(moveResult.Changes))
 		for j, change := range moveResult.Changes {

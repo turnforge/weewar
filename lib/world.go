@@ -85,24 +85,45 @@ func (w *World) Push() *World {
 	return out
 }
 
+// Pop returns the parent world (for transaction rollback)
+func (w *World) Pop() *World {
+	return w.parent
+}
+
 // =============================================================================
 // World State Access Methods
 // =============================================================================
 
 func (w *World) PlayerCount() int32 {
 	if w.parent != nil {
-		return w.PlayerCount()
+		return w.parent.PlayerCount()  // FIX: Call parent.PlayerCount(), not w.PlayerCount()
 	}
 	return int32(len(w.unitsByPlayer) - 1)
 }
 
 func (w *World) TilesByCoord() iter.Seq2[AxialCoord, *v1.Tile] {
-	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
-	// or conversely iterate parent and only return parent's K,V value if it is not in this layer
+	// Merged iteration: child tiles override parent tiles, respect deletions
 	return func(yield func(AxialCoord, *v1.Tile) bool) {
-		for k, v := range w.tilesByCoord {
-			if !yield(k, v) {
+		seen := make(map[AxialCoord]bool)
+		
+		// First iterate current layer (child overrides parent)
+		for coord, tile := range w.tilesByCoord {
+			seen[coord] = true
+			if !yield(coord, tile) {
 				return
+			}
+		}
+		
+		// Then iterate parent layers for unseen coordinates
+		if w.parent != nil {
+			for coord, tile := range w.parent.TilesByCoord() {
+				// Skip if already seen in child or explicitly deleted in child
+				if seen[coord] || w.tileDeleted[coord] {
+					continue
+				}
+				if !yield(coord, tile) {
+					return
+				}
 			}
 		}
 	}
@@ -113,12 +134,28 @@ func (w *World) NumUnits() int32 {
 }
 
 func (w *World) UnitsByCoord() iter.Seq2[AxialCoord, *v1.Unit] {
-	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
-	// or conversely iterate parent and only return parent's K,V value if it is not in this layer
+	// Merged iteration: child units override parent units, respect deletions
 	return func(yield func(AxialCoord, *v1.Unit) bool) {
-		for k, v := range w.unitsByCoord {
-			if !yield(k, v) {
+		seen := make(map[AxialCoord]bool)
+		
+		// First iterate current layer (child overrides parent)
+		for coord, unit := range w.unitsByCoord {
+			seen[coord] = true
+			if !yield(coord, unit) {
 				return
+			}
+		}
+		
+		// Then iterate parent layers for unseen coordinates
+		if w.parent != nil {
+			for coord, unit := range w.parent.UnitsByCoord() {
+				// Skip if already seen in child or explicitly deleted in child
+				if seen[coord] || w.unitDeleted[coord] {
+					continue
+				}
+				if !yield(coord, unit) {
+					return
+				}
 			}
 		}
 	}

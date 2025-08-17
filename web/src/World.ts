@@ -96,8 +96,8 @@ export interface WorldMetadata {
 export class World {
     // Core data
     private metadata: WorldMetadata;
-    private tiles: { [key: string]: Tile} = {};
-    private units: { [key: string]: Unit} = {};
+    public tiles: { [key: string]: Tile} = {};
+    public units: { [key: string]: Unit} = {};
     
     // Persistence state
     private worldId: string | null = null;

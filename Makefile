@@ -15,6 +15,7 @@ vars:
 	echo WASM_EXEC_PATH=${WASM_EXEC_PATH}
 
 test:
+	cd services && go test . -cover
 	cd lib && go test . -cover
 	# cd cmd/weewar-cli && go test ./...
 

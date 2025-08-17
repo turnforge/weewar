@@ -4,16 +4,6 @@ import { ProcessMovesRequest, ProcessMovesResponse, GetGameRequest, GetGameState
 import { create } from '@bufbuild/protobuf';
 
 /**
- * Legacy interface for backward compatibility with GameViewerPage  
- * TODO: Remove once GameViewerPage is updated to use new architecture
- */
-export interface UnitSelectionData {
-    unit: any;
-    movableCoords: Array<{ coord: { Q: number; R: number }; cost: number }>;
-    attackableCoords: Array<{ Q: number; R: number }>;
-}
-
-/**
  * GameState - Lightweight WASM interface and game metadata manager
  * 
  * Core responsibilities:
@@ -30,8 +20,8 @@ export class GameState {
     
     // ✅ Lightweight game metadata only
     private gameId: string = '';
-    private currentPlayer: number = 1;
-    private turnCounter: number = 1;
+    public currentPlayer: number = 1;
+    public turnCounter: number = 1;
     private gameName: string = '';
 
     constructor(eventBus: EventBus) {
@@ -177,14 +167,24 @@ export class GameState {
      * - End turn actions
      * - Any other game state modifications
      */
-    public async processMoves(moves: GameMove[], validateStates=false): Promise<WorldChange[]> {
+    public async processMoves(moves: GameMove[]): Promise<WorldChange[]> {
         const client = await this.ensureWASMLoaded();
 
         if (!this.gameId) {
             throw new Error('Game ID not set. Call setGameId() first.');
         }
 
-        console.log('[GameState] Processing moves:', moves);
+        console.log('[GameState.processMoves] Processing moves:', moves);
+
+        // Get the current WASM state before processing moves (for comparison)
+        const preState = await this.getCurrentGameState();
+        const preWorldData = preState.worldData;
+        console.log('[GameState.processMoves] Pre-move WASM state:', {
+            currentPlayer: preState.currentPlayer,
+            turnCounter: preState.turnCounter,
+            unitCount: preWorldData?.units?.length || 0,
+            units: preWorldData?.units || []
+        });
 
         // Create request for ProcessMoves service
         const request = ProcessMovesRequest.from({
@@ -192,40 +192,64 @@ export class GameState {
             moves: moves
         });
 
-        if (validateStates) { // as debug check our state with the server is in sync before making moves
-          await this.ensureInSyncWithServer()
-        }
-
         // Call the ProcessMoves service  
         const response: ProcessMovesResponse = await client.gamesService.processMoves(request);
 
         // Extract world changes from move results (each move result contains its own changes)
         const worldChanges: WorldChange[] = [];
         for (const moveResult of response.moveResults || []) {
+            console.log('[GameState.processMoves] Move result:', {
+                sequenceNum: moveResult.sequenceNum,
+                isPermanent: moveResult.isPermanent,
+                changesCount: moveResult.changes?.length || 0,
+                changes: moveResult.changes
+            });
             worldChanges.push(...(moveResult.changes || []));
         }
         
-        console.log('[GameState] Received ProcessMoves response:', {
+        console.log('[GameState.processMoves] Extracted WorldChanges from WASM:', {
             moveResultsCount: response.moveResults?.length || 0,
             totalWorldChanges: worldChanges.length,
             worldChanges: worldChanges
         });
 
-        // ✅ Direct EventBus emit for World to coordinate
-        this.eventBus.emit('server-changes', { changes: worldChanges }, this, this);
+        // Get the actual WASM state after processing moves to ensure synchronization
+        const postState = await this.getCurrentGameState();
+        const postWorldData = postState.worldData;
+        
+        console.log('[GameState.processMoves] Post-move WASM state:', {
+            currentPlayer: postState.currentPlayer,
+            turnCounter: postState.turnCounter,
+            unitCount: postWorldData?.units?.length || 0,
+            units: postWorldData?.units || []
+        });
+        
+        console.log('[GameState.processMoves] State transition summary:', {
+            preState: {
+                currentPlayer: preState.currentPlayer,
+                turnCounter: preState.turnCounter,
+                unitCount: preWorldData?.units?.length || 0
+            },
+            postState: {
+                currentPlayer: postState.currentPlayer,
+                turnCounter: postState.turnCounter,
+                unitCount: postWorldData?.units?.length || 0
+            },
+            changesReported: worldChanges.length
+        });
 
-        if (validateStates) { // as debug check our state with the server is in sync AFTER making moves
-          await this.ensureInSyncWithServer()
-        }
+        // ✅ Direct EventBus emit for World to coordinate
+        // Use the actual changes returned by processMoves, trusting the WASM implementation
+        console.log('[GameState.processMoves] 🔥 EMITTING server-changes event:', {
+            changesCount: worldChanges.length,
+            changes: worldChanges,
+            eventBusExists: !!this.eventBus
+        });
+        this.eventBus.emit('server-changes', { changes: worldChanges }, this, this);
+        console.log('[GameState.processMoves] ✅ server-changes event emitted');
         
         // Return changes for any components that still need them
         return worldChanges;
-    }
-
-    protected async ensureInSyncWithServer() {
-      const backendState = this.getCurrentGameState();
-      if backendState.currentPlayer != this.currentPlayer {
-      }
     }
 
     /**

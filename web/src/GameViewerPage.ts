@@ -643,8 +643,9 @@ class GameViewerPage extends BasePage implements LCMComponent {
     /**
      * Execute a unit move using ProcessMoves API
      */
-    private async executeMove(fromCoord: { q: number, r: number }, toCoord: { q: number, r: number }, moveOption: MoveOption): Promise<void> {
-        console.log(`[GameViewerPage] Executing move from (${fromCoord.q}, ${fromCoord.r}) to (${toCoord.q}, ${toCoord.r})`);
+    private async executeMove(fromCoord: { q: number, r: number }, toCoord: { q: number, r: number }, moveOption: MoveOption, validateStates=true): Promise<void> {
+        console.log(`[GameViewerPage.executeMove] Starting move execution from (${fromCoord.q}, ${fromCoord.r}) to (${toCoord.q}, ${toCoord.r})`);
+        console.log(`[GameViewerPage.executeMove] MoveOption:`, moveOption);
 
         // Set processing state to prevent concurrent moves
         this.isProcessingMove = true;
@@ -658,16 +659,90 @@ class GameViewerPage extends BasePage implements LCMComponent {
 
             // ✅ Get current player from move option or query WASM
             const currentGameState = await this.gameState!.getCurrentGameState();
+            console.log(`[GameViewerPage.executeMove] Current game state:`, {
+                currentPlayer: currentGameState.currentPlayer,
+                turnCounter: currentGameState.turnCounter,
+                unitCount: currentGameState.worldData?.units?.length || 0
+            });
             
             const gameMove= GameMove.from({
                 player: currentGameState.currentPlayer,
                 moveUnit: moveOption.action,
             })!;
+            console.log(`[GameViewerPage.executeMove] Created GameMove:`, gameMove);
+
+            if (validateStates) { // as debug check our state with the server is in sync before making moves
+              console.log(`[GameViewerPage.executeMove] ⚡ BEFORE move - validating sync with server...`);
+              await this.ensureInSyncWithServer()
+              console.log(`[GameViewerPage.executeMove] ✅ BEFORE move - sync validation passed`);
+            }
+
+            // Log World state before move
+            const unitsBefore = [];
+            for (const key in this.world.units) {
+                const u = this.world.units[key];
+                if (u) {
+                    unitsBefore.push({
+                        key: key,
+                        q: u.q, r: u.r, player: u.player, unitType: u.unitType,
+                        availableHealth: u.availableHealth, distanceLeft: u.distanceLeft, turnCounter: u.turnCounter
+                    });
+                }
+            }
+            console.log(`[GameViewerPage.executeMove] World state BEFORE move:`, {
+                unitCount: Object.keys(this.world.units).length,
+                units: unitsBefore
+            });
 
             // ✅ Call ProcessMoves API - this will trigger World updates via EventBus
+            console.log(`[GameViewerPage.executeMove] 🚀 Calling GameState.processMoves...`);
             const worldChanges = await this.gameState!.processMoves([gameMove]);
             
-            console.log('[GameViewerPage] Move executed successfully, world changes:', worldChanges);
+            console.log('[GameViewerPage.executeMove] Move executed successfully, world changes received:', worldChanges);
+
+            // Log World state after move
+            const unitsAfter = [];
+            for (const key in this.world.units) {
+                const u = this.world.units[key];
+                if (u) {
+                    unitsAfter.push({
+                        key: key,
+                        q: u.q, r: u.r, player: u.player, unitType: u.unitType,
+                        availableHealth: u.availableHealth, distanceLeft: u.distanceLeft, turnCounter: u.turnCounter
+                    });
+                }
+            }
+            console.log(`[GameViewerPage.executeMove] World state AFTER move:`, {
+                unitCount: Object.keys(this.world.units).length,
+                units: unitsAfter
+            });
+
+            if (validateStates) { // as debug check our state with the server is in sync before making moves
+              console.log(`[GameViewerPage.executeMove] ⚡ AFTER move - validating sync with server...`);
+              
+              // Add a small delay to ensure all async operations complete
+              await new Promise(resolve => setTimeout(resolve, 100));
+              
+              const unitsFinal = [];
+              for (const key in this.world.units) {
+                  const u = this.world.units[key];
+                  if (u) {
+                      unitsFinal.push({
+                          key: key,
+                          q: u.q, r: u.r, player: u.player, unitType: u.unitType,
+                          availableHealth: u.availableHealth, distanceLeft: u.distanceLeft, turnCounter: u.turnCounter
+                      });
+                  }
+              }
+              console.log(`[GameViewerPage.executeMove] Final World state before validation:`, {
+                unitCount: Object.keys(this.world.units).length,
+                unitKeys: Object.keys(this.world.units),
+                units: unitsFinal
+              });
+              
+              await this.ensureInSyncWithServer()
+              console.log(`[GameViewerPage.executeMove] ✅ AFTER move - sync validation passed`);
+            }
 
             // Clear selection and highlights after successful move
             this.clearUnitSelection();
@@ -691,6 +766,92 @@ class GameViewerPage extends BasePage implements LCMComponent {
             // Always clear processing state
             this.isProcessingMove = false;
         }
+    }
+
+    protected async ensureInSyncWithServer() {
+      console.log('[ensureInSyncWithServer] Starting sync validation...');
+      const backendState = await this.gameState.getCurrentGameState();
+      
+      // Enhanced metadata validation with detailed logging
+      console.log('[ensureInSyncWithServer] Metadata comparison:', {
+        backend: { currentPlayer: backendState.currentPlayer, turnCounter: backendState.turnCounter },
+        frontend: { currentPlayer: this.gameState.currentPlayer, turnCounter: this.gameState.turnCounter }
+      });
+      
+      if (backendState.currentPlayer != this.gameState.currentPlayer) {
+        throw new Error(`Backend State (${backendState.currentPlayer}) != this.currentPlayer (${this.gameState.currentPlayer})`)
+      }
+      if (backendState.turnCounter != this.gameState.turnCounter) {
+        throw new Error(`Backend State (${backendState.turnCounter}) != this.turnCounter (${this.gameState.turnCounter})`)
+      }
+
+      // Enhanced world data validation
+      const backendWorldData = backendState.worldData!;
+      const backendTiles = backendWorldData.tiles
+      const backendUnits = backendWorldData.units
+      
+      console.log('[ensureInSyncWithServer] World data counts:', {
+        backend: { tiles: backendTiles.length, units: backendUnits.length },
+        frontend: { tiles: Object.keys(this.world.tiles).length, units: Object.keys(this.world.units).length }
+      });
+      
+      if (backendTiles.length != Object.keys(this.world.tiles).length) {
+        throw new Error(`Backend Tile Count (${backendTiles.length}) != this.tileCount(${Object.keys(this.world.tiles).length})`)
+      }
+      if (backendUnits.length != Object.keys(this.world.units).length) {
+        throw new Error(`Backend Unit Count (${backendUnits.length}) != this.unitCount(${Object.keys(this.world.units).length})`)
+      }
+
+      // ✅ NEW APPROACH: Use coordinate-based validation instead of array index matching
+      console.log('[ensureInSyncWithServer] Coordinate-based unit validation:');
+      
+      // Create coordinate map for backend units
+      const backendUnitMap = new Map<string, Unit>();
+      for (const unit of backendUnits) {
+        const key = `${unit.q},${unit.r}`;
+        backendUnitMap.set(key, unit);
+      }
+      
+      // Validate each frontend unit by coordinate lookup
+      for (const [coord, frontendUnit] of Object.entries(this.world.units)) {
+        const backendUnit = backendUnitMap.get(coord);
+        
+        console.log(`[ensureInSyncWithServer] Validating unit at ${coord}:`, {
+          frontendUnit: frontendUnit,
+          backendUnit: backendUnit,
+          backendExists: backendUnitMap.has(coord)
+        });
+        
+        if (!backendUnit) {
+          throw new Error(`Frontend unit at ${coord} not found in backend state`);
+        }
+        
+        // Check all unit fields for mismatches
+        const mismatches = [];
+        if (frontendUnit.q != backendUnit.q) mismatches.push(`q: ${frontendUnit.q} != ${backendUnit.q}`);
+        if (frontendUnit.r != backendUnit.r) mismatches.push(`r: ${frontendUnit.r} != ${backendUnit.r}`);
+        if (frontendUnit.unitType != backendUnit.unitType) mismatches.push(`unitType: ${frontendUnit.unitType} != ${backendUnit.unitType}`);
+        if (frontendUnit.player != backendUnit.player) mismatches.push(`player: ${frontendUnit.player} != ${backendUnit.player}`);
+        if (frontendUnit.availableHealth != backendUnit.availableHealth) mismatches.push(`availableHealth: ${frontendUnit.availableHealth} != ${backendUnit.availableHealth}`);
+        if (frontendUnit.distanceLeft != backendUnit.distanceLeft) mismatches.push(`distanceLeft: ${frontendUnit.distanceLeft} != ${backendUnit.distanceLeft}`);
+        if (frontendUnit.turnCounter != backendUnit.turnCounter) mismatches.push(`turnCounter: ${frontendUnit.turnCounter} != ${backendUnit.turnCounter}`);
+        
+        if (mismatches.length > 0) {
+          console.error(`[ensureInSyncWithServer] Unit at ${coord} mismatches:`, mismatches);
+          console.error(`[ensureInSyncWithServer] Frontend unit:`, frontendUnit);
+          console.error(`[ensureInSyncWithServer] Backend unit:`, backendUnit);
+          throw new Error(`Backend unit at ${coord} does not match Frontend unit: ${mismatches.join(', ')}`);
+        }
+      }
+      
+      // Also check for backend units not in frontend
+      for (const [coord, backendUnit] of backendUnitMap.entries()) {
+        if (!this.world.units[coord]) {
+          throw new Error(`Backend unit at ${coord} not found in frontend state`);
+        }
+      }
+      
+      console.log('[ensureInSyncWithServer] ✅ All validation checks passed!');
     }
 
     /**

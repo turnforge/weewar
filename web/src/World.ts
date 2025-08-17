@@ -125,22 +125,36 @@ export class World {
      */
     private subscribeToServerChanges(): void {
         // World subscribes first to ensure it's always up-to-date before other components
+        console.log('[World.subscribeToServerChanges] 📡 Subscribing to server-changes events');
         this.eventBus.addSubscription('server-changes', null, this);
+        console.log('[World.subscribeToServerChanges] ✅ Subscription added for server-changes');
     }
     
     /**
      * Handle EventBus events - specifically server-changes
      */
     public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
+        console.log(`[World.handleBusEvent] 🎯 Received event: ${eventType}`, {
+            eventType,
+            data,
+            changesCount: data?.changes?.length || 0,
+            emitter: emitter?.constructor?.name || 'unknown'
+        });
+        
         if (eventType === 'server-changes') {
+            console.log(`[World.handleBusEvent] 🔄 Processing server-changes event with ${data.changes?.length || 0} changes`);
+            
             // 1. Apply changes to World's internal state first
             this.applyServerChanges(data.changes);
             
             // 2. Publish world-updated event for other components (GameScene, etc.)
+            console.log(`[World.handleBusEvent] 📡 Emitting world-updated event`);
             this.eventBus.emit('world-updated', {
                 changes: data.changes,
                 world: this
             }, this, this);
+        } else {
+            console.log(`[World.handleBusEvent] ❓ Ignoring unhandled event: ${eventType}`);
         }
     }
     
@@ -148,19 +162,31 @@ export class World {
      * Apply server changes to World's internal data structures
      */
     private applyServerChanges(changes: WorldChange[]): void {
+        console.log(`[World.applyServerChanges] Applying ${changes.length} server changes:`, changes);
+        
         for (const change of changes) {
             if (change.unitMoved) {
+                console.log('[World.applyServerChanges] Processing unitMoved:', {
+                    previousUnit: change.unitMoved.previousUnit,
+                    updatedUnit: change.unitMoved.updatedUnit
+                });
+                
                 // Remove unit from previous position
                 if (change.unitMoved.previousUnit) {
+                    const prevKey = `${change.unitMoved.previousUnit.q},${change.unitMoved.previousUnit.r}`;
+                    console.log(`[World.applyServerChanges] Removing unit from ${prevKey}`);
                     this.removeUnitAt(change.unitMoved.previousUnit.q, change.unitMoved.previousUnit.r);
                 }
                 // Add unit to new position
                 if (change.unitMoved.updatedUnit) {
+                    const newKey = `${change.unitMoved.updatedUnit.q},${change.unitMoved.updatedUnit.r}`;
+                    console.log(`[World.applyServerChanges] Setting unit at ${newKey}:`, change.unitMoved.updatedUnit);
                     this.setUnitDirect(change.unitMoved.updatedUnit);
                 }
             }
             
             if (change.unitDamaged) {
+                console.log('[World.applyServerChanges] Processing unitDamaged:', change.unitDamaged);
                 // Update unit health
                 if (change.unitDamaged.updatedUnit) {
                     this.setUnitDirect(change.unitDamaged.updatedUnit);
@@ -168,6 +194,7 @@ export class World {
             }
             
             if (change.unitKilled) {
+                console.log('[World.applyServerChanges] Processing unitKilled:', change.unitKilled);
                 // Remove killed unit
                 if (change.unitKilled.previousUnit) {
                     this.removeUnitAt(change.unitKilled.previousUnit.q, change.unitKilled.previousUnit.r);
@@ -176,11 +203,20 @@ export class World {
             
             // Handle player changes (turn transitions with unit resets)
             if (change.playerChanged && change.playerChanged.resetUnits) {
+                console.log('[World.applyServerChanges] Processing playerChanged with resetUnits:', {
+                    previousPlayer: change.playerChanged.previousPlayer,
+                    newPlayer: change.playerChanged.newPlayer,
+                    resetUnitsCount: change.playerChanged.resetUnits?.length || 0
+                });
+                
                 for (const resetUnit of change.playerChanged.resetUnits) {
+                    console.log(`[World.applyServerChanges] Resetting unit at (${resetUnit.q},${resetUnit.r}):`, resetUnit);
                     this.setUnitDirect(resetUnit);
                 }
             }
         }
+        
+        console.log(`[World.applyServerChanges] ✅ Applied all changes. Current unit count: ${Object.keys(this.units).length}`);
     }
     
     // EventBus communication - emit state changes as events
@@ -389,11 +425,28 @@ export class World {
     
     public removeUnitAt(q: number, r: number): boolean {
         const key = `${q},${r}`;
+        const existingUnit = this.units[key];
+        
+        console.log(`[World.removeUnitAt] Removing unit at key "${key}":`, {
+            existingUnit: existingUnit,
+            keyExists: key in this.units,
+            beforeUnitCount: Object.keys(this.units).length,
+            allUnitKeys: Object.keys(this.units)
+        });
+        
         if (key in this.units) {
             delete this.units[key];
+            
+            console.log(`[World.removeUnitAt] After removing unit:`, {
+                afterUnitCount: Object.keys(this.units).length,
+                allUnitKeys: Object.keys(this.units)
+            });
+            
             this.addUnitChange(q, r, null);
             return true;
         }
+        
+        console.log(`[World.removeUnitAt] Unit not found at key "${key}"`);
         return false;
     }
     
@@ -403,7 +456,21 @@ export class World {
     public setUnitDirect(unit: Unit): void {
         const key = `${unit.q},${unit.r}`;
         const existingUnit = this.units[key];
+        
+        console.log(`[World.setUnitDirect] Setting unit at key "${key}":`, {
+            newUnit: unit,
+            existingUnit: existingUnit,
+            beforeUnitCount: Object.keys(this.units).length
+        });
+        
         this.units[key] = unit;
+        
+        console.log(`[World.setUnitDirect] After setting unit:`, {
+            afterUnitCount: Object.keys(this.units).length,
+            unitAtKey: this.units[key],
+            allUnitKeys: Object.keys(this.units)
+        });
+        
         this.addUnitChange(unit.q, unit.r, unit);
     }
     

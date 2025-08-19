@@ -10,6 +10,21 @@
     "type": "git",
     "url": "git+https://github.com/panyam/turnengine/games/weewar.git"
   },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "buildcssprod": "tailwindcss -i ./tailwind.input.css -o ./static/css/tailwind.css --minify",
+    "buildcss": "tailwindcss -i ./tailwind.input.css -o ./static/css/tailwind.css",
+    "buildprod": "webpack --mode=production",
+    "build": "npm run buildcss && webpack --mode=development",
+    "watch": "webpack --mode=development --watch",
+    "test": "jest --coverage --runInBand --verbose",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "serve-test": "python3 -m http.server 3000",
+    "lint": "eslint './src' --quiet --ext .ts --resolve-plugins-relative-to .",
+    "lintfix": "eslint 'src/**/*.ts' --quiet --fix --resolve-plugins-relative-to .",
+    "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
+  },
   "keywords": [
     "weewar",
     "temlate apps"
@@ -28,13 +43,13 @@
     "galore": "*",
     "golden-layout": "^2.6.0",
     "phaser": "^3.80.1",
-    "playwright": "^1.54.2",
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "split.js": "^1.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "*",
     "@types/ace": "^0.0.52",
@@ -71,6 +86,7 @@
     "jsdom": "^26.0.0",
     "mini-css-extract-plugin": "^2.9.2",
     "npm-run-all": "^4.1.5",
+    "playwright": "^1.54.2",
     "postcss-loader": "^8.1.1",
     "pre-commit": "^1.2.2",
     "prettier": "^3.5.3",
@@ -90,19 +106,5 @@
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.0"
-  },
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "buildcssprod": "tailwindcss -i ./tailwind.input.css -o ./static/css/tailwind.css --minify",
-    "buildcss": "tailwindcss -i ./tailwind.input.css -o ./static/css/tailwind.css",
-    "buildprod": "webpack --mode=production",
-    "build": "npm run buildcss && webpack --mode=development",
-    "watch": "webpack --mode=development --watch",
-    "test": "jest --coverage --runInBand --verbose",
-    "test:integration": "playwright test",
-    "serve-test": "python3 -m http.server 3000",
-    "lint": "eslint './src' --quiet --ext .ts --resolve-plugins-relative-to .",
-    "lintfix": "eslint 'src/**/*.ts' --quiet --fix --resolve-plugins-relative-to .",
-    "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
   }
 }

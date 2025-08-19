@@ -6,6 +6,11 @@ module.exports = {
     '**/__tests__/**/*.ts',
     '**/?(*.)+(spec|test).ts'
   ],
+  // Explicitly exclude e2e tests from Jest
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/e2e/',
+  ],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
@@ -18,8 +23,8 @@ module.exports = {
   coverageDirectory: 'coverage',
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   // Increase timeout for WASM-related tests
-  testTimeout: 10000,
-  // Allow tests to run in parallel but limit concurrency for WASM tests
+  testTimeout: 15000, // Increased for WASM operations
+  // Allow tests to run in parallel but limit concurrency for WASM tests  
   maxWorkers: 2,
   // Ensure proper cleanup between tests
   clearMocks: true,

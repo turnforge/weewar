@@ -1,25 +1,33 @@
 # Next Steps for Web Module (v8.0)
 
+## Recent Accomplishments ✅
+- **E2E Testing Infrastructure**: Complete Playwright-based integration testing for GameViewerPage
+  - Real production endpoint testing via `/games/{gameId}/view`
+  - Minimal API mocking strategy with surgical fetch patching
+  - Proper game lifecycle management (create → test → cleanup)
+  - Test separation: Jest (unit) vs Playwright (e2e) with proper configuration
+  - Foundation ready for command interface implementation
+
 ## Immediate Priorities
 
-### 1. Container Management Fixes
-- **GameViewerPage**: Apply same container fix as WorldViewerPage
-  - Update to target `#phaser-viewer-container` instead of outer wrapper
-  - Test canvas placement in game viewer interface
+### 1. Command Interface Implementation 
+- **GameViewerPage Command Interface**: Add high-level testing commands
+  - `selectUnit(q, r)` - Select unit at hex coordinates
+  - `moveSelectedUnit(q, r)` - Move selected unit to target
+  - `attackWithSelectedUnit(q, r)` - Attack target with selected unit
+  - `endTurn()` - End current player turn
+  - `getGameState()` - Retrieve current game state for assertions
+- **LLM-Friendly Failure Reporting**: Structured test result reporting with step tracking
+- **Accessibility Benefits**: Command interface improves accessibility for screen readers
+
+### 2. Container Management Fixes  
 - **StartGamePage**: Review and fix if similar container issues exist
 - **Other Phaser Integration Points**: Audit all pages using PhaserWorldScene
 
-### 2. Wrapper Elimination Validation
-- **Test All Removed Wrappers**: Ensure PhaserWorldEditor and PhaserPanel removal didn't break functionality
-- **Method Signature Validation**: Verify all TypeScript compatibility issues are resolved
-- **Editor Functionality**: Comprehensive testing of world editor features after wrapper removal
-- **Reference Image Features**: Test reference image functionality in unified PhaserEditorScene
-
-### 3. Phaser Scale Mode Testing
-- **Canvas Growth Testing**: Verify FIT mode prevents infinite canvas growth
-- **Responsive Behavior**: Test canvas resizing with container size changes
-- **Different Screen Sizes**: Test on various viewport dimensions
-- **Performance Impact**: Measure any performance differences from scale mode change
+### 3. E2E Test Expansion
+- **Additional Test Scenarios**: Implement COMBAT_BASIC, TURN_FLOW, ERROR_HANDLING scenarios
+- **Cross-deployment Testing**: Verify tests work against test/production deployments
+- **Head-full Debugging**: Enhanced debugging capabilities for test failures
 
 ## Short-term Development
 

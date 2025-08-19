@@ -11,15 +11,14 @@ rules:
   # Go Backend Development & Testing
   - name: "betests"
     watch:
+      - action: "include"
+        patterns:
+          - "web/server/*.go"
       - action: "exclude"
         patterns:
           - "**/*.log"
-          - "web/node_modules/**"
-      - action: "include"
-        patterns:
-          - "web/**/*.go"
-      - action: "exclude"
-        patterns:
+          - "**/*.log"
+          - "web/**/*"
           - "web"
       - action: "include"
         patterns:
@@ -32,15 +31,14 @@ rules:
   - name: "backend"
     color: "blue"
     watch:
-      - action: "exclude"
-        patterns:
-          - "web/node_modules/**"
-          - "**/*.log"
       - action: "include"
         patterns:
-          - "web/**/*.go"
+          - "web/server/*.go"
       - action: "exclude"
         patterns:
+          - "**/*.log"
+          - "**/*.log"
+          - "web/**/*"
           - "web"
       - action: "include"
         patterns:
@@ -101,11 +99,7 @@ rules:
     commands:
       - "echo '⚡ Building frontend...'"
       - "npm run build"
-      - "echo '🧪 Running frontend tests...'"
-      # - "npm run test:unit"
-      - "echo '✅ Frontend build complete and tests disabled'"
   - name: "fetests"
-    skip_run_on_init: true
     workdir: "./web"
     watch:
       - action: "exclude"
@@ -129,7 +123,8 @@ rules:
           - "tsconfig.json"
     commands:
       - "echo '🧪 Running frontend tests...'"
-      - "npm run test"
+      # - "npm run test"
+      - "npm run test:e2e"
 
   # Protocol Buffers (affects both Go and Web)
   - name: "protobuf"

@@ -38,9 +38,6 @@ importers:
       phaser:
         specifier: ^3.80.1
         version: 3.90.0
-      playwright:
-        specifier: ^1.54.2
-        version: 1.54.2
       prismjs:
         specifier: ^1.30.0
         version: 1.30.0
@@ -54,6 +51,9 @@ importers:
         specifier: ^1.6.5
         version: 1.6.5
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.54.2
+        version: 1.54.2
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.16.5)(typescript@5.8.3)))
@@ -162,6 +162,9 @@ importers:
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
+      playwright:
+        specifier: ^1.54.2
+        version: 1.54.2
       postcss-loader:
         specifier: ^8.1.1
         version: 8.1.1(postcss@8.5.6)(typescript@5.8.3)(webpack@5.100.2)
@@ -775,6 +778,11 @@ packages:
   '@pkgr/core@0.2.9':
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+
+  '@playwright/test@1.54.2':
+    resolution: {integrity: sha512-A+znathYxPf+72riFd1r1ovOLqsIIB0jKIoPjyK2kqEIe30/6jF6BC7QNluHuwUmsD2tv1XZVugN8GqfTMOxsA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
@@ -6042,6 +6050,10 @@ snapshots:
     optional: true
 
   '@pkgr/core@0.2.9': {}
+
+  '@playwright/test@1.54.2':
+    dependencies:
+      playwright: 1.54.2
 
   '@polka/url@1.0.0-next.29': {}
 

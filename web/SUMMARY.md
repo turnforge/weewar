@@ -47,7 +47,18 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Error Isolation**: Component failures don't cascade through synchronization barriers
 - **Race Condition Prevention**: Synchronization barriers eliminate timing dependencies
 
-### Recent Achievements (Session 2025-08-05)
+### Recent Achievements (Session 2025-08-19)
+
+#### E2E Testing Infrastructure (Phase 1 Complete)
+- **Playwright Integration**: Complete integration testing framework for GameViewerPage
+- **Production Testing**: Tests run against real `/games/{gameId}/view` endpoints using actual server
+- **Minimal API Mocking**: Surgical fetch patching framework - only mock external APIs, keep internal real
+- **Game Lifecycle Management**: Create test games → run tests → cleanup automatically via real APIs
+- **Test Separation**: Jest (unit tests) vs Playwright (e2e tests) with proper configuration isolation
+- **Debugging Support**: Both headless and head-full modes with video recording on failures
+- **Foundation Ready**: Infrastructure ready for command interface implementation in Phase 2
+
+#### Previous Session Achievements (Session 2025-08-05)
 
 #### Phaser Architecture Unification (v8.0)
 - **Wrapper Elimination**: Removed PhaserWorldEditor and PhaserPanel unnecessary wrapper classes
@@ -178,8 +189,8 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Layout**: DockView for professional panel management
 
 ## Status
-**Current Version**: 8.0 (Phaser Architecture Unification)  
-**Status**: Production-ready with unified Phaser scene architecture and container management fixes  
+**Current Version**: 8.1 (E2E Testing Infrastructure)  
+**Status**: Production-ready with complete Playwright-based integration testing  
 **Build Status**: Clean compilation with all TypeScript errors resolved  
-**Architecture**: Simplified wrapper-free Phaser integration with proper container targeting  
-**Next Milestone**: Additional container fixes for other pages and performance optimization
+**Testing**: Jest (unit) + Playwright (e2e) with real production endpoint testing  
+**Next Milestone**: Command interface implementation for high-level game action testing

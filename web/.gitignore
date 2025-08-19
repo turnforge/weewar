@@ -1,2 +1,4 @@
 static/js/gen
+playwright-report
+test-results
 coverage

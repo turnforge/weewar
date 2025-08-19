@@ -1,24 +1,25 @@
 # Next Steps for Web Module (v8.0)
 
 ## Recent Accomplishments ✅
-- **E2E Testing Infrastructure**: Complete Playwright-based integration testing for GameViewerPage
+- **Command Interface Implementation**: Complete high-level game action API for testing and accessibility
+  - `selectUnitAt(q, r)` - Unified unit selection with validation and error reporting
+  - `moveSelectedUnitTo(q, r)` - Unit movement with path validation 
+  - `endCurrentPlayerTurn()` - Turn management with state updates
+  - `getGameState()` - Comprehensive game state queries
+  - `clearSelection()` - Selection management
+- **E2E Testing Infrastructure**: Complete Playwright-based integration testing 
   - Real production endpoint testing via `/games/{gameId}/view`
-  - Minimal API mocking strategy with surgical fetch patching
-  - Proper game lifecycle management (create → test → cleanup)
-  - Test separation: Jest (unit) vs Playwright (e2e) with proper configuration
-  - Foundation ready for command interface implementation
+  - GameActions and GameTestUtils for high-level test operations
+  - Test world setup/cleanup scripts with persistent world management
+  - LLM-friendly structured ActionResult responses
+- **Consolidated Architecture**: Single implementation used by both UI clicks and command interface
 
 ## Immediate Priorities
 
-### 1. Command Interface Implementation 
-- **GameViewerPage Command Interface**: Add high-level testing commands
-  - `selectUnit(q, r)` - Select unit at hex coordinates
-  - `moveSelectedUnit(q, r)` - Move selected unit to target
-  - `attackWithSelectedUnit(q, r)` - Attack target with selected unit
-  - `endTurn()` - End current player turn
-  - `getGameState()` - Retrieve current game state for assertions
-- **LLM-Friendly Failure Reporting**: Structured test result reporting with step tracking
-- **Accessibility Benefits**: Command interface improves accessibility for screen readers
+### 1. Test World Setup Completion
+- **Fix World Data Storage**: Investigate why world data appears empty after creation
+- **Update Test Configuration**: Fix config file paths for test world IDs
+- **Validate Command Interface**: Complete end-to-end testing with real game scenarios
 
 ### 2. Container Management Fixes  
 - **StartGamePage**: Review and fix if similar container issues exist

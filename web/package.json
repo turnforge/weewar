@@ -20,6 +20,8 @@
     "test": "jest --coverage --runInBand --verbose",
     "test:e2e": "npx playwright test",
     "test:e2e:headed": "npx playwright test --headed",
+    "setup-test-worlds": "node e2e/setup-test-worlds.js",
+    "cleanup-test-worlds": "node e2e/setup-test-worlds.js --cleanup",
     "serve-test": "python3 -m http.server 3000",
     "lint": "eslint './src' --quiet --ext .ts --resolve-plugins-relative-to .",
     "lintfix": "eslint 'src/**/*.ts' --quiet --fix --resolve-plugins-relative-to .",

@@ -15,18 +15,24 @@
 - [x] **API Mocking**: Surgical fetch patching framework with blueprint for expansion
 - [x] **Basic Playwright Config**: Head/headless modes, test isolation, proper cleanup
 - [x] **Game Lifecycle Management**: Create → test → cleanup with proper storage management
+- [x] **Persistent Test Worlds**: Setup/cleanup scripts for reusable test world management
 
-### Phase 2: Command Interface
-- [ ] **GameViewerPage Commands**: Add command methods to actual GameViewerPage.ts
-- [ ] **Action Abstraction**: High-level game actions (selectUnit, moveUnit, endTurn)
-- [ ] **Fallback Strategy**: UI interaction when command interface unavailable
-- [ ] **Result Tracking**: Structured success/failure with step information
+### Phase 2: Command Interface ✅ COMPLETE  
+- [x] **GameViewerPage Command Interface**: High-level game action methods
+  - [x] `selectUnitAt(q, r)` with validation and error reporting
+  - [x] `moveSelectedUnitTo(q, r)` with path validation
+  - [x] `endCurrentPlayerTurn()` with state management
+  - [x] `getGameState()` comprehensive queries
+  - [x] `clearSelection()` selection management
+- [x] **Unified Architecture**: Single implementation for UI and command interface
+- [x] **E2E Testing Utilities**: GameActions and GameTestUtils classes
+- [x] **Structured Response Format**: ActionResult interface for consistent error reporting
 
-### Phase 3: Test Scenarios  
-- [ ] **Basic Game Flow**: Load game, select unit, move, end turn
-- [ ] **Combat Scenarios**: Unit attacks, health changes
-- [ ] **Error Conditions**: Invalid moves, out of range actions
-- [ ] **Multi-turn Games**: Complex scenarios across turns
+### Phase 3: Test Scenarios Expansion 🚧 IN PROGRESS
+- [ ] **Complete Test World Setup**: Fix world data storage and configuration  
+- [ ] **Action Testing**: Comprehensive testing of all command interface methods
+- [ ] **Multi-scenario Coverage**: Basic movement, combat, turn flow, error handling
+- [ ] **Cross-deployment Testing**: Verify tests work against test/production deployments
 
 ### Phase 4: Debugging & Observability
 - [ ] **Screenshot Capture**: Automatic screenshots on failures

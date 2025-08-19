@@ -31,16 +31,16 @@ export const TEST_SCENARIOS: Record<string, TestGameScenario> = {
   BASIC_MOVEMENT: {
     gameId: 'test-basic-movement',
     name: 'Basic Movement Test',
-    description: '3x3 map with two units for testing basic movement mechanics',
+    description: '3x3 map with units for testing basic movement mechanics',
     players: 2,
     tiles: [
       {q: 0, r: 0, player: 0, tileType: 1}, {q: 1, r: 0, player: 0, tileType: 1}, {q: 2, r: 0, player: 0, tileType: 1},
-      {q: 0, r: 1, player: 0, tileType: 1}, {q: 1, r: 1, player: 0, tileType: 2}, {q: 2, r: 1, player: 0, tileType: 1},
+      {q: 0, r: 1, player: 0, tileType: 1}, {q: 1, r: 1, player: 0, tileType: 1}, {q: 2, r: 1, player: 0, tileType: 1},
       {q: 0, r: 2, player: 0, tileType: 1}, {q: 1, r: 2, player: 0, tileType: 1}, {q: 2, r: 2, player: 0, tileType: 1}
     ],
     units: [
-      {q: 0, r: 0, player: 1, unitType: 1, availableHealth: 100, distanceLeft: 3},
-      {q: 2, r: 2, player: 2, unitType: 1, availableHealth: 100, distanceLeft: 3}
+      {q: 0, r: 0, player: 1, unitType: 1, availableHealth: 100, distanceLeft: 3, turnCounter: 1},
+      {q: 2, r: 2, player: 2, unitType: 1, availableHealth: 100, distanceLeft: 3, turnCounter: 1}
     ],
     turnCounter: 1,
     currentPlayer: 1
@@ -111,31 +111,59 @@ export async function createTestGame(
   serverUrl: string = 'http://localhost:8080'
 ): Promise<GameCreationResult> {
   try {
+    // Load the world IDs from the setup script
+    const fs = require('fs');
+    const path = require('path');
+    const configPath = path.join(__dirname, 'test-world-ids.json');
+    
+    let worldIds: Record<string, string> = {};
+    try {
+      const configData = fs.readFileSync(configPath, 'utf8');
+      worldIds = JSON.parse(configData);
+    } catch (error) {
+      throw new Error(`Test worlds not found. Please run: npm run setup-test-worlds\nError: ${error}`);
+    }
+
+    // Map scenario IDs to world IDs
+    const worldIdMap: Record<string, string> = {
+      'test-basic-movement': 'basic-movement',
+      'test-combat-basic': 'combat-basic', 
+      'test-turn-flow': 'turn-flow',
+      'test-error-handling': 'error-handling'
+    };
+
+    const worldId = worldIdMap[scenario.gameId];
+    if (!worldId || !worldIds[worldId]) {
+      throw new Error(`No world found for scenario ${scenario.gameId}. Available worlds: ${Object.keys(worldIds).join(', ')}`);
+    }
+
+    const gamePayload = {
+      game: {
+        world_id: worldId, // Use the persistent test world
+        name: scenario.name,
+        description: scenario.description,
+        creator_id: 'test-user',
+        max_players: scenario.players,
+        current_players: [
+          { id: 'player1', name: 'Player 1', type: 'human' },
+          { id: 'player2', name: 'Player 2', type: 'human' }
+        ]
+      },
+      game_state: {
+        turn_counter: scenario.turnCounter || 1,
+        current_player: scenario.currentPlayer || 1
+      }
+    };
+
+    console.log(`🔧 Creating game with world: ${worldId}`);
+    
     // Create the game using the real API
     const createResponse = await fetch(`${serverUrl}/api/v1/games`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        game: {
-          world_id: 'small-world', // Use existing test world
-          name: scenario.name,
-          description: scenario.description,
-          creator_id: 'test-user',
-          max_players: scenario.players,
-          current_players: [
-            { id: 'player1', name: 'Player 1', type: 'human' },
-            { id: 'player2', name: 'Player 2', type: 'human' }
-          ],
-          game_state: {
-            turn_counter: scenario.turnCounter || 1,
-            current_player: scenario.currentPlayer || 1,
-            tiles: scenario.tiles,
-            units: scenario.units
-          }
-        }
-      })
+      body: JSON.stringify(gamePayload)
     });
 
     if (!createResponse.ok) {
@@ -147,6 +175,8 @@ export async function createTestGame(
     }
 
     const gameData = await createResponse.json();
+    console.log('🔍 Game creation response:', JSON.stringify(gameData, null, 2));
+    
     const actualGameId = gameData.game?.id;
     
     if (!actualGameId) {

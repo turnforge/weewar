@@ -49,14 +49,18 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 
 ### Recent Achievements (Session 2025-08-19)
 
-#### E2E Testing Infrastructure (Phase 1 Complete)
-- **Playwright Integration**: Complete integration testing framework for GameViewerPage
-- **Production Testing**: Tests run against real `/games/{gameId}/view` endpoints using actual server
-- **Minimal API Mocking**: Surgical fetch patching framework - only mock external APIs, keep internal real
-- **Game Lifecycle Management**: Create test games → run tests → cleanup automatically via real APIs
-- **Test Separation**: Jest (unit tests) vs Playwright (e2e tests) with proper configuration isolation
-- **Debugging Support**: Both headless and head-full modes with video recording on failures
-- **Foundation Ready**: Infrastructure ready for command interface implementation in Phase 2
+#### Command Interface and Advanced E2E Testing (Complete)
+- **Command Interface Implementation**: High-level game action API for testing and accessibility
+  - Unified methods used by both UI interactions and programmatic testing
+  - Structured ActionResult responses with success/failure reporting
+  - Full game state queries and selection management
+  - Exposed via window.gameViewerPage for e2e access
+- **Advanced E2E Infrastructure**: Production-ready testing with persistent test worlds
+  - GameActions class for high-level test operations (selectUnit, moveUnit, endTurn)
+  - GameTestUtils for debugging and enhanced failure reporting  
+  - Test world setup/cleanup scripts with reusable world management
+  - Real production endpoint testing with minimal surgical API mocking
+- **Consolidated Architecture**: Eliminated duplicate methods, single implementation for UI and tests
 
 #### Previous Session Achievements (Session 2025-08-05)
 
@@ -189,8 +193,8 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Layout**: DockView for professional panel management
 
 ## Status
-**Current Version**: 8.1 (E2E Testing Infrastructure)  
-**Status**: Production-ready with complete Playwright-based integration testing  
+**Current Version**: 8.2 (Command Interface and Advanced E2E Testing)  
+**Status**: Production-ready with complete command interface and advanced testing infrastructure  
 **Build Status**: Clean compilation with all TypeScript errors resolved  
-**Testing**: Jest (unit) + Playwright (e2e) with real production endpoint testing  
-**Next Milestone**: Command interface implementation for high-level game action testing
+**Testing**: Jest (unit) + Playwright (e2e) with command interface and persistent test worlds  
+**Next Milestone**: Complete test world setup validation and expand test scenarios

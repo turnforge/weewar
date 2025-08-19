@@ -14,6 +14,41 @@ import { GameEventTypes, WorldEventTypes } from './events';
 import { RulesTable, TerrainStats } from './RulesTable';
 
 /**
+ * Result of a game action command - used for testing and accessibility
+ */
+export interface ActionResult {
+    success: boolean;
+    message: string;
+    data?: any;
+    error?: string;
+}
+
+/**
+ * Game state information for testing and debugging
+ */
+export interface GameStateInfo {
+    gameId: string;
+    currentPlayer: number;
+    turnCounter: number;
+    selectedUnit?: { q: number, r: number };
+    unitsCount: number;
+    tilesCount: number;
+}
+
+/**
+ * Command interface for testing and accessibility
+ * These methods provide high-level game actions that can be easily tested
+ */
+export interface GameViewerCommands {
+    selectUnitAt(q: number, r: number): Promise<ActionResult>;
+    moveSelectedUnitTo(q: number, r: number): Promise<ActionResult>;
+    attackWithSelectedUnit(q: number, r: number): Promise<ActionResult>;
+    endCurrentPlayerTurn(): Promise<ActionResult>;
+    getGameState(): Promise<GameStateInfo>;
+    clearSelection(): ActionResult;
+}
+
+/**
  * Game Viewer Page - Interactive game play interface
  * Responsible for:
  * - Loading world as a game instance
@@ -22,7 +57,7 @@ import { RulesTable, TerrainStats } from './RulesTable';
  * - Handling player interactions (unit selection, movement, attacks)
  * - Providing game controls and UI feedback
  */
-export class GameViewerPage extends BasePage implements LCMComponent {
+export class GameViewerPage extends BasePage implements LCMComponent, GameViewerCommands {
     private currentGameId: string | null;
     private gameScene: PhaserGameScene
     private gameState: GameState
@@ -297,8 +332,7 @@ export class GameViewerPage extends BasePage implements LCMComponent {
      * This method is called by BasePage constructor, but we're using external LifecycleController
      * so we make this a no-op and handle event binding in LCMComponent.activate()
      */
-    protected bindSpecificEvents(): void {
-    }
+    protected bindSpecificEvents(): void {}
 
     /**
      * Internal method to bind game-specific events (called from activate() phase)
@@ -307,7 +341,9 @@ export class GameViewerPage extends BasePage implements LCMComponent {
         // End Turn button
         const endTurnBtn = document.getElementById('end-turn-btn');
         if (endTurnBtn) {
-            endTurnBtn.addEventListener('click', this.endTurn.bind(this));
+            endTurnBtn.addEventListener('click', () => {
+                this.endCurrentPlayerTurn(); // Use unified method
+            });
         }
 
         // Undo Move button
@@ -339,32 +375,271 @@ export class GameViewerPage extends BasePage implements LCMComponent {
         }
     }
 
+    // =============================================================================
+    // GameViewerCommands Interface Implementation (for testing and accessibility)
+    // =============================================================================
 
+    /**
+     * Select a unit at the given coordinates
+     * This is the unified method used by both UI clicks and command interface
+     */
+    async selectUnitAt(q: number, r: number): Promise<ActionResult> {
+        try {
+            if (!this.gameState?.isReady()) {
+                const error = {
+                    success: false,
+                    message: 'Game not ready',
+                    error: 'Game state not initialized or WASM not loaded'
+                } as ActionResult;
+                return error;
+            }
+
+            // Check if there's a unit at this position
+            const unit = this.world?.getUnitAt(q, r);
+            if (!unit) {
+                const error = {
+                    success: false,
+                    message: `No unit found at position (${q}, ${r})`,
+                    error: 'No unit at coordinates'
+                } as ActionResult;
+                return error;
+            }
+
+            // Get options for this position to see if unit is selectable
+            const response = await this.gameState.getOptionsAt(q, r);
+            const options = response.options || [];
+            
+            const hasMovementOptions = options.some((opt: any) => opt.move !== undefined);
+            const hasAttackOptions = options.some((opt: any) => opt.attack !== undefined);
+            
+            if (!hasMovementOptions && !hasAttackOptions) {
+                const error = {
+                    success: false,
+                    message: `Unit at (${q}, ${r}) has no available actions`,
+                    error: 'Unit not actionable',
+                    data: { unit: unit, optionsCount: options.length }
+                } as ActionResult;
+                return error;
+            }
+
+            // Use existing unit selection logic
+            this.processUnitSelection(q, r, options);
+
+            // Success result
+            const result = {
+                success: true,
+                message: `Unit selected at (${q}, ${r})`,
+                data: { 
+                    unit: unit, 
+                    movementOptions: hasMovementOptions ? options.filter((opt: any) => opt.move).length : 0,
+                    attackOptions: hasAttackOptions ? options.filter((opt: any) => opt.attack).length : 0
+                }
+            } as ActionResult;
+
+            return result;
+
+        } catch (error) {
+            return {
+                success: false,
+                message: `Failed to select unit at (${q}, ${r})`,
+                error: error instanceof Error ? error.message : String(error)
+            } as ActionResult;
+        }
+    }
+
+    /**
+     * Move the currently selected unit to target coordinates
+     */
+    async moveSelectedUnitTo(q: number, r: number): Promise<ActionResult> {
+        try {
+            if (!this.gameState?.isReady()) {
+                return {
+                    success: false,
+                    message: 'Game not ready',
+                    error: 'Game state not initialized'
+                };
+            }
+
+            if (!this.selectedUnitCoord) {
+                return {
+                    success: false,
+                    message: 'No unit selected',
+                    error: 'Must select a unit before moving'
+                };
+            }
+
+            if (this.isProcessingMove) {
+                return {
+                    success: false,
+                    message: 'Move already in progress',
+                    error: 'Another move is being processed'
+                };
+            }
+
+            // Find the move option for this target
+            const moveOption = this.availableMovementOptions.find(opt => opt.q === q && opt.r === r);
+            if (!moveOption) {
+                return {
+                    success: false,
+                    message: `Cannot move to (${q}, ${r}) - not a valid move target`,
+                    error: 'Invalid move target',
+                    data: { 
+                        selectedUnit: this.selectedUnitCoord,
+                        availableMoves: this.availableMovementOptions.map(opt => ({q: opt.q, r: opt.r}))
+                    }
+                };
+            }
+
+            // Execute the move using existing logic
+            const fromCoord = this.selectedUnitCoord;
+            await this.executeMove(fromCoord, { q, r }, moveOption, false); // Skip validation for command interface
+
+            return {
+                success: true,
+                message: `Unit moved from (${fromCoord.q}, ${fromCoord.r}) to (${q}, ${r})`,
+                data: { from: fromCoord, to: { q, r } }
+            };
+
+        } catch (error) {
+            return {
+                success: false,
+                message: `Failed to move unit to (${q}, ${r})`,
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+    }
+
+    /**
+     * Attack with the currently selected unit
+     */
+    async attackWithSelectedUnit(q: number, r: number): Promise<ActionResult> {
+        // TODO: Implement attack functionality
+        // For now, return not implemented
+        return {
+            success: false,
+            message: 'Attack functionality not yet implemented',
+            error: 'Feature not implemented',
+            data: { targetPosition: { q, r } }
+        };
+    }
+
+    /**
+     * End the current player's turn 
+     * This is the unified method used by both UI clicks and command interface
+     */
+    async endCurrentPlayerTurn(): Promise<ActionResult> {
+        try {
+            if (!this.gameState?.isReady()) {
+                return {
+                    success: false,
+                    message: 'Game not ready',
+                    error: 'Game state not initialized'
+                } as ActionResult;
+            }
+
+            const currentPlayer = this.gameState.getCurrentPlayer();
+            const currentTurn = this.gameState.getTurnCounter();
+
+            // Execute the turn end logic
+            await this.gameState.endTurn(currentPlayer);
+            
+            // Update UI state
+            const newPlayer = this.gameState.getCurrentPlayer();
+            const newTurn = this.gameState.getTurnCounter();
+            
+            this.updateGameStatus(`Ready - Player ${newPlayer}'s Turn`, newPlayer);
+            this.updateTurnCounter(newTurn);
+            this.clearUnitSelection();
+            
+            this.logGameEvent(`Player ${newPlayer}'s turn begins`);
+            this.showToast('Info', `Player ${newPlayer}'s turn`, 'info');
+
+            return {
+                success: true,
+                message: `Turn ended. Now Player ${newPlayer}'s turn`,
+                data: { 
+                    previousPlayer: currentPlayer,
+                    currentPlayer: newPlayer,
+                    previousTurn: currentTurn,
+                    currentTurn: newTurn
+                }
+            } as ActionResult;
+
+        } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : String(error);
+            this.showToast('Error', errorMsg, 'error');
+            return {
+                success: false,
+                message: 'Failed to end turn',
+                error: errorMsg
+            } as ActionResult;
+        }
+    }
+
+    /**
+     * Get current game state information
+     */
+    async getGameState(): Promise<GameStateInfo> {
+        try {
+            if (!this.gameState?.isReady() || !this.world) {
+                return {
+                    gameId: this.currentGameId || 'unknown',
+                    currentPlayer: -1,
+                    turnCounter: -1,
+                    selectedUnit: undefined,
+                    unitsCount: 0,
+                    tilesCount: 0
+                };
+            }
+
+            const gameState = await this.gameState.getCurrentGameState();
+            
+            return {
+                gameId: gameState.gameId || this.currentGameId || 'unknown',
+                currentPlayer: gameState.currentPlayer,
+                turnCounter: gameState.turnCounter,
+                selectedUnit: this.selectedUnitCoord || undefined,
+                unitsCount: Object.keys(this.world.units).length,
+                tilesCount: Object.keys(this.world.tiles).length
+            };
+
+        } catch (error) {
+            console.error('Failed to get game state:', error);
+            return {
+                gameId: this.currentGameId || 'unknown',
+                currentPlayer: -1,
+                turnCounter: -1,
+                selectedUnit: undefined,
+                unitsCount: 0,
+                tilesCount: 0
+            };
+        }
+    }
+
+    /**
+     * Clear current unit selection
+     */
+    clearSelection(): ActionResult {
+        try {
+            this.clearUnitSelection();
+            this.clearAllHighlights();
+            
+            return {
+                success: true,
+                message: 'Selection cleared'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Failed to clear selection',
+                error: error instanceof Error ? error.message : String(error)
+            };
+        }
+    }
 
     /**
      * Game action handlers - all synchronous for immediate UI feedback
      */
-    private async endTurn(): Promise<void> {
-        if (!this.gameState?.isReady()) {
-            this.showToast('Error', 'Game not ready', 'error');
-            return;
-        }
-        
-        // ✅ Use GameState metadata
-        const currentPlayer = this.gameState.getCurrentPlayer();
-        await this.gameState.endTurn(currentPlayer);
-        
-        // ✅ Use GameState metadata for UI updates
-        const newPlayer = this.gameState.getCurrentPlayer();
-        const turnCounter = this.gameState.getTurnCounter();
-        
-        this.updateGameStatus(`Ready - Player ${newPlayer}'s Turn`, newPlayer);
-        this.updateTurnCounter(turnCounter);
-        this.clearUnitSelection();
-        
-        this.logGameEvent(`Player ${newPlayer}'s turn begins`);
-        this.showToast('Info', `Player ${newPlayer}'s turn`, 'info');
-    }
 
     private undoMove(): void {
         this.showToast('Info', 'Undo not yet implemented', 'info');
@@ -480,7 +755,7 @@ export class GameViewerPage extends BasePage implements LCMComponent {
             
             if (hasMovementOptions || hasAttackOptions) {
                 // This unit has actionable options - select it
-                this.selectUnitAt(q, r, options);
+                this.selectUnitAt(q, r); // Use unified method
             } else if (hasOnlyEndTurn) {
                 // This position only has endTurn option - could be empty tile, enemy unit, or friendly unit with no actions
                 
@@ -555,18 +830,6 @@ export class GameViewerPage extends BasePage implements LCMComponent {
         }
     }
 
-    /**
-     * Select unit and show movement/attack highlights
-     */
-    private selectUnitAt(q: number, r: number, options: any[]): void {
-        if (!this.gameState?.isReady()) {
-            console.warn('[GameViewerPage] Game not ready for unit selection');
-            return;
-        }
-
-        // Process the provided options (from getOptionsAt)
-        this.processUnitSelection(q, r, options);
-    }
 
     /**
      * Process unit selection with unified options format
@@ -803,6 +1066,9 @@ export class GameViewerPage extends BasePage implements LCMComponent {
 document.addEventListener('DOMContentLoaded', async () => {
     // Create page instance (just basic setup)
     const gameViewerPage = new GameViewerPage("GameViewerPage");
+    
+    // Make GameViewerPage available for e2e testing via command interface
+    (window as any).gameViewerPage = gameViewerPage;
     
     // Create lifecycle controller with debug logging
     const lifecycleController = new LifecycleController(gameViewerPage.eventBus, LifecycleController.DefaultConfig);

@@ -1,6 +1,5 @@
 settings:
   project_id: "weewar"
-  max_parallel_rules: 1
   color_logs: true
   color_scheme: "dark"
   prefix_logs: true

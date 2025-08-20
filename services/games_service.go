@@ -88,7 +88,7 @@ func (s *FSGamesServiceImpl) CreateGame(ctx context.Context, req *v1.CreateGameR
 		TurnCounter:   1, // First turn
 		WorldData:     world.WorldData,
 	}
-	
+
 	// Initialize units with default stats from rules engine for new games
 	if gs.WorldData != nil && gs.WorldData.Units != nil {
 		rulesEngine := weewar.DefaultRulesEngine()
@@ -99,7 +99,7 @@ func (s *FSGamesServiceImpl) CreateGame(ctx context.Context, req *v1.CreateGameR
 				log.Printf("Warning: failed to get unit data for type %d: %v", unit.UnitType, err)
 				continue // Skip this unit but don't fail the entire game creation
 			}
-			
+
 			// Set default health and movement points for new game
 			unit.AvailableHealth = unitData.Health
 			unit.DistanceLeft = unitData.MovementPoints
@@ -152,7 +152,6 @@ func (s *FSGamesServiceImpl) GetGame(ctx context.Context, req *v1.GetGameRequest
 
 	return resp, nil
 }
-
 
 // UpdateGame updates an existing game
 func (s *FSGamesServiceImpl) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest) (resp *v1.UpdateGameResponse, err error) {

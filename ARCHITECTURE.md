@@ -149,22 +149,38 @@ func (w *World) NumUnits() int32 {
 
 **Game Logic → State → UI**: Unidirectional data flow prevents circular dependencies.
 
-**Event Bus Pattern**: Loose coupling between components through event emission:
+**Event Bus Pattern**: Loose coupling between components through centralized event coordination:
 ```typescript
-// GameState emits events
-this.emit('world-updated', updatedWorld);
+// GameState processes moves and emits server changes
+this.eventBus.emit('server-changes', { changes: worldChanges }, this, this);
 
-// GameViewer subscribes to events  
-gameState.on('world-updated', (world) => this.updateScene(world));
+// World applies changes and emits specific world events
+this.eventBus.emit(WorldEventType.TILES_CHANGED, { changes: tileChanges }, this, this);
+
+// PhaserWorldScene automatically syncs display
+handleTilesChanged(data) { this.setTile(change.tile); }
 ```
+
+### Automatic Rendering Synchronization
+
+**Unified Event Flow**: Server changes automatically propagate to all rendering components:
+1. **User Action** → **GameState.processMoves()** 
+2. **server-changes** → **World.applyServerChanges()**
+3. **TILES_CHANGED/UNITS_CHANGED** → **PhaserWorldScene.handleTilesChanged()/handleUnitsChanged()**
+4. **Automatic Rendering Updates**
+
+**Scene Architecture**: PhaserWorldScene base class handles world synchronization for all scenes:
+- **PhaserEditorScene**: Inherits automatic world sync + editor interactions
+- **PhaserViewerScene**: Inherits automatic world sync + viewer interactions
+- No duplication of world event handling logic
 
 ### State Synchronization
 
 **Server as Source of Truth**: All state changes validated server-side with client updates.
 
-**Optimistic UI**: Client shows immediate feedback while server processes moves.
+**Dual Subscription Pattern**: GameState subscribes to server-changes for metadata (currentPlayer, turnCounter) while also emitting them.
 
-**Conflict Resolution**: Server state takes precedence in case of discrepancies.
+**World as Data Authority**: World component handles actual tile/unit data changes and re-emits as specific world events.
 
 ## Testing Architecture
 
@@ -180,6 +196,13 @@ gameState.on('world-updated', (world) => this.updateScene(world));
 - Real WasmGamesService usage
 - Transaction flow validation
 - State consistency verification
+
+**E2E Browser Tests**: Real GameViewerPage testing with Playwright
+- Tests actual production `/games/{gameId}/view` endpoints
+- Real WASM + EventBus + World integration testing
+- Minimal surgical API mocking (only external calls)
+- Command interface for accessibility and programmatic testing
+- Both headless and head-full browser modes for debugging
 
 **Transaction Flow Tests**: Exact simulation of ProcessMoves behavior
 - Transaction creation and rollback

@@ -107,6 +107,7 @@ The current system supports:
 This represents a **fully functional core gameplay loop** ready for demonstration and further feature development.
 
 ## Status Update
-**Current Version**: 8.3 (World Event Architecture Refactoring)  
-**Status**: Production-ready with unified world synchronization architecture  
-**Architecture**: Automatic world-to-rendering synchronization via PhaserWorldScene base class
+**Current Version**: 8.4 (Input System Fixes & Editor Polish)  
+**Status**: Production-ready with robust input handling and complete tile editing functionality  
+**Architecture**: Automatic world-to-rendering synchronization via PhaserWorldScene base class  
+**Recent Fixes**: Proper Phaser tap/drag separation and tile clearing visual sync

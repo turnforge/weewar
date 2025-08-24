@@ -1,4 +1,6 @@
 settings:
+  cycle_detection:
+    enabled: false
   project_id: "weewar"
   color_logs: true
   color_scheme: "dark"
@@ -29,6 +31,7 @@ rules:
       - "make test"
   - name: "backend"
     color: "blue"
+    lro: true
     watch:
       - action: "include"
         patterns:
@@ -52,8 +55,8 @@ rules:
       - "make binlocal"
       - "echo '✅ Backend build and tests complete'"
       - "pkill weewar || true"
-      # - "kill -9 `ps -ef | grep weewar  | sed -e \"s/  */:/g\" | cut -d ':' -f 3`"
       - "./bin/weewar serve"
+      # - "sleep 20 && echo Done Sleeping"
   - name: "cli"
     color: "red"
     watch:
@@ -98,6 +101,7 @@ rules:
     commands:
       - "echo '⚡ Building frontend...'"
       - "npm run build"
+
   - name: "fetests"
     workdir: "./web"
     watch:

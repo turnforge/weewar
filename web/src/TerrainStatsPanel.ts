@@ -1,7 +1,7 @@
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
-import { TERRAIN_NAMES } from './ColorsAndNames';
+import { TERRAIN_NAMES, UNIT_NAMES } from './ColorsAndNames';
 import { TerrainStats , RulesTable } from './RulesTable';
 
 interface UnitData {
@@ -346,14 +346,20 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         const descElement = this.findElement('#unit-description');
 
         if (iconElement) {
-            // Get unit definition from rules table
-            const unitDef = this.rulesTable.getUnitDefinition(unit.unitType);
-            iconElement.textContent = unitDef?.icon || '⚔️';
+            // Use the same image path pattern as Phaser
+            const unitType = unit.unitType;
+            const color = unit.player || 0;
+            const imagePath = `/static/assets/v1/Units/${unitType}/${color}.png`;
+            
+            // Create an img element instead of using text content
+            iconElement.innerHTML = `<img src="${imagePath}" alt="Unit ${unitType}" class="w-8 h-8 object-contain" style="image-rendering: pixelated;" onerror="this.style.display='none'; this.nextSibling.style.display='inline';">
+                                     <span style="display:none;">⚔️</span>`;
         }
 
         if (nameElement) {
             const unitDef = this.rulesTable.getUnitDefinition(unit.unitType);
-            nameElement.textContent = unitDef?.name || `Unit ${unit.unitType}`;
+            const unitName = unitDef?.name || UNIT_NAMES[unit.unitType]?.name || `Unit ${unit.unitType}`;
+            nameElement.textContent = unitName;
         }
 
         if (playerElement) {

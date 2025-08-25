@@ -120,8 +120,8 @@ export interface Unit {
 export interface TerrainDefinition {
   id: number;
   name: string;
-  baseMoveCost: number;
-  defenseBonus: number;
+  /** double base_move_cost = 3;     // Base movement cost
+ double defense_bonus = 4;      // Defense bonus multiplier (0.0 to 1.0) */
   type: number;
   description: string;
 }
@@ -137,23 +137,24 @@ export interface UnitDefinition {
   movementPoints: number;
   attackRange: number;
   health: number;
+  coins: number;
   properties: string[];
 }
 
 
 /**
- * Movement cost matrix for unit types on terrain types
+ * Properties that are specific to unit on a particular terrain
  */
-export interface MovementMatrix {
-  /** Map of unit_id -> (terrain_id -> movement_cost) */
-  costs?: Map<number, TerrainCostMap>;
-}
-
-
-
-export interface TerrainCostMap {
-  /** Map of terrain_id -> movement_cost */
-  terrainCosts?: Map<number, number>;
+export interface TerrainUnitProperties {
+  tileId: number;
+  unitId: number;
+  healingBonus: number;
+  canBuild: boolean;
+  canCapture: boolean;
+  /** How much more attack this terrain gives to this unit beyond what the unit's attack points are. */
+  attackBonus: number;
+  /** How much more defense this terrain gives to this unit beyond what hte unit's defense points are */
+  defenseBonus: number;
 }
 
 

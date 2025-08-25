@@ -293,16 +293,6 @@ export const TerrainDefinitionSchema: MessageSchema = {
       id: 2,
     },
     {
-      name: "baseMoveCost",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-    {
-      name: "defenseBonus",
-      type: FieldType.NUMBER,
-      id: 4,
-    },
-    {
       name: "type",
       type: FieldType.NUMBER,
       id: 5,
@@ -353,9 +343,14 @@ export const UnitDefinitionSchema: MessageSchema = {
       id: 6,
     },
     {
+      name: "coins",
+      type: FieldType.NUMBER,
+      id: 7,
+    },
+    {
       name: "properties",
       type: FieldType.REPEATED,
-      id: 7,
+      id: 8,
       repeated: true,
     },
   ],
@@ -363,32 +358,45 @@ export const UnitDefinitionSchema: MessageSchema = {
 
 
 /**
- * Schema for MovementMatrix message
+ * Schema for TerrainUnitProperties message
  */
-export const MovementMatrixSchema: MessageSchema = {
-  name: "MovementMatrix",
+export const TerrainUnitPropertiesSchema: MessageSchema = {
+  name: "TerrainUnitProperties",
   fields: [
     {
-      name: "costs",
-      type: FieldType.MESSAGE,
+      name: "tileId",
+      type: FieldType.NUMBER,
       id: 1,
-      messageType: "weewar.v1.CostsEntry",
     },
-  ],
-};
-
-
-/**
- * Schema for TerrainCostMap message
- */
-export const TerrainCostMapSchema: MessageSchema = {
-  name: "TerrainCostMap",
-  fields: [
     {
-      name: "terrainCosts",
-      type: FieldType.MESSAGE,
-      id: 1,
-      messageType: "weewar.v1.TerrainCostsEntry",
+      name: "unitId",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "healingBonus",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "canBuild",
+      type: FieldType.BOOLEAN,
+      id: 4,
+    },
+    {
+      name: "canCapture",
+      type: FieldType.BOOLEAN,
+      id: 5,
+    },
+    {
+      name: "attackBonus",
+      type: FieldType.NUMBER,
+      id: 6,
+    },
+    {
+      name: "defenseBonus",
+      type: FieldType.NUMBER,
+      id: 7,
     },
   ],
 };
@@ -2253,8 +2261,7 @@ export const WeewarV1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.Unit": UnitSchema,
   "weewar.v1.TerrainDefinition": TerrainDefinitionSchema,
   "weewar.v1.UnitDefinition": UnitDefinitionSchema,
-  "weewar.v1.MovementMatrix": MovementMatrixSchema,
-  "weewar.v1.TerrainCostMap": TerrainCostMapSchema,
+  "weewar.v1.TerrainUnitProperties": TerrainUnitPropertiesSchema,
   "weewar.v1.Game": GameSchema,
   "weewar.v1.GameConfiguration": GameConfigurationSchema,
   "weewar.v1.GamePlayer": GamePlayerSchema,

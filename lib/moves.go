@@ -135,22 +135,6 @@ func (m *DefaultMoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action
 	return
 }
 
-// CanEndTurn checks if current player can end their turn
-/*
-func (g *Game) CanEndTurn() bool {
-	if g.Status != GameStatusPlaying {
-		return false
-	}
-
-	// For now, player can always end turn
-	// In a full implementation, this might check:
-	// - Whether player has units that must move
-	// - Whether player has mandatory actions to complete
-	// - Whether player has captured a base this turn
-	return true
-}
-*/
-
 // IsValidMove checks if movement is legal using cube coordinates
 func (g *Game) IsValidMove(from, to AxialCoord) bool {
 	// Get the unit at the starting position
@@ -525,21 +509,22 @@ func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {
 }
 
 // GetMovementOptions returns movement options for unit at given coordinates with full validation
-func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) ([]TileOption, error) {
+func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) (distances map[AxialCoord]float64, parents map[AxialCoord]AxialCoord, err error) {
 	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
-		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
+		return nil, nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
 	}
 	if unit.Player != game.CurrentPlayer {
-		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+		return nil, nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
 	}
 	if unit.AvailableHealth <= 0 {
-		return nil, fmt.Errorf("unit has no health remaining")
+		return nil, nil, fmt.Errorf("unit has no health remaining")
 	}
 	if unit.DistanceLeft <= 0 {
-		return nil, fmt.Errorf("unit has no movement points remaining")
+		return nil, nil, fmt.Errorf("unit has no movement points remaining")
 	}
-	return game.rulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft))
+	distances, parents, err = game.rulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft))
+	return
 }
 
 // GetAttackOptions returns attack options for unit at given coordinates with full validation
@@ -578,27 +563,6 @@ func (g *Game) CanMove(from, to Position) (bool, error) {
 	return g.CanMoveUnit(unit, to), nil
 }
 
-// calculateDistance calculates distance between two positions
-// Source: https://www.redblobgames.com/grids/hexagons-v1/#distances
-func (g *Game) calculateDistance(a, b AxialCoord) int {
-	// Simplified hex distance calculation
-	return (abs(a.Q-b.Q) + abs(a.Q+a.R-b.Q-b.R) + abs(a.R-b.R)) / 2
-}
-
-// GetUnitMovementOptions returns all tiles a unit can move to using rules engine
-func (g *Game) GetUnitMovementOptionsFrom(q, r int) ([]TileOption, error) {
-	return g.GetUnitMovementOptions(g.World.UnitAt(AxialCoord{q, r}))
-}
-
-// GetUnitMovementOptions returns all tiles a unit can move to using rules engine
-func (g *Game) GetUnitMovementOptions(unit *v1.Unit) ([]TileOption, error) {
-	dl := 0
-	if unit != nil {
-		dl = int(unit.DistanceLeft)
-	}
-	return g.rulesEngine.GetMovementOptions(g.World, unit, dl)
-}
-
 // GetUnitAttackOptions returns all positions a unit can attack using rules engine
 func (g *Game) GetUnitAttackOptionsFrom(q, r int) ([]AxialCoord, error) {
 	return g.GetUnitAttackOptions(g.World.UnitAt(AxialCoord{q, r}))
@@ -606,76 +570,3 @@ func (g *Game) GetUnitAttackOptionsFrom(q, r int) ([]AxialCoord, error) {
 func (g *Game) GetUnitAttackOptions(unit *v1.Unit) ([]AxialCoord, error) {
 	return g.rulesEngine.GetAttackOptions(g.World, unit)
 }
-
-/*
-// CreateAttackAction creates a standardized attack action
-func CreateAttackAction(attackerQ, attackerR, defenderQ, defenderR int) GameAction {
-	return GameAction{
-		Type: "attack",
-		Params: map[string]interface{}{
-			"attackerQ": attackerQ,
-			"attackerR": attackerR,
-			"defenderQ": defenderQ,
-			"defenderR": defenderR,
-		},
-	}
-}
-
-// CreateUnitMovedChange creates a standardized unit moved change
-func CreateUnitMovedChange(unitID string, fromQ, fromR, toQ, toR int) WorldChange {
-	return WorldChange{
-		Type:       "unitMoved",
-		EntityType: "unit",
-		EntityID:   unitID,
-		FromState: map[string]interface{}{
-			"q": fromQ,
-			"r": fromR,
-		},
-		ToState: map[string]interface{}{
-			"q": toQ,
-			"r": toR,
-		},
-	}
-}
-
-// CreateUnitKilledChange creates a standardized unit killed change
-func CreateUnitKilledChange(unitID string, unitData interface{}) WorldChange {
-	return WorldChange{
-		Type:       "unitKilled",
-		EntityType: "unit",
-		EntityID:   unitID,
-		FromState:  unitData,
-		ToState:    nil,
-	}
-}
-
-// CreatePlayerChangedChange creates a standardized player changed change
-func CreatePlayerChangedChange(fromPlayer, toPlayer int) WorldChange {
-	return WorldChange{
-		Type:       "playerChanged",
-		EntityType: "game",
-		EntityID:   "currentPlayer",
-		FromState: map[string]interface{}{
-			"player": fromPlayer,
-		},
-		ToState: map[string]interface{}{
-			"player": toPlayer,
-		},
-	}
-}
-
-// CreateTurnAdvancedChange creates a standardized turn advanced change
-func CreateTurnAdvancedChange(fromTurn, toTurn int) WorldChange {
-	return WorldChange{
-		Type:       "turnAdvanced",
-		EntityType: "game",
-		EntityID:   "turnCounter",
-		FromState: map[string]interface{}{
-			"turn": fromTurn,
-		},
-		ToState: map[string]interface{}{
-			"turn": toTurn,
-		},
-	}
-}
-*/

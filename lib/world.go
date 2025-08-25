@@ -105,6 +105,24 @@ func (w *World) PlayerCount() int32 {
 	return int32(len(w.unitsByPlayer) - 1)
 }
 
+// Iterate a given coord's neighbors (if they are also in the map)
+func (w *World) Neighbors(coord AxialCoord) iter.Seq2[AxialCoord, *v1.Tile] {
+	var neighbors [6]AxialCoord
+	coord.Neighbors(&neighbors)
+	return func(yield func(AxialCoord, *v1.Tile) bool) {
+		for _, neigh := range neighbors {
+			// Check if neighbor tile exists and is passable
+			tile := w.TileAt(neigh)
+			if tile == nil {
+				continue // Invalid tile
+			}
+			if !yield(neigh, tile) {
+				return
+			}
+		}
+	}
+}
+
 func (w *World) TilesByCoord() iter.Seq2[AxialCoord, *v1.Tile] {
 	// Merged iteration: child tiles override parent tiles, respect deletions
 	return func(yield func(AxialCoord, *v1.Tile) bool) {

@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/models.proto.
  */
 export const file_weewar_v1_models: GenFile = /*@__PURE__*/
-  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiygEKBFVzZXISLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSDAoEbmFtZRgEIAEoCRITCgtkZXNjcmlwdGlvbhgFIAEoCRIMCgR0YWdzGAYgAygJEhEKCWltYWdlX3VybBgHIAEoCRISCgpkaWZmaWN1bHR5GAggASgJIkYKClBhZ2luYXRpb24SEAoIcGFnZV9rZXkYASABKAkSEwoLcGFnZV9vZmZzZXQYAiABKAUSEQoJcGFnZV9zaXplGAMgASgFIm4KElBhZ2luYXRpb25SZXNwb25zZRIVCg1uZXh0X3BhZ2Vfa2V5GAIgASgJEhgKEG5leHRfcGFnZV9vZmZzZXQYAyABKAUSEAoIaGFzX21vcmUYBCABKAgSFQoNdG90YWxfcmVzdWx0cxgFIAEoBSKJAgoFV29ybGQSLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSEgoKY3JlYXRvcl9pZBgEIAEoCRIMCgRuYW1lGAUgASgJEhMKC2Rlc2NyaXB0aW9uGAYgASgJEgwKBHRhZ3MYByADKAkSEQoJaW1hZ2VfdXJsGAggASgJEhIKCmRpZmZpY3VsdHkYCSABKAkSKAoKd29ybGRfZGF0YRgKIAEoCzIULndlZXdhci52MS5Xb3JsZERhdGEiSwoJV29ybGREYXRhEh4KBXRpbGVzGAEgAygLMg8ud2Vld2FyLnYxLlRpbGUSHgoFdW5pdHMYAiADKAsyDy53ZWV3YXIudjEuVW5pdCI/CgRUaWxlEgkKAXEYASABKAUSCQoBchgCIAEoBRIRCgl0aWxlX3R5cGUYAyABKAUSDgoGcGxheWVyGAQgASgFIoYBCgRVbml0EgkKAXEYASABKAUSCQoBchgCIAEoBRIOCgZwbGF5ZXIYAyABKAUSEQoJdW5pdF90eXBlGAQgASgFEhgKEGF2YWlsYWJsZV9oZWFsdGgYBSABKAUSFQoNZGlzdGFuY2VfbGVmdBgGIAEoBRIUCgx0dXJuX2NvdW50ZXIYByABKAUifwoRVGVycmFpbkRlZmluaXRpb24SCgoCaWQYASABKAUSDAoEbmFtZRgCIAEoCRIWCg5iYXNlX21vdmVfY29zdBgDIAEoARIVCg1kZWZlbnNlX2JvbnVzGAQgASgBEgwKBHR5cGUYBSABKAUSEwoLZGVzY3JpcHRpb24YBiABKAkikgEKDlVuaXREZWZpbml0aW9uEgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSFwoPbW92ZW1lbnRfcG9pbnRzGAQgASgFEhQKDGF0dGFja19yYW5nZRgFIAEoBRIOCgZoZWFsdGgYBiABKAUSEgoKcHJvcGVydGllcxgHIAMoCSKOAQoOTW92ZW1lbnRNYXRyaXgSMwoFY29zdHMYASADKAsyJC53ZWV3YXIudjEuTW92ZW1lbnRNYXRyaXguQ29zdHNFbnRyeRpHCgpDb3N0c0VudHJ5EgsKA2tleRgBIAEoBRIoCgV2YWx1ZRgCIAEoCzIZLndlZXdhci52MS5UZXJyYWluQ29zdE1hcDoCOAEiiQEKDlRlcnJhaW5Db3N0TWFwEkIKDXRlcnJhaW5fY29zdHMYASADKAsyKy53ZWV3YXIudjEuVGVycmFpbkNvc3RNYXAuVGVycmFpbkNvc3RzRW50cnkaMwoRVGVycmFpbkNvc3RzRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgBOgI4ASKeAgoER2FtZRIuCgpjcmVhdGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIKCgJpZBgDIAEoCRISCgpjcmVhdG9yX2lkGAQgASgJEhAKCHdvcmxkX2lkGAUgASgJEgwKBG5hbWUYBiABKAkSEwoLZGVzY3JpcHRpb24YByABKAkSDAoEdGFncxgIIAMoCRIRCglpbWFnZV91cmwYCSABKAkSEgoKZGlmZmljdWx0eRgKIAEoCRIsCgZjb25maWcYCyABKAsyHC53ZWV3YXIudjEuR2FtZUNvbmZpZ3VyYXRpb24iZgoRR2FtZUNvbmZpZ3VyYXRpb24SJgoHcGxheWVycxgBIAMoCzIVLndlZXdhci52MS5HYW1lUGxheWVyEikKCHNldHRpbmdzGAIgASgLMhcud2Vld2FyLnYxLkdhbWVTZXR0aW5ncyJUCgpHYW1lUGxheWVyEhEKCXBsYXllcl9pZBgBIAEoBRITCgtwbGF5ZXJfdHlwZRgCIAEoCRINCgVjb2xvchgDIAEoCRIPCgd0ZWFtX2lkGAQgASgFImQKDEdhbWVTZXR0aW5ncxIVCg1hbGxvd2VkX3VuaXRzGAEgAygFEhcKD3R1cm5fdGltZV9saW1pdBgCIAEoBRIRCgl0ZWFtX21vZGUYAyABKAkSEQoJbWF4X3R1cm5zGAQgASgFIqQBCglHYW1lU3RhdGUSLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHZ2FtZV9pZBgDIAEoCRIUCgx0dXJuX2NvdW50ZXIYBCABKAUSFgoOY3VycmVudF9wbGF5ZXIYBSABKAUSKAoKd29ybGRfZGF0YRgGIAEoCzIULndlZXdhci52MS5Xb3JsZERhdGEiTAoPR2FtZU1vdmVIaXN0b3J5Eg8KB2dhbWVfaWQYASABKAkSKAoGZ3JvdXBzGAIgAygLMhgud2Vld2FyLnYxLkdhbWVNb3ZlR3JvdXAiwgEKDUdhbWVNb3ZlR3JvdXASLgoKc3RhcnRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLAoIZW5kZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiIKBW1vdmVzGAQgAygLMhMud2Vld2FyLnYxLkdhbWVNb3ZlEi8KDG1vdmVfcmVzdWx0cxgFIAMoCzIZLndlZXdhci52MS5HYW1lTW92ZVJlc3VsdCL+AQoIR2FtZU1vdmUSDgoGcGxheWVyGAEgASgFEi0KCXRpbWVzdGFtcBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASFAoMc2VxdWVuY2VfbnVtGAMgASgDEi4KCW1vdmVfdW5pdBgEIAEoCzIZLndlZXdhci52MS5Nb3ZlVW5pdEFjdGlvbkgAEjIKC2F0dGFja191bml0GAUgASgLMhsud2Vld2FyLnYxLkF0dGFja1VuaXRBY3Rpb25IABIsCghlbmRfdHVybhgGIAEoCzIYLndlZXdhci52MS5FbmRUdXJuQWN0aW9uSABCCwoJbW92ZV90eXBlImUKDkdhbWVNb3ZlUmVzdWx0EhQKDGlzX3Blcm1hbmVudBgBIAEoCBIUCgxzZXF1ZW5jZV9udW0YAiABKAMSJwoHY2hhbmdlcxgDIAMoCzIWLndlZXdhci52MS5Xb3JsZENoYW5nZSJMCg5Nb3ZlVW5pdEFjdGlvbhIOCgZmcm9tX3EYASABKAUSDgoGZnJvbV9yGAIgASgFEgwKBHRvX3EYAyABKAUSDAoEdG9fchgEIAEoBSJiChBBdHRhY2tVbml0QWN0aW9uEhIKCmF0dGFja2VyX3EYASABKAUSEgoKYXR0YWNrZXJfchgCIAEoBRISCgpkZWZlbmRlcl9xGAMgASgFEhIKCmRlZmVuZGVyX3IYBCABKAUiDwoNRW5kVHVybkFjdGlvbiLyAQoLV29ybGRDaGFuZ2USMAoKdW5pdF9tb3ZlZBgBIAEoCzIaLndlZXdhci52MS5Vbml0TW92ZWRDaGFuZ2VIABI0Cgx1bml0X2RhbWFnZWQYAiABKAsyHC53ZWV3YXIudjEuVW5pdERhbWFnZWRDaGFuZ2VIABIyCgt1bml0X2tpbGxlZBgDIAEoCzIbLndlZXdhci52MS5Vbml0S2lsbGVkQ2hhbmdlSAASOAoOcGxheWVyX2NoYW5nZWQYBCABKAsyHi53ZWV3YXIudjEuUGxheWVyQ2hhbmdlZENoYW5nZUgAQg0KC2NoYW5nZV90eXBlImAKD1VuaXRNb3ZlZENoYW5nZRImCg1wcmV2aW91c191bml0GAYgASgLMg8ud2Vld2FyLnYxLlVuaXQSJQoMdXBkYXRlZF91bml0GAcgASgLMg8ud2Vld2FyLnYxLlVuaXQiYgoRVW5pdERhbWFnZWRDaGFuZ2USJgoNcHJldmlvdXNfdW5pdBgGIAEoCzIPLndlZXdhci52MS5Vbml0EiUKDHVwZGF0ZWRfdW5pdBgHIAEoCzIPLndlZXdhci52MS5Vbml0IjoKEFVuaXRLaWxsZWRDaGFuZ2USJgoNcHJldmlvdXNfdW5pdBgGIAEoCzIPLndlZXdhci52MS5Vbml0IpEBChNQbGF5ZXJDaGFuZ2VkQ2hhbmdlEhcKD3ByZXZpb3VzX3BsYXllchgBIAEoBRISCgpuZXdfcGxheWVyGAIgASgFEhUKDXByZXZpb3VzX3R1cm4YAyABKAUSEAoIbmV3X3R1cm4YBCABKAUSJAoLcmVzZXRfdW5pdHMYBSADKAsyDy53ZWV3YXIudjEuVW5pdEKdAQoNY29tLndlZXdhci52MUILTW9kZWxzUHJvdG9QAVo6Z2l0aHViLmNvbS9wYW55YW0vdHVybmVuZ2luZS9nYW1lcy93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MaICA1dYWKoCCVdlZXdhci5WMcoCCVdlZXdhclxWMeICFVdlZXdhclxWMVxHUEJNZXRhZGF0YeoCCldlZXdhcjo6VjFiBnByb3RvMw", [file_google_protobuf_timestamp]);
+  fileDesc("ChZ3ZWV3YXIvdjEvbW9kZWxzLnByb3RvEgl3ZWV3YXIudjEiygEKBFVzZXISLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSDAoEbmFtZRgEIAEoCRITCgtkZXNjcmlwdGlvbhgFIAEoCRIMCgR0YWdzGAYgAygJEhEKCWltYWdlX3VybBgHIAEoCRISCgpkaWZmaWN1bHR5GAggASgJIkYKClBhZ2luYXRpb24SEAoIcGFnZV9rZXkYASABKAkSEwoLcGFnZV9vZmZzZXQYAiABKAUSEQoJcGFnZV9zaXplGAMgASgFIm4KElBhZ2luYXRpb25SZXNwb25zZRIVCg1uZXh0X3BhZ2Vfa2V5GAIgASgJEhgKEG5leHRfcGFnZV9vZmZzZXQYAyABKAUSEAoIaGFzX21vcmUYBCABKAgSFQoNdG90YWxfcmVzdWx0cxgFIAEoBSKJAgoFV29ybGQSLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSEgoKY3JlYXRvcl9pZBgEIAEoCRIMCgRuYW1lGAUgASgJEhMKC2Rlc2NyaXB0aW9uGAYgASgJEgwKBHRhZ3MYByADKAkSEQoJaW1hZ2VfdXJsGAggASgJEhIKCmRpZmZpY3VsdHkYCSABKAkSKAoKd29ybGRfZGF0YRgKIAEoCzIULndlZXdhci52MS5Xb3JsZERhdGEiSwoJV29ybGREYXRhEh4KBXRpbGVzGAEgAygLMg8ud2Vld2FyLnYxLlRpbGUSHgoFdW5pdHMYAiADKAsyDy53ZWV3YXIudjEuVW5pdCI/CgRUaWxlEgkKAXEYASABKAUSCQoBchgCIAEoBRIRCgl0aWxlX3R5cGUYAyABKAUSDgoGcGxheWVyGAQgASgFIoYBCgRVbml0EgkKAXEYASABKAUSCQoBchgCIAEoBRIOCgZwbGF5ZXIYAyABKAUSEQoJdW5pdF90eXBlGAQgASgFEhgKEGF2YWlsYWJsZV9oZWFsdGgYBSABKAUSFQoNZGlzdGFuY2VfbGVmdBgGIAEoBRIUCgx0dXJuX2NvdW50ZXIYByABKAUiUAoRVGVycmFpbkRlZmluaXRpb24SCgoCaWQYASABKAUSDAoEbmFtZRgCIAEoCRIMCgR0eXBlGAUgASgFEhMKC2Rlc2NyaXB0aW9uGAYgASgJIqEBCg5Vbml0RGVmaW5pdGlvbhIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhcKD21vdmVtZW50X3BvaW50cxgEIAEoBRIUCgxhdHRhY2tfcmFuZ2UYBSABKAUSDgoGaGVhbHRoGAYgASgFEg0KBWNvaW5zGAcgASgFEhIKCnByb3BlcnRpZXMYCCADKAkipQEKFVRlcnJhaW5Vbml0UHJvcGVydGllcxIPCgd0aWxlX2lkGAEgASgFEg8KB3VuaXRfaWQYAiABKAUSFQoNaGVhbGluZ19ib251cxgDIAEoBRIRCgljYW5fYnVpbGQYBCABKAgSEwoLY2FuX2NhcHR1cmUYBSABKAgSFAoMYXR0YWNrX2JvbnVzGAYgASgFEhUKDWRlZmVuc2VfYm9udXMYByABKAUingIKBEdhbWUSLgoKY3JlYXRlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASCgoCaWQYAyABKAkSEgoKY3JlYXRvcl9pZBgEIAEoCRIQCgh3b3JsZF9pZBgFIAEoCRIMCgRuYW1lGAYgASgJEhMKC2Rlc2NyaXB0aW9uGAcgASgJEgwKBHRhZ3MYCCADKAkSEQoJaW1hZ2VfdXJsGAkgASgJEhIKCmRpZmZpY3VsdHkYCiABKAkSLAoGY29uZmlnGAsgASgLMhwud2Vld2FyLnYxLkdhbWVDb25maWd1cmF0aW9uImYKEUdhbWVDb25maWd1cmF0aW9uEiYKB3BsYXllcnMYASADKAsyFS53ZWV3YXIudjEuR2FtZVBsYXllchIpCghzZXR0aW5ncxgCIAEoCzIXLndlZXdhci52MS5HYW1lU2V0dGluZ3MiVAoKR2FtZVBsYXllchIRCglwbGF5ZXJfaWQYASABKAUSEwoLcGxheWVyX3R5cGUYAiABKAkSDQoFY29sb3IYAyABKAkSDwoHdGVhbV9pZBgEIAEoBSJkCgxHYW1lU2V0dGluZ3MSFQoNYWxsb3dlZF91bml0cxgBIAMoBRIXCg90dXJuX3RpbWVfbGltaXQYAiABKAUSEQoJdGVhbV9tb2RlGAMgASgJEhEKCW1heF90dXJucxgEIAEoBSKkAQoJR2FtZVN0YXRlEi4KCnVwZGF0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg8KB2dhbWVfaWQYAyABKAkSFAoMdHVybl9jb3VudGVyGAQgASgFEhYKDmN1cnJlbnRfcGxheWVyGAUgASgFEigKCndvcmxkX2RhdGEYBiABKAsyFC53ZWV3YXIudjEuV29ybGREYXRhIkwKD0dhbWVNb3ZlSGlzdG9yeRIPCgdnYW1lX2lkGAEgASgJEigKBmdyb3VwcxgCIAMoCzIYLndlZXdhci52MS5HYW1lTW92ZUdyb3VwIsIBCg1HYW1lTW92ZUdyb3VwEi4KCnN0YXJ0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiwKCGVuZGVkX2F0GAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIiCgVtb3ZlcxgEIAMoCzITLndlZXdhci52MS5HYW1lTW92ZRIvCgxtb3ZlX3Jlc3VsdHMYBSADKAsyGS53ZWV3YXIudjEuR2FtZU1vdmVSZXN1bHQi/gEKCEdhbWVNb3ZlEg4KBnBsYXllchgBIAEoBRItCgl0aW1lc3RhbXAYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhQKDHNlcXVlbmNlX251bRgDIAEoAxIuCgltb3ZlX3VuaXQYBCABKAsyGS53ZWV3YXIudjEuTW92ZVVuaXRBY3Rpb25IABIyCgthdHRhY2tfdW5pdBgFIAEoCzIbLndlZXdhci52MS5BdHRhY2tVbml0QWN0aW9uSAASLAoIZW5kX3R1cm4YBiABKAsyGC53ZWV3YXIudjEuRW5kVHVybkFjdGlvbkgAQgsKCW1vdmVfdHlwZSJlCg5HYW1lTW92ZVJlc3VsdBIUCgxpc19wZXJtYW5lbnQYASABKAgSFAoMc2VxdWVuY2VfbnVtGAIgASgDEicKB2NoYW5nZXMYAyADKAsyFi53ZWV3YXIudjEuV29ybGRDaGFuZ2UiTAoOTW92ZVVuaXRBY3Rpb24SDgoGZnJvbV9xGAEgASgFEg4KBmZyb21fchgCIAEoBRIMCgR0b19xGAMgASgFEgwKBHRvX3IYBCABKAUiYgoQQXR0YWNrVW5pdEFjdGlvbhISCgphdHRhY2tlcl9xGAEgASgFEhIKCmF0dGFja2VyX3IYAiABKAUSEgoKZGVmZW5kZXJfcRgDIAEoBRISCgpkZWZlbmRlcl9yGAQgASgFIg8KDUVuZFR1cm5BY3Rpb24i8gEKC1dvcmxkQ2hhbmdlEjAKCnVuaXRfbW92ZWQYASABKAsyGi53ZWV3YXIudjEuVW5pdE1vdmVkQ2hhbmdlSAASNAoMdW5pdF9kYW1hZ2VkGAIgASgLMhwud2Vld2FyLnYxLlVuaXREYW1hZ2VkQ2hhbmdlSAASMgoLdW5pdF9raWxsZWQYAyABKAsyGy53ZWV3YXIudjEuVW5pdEtpbGxlZENoYW5nZUgAEjgKDnBsYXllcl9jaGFuZ2VkGAQgASgLMh4ud2Vld2FyLnYxLlBsYXllckNoYW5nZWRDaGFuZ2VIAEINCgtjaGFuZ2VfdHlwZSJgCg9Vbml0TW92ZWRDaGFuZ2USJgoNcHJldmlvdXNfdW5pdBgGIAEoCzIPLndlZXdhci52MS5Vbml0EiUKDHVwZGF0ZWRfdW5pdBgHIAEoCzIPLndlZXdhci52MS5Vbml0ImIKEVVuaXREYW1hZ2VkQ2hhbmdlEiYKDXByZXZpb3VzX3VuaXQYBiABKAsyDy53ZWV3YXIudjEuVW5pdBIlCgx1cGRhdGVkX3VuaXQYByABKAsyDy53ZWV3YXIudjEuVW5pdCI6ChBVbml0S2lsbGVkQ2hhbmdlEiYKDXByZXZpb3VzX3VuaXQYBiABKAsyDy53ZWV3YXIudjEuVW5pdCKRAQoTUGxheWVyQ2hhbmdlZENoYW5nZRIXCg9wcmV2aW91c19wbGF5ZXIYASABKAUSEgoKbmV3X3BsYXllchgCIAEoBRIVCg1wcmV2aW91c190dXJuGAMgASgFEhAKCG5ld190dXJuGAQgASgFEiQKC3Jlc2V0X3VuaXRzGAUgAygLMg8ud2Vld2FyLnYxLlVuaXRCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message weewar.v1.User
@@ -383,20 +383,9 @@ export type TerrainDefinition = Message<"weewar.v1.TerrainDefinition"> & {
   name: string;
 
   /**
-   * Base movement cost
+   * double base_move_cost = 3;     // Base movement cost
+   * double defense_bonus = 4;      // Defense bonus multiplier (0.0 to 1.0)
    *
-   * @generated from field: double base_move_cost = 3;
-   */
-  baseMoveCost: number;
-
-  /**
-   * Defense bonus multiplier (0.0 to 1.0)
-   *
-   * @generated from field: double defense_bonus = 4;
-   */
-  defenseBonus: number;
-
-  /**
    * Terrain category type
    *
    * @generated from field: int32 type = 5;
@@ -465,9 +454,16 @@ export type UnitDefinition = Message<"weewar.v1.UnitDefinition"> & {
   health: number;
 
   /**
+   * how much it costs to build
+   *
+   * @generated from field: int32 coins = 7;
+   */
+  coins: number;
+
+  /**
    * Special properties/abilities
    *
-   * @generated from field: repeated string properties = 7;
+   * @generated from field: repeated string properties = 8;
    */
   properties: string[];
 };
@@ -480,44 +476,63 @@ export const UnitDefinitionSchema: GenMessage<UnitDefinition> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 8);
 
 /**
- * Movement cost matrix for unit types on terrain types
+ * Properties that are specific to unit on a particular terrain
  *
- * @generated from message weewar.v1.MovementMatrix
+ * @generated from message weewar.v1.TerrainUnitProperties
  */
-export type MovementMatrix = Message<"weewar.v1.MovementMatrix"> & {
+export type TerrainUnitProperties = Message<"weewar.v1.TerrainUnitProperties"> & {
   /**
-   * Map of unit_id -> (terrain_id -> movement_cost)
-   *
-   * @generated from field: map<int32, weewar.v1.TerrainCostMap> costs = 1;
+   * @generated from field: int32 tile_id = 1;
    */
-  costs: { [key: number]: TerrainCostMap };
+  tileId: number;
+
+  /**
+   * @generated from field: int32 unit_id = 2;
+   */
+  unitId: number;
+
+  /**
+   * How much healing per turn this tile would offer this unit
+   *
+   * @generated from field: int32 healing_bonus = 3;
+   */
+  healingBonus: number;
+
+  /**
+   * Whether this particular terrain can build this given unit
+   *
+   * @generated from field: bool can_build = 4;
+   */
+  canBuild: boolean;
+
+  /**
+   * Whether this particular unit can capture this terrain/building type
+   *
+   * @generated from field: bool can_capture = 5;
+   */
+  canCapture: boolean;
+
+  /**
+   * How much more attack this terrain gives to this unit beyond what the unit's attack points are.
+   *
+   * @generated from field: int32 attack_bonus = 6;
+   */
+  attackBonus: number;
+
+  /**
+   * How much more defense this terrain gives to this unit beyond what hte unit's defense points are
+   *
+   * @generated from field: int32 defense_bonus = 7;
+   */
+  defenseBonus: number;
 };
 
 /**
- * Describes the message weewar.v1.MovementMatrix.
- * Use `create(MovementMatrixSchema)` to create a new message.
+ * Describes the message weewar.v1.TerrainUnitProperties.
+ * Use `create(TerrainUnitPropertiesSchema)` to create a new message.
  */
-export const MovementMatrixSchema: GenMessage<MovementMatrix> = /*@__PURE__*/
+export const TerrainUnitPropertiesSchema: GenMessage<TerrainUnitProperties> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models, 9);
-
-/**
- * @generated from message weewar.v1.TerrainCostMap
- */
-export type TerrainCostMap = Message<"weewar.v1.TerrainCostMap"> & {
-  /**
-   * Map of terrain_id -> movement_cost  
-   *
-   * @generated from field: map<int32, double> terrain_costs = 1;
-   */
-  terrainCosts: { [key: number]: number };
-};
-
-/**
- * Describes the message weewar.v1.TerrainCostMap.
- * Use `create(TerrainCostMapSchema)` to create a new message.
- */
-export const TerrainCostMapSchema: GenMessage<TerrainCostMap> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 10);
 
 /**
  * Describes a game and its metadata
@@ -604,7 +619,7 @@ export type Game = Message<"weewar.v1.Game"> & {
  * Use `create(GameSchema)` to create a new message.
  */
 export const GameSchema: GenMessage<Game> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 11);
+  messageDesc(file_weewar_v1_models, 10);
 
 /**
  * @generated from message weewar.v1.GameConfiguration
@@ -630,7 +645,7 @@ export type GameConfiguration = Message<"weewar.v1.GameConfiguration"> & {
  * Use `create(GameConfigurationSchema)` to create a new message.
  */
 export const GameConfigurationSchema: GenMessage<GameConfiguration> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 12);
+  messageDesc(file_weewar_v1_models, 11);
 
 /**
  * @generated from message weewar.v1.GamePlayer
@@ -672,7 +687,7 @@ export type GamePlayer = Message<"weewar.v1.GamePlayer"> & {
  * Use `create(GamePlayerSchema)` to create a new message.
  */
 export const GamePlayerSchema: GenMessage<GamePlayer> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 13);
+  messageDesc(file_weewar_v1_models, 12);
 
 /**
  * @generated from message weewar.v1.GameSettings
@@ -714,7 +729,7 @@ export type GameSettings = Message<"weewar.v1.GameSettings"> & {
  * Use `create(GameSettingsSchema)` to create a new message.
  */
 export const GameSettingsSchema: GenMessage<GameSettings> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 14);
+  messageDesc(file_weewar_v1_models, 13);
 
 /**
  * Holds the game's Active/Current state (eg world state)
@@ -757,7 +772,7 @@ export type GameState = Message<"weewar.v1.GameState"> & {
  * Use `create(GameStateSchema)` to create a new message.
  */
 export const GameStateSchema: GenMessage<GameState> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 15);
+  messageDesc(file_weewar_v1_models, 14);
 
 /**
  * Holds the game's move history (can be used as a replay log)
@@ -785,7 +800,7 @@ export type GameMoveHistory = Message<"weewar.v1.GameMoveHistory"> & {
  * Use `create(GameMoveHistorySchema)` to create a new message.
  */
 export const GameMoveHistorySchema: GenMessage<GameMoveHistory> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 16);
+  messageDesc(file_weewar_v1_models, 15);
 
 /**
  * A move group - we can allow X moves in one "tick"
@@ -828,7 +843,7 @@ export type GameMoveGroup = Message<"weewar.v1.GameMoveGroup"> & {
  * Use `create(GameMoveGroupSchema)` to create a new message.
  */
 export const GameMoveGroupSchema: GenMessage<GameMoveGroup> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 17);
+  messageDesc(file_weewar_v1_models, 16);
 
 /**
  * *
@@ -886,7 +901,7 @@ export type GameMove = Message<"weewar.v1.GameMove"> & {
  * Use `create(GameMoveSchema)` to create a new message.
  */
 export const GameMoveSchema: GenMessage<GameMove> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 18);
+  messageDesc(file_weewar_v1_models, 17);
 
 /**
  * *
@@ -924,7 +939,7 @@ export type GameMoveResult = Message<"weewar.v1.GameMoveResult"> & {
  * Use `create(GameMoveResultSchema)` to create a new message.
  */
 export const GameMoveResultSchema: GenMessage<GameMoveResult> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 19);
+  messageDesc(file_weewar_v1_models, 18);
 
 /**
  * *
@@ -959,7 +974,7 @@ export type MoveUnitAction = Message<"weewar.v1.MoveUnitAction"> & {
  * Use `create(MoveUnitActionSchema)` to create a new message.
  */
 export const MoveUnitActionSchema: GenMessage<MoveUnitAction> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 20);
+  messageDesc(file_weewar_v1_models, 19);
 
 /**
  * *
@@ -994,7 +1009,7 @@ export type AttackUnitAction = Message<"weewar.v1.AttackUnitAction"> & {
  * Use `create(AttackUnitActionSchema)` to create a new message.
  */
 export const AttackUnitActionSchema: GenMessage<AttackUnitAction> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 21);
+  messageDesc(file_weewar_v1_models, 20);
 
 /**
  * *
@@ -1012,7 +1027,7 @@ export type EndTurnAction = Message<"weewar.v1.EndTurnAction"> & {
  * Use `create(EndTurnActionSchema)` to create a new message.
  */
 export const EndTurnActionSchema: GenMessage<EndTurnAction> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 22);
+  messageDesc(file_weewar_v1_models, 21);
 
 /**
  * *
@@ -1058,7 +1073,7 @@ export type WorldChange = Message<"weewar.v1.WorldChange"> & {
  * Use `create(WorldChangeSchema)` to create a new message.
  */
 export const WorldChangeSchema: GenMessage<WorldChange> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 23);
+  messageDesc(file_weewar_v1_models, 22);
 
 /**
  * *
@@ -1087,7 +1102,7 @@ export type UnitMovedChange = Message<"weewar.v1.UnitMovedChange"> & {
  * Use `create(UnitMovedChangeSchema)` to create a new message.
  */
 export const UnitMovedChangeSchema: GenMessage<UnitMovedChange> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 24);
+  messageDesc(file_weewar_v1_models, 23);
 
 /**
  * *
@@ -1116,7 +1131,7 @@ export type UnitDamagedChange = Message<"weewar.v1.UnitDamagedChange"> & {
  * Use `create(UnitDamagedChangeSchema)` to create a new message.
  */
 export const UnitDamagedChangeSchema: GenMessage<UnitDamagedChange> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 25);
+  messageDesc(file_weewar_v1_models, 24);
 
 /**
  * *
@@ -1138,7 +1153,7 @@ export type UnitKilledChange = Message<"weewar.v1.UnitKilledChange"> & {
  * Use `create(UnitKilledChangeSchema)` to create a new message.
  */
 export const UnitKilledChangeSchema: GenMessage<UnitKilledChange> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 26);
+  messageDesc(file_weewar_v1_models, 25);
 
 /**
  * *
@@ -1180,5 +1195,5 @@ export type PlayerChangedChange = Message<"weewar.v1.PlayerChangedChange"> & {
  * Use `create(PlayerChangedChangeSchema)` to create a new message.
  */
 export const PlayerChangedChangeSchema: GenMessage<PlayerChangedChange> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models, 27);
+  messageDesc(file_weewar_v1_models, 26);
 

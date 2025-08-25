@@ -6,7 +6,7 @@ import (
 	pj "google.golang.org/protobuf/encoding/protojson"
 )
 
-type WasmWorldsServiceImpl struct {
+type SingletonWorldsServiceImpl struct {
 	BaseWorldsServiceImpl
 	SingletonWorld     *v1.World
 	SingletonWorldData *v1.WorldData
@@ -16,8 +16,8 @@ type WasmWorldsServiceImpl struct {
 
 // NOTE - ONly API really needed here are "getters" and "move processors" so no Creations, Deletions, Listing or even
 // GetWorld needed - GetWorld data is set when we create this
-func NewWasmWorldsServiceImpl() *WasmWorldsServiceImpl {
-	w := &WasmWorldsServiceImpl{
+func NewSingletonWorldsServiceImpl() *SingletonWorldsServiceImpl {
+	w := &SingletonWorldsServiceImpl{
 		BaseWorldsServiceImpl: BaseWorldsServiceImpl{
 			// WorldsService: SingletonWorldsService
 		},
@@ -28,15 +28,15 @@ func NewWasmWorldsServiceImpl() *WasmWorldsServiceImpl {
 	return w
 }
 
-func (w *WasmWorldsServiceImpl) GetRuntimeWorld(gameId string) (*weewar.World, error) {
+func (w *SingletonWorldsServiceImpl) GetRuntimeWorld(gameId string) (*weewar.World, error) {
 	return w.RuntimeWorld, nil
 }
 
-func (w *WasmWorldsServiceImpl) SaveWorld(game *v1.World, state *v1.WorldData) error {
+func (w *SingletonWorldsServiceImpl) SaveWorld(game *v1.World, state *v1.WorldData) error {
 	return nil
 }
 
-func (w *WasmWorldsServiceImpl) Load(
+func (w *SingletonWorldsServiceImpl) Load(
 	worldBytes []byte,
 	worldDataBytes []byte,
 ) {

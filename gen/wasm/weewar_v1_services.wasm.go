@@ -10,11 +10,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"syscall/js"
 	"time"
 
-	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	"google.golang.org/protobuf/encoding/protojson"
+	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
 // Weewar_v1_servicesServicesExports provides WASM exports for dependency injection

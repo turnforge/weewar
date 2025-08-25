@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"fmt"
 	"math"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
@@ -447,10 +448,13 @@ func (pe *PositionEvaluator) evaluateUnitPosition(unit *v1.Unit, game *weewar.Ga
 	positionScore := 0.0
 
 	// Terrain defensive bonus
-	if game.World != nil {
-		if unitAt := game.World.UnitAt(weewar.UnitGetCoord(unit)); unitAt != nil && pe.rulesEngine != nil {
-			if terrainData, err := pe.rulesEngine.GetTerrainData(unitAt.UnitType); err == nil {
-				positionScore += terrainData.DefenseBonus * 0.3
+	if game.World != nil && pe.rulesEngine != nil {
+		coord := weewar.UnitGetCoord(unit)
+		if tile := game.World.TileAt(coord); tile != nil {
+			// Get terrain-unit properties for defense bonus
+			key := fmt.Sprintf("%d:%d", tile.TileType, unit.UnitType)
+			if props, exists := pe.rulesEngine.TerrainUnitProperties[key]; exists {
+				positionScore += float64(props.DefenseBonus) * 0.3
 			}
 		}
 	}

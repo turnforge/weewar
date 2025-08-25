@@ -13,63 +13,70 @@ type AttackMatrix struct {
 	Attacks map[int32]map[int32]*DamageDistribution `json:"attacks"`
 }
 
-// CalculateCombatDamage calculates damage using canonical DamageDistribution
-func (re *RulesEngine) CalculateCombatDamage(attackerID, defenderID int32, rng *rand.Rand) (int, error) {
-	attackerAttacks, exists := re.AttackMatrix.Attacks[attackerID]
-	if !exists {
-		return 0, fmt.Errorf("unit ID %d cannot attack", attackerID)
+// CalculateCombatDamage calculates damage using the new proto-based system
+// Returns (damage, canAttack, error) where canAttack indicates if the attack is possible
+func (re *RulesEngine) CalculateCombatDamage(attackerID, defenderID int32, rng *rand.Rand) (int, bool, error) {
+	// Create key for unit-unit combat properties
+	key := fmt.Sprintf("%d:%d", attackerID, defenderID)
+	
+	props, exists := re.UnitUnitProperties[key]
+	if !exists || props.Damage == nil {
+		// Attack is not possible between these unit types
+		return 0, false, nil
 	}
 
-	damageDist, exists := attackerAttacks[defenderID]
-	if !exists {
-		return 0, fmt.Errorf("unit ID %d cannot attack unit ID %d", attackerID, defenderID)
-	}
-
-	return re.rollDamageFromBuckets(damageDist.DamageBuckets, rng), nil
+	damage := re.rollDamageFromDistribution(props.Damage, rng)
+	return damage, true, nil
 }
 
-// GetCombatPrediction provides combat prediction using existing types
-func (re *RulesEngine) GetCombatPrediction(attackerID, defenderID int32) (*DamageDistribution, error) {
-	attackerAttacks, exists := re.AttackMatrix.Attacks[attackerID]
-	if !exists {
-		return nil, fmt.Errorf("unit ID %d cannot attack", attackerID)
+// GetCombatPrediction provides combat prediction using the new proto-based system
+// Returns (damage_distribution, canAttack) where canAttack indicates if the attack is possible
+func (re *RulesEngine) GetCombatPrediction(attackerID, defenderID int32) (*v1.DamageDistribution, bool) {
+	// Create key for unit-unit combat properties
+	key := fmt.Sprintf("%d:%d", attackerID, defenderID)
+	
+	props, exists := re.UnitUnitProperties[key]
+	if !exists || props.Damage == nil {
+		// Attack is not possible between these unit types
+		return nil, false
 	}
 
-	damageDist, exists := attackerAttacks[defenderID]
-	if !exists {
-		return nil, fmt.Errorf("unit ID %d cannot attack unit ID %d", attackerID, defenderID)
-	}
-
-	return damageDist, nil
+	return props.Damage, true
 }
 
-// rollDamageFromBuckets uses weighted random selection
-func (re *RulesEngine) rollDamageFromBuckets(buckets []DamageBucket, rng *rand.Rand) int {
-	if len(buckets) == 0 {
-		return 0
+// rollDamageFromDistribution uses the proto damage distribution with ranges
+func (re *RulesEngine) rollDamageFromDistribution(dist *v1.DamageDistribution, rng *rand.Rand) int {
+	if dist == nil || len(dist.Ranges) == 0 {
+		// Fall back to expected damage if no ranges defined
+		return int(dist.ExpectedDamage)
 	}
 
-	// Calculate total weight
+	// Use weighted random selection from damage ranges
 	totalWeight := 0.0
-	for _, bucket := range buckets {
-		totalWeight += bucket.Weight
+	for _, damageRange := range dist.Ranges {
+		totalWeight += damageRange.Probability
 	}
 
 	if totalWeight <= 0 {
-		return buckets[0].Damage
+		return int(dist.ExpectedDamage)
 	}
 
-	// Generate random value and find bucket
-	random := rng.Float64() * totalWeight
+	// Random selection based on probability weights
+	randomValue := rng.Float64() * totalWeight
 	cumulative := 0.0
-	for _, bucket := range buckets {
-		cumulative += bucket.Weight
-		if random <= cumulative {
-			return bucket.Damage
+
+	for _, damageRange := range dist.Ranges {
+		cumulative += damageRange.Probability
+		if randomValue <= cumulative {
+			// Random damage within the range
+			minDmg := damageRange.MinValue
+			maxDmg := damageRange.MaxValue
+			return int(minDmg + rng.Float64()*(maxDmg-minDmg))
 		}
 	}
 
-	return buckets[len(buckets)-1].Damage
+	// Fallback (should not reach here)
+	return int(dist.ExpectedDamage)
 }
 
 // GetAttackOptions returns all positions a unit can attack from its current position
@@ -110,7 +117,7 @@ func (re *RulesEngine) GetAttackOptions(world *World, unit *v1.Unit) ([]AxialCoo
 			}
 
 			// Check if this unit can attack the target unit type
-			if _, err := re.GetCombatPrediction(unit.UnitType, targetUnit.UnitType); err == nil {
+			if _, canAttack := re.GetCombatPrediction(unit.UnitType, targetUnit.UnitType); canAttack {
 				attackPositions = append(attackPositions, targetCoord)
 			}
 		}
@@ -131,8 +138,8 @@ func (re *RulesEngine) CanUnitAttackTarget(attacker *v1.Unit, target *v1.Unit) (
 	}
 
 	// Check if attacker can attack this unit type
-	_, err := re.GetCombatPrediction(attacker.UnitType, target.UnitType)
-	if err != nil {
+	_, canAttack := re.GetCombatPrediction(attacker.UnitType, target.UnitType)
+	if !canAttack {
 		return false, nil // Cannot attack this unit type
 	}
 

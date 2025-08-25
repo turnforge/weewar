@@ -302,6 +302,12 @@ export const TerrainDefinitionSchema: MessageSchema = {
       type: FieldType.STRING,
       id: 6,
     },
+    {
+      name: "unitProperties",
+      type: FieldType.MESSAGE,
+      id: 7,
+      messageType: "weewar.v1.UnitPropertiesEntry",
+    },
   ],
 };
 
@@ -328,29 +334,40 @@ export const UnitDefinitionSchema: MessageSchema = {
       id: 3,
     },
     {
-      name: "movementPoints",
+      name: "health",
       type: FieldType.NUMBER,
       id: 4,
     },
     {
-      name: "attackRange",
+      name: "coins",
       type: FieldType.NUMBER,
       id: 5,
     },
     {
-      name: "health",
+      name: "movementPoints",
       type: FieldType.NUMBER,
       id: 6,
     },
     {
-      name: "coins",
+      name: "attackRange",
       type: FieldType.NUMBER,
       id: 7,
     },
     {
+      name: "minAttackRange",
+      type: FieldType.NUMBER,
+      id: 8,
+    },
+    {
+      name: "terrainProperties",
+      type: FieldType.MESSAGE,
+      id: 9,
+      messageType: "weewar.v1.TerrainPropertiesEntry",
+    },
+    {
       name: "properties",
       type: FieldType.REPEATED,
-      id: 8,
+      id: 10,
       repeated: true,
     },
   ],
@@ -364,7 +381,7 @@ export const TerrainUnitPropertiesSchema: MessageSchema = {
   name: "TerrainUnitProperties",
   fields: [
     {
-      name: "tileId",
+      name: "terrainId",
       type: FieldType.NUMBER,
       id: 1,
     },
@@ -374,29 +391,151 @@ export const TerrainUnitPropertiesSchema: MessageSchema = {
       id: 2,
     },
     {
-      name: "healingBonus",
+      name: "movementCost",
       type: FieldType.NUMBER,
       id: 3,
     },
     {
-      name: "canBuild",
-      type: FieldType.BOOLEAN,
+      name: "healingBonus",
+      type: FieldType.NUMBER,
       id: 4,
     },
     {
-      name: "canCapture",
+      name: "canBuild",
       type: FieldType.BOOLEAN,
       id: 5,
     },
     {
+      name: "canCapture",
+      type: FieldType.BOOLEAN,
+      id: 6,
+    },
+    {
       name: "attackBonus",
       type: FieldType.NUMBER,
-      id: 6,
+      id: 7,
     },
     {
       name: "defenseBonus",
       type: FieldType.NUMBER,
-      id: 7,
+      id: 8,
+    },
+  ],
+};
+
+
+/**
+ * Schema for UnitUnitProperties message
+ */
+export const UnitUnitPropertiesSchema: MessageSchema = {
+  name: "UnitUnitProperties",
+  fields: [
+    {
+      name: "attackerId",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "defenderId",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "damage",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "weewar.v1.DamageDistribution",
+    },
+  ],
+};
+
+
+/**
+ * Schema for DamageDistribution message
+ */
+export const DamageDistributionSchema: MessageSchema = {
+  name: "DamageDistribution",
+  fields: [
+    {
+      name: "minDamage",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "maxDamage",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "expectedDamage",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "ranges",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "weewar.v1.DamageRange",
+      repeated: true,
+    },
+  ],
+};
+
+
+/**
+ * Schema for DamageRange message
+ */
+export const DamageRangeSchema: MessageSchema = {
+  name: "DamageRange",
+  fields: [
+    {
+      name: "minValue",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "maxValue",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "probability",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+  ],
+};
+
+
+/**
+ * Schema for RulesEngine message
+ */
+export const RulesEngineSchema: MessageSchema = {
+  name: "RulesEngine",
+  fields: [
+    {
+      name: "units",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.UnitsEntry",
+    },
+    {
+      name: "terrains",
+      type: FieldType.MESSAGE,
+      id: 2,
+      messageType: "weewar.v1.TerrainsEntry",
+    },
+    {
+      name: "terrainUnitProperties",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "weewar.v1.TerrainUnitPropertiesEntry",
+    },
+    {
+      name: "unitUnitProperties",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "weewar.v1.UnitUnitPropertiesEntry",
     },
   ],
 };
@@ -2262,6 +2401,10 @@ export const WeewarV1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.TerrainDefinition": TerrainDefinitionSchema,
   "weewar.v1.UnitDefinition": UnitDefinitionSchema,
   "weewar.v1.TerrainUnitProperties": TerrainUnitPropertiesSchema,
+  "weewar.v1.UnitUnitProperties": UnitUnitPropertiesSchema,
+  "weewar.v1.DamageDistribution": DamageDistributionSchema,
+  "weewar.v1.DamageRange": DamageRangeSchema,
+  "weewar.v1.RulesEngine": RulesEngineSchema,
   "weewar.v1.Game": GameSchema,
   "weewar.v1.GameConfiguration": GameConfigurationSchema,
   "weewar.v1.GamePlayer": GamePlayerSchema,

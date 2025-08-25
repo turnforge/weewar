@@ -29,8 +29,12 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 	}
 
 	rulesEngine := &RulesEngine{
-		Units:    make(map[int32]*v1.UnitDefinition),
-		Terrains: make(map[int32]*v1.TerrainDefinition),
+		RulesEngine: &v1.RulesEngine{
+			Units:                 make(map[int32]*v1.UnitDefinition),
+			Terrains:              make(map[int32]*v1.TerrainDefinition),
+			TerrainUnitProperties: make(map[string]*v1.TerrainUnitProperties),
+			UnitUnitProperties:    make(map[string]*v1.UnitUnitProperties),
+		},
 	}
 
 	// Load terrains using protojson for proper field handling
@@ -79,50 +83,38 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 		}
 	}
 
-	// Load MovementMatrix with special handling for JSON format
-	if movementMatrixData, ok := rawData["movementMatrix"].(map[string]interface{}); ok {
-		if costsData, ok := movementMatrixData["costs"].(map[string]interface{}); ok {
-			movementMatrix := &v1.MovementMatrix{
-				Costs: make(map[int32]*v1.TerrainCostMap),
+	// Load TerrainUnitProperties (centralized movement costs and terrain interactions)
+	if terrainUnitPropsData, ok := rawData["terrainUnitProperties"].(map[string]interface{}); ok {
+		for key, propRaw := range terrainUnitPropsData {
+			propBytes, err := json.Marshal(propRaw)
+			if err != nil {
+				continue
 			}
 			
-			for unitIDStr, terrainCostsRaw := range costsData {
-				unitID, err := strconv.ParseInt(unitIDStr, 10, 32)
-				if err != nil {
-					continue
-				}
-				
-				if terrainCosts, ok := terrainCostsRaw.(map[string]interface{}); ok {
-					terrainCostMap := &v1.TerrainCostMap{
-						TerrainCosts: make(map[int32]float64),
-					}
-					
-					for terrainIDStr, costRaw := range terrainCosts {
-						terrainID, err := strconv.ParseInt(terrainIDStr, 10, 32)
-						if err != nil {
-							continue
-						}
-						
-						if cost, ok := costRaw.(float64); ok {
-							terrainCostMap.TerrainCosts[int32(terrainID)] = cost
-						}
-					}
-					
-					movementMatrix.Costs[int32(unitID)] = terrainCostMap
-				}
+			props := &v1.TerrainUnitProperties{}
+			if err := protojson.Unmarshal(propBytes, props); err == nil {
+				rulesEngine.TerrainUnitProperties[key] = props
 			}
-			
-			rulesEngine.MovementMatrix = movementMatrix
 		}
 	}
 
-	if attackMatrixData, ok := rawData["attackMatrix"]; ok {
-		attackBytes, _ := json.Marshal(attackMatrixData)
-		attackMatrix := &AttackMatrix{}
-		if err := json.Unmarshal(attackBytes, attackMatrix); err == nil {
-			rulesEngine.AttackMatrix = attackMatrix
+	// Load UnitUnitProperties (centralized combat interactions)
+	if unitUnitPropsData, ok := rawData["unitUnitProperties"].(map[string]interface{}); ok {
+		for key, propRaw := range unitUnitPropsData {
+			propBytes, err := json.Marshal(propRaw)
+			if err != nil {
+				continue
+			}
+			
+			props := &v1.UnitUnitProperties{}
+			if err := protojson.Unmarshal(propBytes, props); err == nil {
+				rulesEngine.UnitUnitProperties[key] = props
+			}
 		}
 	}
+
+	// Populate reference maps from centralized properties for fast lookup
+	rulesEngine.PopulateReferenceMaps()
 
 	// Validate the loaded data
 	if err := rulesEngine.ValidateRules(); err != nil {

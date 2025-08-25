@@ -138,10 +138,13 @@ message Unit {
 message TerrainDefinition {
   int32 id = 1;                  // Terrain type ID
   string name = 2;               // Display name (e.g., "Grass", "Mountain")  
-  double base_move_cost = 3;     // Base movement cost
-  double defense_bonus = 4;      // Defense bonus multiplier (0.0 to 1.0)
+  // double base_move_cost = 3;     // Base movement cost
+  // double defense_bonus = 4;      // Defense bonus multiplier (0.0 to 1.0)
   int32 type = 5;               // Terrain category type
   string description = 6;        // Human-readable description
+
+  // How this terrain impacts 
+  map<int32, TerrainUnitProperties> unit_properties = 7;
 }
 
 // Rules engine unit definition  
@@ -149,21 +152,60 @@ message UnitDefinition {
   int32 id = 1;                  // Unit type ID
   string name = 2;               // Display name (e.g., "Infantry", "Tank")
   string description = 3;        //
-  int32 movement_points = 4;     // Maximum movement per turn
-  int32 attack_range = 5;        // Attack range in tiles
-  int32 health = 6;             // Maximum health points
-  repeated string properties = 7; // Special properties/abilities
+  int32 health = 4;             // Maximum health points
+  int32 coins = 5;              // how much it costs to build
+  int32 movement_points = 6;     // Maximum movement per turn
+  int32 attack_range = 7;        // Max Attack range in tiles
+  int32 min_attack_range = 8;        // Minimum attack range in tile radius if specified (otherwise - will be 1
+  map<int32, TerrainUnitProperties> terrain_properties = 9;
+  repeated string properties = 10; // Special properties/abilities
 }
 
-// Movement cost matrix for unit types on terrain types
-message MovementMatrix {
-  // Map of unit_id -> (terrain_id -> movement_cost)
-  map<int32, TerrainCostMap> costs = 1;
+// Properties that are specific to unit on a particular terrain
+message TerrainUnitProperties {
+  int32 terrain_id = 1;  // Renamed from tile_id for clarity
+  int32 unit_id = 2;
+  double movement_cost = 3;          // Movement cost for this unit on this terrain
+  int32 healing_bonus = 4;           // How much healing per turn this tile would offer this unit
+  bool can_build = 5;                // Whether this particular terrain can build this given unit
+  bool can_capture = 6;              // Whether this particular unit can capture this terrain/building type
+  int32 attack_bonus = 7;            // How much more attack this terrain gives to this unit
+  int32 defense_bonus = 8;           // How much more defense this terrain gives to this unit
 }
 
-message TerrainCostMap {
-  // Map of terrain_id -> movement_cost  
-  map<int32, double> terrain_costs = 1;
+// Properties for unit-vs-unit combat interactions
+message UnitUnitProperties {
+  int32 attacker_id = 1;
+  int32 defender_id = 2;
+  DamageDistribution damage = 3;
+}
+
+// Damage distribution for combat calculations
+message DamageDistribution {
+  double min_damage = 1;
+  double max_damage = 2;
+  double expected_damage = 3;
+  repeated DamageRange ranges = 4;
+}
+
+message DamageRange {
+  double min_value = 1;
+  double max_value = 2;
+  double probability = 3;
+}
+
+// Main rules engine definition - centralized source of truth
+message RulesEngine {
+  // Core entity definitions
+  map<int32, UnitDefinition> units = 1;
+  map<int32, TerrainDefinition> terrains = 2;
+  
+  // Centralized property definitions (source of truth)
+  // Key format: "terrain_id:unit_id" (e.g., "1:3" for terrain 1, unit 3)
+  map<string, TerrainUnitProperties> terrain_unit_properties = 3;
+  
+  // Key format: "attacker_id:defender_id" (e.g., "1:2" for unit 1 attacking unit 2)
+  map<string, UnitUnitProperties> unit_unit_properties = 4;
 }
 
 ///////// Game related models

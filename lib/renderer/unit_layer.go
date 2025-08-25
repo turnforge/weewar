@@ -43,8 +43,9 @@ func (ul *UnitLayer) Render(world *lib.World, options LayerRenderOptions) {
 		ul.buffer.Clear()
 
 		// Render all units from all players
-		for _, playerUnits := range world.AllUnits() {
-			for _, unit := range playerUnits {
+		playerCount := world.PlayerCount()
+		for playerID := 1; playerID <= int(playerCount); playerID++ {
+			for _, unit := range world.GetPlayerUnits(playerID) {
 				if unit != nil {
 					ul.renderUnit(world, unit, options)
 				}

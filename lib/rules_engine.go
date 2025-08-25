@@ -11,15 +11,9 @@ import (
 // Rules Engine - Extends existing types with data-driven rules
 // =============================================================================
 
-// RulesEngine provides data-driven game rules using proto definitions
+// RulesEngine embeds the proto-based rules engine
 type RulesEngine struct {
-	// Core data maps using proto types for consistency
-	Units    map[int32]*v1.UnitDefinition    `json:"units"`
-	Terrains map[int32]*v1.TerrainDefinition `json:"terrains"`
-
-	// Canonical rule matrices using proto types
-	MovementMatrix *v1.MovementMatrix `json:"movementMatrix"`
-	AttackMatrix   *AttackMatrix      `json:"attackMatrix"` // TODO: Convert to proto type
+	*v1.RulesEngine
 }
 
 // =============================================================================
@@ -29,10 +23,12 @@ type RulesEngine struct {
 // NewRulesEngine creates a new rules engine instance
 func NewRulesEngine() *RulesEngine {
 	return &RulesEngine{
-		Units:          make(map[int32]*v1.UnitDefinition),
-		Terrains:       make(map[int32]*v1.TerrainDefinition),
-		MovementMatrix: &v1.MovementMatrix{Costs: make(map[int32]*v1.TerrainCostMap)},
-		AttackMatrix:   &AttackMatrix{Attacks: make(map[int32]map[int32]*DamageDistribution)},
+		RulesEngine: &v1.RulesEngine{
+			Units:                  make(map[int32]*v1.UnitDefinition),
+			Terrains:               make(map[int32]*v1.TerrainDefinition),
+			TerrainUnitProperties:  make(map[string]*v1.TerrainUnitProperties),
+			UnitUnitProperties:     make(map[string]*v1.UnitUnitProperties),
+		},
 	}
 }
 
@@ -54,6 +50,35 @@ func init() {
 // GetDefaultRulesEngine returns a font family that works in WASM environments
 func DefaultRulesEngine() *RulesEngine {
 	return defaultRulesEngine
+}
+
+// PopulateReferenceMaps populates the terrain/unit property reference maps for fast lookup
+// This should be called after loading the centralized properties
+func (re *RulesEngine) PopulateReferenceMaps() {
+	// Initialize reference maps in units and terrains
+	for _, unit := range re.Units {
+		if unit.TerrainProperties == nil {
+			unit.TerrainProperties = make(map[int32]*v1.TerrainUnitProperties)
+		}
+	}
+	for _, terrain := range re.Terrains {
+		if terrain.UnitProperties == nil {
+			terrain.UnitProperties = make(map[int32]*v1.TerrainUnitProperties)
+		}
+	}
+
+	// Populate reference maps from centralized properties
+	for _, props := range re.TerrainUnitProperties {
+		// Add to unit's terrain map
+		if unit := re.Units[props.UnitId]; unit != nil {
+			unit.TerrainProperties[props.TerrainId] = props
+		}
+		
+		// Add to terrain's unit map  
+		if terrain := re.Terrains[props.TerrainId]; terrain != nil {
+			terrain.UnitProperties[props.UnitId] = props
+		}
+	}
 }
 
 // =============================================================================
@@ -98,7 +123,7 @@ func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remaining
 }
 
 // GetMovementCost calculates movement cost for a unit to move to a specific destination
-// Uses the unit's current position as starting point and recalculates based on current world state
+// Uses dijkstraMovement for accurate pathfinding costs
 func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoord) (float64, error) {
 	if unit == nil {
 		return 0, fmt.Errorf("unit is nil")
@@ -109,33 +134,36 @@ func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoor
 		return 0, nil
 	}
 
-	// For single adjacent moves, just return terrain cost
-	distance := CubeDistance(from, to)
-	if distance == 1 {
-		toTile := world.TileAt(to)
-		if toTile == nil {
-			return 0, fmt.Errorf("invalid destination tile")
-		}
-		return re.getUnitTerrainCost(unit.UnitType, toTile.TileType)
+	// Use dijkstraMovement to get accurate costs
+	distances, _ := re.dijkstraMovement(world, unit.UnitType, from, float64(unit.DistanceLeft))
+	
+	cost, exists := distances[to]
+	if !exists {
+		return 0, fmt.Errorf("destination %v is not reachable from %v", to, from)
 	}
-
-	// For multi-tile moves, use Dijkstra pathfinding
-	return re.calculatePathCost(world, unit.UnitType, from, to)
+	
+	return cost, nil
 }
 
-// calculatePathCost uses Dijkstra's algorithm to find minimum cost path
+// calculatePathCost uses dijkstraMovement to find minimum cost path
 func (re *RulesEngine) calculatePathCost(world *World, unitType int32, from, to AxialCoord) (float64, error) {
-	// Simple implementation - for now return distance * average terrain cost
-	// TODO: Implement full Dijkstra's algorithm
-	distance := float64(CubeDistance(from, to))
-
-	// Get average terrain cost as approximation
-	averageCost := 1.5                                    // Default average
-	if terrain, err := re.GetTerrainData(1); err == nil { // Use grass as reference
-		averageCost = terrain.BaseMoveCost
+	// Get unit data to determine movement points
+	unitData, err := re.GetUnitData(unitType)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get unit data: %w", err)
 	}
-
-	return distance * averageCost, nil
+	
+	// Use the unit's maximum movement points as limit
+	maxMovement := float64(unitData.MovementPoints)
+	
+	distances, _ := re.dijkstraMovement(world, unitType, from, maxMovement)
+	
+	cost, exists := distances[to]
+	if !exists {
+		return 0, fmt.Errorf("destination %v is not reachable from %v with %d movement points", to, from, unitData.MovementPoints)
+	}
+	
+	return cost, nil
 }
 
 // =============================================================================
@@ -317,27 +345,27 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 }
 
 // getUnitTerrainCost returns movement cost for unit type on terrain type (internal helper)
-// First checks unit-specific matrix, then falls back to terrain's base cost
+// Uses the new centralized TerrainUnitProperties system
 func (re *RulesEngine) getUnitTerrainCost(unitID, terrainID int32) (float64, error) {
-	// First, try unit-specific movement cost from matrix
-	if re.MovementMatrix != nil && re.MovementMatrix.Costs != nil {
-		fmt.Println("111. Cost of Terrain: ", terrainID)
-		if unitCosts, exists := re.MovementMatrix.Costs[unitID]; exists && unitCosts != nil {
-			fmt.Println("222. Cost of Terrain: ", unitCosts)
-			if cost, exists := unitCosts.TerrainCosts[terrainID]; exists {
-				return cost, nil
+	// Create key for centralized properties lookup
+	key := fmt.Sprintf("%d:%d", terrainID, unitID)
+	
+	// First, try centralized properties (source of truth)
+	if props, exists := re.TerrainUnitProperties[key]; exists {
+		if props.MovementCost > 0 {
+			return props.MovementCost, nil
+		}
+	}
+
+	// Fall back to unit's terrain properties map (populated reference)
+	if unit, err := re.GetUnitData(unitID); err == nil {
+		if props, exists := unit.TerrainProperties[terrainID]; exists {
+			if props.MovementCost > 0 {
+				return props.MovementCost, nil
 			}
 		}
 	}
 
-	// Fall back to terrain's base movement cost
-	if terrain, err := re.GetTerrainData(terrainID); err == nil {
-		fmt.Println("Cost of Terrain: ", terrainID, terrain.BaseMoveCost, terrain)
-		if terrain.BaseMoveCost > 0 {
-			return terrain.BaseMoveCost, nil
-		}
-	}
-
-	// Final fallback to 1.0
+	// Final fallback to default movement cost of 1.0
 	return 1.0, nil
 }

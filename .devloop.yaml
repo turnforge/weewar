@@ -54,22 +54,6 @@ rules:
       - "echo '✅ Backend build and tests complete'"
       - "pkill weewar || true"
       - "./bin/weewar serve"
-      # - "sleep 20 && echo Done Sleeping"
-  - name: "cli"
-    color: "red"
-    watch:
-      - action: "include"
-        patterns:
-          - "lib/**/*.go"
-          - "cmd/**/*.go"
-          - "services/**/*.go"
-          - "go.mod"
-          - "go.sum"
-    commands:
-      - "echo '🔧 Building WeeWar Binary...'"
-      - "make wasm"
-      - "make binlocal"
-      - "make cli"
 
   # Frontend Development & Testing
   - name: "frontend"

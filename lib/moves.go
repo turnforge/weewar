@@ -284,16 +284,21 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	attackerDamage := 0
 	defenderDamage := 0
 
-	defenderDamage, err = g.rulesEngine.CalculateCombatDamage(attacker.UnitType, defender.UnitType, g.rng)
+	var canAttack bool
+	defenderDamage, canAttack, err = g.rulesEngine.CalculateCombatDamage(attacker.UnitType, defender.UnitType, g.rng)
 	if err != nil {
 		return nil, fmt.Errorf("failed to calculate combat damage: %w", err)
+	}
+	if !canAttack {
+		return nil, fmt.Errorf("unit type %d cannot attack unit type %d", attacker.UnitType, defender.UnitType)
 	}
 
 	// Check if defender can counter-attack
 	if canCounter, err := g.rulesEngine.CanUnitAttackTarget(defender, attacker); err == nil && canCounter {
-		attackerDamage, err = g.rulesEngine.CalculateCombatDamage(defender.UnitType, attacker.UnitType, g.rng)
-		if err != nil {
-			// If counter-attack calculation fails, no counter damage
+		var canCounterAttack bool
+		attackerDamage, canCounterAttack, err = g.rulesEngine.CalculateCombatDamage(defender.UnitType, attacker.UnitType, g.rng)
+		if err != nil || !canCounterAttack {
+			// If counter-attack calculation fails or is not possible, no counter damage
 			attackerDamage = 0
 		}
 	}

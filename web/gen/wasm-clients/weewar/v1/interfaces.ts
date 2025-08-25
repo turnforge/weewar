@@ -124,6 +124,8 @@ export interface TerrainDefinition {
  double defense_bonus = 4;      // Defense bonus multiplier (0.0 to 1.0) */
   type: number;
   description: string;
+  /** How this terrain impacts */
+  unitProperties?: Map<number, TerrainUnitProperties>;
 }
 
 
@@ -134,10 +136,12 @@ export interface UnitDefinition {
   id: number;
   name: string;
   description: string;
-  movementPoints: number;
-  attackRange: number;
   health: number;
   coins: number;
+  movementPoints: number;
+  attackRange: number;
+  minAttackRange: number;
+  terrainProperties?: Map<number, TerrainUnitProperties>;
   properties: string[];
 }
 
@@ -146,15 +150,58 @@ export interface UnitDefinition {
  * Properties that are specific to unit on a particular terrain
  */
 export interface TerrainUnitProperties {
-  tileId: number;
+  terrainId: number;
   unitId: number;
+  movementCost: number;
   healingBonus: number;
   canBuild: boolean;
   canCapture: boolean;
-  /** How much more attack this terrain gives to this unit beyond what the unit's attack points are. */
   attackBonus: number;
-  /** How much more defense this terrain gives to this unit beyond what hte unit's defense points are */
   defenseBonus: number;
+}
+
+
+/**
+ * Properties for unit-vs-unit combat interactions
+ */
+export interface UnitUnitProperties {
+  attackerId: number;
+  defenderId: number;
+  damage?: DamageDistribution;
+}
+
+
+/**
+ * Damage distribution for combat calculations
+ */
+export interface DamageDistribution {
+  minDamage: number;
+  maxDamage: number;
+  expectedDamage: number;
+  ranges?: DamageRange[];
+}
+
+
+
+export interface DamageRange {
+  minValue: number;
+  maxValue: number;
+  probability: number;
+}
+
+
+/**
+ * Main rules engine definition - centralized source of truth
+ */
+export interface RulesEngine {
+  /** Core entity definitions */
+  units?: Map<number, UnitDefinition>;
+  terrains?: Map<number, TerrainDefinition>;
+  /** Centralized property definitions (source of truth)
+ Key format: "terrain_id:unit_id" (e.g., "1:3" for terrain 1, unit 3) */
+  terrainUnitProperties?: Map<string, TerrainUnitProperties>;
+  /** Key format: "attacker_id:defender_id" (e.g., "1:2" for unit 1 attacking unit 2) */
+  unitUnitProperties?: Map<string, UnitUnitProperties>;
 }
 
 

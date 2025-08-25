@@ -84,8 +84,9 @@ func (br *BufferRenderer) RenderUnitsWithAssets(world *weewar.World, viewState *
 	}
 
 	// Render units for each player
-	for _, playerUnits := range world.unitsByPlayer {
-		for _, unit := range playerUnits {
+	playerCount := world.PlayerCount()
+	for playerID := 1; playerID <= int(playerCount); playerID++ {
+		for _, unit := range world.GetPlayerUnits(playerID) {
 			if unit == nil {
 				continue
 			}

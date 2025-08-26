@@ -1,188 +1,183 @@
 <!-- TerrainStatsPanel Template -->
-<div id="terrain-stats-panel-template">
-    <div class="terrain-stats-panel h-full bg-white dark:bg-gray-800 p-4">
-        <h4 class="font-medium text-gray-900 dark:text-white mb-3">🌍 Terrain Info</h4>
-        
-        <!-- No Selection State -->
-        <div id="no-terrain-selected" class="text-center py-8">
-            <div class="text-gray-400 dark:text-gray-500 mb-2">
-                <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2L3 7v11a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V7l-7-5z"/>
-                </svg>
-            </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-                Click on a tile to view<br>terrain information
-            </p>
+<div id="terrain-stats-panel-template" class="terrain-stats-panel bg-white dark:bg-gray-800 p-4 overflow-y-auto h-full">
+    <h4 class="font-medium text-gray-900 dark:text-white mb-3">
+      🌍 Terrain Info
+    </h4>
+
+    <!-- No Selection State -->
+    <div id="no-terrain-selected" class="text-center py-8">
+      <div class="text-gray-400 dark:text-gray-500 mb-2">
+        <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2L3 7v11a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V7l-7-5z" />
+        </svg>
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Click on a tile to view<br />terrain information
+      </p>
+    </div>
+
+    <!-- Selected Terrain Info -->
+    <div id="terrain-details" class="hidden">
+      <!-- Terrain Header -->
+      <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span id="terrain-icon" class="text-2xl">🌱</span>
+          <span
+            id="terrain-coordinates"
+            class="text-xs text-gray-500 dark:text-gray-400"
+          >
+            (0, 0)
+          </span>
         </div>
-        
-        <!-- Selected Terrain Info -->
-        <div id="terrain-details" class="hidden">
-            <!-- Terrain Header -->
-            <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="flex items-center justify-between mb-2">
-                    <span id="terrain-icon" class="text-2xl">🌱</span>
-                    <span id="terrain-coordinates" class="text-xs text-gray-500 dark:text-gray-400">
-                        (0, 0)
-                    </span>
-                </div>
-                <h5 id="terrain-name" class="font-medium text-gray-900 dark:text-white">
-                    Grass
-                </h5>
-                <p id="terrain-description" class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    Standard grassland terrain
-                </p>
-            </div>
-            
-            <!-- Movement Cost -->
-            <div class="mb-4">
-                <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    ⚡ Movement Cost
-                </h6>
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                    <span id="movement-cost" class="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                        1.0
-                    </span>
-                    <span class="text-sm text-gray-600 dark:text-gray-400 ml-1">
-                        points
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Defense Bonus -->
-            <div class="mb-4">
-                <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    🛡️ Defense Bonus
-                </h6>
-                <div class="bg-green-50 dark:bg-green-900/20 p-2 rounded">
-                    <span id="defense-bonus" class="text-lg font-semibold text-green-600 dark:text-green-400">
-                        +0%
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Player Ownership (if applicable) -->
-            <div id="player-ownership" class="hidden mb-4">
-                <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    👤 Owner
-                </h6>
-                <div class="bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
-                    <span id="owner-player" class="text-sm font-medium text-purple-600 dark:text-purple-400">
-                        Player 1
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Additional Properties -->
-            <div id="terrain-properties" class="mb-4">
-                <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    ℹ️ Properties
-                </h6>
-                <div id="properties-list" class="space-y-1">
-                    <!-- Properties will be populated dynamically -->
-                </div>
-            </div>
+        <h5 id="terrain-name" class="font-medium text-gray-900 dark:text-white">
+          Grass
+        </h5>
+        <p
+          id="terrain-description"
+          class="text-sm text-gray-600 dark:text-gray-300 mt-1"
+        >
+          Standard grassland terrain
+        </p>
+      </div>
+
+      <!-- Movement Cost -->
+      <div class="mb-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          ⚡ Movement Cost
+        </h6>
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+          <span
+            id="movement-cost"
+            class="text-lg font-semibold text-blue-600 dark:text-blue-400"
+          >
+            1.0
+          </span>
+          <span class="text-sm text-gray-600 dark:text-gray-400 ml-1">
+            points
+          </span>
         </div>
-        
-        <!-- Unit Info (when unit is present on tile) -->
-        <div id="unit-details" class="hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <h4 class="font-medium text-gray-900 dark:text-white mb-3">⚔️ Unit Info</h4>
-            
-            <!-- Unit Header -->
-            <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="flex items-center justify-between mb-2">
-                    <span id="unit-icon" class="text-2xl">🔱</span>
-                    <span id="unit-player" class="text-xs text-gray-500 dark:text-gray-400">
-                        Player 1
-                    </span>
-                </div>
-                <h5 id="unit-name" class="font-medium text-gray-900 dark:text-white">
-                    Infantry
-                </h5>
-                <p id="unit-description" class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    Basic ground unit
-                </p>
-            </div>
-            
-            <!-- Unit Stats -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <!-- Health -->
-                <div class="bg-red-50 dark:bg-red-900/20 p-2 rounded">
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">❤️ Health</div>
-                    <div id="unit-health" class="text-lg font-semibold text-red-600 dark:text-red-400">
-                        100
-                    </div>
-                </div>
-                
-                <!-- Movement -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">⚡ Movement</div>
-                    <div id="unit-movement" class="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                        3
-                    </div>
-                </div>
-                
-                <!-- Attack Range -->
-                <div class="bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">🎯 Range</div>
-                    <div id="unit-range" class="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                        1
-                    </div>
-                </div>
-                
-                <!-- Status -->
-                <div class="bg-green-50 dark:bg-green-900/20 p-2 rounded">
-                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">📍 Status</div>
-                    <div id="unit-status" class="text-sm font-semibold text-green-600 dark:text-green-400">
-                        Ready
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Unit Properties -->
-            <div id="unit-properties" class="mb-4">
-                <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    ⚙️ Unit Properties  
-                </h6>
-                <div id="unit-properties-list" class="space-y-1">
-                    <!-- Unit properties will be populated dynamically -->
-                </div>
-            </div>
+      </div>
+
+      <!-- Defense Bonus -->
+      <div class="mb-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          🛡️ Defense Bonus
+        </h6>
+        <div class="bg-green-50 dark:bg-green-900/20 p-2 rounded">
+          <span
+            id="defense-bonus"
+            class="text-lg font-semibold text-green-600 dark:text-green-400"
+          >
+            +0%
+          </span>
         </div>
+      </div>
+
+      <!-- Player Ownership (if applicable) -->
+      <div id="player-ownership" class="hidden mb-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          👤 Owner
+        </h6>
+        <div class="bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
+          <span
+            id="owner-player"
+            class="text-sm font-medium text-purple-600 dark:text-purple-400"
+          >
+            Player 1
+          </span>
+        </div>
+      </div>
+
+      <!-- Additional Properties -->
+      <div id="terrain-properties" class="mb-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          ℹ️ Properties
+        </h6>
+        <div id="properties-list" class="space-y-1">
+          <!-- Properties will be populated dynamically -->
+        </div>
+      </div>
     </div>
 </div>
 
 <!-- Terrain-Unit Properties Table Template -->
 <template id="terrain-unit-properties-table-template">
-    <div class="mt-4">
-        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            🎯 Unit Interactions
-        </h6>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Unit</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Move Cost</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Healing</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Capture</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white">Build</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                    <!-- Rows will be populated dynamically -->
-                </tbody>
-            </table>
-        </div>
+  <div class="mt-4">
+    <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      🎯 Unit Interactions
+    </h6>
+    <div class="overflow-x-auto">
+      <table
+        class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg"
+      >
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th
+              class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+            >
+              Unit
+            </th>
+            <th
+              class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+            >
+              Move Cost
+            </th>
+            <th
+              class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+            >
+              Healing
+            </th>
+            <th
+              class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+            >
+              Capture
+            </th>
+            <th
+              class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white"
+            >
+              Build
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600"
+        >
+          <!-- Rows will be populated dynamically -->
+        </tbody>
+      </table>
     </div>
+  </div>
 </template>
 
 <!-- Unit Row Template for Terrain-Unit Properties Table -->
 <template id="unit-row-template">
-    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-        <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium" data-unit-name>Unit Name</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-movement-cost>1.0</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-healing>-</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-capture>-</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white" data-build>-</td>
-    </tr>
+  <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+    <td
+      class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium"
+      data-unit-name
+    >
+      Unit Name
+    </td>
+    <td
+      class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+      data-movement-cost
+    >
+      1.0
+    </td>
+    <td
+      class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+      data-healing
+    >
+      -
+    </td>
+    <td
+      class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
+      data-capture
+    >
+      -
+    </td>
+    <td class="px-2 py-2 text-center text-gray-900 dark:text-white" data-build>
+      -
+    </td>
+  </tr>
 </template>

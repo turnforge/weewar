@@ -10,6 +10,7 @@ import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
+import { UnitStatsPanel } from './UnitStatsPanel';
 import { GameLogPanel } from './GameLogPanel';
 import { GameActionsPanel, GameActionsCallbacks } from './GameActionsPanel';
 import { GameEventTypes, WorldEventTypes } from './events';
@@ -66,6 +67,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private gameState: GameState
     private world: World  // ✅ Shared World component
     private terrainStatsPanel: TerrainStatsPanel
+    private unitStatsPanel: UnitStatsPanel
     private gameLogPanel: GameLogPanel
     private gameActionsPanel: GameActionsPanel
     private rulesTable: RulesTable = new RulesTable();
@@ -118,6 +120,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         console.assert(this.gameState != null, "gameState could not be created")
         console.assert(this.world != null, "World could not be created")
         console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
+        console.assert(this.unitStatsPanel != null, "unitStatsPanel could not be created")
         console.assert(this.gameLogPanel != null, "gameLogPanel could not be created")
         console.assert(this.gameActionsPanel != null, "gameActionsPanel could not be created")
         console.assert(this.rulesTable != null, "rulesTable could not be created")
@@ -127,6 +130,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         return [
             this.gameScene,
             this.terrainStatsPanel,
+            this.unitStatsPanel,
             this.gameLogPanel,
             this.gameActionsPanel,
         ]
@@ -161,17 +165,17 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                     // Always show terrain info (even when unit is present)
                     this.handleTileClick(q, r, tile);
                     
-                    // If there's a unit, also handle unit logic and show unit info in terrain panel
+                    // If there's a unit, also handle unit logic and show unit info in unit panel
                     if (unit) {
                         this.handleUnitClick(q, r);
-                        // Update terrain panel to also show unit info
-                        if (this.terrainStatsPanel) {
-                            this.terrainStatsPanel.updateUnitInfo(unit);
+                        // Update unit stats panel with unit info
+                        if (this.unitStatsPanel) {
+                            this.unitStatsPanel.updateUnitInfo(unit);
                         }
                     } else {
-                        // Clear unit info from terrain panel when no unit
-                        if (this.terrainStatsPanel) {
-                            this.terrainStatsPanel.clearUnitInfo();
+                        // Clear unit info from unit stats panel when no unit
+                        if (this.unitStatsPanel) {
+                            this.unitStatsPanel.clearUnitInfo();
                         }
                     }
                     break;
@@ -338,6 +342,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                         return this.createMainGameComponent();
                     case 'terrain-stats':
                         return this.createTerrainStatsComponent();
+                    case 'unit-stats':
+                        return this.createUnitStatsComponent();
                     case 'game-actions':
                         return this.createGameActionsComponent();
                     case 'game-log':
@@ -393,6 +399,17 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             position: { 
                 direction: 'right',
                 referencePanel: 'main-game-panel'
+            }
+        });
+
+        // Add unit stats panel (below terrain stats panel)
+        this.dockview.addPanel({
+            id: 'unit-stats-panel',
+            component: 'unit-stats',
+            title: 'Unit Info',
+            position: { 
+                direction: 'below',
+                referencePanel: 'terrain-stats-panel'
             }
         });
 
@@ -499,7 +516,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         const element = template.cloneNode(true) as HTMLElement;
         element.style.display = 'block';
-        element.id = 'terrain-stats-panel-instance';
+        // Keep the template ID, don't create wrapper instance
 
         return {
             element,
@@ -509,6 +526,32 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             },
             dispose: () => {
                 // TerrainStatsPanel cleanup will be handled by LCM lifecycle
+                // Component disposal is managed by DockView
+            }
+        };
+    }
+
+    /**
+     * Create unit stats component
+     */
+    private createUnitStatsComponent() {
+        const template = document.getElementById('unit-stats-panel-template');
+        if (!template) {
+            throw new Error('unit-stats-panel-template not found');
+        }
+
+        const element = template.cloneNode(true) as HTMLElement;
+        element.style.display = 'block';
+        // Keep the template ID, don't create wrapper instance
+
+        return {
+            element,
+            init: () => {
+                // Create UnitStatsPanel with the cloned element
+                this.unitStatsPanel = new UnitStatsPanel(element, this.eventBus, true);
+            },
+            dispose: () => {
+                // UnitStatsPanel cleanup will be handled by LCM lifecycle
                 // Component disposal is managed by DockView
             }
         };
@@ -525,7 +568,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         const element = template.cloneNode(true) as HTMLElement;
         element.style.display = 'block';
-        element.id = 'game-actions-panel-instance';
+        // Keep the template ID, don't create wrapper instance
 
         // Create callbacks object for GameActionsPanel
         const callbacks: GameActionsCallbacks = {
@@ -560,7 +603,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         const element = template.cloneNode(true) as HTMLElement;
         element.style.display = 'block';
-        element.id = 'game-log-panel-instance';
+        // Keep the template ID, don't create wrapper instance
 
         return {
             element,

@@ -45,6 +45,13 @@ export class RulesTable {
     }
 
     /**
+     * Get terrain definition by ID
+     */
+    public getTerrainDefinition(terrainId: number): TerrainDefinition | null {
+        return this.terrainDefinitions[terrainId] || null;
+    }
+
+    /**
      * Get movement cost for a unit on specific terrain
      */
     public getMovementCost(terrainId: number, unitId: number): number {

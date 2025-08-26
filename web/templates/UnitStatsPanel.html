@@ -1,0 +1,162 @@
+<!-- UnitStatsPanel Template -->
+<div id="unit-stats-panel-template" class="unit-stats-panel h-full bg-white dark:bg-gray-800 p-4 overflow-y-auto">
+        <h4 class="font-medium text-gray-900 dark:text-white mb-3">⚔️ Unit Info</h4>
+        
+        <!-- No Selection State -->
+        <div id="no-unit-selected" class="text-center py-8">
+            <div class="text-gray-400 dark:text-gray-500 mb-2">
+                <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Click on a unit to view<br>detailed unit information
+            </p>
+        </div>
+        
+        <!-- Selected Unit Info -->
+        <div id="unit-details" class="hidden">
+            <!-- Unit Header -->
+            <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <span id="unit-icon" class="text-2xl">⚔️</span>
+                    <span id="unit-player" class="text-xs text-gray-500 dark:text-gray-400">
+                        Player 1
+                    </span>
+                </div>
+                <h5 id="unit-name" class="font-medium text-gray-900 dark:text-white">
+                    Infantry
+                </h5>
+                <p id="unit-description" class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    Basic ground unit
+                </p>
+            </div>
+            
+            <!-- Unit Stats -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <!-- Health -->
+                <div class="bg-red-50 dark:bg-red-900/20 p-2 rounded">
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">❤️ Health</div>
+                    <div id="unit-health" class="text-lg font-semibold text-red-600 dark:text-red-400">
+                        100
+                    </div>
+                </div>
+                
+                <!-- Movement -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">⚡ Movement</div>
+                    <div id="unit-movement" class="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                        3
+                    </div>
+                </div>
+                
+                <!-- Attack Range -->
+                <div class="bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">🎯 Range</div>
+                    <div id="unit-range" class="text-lg font-semibold text-orange-600 dark:text-orange-400">
+                        1
+                    </div>
+                </div>
+                
+                <!-- Status -->
+                <div class="bg-green-50 dark:bg-green-900/20 p-2 rounded">
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-1">📍 Status</div>
+                    <div id="unit-status" class="text-sm font-semibold text-green-600 dark:text-green-400">
+                        Ready
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Unit Properties -->
+            <div id="unit-properties" class="mb-4">
+                <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    ⚙️ Unit Properties  
+                </h6>
+                <div id="unit-properties-list" class="space-y-1">
+                    <!-- Unit properties will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Unit-Terrain Properties Section -->
+            <div id="unit-terrain-properties" class="mb-4">
+                <!-- Table will be populated dynamically -->
+            </div>
+
+            <!-- Unit-Unit Combat Properties Section -->
+            <div id="unit-combat-properties" class="mb-4">
+                <!-- Combat table will be populated dynamically -->
+            </div>
+        </div>
+</div>
+
+<!-- Unit-Terrain Properties Table Template -->
+<template id="unit-terrain-properties-table-template">
+    <div class="mt-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            🌍 Terrain Movement
+        </h6>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Terrain</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Move Cost</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Healing</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Capture</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white">Build</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                    <!-- Rows will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
+
+<!-- Terrain Row Template for Unit-Terrain Properties Table -->
+<template id="terrain-row-template">
+    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+        <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium" data-terrain-name>Terrain Name</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-movement-cost>1.0</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-healing>-</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-capture>-</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white" data-build>-</td>
+    </tr>
+</template>
+
+<!-- Unit Combat Table Template -->
+<template id="unit-combat-table-template">
+    <div class="mt-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            ⚔️ Combat vs Units
+        </h6>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Target</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Min Dmg</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Max Dmg</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Avg Dmg</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white">Can Attack</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                    <!-- Rows will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
+
+<!-- Combat Row Template for Unit Combat Table -->
+<template id="combat-row-template">
+    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+        <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium" data-target-name>Target Unit</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-min-damage>0</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-max-damage>100</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-avg-damage>50.0</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white" data-can-attack>✓</td>
+    </tr>
+</template>

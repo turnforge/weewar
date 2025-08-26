@@ -58,6 +58,7 @@
     /* Ensure dockview fills available space */
     #dockview-container { @apply h-full w-full; }
     
+    
     /* Theme overrides for consistency */
     .dockview-theme-dark {
         --dv-background-color: theme('colors.gray.900');
@@ -172,9 +173,8 @@
             <div id="main-game-panel-template">
                 {{# include "panels/MainGamePanel.html" #}}
             </div>
-            <div id="terrain-stats-panel-template">
-                {{# include "TerrainStatsPanel.html" #}}
-            </div>
+            {{# include "TerrainStatsPanel.html" #}}
+            {{# include "UnitStatsPanel.html" #}}
             <div id="game-actions-panel-template">
                 {{# include "panels/GameActionsPanel.html" #}}
             </div>

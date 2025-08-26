@@ -10,6 +10,7 @@ import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
+import { GameLogPanel } from './GameLogPanel';
 import { GameEventTypes, WorldEventTypes } from './events';
 import { RulesTable, TerrainStats } from './RulesTable';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
@@ -64,6 +65,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private gameState: GameState
     private world: World  // ✅ Shared World component
     private terrainStatsPanel: TerrainStatsPanel
+    private gameLogPanel: GameLogPanel
     private rulesTable: RulesTable = new RulesTable();
     
     // Dockview interface
@@ -71,8 +73,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     
     // Game configuration accessed directly from WASM-cached Game proto
     
-    // UI state
-    private gameLog: string[] = [];
+    // UI state - gameLog is now handled by GameLogPanel
     
     // Move execution state
     private selectedUnitCoord: { q: number, r: number } | null = null;
@@ -96,9 +97,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         // Create child components
         this.createComponents();
         
-        // Initialize basic UI state
         this.updateGameStatus('Game Loading...');
-        this.initializeGameLog();
         
         // Start WASM and game data loading early (parallel to WorldViewer initialization)
         if (!this.currentGameId) {
@@ -116,6 +115,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         console.assert(this.gameState != null, "gameState could not be created")
         console.assert(this.world != null, "World could not be created")
         console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
+        console.assert(this.gameLogPanel != null, "gameLogPanel could not be created")
         console.assert(this.rulesTable != null, "rulesTable could not be created")
         
         // Return child components for lifecycle management
@@ -123,6 +123,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         return [
             this.gameScene,
             this.terrainStatsPanel,
+            this.gameLogPanel,
         ]
     }
 
@@ -185,7 +186,16 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.checkAndLoadWorldIntoViewer();
     }
 
+    /*
     public destroy(): void {
+        // Save layout before destroying
+        this.saveDockviewLayout();
+        
+        // Dispose dockview
+        if (this.dockview) {
+            this.dockview.dispose();
+        }
+        
         if (this.gameScene) {
             this.gameScene.destroy();
             this.gameScene = null as any;
@@ -201,13 +211,18 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             this.terrainStatsPanel = null as any;
         }
 
+        if (this.gameLogPanel) {
+            this.gameLogPanel.destroy();
+            this.gameLogPanel = null as any;
+        }
+
         if (this.rulesTable) {
             this.rulesTable = null as any;
         }
         
         this.currentGameId = null;
-        this.gameLog = [];
     }
+   */
 
     /**
      * Subscribe to GameState events
@@ -304,8 +319,23 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         this.dockview = dockviewComponent.api;
 
-        // Configure default layout for game viewing
-        this.configureDefaultGameLayout();
+        // Load saved layout or create default
+        const savedLayout = this.loadDockviewLayout();
+        if (savedLayout) {
+            try {
+                this.dockview.fromJSON(savedLayout);
+            } catch (e) {
+                console.warn('Failed to restore game viewer dockview layout, using default', e);
+                this.configureDefaultGameLayout();
+            }
+        } else {
+            this.configureDefaultGameLayout();
+        }
+        
+        // Save layout on changes
+        this.dockview.onDidLayoutChange(() => {
+            this.saveDockviewLayout();
+        });
     }
 
     /**
@@ -354,9 +384,29 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         });
 
         // Set panel sizes for optimal viewing
-        this.dockview.getPanel('terrain-stats-panel')?.api.setSize({ width: 320 });
-        this.dockview.getPanel('game-actions-panel')?.api.setSize({ width: 280 });
-        this.dockview.getPanel('game-log-panel')?.api.setSize({ height: 200 });
+        setTimeout(() => {
+            this.dockview.getPanel('terrain-stats-panel')?.api.setSize({ width: 320 });
+            this.dockview.getPanel('game-actions-panel')?.api.setSize({ width: 280 });
+            this.dockview.getPanel('game-log-panel')?.api.setSize({ height: 200 });
+        }, 100);
+    }
+
+    /**
+     * Save the current DockView layout to localStorage
+     */
+    private saveDockviewLayout(): void {
+        if (!this.dockview) return;
+        
+        const layout = this.dockview.toJSON();
+        localStorage.setItem('game-viewer-dockview-layout', JSON.stringify(layout));
+    }
+    
+    /**
+     * Load saved DockView layout from localStorage
+     */
+    private loadDockviewLayout(): any {
+        const saved = localStorage.getItem('game-viewer-dockview-layout');
+        return saved ? JSON.parse(saved) : null;
     }
 
     /**
@@ -385,6 +435,20 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             dispose: () => {
                 // PhaserGameScene cleanup will be handled by LCM lifecycle
                 // Component disposal is managed by DockView
+            },
+            onDidResize: () => {
+                // Handle panel resize events - resize the Phaser scene
+                if (this.gameScene) {
+                    // Get the current container size
+                    const phaserContainer = element.querySelector('#phaser-viewer-container') as HTMLElement;
+                    if (phaserContainer) {
+                        const width = phaserContainer.clientWidth;
+                        const height = phaserContainer.clientHeight;
+                        
+                        // Use the public resize method
+                        this.gameScene.resize(width, height);
+                    }
+                }
             }
         };
     }
@@ -456,11 +520,12 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         return {
             element,
             init: () => {
-                // Set up event listeners for log filtering and management
-                this.initializeGameLogPanel(element);
+                // Create GameLogPanel with the cloned element
+                this.gameLogPanel = new GameLogPanel(element, this.eventBus);
             },
             dispose: () => {
-                // Clean up any listeners if needed
+                // GameLogPanel cleanup will be handled by LCM lifecycle
+                // Component disposal is managed by DockView
             }
         };
     }
@@ -492,73 +557,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         }
     }
 
-    /**
-     * Initialize game log panel event handlers
-     */
-    private initializeGameLogPanel(element: HTMLElement): void {
-        // Set up log filtering buttons
-        const filterBtns = element.querySelectorAll('.log-filter-btn');
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const target = e.target as HTMLElement;
-                const filter = target.dataset.filter;
-                this.handleLogFilter(filter || 'all', element);
-            });
-        });
-
-        // Set up clear log button
-        const clearBtn = element.querySelector('#clear-log-btn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => this.handleClearLog(element));
-        }
-    }
-
-    /**
-     * Handle log filtering
-     */
-    private handleLogFilter(filter: string, logPanel: HTMLElement): void {
-        // Update active filter button
-        const filterBtns = logPanel.querySelectorAll('.log-filter-btn');
-        filterBtns.forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
-        });
-
-        // Show/hide log entries based on filter
-        const logEntries = logPanel.querySelectorAll('.log-entry');
-        logEntries.forEach(entry => {
-            const entryType = entry.getAttribute('data-type') || 'system';
-            const shouldShow = filter === 'all' || entryType === filter;
-            entry.classList.toggle('hidden', !shouldShow);
-        });
-    }
-
-    /**
-     * Handle clearing the game log
-     */
-    private handleClearLog(logPanel: HTMLElement): void {
-        const logContainer = logPanel.querySelector('#game-log');
-        if (logContainer) {
-            logContainer.innerHTML = '';
-            this.gameLog = [];
-            this.updateLogStats(logPanel);
-        }
-    }
-
-    /**
-     * Update log statistics display
-     */
-    private updateLogStats(logPanel: HTMLElement): void {
-        const entryCountEl = logPanel.querySelector('#log-entry-count');
-        const lastUpdateEl = logPanel.querySelector('#log-last-update');
-        
-        if (entryCountEl) {
-            entryCountEl.textContent = `${this.gameLog.length} entries`;
-        }
-        
-        if (lastUpdateEl) {
-            lastUpdateEl.textContent = 'Just now';
-        }
-    }
 
     /**
      * Handle end turn button click
@@ -609,10 +607,16 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                 await this.gameScene.loadWorld(this.world);
                 this.showToast('Success', `Game loaded: ${game.name || this.world.getName() || 'Untitled'}`, 'success');
                 
+                // Hide the loading overlay now that the game is loaded
+                this.hideLoadingOverlay();
+                
+                // Ensure the game canvas is properly sized after loading
+                this.resizeGameCanvas();
+                
                 // Update UI with loaded game state
                 const gameState = await this.gameState.getCurrentGameState();
                 this.updateGameUIFromState(gameState);
-                this.logGameEvent(`Game loaded: ${gameState.gameId}`);
+                this.gameLogPanel.logGameEvent(`Game loaded: ${gameState.gameId}`, 'system');
             } else {
                 throw new Error('GameScene or World not available');
             }
@@ -878,7 +882,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             this.updateTurnCounter(newTurn);
             this.clearUnitSelection();
             
-            this.logGameEvent(`Player ${newPlayer}'s turn begins`);
+            if (this.gameLogPanel) {
+                this.gameLogPanel.logGameEvent(`Player ${newPlayer}'s turn begins`, 'system');
+            }
             this.showToast('Info', `Player ${newPlayer}'s turn`, 'info');
 
             return {
@@ -1322,6 +1328,39 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     }
 
     /**
+     * Hide the loading overlay in the main game panel
+     */
+    private hideLoadingOverlay(): void {
+        // Find the loading overlay in the main game panel instance
+        const gameLoadingOverlay = document.querySelector('#main-game-panel-instance #game-loading') as HTMLElement;
+        if (gameLoadingOverlay) {
+            gameLoadingOverlay.style.display = 'none';
+        }
+    }
+
+    /**
+     * Resize the game canvas to fit the container properly
+     */
+    private resizeGameCanvas(): void {
+        if (this.gameScene) {
+            // Find the Phaser container in the main game panel
+            const phaserContainer = document.querySelector('#main-game-panel-instance #phaser-viewer-container') as HTMLElement;
+            if (phaserContainer) {
+                // Force a resize to ensure the canvas fits the container
+                const width = phaserContainer.clientWidth;
+                const height = phaserContainer.clientHeight;
+                
+                // Add a small delay to ensure DOM has settled
+                setTimeout(() => {
+                    if (this.gameScene) {
+                        this.gameScene.resize(width, height);
+                    }
+                }, 100);
+            }
+        }
+    }
+
+    /**
      * UI update functions
      */
     private updateGameStatus(status: string, currentPlayer?: number): void {
@@ -1359,32 +1398,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                 <div><strong>Player:</strong> ${unit.playerId || 'Unknown'}</div>
                 <div><strong>Health:</strong> ${unit.health || 'Unknown'}</div>
             `;
-        }
-    }
-
-    private initializeGameLog(): void {
-        this.gameLog = [];
-    }
-
-    private logGameEvent(message: string): void {
-        this.gameLog.push(message);
-        
-        // Update game log UI
-        const gameLogElement = document.getElementById('game-log');
-        if (gameLogElement) {
-            const logEntry = document.createElement('div');
-            logEntry.textContent = message;
-            logEntry.className = 'text-xs text-gray-600 dark:text-gray-300';
-            
-            gameLogElement.appendChild(logEntry);
-            
-            // Keep only last 20 entries
-            if (gameLogElement.children.length > 20) {
-                gameLogElement.removeChild(gameLogElement.firstChild!);
-            }
-            
-            // Scroll to bottom
-            gameLogElement.scrollTop = gameLogElement.scrollHeight;
         }
     }
 }

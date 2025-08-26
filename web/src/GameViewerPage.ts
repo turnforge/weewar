@@ -11,6 +11,7 @@ import { LifecycleController } from '../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from './ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
 import { GameLogPanel } from './GameLogPanel';
+import { GameActionsPanel, GameActionsCallbacks } from './GameActionsPanel';
 import { GameEventTypes, WorldEventTypes } from './events';
 import { RulesTable, TerrainStats } from './RulesTable';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
@@ -66,6 +67,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private world: World  // ✅ Shared World component
     private terrainStatsPanel: TerrainStatsPanel
     private gameLogPanel: GameLogPanel
+    private gameActionsPanel: GameActionsPanel
     private rulesTable: RulesTable = new RulesTable();
     
     // Dockview interface
@@ -116,6 +118,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         console.assert(this.world != null, "World could not be created")
         console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
         console.assert(this.gameLogPanel != null, "gameLogPanel could not be created")
+        console.assert(this.gameActionsPanel != null, "gameActionsPanel could not be created")
         console.assert(this.rulesTable != null, "rulesTable could not be created")
         
         // Return child components for lifecycle management
@@ -124,6 +127,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             this.gameScene,
             this.terrainStatsPanel,
             this.gameLogPanel,
+            this.gameActionsPanel,
         ]
     }
 
@@ -214,6 +218,11 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         if (this.gameLogPanel) {
             this.gameLogPanel.destroy();
             this.gameLogPanel = null as any;
+        }
+
+        if (this.gameActionsPanel) {
+            this.gameActionsPanel.destroy();
+            this.gameActionsPanel = null as any;
         }
 
         if (this.rulesTable) {
@@ -492,14 +501,24 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         element.style.display = 'block';
         element.id = 'game-actions-panel-instance';
 
+        // Create callbacks object for GameActionsPanel
+        const callbacks: GameActionsCallbacks = {
+            onEndTurn: () => this.endCurrentPlayerTurn(),
+            onShowAllUnits: () => this.showAllPlayerUnits(),
+            onCenterOnAction: () => this.centerOnAction(),
+            onMoveUnit: () => this.selectMoveMode(),
+            onAttackUnit: () => this.selectAttackMode(),
+            onUndo: () => this.undoMove()
+        };
+
         return {
             element,
             init: () => {
-                // Set up event listeners for game action buttons
-                this.initializeGameActionsPanel(element);
+                // Create GameActionsPanel with the cloned element and callbacks
+                this.gameActionsPanel = new GameActionsPanel(element, this.eventBus, callbacks);
             },
             dispose: () => {
-                // Clean up any listeners if needed
+                // GameActionsPanel cleanup will be handled by LCM lifecycle
             }
         };
     }
@@ -530,57 +549,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         };
     }
 
-    /**
-     * Initialize game actions panel event handlers
-     */
-    private initializeGameActionsPanel(element: HTMLElement): void {
-        // Wire up the action buttons to the same handlers as the original implementation
-        const moveUnitBtn = element.querySelector('#move-unit-btn');
-        const attackUnitBtn = element.querySelector('#attack-unit-btn');
-        const selectAllUnitsBtn = element.querySelector('#select-all-units-btn');
-        const centerOnActionBtn = element.querySelector('#center-on-action-btn');
-        const endTurnBtn = element.querySelector('#end-turn-action-btn');
-        const undoBtn = element.querySelector('#undo-action-btn');
-
-        // Set up the same event handlers as before
-        // These will be implemented when we migrate the existing button logic
-        if (endTurnBtn) {
-            endTurnBtn.addEventListener('click', () => this.handleEndTurn());
-        }
-        
-        if (selectAllUnitsBtn) {
-            selectAllUnitsBtn.addEventListener('click', () => this.handleShowAllUnits());
-        }
-        
-        if (centerOnActionBtn) {
-            centerOnActionBtn.addEventListener('click', () => this.handleCenterOnAction());
-        }
-    }
-
-
-    /**
-     * Handle end turn button click
-     */
-    private handleEndTurn(): void {
-        // Implementation will be connected to existing end turn logic
-        console.log('End turn clicked');
-    }
-
-    /**
-     * Handle show all units button click
-     */
-    private handleShowAllUnits(): void {
-        // Implementation will be connected to existing unit selection logic
-        console.log('Show all units clicked');
-    }
-
-    /**
-     * Handle center on action button click
-     */
-    private handleCenterOnAction(): void {
-        // Implementation will be connected to existing camera centering logic
-        console.log('Center on action clicked');
-    }
 
     /**
      * Check if both WorldViewer and game data are ready, then load world into viewer
@@ -1043,10 +1011,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.selectedUnitCoord = null;
         this.availableMovementOptions = [];
         
-        // Hide unit info panel
-        const unitInfoPanel = document.getElementById('selected-unit-info');
-        if (unitInfoPanel) {
-            unitInfoPanel.classList.add('hidden');
+        // Hide unit info via GameActionsPanel
+        if (this.gameActionsPanel) {
+            this.gameActionsPanel.hideSelectedUnit();
         }
     }
 
@@ -1180,6 +1147,12 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         // Store selected unit info and available options for move execution
         this.selectedUnitCoord = { q, r };
         this.availableMovementOptions = moveOptionObjects;
+        
+        // Show selected unit in GameActionsPanel
+        const selectedUnit = this.world?.getUnitAt(q, r);
+        if (this.gameActionsPanel && selectedUnit) {
+            this.gameActionsPanel.showSelectedUnit(selectedUnit);
+        }
         
         // Update GameViewer to show highlights using layer-based approach  
         if (this.gameScene) {
@@ -1380,6 +1353,11 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         
         // Update turn counter
         this.updateTurnCounter(gameState.turnCounter);
+        
+        // Update game actions panel with current game state
+        if (this.gameActionsPanel) {
+            this.gameActionsPanel.updateGameStatus(gameState.currentPlayer, gameState.turnCounter);
+        }
     }
     
     private updateTurnCounter(turnCounter: number): void {
@@ -1389,17 +1367,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         }
     }
 
-    private updateSelectedUnitInfo(unit: any): void {
-        const unitDetails = document.getElementById('unit-details');
-        if (unitDetails) {
-            unitDetails.innerHTML = `
-                <div><strong>Type:</strong> ${unit.type || 'Unknown'}</div>
-                <div><strong>Position:</strong> (${unit.q}, ${unit.r})</div>
-                <div><strong>Player:</strong> ${unit.playerId || 'Unknown'}</div>
-                <div><strong>Health:</strong> ${unit.health || 'Unknown'}</div>
-            `;
-        }
-    }
 }
 
 // Initialize page when DOM is ready using LifecycleController

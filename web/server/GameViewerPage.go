@@ -132,17 +132,28 @@ func (p *GameViewerPage) GetUnitDataJSON() string {
 	return string(unitData)
 }
 
-// GetMovementMatrixJSON returns movement cost matrix as JSON string
-func (p *GameViewerPage) GetMovementMatrixJSON() string {
+// GetTerrainUnitPropertiesJSON returns terrain-unit interaction properties as JSON string
+func (p *GameViewerPage) GetTerrainUnitPropertiesJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
 	
-	// Use protojson for consistent camelCase field names
-	movementData, err := protojson.Marshal(rulesEngine.MovementMatrix)
+	terrainUnitData, err := json.Marshal(rulesEngine.TerrainUnitProperties)
 	if err != nil {
-		log.Printf("Error marshaling movement matrix: %v", err)
+		log.Printf("Error marshaling terrain-unit properties: %v", err)
 		return "{}"
 	}
-	return string(movementData)
+	return string(terrainUnitData)
+}
+
+// GetUnitUnitPropertiesJSON returns unit-vs-unit combat properties as JSON string
+func (p *GameViewerPage) GetUnitUnitPropertiesJSON() string {
+	rulesEngine := weewar.DefaultRulesEngine()
+	
+	unitUnitData, err := json.Marshal(rulesEngine.UnitUnitProperties)
+	if err != nil {
+		log.Printf("Error marshaling unit-unit properties: %v", err)
+		return "{}"
+	}
+	return string(unitUnitData)
 }
 
 func (p *GameViewerPage) Copy() View {

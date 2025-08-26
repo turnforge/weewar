@@ -52,7 +52,10 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 			}
 
 			terrain := &v1.TerrainDefinition{}
-			if err := protojson.Unmarshal(terrainBytes, terrain); err != nil {
+			unmarshaler := protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			}
+			if err := unmarshaler.Unmarshal(terrainBytes, terrain); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal terrain %d: %w", id, err)
 			}
 
@@ -75,7 +78,10 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 			}
 
 			unit := &v1.UnitDefinition{}
-			if err := protojson.Unmarshal(unitBytes, unit); err != nil {
+			unmarshaler := protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			}
+			if err := unmarshaler.Unmarshal(unitBytes, unit); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal unit %d: %w", id, err)
 			}
 
@@ -92,7 +98,10 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 			}
 			
 			props := &v1.TerrainUnitProperties{}
-			if err := protojson.Unmarshal(propBytes, props); err == nil {
+			unmarshaler := protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			}
+			if err := unmarshaler.Unmarshal(propBytes, props); err == nil {
 				rulesEngine.TerrainUnitProperties[key] = props
 			}
 		}
@@ -107,7 +116,10 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 			}
 			
 			props := &v1.UnitUnitProperties{}
-			if err := protojson.Unmarshal(propBytes, props); err == nil {
+			unmarshaler := protojson.UnmarshalOptions{
+				DiscardUnknown: true,
+			}
+			if err := unmarshaler.Unmarshal(propBytes, props); err == nil {
 				rulesEngine.UnitUnitProperties[key] = props
 			}
 		}

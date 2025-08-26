@@ -99,13 +99,13 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         // Update terrain header information
         this.updateTerrainHeader(terrainStats);
         
-        // Update movement cost (use rules engine data if available)
-        const movementCost = terrainStats.baseMoveCost;
-        this.updateMovementCost(movementCost);
+        // Update movement cost - now calculated from terrain-unit properties
+        // For display purposes, show average or use a default unit (unit ID 1 - Soldier)
+        const defaultMovementCost = this.rulesTable.getMovementCost(terrainStats.id, 1);
+        this.updateMovementCost(defaultMovementCost);
         
-        // Update defense bonus (use rules engine data if available)
-        const defenseBonus = terrainStats.defenseBonus;
-        this.updateDefenseBonus(defenseBonus);
+        // Defense bonus is now per terrain-unit combination, skip general display
+        // this.updateDefenseBonus(0); // Could calculate average if needed
         
         // Update player ownership if applicable
         this.updatePlayerOwnership(terrainStats.player);
@@ -227,42 +227,11 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         if (terrainStats) {
             properties.push({
                 name: 'Base Move Cost',
-                value: terrainStats.baseMoveCost.toFixed(1)
+                value: 'Varies by unit (see table below)'
             });
-
-            if (terrainStats.defenseBonus !== 0) {
-                const sign = terrainStats.defenseBonus >= 0 ? '+' : '';
-                properties.push({
-                    name: 'Defense Bonus',
-                    value: `${sign}${(terrainStats.defenseBonus * 100).toFixed(0)}%`
-                });
-            }
         }
 
-        // Add movement costs for different unit types if available
-        const mm = this.rulesTable.movementMatrix
-        if (mm && mm.costs) {
-            const unitMovements: string[] = [];
-            
-            // Show movement costs for first few unit types as examples
-            Object.entries(mm.costs).slice(0, 3).forEach(([unitId, terrainCosts]) => {
-                const cost = (terrainCosts as any)[terrainStats.id];
-                if (cost !== undefined) {
-                    const unitDef = this.rulesTable.getUnitDefinition(parseInt(unitId));
-                    const unitName = unitDef?.name || `Unit ${unitId}`;
-                    unitMovements.push(`${unitName}: ${cost.toFixed(1)}`);
-                }
-            });
-            
-            if (unitMovements.length > 0) {
-                properties.push({
-                    name: 'Unit Movement Costs',
-                    value: unitMovements.join(', ')
-                });
-            }
-        }
-
-        // Generate HTML
+        // Generate HTML for properties
         let propertiesHTML = '';
         properties.forEach(property => {
             propertiesHTML += `
@@ -274,6 +243,79 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
 
         propertiesList.innerHTML = propertiesHTML || 
             '<div class="text-sm text-gray-500 dark:text-gray-400 italic">No properties available</div>';
+        
+        // Add terrain-unit properties table if terrain is selected
+        if (terrainStats) {
+            this.generateTerrainUnitPropertiesTable(terrainStats.id, propertiesList);
+        }
+    }
+
+    /**
+     * Generate terrain-unit properties table using HTML templates
+     */
+    private generateTerrainUnitPropertiesTable(terrainId: number, container: HTMLElement): void {
+        // Get the table template
+        const tableTemplate = document.getElementById('terrain-unit-properties-table-template') as HTMLTemplateElement;
+        const rowTemplate = document.getElementById('unit-row-template') as HTMLTemplateElement;
+        
+        if (!tableTemplate || !rowTemplate) {
+            console.warn('Terrain-unit properties table templates not found');
+            return;
+        }
+        
+        // Clone the table template
+        const tableElement = tableTemplate.content.cloneNode(true) as DocumentFragment;
+        const tbody = tableElement.querySelector('tbody');
+        
+        if (!tbody) {
+            console.warn('Table body not found in template');
+            return;
+        }
+        
+        // Get all available units (common unit IDs)
+        const commonUnitIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        let hasAnyUnits = false;
+        
+        commonUnitIds.forEach(unitId => {
+            const unitDef = this.rulesTable.getUnitDefinition(unitId);
+            if (unitDef && unitDef.name) {
+                // Clone the row template
+                const rowElement = rowTemplate.content.cloneNode(true) as DocumentFragment;
+                const row = rowElement.querySelector('tr');
+                
+                if (row) {
+                    // Get terrain-unit properties
+                    const properties = this.rulesTable.getTerrainUnitProperties(terrainId, unitId);
+                    const movementCost = this.rulesTable.getMovementCost(terrainId, unitId);
+                    
+                    // Fill in the row data
+                    const unitNameCell = row.querySelector('[data-unit-name]');
+                    const movementCostCell = row.querySelector('[data-movement-cost]');
+                    const healingCell = row.querySelector('[data-healing]');
+                    const captureCell = row.querySelector('[data-capture]');
+                    const buildCell = row.querySelector('[data-build]');
+                    
+                    if (unitNameCell) unitNameCell.textContent = unitDef.name;
+                    if (movementCostCell) movementCostCell.textContent = movementCost.toFixed(1);
+                    if (healingCell) healingCell.textContent = properties?.healingBonus && properties.healingBonus > 0 ? `+${properties.healingBonus}` : '-';
+                    if (captureCell) captureCell.textContent = properties?.canCapture ? '✓' : '-';
+                    if (buildCell) buildCell.textContent = properties?.canBuild ? '✓' : '-';
+                    
+                    // Add alternating row colors
+                    if (tbody.children.length % 2 === 1) {
+                        row.classList.add('bg-gray-50', 'dark:bg-gray-700');
+                    }
+                    
+                    tbody.appendChild(rowElement);
+                    hasAnyUnits = true;
+                }
+            }
+        });
+        
+        // Only append the table if we have units to show
+        if (hasAnyUnits) {
+            container.appendChild(tableElement);
+        }
     }
 
     /**

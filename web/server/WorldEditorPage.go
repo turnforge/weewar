@@ -87,12 +87,16 @@ func (v *WorldEditorPage) SetupDefaults() {
 			// Use web-accessible static URL path for the tile asset
 			iconDataURL := fmt.Sprintf("/static/assets/v1/Tiles/%d/0.png", i)
 
+			// Calculate base movement cost from terrain-unit properties (use average or default)
+			baseMoveCost := 1.0 // Default
+			// TODO: Could calculate average movement cost across all units for this terrain
+			
 			terrain := TerrainType{
 				TerrainData: weewar.TerrainData{
-					ID:           terrainData.Id,                       // int32 to int32
+					ID:           terrainData.Id,                       
 					Name:         terrainData.Name,
-					BaseMoveCost: float64(terrainData.BaseMoveCost),    // int32 to float64
-					DefenseBonus: float64(terrainData.DefenseBonus),    // int32 to float64
+					BaseMoveCost: baseMoveCost,    
+					DefenseBonus: 0.0, // Defense bonus is now calculated per unit-terrain combination
 				},
 				IconDataURL:     iconDataURL,
 				HasPlayerColors: false, // TODO: Add terrain type info to proto or use heuristic

@@ -150,3 +150,39 @@
         </div>
     </div>
 </div>
+
+<!-- Terrain-Unit Properties Table Template -->
+<template id="terrain-unit-properties-table-template">
+    <div class="mt-4">
+        <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            🎯 Unit Interactions
+        </h6>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Unit</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Move Cost</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Healing</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Capture</th>
+                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white">Build</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                    <!-- Rows will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
+
+<!-- Unit Row Template for Terrain-Unit Properties Table -->
+<template id="unit-row-template">
+    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+        <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium" data-unit-name>Unit Name</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-movement-cost>1.0</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-healing>-</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-capture>-</td>
+        <td class="px-2 py-2 text-center text-gray-900 dark:text-white" data-build>-</td>
+    </tr>
+</template>

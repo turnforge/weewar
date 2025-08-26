@@ -1,5 +1,5 @@
 import { 
-    TerrainDefinition, UnitDefinition, MovementMatrix
+    TerrainDefinition, UnitDefinition, TerrainUnitProperties, UnitUnitProperties
 } from '../gen/weewar/v1/models_pb';
 
 /**
@@ -22,8 +22,6 @@ export class TerrainStats {
     // Convenience getters that delegate to TerrainDefinition
     get id(): number { return this.terrainDefinition.id; }
     get name(): string { return this.terrainDefinition.name; }
-    get baseMoveCost(): number { return this.terrainDefinition.baseMoveCost; }
-    get defenseBonus(): number { return this.terrainDefinition.defenseBonus; }
     get description(): string { return this.terrainDefinition.description; }
 }
 
@@ -31,7 +29,8 @@ export class RulesTable {
     // Cached rules engine data (loaded from page JSON)
     private terrainDefinitions: { [id: number]: TerrainDefinition } = {};
     private unitDefinitions: { [id: number]: UnitDefinition } = {};
-    public movementMatrix: MovementMatrix | null = null;
+    private terrainUnitProperties: { [key: string]: TerrainUnitProperties } = {};
+    private unitUnitProperties: { [key: string]: UnitUnitProperties } = {};
 
     constructor() {
         // Load rules engine data from page
@@ -43,6 +42,31 @@ export class RulesTable {
      */
     public getUnitDefinition(unitId: number): UnitDefinition | null {
         return this.unitDefinitions[unitId] || null;
+    }
+
+    /**
+     * Get movement cost for a unit on specific terrain
+     */
+    public getMovementCost(terrainId: number, unitId: number): number {
+        const key = `${terrainId}:${unitId}`;
+        const properties = this.terrainUnitProperties[key];
+        return properties?.movementCost ?? 1.0; // Default movement cost
+    }
+
+    /**
+     * Get terrain-unit properties
+     */
+    public getTerrainUnitProperties(terrainId: number, unitId: number): TerrainUnitProperties | null {
+        const key = `${terrainId}:${unitId}`;
+        return this.terrainUnitProperties[key] || null;
+    }
+
+    /**
+     * Get unit-vs-unit combat properties
+     */
+    public getUnitUnitProperties(attackerId: number, defenderId: number): UnitUnitProperties | null {
+        const key = `${attackerId}:${defenderId}`;
+        return this.unitUnitProperties[key] || null;
     }
 
     /**
@@ -80,10 +104,16 @@ export class RulesTable {
             this.unitDefinitions = unitData;
         }
 
-        // Load movement matrix
-        const movementElement = document.getElementById('movement-matrix-json');
-        if (movementElement && movementElement.textContent) {
-            this.movementMatrix = JSON.parse(movementElement.textContent);
+        // Load terrain-unit properties (centralized)
+        const terrainUnitElement = document.getElementById('terrain-unit-properties-json');
+        if (terrainUnitElement && terrainUnitElement.textContent) {
+            this.terrainUnitProperties = JSON.parse(terrainUnitElement.textContent);
+        }
+
+        // Load unit-unit combat properties (centralized)
+        const unitUnitElement = document.getElementById('unit-unit-properties-json');
+        if (unitUnitElement && unitUnitElement.textContent) {
+            this.unitUnitProperties = JSON.parse(unitUnitElement.textContent);
         }
     }
 }

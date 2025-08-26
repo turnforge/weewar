@@ -173,6 +173,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                             this.unitStatsPanel.updateUnitInfo(unit);
                         }
                     } else {
+                        // Empty tile clicked - clear selection
+                        this.clearSelection();
                         // Clear unit info from unit stats panel when no unit
                         if (this.unitStatsPanel) {
                             this.unitStatsPanel.clearUnitInfo();

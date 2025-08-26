@@ -22,12 +22,24 @@
 - **WASM Client Migration**: Simplified APIs with direct property access (`change.unitMoved`)
 - **Technical Foundations**: Protobuf definitions, server-side action objects, error resolution
 
+## 🎉 Major Milestone Completed: Rules Engine Architectural Refactoring
+
+### ✅ Recently Completed (Latest Session)
+
+**Centralized Proto-Based Rules Engine - COMPLETED**
+- **🏗️ Architectural Transformation**: Migrated from duplicated MovementMatrix/TerrainCosts to centralized proto-based system
+- **📊 TerrainUnitProperties & UnitUnitProperties**: Single source of truth with string-based keys ("terrain_id:unit_id", "attacker_id:defender_id")  
+- **⚔️ Combat System Overhaul**: Updated to use proto-based damage distributions with probability buckets
+- **🔧 Rules Data Extraction**: Created comprehensive tool extracting 38 units, 23 terrains, 558 terrain-unit properties, 1,146 combat properties
+- **🎨 Frontend Integration**: Updated RulesTable.ts and TerrainStatsPanel.ts with template-based terrain-unit properties table
+- **🚀 Performance**: Fast lookup with populated reference maps while maintaining centralized data integrity
+
 ### 🔄 In Progress / Next Sprint
 
-**Bug Resolution Follow-up - COMPLETED**
-- [x] **Fix UnitMovedChange Coordinates**: Fixed move processor to capture moved unit correctly after copy-on-write
-- [x] **Verify ProcessMoves Integration**: End-to-end ProcessMoves flow now works perfectly with proper unit movement
-- [x] **Complete Unit Movement Pipeline**: All tests passing - units move correctly with no duplication
+**GameViewerPage Layout Enhancement - STARTING**
+- [ ] **DockView Integration**: Add flexible panel layout system like WorldEditorPage
+- [ ] **Panel Management**: TerrainStatsPanel, Main Game Panel, GameActions Panel, GameLog Panel  
+- [ ] **User Customization**: Allow users to arrange panels according to their preferences
 
 **Architecture Validation & Testing**
 - [ ] **End-to-End Testing**: Test the complete move processing pipeline with real game scenarios

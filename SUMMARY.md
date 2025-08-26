@@ -92,12 +92,16 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 
 ## Technical Architecture Highlights
 
+**Centralized Rules Engine**: Proto-based single source of truth with TerrainUnitProperties and UnitUnitProperties using string-based keys for O(1) lookup while eliminating data duplication.
+
 **Transaction Safety**: The World system implements a parent-child transaction model with copy-on-write semantics, enabling safe rollback and ordered change application.
 
 **Service Reusability**: Same service implementations work across HTTP, gRPC, and WASM transports through interface abstraction.
 
 **Type Safety**: Generated WASM client provides compile-time type checking while maintaining flexibility with protobuf integration.
 
+**Template-Based UI**: Clean separation of concerns with HTML templates for complex UI components like terrain-unit properties tables.
+
 **Event System**: Clean observer pattern enables loose coupling between game logic, state management, and UI rendering.
 
-This architecture represents a production-ready foundation for turn-based strategy games with excellent separation of concerns, comprehensive testing, and robust state management.
+This architecture represents a production-ready foundation for turn-based strategy games with excellent separation of concerns, centralized rules management, comprehensive testing, and robust state management.

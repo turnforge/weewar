@@ -1,5 +1,30 @@
 # Next Steps - WeeWar Development
 
+## 🎉 Major Milestone Completed: Multiplayer Coordination Framework
+
+### ✅ Recently Completed (Current Session)
+
+**Distributed Validation Architecture - 90% COMPLETE**
+- **🏗️ TurnEngine Coordination**: Created game-agnostic coordination protocol in TurnEngine package
+- **📊 K-of-N Consensus**: Implemented proposal/validation system with multiple validator support
+- **🔧 File-Based Storage**: Atomic file operations with mutex locking for concurrent access
+- **⚡ Callback Pattern**: OnProposalStarted/Accepted/Failed hooks for state management
+- **🎯 Local-First Design**: WASM clients validate moves, server only coordinates consensus
+- **📦 Opaque Blob Storage**: Server stores game state without understanding content
+- **🔄 Pull-Based Sync**: Simple REST polling model (websockets planned for Phase 3)
+
+**Architecture Consolidation - COMPLETED**
+- **Generic FileStorage**: Moved from WeeWar to TurnEngine for code reuse
+- **Dependency Isolation**: TurnEngine has no references to WeeWar (one-way dependency)
+- **Proto Integration**: Added ProposalTrackingInfo to GameState for coordination
+- **Service Wrapping**: CoordinatorGamesService extends FSGamesService with coordination
+
+**Remaining Tasks (Week 1)**
+- [ ] Unit tests for coordinator consensus logic
+- [ ] Manual test CLI for local multiplayer testing
+- [ ] WASM client updates to use coordinator service
+- [ ] UI indicators for proposal status (pending/validating/accepted/rejected)
+
 ## 🎉 Major Milestone Completed: Unit Duplication Bug Fixed
 
 ### ✅ Recently Completed (Current Session)
@@ -35,6 +60,13 @@
 - **🚀 Performance**: Fast lookup with populated reference maps while maintaining centralized data integrity
 
 ### 🔄 In Progress / Next Sprint
+
+**Multiplayer Testing & Validation - HIGH PRIORITY**
+- [ ] **Consensus Testing**: Unit tests for K-of-N validation scenarios
+- [ ] **Manual Test CLI**: Command-line tool for simulating multiple players
+- [ ] **WASM Integration**: Update client to submit proposals instead of direct moves
+- [ ] **UI Feedback**: Show proposal status during validation phase
+- [ ] **Error Handling**: Graceful handling of validation failures
 
 **GameViewerPage Layout Enhancement - STARTING**
 - [ ] **DockView Integration**: Add flexible panel layout system like WorldEditorPage
@@ -74,10 +106,22 @@
 
 ### 🎯 Strategic Objectives
 
+**Phase 2 Completion (Week 1)**
+- [ ] **Coordinator Testing**: Comprehensive validation of consensus mechanism
+- [ ] **Client Integration**: WASM clients using coordinator for moves
+- [ ] **Manual Testing**: Local multiplayer gameplay validation
+- [ ] **Documentation**: Update guides for multiplayer setup
+
+**Phase 3 Production (Weeks 2-3)**
+- [ ] **Database Migration**: PostgreSQL storage implementation
+- [ ] **WebSocket Support**: Real-time updates for better UX
+- [ ] **Performance Optimization**: Load testing with concurrent games
+- [ ] **Player Presence**: Online status and connection management
+
 **Feature Completeness**
 - [ ] **Full Combat System**: Attacks, damage, unit destruction, health management
 - [ ] **Map Editor Integration**: Seamless world creation and game initialization
-- [ ] **Multiplayer Support**: Multiple players, turn management, spectator mode
+- [🔄] **Multiplayer Support**: Coordination framework 90% complete, testing needed
 - [ ] **Game Persistence**: Save/load games, replay system, move history
 
 **User Experience**
@@ -119,7 +163,8 @@ The current system supports:
 This represents a **fully functional core gameplay loop** ready for demonstration and further feature development.
 
 ## Status Update
-**Current Version**: 8.4 (Input System Fixes & Editor Polish)  
-**Status**: Production-ready with robust input handling and complete tile editing functionality  
-**Architecture**: Automatic world-to-rendering synchronization via PhaserWorldScene base class  
-**Recent Fixes**: Proper Phaser tap/drag separation and tile clearing visual sync
+**Current Version**: 9.0 (Multiplayer Coordination Framework)  
+**Status**: Core coordination architecture complete, testing and integration pending  
+**Architecture**: Local-first validation with distributed consensus via TurnEngine  
+**Recent Achievements**: Game-agnostic coordinator, file-based storage, callback pattern  
+**Next Focus**: Complete Phase 2 with testing and client integration (Week 1)

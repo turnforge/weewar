@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
+	"github.com/panyam/turnengine/engine/storage"
 )
 
 func CreateTestWorld(name string, nq, nr int, units []*v1.Unit) *weewar.World {
@@ -31,7 +32,7 @@ func CreateTestWorld(name string, nq, nr int, units []*v1.Unit) *weewar.World {
 func LoadTestWorldFromStorage(worldsStorageDir, worldId string) (*weewar.World, *v1.GameState, error) {
 	// Create FSWorldsService to load real world data
 	worldsService := &FSWorldsServiceImpl{
-		storage: NewFileStorage(worldsStorageDir),
+		storage: storage.NewFileStorage(worldsStorageDir),
 	}
 	
 	// Load the world using GetWorld RPC (same as production code)

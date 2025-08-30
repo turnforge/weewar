@@ -8,6 +8,7 @@ import (
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
+	"github.com/panyam/turnengine/engine/storage"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -16,7 +17,7 @@ var WORLDS_STORAGE_DIR = ""
 // FSWorldsServiceImpl implements the FSWorldsService gRPC interface
 type FSWorldsServiceImpl struct {
 	BaseWorldsServiceImpl
-	storage *FileStorage
+	storage *storage.FileStorage
 }
 
 // NewFSWorldsService creates a new FSWorldsService implementation
@@ -24,7 +25,7 @@ func NewFSWorldsService() *FSWorldsServiceImpl {
 	if WORLDS_STORAGE_DIR == "" {
 		WORLDS_STORAGE_DIR = weewar.DevDataPath("storage/worlds")
 	}
-	service := &FSWorldsServiceImpl{storage: NewFileStorage(WORLDS_STORAGE_DIR)}
+	service := &FSWorldsServiceImpl{storage: storage.NewFileStorage(WORLDS_STORAGE_DIR)}
 	return service
 }
 
@@ -37,7 +38,7 @@ func (s *FSWorldsServiceImpl) ListWorlds(ctx context.Context, req *v1.ListWorlds
 			TotalResults: 0,
 		},
 	}
-	resp.Items, err = ListFSEntities[*v1.World](s.storage, nil)
+	resp.Items, err = storage.ListFSEntities[*v1.World](s.storage, nil)
 	resp.Pagination.TotalResults = int32(len(resp.Items))
 	return resp, nil
 }
@@ -48,12 +49,12 @@ func (s *FSWorldsServiceImpl) GetWorld(ctx context.Context, req *v1.GetWorldRequ
 		return nil, fmt.Errorf("world ID is required")
 	}
 
-	world, err := LoadFSArtifact[*v1.World](s.storage, req.Id, "metadata")
+	world, err := storage.LoadFSArtifact[*v1.World](s.storage, req.Id, "metadata")
 	if err != nil {
 		return nil, fmt.Errorf("world metadata not found: %w", err)
 	}
 
-	worldData, err := LoadFSArtifact[*v1.WorldData](s.storage, req.Id, "data")
+	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.Id, "data")
 	if err != nil {
 		return nil, fmt.Errorf("world data not found: %w", err)
 	}
@@ -75,7 +76,7 @@ func (s *FSWorldsServiceImpl) UpdateWorld(ctx context.Context, req *v1.UpdateWor
 	}
 
 	// Load existing metadata
-	world, err := LoadFSArtifact[*v1.World](s.storage, req.World.Id, "metadata")
+	world, err := storage.LoadFSArtifact[*v1.World](s.storage, req.World.Id, "metadata")
 	if err != nil {
 		return nil, fmt.Errorf("world not found: %w", err)
 	}
@@ -99,7 +100,7 @@ func (s *FSWorldsServiceImpl) UpdateWorld(ctx context.Context, req *v1.UpdateWor
 		return nil, fmt.Errorf("failed to update world metadata: %w", err)
 	}
 
-	worldData, err := LoadFSArtifact[*v1.WorldData](s.storage, req.World.Id, "data")
+	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.World.Id, "data")
 	if err != nil {
 		return nil, fmt.Errorf("world not found: %w", err)
 	}

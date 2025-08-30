@@ -2,7 +2,7 @@
 
 ## System Overview
 
-WeeWar implements a clean separation between game logic (Go), state management (WASM), and presentation (TypeScript/Phaser). The architecture emphasizes transaction safety, type safety, and maintainable separation of concerns.
+WeeWar implements a clean separation between game logic (Go), state management (WASM), coordination (TurnEngine), and presentation (TypeScript/Phaser). The architecture emphasizes transaction safety, type safety, distributed validation, and maintainable separation of concerns.
 
 ## Core Design Principles
 
@@ -223,11 +223,71 @@ handleTilesChanged(data) { this.setTile(change.tile); }
 **Transaction Cleanup**: Automatic cleanup when transactions complete
 **Object Reuse**: Minimize allocation/deallocation in hot paths
 
+## Multiplayer Coordination Architecture
+
+### Local-First Validation Model
+
+**Distributed Trust**: Each player's WASM validates moves locally before submission to coordinator.
+
+**Server as Coordinator**: Server never runs game logic - only manages consensus and storage:
+```go
+// CoordinatorService is game-agnostic
+type CoordinatorService struct {
+    storage Storage      // Opaque blob storage
+    callbacks Callbacks  // Game-specific hooks
+}
+```
+
+### Coordination Flow
+
+1. **Player Makes Move**: WASM runs ProcessMoves locally
+2. **Submit Proposal**: Send moves + changes + new state to coordinator  
+3. **Validator Assignment**: Coordinator assigns K validators from other players
+4. **Distributed Validation**: Each validator's WASM verifies the proposal
+5. **Consensus**: K-of-N approval commits the new state
+
+### Key Design Decisions
+
+**Game-Agnostic Coordinator**: TurnEngine coordinator knows nothing about WeeWar:
+- All game data stored as opaque blobs
+- State transitions verified by hash comparison
+- Callbacks notify game service of proposal lifecycle
+
+**Pull-Based Synchronization**: Simple REST polling (no websockets yet):
+- Players refresh before making moves
+- Validators poll for pending work
+- Reduces complexity for initial implementation
+
+**File-Based Storage**: JSON files for development simplicity:
+- Human-readable for debugging
+- Atomic operations via file locking
+- Easy migration to database later
+
+### Service Architecture
+
+```
+TurnEngine (Generic)
+├── coordination/
+│   ├── service.go         # Consensus logic
+│   ├── storage.go         # Storage interface
+│   └── file_storage.go    # File implementation
+└── storage/
+    └── file_storage.go    # Generic file storage
+
+WeeWar (Game-Specific)  
+├── services/
+│   ├── coordinator_games.go  # Wraps FSGamesService
+│   └── base.go               # ProcessMoves logic
+└── protos/
+    └── models.proto          # Includes ProposalTrackingInfo
+```
+
 ## Future Architecture Considerations
 
 ### Scalability
 
-**Multi-Player Support**: Transaction system ready for concurrent player actions
+**Multi-Player Support**: Coordination system supports K-of-N validation
+**Cross-Game Validators**: Can use validators from other games (v2)
 **State Partitioning**: World architecture supports regional game state management
 **Caching Layer**: Service layer ready for redis/memcache integration
 
@@ -236,5 +296,6 @@ handleTilesChanged(data) { this.setTile(change.tile); }
 **Rules Engine**: JSON-configurable game mechanics
 **Transport Layer**: Easy addition of new client protocols
 **Rendering Backend**: Phaser abstraction allows for alternative renderers
+**Consensus Algorithms**: Pluggable validation strategies
 
-This architecture provides a solid foundation for turn-based strategy games with excellent separation of concerns, comprehensive testing, and robust state management.
+This architecture provides a solid foundation for turn-based strategy games with distributed validation, excellent separation of concerns, comprehensive testing, and robust state management.

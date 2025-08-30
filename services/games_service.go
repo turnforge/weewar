@@ -8,6 +8,7 @@ import (
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
+	"github.com/panyam/turnengine/engine/storage"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -17,7 +18,7 @@ var GAMES_STORAGE_DIR = ""
 type FSGamesServiceImpl struct {
 	BaseGamesServiceImpl
 	WorldsService v1.WorldsServiceServer
-	storage       *FileStorage // Storage area for all files
+	storage       *storage.FileStorage // Storage area for all files
 }
 
 // NewGamesService creates a new GamesService implementation for server mode
@@ -28,7 +29,7 @@ func NewFSGamesService() *FSGamesServiceImpl {
 	service := &FSGamesServiceImpl{
 		BaseGamesServiceImpl: BaseGamesServiceImpl{},
 		WorldsService:        NewFSWorldsService(),
-		storage:              NewFileStorage(GAMES_STORAGE_DIR),
+		storage:              storage.NewFileStorage(GAMES_STORAGE_DIR),
 	}
 	service.Self = service
 
@@ -44,7 +45,7 @@ func (s *FSGamesServiceImpl) ListGames(ctx context.Context, req *v1.ListGamesReq
 			TotalResults: 0,
 		},
 	}
-	resp.Items, err = ListFSEntities[*v1.Game](s.storage, nil)
+	resp.Items, err = storage.ListFSEntities[*v1.Game](s.storage, nil)
 	resp.Pagination.TotalResults = int32(len(resp.Items))
 	return resp, nil
 }
@@ -129,17 +130,17 @@ func (s *FSGamesServiceImpl) GetGame(ctx context.Context, req *v1.GetGameRequest
 		return nil, fmt.Errorf("game ID is required")
 	}
 
-	game, err := LoadFSArtifact[*v1.Game](s.storage, req.Id, "metadata")
+	game, err := storage.LoadFSArtifact[*v1.Game](s.storage, req.Id, "metadata")
 	if err != nil {
 		return nil, fmt.Errorf("game metadata not found: %w", err)
 	}
 
-	gameState, err := LoadFSArtifact[*v1.GameState](s.storage, req.Id, "state")
+	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, req.Id, "state")
 	if err != nil {
 		return nil, fmt.Errorf("game state not found: %w", err)
 	}
 
-	gameHistory, err := LoadFSArtifact[*v1.GameMoveHistory](s.storage, req.Id, "history")
+	gameHistory, err := storage.LoadFSArtifact[*v1.GameMoveHistory](s.storage, req.Id, "history")
 	if err != nil {
 		return nil, fmt.Errorf("game state not found: %w", err)
 	}
@@ -161,7 +162,7 @@ func (s *FSGamesServiceImpl) UpdateGame(ctx context.Context, req *v1.UpdateGameR
 
 	// Load existing metadata
 	if req.NewGame != nil {
-		game, err := LoadFSArtifact[*v1.Game](s.storage, req.GameId, "metadata")
+		game, err := storage.LoadFSArtifact[*v1.Game](s.storage, req.GameId, "metadata")
 		if err != nil {
 			return nil, fmt.Errorf("game not found: %w", err)
 		}

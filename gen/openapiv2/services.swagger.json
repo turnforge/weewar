@@ -1,10 +1,13 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "weewar/v1/models.proto",
+    "title": "turnengine/v1/coordinator.proto",
     "version": "version not set"
   },
   "tags": [
+    {
+      "name": "CoordinatorService"
+    },
     {
       "name": "GamesService"
     },
@@ -36,7 +39,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -89,7 +92,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -122,7 +125,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -182,7 +185,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -227,7 +230,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -277,7 +280,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -322,7 +325,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -354,7 +357,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -390,7 +393,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -423,7 +426,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -459,7 +462,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -512,7 +515,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -545,7 +548,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -581,7 +584,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -614,7 +617,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -699,7 +702,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -735,7 +738,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -788,7 +791,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -821,7 +824,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -857,7 +860,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -890,7 +893,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -989,7 +992,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -1013,16 +1016,7 @@
     }
   },
   "definitions": {
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
-    },
-    "rpcStatus": {
+    "googlerpcStatus": {
       "type": "object",
       "properties": {
         "code": {
@@ -1040,6 +1034,15 @@
           }
         }
       }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
     },
     "v1AttackOption": {
       "type": "object",
@@ -1517,6 +1520,19 @@
         "worldData": {
           "$ref": "#/definitions/v1WorldData",
           "title": "Current world state"
+        },
+        "proposalInfo": {
+          "$ref": "#/definitions/v1ProposalTrackingInfo",
+          "title": "Proposal tracking for multiplayer coordination (from TurnEngine)"
+        },
+        "stateHash": {
+          "type": "string",
+          "title": "Current state hash for validation"
+        },
+        "version": {
+          "type": "string",
+          "format": "int64",
+          "title": "Version number for optimistic locking"
         }
       },
       "title": "Holds the game's Active/Current state (eg world state)"
@@ -1578,6 +1594,37 @@
       },
       "title": "*\nResponse with all available options at a position"
     },
+    "v1GetPendingValidationsResponse": {
+      "type": "object",
+      "properties": {
+        "validations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PendingValidation"
+          }
+        }
+      }
+    },
+    "v1GetProposalStatusResponse": {
+      "type": "object",
+      "properties": {
+        "proposal": {
+          "$ref": "#/definitions/v1ProposalInfo"
+        },
+        "phase": {
+          "$ref": "#/definitions/v1ProposalPhase"
+        },
+        "votesReceived": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "votesRequired": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "v1GetUserResponse": {
       "type": "object",
       "properties": {
@@ -1632,7 +1679,7 @@
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
+          "$ref": "#/definitions/weewarv1PaginationResponse"
         }
       }
     },
@@ -1664,7 +1711,7 @@
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
+          "$ref": "#/definitions/weewarv1PaginationResponse"
         }
       }
     },
@@ -1679,7 +1726,7 @@
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
+          "$ref": "#/definitions/weewarv1PaginationResponse"
         }
       }
     },
@@ -1727,45 +1774,35 @@
       },
       "title": "*\nMove unit from one position to another"
     },
-    "v1Pagination": {
+    "v1PendingValidation": {
       "type": "object",
       "properties": {
-        "pageKey": {
+        "sessionId": {
+          "type": "string"
+        },
+        "proposalId": {
+          "type": "string"
+        },
+        "proposerId": {
+          "type": "string"
+        },
+        "fromStateHash": {
+          "type": "string"
+        },
+        "movesBlob": {
           "type": "string",
-          "description": "*\nInstead of an offset an abstract  \"page\" key is provided that offers\nan opaque \"pointer\" into some offset in a result set."
+          "format": "byte"
         },
-        "pageOffset": {
-          "type": "integer",
-          "format": "int32",
-          "description": "*\nIf a pagekey is not supported we can also support a direct integer offset\nfor cases where it makes sense."
-        },
-        "pageSize": {
-          "type": "integer",
-          "format": "int32",
-          "description": "*\nNumber of results to return."
-        }
-      }
-    },
-    "v1PaginationResponse": {
-      "type": "object",
-      "properties": {
-        "nextPageKey": {
+        "changesBlob": {
           "type": "string",
-          "description": "*\nThe key/pointer string that subsequent List requests should pass to\ncontinue the pagination."
+          "format": "byte"
         },
-        "nextPageOffset": {
-          "type": "integer",
-          "format": "int32",
-          "title": "*\nAlso support an integer offset if possible"
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
         },
-        "hasMore": {
-          "type": "boolean",
-          "description": "*\nWhether theere are more results."
-        },
-        "totalResults": {
-          "type": "integer",
-          "format": "int32",
-          "description": "*\nTotal number of results."
+        "nonce": {
+          "type": "string"
         }
       }
     },
@@ -1821,6 +1858,162 @@
         }
       },
       "description": "*\nResponse after adding moves to game.\n\nReturns the response of the moves along with all the changes incurred as a result"
+    },
+    "v1ProposalInfo": {
+      "type": "object",
+      "properties": {
+        "proposalId": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "proposerId": {
+          "type": "string"
+        },
+        "fromStateHash": {
+          "type": "string",
+          "title": "State transition (opaque to coordinator)"
+        },
+        "toStateHash": {
+          "type": "string"
+        },
+        "movesBlob": {
+          "type": "string",
+          "format": "byte",
+          "title": "Opaque game moves"
+        },
+        "changesBlob": {
+          "type": "string",
+          "format": "byte",
+          "title": "Opaque changes"
+        },
+        "newStateBlob": {
+          "type": "string",
+          "format": "byte",
+          "title": "Opaque new state"
+        },
+        "assignedValidators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation tracking"
+        },
+        "votes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1ValidationVote"
+          }
+        },
+        "phase": {
+          "$ref": "#/definitions/v1ProposalPhase"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Timing"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nonce": {
+          "type": "string",
+          "title": "Anti-replay"
+        }
+      }
+    },
+    "v1ProposalPhase": {
+      "type": "string",
+      "enum": [
+        "PROPOSAL_PHASE_UNSPECIFIED",
+        "PROPOSAL_PHASE_OPEN",
+        "PROPOSAL_PHASE_COLLECTING",
+        "PROPOSAL_PHASE_FINALIZING",
+        "PROPOSAL_PHASE_COMMITTED",
+        "PROPOSAL_PHASE_REJECTED",
+        "PROPOSAL_PHASE_TIMEOUT"
+      ],
+      "default": "PROPOSAL_PHASE_UNSPECIFIED",
+      "title": "- PROPOSAL_PHASE_OPEN: Ready for new proposals\n - PROPOSAL_PHASE_COLLECTING: Collecting validator votes\n - PROPOSAL_PHASE_FINALIZING: Consensus reached, updating\n - PROPOSAL_PHASE_COMMITTED: Successfully committed\n - PROPOSAL_PHASE_REJECTED: Failed validation\n - PROPOSAL_PHASE_TIMEOUT: Timed out"
+    },
+    "v1ProposalTrackingInfo": {
+      "type": "object",
+      "properties": {
+        "proposalId": {
+          "type": "string",
+          "title": "ID of the active proposal"
+        },
+        "proposerId": {
+          "type": "string",
+          "title": "Player who made the proposal"
+        },
+        "phase": {
+          "$ref": "#/definitions/v1ProposalPhase",
+          "title": "Current phase of the proposal"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Creation time"
+        },
+        "validatorCount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Number of validators assigned"
+        },
+        "votesReceived": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Number of votes received"
+        }
+      },
+      "title": "Lightweight proposal tracking for game state (game-agnostic)"
+    },
+    "v1SubmitProposalResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/v1SubmitProposalResponseStatus"
+        },
+        "proposalId": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "title": "If rejected"
+        },
+        "assignedValidators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1SubmitProposalResponseStatus": {
+      "type": "string",
+      "enum": [
+        "STATUS_UNSPECIFIED",
+        "STATUS_ACCEPTED",
+        "STATUS_REJECTED"
+      ],
+      "default": "STATUS_UNSPECIFIED"
+    },
+    "v1SubmitValidationResponse": {
+      "type": "object",
+      "properties": {
+        "recorded": {
+          "type": "boolean"
+        },
+        "consensusReached": {
+          "type": "boolean"
+        },
+        "consensusApproved": {
+          "type": "boolean"
+        }
+      }
     },
     "v1Tile": {
       "type": "object",
@@ -1998,6 +2191,30 @@
         }
       }
     },
+    "v1ValidationVote": {
+      "type": "object",
+      "properties": {
+        "validatorId": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "computedHash": {
+          "type": "string"
+        },
+        "errorReason": {
+          "type": "string"
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signature": {
+          "type": "string"
+        }
+      }
+    },
     "v1World": {
       "type": "object",
       "properties": {
@@ -2082,6 +2299,48 @@
             "$ref": "#/definitions/v1Unit"
           },
           "title": "All units on the world and who they belong to"
+        }
+      }
+    },
+    "weewarv1Pagination": {
+      "type": "object",
+      "properties": {
+        "pageKey": {
+          "type": "string",
+          "description": "*\nInstead of an offset an abstract  \"page\" key is provided that offers\nan opaque \"pointer\" into some offset in a result set."
+        },
+        "pageOffset": {
+          "type": "integer",
+          "format": "int32",
+          "description": "*\nIf a pagekey is not supported we can also support a direct integer offset\nfor cases where it makes sense."
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32",
+          "description": "*\nNumber of results to return."
+        }
+      }
+    },
+    "weewarv1PaginationResponse": {
+      "type": "object",
+      "properties": {
+        "nextPageKey": {
+          "type": "string",
+          "description": "*\nThe key/pointer string that subsequent List requests should pass to\ncontinue the pagination."
+        },
+        "nextPageOffset": {
+          "type": "integer",
+          "format": "int32",
+          "title": "*\nAlso support an integer offset if possible"
+        },
+        "hasMore": {
+          "type": "boolean",
+          "description": "*\nWhether theere are more results."
+        },
+        "totalResults": {
+          "type": "integer",
+          "format": "int32",
+          "description": "*\nTotal number of results."
         }
       }
     }

@@ -1,6 +1,7 @@
 // Generated TypeScript interfaces from proto file
 // DO NOT EDIT - This file is auto-generated
 
+import { ProposalTrackingInfo } from "../../turnengine/v1/interfaces";
 
 
 
@@ -278,6 +279,12 @@ export interface GameState {
   currentPlayer: number;
   /** Current world state */
   worldData?: WorldData;
+  /** Proposal tracking for multiplayer coordination (from TurnEngine) */
+  proposalInfo?: ProposalTrackingInfo;
+  /** Current state hash for validation */
+  stateHash: string;
+  /** Version number for optimistic locking */
+  version: number;
 }
 
 

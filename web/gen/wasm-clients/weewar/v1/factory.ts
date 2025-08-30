@@ -1,4 +1,5 @@
 
+import { ProposalTrackingInfo } from "../../turnengine/v1/interfaces";
 
 
 
@@ -7,6 +8,7 @@ import { User as UserInterface, Pagination as PaginationInterface, PaginationRes
 
 import { User as ConcreteUser, Pagination as ConcretePagination, PaginationResponse as ConcretePaginationResponse, World as ConcreteWorld, WorldData as ConcreteWorldData, Tile as ConcreteTile, Unit as ConcreteUnit, TerrainDefinition as ConcreteTerrainDefinition, UnitDefinition as ConcreteUnitDefinition, TerrainUnitProperties as ConcreteTerrainUnitProperties, UnitUnitProperties as ConcreteUnitUnitProperties, DamageDistribution as ConcreteDamageDistribution, DamageRange as ConcreteDamageRange, RulesEngine as ConcreteRulesEngine, Game as ConcreteGame, GameConfiguration as ConcreteGameConfiguration, GamePlayer as ConcreteGamePlayer, GameSettings as ConcreteGameSettings, GameState as ConcreteGameState, GameMoveHistory as ConcreteGameMoveHistory, GameMoveGroup as ConcreteGameMoveGroup, GameMove as ConcreteGameMove, GameMoveResult as ConcreteGameMoveResult, MoveUnitAction as ConcreteMoveUnitAction, AttackUnitAction as ConcreteAttackUnitAction, EndTurnAction as ConcreteEndTurnAction, WorldChange as ConcreteWorldChange, UnitMovedChange as ConcreteUnitMovedChange, UnitDamagedChange as ConcreteUnitDamagedChange, UnitKilledChange as ConcreteUnitKilledChange, PlayerChangedChange as ConcretePlayerChangedChange, GameInfo as ConcreteGameInfo, ListGamesRequest as ConcreteListGamesRequest, ListGamesResponse as ConcreteListGamesResponse, GetGameRequest as ConcreteGetGameRequest, GetGameResponse as ConcreteGetGameResponse, GetGameContentRequest as ConcreteGetGameContentRequest, GetGameContentResponse as ConcreteGetGameContentResponse, UpdateGameRequest as ConcreteUpdateGameRequest, UpdateGameResponse as ConcreteUpdateGameResponse, DeleteGameRequest as ConcreteDeleteGameRequest, DeleteGameResponse as ConcreteDeleteGameResponse, GetGamesRequest as ConcreteGetGamesRequest, GetGamesResponse as ConcreteGetGamesResponse, CreateGameRequest as ConcreteCreateGameRequest, CreateGameResponse as ConcreteCreateGameResponse, ProcessMovesRequest as ConcreteProcessMovesRequest, ProcessMovesResponse as ConcreteProcessMovesResponse, GetGameStateRequest as ConcreteGetGameStateRequest, GetGameStateResponse as ConcreteGetGameStateResponse, ListMovesRequest as ConcreteListMovesRequest, ListMovesResponse as ConcreteListMovesResponse, GetOptionsAtRequest as ConcreteGetOptionsAtRequest, GetOptionsAtResponse as ConcreteGetOptionsAtResponse, GameOption as ConcreteGameOption, EndTurnOption as ConcreteEndTurnOption, MoveOption as ConcreteMoveOption, AttackOption as ConcreteAttackOption, BuildUnitOption as ConcreteBuildUnitOption, CaptureBuildingOption as ConcreteCaptureBuildingOption, UserInfo as ConcreteUserInfo, ListUsersRequest as ConcreteListUsersRequest, ListUsersResponse as ConcreteListUsersResponse, GetUserRequest as ConcreteGetUserRequest, GetUserResponse as ConcreteGetUserResponse, GetUserContentRequest as ConcreteGetUserContentRequest, GetUserContentResponse as ConcreteGetUserContentResponse, UpdateUserRequest as ConcreteUpdateUserRequest, UpdateUserResponse as ConcreteUpdateUserResponse, DeleteUserRequest as ConcreteDeleteUserRequest, DeleteUserResponse as ConcreteDeleteUserResponse, GetUsersRequest as ConcreteGetUsersRequest, GetUsersResponse as ConcreteGetUsersResponse, CreateUserRequest as ConcreteCreateUserRequest, CreateUserResponse as ConcreteCreateUserResponse, WorldInfo as ConcreteWorldInfo, ListWorldsRequest as ConcreteListWorldsRequest, ListWorldsResponse as ConcreteListWorldsResponse, GetWorldRequest as ConcreteGetWorldRequest, GetWorldResponse as ConcreteGetWorldResponse, UpdateWorldRequest as ConcreteUpdateWorldRequest, UpdateWorldResponse as ConcreteUpdateWorldResponse, DeleteWorldRequest as ConcreteDeleteWorldRequest, DeleteWorldResponse as ConcreteDeleteWorldResponse, GetWorldsRequest as ConcreteGetWorldsRequest, GetWorldsResponse as ConcreteGetWorldsResponse, CreateWorldRequest as ConcreteCreateWorldRequest, CreateWorldResponse as ConcreteCreateWorldResponse } from "./models";
 
+import { TurnengineV1Factory } from "../../turnengine/v1/factory";
 
 
 /**
@@ -21,6 +23,8 @@ export interface FactoryResult<T> {
  * Enhanced factory with context-aware object construction
  */
 export class WeewarV1Factory {
+  // Dependency factory for turnengine.v1 package
+  private v1Factory = new TurnengineV1Factory();
 
 
   /**
@@ -1813,6 +1817,9 @@ export class WeewarV1Factory {
     }
     
     // Delegate to appropriate dependency factory
+    if (packageName === "turnengine.v1") {
+      return (this.v1Factory as any)[methodName];
+    }
 
     
     return undefined;

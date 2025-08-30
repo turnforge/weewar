@@ -727,6 +727,22 @@ export const GameStateSchema: MessageSchema = {
       id: 6,
       messageType: "weewar.v1.WorldData",
     },
+    {
+      name: "proposalInfo",
+      type: FieldType.MESSAGE,
+      id: 7,
+      messageType: "turnengine.v1.ProposalTrackingInfo",
+    },
+    {
+      name: "stateHash",
+      type: FieldType.STRING,
+      id: 8,
+    },
+    {
+      name: "version",
+      type: FieldType.NUMBER,
+      id: 9,
+    },
   ],
 };
 

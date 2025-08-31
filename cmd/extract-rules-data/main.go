@@ -102,7 +102,7 @@ func main() {
 	}
 
 	// Write output
-	outputPath := "games/weewar/weewar-rules.json"
+	outputPath := "weewar-rules.json"
 	jsonData, err := json.MarshalIndent(rulesData, "", "  ")
 	if err != nil {
 		fmt.Printf("Error marshaling JSON: %v\n", err)
@@ -236,14 +236,43 @@ func extractTerrainName(doc *html.Node) string {
 }
 
 func extractTerrainUnitInteractions(doc *html.Node, terrainID int32, rulesData *RulesData) error {
-	// Find the units interaction table
+	// First, find the table headers to understand column layout
+	var columnHeaders []string
+	var foundTable bool
+	
+	var findHeaders func(*html.Node)
+	findHeaders = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "thead" && !foundTable {
+			// Extract column headers
+			for row := n.FirstChild; row != nil; row = row.NextSibling {
+				if row.Type == html.ElementNode && row.Data == "tr" {
+					for cell := row.FirstChild; cell != nil; cell = cell.NextSibling {
+						if cell.Type == html.ElementNode && cell.Data == "th" {
+							headerText := getTextContent(cell)
+							columnHeaders = append(columnHeaders, strings.ToLower(strings.TrimSpace(headerText)))
+						}
+					}
+					foundTable = true
+					break
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			if !foundTable {
+				findHeaders(c)
+			}
+		}
+	}
+	findHeaders(doc)
+	
+	// Now find the tbody and process rows with column header knowledge
 	var traverse func(*html.Node)
 	traverse = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "tbody" {
 			// Process each row in the table
 			for row := n.FirstChild; row != nil; row = row.NextSibling {
 				if row.Type == html.ElementNode && row.Data == "tr" {
-					extractUnitRowData(row, terrainID, rulesData)
+					extractUnitRowData(row, terrainID, columnHeaders, rulesData)
 				}
 			}
 		}
@@ -256,7 +285,7 @@ func extractTerrainUnitInteractions(doc *html.Node, terrainID int32, rulesData *
 	return nil
 }
 
-func extractUnitRowData(row *html.Node, terrainID int32, rulesData *RulesData) {
+func extractUnitRowData(row *html.Node, terrainID int32, columnHeaders []string, rulesData *RulesData) {
 	var unitID int32 = -1
 	properties := TerrainUnitProperties{
 		MovementCost: 1.0, // Default movement cost
@@ -265,21 +294,27 @@ func extractUnitRowData(row *html.Node, terrainID int32, rulesData *RulesData) {
 	cellIndex := 0
 	for cell := row.FirstChild; cell != nil; cell = cell.NextSibling {
 		if cell.Type == html.ElementNode && cell.Data == "td" {
-			cellText := getTextContent(cell)
-
-			switch cellIndex {
-			case 0: // Unit name and ID extraction
-				unitID = extractUnitIDFromCell(cell)
-			case 3: // Movement cost column
-				properties.MovementCost = parseMovementCost(cellText)
-			case 6: // Heal column
-				if heal := parseModifierValue(cellText); heal > 0 {
-					properties.HealingBonus = heal
+			// Check if we have a valid column header for this index
+			if cellIndex < len(columnHeaders) {
+				columnName := columnHeaders[cellIndex]
+				cellText := getTextContent(cell)
+				
+				switch columnName {
+				case "unit":
+					unitID = extractUnitIDFromCell(cell)
+				case "movement":
+					properties.MovementCost = parseMovementCost(cellText)
+				case "heal":
+					if heal := parseModifierValue(cellText); heal > 0 {
+						properties.HealingBonus = heal
+					}
+				case "captures":
+					properties.CanCapture = containsCheckmark(cell)
+				case "builds":
+					properties.CanBuild = containsCheckmark(cell)
+				// Note: We're not extracting Attack and Defense here as they're 
+				// terrain modifiers, not movement/interaction properties
 				}
-			case 7: // Captures column
-				properties.CanCapture = containsCheckmark(cell)
-			case 8: // Builds column
-				properties.CanBuild = containsCheckmark(cell)
 			}
 			cellIndex++
 		}

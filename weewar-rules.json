@@ -561,13 +561,16 @@
   },
   "terrainUnitProperties": {
     "10:10": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "10:12": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:13": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:14": {
       "movementCost": 1
@@ -576,7 +579,8 @@
       "movementCost": 1
     },
     "10:16": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:17": {
       "movementCost": 1
@@ -588,13 +592,15 @@
       "movementCost": 1
     },
     "10:24": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "10:28": {
       "movementCost": 1
     },
     "10:31": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:32": {
       "movementCost": 1
@@ -603,19 +609,24 @@
       "movementCost": 1
     },
     "10:37": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:39": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "10:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "12:1": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "12:14": {
       "movementCost": 1
@@ -633,28 +644,35 @@
       "movementCost": 1
     },
     "12:2": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "12:20": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "12:25": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "12:26": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "12:27": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "12:28": {
       "movementCost": 1
     },
     "12:29": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "12:3": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "12:30": {
       "movementCost": 1.25
@@ -663,40 +681,52 @@
       "movementCost": 1
     },
     "12:4": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "12:40": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "12:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "12:44": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "12:5": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "12:6": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "12:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "12:8": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "12:9": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:10": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "14:12": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:13": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:14": {
       "movementCost": 1
@@ -705,7 +735,8 @@
       "movementCost": 1
     },
     "14:16": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:17": {
       "movementCost": 1
@@ -717,13 +748,15 @@
       "movementCost": 1
     },
     "14:24": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "14:28": {
       "movementCost": 1
     },
     "14:31": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:32": {
       "movementCost": 1
@@ -732,25 +765,32 @@
       "movementCost": 1
     },
     "14:37": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:39": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "14:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "14:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "15:10": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "15:12": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "15:13": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "15:14": {
       "movementCost": 1
@@ -759,7 +799,8 @@
       "movementCost": 1
     },
     "15:16": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "15:17": {
       "movementCost": 1
@@ -771,13 +812,15 @@
       "movementCost": 1
     },
     "15:24": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "15:28": {
       "movementCost": 1
     },
     "15:31": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "15:32": {
       "movementCost": 1
@@ -786,19 +829,25 @@
       "movementCost": 1
     },
     "15:37": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "15:39": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "15:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "15:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "16:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:11": {
       "movementCost": 1
@@ -819,34 +868,47 @@
       "movementCost": 1
     },
     "16:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:21": {
-      "movementCost": 1
+      "movementCost": 1,
+      "canBuild": true
     },
     "16:22": {
-      "movementCost": 1
+      "movementCost": 1,
+      "canBuild": true
     },
     "16:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "16:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "16:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:28": {
       "movementCost": 1
     },
     "16:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "16:30": {
       "movementCost": 0.75
@@ -855,46 +917,63 @@
       "movementCost": 1
     },
     "16:38": {
-      "movementCost": 1
+      "movementCost": 1,
+      "canBuild": true
     },
     "16:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "16:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "16:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "16:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "16:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "16:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2,
+      "canCapture": true
     },
     "16:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "16:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "17:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:10": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "17:12": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:13": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:14": {
       "movementCost": 1
@@ -903,7 +982,8 @@
       "movementCost": 1
     },
     "17:16": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:17": {
       "movementCost": 1
@@ -915,37 +995,46 @@
       "movementCost": 1
     },
     "17:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "17:24": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "17:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "17:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "17:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:28": {
       "movementCost": 1
     },
     "17:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "17:30": {
       "movementCost": 0.75
     },
     "17:31": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:32": {
       "movementCost": 1
@@ -954,49 +1043,64 @@
       "movementCost": 1
     },
     "17:37": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:39": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "17:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "17:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "17:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "17:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "17:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "17:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "17:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "18:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "18:10": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:12": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "18:13": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "18:14": {
       "movementCost": 1
@@ -1005,7 +1109,8 @@
       "movementCost": 1
     },
     "18:16": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "18:17": {
       "movementCost": 1
@@ -1017,37 +1122,46 @@
       "movementCost": 1
     },
     "18:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "18:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "18:24": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "18:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "18:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "18:28": {
       "movementCost": 1
     },
     "18:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "18:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:30": {
       "movementCost": 0.75
     },
     "18:31": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "18:32": {
       "movementCost": 1
@@ -1056,49 +1170,64 @@
       "movementCost": 1
     },
     "18:37": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "18:39": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "18:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "18:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "18:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "18:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "18:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "18:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "19:10": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "19:12": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:13": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:14": {
       "movementCost": 1
@@ -1107,7 +1236,8 @@
       "movementCost": 1
     },
     "19:16": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:17": {
       "movementCost": 1
@@ -1119,37 +1249,46 @@
       "movementCost": 1
     },
     "19:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "19:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:24": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "19:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "19:28": {
       "movementCost": 1
     },
     "19:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "19:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "19:30": {
       "movementCost": 0.75
     },
     "19:31": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:32": {
       "movementCost": 1
@@ -1158,40 +1297,54 @@
       "movementCost": 1
     },
     "19:37": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:39": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "19:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "19:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "19:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "19:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "19:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "19:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "19:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "19:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "1:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:11": {
       "movementCost": 1
@@ -1212,64 +1365,105 @@
       "movementCost": 1
     },
     "1:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canBuild": true
     },
     "1:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canBuild": true
     },
     "1:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:28": {
       "movementCost": 1
     },
     "1:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2,
+      "canBuild": true
     },
     "1:30": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "canBuild": true
     },
     "1:33": {
       "movementCost": 1
     },
     "1:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2,
+      "canBuild": true
     },
     "1:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "1:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2,
+      "canBuild": true
     },
     "1:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2,
+      "canBuild": true
     },
     "1:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2,
+      "canBuild": true
     },
     "1:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2,
+      "canBuild": true,
+      "canCapture": true
     },
     "1:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canBuild": true
     },
     "1:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canBuild": true
     },
     "20:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:11": {
       "movementCost": 1
@@ -1290,28 +1484,39 @@
       "movementCost": 1
     },
     "20:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "20:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "20:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:28": {
       "movementCost": 1
     },
     "20:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "20:30": {
       "movementCost": 0.75
@@ -1320,34 +1525,47 @@
       "movementCost": 1
     },
     "20:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "20:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "20:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "20:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "20:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "20:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2,
+      "canCapture": true
     },
     "20:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "20:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "21:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "21:14": {
       "movementCost": 1
@@ -1365,28 +1583,35 @@
       "movementCost": 1
     },
     "21:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "21:20": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "21:25": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "21:26": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "21:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "21:28": {
       "movementCost": 1
     },
     "21:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "21:3": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "21:30": {
       "movementCost": 1.75
@@ -1395,34 +1620,44 @@
       "movementCost": 1
     },
     "21:4": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "21:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "21:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "21:44": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "21:5": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "21:6": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "21:7": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "21:8": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "21:9": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "22:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "22:14": {
       "movementCost": 1
@@ -1440,28 +1675,35 @@
       "movementCost": 1
     },
     "22:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "22:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "22:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "22:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "22:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "22:28": {
       "movementCost": 1
     },
     "22:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "22:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "22:30": {
       "movementCost": 0.75
@@ -1470,34 +1712,44 @@
       "movementCost": 1
     },
     "22:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "22:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "22:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "22:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "22:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "22:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "22:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "22:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "22:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "23:10": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "23:14": {
       "movementCost": 1
@@ -1515,7 +1767,8 @@
       "movementCost": 1
     },
     "23:24": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "23:28": {
       "movementCost": 1
@@ -1524,10 +1777,12 @@
       "movementCost": 1
     },
     "23:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "25:1": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "25:14": {
       "movementCost": 1
@@ -1545,28 +1800,34 @@
       "movementCost": 1
     },
     "25:2": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "25:27": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "25:28": {
       "movementCost": 1
     },
     "25:29": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "25:33": {
       "movementCost": 1
     },
     "25:40": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "25:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "26:1": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:14": {
       "movementCost": 1
@@ -1584,28 +1845,35 @@
       "movementCost": 1
     },
     "26:2": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:20": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:25": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:26": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:27": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:28": {
       "movementCost": 1
     },
     "26:29": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:3": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "26:30": {
       "movementCost": 1.75
@@ -1614,46 +1882,63 @@
       "movementCost": 1
     },
     "26:4": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "26:40": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "26:44": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "26:5": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "26:6": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 2
     },
     "26:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "26:8": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "26:9": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "2:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:10": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:11": {
       "movementCost": 1
     },
     "2:12": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:13": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:14": {
       "movementCost": 1
@@ -1662,7 +1947,9 @@
       "movementCost": 1
     },
     "2:16": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:17": {
       "movementCost": 1
@@ -1674,157 +1961,231 @@
       "movementCost": 1
     },
     "2:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:24": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "2:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "2:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:28": {
       "movementCost": 1
     },
     "2:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "2:30": {
       "movementCost": 0.75
     },
     "2:31": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:32": {
-      "movementCost": 1
+      "movementCost": 1,
+      "canBuild": true
     },
     "2:33": {
       "movementCost": 1
     },
     "2:37": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:39": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "2:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "2:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "2:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "2:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "2:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "2:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2,
+      "canBuild": true,
+      "canCapture": true
     },
     "2:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "2:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "3:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "3:11": {
       "movementCost": 1
     },
     "3:14": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:15": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:17": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:18": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:19": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "3:20": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "3:25": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "3:26": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "3:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "3:28": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "3:3": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "3:30": {
       "movementCost": 0.75
     },
     "3:33": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 3,
+      "canBuild": true
     },
     "3:4": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "3:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canCapture": true
     },
     "3:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1,
+      "canBuild": true,
+      "canCapture": true
     },
     "3:44": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "3:5": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "3:6": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 2
     },
     "3:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2,
+      "canCapture": true
     },
     "3:8": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "3:9": {
-      "movementCost": 0.75
+      "movementCost": 0.75,
+      "healingBonus": 1
     },
     "4:1": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "4:14": {
       "movementCost": 1
@@ -1842,28 +2203,35 @@
       "movementCost": 1
     },
     "4:2": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "4:20": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "4:25": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "4:26": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "4:27": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "4:28": {
       "movementCost": 1
     },
     "4:29": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "4:3": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "4:30": {
       "movementCost": 1.25
@@ -1872,34 +2240,44 @@
       "movementCost": 1
     },
     "4:4": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "4:40": {
-      "movementCost": 1.75
+      "movementCost": 1.75,
+      "healingBonus": 1
     },
     "4:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "4:44": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "4:5": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "4:6": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 2
     },
     "4:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "4:8": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "4:9": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "5:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:14": {
       "movementCost": 1
@@ -1917,28 +2295,35 @@
       "movementCost": 1
     },
     "5:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:20": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:25": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:26": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:28": {
       "movementCost": 1
     },
     "5:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:3": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "5:30": {
       "movementCost": 1
@@ -1947,34 +2332,44 @@
       "movementCost": 1
     },
     "5:4": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "5:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:44": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "5:5": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "5:6": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "5:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "5:8": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "5:9": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "6:1": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:14": {
       "movementCost": 1
@@ -1992,28 +2387,35 @@
       "movementCost": 1
     },
     "6:2": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:20": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:25": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:26": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:27": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:28": {
       "movementCost": 1
     },
     "6:29": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:3": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:30": {
       "movementCost": 1
@@ -2022,34 +2424,44 @@
       "movementCost": 1
     },
     "6:4": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:40": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "6:44": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:5": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:6": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:8": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "6:9": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 6
     },
     "7:1": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "7:14": {
       "movementCost": 1
@@ -2067,28 +2479,34 @@
       "movementCost": 1
     },
     "7:2": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "7:27": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "7:28": {
       "movementCost": 1
     },
     "7:29": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "7:33": {
       "movementCost": 1
     },
     "7:40": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "7:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "8:1": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:14": {
       "movementCost": 1
@@ -2106,28 +2524,35 @@
       "movementCost": 1
     },
     "8:2": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:20": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:25": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:26": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:27": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:28": {
       "movementCost": 1
     },
     "8:29": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:3": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "8:30": {
       "movementCost": 2
@@ -2136,34 +2561,44 @@
       "movementCost": 1
     },
     "8:4": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "8:40": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "8:44": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "8:5": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "8:6": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "8:7": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 2
     },
     "8:8": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "8:9": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "9:1": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "9:14": {
       "movementCost": 1
@@ -2181,28 +2616,35 @@
       "movementCost": 1
     },
     "9:2": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "9:20": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "9:25": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "9:26": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "9:27": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "9:28": {
       "movementCost": 1
     },
     "9:29": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "9:3": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "9:30": {
       "movementCost": 2
@@ -2211,28 +2653,36 @@
       "movementCost": 1
     },
     "9:4": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "9:40": {
-      "movementCost": 1.25
+      "movementCost": 1.25,
+      "healingBonus": 1
     },
     "9:41": {
-      "movementCost": 1
+      "movementCost": 1,
+      "healingBonus": 1
     },
     "9:44": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "9:5": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "9:6": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 2
     },
     "9:8": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     },
     "9:9": {
-      "movementCost": 2
+      "movementCost": 2,
+      "healingBonus": 1
     }
   },
   "unitUnitProperties": {

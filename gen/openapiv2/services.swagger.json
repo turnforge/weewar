@@ -257,12 +257,8 @@
                   },
                   "title": "*\nList of moves to add"
                 },
-                "expectedChanges": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1WorldChange"
-                  },
+                "expectedResponse": {
+                  "$ref": "#/definitions/v1ProcessMovesResponse",
                   "description": "*\nThe player can submit a list of \"Expected\" changes when in local-first mode\nIf this is list provided the server will validate it - either via the coordinator\nor by itself.  If it is not provided then the server will validate it and return\nthe changes."
                 }
               },

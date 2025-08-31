@@ -1268,7 +1268,7 @@ export class ProcessMovesRequest implements ProcessMovesRequestInterface {
  If this is list provided the server will validate it - either via the coordinator
  or by itself.  If it is not provided then the server will validate it and return
  the changes. */
-  expectedChanges: WorldChange[] = [];
+  expectedResponse?: ProcessMovesResponse;
 
   /**
    * Create and deserialize an instance from raw data

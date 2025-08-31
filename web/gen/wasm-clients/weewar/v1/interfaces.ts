@@ -619,7 +619,7 @@ export interface ProcessMovesRequest {
  If this is list provided the server will validate it - either via the coordinator
  or by itself.  If it is not provided then the server will validate it and return
  the changes. */
-  expectedChanges?: WorldChange[];
+  expectedResponse?: ProcessMovesResponse;
 }
 
 

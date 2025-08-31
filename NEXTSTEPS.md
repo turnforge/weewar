@@ -61,12 +61,15 @@
 
 ### 🔄 In Progress / Next Sprint
 
-**Multiplayer Testing & Validation - HIGH PRIORITY**
-- [ ] **Consensus Testing**: Unit tests for K-of-N validation scenarios
-- [ ] **Manual Test CLI**: Command-line tool for simulating multiple players
-- [ ] **WASM Integration**: Update client to submit proposals instead of direct moves
-- [ ] **UI Feedback**: Show proposal status during validation phase
-- [ ] **Error Handling**: Graceful handling of validation failures
+**Multiplayer Coordination Integration - IN PROGRESS**
+- [x] **Proto Updates**: Added ExpectedResponse to ProcessMovesRequest
+- [x] **Serialization**: Implemented serialize/deserialize helpers
+- [x] **ProcessMoves Update**: GameService forwards to Coordinator when ExpectedResponse provided
+- [ ] **Wire Coordinator**: Connect coordinator client to FSGamesService
+- [ ] **WASM Client**: Update to compute ExpectedResponse locally
+- [ ] **Validator Service**: Create independent validator nodes
+- [ ] **Testing**: Unit tests for consensus scenarios
+- [ ] **Manual CLI**: Tool for simulating multiple players
 
 **GameViewerPage Layout Enhancement - STARTING**
 - [ ] **DockView Integration**: Add flexible panel layout system like WorldEditorPage

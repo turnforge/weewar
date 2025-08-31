@@ -905,9 +905,9 @@ type ProcessMovesRequest struct {
 	// If this is list provided the server will validate it - either via the coordinator
 	// or by itself.  If it is not provided then the server will validate it and return
 	// the changes.
-	ExpectedChanges []*WorldChange `protobuf:"bytes,2,rep,name=expected_changes,json=expectedChanges,proto3" json:"expected_changes,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	ExpectedResponse *ProcessMovesResponse `protobuf:"bytes,2,opt,name=expected_response,json=expectedResponse,proto3" json:"expected_response,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ProcessMovesRequest) Reset() {
@@ -954,9 +954,9 @@ func (x *ProcessMovesRequest) GetMoves() []*GameMove {
 	return nil
 }
 
-func (x *ProcessMovesRequest) GetExpectedChanges() []*WorldChange {
+func (x *ProcessMovesRequest) GetExpectedResponse() *ProcessMovesResponse {
 	if x != nil {
-		return x.ExpectedChanges
+		return x.ExpectedResponse
 	}
 	return nil
 }
@@ -1907,11 +1907,11 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"\ffield_errors\x18\x03 \x03(\v2..weewar.v1.CreateGameResponse.FieldErrorsEntryR\vfieldErrors\x1a>\n" +
 	"\x10FieldErrorsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x9c\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa7\x01\n" +
 	"\x13ProcessMovesRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12)\n" +
-	"\x05moves\x18\x03 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\x12A\n" +
-	"\x10expected_changes\x18\x02 \x03(\v2\x16.weewar.v1.WorldChangeR\x0fexpectedChanges\"\x86\x01\n" +
+	"\x05moves\x18\x03 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\x12L\n" +
+	"\x11expected_response\x18\x02 \x01(\v2\x1f.weewar.v1.ProcessMovesResponseR\x10expectedResponse\"\x86\x01\n" +
 	"\x14ProcessMovesResponse\x12<\n" +
 	"\fmove_results\x18\x01 \x03(\v2\x19.weewar.v1.GameMoveResultR\vmoveResults\x120\n" +
 	"\achanges\x18\x02 \x03(\v2\x16.weewar.v1.WorldChangeR\achanges\".\n" +
@@ -2039,8 +2039,8 @@ var file_weewar_v1_games_proto_goTypes = []any{
 	(*GameMoveHistory)(nil),        // 35: weewar.v1.GameMoveHistory
 	(*fieldmaskpb.FieldMask)(nil),  // 36: google.protobuf.FieldMask
 	(*GameMove)(nil),               // 37: weewar.v1.GameMove
-	(*WorldChange)(nil),            // 38: weewar.v1.WorldChange
-	(*GameMoveResult)(nil),         // 39: weewar.v1.GameMoveResult
+	(*GameMoveResult)(nil),         // 38: weewar.v1.GameMoveResult
+	(*WorldChange)(nil),            // 39: weewar.v1.WorldChange
 	(*GameMoveGroup)(nil),          // 40: weewar.v1.GameMoveGroup
 	(*MoveUnitAction)(nil),         // 41: weewar.v1.MoveUnitAction
 	(*AttackUnitAction)(nil),       // 42: weewar.v1.AttackUnitAction
@@ -2063,9 +2063,9 @@ var file_weewar_v1_games_proto_depIdxs = []int32{
 	34, // 14: weewar.v1.CreateGameResponse.game_state:type_name -> weewar.v1.GameState
 	30, // 15: weewar.v1.CreateGameResponse.field_errors:type_name -> weewar.v1.CreateGameResponse.FieldErrorsEntry
 	37, // 16: weewar.v1.ProcessMovesRequest.moves:type_name -> weewar.v1.GameMove
-	38, // 17: weewar.v1.ProcessMovesRequest.expected_changes:type_name -> weewar.v1.WorldChange
-	39, // 18: weewar.v1.ProcessMovesResponse.move_results:type_name -> weewar.v1.GameMoveResult
-	38, // 19: weewar.v1.ProcessMovesResponse.changes:type_name -> weewar.v1.WorldChange
+	16, // 17: weewar.v1.ProcessMovesRequest.expected_response:type_name -> weewar.v1.ProcessMovesResponse
+	38, // 18: weewar.v1.ProcessMovesResponse.move_results:type_name -> weewar.v1.GameMoveResult
+	39, // 19: weewar.v1.ProcessMovesResponse.changes:type_name -> weewar.v1.WorldChange
 	34, // 20: weewar.v1.GetGameStateResponse.state:type_name -> weewar.v1.GameState
 	40, // 21: weewar.v1.ListMovesResponse.move_groups:type_name -> weewar.v1.GameMoveGroup
 	23, // 22: weewar.v1.GetOptionsAtResponse.options:type_name -> weewar.v1.GameOption

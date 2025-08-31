@@ -6,8 +6,12 @@ import (
 	"log"
 	"log/slog"
 	"net"
+	"time"
 
+	"github.com/panyam/turnengine/engine/coordination"
+	turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
+	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -23,9 +27,27 @@ func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool
 	// grpc.UnaryInterceptor(EnsureAccessToken), // Add interceptors if needed
 	)
 
+	// Create GamesService
+	gamesService := NewFSGamesService()
+	
+	// Create coordination storage
+	coordStorageDir := weewar.DevDataPath("storage/coordination")
+	coordStorage, err := coordination.NewFileCoordinationStorage(coordStorageDir)
+	if err != nil {
+		return fmt.Errorf("failed to create coordination storage: %w", err)
+	}
+	
+	// Create coordinator service with games service as callback
+	coordConfig := coordination.Config{
+		RequiredValidators: 1, // Start with 1 for testing
+		ValidationTimeout:  5 * time.Minute,
+	}
+	coordService := coordination.NewService(coordStorage, coordConfig, gamesService)
+
 	// Register services
-	v1.RegisterGamesServiceServer(server, NewFSGamesService())
+	v1.RegisterGamesServiceServer(server, gamesService)
 	v1.RegisterWorldsServiceServer(server, NewFSWorldsService())
+	turnengine.RegisterCoordinatorServiceServer(server, coordService)
 
 	l, err := net.Listen("tcp", s.Address)
 	if err != nil {

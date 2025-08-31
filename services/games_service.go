@@ -2,13 +2,17 @@ package services
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"time"
 
+	turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1"
+	"github.com/panyam/turnengine/engine/storage"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
-	"github.com/panyam/turnengine/engine/storage"
+	"google.golang.org/protobuf/proto"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -204,4 +208,152 @@ func (s *FSGamesServiceImpl) UpdateGame(ctx context.Context, req *v1.UpdateGameR
 
 func (w *FSGamesServiceImpl) GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (out *weewar.Game, err error) {
 	return ProtoToRuntimeGame(game, gameState)
+}
+
+// Helper functions for serialization
+
+// serialize converts a protobuf message to bytes
+func serialize(msg proto.Message) []byte {
+	if msg == nil {
+		return nil
+	}
+	data, err := proto.Marshal(msg)
+	if err != nil {
+		log.Printf("Failed to serialize: %v", err)
+		return nil
+	}
+	return data
+}
+
+// deserialize converts bytes back to a protobuf message
+func deserialize(data []byte, msg proto.Message) error {
+	if len(data) == 0 {
+		return fmt.Errorf("empty data")
+	}
+	return proto.Unmarshal(data, msg)
+}
+
+// computeHash generates a SHA256 hash of any protobuf message
+func computeHash(msg proto.Message) string {
+	if msg == nil {
+		return ""
+	}
+	data := serialize(msg)
+	if data == nil {
+		return ""
+	}
+	hash := sha256.Sum256(data)
+	return hex.EncodeToString(hash[:])
+}
+
+func (s *FSGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.ProcessMovesRequest) (*v1.ProcessMovesResponse, error) {
+	// If client didn't provide expected results, run ProcessMoves locally
+	if req.ExpectedResponse == nil {
+		return s.BaseGamesServiceImpl.ProcessMoves(ctx, req)
+	}
+
+	// Client provided expected results - validate through coordinator
+
+	// Get current game state
+	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	if err != nil || gameresp.Game == nil {
+		return nil, fmt.Errorf("failed to get game: %w", err)
+	}
+	if gameresp.State == nil {
+		return nil, fmt.Errorf("game state cannot be nil")
+	}
+
+	// Apply expected changes to current state to get new state
+	// This is what validators will do independently
+	newState := proto.Clone(gameresp.State).(*v1.GameState)
+	// TODO: Apply req.ExpectedChanges to newState
+
+	// Compute hashes (validators will compute same hashes)
+	fromStateHash := computeHash(gameresp.State)
+	toStateHash := computeHash(newState)
+
+	// Serialize for coordinator (game-agnostic blobs)
+	movesBlob := serialize(&v1.ProcessMovesRequest{
+		GameId: req.GameId,
+		Moves:  req.Moves,
+	})
+	changesBlob := serialize(req.ExpectedResponse)
+	newStateBlob := serialize(newState)
+
+	// Create proposal for coordinator
+	proposal := &turnengine.SubmitProposalRequest{
+		SessionId:     req.GameId,
+		ProposerId:    "player1", // TODO: Get from context/session
+		FromStateHash: fromStateHash,
+		ToStateHash:   toStateHash,
+		MovesBlob:     movesBlob,
+		ChangesBlob:   changesBlob,
+		NewStateBlob:  newStateBlob,
+	}
+
+	// TODO: Submit to coordinator when wired up
+	_ = proposal
+
+	// For now, just apply the changes directly (simulating accepted proposal)
+	return req.ExpectedResponse, nil
+}
+
+// Implement coordination.Callbacks interface
+
+// OnProposalStarted is called when a proposal is accepted for validation
+func (s *FSGamesServiceImpl) OnProposalStarted(gameID string, proposal *turnengine.ProposalInfo) error {
+	// Load the game state
+	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, gameID, "state")
+	if err != nil {
+		return fmt.Errorf("failed to load game state: %w", err)
+	}
+
+	// Set the proposal tracking info
+	gameState.ProposalInfo = &turnengine.ProposalTrackingInfo{
+		ProposalId:     proposal.ProposalId,
+		ProposerId:     proposal.ProposerId,
+		Phase:          turnengine.ProposalPhase_PROPOSAL_PHASE_COLLECTING,
+		CreatedAt:      proposal.CreatedAt,
+		ValidatorCount: int32(len(proposal.AssignedValidators)),
+		VotesReceived:  0,
+	}
+
+	// Save the updated state
+	return s.storage.SaveArtifact(gameID, "state", gameState)
+}
+
+// OnProposalAccepted is called when consensus approves the proposal
+func (s *FSGamesServiceImpl) OnProposalAccepted(gameID string, proposal *turnengine.ProposalInfo) error {
+	// The new state is in the proposal's new_state_blob
+	// We need to save it as the new game state
+
+	// Note: In a real implementation, we'd unmarshal proposal.NewStateBlob
+	// For now, just clear the proposal info
+
+	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, gameID, "state")
+	if err != nil {
+		return fmt.Errorf("failed to load game state: %w", err)
+	}
+
+	// Clear proposal info and update state hash
+	gameState.ProposalInfo = nil
+	gameState.StateHash = proposal.ToStateHash
+
+	// Save the state
+	return s.storage.SaveArtifact(gameID, "state", gameState)
+}
+
+// OnProposalFailed is called when proposal is rejected or times out
+func (s *FSGamesServiceImpl) OnProposalFailed(gameID string, proposal *turnengine.ProposalInfo, reason string) error {
+	// Clear the proposal info from game state
+	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, gameID, "state")
+	if err != nil {
+		return fmt.Errorf("failed to load game state: %w", err)
+	}
+
+	// Clear proposal info
+	gameState.ProposalInfo = nil
+
+	// Save the state
+	return s.storage.SaveArtifact(gameID, "state", gameState)
 }

@@ -271,7 +271,7 @@ message ProcessMovesRequest {
    * or by itself.  If it is not provided then the server will validate it and return
    * the changes.
    */
-  repeated WorldChange expected_changes = 2;
+  ProcessMovesResponse expected_response = 2;
 }
 
 /**

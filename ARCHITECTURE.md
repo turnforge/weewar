@@ -240,11 +240,12 @@ type CoordinatorService struct {
 
 ### Coordination Flow
 
-1. **Player Makes Move**: WASM runs ProcessMoves locally
-2. **Submit Proposal**: Send moves + changes + new state to coordinator  
-3. **Validator Assignment**: Coordinator assigns K validators from other players
-4. **Distributed Validation**: Each validator's WASM verifies the proposal
-5. **Consensus**: K-of-N approval commits the new state
+1. **Player Makes Move**: WASM runs ProcessMoves locally, computes ExpectedResponse
+2. **Submit to GameService**: Send moves + ExpectedResponse to GameService.ProcessMoves
+3. **GameService to Coordinator**: GameService creates proposal and submits to Coordinator
+4. **Validator Assignment**: Coordinator assigns K validators (can be other players or dedicated nodes)
+5. **Independent Validation**: Each validator runs same ProcessMoves, compares hash
+6. **Consensus**: K-of-N approval commits the new state via callbacks
 
 ### Key Design Decisions
 
@@ -257,6 +258,12 @@ type CoordinatorService struct {
 - Players refresh before making moves
 - Validators poll for pending work
 - Reduces complexity for initial implementation
+
+**ExpectedResponse Pattern**: Client pre-computes validation results:
+- Client runs ProcessMoves locally, gets changes and new state
+- Sends ExpectedResponse with moves to GameService
+- GameService forwards to Coordinator without running game logic
+- Validators independently verify the ExpectedResponse is correct
 
 **File-Based Storage**: JSON files for development simplicity:
 - Human-readable for debugging

@@ -264,6 +264,14 @@ message ProcessMovesRequest {
    * List of moves to add
    */
   repeated GameMove moves = 3;
+
+  /**
+   * The player can submit a list of "Expected" changes when in local-first mode
+   * If this is list provided the server will validate it - either via the coordinator
+   * or by itself.  If it is not provided then the server will validate it and return
+   * the changes.
+   */
+  repeated WorldChange expected_changes = 2;
 }
 
 /**

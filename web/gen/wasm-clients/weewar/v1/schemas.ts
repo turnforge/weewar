@@ -1448,6 +1448,13 @@ export const ProcessMovesRequestSchema: MessageSchema = {
       messageType: "weewar.v1.GameMove",
       repeated: true,
     },
+    {
+      name: "expectedChanges",
+      type: FieldType.MESSAGE,
+      id: 2,
+      messageType: "weewar.v1.WorldChange",
+      repeated: true,
+    },
   ],
 };
 

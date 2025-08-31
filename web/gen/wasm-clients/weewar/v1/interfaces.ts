@@ -614,6 +614,12 @@ export interface ProcessMovesRequest {
   /** *
  List of moves to add */
   moves?: GameMove[];
+  /** *
+ The player can submit a list of "Expected" changes when in local-first mode
+ If this is list provided the server will validate it - either via the coordinator
+ or by itself.  If it is not provided then the server will validate it and return
+ the changes. */
+  expectedChanges?: WorldChange[];
 }
 
 

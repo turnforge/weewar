@@ -121,7 +121,8 @@ func (v *WorldEditorPage) SetupDefaults() {
 	// Sort terrain lists by name for easier visual grouping
 	// Clear should always be first in Nature Terrains
 	sort.Slice(v.CityTerrains, func(i, j int) bool {
-		return v.CityTerrains[i].Name < v.CityTerrains[j].Name
+		//return v.CityTerrains[i].Name < v.CityTerrains[j].Name
+		return v.CityTerrains[i].ID < v.CityTerrains[j].ID
 	})
 	sort.Slice(v.NatureTerrains, func(i, j int) bool {
 		// Clear (ID 0) should always be first
@@ -131,7 +132,8 @@ func (v *WorldEditorPage) SetupDefaults() {
 		if v.NatureTerrains[j].ID == 0 {
 			return false
 		}
-		return v.NatureTerrains[i].Name < v.NatureTerrains[j].Name
+		// return v.NatureTerrains[i].Name < v.NatureTerrains[j].Name
+		return v.NatureTerrains[i].ID < v.NatureTerrains[j].ID
 	})
 
 	// Load unit types with icons

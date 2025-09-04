@@ -356,6 +356,92 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
     }
 
     /**
+     * Generate SVG histogram for damage distribution
+     */
+    private createDamageHistogram(damageDistribution: any): string {
+        if (!damageDistribution || !damageDistribution.ranges || damageDistribution.ranges.length === 0) {
+            return '<div class="text-gray-400 text-xs">No data</div>';
+        }
+
+        const ranges = damageDistribution.ranges;
+        const width = 220;
+        const height = 50;
+        const topPadding = 5;
+        const bottomPadding = 15; // Space for x-axis labels
+        const chartHeight = height - topPadding - bottomPadding;
+        const barSpacing = 1;
+        const barWidth = (width / ranges.length) - barSpacing;
+        
+        // Find max probability for scaling
+        const maxProbability = Math.max(...ranges.map((r: any) => r.probability || 0));
+        
+        // Create SVG with x-axis labels
+        let svg = `<svg width="${width}" height="${height}" class="inline-block">`;
+        
+        ranges.forEach((range: any, index: number) => {
+            const probability = range.probability || 0;
+            const barHeight = (probability / maxProbability) * chartHeight;
+            const x = index * (barWidth + barSpacing);
+            const y = topPadding + chartHeight - barHeight;
+            
+            // Use the actual damage value (assuming minValue = maxValue for each bucket)
+            const damageValue = Math.round(range.minValue);
+            
+            // Determine color based on damage value
+            let fillColor = 'rgb(156, 163, 175)'; // gray-400
+            if (damageValue >= 80) {
+                fillColor = 'rgb(239, 68, 68)'; // red-500
+            } else if (damageValue >= 60) {
+                fillColor = 'rgb(251, 146, 60)'; // orange-400
+            } else if (damageValue >= 40) {
+                fillColor = 'rgb(250, 204, 21)'; // yellow-400
+            } else if (damageValue >= 20) {
+                fillColor = 'rgb(134, 239, 172)'; // green-300
+            } else if (damageValue > 0) {
+                fillColor = 'rgb(147, 197, 253)'; // blue-300
+            }
+            
+            // Add bar with improved tooltip
+            const percentageStr = (probability * 100).toFixed(1);
+            const tooltipText = `${percentageStr}% of the time ${damageValue} damage dealt`;
+            
+            svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
+                         fill="${fillColor}" opacity="0.8" 
+                         class="hover:opacity-100 transition-opacity cursor-help"
+                         data-tooltip="${tooltipText}">
+                      <title>${tooltipText}</title>
+                    </rect>`;
+            
+            // Add x-axis label for this bar (show every bar or every other bar depending on space)
+            if (index % Math.ceil(ranges.length / 11) === 0 || index === ranges.length - 1) {
+                svg += `<text x="${x + barWidth/2}" y="${height - 2}" 
+                             text-anchor="middle" 
+                             fill="currentColor" 
+                             opacity="0.6" 
+                             font-size="9">${damageValue}</text>`;
+            }
+        });
+        
+        // Add baseline
+        svg += `<line x1="0" y1="${topPadding + chartHeight}" x2="${width}" y2="${topPadding + chartHeight}" 
+                     stroke="currentColor" stroke-opacity="0.3" stroke-width="1"/>`;
+        
+        // Add expected damage marker if it exists
+        if (damageDistribution.expectedDamage !== undefined) {
+            const expectedX = (damageDistribution.expectedDamage / 100) * width;
+            svg += `<line x1="${expectedX}" y1="${topPadding}" x2="${expectedX}" y2="${topPadding + chartHeight}" 
+                         stroke="rgb(239, 68, 68)" stroke-width="2" stroke-dasharray="2,2" opacity="0.6">
+                      <title>Expected: ${damageDistribution.expectedDamage.toFixed(1)}</title>
+                    </line>`;
+        }
+        
+        svg += '</svg>';
+        
+        // Return just the SVG without the duplicate summary text
+        return svg;
+    }
+
+    /**
      * Generate unit-unit combat damage distribution table
      */
     private generateUnitCombatTable(unitId: number): void {
@@ -401,20 +487,20 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
                     if (row) {
                         // Fill in the row data
                         const targetNameCell = row.querySelector('[data-target-name]');
-                        const minDamageCell = row.querySelector('[data-min-damage]');
-                        const maxDamageCell = row.querySelector('[data-max-damage]');
-                        const avgDamageCell = row.querySelector('[data-avg-damage]');
-                        const canAttackCell = row.querySelector('[data-can-attack]');
+                        const damageHistogramCell = row.querySelector('[data-damage-histogram]');
                         
                         if (targetNameCell) targetNameCell.textContent = targetUnitDef.name;
                         
-                        // Use damage distribution from DamageDistribution
-                        const damageDistribution = combatProps.damage;
-                        
-                        if (minDamageCell) minDamageCell.textContent = damageDistribution.minDamage.toString();
-                        if (maxDamageCell) maxDamageCell.textContent = damageDistribution.maxDamage.toString();
-                        if (avgDamageCell) avgDamageCell.textContent = damageDistribution.expectedDamage.toFixed(2);
-                        if (canAttackCell) canAttackCell.textContent = damageDistribution.minDamage > 0 ? '✓' : '-';
+                        // Create histogram visualization
+                        if (damageHistogramCell) {
+                            const damageDistribution = combatProps.damage;
+                            const histogram = this.createDamageHistogram(damageDistribution);
+                            const summaryText = `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Range: ${Math.round(damageDistribution.minDamage)}-${Math.round(damageDistribution.maxDamage)}, 
+                                Avg: ${damageDistribution.expectedDamage.toFixed(0)}
+                            </div>`;
+                            damageHistogramCell.innerHTML = `<div>${histogram}${summaryText}</div>`;
+                        }
                         
                         // Add alternating row colors
                         if (tbody.children.length % 2 === 1) {

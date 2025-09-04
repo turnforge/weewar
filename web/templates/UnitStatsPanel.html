@@ -139,11 +139,8 @@
             <table class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Target</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Min Dmg</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Max Dmg</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">Avg Dmg</th>
-                        <th class="px-2 py-2 text-center font-medium text-gray-900 dark:text-white">Can Attack</th>
+                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" style="width: 30%;">Target</th>
+                        <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white" style="width: 70%;">Damage Distribution</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
@@ -157,10 +154,9 @@
 <!-- Combat Row Template for Unit Combat Table -->
 <template id="combat-row-template">
     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-        <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium" data-target-name>Target Unit</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-min-damage>0</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-max-damage>100</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" data-avg-damage>50.0</td>
-        <td class="px-2 py-2 text-center text-gray-900 dark:text-white" data-can-attack>✓</td>
+        <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium align-top" data-target-name>Target Unit</td>
+        <td class="px-2 py-3 text-left text-gray-900 dark:text-white" data-damage-histogram>
+            <!-- Histogram will be populated here -->
+        </td>
     </tr>
 </template>

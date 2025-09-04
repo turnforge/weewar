@@ -329,7 +329,7 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
                             movementCostCell.textContent = 'Impassable';
                             movementCostCell.classList.add('text-red-600', 'dark:text-red-400');
                         } else {
-                            movementCostCell.textContent = movementCost.toFixed(1);
+                            movementCostCell.textContent = movementCost.toFixed(2);
                         }
                     }
                     if (attackCell) attackCell.textContent = properties?.attackBonus && properties.attackBonus !== 0 ? `${properties.attackBonus > 0 ? '+' : ''}${properties.attackBonus}` : '-';
@@ -413,7 +413,7 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
                         
                         if (minDamageCell) minDamageCell.textContent = damageDistribution.minDamage.toString();
                         if (maxDamageCell) maxDamageCell.textContent = damageDistribution.maxDamage.toString();
-                        if (avgDamageCell) avgDamageCell.textContent = damageDistribution.expectedDamage.toFixed(1);
+                        if (avgDamageCell) avgDamageCell.textContent = damageDistribution.expectedDamage.toFixed(2);
                         if (canAttackCell) canAttackCell.textContent = damageDistribution.minDamage > 0 ? '✓' : '-';
                         
                         // Add alternating row colors

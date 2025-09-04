@@ -162,7 +162,7 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     private updateMovementCost(cost: number): void {
         const costElement = this.findElement('#movement-cost');
         if (costElement) {
-            costElement.textContent = cost.toFixed(1);
+            costElement.textContent = cost.toFixed(2);
         }
     }
 
@@ -261,6 +261,22 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
             return;
         }
         
+        // Determine if this is a city terrain (can be captured/built on)
+        const cityTerrainIds = [1, 2, 3, 6, 16, 20, 21, 25]; // Base, Hospital, Silo, Mines, City, Tower
+        const isCityTerrain = cityTerrainIds.includes(terrainId);
+        
+        // Hide capture and build columns for nature terrains
+        const table = tableElement.querySelector('table');
+        if (table && !isCityTerrain) {
+            // Find and hide the Capture and Build header columns
+            const headers = table.querySelectorAll('thead th');
+            if (headers.length >= 7) {
+                // Hide Capture column (index 5) and Build column (index 6)
+                (headers[5] as HTMLElement).style.display = 'none';
+                (headers[6] as HTMLElement).style.display = 'none';
+            }
+        }
+        
         // Get all available units (common unit IDs)
         const commonUnitIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         let hasAnyUnits = false;
@@ -287,12 +303,20 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
                     const buildCell = row.querySelector('[data-build]');
                     
                     if (unitNameCell) unitNameCell.textContent = unitDef.name;
-                    if (movementCostCell) movementCostCell.textContent = movementCost.toFixed(1);
+                    if (movementCostCell) movementCostCell.textContent = movementCost.toFixed(2);
                     if (attackCell) attackCell.textContent = properties?.attackBonus && properties.attackBonus !== 0 ? `${properties.attackBonus > 0 ? '+' : ''}${properties.attackBonus}` : '-';
                     if (defenseCell) defenseCell.textContent = properties?.defenseBonus && properties.defenseBonus !== 0 ? `${properties.defenseBonus > 0 ? '+' : ''}${properties.defenseBonus}` : '-';
                     if (healingCell) healingCell.textContent = properties?.healingBonus && properties.healingBonus > 0 ? `+${properties.healingBonus}` : '-';
-                    if (captureCell) captureCell.textContent = properties?.canCapture ? '✓' : '-';
-                    if (buildCell) buildCell.textContent = properties?.canBuild ? '✓' : '-';
+                    
+                    // Only show capture and build columns for city terrains
+                    if (isCityTerrain) {
+                        if (captureCell) captureCell.textContent = properties?.canCapture ? '✓' : '-';
+                        if (buildCell) buildCell.textContent = properties?.canBuild ? '✓' : '-';
+                    } else {
+                        // Hide capture and build cells for nature terrains
+                        if (captureCell) (captureCell as HTMLElement).style.display = 'none';
+                        if (buildCell) (buildCell as HTMLElement).style.display = 'none';
+                    }
                     
                     // Add alternating row colors
                     if (tbody.children.length % 2 === 1) {

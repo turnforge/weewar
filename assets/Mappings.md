@@ -1,32 +1,35 @@
-# Medieval Fantasy Game Asset Collection
+# Game Asset Theme Collections
 
 ## Overview
-This collection contains **32 detailed SVG units** and **24 hexagonal tiles** designed for a Medieval Fantasy themed strategy game. Each asset features rich textures, detailed character designs, and cartoonish styling that maintains clarity when player colors are applied.
+This collection contains **40 detailed SVG units** and **24 hexagonal tiles** designed for themed turn-based strategy games. Each theme features rich textures, detailed designs, and clean styling that maintains clarity when player colors are applied. The ThemeMapping tables section contains mappings from the original unit and tile types to various themed equivalents.
 
 ## Theme Mapping Tables
 
-### Nature Tiles (14 tiles)
-| Original Name | Medieval Fantasy Name |
-|---------------|----------------------|
-| Desert | Desert |
-| Grass | Meadow |
-| Mountain | Mountain |
-| Swamp | Bog |
-| Forest | Woodland |
-| Water (Regular) | Lake |
-| Water (Shallow) | Stream |
-| Water (Deep) | Deep Sea |
-| Lava | Molten Rock |
-| Snow | Frozen Tundra |
-| Bridge (Regular) | Stone Bridge |
-| Bridge (Shallow) | Ford Bridge |
-| Bridge (Deep) | Great Bridge |
-| Road | King's Road |
+### Medieval Fantasy Theme
 
-### City Tiles (10 tiles)
+#### Nature Tiles (14 tiles)
+| Original Name    | Medieval Fantasy Name |
+|------------------|-----------------------|
+| Desert           | Desert                |
+| Grass            | Meadow                |
+| Mountain         | Mountain              |
+| Swamp            | Bog                   |
+| Forest           | Woodland              |
+| Water (Regular)  | Lake                  |
+| Water (Shallow)  | Stream                |
+| Water (Deep)     | Deep Sea              |
+| Water (Rocky)    | Rocky Water           |
+| Lava             | Molten Rock           |
+| Snow             | Frozen Tundra         |
+| Bridge (Regular) | Stone Bridge          |
+| Bridge (Shallow) | Ford Bridge           |
+| Bridge (Deep)    | Great Bridge          |
+| Road             | King's Road           |
+
+#### City Tiles (10 tiles)
 | Original Name | Medieval Fantasy Name |
-|---------------|----------------------|
-| Land Base | Castle |
+|---------------|-----------------------|
+| Land Base     | Castle                |
 | Naval Base | Harbor |
 | Airport | Aviary |
 | Hospital | Sanctuary |
@@ -37,9 +40,9 @@ This collection contains **32 detailed SVG units** and **24 hexagonal tiles** de
 | Barracks | Garrison |
 | Lumbermill | Sawmill |
 
-### Unit Collection (32 units)
+#### Unit Collection (40 units)
 
-#### Ground Forces (9 units)
+##### Ground Forces (9 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Soldier Level 1 | Peasant Militia |
@@ -52,7 +55,7 @@ This collection contains **32 detailed SVG units** and **24 hexagonal tiles** de
 | Mech | Steam Golem |
 | Goliath RC Tank | Clockwork Colossus |
 
-#### Artillery (4 units)
+##### Artillery (4 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Artillery Level 1 - Basic | Catapult |
@@ -60,14 +63,14 @@ This collection contains **32 detailed SVG units** and **24 hexagonal tiles** de
 | Artillery Level 3 - Quick | Ballista |
 | Artillery Level 4 - Mega | Dragon Cannon |
 
-#### Anti-Air Defense (3 units)
+##### Anti-Air Defense (3 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Anti Aircraft Level 1 | Archer Tower |
 | Anti Aircraft Level 2 | Crossbow Tower |
 | Anti Aircraft Level 3 | Dragon Slayer |
 
-#### Naval Forces (4 units)
+##### Naval Forces (5 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Speedboat | Swift Galley |
@@ -76,7 +79,7 @@ This collection contains **32 detailed SVG units** and **24 hexagonal tiles** de
 | Battleship | War Galleon |
 | Aircraft Carrier | Dragon Carrier |
 
-#### Air Units (4 units)
+##### Air Units (5 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Crop Duster | Scout Griffin |
@@ -85,21 +88,22 @@ This collection contains **32 detailed SVG units** and **24 hexagonal tiles** de
 | Bomber | Dragon Bomber |
 | Paratrooper | Sky Warrior |
 
-#### Support Units (3 units)
+##### Support Units (3 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Medic | Healer |
 | Engineer | Builder |
 | Miner | Prospector |
 
-#### Projectiles (3 units)
+##### Projectiles (3 units)
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Missile (Standard) | Fire Arrow |
 | Missile (Anti Aircraft) | Lightning Bolt |
 | Missile (Nuclear) | Dragon's Breath |
 
-#### Remaining Units (2 units)
+##### Remaining Units (8 units)
+
 | Original Name | Medieval Fantasy Name |
 |---------------|----------------------|
 | Hovercraft | Wind Rider |
@@ -113,11 +117,123 @@ This collection contains **32 detailed SVG units** and **24 hexagonal tiles** de
 
 *Note: Some units from the original list were not yet created but names are mapped for future development.*
 
+### Modern Military Theme
+
+#### Nature Tiles (14 tiles)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Desert | Desert |
+| Grass | Grassland |
+| Mountain | Mountain Range |
+| Swamp | Marsh |
+| Forest | Forest |
+| Water (Regular) | Ocean |
+| Water (Shallow) | River |
+| Water (Deep) | Deep Ocean |
+| Water (Rocky) | Rocky Water |
+| Lava | Volcanic Zone |
+| Snow | Arctic |
+| Bridge (Regular) | Concrete Bridge |
+| Bridge (Shallow) | Pontoon Bridge |
+| Bridge (Deep) | Suspension Bridge |
+| Road | Highway |
+
+#### City Tiles (10 tiles)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Land Base | Military Base |
+| Naval Base | Naval Port |
+| Airport | Airfield |
+| Hospital | Field Hospital |
+| Missile Silo | Radar Station |
+| Mines | Oil Refinery |
+| City | City |
+| Guard Tower | Outpost |
+| Barracks | Barracks |
+| Lumbermill | Supply Depot |
+
+#### Unit Collection (40 units)
+
+##### Ground Forces (9 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Soldier Level 1 | Infantry |
+| Soldier Level 2 | Marine |
+| Soldier Level 3 | Special Forces |
+| Tank Level 1 | Humvee |
+| Tank Level 2 | Tank |
+| Tank Level 3 | Heavy Tank |
+| Stryker | APC |
+| Mech | Mech Warrior |
+| Goliath RC Tank | Unmanned Tank |
+
+##### Artillery (4 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Artillery Level 1 - Basic | Howitzer |
+| Artillery Level 2 - Advanced | MLRS |
+| Artillery Level 3 - Quick | Mobile Artillery |
+| Artillery Level 4 - Mega | Rail Gun |
+
+##### Anti-Air Defense (3 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Anti Aircraft Level 1 | SAM Site |
+| Anti Aircraft Level 2 | Patriot Battery |
+| Anti Aircraft Level 3 | CIWS |
+
+##### Naval Forces (5 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Speedboat | Patrol Boat |
+| Sailboat | Coast Guard |
+| Destroyer | Destroyer |
+| Battleship | Cruiser |
+| Aircraft Carrier | Aircraft Carrier |
+
+##### Air Units (5 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Crop Duster | Recon Drone |
+| Jetfighter | Fighter Jet |
+| Helicopter | Attack Helicopter |
+| Bomber | Stealth Bomber |
+| Paratrooper | Paratrooper |
+
+##### Support Units (3 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Medic | Combat Medic |
+| Engineer | Combat Engineer |
+| Miner | Scout |
+
+##### Projectiles (3 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Missile (Standard) | Cruise Missile |
+| Missile (Anti Aircraft) | Air Defense Missile |
+| Missile (Nuclear) | ICBM |
+
+##### Remaining Units (8 units)
+| Original Name | Modern Military Name |
+|---------------|----------------------|
+| Hovercraft | Hovercraft |
+| Submarine | Submarine |
+| Tugboat | Support Vessel |
+| Sea Mine | Naval Mine |
+| Zeppelin | Surveillance Blimp |
+| Drone | Combat Drone |
+| Cruiser | Battleship |
+| Stratotanker | Refueling Tanker |
+
+*Note: Modern Military theme uses contemporary military equipment and vehicles with clean, functional design aesthetic.*
+
 ## Design Guidelines for Creating New Themed Assets
 
 ### 1. Theme Development Process
 
 #### Step 1: Choose Your Theme
+
 Examples of potential themes:
 - **Steam Punk**: Victorian-era technology with gears, brass, steam
 - **Space/Sci-Fi**: Futuristic technology, energy weapons, spacecraft
@@ -127,6 +243,7 @@ Examples of potential themes:
 - **Post-Apocalyptic**: Scavenged materials, rust, makeshift equipment
 
 #### Step 2: Create Theme Mapping Tables
+
 For each theme, systematically rename every unit and tile to fit the aesthetic:
 
 **Example - Steam Punk Theme:**
@@ -177,10 +294,12 @@ Always include rich gradients for depth:
 ```
 
 ##### Character Design Standards
+
+- **Terrain Features**: Clear ridges and distinct features indicative of terrain types
 - **Facial Features**: Clear eyes, expressions, distinctive features
 - **Equipment Details**: Visible tools, weapons, clothing textures
 - **Scale Appropriate**: Details visible at small sizes
-- **Personality**: Each unit should have visual character
+- **Personality**: Each unit and terrain should have visual character
 
 #### Player Color Compatibility
 - **Background Elements**: Use neutral colors that can be tinted
@@ -264,40 +383,52 @@ Always include rich gradients for depth:
 
 ## Asset File Structure
 ```
-/theme_name/
-  /nature_tiles/
+/themes/fantasy
+  /Tiles/
     Desert.svg
     Meadow.svg
     ...
-  /city_tiles/
     Castle.svg
     Harbor.svg
     ...
-  /units/
-    /ground/
+  /Units/
       PeasantMilitia.svg
       Knight.svg
       ...
-    /naval/
       SwiftGalley.svg
       WarGalleon.svg
       ...
-    /air/
       WyvernRider.svg
       DragonBomber.svg
       ...
-    /artillery/
       Catapult.svg
       Trebuchet.svg
       ...
-    /support/
       Healer.svg
       Builder.svg
       ...
-    /projectiles/
       FireArrow.svg
       LightningBolt.svg
       ...
 ```
 
 This framework provides a complete blueprint for creating cohesive themed asset collections while maintaining the rich detail and functionality demonstrated in the Medieval Fantasy set.
+
+
+## Prompt for creating new themes
+
+
+```
+Read up Mappings.md first
+
+Ok let us create another Theme - the Modern Military theme with contemporary units similar to the style of the original Weewar game - do you remember this?  Tell me what your plan for this will be before proceeding
+
+Also make sure you track the progress in a TODO so we can resume on restarts.
+
+Make sure terrains are not flat and have richness in detail.  By richness I mean more than just a few circles and
+triangles and capture the essense and character of the tile being generated.
+
+Make sure that all the features are constrained within the hexagonal tile area so it wont be clipped by a neighboring
+hex tile.  For river and bridge tiles make sure it covers the entire hex tile - otherwise if it is "flowing" from one
+edge to opposite edge a cluster of similar tiles will look disjoint.
+```

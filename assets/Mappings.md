@@ -145,7 +145,7 @@ This collection contains **40 detailed SVG units** and **24 hexagonal tiles** de
 | Naval Base | Naval Port |
 | Airport | Airfield |
 | Hospital | Field Hospital |
-| Missile Silo | Radar Station |
+| Missile Silo | Missile Silo |
 | Mines | Oil Refinery |
 | City | City |
 | Guard Tower | Outpost |

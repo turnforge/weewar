@@ -772,6 +772,8 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         if (this.textures.exists(textureKey)) {
             const tileSprite = this.add.sprite(position.x, position.y, textureKey);
             tileSprite.setOrigin(0.5, 0.5);
+            // Scale sprite to match hex tile size
+            tileSprite.setDisplaySize(this.tileWidth, this.tileHeight);
             this.tileSprites.set(key, tileSprite); // Use coordinate key, not texture key
         } else {
             // Try fallback without player color
@@ -779,6 +781,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             if (this.textures.exists(fallbackKey)) {
                 const tileSprite = this.add.sprite(position.x, position.y, fallbackKey);
                 tileSprite.setOrigin(0.5, 0.5);
+                tileSprite.setDisplaySize(this.tileWidth, this.tileHeight);
                 this.tileSprites.set(key, tileSprite);
             } else {
                 console.error(`[PhaserWorldScene] Texture not found: ${textureKey} or ${fallbackKey}`);
@@ -836,6 +839,8 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             const unitSprite = this.add.sprite(position.x, position.y, textureKey);
             unitSprite.setOrigin(0.5, 0.5);
             unitSprite.setDepth(10); // Units render above tiles
+            // Scale sprite to match hex tile size
+            unitSprite.setDisplaySize(this.tileWidth, this.tileHeight);
             this.unitSprites.set(key, unitSprite);
         } else {
             // Try fallback without player color
@@ -844,6 +849,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
                 const unitSprite = this.add.sprite(position.x, position.y, fallbackKey);
                 unitSprite.setOrigin(0.5, 0.5);
                 unitSprite.setDepth(10);
+                unitSprite.setDisplaySize(this.tileWidth, this.tileHeight);
                 this.unitSprites.set(key, unitSprite);
             } else {
                 console.error(`[PhaserWorldScene] Unit texture not found: ${textureKey} or ${fallbackKey}`);

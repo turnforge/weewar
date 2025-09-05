@@ -1,0 +1,60 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Elite Guardian - Level 3 Soldier -->
+  
+  <!-- Head -->
+  <circle cx="50" cy="24" r="7" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Stern eyes -->
+  <circle cx="47" cy="22" r="1.5" fill="#8d4a47"/>
+  <circle cx="53" cy="22" r="1.5" fill="#8d4a47"/>
+  <!-- Scar -->
+  <line x1="45" y1="20" x2="47" y2="22" stroke="#8d4a47" stroke-width="1"/>
+  <!-- Beard -->
+  <path d="M45 28 Q50 32 55 28 Q53 30 50 30 Q47 30 45 28" fill="#5d4037"/>
+  
+  <!-- Ornate Helmet -->
+  <path d="M43 12 Q50 6 57 12 Q57 20 50 20 Q43 20 43 12" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <!-- Helmet ornaments -->
+  <circle cx="50" cy="10" r="2" fill="#ff5722"/>
+  <polygon points="50,6 48,8 52,8" fill="#ff5722"/>
+  <!-- Helmet wings -->
+  <path d="M43 15 Q40 12 38 15 Q40 18 43 15" fill="#ffc107"/>
+  <path d="M57 15 Q60 12 62 15 Q60 18 57 15" fill="#ffc107"/>
+  
+  <!-- Elaborate armor -->
+  <rect x="43" y="31" width="14" height="24" fill="#ffc107" stroke="#ff8f00" stroke-width="1" rx="3"/>
+  <!-- Armor details -->
+  <rect x="45" y="34" width="10" height="3" fill="#ff8f00"/>
+  <circle cx="50" cy="40" r="2" fill="#ff5722"/>
+  <polygon points="50,44 47,47 50,50 53,47" fill="#f44336"/>
+  <rect x="46" y="51" width="8" height="2" fill="#ff8f00"/>
+  
+  <!-- Ornate arms -->
+  <circle cx="38" cy="37" r="4" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <rect x="34" y="33" width="8" height="12" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <circle cx="62" cy="37" r="4" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <rect x="58" y="33" width="8" height="12" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  
+  <!-- Armored legs -->
+  <rect x="45" y="55" width="4" height="17" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <rect x="51" y="55" width="4" height="17" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <!-- Golden boots -->
+  <ellipse cx="47" cy="74" rx="3" ry="2.5" fill="#ff8f00"/>
+  <ellipse cx="53" cy="74" rx="3" ry="2.5" fill="#ff8f00"/>
+  
+  <!-- Magical sword -->
+  <rect x="25" y="10" width="4" height="30" fill="#e1bee7"/>
+  <rect x="23" y="40" width="8" height="4" fill="#9c27b0"/>
+  <circle cx="27" cy="47" r="3" fill="#9c27b0"/>
+  <!-- Magical glow -->
+  <circle cx="27" cy="25" r="8" fill="#e1bee7" opacity="0.3"/>
+  
+  <!-- Royal Shield -->
+  <path d="M68 20 Q77 15 86 20 Q86 50 77 55 Q68 50 68 20" fill="#3f51b5" stroke="#303f9f" stroke-width="2"/>
+  <polygon points="77,25 74,28 77,31 80,28" fill="#ffc107"/>
+  <rect x="75" y="35" width="4" height="10" fill="#ffc107"/>
+  <circle cx="77" cy="48" r="2" fill="#ffc107"/>
+  
+  <!-- Royal cape -->
+  <path d="M43 33 Q30 25 20 35 Q25 55 43 50" fill="#7b1fa2" opacity="0.9"/>
+  <path d="M25 40 Q30 38 35 40 Q32 42 30 42 Q27 42 25 40" fill="#9c27b0"/>
+</svg>

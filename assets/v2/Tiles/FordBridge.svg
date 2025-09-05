@@ -1,0 +1,12 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="#4dd0e1" stroke="#0097a7" stroke-width="2"/>
+  <!-- Shallow water base -->
+  <path d="M20 45 Q30 40 40 45 Q50 50 60 45 Q70 40 80 45" stroke="#80deea" stroke-width="1.5" fill="none"/>
+  <!-- Bridge -->
+  <rect x="15" y="45" width="70" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+  <rect x="20" y="47" width="60" height="6" fill="#8d6e63"/>
+  <!-- Visible supports in shallow water -->
+  <rect x="30" y="50" width="3" height="10" fill="#3e2723"/>
+  <rect x="45" y="50" width="3" height="10" fill="#3e2723"/>
+  <rect x="60" y="50" width="3" height="10" fill="#3e2723"/>
+</svg>

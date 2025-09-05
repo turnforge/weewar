@@ -1,0 +1,163 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="featherGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff8f00"/>
+      <stop offset="50%" stop-color="#ef6c00"/>
+      <stop offset="100%" stop-color="#bf360c"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="50%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="beakGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffc107"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+    <radialGradient id="eyeGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#ffeb3b"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Scout Griffin - Crop Duster equivalent -->
+  
+  <!-- Griffin body (lion rear) -->
+  <ellipse cx="45" cy="55" rx="15" ry="10" fill="url(#bodyGrad)" stroke="#3e2723" stroke-width="2"/>
+  <!-- Body fur texture -->
+  <path d="M35 50 Q40 48 45 50" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M35 55 Q40 53 45 55" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M35 60 Q40 58 45 60" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M45 50 Q50 48 55 50" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M45 55 Q50 53 55 55" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M45 60 Q50 58 55 60" stroke="#5d4037" stroke-width="1" fill="none"/>
+  
+  <!-- Griffin chest (eagle front) -->
+  <ellipse cx="55" cy="40" rx="12" ry="8" fill="url(#featherGrad)" stroke="#bf360c" stroke-width="2"/>
+  <!-- Chest feather pattern -->
+  <path d="M48 35 Q52 33 56 35" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M48 38 Q52 36 56 38" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M48 41 Q52 39 56 41" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M48 44 Q52 42 56 44" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M56 35 Q60 33 64 35" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M56 38 Q60 36 64 38" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M56 41 Q60 39 64 41" stroke="#d84315" stroke-width="1" fill="none"/>
+  
+  <!-- Griffin head -->
+  <ellipse cx="70" cy="30" rx="8" ry="6" fill="url(#featherGrad)" stroke="#bf360c" stroke-width="2"/>
+  <!-- Head crest feathers -->
+  <polygon points="70,22 68,25 70,28 72,25" fill="#ff5722"/>
+  <polygon points="72,20 70,23 72,26 74,23" fill="#ff5722"/>
+  <polygon points="68,20 66,23 68,26 70,23" fill="#ff5722"/>
+  
+  <!-- Eagle beak -->
+  <polygon points="78,30 85,32 78,34" fill="url(#beakGrad)" stroke="#e65100" stroke-width="1"/>
+  <!-- Beak detail -->
+  <line x1="80" y1="31" x2="83" y2="32" stroke="#ff8f00" stroke-width="0.5"/>
+  
+  <!-- Sharp eagle eyes -->
+  <circle cx="72" cy="28" r="2" fill="url(#eyeGrad)" stroke="#e65100" stroke-width="1"/>
+  <circle cx="72" cy="28" r="1" fill="#1976d2"/>
+  <circle cx="72" cy="27" r="0.5" fill="#f5f5f5"/>
+  <circle cx="68" cy="30" r="2" fill="url(#eyeGrad)" stroke="#e65100" stroke-width="1"/>
+  <circle cx="68" cy="30" r="1" fill="#1976d2"/>
+  <circle cx="68" cy="29" r="0.5" fill="#f5f5f5"/>
+  
+  <!-- Large wings spread for flight -->
+  <path d="M40 35 Q20 20 10 30 Q15 45 30 50 Q35 45 40 40" fill="url(#featherGrad)" stroke="#bf360c" stroke-width="2"/>
+  <path d="M60 35 Q80 20 90 30 Q85 45 70 50 Q65 45 60 40" fill="url(#featherGrad)" stroke="#bf360c" stroke-width="2"/>
+  
+  <!-- Wing feather details -->
+  <path d="M35 40 Q25 30 18 35" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M32 43 Q22 33 15 38" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M30 46 Q20 36 13 41" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M65 40 Q75 30 82 35" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M68 43 Q78 33 85 38" stroke="#d84315" stroke-width="1" fill="none"/>
+  <path d="M70 46 Q80 36 87 41" stroke="#d84315" stroke-width="1" fill="none"/>
+  
+  <!-- Primary flight feathers -->
+  <polygon points="10,30 8,32 12,35 14,33" fill="#d84315"/>
+  <polygon points="12,28 10,30 14,33 16,31" fill="#d84315"/>
+  <polygon points="14,26 12,28 16,31 18,29" fill="#d84315"/>
+  <polygon points="90,30 92,32 88,35 86,33" fill="#d84315"/>
+  <polygon points="88,28 90,30 86,33 84,31" fill="#d84315"/>
+  <polygon points="86,26 88,28 84,31 82,29" fill="#d84315"/>
+  
+  <!-- Eagle front talons -->
+  <ellipse cx="60" cy="50" rx="3" ry="5" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <ellipse cx="65" cy="52" rx="3" ry="5" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <!-- Talon claws -->
+  <polygon points="58,55 56,57 60,57" fill="#424242"/>
+  <polygon points="60,56 58,58 62,58" fill="#424242"/>
+  <polygon points="62,55 60,57 64,57" fill="#424242"/>
+  <polygon points="63,57 61,59 65,59" fill="#424242"/>
+  <polygon points="65,58 63,60 67,60" fill="#424242"/>
+  <polygon points="67,57 65,59 69,59" fill="#424242"/>
+  
+  <!-- Lion hind legs -->
+  <ellipse cx="40" cy="65" rx="3" ry="6" fill="url(#bodyGrad)" stroke="#3e2723" stroke-width="1"/>
+  <ellipse cx="50" cy="67" rx="3" ry="6" fill="url(#bodyGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Paw pads -->
+  <circle cx="40" cy="71" r="2" fill="#5d4037"/>
+  <circle cx="50" cy="73" r="2" fill="#5d4037"/>
+  <!-- Lion claws -->
+  <polygon points="38,73 36,75 40,75" fill="#424242"/>
+  <polygon points="42,73 40,75 44,75" fill="#424242"/>
+  <polygon points="48,75 46,77 50,77" fill="#424242"/>
+  <polygon points="52,75 50,77 54,77" fill="#424242"/>
+  
+  <!-- Lion tail with tuft -->
+  <path d="M30 60 Q20 65 15 70 Q20 75 25 70" stroke="url(#bodyGrad)" stroke-width="4" fill="none"/>
+  <circle cx="25" cy="70" r="3" fill="#5d4037"/>
+  
+  <!-- Rider (scout) -->
+  <circle cx="50" cy="25" r="4" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Scout goggles -->
+  <circle cx="48" cy="24" r="2" fill="#81d4fa" stroke="#0277bd" stroke-width="1"/>
+  <circle cx="52" cy="24" r="2" fill="#81d4fa" stroke="#0277bd" stroke-width="1"/>
+  <rect x="46" y="23" width="8" height="2" fill="#8d6e63"/>
+  <!-- Wind-blown hair -->
+  <path d="M46 20 Q50 15 54 20" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Scout outfit -->
+  <rect x="47" y="29" width="6" height="10" fill="#4caf50" stroke="#2e7d32" stroke-width="1"/>
+  <!-- Equipment belt -->
+  <rect x="46" y="35" width="8" height="2" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Scouting equipment -->
+  <!-- Spyglass -->
+  <rect x="42" y="30" width="1" height="6" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <circle cx="42.5" cy="28" r="1.5" fill="#81d4fa"/>
+  
+  <!-- Message pouch -->
+  <ellipse cx="55" cy="32" rx="2" ry="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <rect x="54" y="30" width="2" height="1" fill="#6d4c41"/>
+  
+  <!-- Riding harness -->
+  <path d="M47 29 Q50 35 53 29" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M50 35 Q55 40 60 35" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  
+  <!-- Flight path indicators -->
+  <circle cx="15" cy="20" r="1" fill="#81d4fa" opacity="0.8"/>
+  <circle cx="20" cy="15" r="1" fill="#81d4fa" opacity="0.6"/>
+  <circle cx="25" cy="12" r="1" fill="#81d4fa" opacity="0.4"/>
+  <circle cx="30" cy="10" r="1" fill="#81d4fa" opacity="0.3"/>
+  
+  <!-- Wind currents -->
+  <path d="M5 35 Q2 33 5 30" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M7 40 Q4 38 7 35" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M95 35 Q98 33 95 30" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M93 40 Q96 38 93 35" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  
+  <!-- Terrain below (scouting view) -->
+  <ellipse cx="20" cy="85" rx="8" ry="3" fill="#4caf50" opacity="0.6"/>
+  <ellipse cx="40" cy="88" rx="6" ry="2" fill="#8d6e63" opacity="0.6"/>
+  <ellipse cx="60" cy="85" rx="5" ry="3" fill="#2196f3" opacity="0.6"/>
+  <ellipse cx="80" cy="87" rx="7" ry="2" fill="#795548" opacity="0.6"/>
+  
+  <!-- Keen eye scan lines -->
+  <path d="M72 28 L85 20" stroke="#ffeb3b" stroke-width="1" opacity="0.5"/>
+  <path d="M72 28 L85 35" stroke="#ffeb3b" stroke-width="1" opacity="0.5"/>
+  <path d="M68 30 L55 80" stroke="#ffeb3b" stroke-width="1" opacity="0.5"/>
+  <path d="M68 30 L35 85" stroke="#ffeb3b" stroke-width="1" opacity="0.5"/>
+</svg>

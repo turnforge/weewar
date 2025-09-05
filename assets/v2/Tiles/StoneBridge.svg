@@ -1,0 +1,19 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="waterGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#waterGrad)" stroke="#0d47a1" stroke-width="2"/>
+  <!-- Water base -->
+  <path d="M20 40 Q30 35 40 40 Q50 45 60 40 Q70 35 80 40" stroke="#81d4fa" stroke-width="2" fill="none"/>
+  <!-- Bridge -->
+  <rect x="15" y="45" width="70" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+  <rect x="20" y="47" width="60" height="6" fill="#8d6e63"/>
+  <!-- Bridge supports -->
+  <rect x="30" y="50" width="3" height="15" fill="#3e2723"/>
+  <rect x="45" y="50" width="3" height="15" fill="#3e2723"/>
+  <rect x="60" y="50" width="3" height="15" fill="#3e2723"/>
+</svg>

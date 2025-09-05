@@ -1,0 +1,191 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="armorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="50%" stop-color="#616161"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+    <linearGradient id="wingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e3f2fd"/>
+      <stop offset="50%" stop-color="#bbdefb"/>
+      <stop offset="100%" stop-color="#2196f3"/>
+    </linearGradient>
+    <radialGradient id="magicGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#e1bee7"/>
+      <stop offset="50%" stop-color="#9c27b0"/>
+      <stop offset="100%" stop-color="#4a148c"/>
+    </radialGradient>
+    <linearGradient id="chuteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#bdbdbd"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#2196f3"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Sky Warrior - Paratrooper equivalent -->
+  
+  <!-- Warrior head with detailed helm -->
+  <circle cx="50" cy="25" r="5" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Winged helmet -->
+  <path d="M45 18 Q50 15 55 18 Q55 25 50 25 Q45 25 45 18" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Helmet wings -->
+  <path d="M45 20 Q40 17 38 20 Q42 23 45 21" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <path d="M55 20 Q60 17 62 20 Q58 23 55 21" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <!-- Helmet crest -->
+  <polygon points="50,15 48,17 52,17" fill="#f44336"/>
+  <!-- Eye protection -->
+  <rect x="47" y="23" width="6" height="2" fill="#81d4fa" stroke="#0277bd" stroke-width="1"/>
+  <!-- Eyes visible -->
+  <circle cx="48" cy="24" r="0.8" fill="#1976d2"/>
+  <circle cx="52" cy="24" r="0.8" fill="#1976d2"/>
+  
+  <!-- Armored torso -->
+  <rect x="45" y="30" width="10" height="18" fill="url(#armorGrad)" stroke="#000" stroke-width="2" rx="2"/>
+  <!-- Chest plate details -->
+  <rect x="46" y="32" width="8" height="2" fill="#757575"/>
+  <rect x="46" y="40" width="8" height="2" fill="#757575"/>
+  <circle cx="47" cy="36" r="1" fill="#424242"/>
+  <circle cx="53" cy="36" r="1" fill="#424242"/>
+  <circle cx="50" cy="44" r="1.5" fill="#616161"/>
+  <!-- Heraldic symbol -->
+  <polygon points="50,38 48,40 50,42 52,40" fill="#2196f3"/>
+  
+  <!-- Magical wings -->
+  <path d="M35 32 Q20 20 15 25 Q18 40 30 45 Q35 40 40 35" fill="url(#wingGrad)" stroke="#1976d2" stroke-width="2"/>
+  <path d="M65 32 Q80 20 85 25 Q82 40 70 45 Q65 40 60 35" fill="url(#wingGrad)" stroke="#1976d2" stroke-width="2"/>
+  
+  <!-- Wing feather details -->
+  <path d="M30 35 Q22 25 18 30" stroke="#0d47a1" stroke-width="1.5" fill="none"/>
+  <path d="M32 38 Q24 28 20 33" stroke="#0d47a1" stroke-width="1.5" fill="none"/>
+  <path d="M34 41 Q26 31 22 36" stroke="#0d47a1" stroke-width="1.5" fill="none"/>
+  <path d="M70 35 Q78 25 82 30" stroke="#0d47a1" stroke-width="1.5" fill="none"/>
+  <path d="M68 38 Q76 28 80 33" stroke="#0d47a1" stroke-width="1.5" fill="none"/>
+  <path d="M66 41 Q74 31 78 36" stroke="#0d47a1" stroke-width="1.5" fill="none"/>
+  
+  <!-- Wing magical energy -->
+  <circle cx="25" cy="30" r="2" fill="url(#magicGrad)" opacity="0.7"/>
+  <circle cx="75" cy="30" r="2" fill="url(#magicGrad)" opacity="0.7"/>
+  <circle cx="22" cy="35" r="1.5" fill="#e1bee7" opacity="0.6"/>
+  <circle cx="78" cy="35" r="1.5" fill="#e1bee7" opacity="0.6"/>
+  
+  <!-- Armored arms -->
+  <ellipse cx="38" cy="36" rx="4" ry="7" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <ellipse cx="62" cy="36" rx="4" ry="7" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Shoulder pauldrons -->
+  <circle cx="38" cy="32" r="3" fill="#757575" stroke="#424242" stroke-width="1"/>
+  <circle cx="62" cy="32" r="3" fill="#757575" stroke="#424242" stroke-width="1"/>
+  <!-- Gauntlets -->
+  <circle cx="35" cy="43" r="3" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="65" cy="43" r="3" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Gauntlet spikes -->
+  <polygon points="33,41 31,42 35,42" fill="#424242"/>
+  <polygon points="67,41 65,42 69,42" fill="#424242"/>
+  
+  <!-- Sky sword -->
+  <rect x="25" y="25" width="3" height="20" fill="#e3f2fd" stroke="#1976d2" stroke-width="1"/>
+  <rect x="23" y="45" width="7" height="3" fill="#9e9e9e" stroke="#616161" stroke-width="1"/>
+  <circle cx="26.5" cy="48" r="2" fill="#9e9e9e"/>
+  <!-- Magical blade glow -->
+  <rect x="25.5" y="25" width="2" height="20" fill="#ffffff" opacity="0.8"/>
+  <circle cx="26.5" cy="25" r="3" fill="#e3f2fd" opacity="0.6"/>
+  
+  <!-- Sky shield -->
+  <ellipse cx="75" cy="40" rx="6" ry="8" fill="url(#wingGrad)" stroke="#1976d2" stroke-width="2"/>
+  <circle cx="75" cy="40" r="4" fill="#2196f3"/>
+  <polygon points="75,36 73,40 75,44 77,40" fill="#ffffff"/>
+  <!-- Shield energy field -->
+  <circle cx="75" cy="40" r="9" fill="none" stroke="#e3f2fd" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Armored legs -->
+  <rect x="47" y="48" width="3" height="18" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="50" y="48" width="3" height="18" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Leg armor details -->
+  <rect x="47" y="52" width="3" height="2" fill="#757575"/>
+  <rect x="50" y="52" width="3" height="2" fill="#757575"/>
+  <rect x="47" y="60" width="3" height="2" fill="#757575"/>
+  <rect x="50" y="60" width="3" height="2" fill="#757575"/>
+  <!-- Knee guards -->
+  <circle cx="48.5" cy="56" r="2" fill="#616161" stroke="#424242" stroke-width="1"/>
+  <circle cx="51.5" cy="56" r="2" fill="#616161" stroke="#424242" stroke-width="1"/>
+  
+  <!-- Winged boots -->
+  <ellipse cx="48.5" cy="68" rx="3" ry="2" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <ellipse cx="51.5" cy="68" rx="3" ry="2" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Boot wings -->
+  <path d="M45 67 Q42 65 44 69" fill="#e3f2fd" stroke="#2196f3" stroke-width="1"/>
+  <path d="M55 67 Q58 65 56 69" fill="#e3f2fd" stroke="#2196f3" stroke-width="1"/>
+  <path d="M45 69 Q42 67 44 71" fill="#bbdefb" stroke="#1976d2" stroke-width="1"/>
+  <path d="M55 69 Q58 67 56 71" fill="#bbdefb" stroke="#1976d2" stroke-width="1"/>
+  
+  <!-- Magical parachute/wings -->
+  <path d="M30 15 Q50 5 70 15 Q65 25 50 20 Q35 25 30 15" fill="url(#chuteGrad)" stroke="#bdbdbd" stroke-width="2"/>
+  <!-- Parachute magical pattern -->
+  <circle cx="40" cy="15" r="2" fill="url(#magicGrad)" opacity="0.7"/>
+  <circle cx="50" cy="12" r="2" fill="url(#magicGrad)" opacity="0.7"/>
+  <circle cx="60" cy="15" r="2" fill="url(#magicGrad)" opacity="0.7"/>
+  <!-- Runic symbols on chute -->
+  <polygon points="45,16 43,18 45,20 47,18" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="55,16 53,18 55,20 57,18" fill="#9c27b0" opacity="0.8"/>
+  
+  <!-- Control lines -->
+  <path d="M35 18 Q42 25 45 30" stroke="#e0e0e0" stroke-width="2" fill="none"/>
+  <path d="M65 18 Q58 25 55 30" stroke="#e0e0e0" stroke-width="2" fill="none"/>
+  <path d="M45 14 Q47 20 50 25" stroke="#e0e0e0" stroke-width="1.5" fill="none"/>
+  <path d="M55 14 Q53 20 50 25" stroke="#e0e0e0" stroke-width="1.5" fill="none"/>
+  
+  <!-- Equipment harness -->
+  <path d="M45 30 Q50 35 55 30" stroke="#8d6e63" stroke-width="3" fill="none"/>
+  <path d="M47 35 Q50 40 53 35" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <!-- Harness buckles -->
+  <rect x="49" y="33" width="2" height="2" fill="#616161"/>
+  <rect x="49" y="37" width="2" height="2" fill="#616161"/>
+  
+  <!-- Utility belt -->
+  <rect x="44" y="46" width="12" height="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <!-- Belt pouches -->
+  <rect x="45" y="44" width="2" height="4" fill="#795548"/>
+  <rect x="48" y="44" width="2" height="4" fill="#795548"/>
+  <rect x="53" y="44" width="2" height="4" fill="#795548"/>
+  <!-- Magical components -->
+  <circle cx="46" cy="46" r="0.8" fill="#e1bee7"/>
+  <circle cx="49" cy="46" r="0.8" fill="#4caf50"/>
+  <circle cx="54" cy="46" r="0.8" fill="#ff5722"/>
+  
+  <!-- Wind currents around warrior -->
+  <path d="M10 30 Q7 28 10 25" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M12 35 Q9 33 12 30" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M90 30 Q93 28 90 25" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M88 35 Q91 33 88 30" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  
+  <!-- Descent trail -->
+  <circle cx="50" cy="75" r="2" fill="#e3f2fd" opacity="0.6"/>
+  <circle cx="50" cy="80" r="1.5" fill="#bbdefb" opacity="0.5"/>
+  <circle cx="50" cy="85" r="1" fill="#2196f3" opacity="0.4"/>
+  <circle cx="50" cy="90" r="0.8" fill="#1976d2" opacity="0.3"/>
+  
+  <!-- Magical aura -->
+  <circle cx="50" cy="40" r="25" fill="none" stroke="url(#magicGrad)" stroke-width="1" opacity="0.3"/>
+  <circle cx="50" cy="40" r="30" fill="none" stroke="#e1bee7" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Landing target glow -->
+  <circle cx="50" cy="95" r="4" fill="url(#glowGrad)" opacity="0.6"/>
+  <circle cx="50" cy="95" r="6" fill="#2196f3" opacity="0.4"/>
+  <circle cx="50" cy="95" r="8" fill="#e3f2fd" opacity="0.3"/>
+  
+  <!-- Battle ready stance indicators -->
+  <path d="M25 25 Q22 23 25 20" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M75 40 Q78 38 75 35" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.6"/>
+  
+  <!-- Magical energy discharge -->
+  <circle cx="26.5" cy="25" r="1" fill="#ffffff"/>
+  <circle cx="75" cy="40" r="1" fill="#ffffff"/>
+  <circle cx="50" cy="15" r="1" fill="#e1bee7"/>
+  
+  <!-- Combat readiness -->
+  <path d="M35 43 Q33 41 35 38" stroke="#e3f2fd" stroke-width="1.5" fill="none" opacity="0.7"/>
+  <path d="M65 43 Q67 41 65 38" stroke="#e3f2fd" stroke-width="1.5" fill="none" opacity="0.7"/>
+</svg>

@@ -1,0 +1,183 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="stoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bcaaa4"/>
+      <stop offset="50%" stop-color="#a1887f"/>
+      <stop offset="100%" stop-color="#6d4c41"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="50%" stop-color="#616161"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="70%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#424242"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Crossbow Tower - Anti Aircraft Level 2 -->
+  
+  <!-- Reinforced tower base -->
+  <rect x="30" y="55" width="40" height="30" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="3" rx="3"/>
+  <!-- Enhanced stonework -->
+  <line x1="32" y1="60" x2="68" y2="60" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="32" y1="65" x2="68" y2="65" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="32" y1="70" x2="68" y2="70" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="32" y1="75" x2="68" y2="75" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="32" y1="80" x2="68" y2="80" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="38" y1="55" x2="38" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="46" y1="55" x2="46" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="54" y1="55" x2="54" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="62" y1="55" x2="62" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Taller tower shaft -->
+  <rect x="37" y="20" width="26" height="35" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="2"/>
+  <!-- Tower reinforcements -->
+  <rect x="35" y="25" width="30" height="3" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="35" y="35" width="30" height="3" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="35" y="45" width="30" height="3" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Metal studs -->
+  <circle cx="40" cy="26.5" r="1" fill="#424242"/>
+  <circle cx="50" cy="26.5" r="1" fill="#424242"/>
+  <circle cx="60" cy="26.5" r="1" fill="#424242"/>
+  
+  <!-- Advanced tower top -->
+  <rect x="30" y="15" width="40" height="5" fill="url(#woodGrad)" stroke="#212121" stroke-width="2"/>
+  <!-- Platform reinforcements -->
+  <rect x="32" y="16" width="36" height="2" fill="#6d4c41"/>
+  
+  <!-- Crenellated battlements -->
+  <rect x="30" y="12" width="5" height="6" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="38" y="12" width="5" height="6" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="46" y="12" width="5" height="6" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="54" y="12" width="5" height="6" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="62" y="12" width="5" height="6" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="68" y="12" width="2" height="6" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Heavy crossbow mechanism -->
+  <rect x="42" y="8" width="16" height="4" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="2"/>
+  <!-- Crossbow prod (bow) -->
+  <path d="M25 10 Q20 8 18 12 Q22 16 25 14" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="2"/>
+  <path d="M75 10 Q80 8 82 12 Q78 16 75 14" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="2"/>
+  <!-- Bow string -->
+  <path d="M25 10 Q50 6 75 10" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M25 14 Q50 18 75 14" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  
+  <!-- Crossbow stock -->
+  <rect x="45" y="9" width="10" height="2" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Metal reinforcements on stock -->
+  <rect x="46" y="9.2" width="8" height="0.6" fill="url(#metalGrad)"/>
+  <rect x="46" y="10.2" width="8" height="0.6" fill="url(#metalGrad)"/>
+  
+  <!-- Loaded bolt -->
+  <line x1="32" y1="10" x2="45" y2="10" stroke="url(#boltGrad)" stroke-width="2"/>
+  <polygon points="32,10 27,11.5 32,8.5" fill="#424242"/>
+  <!-- Bolt fletching -->
+  <polygon points="45,9 47,10 45,11 43,10" fill="#f44336"/>
+  
+  <!-- Crossbow operator -->
+  <circle cx="50" cy="5" r="3.5" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Operator's helmet -->
+  <path d="M46.5 0 Q50 -3 53.5 0 Q53.5 6 50 6 Q46.5 6 46.5 0" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Helmet visor -->
+  <rect x="47.5" y="3" width="5" height="2" fill="#212121"/>
+  <!-- Eyes through visor -->
+  <circle cx="48.5" cy="4" r="0.8" fill="#1976d2"/>
+  <circle cx="51.5" cy="4" r="0.8" fill="#1976d2"/>
+  
+  <!-- Operator's body -->
+  <rect x="47" y="8" width="6" height="8" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Chainmail texture -->
+  <circle cx="48" cy="10" r="0.5" fill="#757575"/>
+  <circle cx="50" cy="10" r="0.5" fill="#757575"/>
+  <circle cx="52" cy="10" r="0.5" fill="#757575"/>
+  <circle cx="49" cy="12" r="0.5" fill="#757575"/>
+  <circle cx="51" cy="12" r="0.5" fill="#757575"/>
+  <circle cx="48" cy="14" r="0.5" fill="#757575"/>
+  <circle cx="50" cy="14" r="0.5" fill="#757575"/>
+  <circle cx="52" cy="14" r="0.5" fill="#757575"/>
+  
+  <!-- Arms operating crossbow -->
+  <ellipse cx="43" cy="12" rx="2.5" ry="4" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <ellipse cx="57" cy="12" rx="2.5" ry="4" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  
+  <!-- Windlass mechanism -->
+  <rect x="48" y="15" width="4" height="2" fill="url(#metalGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="50" cy="16" r="1.5" fill="#424242"/>
+  <!-- Crank handle -->
+  <rect x="52" y="15.5" width="3" height="1" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Multiple arrow slits -->
+  <rect x="40" y="25" width="2" height="8" fill="#212121"/>
+  <rect x="58" y="25" width="2" height="8" fill="#212121"/>
+  <rect x="40" y="38" width="2" height="8" fill="#212121"/>
+  <rect x="58" y="38" width="2" height="8" fill="#212121"/>
+  <rect x="49" y="48" width="2" height="7" fill="#212121"/>
+  
+  <!-- Bolt storage rack -->
+  <rect x="15" y="65" width="10" height="15" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Multiple bolt bundles -->
+  <line x1="17" y1="63" x2="17" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <line x1="18" y1="63" x2="18" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <line x1="19" y1="63" x2="19" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <line x1="20" y1="63" x2="20" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <line x1="21" y1="63" x2="21" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <line x1="22" y1="63" x2="22" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <line x1="23" y1="63" x2="23" y2="70" stroke="url(#boltGrad)" stroke-width="1"/>
+  <!-- Heavy bolt tips -->
+  <polygon points="17,63 16,64 18,64" fill="#424242"/>
+  <polygon points="19,63 18,64 20,64" fill="#424242"/>
+  <polygon points="21,63 20,64 22,64" fill="#424242"/>
+  <polygon points="23,63 22,64 24,64" fill="#424242"/>
+  
+  <!-- Targeting system -->
+  <rect x="67" y="30" width="8" height="12" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <circle cx="71" cy="36" r="4" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Crosshairs -->
+  <line x1="69" y1="36" x2="73" y2="36" stroke="#d32f2f" stroke-width="1"/>
+  <line x1="71" y1="34" x2="71" y2="38" stroke="#d32f2f" stroke-width="1"/>
+  <!-- Range markers -->
+  <circle cx="71" cy="36" r="3" fill="none" stroke="#f44336" stroke-width="0.5"/>
+  <circle cx="71" cy="36" r="2" fill="none" stroke="#f44336" stroke-width="0.5"/>
+  
+  <!-- Projectile trajectory -->
+  <circle cx="28" cy="10" r="0.8" fill="#ff5722" opacity="0.8"/>
+  <circle cx="33" cy="15" r="0.8" fill="#ff5722" opacity="0.7"/>
+  <circle cx="38" cy="20" r="0.8" fill="#ff5722" opacity="0.6"/>
+  <circle cx="43" cy="25" r="0.8" fill="#ff5722" opacity="0.5"/>
+  <circle cx="48" cy="30" r="0.8" fill="#ff5722" opacity="0.4"/>
+  <circle cx="53" cy="33" r="0.8" fill="#ff5722" opacity="0.3"/>
+  <circle cx="58" cy="35" r="0.8" fill="#ff5722" opacity="0.3"/>
+  <circle cx="63" cy="36" r="0.8" fill="#ff5722" opacity="0.3"/>
+  <circle cx="68" cy="36" r="0.8" fill="#ff5722" opacity="0.4"/>
+  
+  <!-- Tower door with reinforcement -->
+  <rect x="46" y="75" width="8" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="2" rx="4"/>
+  <rect x="47" y="76" width="6" height="8" fill="#6d4c41"/>
+  <!-- Metal door bands -->
+  <rect x="46" y="78" width="8" height="1" fill="url(#metalGrad)"/>
+  <rect x="46" y="81" width="8" height="1" fill="url(#metalGrad)"/>
+  <!-- Door handle -->
+  <circle cx="52" cy="80" r="1.5" fill="#424242"/>
+  
+  <!-- Enhanced foundation -->
+  <rect x="25" y="85" width="50" height="8" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="2"/>
+  <line x1="27" y1="87" x2="73" y2="87" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="27" y1="90" x2="73" y2="90" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="35" y1="85" x2="35" y2="93" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="45" y1="85" x2="45" y2="93" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="55" y1="85" x2="55" y2="93" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="65" y1="85" x2="65" y2="93" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Defensive spikes around base -->
+  <polygon points="25,85 23,87 27,87" fill="#424242"/>
+  <polygon points="75,85 73,87 77,87" fill="#424242"/>
+  <polygon points="20,85 18,87 22,87" fill="#424242"/>
+  <polygon points="80,85 78,87 82,87" fill="#424242"/>
+</svg>

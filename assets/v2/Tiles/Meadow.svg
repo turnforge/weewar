@@ -1,0 +1,19 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="grassGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#7dd857"/>
+      <stop offset="100%" stop-color="#4a9c2d"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+  <!-- Grass tufts -->
+  <path d="M25 60 Q30 50 35 60" stroke="#4caf50" stroke-width="2" fill="none"/>
+  <path d="M40 65 Q45 55 50 65" stroke="#4caf50" stroke-width="2" fill="none"/>
+  <path d="M55 60 Q60 50 65 60" stroke="#4caf50" stroke-width="2" fill="none"/>
+  <path d="M30 45 Q35 35 40 45" stroke="#4caf50" stroke-width="2" fill="none"/>
+  <path d="M60 45 Q65 35 70 45" stroke="#4caf50" stroke-width="2" fill="none"/>
+  <!-- Flowers -->
+  <circle cx="35" cy="40" r="2" fill="#e91e63"/>
+  <circle cx="65" cy="55" r="2" fill="#ff9800"/>
+</svg>

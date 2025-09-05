@@ -1,0 +1,222 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffb74d"/>
+      <stop offset="50%" stop-color="#ff9800"/>
+      <stop offset="100%" stop-color="#e65100"/>
+    </linearGradient>
+    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a1887f"/>
+      <stop offset="50%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#5d4037"/>
+    </linearGradient>
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="50%" stop-color="#616161"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+    <radialGradient id="clockGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#9e9e9e"/>
+    </radialGradient>
+    <radialGradient id="gemGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#e1bee7"/>
+      <stop offset="100%" stop-color="#9c27b0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Clockwork Colossus - Goliath RC Tank equivalent -->
+  
+  <!-- Massive main chassis -->
+  <rect x="25" y="40" width="50" height="30" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="3" rx="4"/>
+  <!-- Detailed panel lines -->
+  <rect x="27" y="42" width="46" height="26" fill="url(#copperGrad)" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Intricate riveting pattern -->
+  <circle cx="32" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="38" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="44" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="50" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="62" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="68" cy="45" r="1.5" fill="#e65100"/>
+  <circle cx="32" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="38" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="44" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="50" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="62" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="68" cy="52" r="1.5" fill="#e65100"/>
+  <circle cx="32" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="38" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="44" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="50" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="62" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="68" cy="59" r="1.5" fill="#e65100"/>
+  <circle cx="32" cy="66" r="1.5" fill="#e65100"/>
+  <circle cx="38" cy="66" r="1.5" fill="#e65100"/>
+  <circle cx="44" cy="66" r="1.5" fill="#e65100"/>
+  <circle cx="50" cy="66" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="66" r="1.5" fill="#e65100"/>
+  <circle cx="62" cy="66" r="1.5" fill="#e65100"/>
+  <circle cx="68" cy="66" r="1.5" fill="#e65100"/>
+  
+  <!-- Massive head dome -->
+  <circle cx="50" cy="25" r="12" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="3"/>
+  <!-- Head panel details -->
+  <circle cx="50" cy="25" r="9" fill="url(#copperGrad)" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Large viewing ports -->
+  <circle cx="45" cy="22" r="3" fill="url(#gemGrad)" stroke="#4a148c" stroke-width="2"/>
+  <circle cx="55" cy="22" r="3" fill="url(#gemGrad)" stroke="#4a148c" stroke-width="2"/>
+  <!-- Glowing inner mechanisms -->
+  <circle cx="45" cy="22" r="2" fill="#e1bee7"/>
+  <circle cx="55" cy="22" r="2" fill="#e1bee7"/>
+  <circle cx="45" cy="22" r="1" fill="#9c27b0"/>
+  <circle cx="55" cy="22" r="1" fill="#9c27b0"/>
+  
+  <!-- Central control clock face -->
+  <circle cx="50" cy="28" r="4" fill="url(#clockGrad)" stroke="#424242" stroke-width="2"/>
+  <!-- Clock numbers -->
+  <text x="50" y="25" text-anchor="middle" font-size="3" fill="#212121">12</text>
+  <text x="53" y="29" text-anchor="middle" font-size="3" fill="#212121">3</text>
+  <text x="50" y="32" text-anchor="middle" font-size="3" fill="#212121">6</text>
+  <text x="47" y="29" text-anchor="middle" font-size="3" fill="#212121">9</text>
+  <!-- Clock hands -->
+  <line x1="50" y1="28" x2="50" y2="25" stroke="#d32f2f" stroke-width="2"/>
+  <line x1="50" y1="28" x2="52" y2="28" stroke="#424242" stroke-width="1"/>
+  <circle cx="50" cy="28" r="0.5" fill="#212121"/>
+  
+  <!-- Head rivets -->
+  <circle cx="42" cy="18" r="1" fill="#e65100"/>
+  <circle cx="58" cy="18" r="1" fill="#e65100"/>
+  <circle cx="42" cy="32" r="1" fill="#e65100"/>
+  <circle cx="58" cy="32" r="1" fill="#e65100"/>
+  <circle cx="38" cy="25" r="1" fill="#e65100"/>
+  <circle cx="62" cy="25" r="1" fill="#e65100"/>
+  
+  <!-- Enormous articulated arms -->
+  <rect x="10" y="30" width="15" height="12" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2" rx="3"/>
+  <rect x="75" y="30" width="15" height="12" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2" rx="3"/>
+  
+  <!-- Shoulder joints -->
+  <circle cx="25" cy="36" r="6" fill="url(#steelGrad)" stroke="#000" stroke-width="2"/>
+  <circle cx="75" cy="36" r="6" fill="url(#steelGrad)" stroke="#000" stroke-width="2"/>
+  <!-- Joint mechanisms -->
+  <circle cx="25" cy="36" r="3" fill="#424242"/>
+  <circle cx="75" cy="36" r="3" fill="#424242"/>
+  <circle cx="23" cy="34" r="1" fill="#616161"/>
+  <circle cx="27" cy="34" r="1" fill="#616161"/>
+  <circle cx="23" cy="38" r="1" fill="#616161"/>
+  <circle cx="27" cy="38" r="1" fill="#616161"/>
+  <circle cx="73" cy="34" r="1" fill="#616161"/>
+  <circle cx="77" cy="34" r="1" fill="#616161"/>
+  <circle cx="73" cy="38" r="1" fill="#616161"/>
+  <circle cx="77" cy="38" r="1" fill="#616161"/>
+  
+  <!-- Hydraulic pistons -->
+  <rect x="12" y="33" width="3" height="6" fill="url(#steelGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="20" y="33" width="3" height="6" fill="url(#steelGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="77" y="33" width="3" height="6" fill="url(#steelGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="85" y="33" width="3" height="6" fill="url(#steelGrad)" stroke="#000" stroke-width="1"/>
+  
+  <!-- Massive crushing fists -->
+  <circle cx="17" cy="50" r="8" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2"/>
+  <circle cx="83" cy="50" r="8" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2"/>
+  <!-- Fist details -->
+  <circle cx="17" cy="50" r="5" fill="url(#copperGrad)"/>
+  <circle cx="83" cy="50" r="5" fill="url(#copperGrad)"/>
+  <!-- Crushing spikes -->
+  <polygon points="17,42 15,44 19,44" fill="#424242"/>
+  <polygon points="17,58 15,56 19,56" fill="#424242"/>
+  <polygon points="9,50 11,48 11,52" fill="#424242"/>
+  <polygon points="25,50 23,48 23,52" fill="#424242"/>
+  <polygon points="83,42 81,44 85,44" fill="#424242"/>
+  <polygon points="83,58 81,56 85,56" fill="#424242"/>
+  <polygon points="75,50 77,48 77,52" fill="#424242"/>
+  <polygon points="91,50 89,48 89,52" fill="#424242"/>
+  
+  <!-- Complex gear systems -->
+  <circle cx="35" cy="55" r="4" fill="url(#brassGrad)" stroke="#e65100" stroke-width="2"/>
+  <circle cx="65" cy="55" r="4" fill="url(#brassGrad)" stroke="#e65100" stroke-width="2"/>
+  <!-- Gear teeth -->
+  <polygon points="35,51 36,52 35,53 34,52" fill="#e65100"/>
+  <polygon points="37,55 38,54 39,55 38,56" fill="#e65100"/>
+  <polygon points="35,59 36,58 35,57 34,58" fill="#e65100"/>
+  <polygon points="31,55 32,54 33,55 32,56" fill="#e65100"/>
+  <polygon points="65,51 66,52 65,53 64,52" fill="#e65100"/>
+  <polygon points="67,55 68,54 69,55 68,56" fill="#e65100"/>
+  <polygon points="65,59 66,58 65,57 64,58" fill="#e65100"/>
+  <polygon points="61,55 62,54 63,55 62,56" fill="#e65100"/>
+  
+  <!-- Massive track assemblies -->
+  <rect x="30" y="70" width="10" height="15" fill="url(#steelGrad)" stroke="#000" stroke-width="2"/>
+  <rect x="60" y="70" width="10" height="15" fill="url(#steelGrad)" stroke="#000" stroke-width="2"/>
+  
+  <!-- Track details -->
+  <rect x="31" y="72" width="8" height="2" fill="#424242"/>
+  <rect x="31" y="75" width="8" height="2" fill="#424242"/>
+  <rect x="31" y="78" width="8" height="2" fill="#424242"/>
+  <rect x="31" y="81" width="8" height="2" fill="#424242"/>
+  <rect x="61" y="72" width="8" height="2" fill="#424242"/>
+  <rect x="61" y="75" width="8" height="2" fill="#424242"/>
+  <rect x="61" y="78" width="8" height="2" fill="#424242"/>
+  <rect x="61" y="81" width="8" height="2" fill="#424242"/>
+  
+  <!-- Drive wheels -->
+  <circle cx="35" cy="78" r="6" fill="url(#steelGrad)" stroke="#000" stroke-width="2"/>
+  <circle cx="65" cy="78" r="6" fill="url(#steelGrad)" stroke="#000" stroke-width="2"/>
+  <!-- Wheel spokes -->
+  <line x1="35" y1="72" x2="35" y2="84" stroke="#424242" stroke-width="2"/>
+  <line x1="29" y1="78" x2="41" y2="78" stroke="#424242" stroke-width="2"/>
+  <line x1="65" y1="72" x2="65" y2="84" stroke="#424242" stroke-width="2"/>
+  <line x1="59" y1="78" x2="71" y2="78" stroke="#424242" stroke-width="2"/>
+  
+  <!-- Control antenna array -->
+  <line x1="50" y1="13" x2="50" y2="8" stroke="url(#brassGrad)" stroke-width="3"/>
+  <line x1="48" y1="8" x2="52" y2="8" stroke="url(#brassGrad)" stroke-width="2"/>
+  <circle cx="50" cy="6" r="2" fill="url(#gemGrad)" stroke="#4a148c" stroke-width="1"/>
+  <circle cx="50" cy="6" r="1" fill="#e1bee7"/>
+  
+  <!-- Secondary antennae -->
+  <line x1="45" y1="15" x2="43" y2="10" stroke="url(#brassGrad)" stroke-width="2"/>
+  <circle cx="43" cy="10" r="1" fill="url(#gemGrad)"/>
+  <line x1="55" y1="15" x2="57" y2="10" stroke="url(#brassGrad)" stroke-width="2"/>
+  <circle cx="57" cy="10" r="1" fill="url(#gemGrad)"/>
+  
+  <!-- Power core chamber -->
+  <circle cx="50" cy="55" r="6" fill="url(#gemGrad)" stroke="#4a148c" stroke-width="2"/>
+  <circle cx="50" cy="55" r="4" fill="#e1bee7" opacity="0.8"/>
+  <circle cx="50" cy="55" r="2" fill="#9c27b0"/>
+  <circle cx="50" cy="55" r="8" fill="#e1bee7" opacity="0.3"/>
+  
+  <!-- Status indicator lights -->
+  <circle cx="30" cy="48" r="1.5" fill="#4caf50"/>
+  <circle cx="35" cy="48" r="1.5" fill="#ffeb3b"/>
+  <circle cx="40" cy="48" r="1.5" fill="#f44336"/>
+  <circle cx="60" cy="48" r="1.5" fill="#4caf50"/>
+  <circle cx="65" cy="48" r="1.5" fill="#ffeb3b"/>
+  <circle cx="70" cy="48" r="1.5" fill="#f44336"/>
+  
+  <!-- Control signal waves -->
+  <circle cx="50" cy="6" r="10" fill="none" stroke="#e1bee7" stroke-width="1" opacity="0.4"/>
+  <circle cx="50" cy="6" r="15" fill="none" stroke="#e1bee7" stroke-width="1" opacity="0.3"/>
+  <circle cx="50" cy="6" r="20" fill="none" stroke="#e1bee7" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Ground impact effects -->
+  <ellipse cx="20" cy="88" rx="8" ry="3" fill="#d7ccc8" opacity="0.6"/>
+  <ellipse cx="80" cy="88" rx="8" ry="3" fill="#d7ccc8" opacity="0.6"/>
+  <ellipse cx="35" cy="90" rx="6" ry="2" fill="#d7ccc8" opacity="0.4"/>
+  <ellipse cx="65" cy="90" rx="6" ry="2" fill="#d7ccc8" opacity="0.4"/>
+  
+  <!-- Maintenance panels -->
+  <rect x="28" y="62" width="6" height="4" fill="url(#copperGrad)" stroke="#5d4037" stroke-width="1"/>
+  <rect x="66" y="62" width="6" height="4" fill="url(#copperGrad)" stroke="#5d4037" stroke-width="1"/>
+  <!-- Panel screws -->
+  <circle cx="30" cy="64" r="0.5" fill="#3e2723"/>
+  <circle cx="32" cy="64" r="0.5" fill="#3e2723"/>
+  <circle cx="68" cy="64" r="0.5" fill="#3e2723"/>
+  <circle cx="70" cy="64" r="0.5" fill="#3e2723"/>
+</svg>

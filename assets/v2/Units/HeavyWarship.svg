@@ -1,0 +1,209 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5d4037"/>
+      <stop offset="50%" stop-color="#4a2c20"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="armorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="50%" stop-color="#616161"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+    <linearGradient id="sailGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#bdbdbd"/>
+    </linearGradient>
+    <radialGradient id="cannonGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#424242"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Heavy Warship - Cruiser equivalent -->
+  
+  <!-- Massive reinforced hull -->
+  <path d="M10 57 Q50 47 90 57 Q90 67 85 72 Q50 77 15 72 Q10 67 10 57" fill="url(#hullGrad)" stroke="#212121" stroke-width="3"/>
+  
+  <!-- Hull armor plating -->
+  <path d="M12 59 Q50 51 88 59" stroke="#3e2723" stroke-width="2" fill="none"/>
+  <path d="M12 63 Q50 55 88 63" stroke="#3e2723" stroke-width="2" fill="none"/>
+  <path d="M12 67 Q50 59 88 67" stroke="#3e2723" stroke-width="2" fill="none"/>
+  
+  <!-- Heavy armor belt -->
+  <rect x="15" y="58" width="70" height="6" fill="url(#armorGrad)" stroke="#000" stroke-width="2"/>
+  <!-- Armor rivets -->
+  <circle cx="20" cy="61" r="1" fill="#424242"/>
+  <circle cx="30" cy="61" r="1" fill="#424242"/>
+  <circle cx="40" cy="61" r="1" fill="#424242"/>
+  <circle cx="50" cy="61" r="1" fill="#424242"/>
+  <circle cx="60" cy="61" r="1" fill="#424242"/>
+  <circle cx="70" cy="61" r="1" fill="#424242"/>
+  <circle cx="80" cy="61" r="1" fill="#424242"/>
+  
+  <!-- Massive deck -->
+  <ellipse cx="50" cy="54" rx="37" ry="5" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Triple main masts -->
+  <line x1="25" y1="15" x2="25" y2="54" stroke="#5d4037" stroke-width="4"/>
+  <line x1="50" y1="12" x2="50" y2="54" stroke="#5d4037" stroke-width="5"/>
+  <line x1="75" y1="15" x2="75" y2="54" stroke="#5d4037" stroke-width="4"/>
+  
+  <!-- Large battle sails -->
+  <rect x="15" y="18" width="20" height="28" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  <rect x="40" y="15" width="20" height="30" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  <rect x="65" y="18" width="20" height="28" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  
+  <!-- War banners on sails -->
+  <polygon points="25,25 22,28 25,31 28,28" fill="#f44336"/>
+  <rect x="23" y="32" width="4" height="8" fill="#f44336"/>
+  <polygon points="50,22 47,25 50,28 53,25" fill="#f44336"/>
+  <rect x="48" y="29" width="4" height="10" fill="#f44336"/>
+  <polygon points="75,25 72,28 75,31 78,28" fill="#f44336"/>
+  <rect x="73" y="32" width="4" height="8" fill="#f44336"/>
+  
+  <!-- Heavy cannon batteries (triple decks) -->
+  <!-- Lower deck cannons -->
+  <circle cx="20" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="17" y="54" width="6" height="4" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="30" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="27" y="54" width="6" height="4" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="40" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="37" y="54" width="6" height="4" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="50" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="47" y="54" width="6" height="4" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="60" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="57" y="54" width="6" height="4" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="70" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="67" y="54" width="6" height="4" fill="url(#armorGrad)" stroke-width="1"/>
+  <circle cx="80" cy="56" r="3" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="77" y="54" width="6" height="4" fill="url(#armorGrad)" stroke="#000" stroke-width="1"/>
+  
+  <!-- Middle deck cannons -->
+  <circle cx="25" cy="52" r="2.5" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="35" cy="52" r="2.5" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="45" cy="52" r="2.5" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="55" cy="52" r="2.5" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="65" cy="52" r="2.5" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="75" cy="52" r="2.5" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  
+  <!-- Upper deck cannons -->
+  <circle cx="30" cy="48" r="2" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="40" cy="48" r="2" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="50" cy="48" r="2" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="60" cy="48" r="2" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="70" cy="48" r="2" fill="url(#cannonGrad)" stroke="#000" stroke-width="1"/>
+  
+  <!-- Battle damage and cannon smoke -->
+  <circle cx="20" cy="50" r="2" fill="#9e9e9e" opacity="0.7"/>
+  <circle cx="18" cy="47" r="1.5" fill="#9e9e9e" opacity="0.5"/>
+  <circle cx="35" cy="49" r="2.5" fill="#9e9e9e" opacity="0.7"/>
+  <circle cx="33" cy="46" r="1.8" fill="#9e9e9e" opacity="0.5"/>
+  <circle cx="75" cy="50" r="2" fill="#9e9e9e" opacity="0.7"/>
+  <circle cx="77" cy="47" r="1.5" fill="#9e9e9e" opacity="0.5"/>
+  
+  <!-- Muzzle flashes -->
+  <ellipse cx="25" cy="49" rx="3" ry="4" fill="#ffeb3b" opacity="0.8"/>
+  <ellipse cx="50" cy="45" rx="3" ry="4" fill="#ff5722" opacity="0.8"/>
+  <ellipse cx="75" cy="49" rx="3" ry="4" fill="#ffeb3b" opacity="0.8"/>
+  
+  <!-- Heavily armored command tower -->
+  <rect x="78" y="25" width="18" height="20" fill="url(#armorGrad)" stroke="#000" stroke-width="3"/>
+  <!-- Tower armor plates -->
+  <rect x="79" y="27" width="16" height="3" fill="#616161"/>
+  <rect x="79" y="35" width="16" height="3" fill="#616161"/>
+  <rect x="79" y="40" width="16" height="3" fill="#616161"/>
+  <!-- Observation windows -->
+  <rect x="82" y="30" width="3" height="3" fill="#81d4fa"/>
+  <rect x="87" y="30" width="3" height="3" fill="#81d4fa"/>
+  <rect x="82" y="38" width="3" height="3" fill="#81d4fa"/>
+  <rect x="87" y="38" width="3" height="3" fill="#81d4fa"/>
+  
+  <!-- Admiral and crew -->
+  <!-- Admiral -->
+  <circle cx="87" cy="20" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Admiral's hat -->
+  <path d="M84 15 Q87 12 90 15 Q90 20 87 20 Q84 20 84 15" fill="#1976d2" stroke="#0d47a1" stroke-width="1"/>
+  <polygon points="87,17 85,19 87,21 89,19" fill="#ffc107"/>
+  <!-- Eyes -->
+  <circle cx="85" cy="18" r="1" fill="#1976d2"/>
+  <circle cx="89" cy="18" r="1" fill="#1976d2"/>
+  <!-- Uniform -->
+  <rect x="84" y="23" width="6" height="10" fill="#1976d2" stroke="#0d47a1" stroke-width="1"/>
+  <rect x="85" y="25" width="4" height="2" fill="#ffc107"/>
+  
+  <!-- Master gunner -->
+  <circle cx="40" cy="42" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <path d="M37 37 Q40 34 43 37" fill="#8d6e63"/>
+  <circle cx="38" cy="40" r="1" fill="#1976d2"/>
+  <circle cx="42" cy="40" r="1" fill="#1976d2"/>
+  <rect x="37" y="45" width="6" height="10" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Sailors -->
+  <circle cx="60" cy="42" r="2.5" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <circle cx="20" cy="45" r="2.5" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  
+  <!-- Reinforced ram bow -->
+  <path d="M90 57 Q98 59 100 62 Q98 65 90 67" fill="url(#armorGrad)" stroke="#000" stroke-width="3"/>
+  <!-- Ram spikes -->
+  <polygon points="100,60 103,62 100,64" fill="#424242"/>
+  <polygon points="98,58 101,60 98,62" fill="#424242"/>
+  <polygon points="98,64 101,66 98,68" fill="#424242"/>
+  
+  <!-- Heavy anchor system -->
+  <path d="M15 52 Q13 54 15 56 Q17 54 15 52" fill="url(#armorGrad)" stroke="#000" stroke-width="2"/>
+  <line x1="15" y1="52" x2="15" y2="48" stroke="#424242" stroke-width="3"/>
+  <line x1="13" y1="51" x2="17" y2="51" stroke="#424242" stroke-width="3"/>
+  
+  <!-- Powder magazines -->
+  <rect x="25" y="60" width="8" height="6" fill="#3e2723" stroke="#212121" stroke-width="2"/>
+  <rect x="67" y="60" width="8" height="6" fill="#3e2723" stroke="#212121" stroke-width="2"/>
+  <!-- Danger markings -->
+  <polygon points="29,58 27,60 29,62 31,60" fill="#f44336"/>
+  <polygon points="71,58 69,60 71,62 73,60" fill="#f44336"/>
+  
+  <!-- Ammunition storage -->
+  <circle cx="20" cy="65" r="2" fill="#424242"/>
+  <circle cx="23" cy="67" r="2" fill="#424242"/>
+  <circle cx="17" cy="67" r="2" fill="#424242"/>
+  <circle cx="80" cy="65" r="2" fill="#424242"/>
+  <circle cx="83" cy="67" r="2" fill="#424242"/>
+  <circle cx="77" cy="67" r="2" fill="#424242"/>
+  
+  <!-- Battle flags -->
+  <line x1="25" y1="15" x2="25" y2="10" stroke="#5d4037" stroke-width="2"/>
+  <rect x="25" y="10" width="12" height="8" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <polygon points="30,13 28,15 30,17 32,15" fill="#ffc107"/>
+  
+  <line x1="50" y1="12" x2="50" y2="6" stroke="#5d4037" stroke-width="3"/>
+  <rect x="50" y="6" width="15" height="10" fill="#1976d2" stroke="#0d47a1" stroke-width="1"/>
+  <polygon points="57,10 55,12 57,14 59,12" fill="#f5f5f5"/>
+  
+  <line x1="75" y1="15" x2="75" y2="10" stroke="#5d4037" stroke-width="2"/>
+  <rect x="75" y="10" width="12" height="8" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <polygon points="81,13 79,15 81,17 83,15" fill="#ffc107"/>
+  
+  <!-- Heavy rigging -->
+  <path d="M15 20 Q25 15 50 12" stroke="#8d6e63" stroke-width="3" fill="none"/>
+  <path d="M85 20 Q75 15 50 12" stroke="#8d6e63" stroke-width="3" fill="none"/>
+  <path d="M25 46 Q37 42 50 40" stroke="#8d6e63" stroke-width="3" fill="none"/>
+  <path d="M75 46 Q63 42 50 40" stroke="#8d6e63" stroke-width="3" fill="none"/>
+  
+  <!-- Combat wake -->
+  <ellipse cx="5" cy="67" rx="6" ry="3" fill="#81d4fa" opacity="0.8"/>
+  <ellipse cx="2" cy="70" rx="5" ry="2" fill="#81d4fa" opacity="0.6"/>
+  <ellipse cx="0" cy="73" rx="4" ry="1.5" fill="#81d4fa" opacity="0.4"/>
+  
+  <!-- Water splashes from cannon fire -->
+  <circle cx="95" cy="70" r="3" fill="#81d4fa" opacity="0.7"/>
+  <circle cx="98" cy="73" r="2" fill="#81d4fa" opacity="0.5"/>
+  <circle cx="100" cy="75" r="1.5" fill="#81d4fa" opacity="0.4"/>
+  
+  <!-- Battle scars -->
+  <polygon points="35,50 39,52 35,56" fill="#212121"/>
+  <polygon points="65,49 69,51 65,55" fill="#212121"/>
+  <!-- Patch repairs -->
+  <rect x="33" y="51" width="6" height="4" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <rect x="63" y="50" width="6" height="4" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+</svg>

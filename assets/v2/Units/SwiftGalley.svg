@@ -1,0 +1,127 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="50%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="sailGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#bdbdbd"/>
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </linearGradient>
+    <radialGradient id="wakeGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#81d4fa"/>
+      <stop offset="100%" stop-color="#4fc3f7"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Swift Galley - Speedboat equivalent -->
+  
+  <!-- Sleek hull design -->
+  <path d="M20 55 Q50 45 80 55 Q82 60 78 65 Q50 70 22 65 Q18 60 20 55" fill="url(#hullGrad)" stroke="#212121" stroke-width="2"/>
+  <!-- Hull planks for speed -->
+  <path d="M22 57 Q50 49 78 57" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M22 61 Q50 53 78 61" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M22 65 Q50 57 78 65" stroke="#5d4037" stroke-width="1" fill="none"/>
+  
+  <!-- Narrow deck -->
+  <ellipse cx="50" cy="52" rx="28" ry="4" fill="#a1887f" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Single main mast -->
+  <line x1="50" y1="20" x2="50" y2="52" stroke="#6d4c41" stroke-width="3"/>
+  
+  <!-- Large triangular sail for speed -->
+  <polygon points="30,25 50,20 50,45 30,50" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  <!-- Sail stress lines -->
+  <path d="M35 30 Q42 25 50 30" stroke="#bdbdbd" stroke-width="1" fill="none"/>
+  <path d="M35 35 Q42 30 50 35" stroke="#bdbdbd" stroke-width="1" fill="none"/>
+  <path d="M35 40 Q42 35 50 40" stroke="#bdbdbd" stroke-width="1" fill="none"/>
+  
+  <!-- Forward jib sail -->
+  <polygon points="25,30 35,25 50,20 25,40" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  
+  <!-- Rigging -->
+  <path d="M25 30 Q37 22 50 20" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <path d="M25 40 Q37 32 50 30" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <path d="M30 50 Q40 40 50 45" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  
+  <!-- Swift crew -->
+  <!-- Helmsman -->
+  <circle cx="60" cy="45" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Sea cap -->
+  <path d="M57 41 Q60 38 63 41 Q63 46 60 46 Q57 46 57 41" fill="#1976d2" stroke="#0d47a1" stroke-width="1"/>
+  <circle cx="60" cy="43" r="1" fill="#1976d2"/>
+  <circle cx="62" cy="43" r="1" fill="#1976d2"/>
+  <!-- Sailor outfit -->
+  <rect x="57" y="48" width="6" height="8" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <rect x="58" y="50" width="4" height="2" fill="#1976d2"/>
+  
+  <!-- Sailor -->
+  <circle cx="40" cy="45" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <path d="M37 41 Q40 38 43 41" fill="#8d6e63"/>
+  <circle cx="38" cy="43" r="1" fill="#1976d2"/>
+  <circle cx="42" cy="43" r="1" fill="#1976d2"/>
+  <rect x="37" y="48" width="6" height="8" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Tiller/steering -->
+  <line x1="65" y1="48" x2="72" y2="45" stroke="#8d6e63" stroke-width="3"/>
+  <circle cx="72" cy="45" r="2" fill="#6d4c41"/>
+  
+  <!-- Oars for additional speed -->
+  <line x1="30" y1="55" x2="15" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  <ellipse cx="12" cy="49" rx="3" ry="1.5" fill="#6d4c41"/>
+  <line x1="70" y1="55" x2="85" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  <ellipse cx="88" cy="49" rx="3" ry="1.5" fill="#6d4c41"/>
+  
+  <!-- Speed bow -->
+  <polygon points="80,55 88,57 80,59" fill="#6d4c41" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Navigation equipment -->
+  <rect x="55" y="40" width="3" height="5" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <circle cx="56.5" cy="38" r="1.5" fill="#81d4fa"/>
+  
+  <!-- Cargo/supplies (minimal for speed) -->
+  <rect x="45" y="48" width="4" height="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <circle cx="47" cy="46" r="1" fill="#795548"/>
+  
+  <!-- Speed wake -->
+  <ellipse cx="15" cy="62" rx="5" ry="3" fill="url(#wakeGrad)" opacity="0.8"/>
+  <ellipse cx="10" cy="65" rx="4" ry="2" fill="url(#wakeGrad)" opacity="0.6"/>
+  <ellipse cx="8" cy="68" rx="3" ry="1.5" fill="url(#wakeGrad)" opacity="0.4"/>
+  <ellipse cx="6" cy="70" rx="2" ry="1" fill="url(#wakeGrad)" opacity="0.3"/>
+  
+  <!-- Spray from speed -->
+  <circle cx="85" cy="58" r="2" fill="#81d4fa" opacity="0.7"/>
+  <circle cx="88" cy="60" r="1.5" fill="#81d4fa" opacity="0.5"/>
+  <circle cx="90" cy="63" r="1" fill="#81d4fa" opacity="0.4"/>
+  <circle cx="92" cy="65" r="0.8" fill="#81d4fa" opacity="0.3"/>
+  
+  <!-- Wind lines showing speed -->
+  <path d="M5 50 Q2 48 5 45" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  <path d="M7 55 Q4 53 7 50" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  <path d="M9 60 Q6 58 9 55" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  <path d="M11 65 Q8 63 11 60" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  
+  <!-- Pennant showing wind -->
+  <line x1="50" y1="20" x2="50" y2="15" stroke="#6d4c41" stroke-width="2"/>
+  <polygon points="50,15 60,17 50,19" fill="#f44336"/>
+  
+  <!-- Water line -->
+  <path d="M15 68 Q50 75 85 68" stroke="url(#waterGrad)" stroke-width="3" fill="none"/>
+  
+  <!-- Rope coils -->
+  <circle cx="35" cy="50" r="2" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <circle cx="35" cy="50" r="1" fill="#6d4c41"/>
+  
+  <!-- Anchor (small for speed) -->
+  <path d="M25 48 Q23 50 25 52 Q27 50 25 48" fill="#424242"/>
+  <line x1="25" y1="48" x2="25" y2="45" stroke="#424242" stroke-width="1"/>
+  
+  <!-- Hull reflection in water -->
+  <ellipse cx="50" cy="75" rx="25" ry="3" fill="#6d4c41" opacity="0.3"/>
+</svg>

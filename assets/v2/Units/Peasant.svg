@@ -1,0 +1,45 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Peasant Militia - Level 1 Soldier -->
+  
+  <!-- Head -->
+  <circle cx="50" cy="25" r="8" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Hair -->
+  <path d="M42 20 Q50 15 58 20 Q58 25 50 25 Q42 25 42 20" fill="#8d6e63"/>
+  <!-- Eyes -->
+  <circle cx="47" cy="23" r="1.5" fill="#1976d2"/>
+  <circle cx="53" cy="23" r="1.5" fill="#1976d2"/>
+  <!-- Nose -->
+  <circle cx="50" cy="26" r="0.8" fill="#e8b896"/>
+  <!-- Mouth -->
+  <path d="M48 28 Q50 29 52 28" stroke="#8d4a47" stroke-width="1" fill="none"/>
+  
+  <!-- Body -->
+  <rect x="45" y="33" width="10" height="20" fill="#8d6e63" rx="2"/>
+  <!-- Tunic details -->
+  <rect x="46" y="35" width="8" height="3" fill="#5d4037"/>
+  <circle cx="50" cy="40" r="1" fill="#795548"/>
+  
+  <!-- Arms -->
+  <circle cx="42" cy="38" r="3" fill="#ffdbcb"/>
+  <rect x="39" y="35" width="6" height="8" fill="#8d6e63"/>
+  <circle cx="58" cy="38" r="3" fill="#ffdbcb"/>
+  <rect x="55" y="35" width="6" height="8" fill="#8d6e63"/>
+  
+  <!-- Legs -->
+  <rect x="47" y="53" width="3" height="15" fill="#795548"/>
+  <rect x="50" y="53" width="3" height="15" fill="#795548"/>
+  <!-- Feet -->
+  <ellipse cx="48.5" cy="70" rx="2" ry="1.5" fill="#3e2723"/>
+  <ellipse cx="51.5" cy="70" rx="2" ry="1.5" fill="#3e2723"/>
+  
+  <!-- Weapon - Simple spear -->
+  <line x1="35" y1="15" x2="35" y2="45" stroke="#8d6e63" stroke-width="2"/>
+  <polygon points="35,15 37,18 33,18" fill="#616161"/>
+  
+  <!-- Shield -->
+  <path d="M60 30 Q65 25 70 30 Q70 40 65 45 Q60 40 60 30" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <circle cx="65" cy="35" r="2" fill="#424242"/>
+  
+  <!-- Simple helmet -->
+  <path d="M44 18 Q50 12 56 18" fill="#616161" stroke="#424242" stroke-width="1"/>
+</svg>

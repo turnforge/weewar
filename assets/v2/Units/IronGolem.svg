@@ -1,0 +1,72 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Iron Golem - Level 3 Tank -->
+  
+  <!-- Main body -->
+  <rect x="30" y="40" width="40" height="25" fill="#616161" stroke="#424242" stroke-width="2" rx="3"/>
+  <!-- Metal plating details -->
+  <rect x="32" y="42" width="36" height="4" fill="#757575"/>
+  <rect x="32" y="48" width="36" height="4" fill="#757575"/>
+  <rect x="32" y="54" width="36" height="4" fill="#757575"/>
+  <rect x="32" y="60" width="36" height="3" fill="#757575"/>
+  
+  <!-- Golem head -->
+  <rect x="40" y="20" width="20" height="20" fill="#616161" stroke="#424242" stroke-width="2" rx="2"/>
+  <!-- Glowing eyes -->
+  <circle cx="45" cy="28" r="3" fill="#ff5722"/>
+  <circle cx="55" cy="28" r="3" fill="#ff5722"/>
+  <circle cx="45" cy="28" r="1.5" fill="#ffeb3b"/>
+  <circle cx="55" cy="28" r="1.5" fill="#ffeb3b"/>
+  <!-- Mouth grill -->
+  <rect x="42" y="33" width="16" height="4" fill="#424242"/>
+  <line x1="44" y1="33" x2="44" y2="37" stroke="#212121" stroke-width="1"/>
+  <line x1="47" y1="33" x2="47" y2="37" stroke="#212121" stroke-width="1"/>
+  <line x1="50" y1="33" x2="50" y2="37" stroke="#212121" stroke-width="1"/>
+  <line x1="53" y1="33" x2="53" y2="37" stroke="#212121" stroke-width="1"/>
+  <line x1="56" y1="33" x2="56" y2="37" stroke="#212121" stroke-width="1"/>
+  
+  <!-- Massive arms -->
+  <rect x="15" y="35" width="15" height="20" fill="#616161" stroke="#424242" stroke-width="2" rx="2"/>
+  <rect x="70" y="35" width="15" height="20" fill="#616161" stroke="#424242" stroke-width="2" rx="2"/>
+  <!-- Arm details -->
+  <circle cx="22.5" cy="40" r="2" fill="#ff5722"/>
+  <circle cx="22.5" cy="50" r="2" fill="#ff5722"/>
+  <circle cx="77.5" cy="40" r="2" fill="#ff5722"/>
+  <circle cx="77.5" cy="50" r="2" fill="#ff5722"/>
+  
+  <!-- Fists/weapons -->
+  <circle cx="22.5" cy="60" r="6" fill="#757575" stroke="#424242" stroke-width="2"/>
+  <circle cx="77.5" cy="60" r="6" fill="#757575" stroke="#424242" stroke-width="2"/>
+  <!-- Spikes on fists -->
+  <polygon points="22.5,54 20,52 25,52" fill="#424242"/>
+  <polygon points="77.5,54 75,52 80,52" fill="#424242"/>
+  
+  <!-- Legs/tracks -->
+  <rect x="35" y="65" width="8" height="12" fill="#424242" stroke="#212121" stroke-width="1"/>
+  <rect x="57" y="65" width="8" height="12" fill="#424242" stroke="#212121" stroke-width="1"/>
+  <!-- Track details -->
+  <rect x="36" y="67" width="6" height="2" fill="#616161"/>
+  <rect x="36" y="70" width="6" height="2" fill="#616161"/>
+  <rect x="36" y="73" width="6" height="2" fill="#616161"/>
+  <rect x="58" y="67" width="6" height="2" fill="#616161"/>
+  <rect x="58" y="70" width="6" height="2" fill="#616161"/>
+  <rect x="58" y="73" width="6" height="2" fill="#616161"/>
+  
+  <!-- Steam vents -->
+  <circle cx="45" cy="15" r="2" fill="#e0e0e0" opacity="0.7"/>
+  <circle cx="50" cy="12" r="1.5" fill="#e0e0e0" opacity="0.5"/>
+  <circle cx="55" cy="15" r="2" fill="#e0e0e0" opacity="0.7"/>
+  <circle cx="60" cy="12" r="1.5" fill="#e0e0e0" opacity="0.5"/>
+  
+  <!-- Armor reinforcements -->
+  <rect x="25" y="45" width="5" height="15" fill="#9e9e9e" stroke="#616161" stroke-width="1"/>
+  <rect x="70" y="45" width="5" height="15" fill="#9e9e9e" stroke="#616161" stroke-width="1"/>
+  
+  <!-- Power core (glowing) -->
+  <circle cx="50" cy="52" r="4" fill="#ff5722"/>
+  <circle cx="50" cy="52" r="2" fill="#ffeb3b"/>
+  <circle cx="50" cy="52" r="6" fill="#ff5722" opacity="0.3"/>
+  
+  <!-- Runes on body -->
+  <path d="M35 45 L37 47 L35 49" stroke="#ffeb3b" stroke-width="1" fill="none"/>
+  <path d="M65 45 L63 47 L65 49" stroke="#ffeb3b" stroke-width="1" fill="none"/>
+</svg>

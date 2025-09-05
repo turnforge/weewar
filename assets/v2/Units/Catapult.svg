@@ -1,0 +1,68 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Catapult - Artillery Level 1 -->
+  
+  <!-- Base platform -->
+  <rect x="25" y="60" width="50" height="8" fill="#8d6e63" stroke="#6d4c41" stroke-width="1" rx="2"/>
+  <!-- Platform supports -->
+  <line x1="30" y1="68" x2="30" y2="75" stroke="#6d4c41" stroke-width="2"/>
+  <line x1="40" y1="68" x2="40" y2="75" stroke="#6d4c41" stroke-width="2"/>
+  <line x1="50" y1="68" x2="50" y2="75" stroke="#6d4c41" stroke-width="2"/>
+  <line x1="60" y1="68" x2="60" y2="75" stroke="#6d4c41" stroke-width="2"/>
+  <line x1="70" y1="68" x2="70" y2="75" stroke="#6d4c41" stroke-width="2"/>
+  
+  <!-- Wheels -->
+  <circle cx="30" cy="75" r="6" fill="#795548" stroke="#5d4037" stroke-width="2"/>
+  <circle cx="70" cy="75" r="6" fill="#795548" stroke="#5d4037" stroke-width="2"/>
+  <!-- Wheel spokes -->
+  <line x1="30" y1="69" x2="30" y2="81" stroke="#5d4037" stroke-width="1"/>
+  <line x1="24" y1="75" x2="36" y2="75" stroke="#5d4037" stroke-width="1"/>
+  <line x1="70" y1="69" x2="70" y2="81" stroke="#5d4037" stroke-width="1"/>
+  <line x1="64" y1="75" x2="76" y2="75" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Support frame -->
+  <line x1="40" y1="30" x2="40" y2="60" stroke="#6d4c41" stroke-width="4"/>
+  <line x1="60" y1="30" x2="60" y2="60" stroke="#6d4c41" stroke-width="4"/>
+  <line x1="40" y1="30" x2="60" y2="30" stroke="#6d4c41" stroke-width="3"/>
+  
+  <!-- Throwing arm -->
+  <line x1="50" y1="32" x2="30" y2="15" stroke="#8d6e63" stroke-width="3"/>
+  <!-- Cup at end of arm -->
+  <path d="M30 15 Q25 12 30 10 Q35 12 30 15" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  <!-- Projectile in cup -->
+  <circle cx="30" cy="12" r="2" fill="#795548"/>
+  
+  <!-- Pivot point -->
+  <circle cx="50" cy="32" r="3" fill="#424242" stroke="#212121" stroke-width="1"/>
+  
+  <!-- Torsion ropes -->
+  <path d="M40 32 Q35 28 40 24 Q45 28 40 32" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M60 32 Q65 28 60 24 Q55 28 60 32" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  
+  <!-- Operator -->
+  <circle cx="75" cy="45" r="4" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Hair -->
+  <path d="M71 41 Q75 38 79 41" fill="#8d6e63"/>
+  <!-- Eyes -->
+  <circle cx="73" cy="44" r="1" fill="#1976d2"/>
+  <circle cx="77" cy="44" r="1" fill="#1976d2"/>
+  <!-- Body -->
+  <rect x="72" y="49" width="6" height="12" fill="#795548"/>
+  <!-- Arms -->
+  <rect x="69" y="52" width="4" height="6" fill="#ffdbcb"/>
+  <rect x="77" y="52" width="4" height="6" fill="#ffdbcb"/>
+  <!-- Legs -->
+  <rect x="73" y="61" width="2" height="8" fill="#795548"/>
+  <rect x="75" y="61" width="2" height="8" fill="#795548"/>
+  
+  <!-- Trigger mechanism -->
+  <rect x="45" y="55" width="10" height="3" fill="#6d4c41"/>
+  <circle cx="55" cy="56.5" r="1.5" fill="#424242"/>
+  <!-- Rope to trigger -->
+  <path d="M75 52 Q65 50 55 56" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  
+  <!-- Ammunition pile -->
+  <circle cx="20" cy="70" r="2" fill="#795548"/>
+  <circle cx="18" cy="68" r="2" fill="#795548"/>
+  <circle cx="22" cy="68" r="2" fill="#795548"/>
+  <circle cx="20" cy="66" r="2" fill="#795548"/>
+</svg>

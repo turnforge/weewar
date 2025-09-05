@@ -1,0 +1,104 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="70%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#424242"/>
+    </linearGradient>
+    <radialGradient id="fireGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffeb3b"/>
+      <stop offset="50%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#d84315"/>
+    </radialGradient>
+    <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="50%" stop-color="#616161"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+    <radialGradient id="trailGrad" cx="0%" cy="50%">
+      <stop offset="0%" stop-color="#ff5722"/>
+      <stop offset="50%" stop-color="#ff9800"/>
+      <stop offset="100%" stop-color="#ffeb3b"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Fire Arrow - Standard Missile equivalent -->
+  
+  <!-- Arrow shaft -->
+  <rect x="20" y="48" width="60" height="4" fill="url(#arrowGrad)" stroke="#3e2723" stroke-width="1" rx="2"/>
+  <!-- Shaft wood grain -->
+  <line x1="22" y1="49" x2="78" y2="49" stroke="#5d4037" stroke-width="0.5"/>
+  <line x1="22" y1="51" x2="78" y2="51" stroke="#5d4037" stroke-width="0.5"/>
+  <!-- Shaft binding -->
+  <rect x="35" y="47" width="2" height="6" fill="#8d6e63"/>
+  <rect x="45" y="47" width="2" height="6" fill="#8d6e63"/>
+  <rect x="55" y="47" width="2" height="6" fill="#8d6e63"/>
+  <rect x="65" y="47" width="2" height="6" fill="#8d6e63"/>
+  
+  <!-- Arrow head with fire enchantment -->
+  <polygon points="80,50 95,52 95,48" fill="url(#headGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Flame-wreathed tip -->
+  <circle cx="95" cy="50" r="3" fill="url(#fireGrad)"/>
+  <circle cx="95" cy="50" r="5" fill="#ff5722" opacity="0.6"/>
+  <circle cx="95" cy="50" r="7" fill="#ffeb3b" opacity="0.3"/>
+  
+  <!-- Arrow head details -->
+  <polygon points="80,49 87,50 80,51" fill="#757575"/>
+  <line x1="82" y1="49.5" x2="85" y2="50" stroke="#9e9e9e" stroke-width="0.5"/>
+  <line x1="82" y1="50.5" x2="85" y2="50" stroke="#9e9e9e" stroke-width="0.5"/>
+  
+  <!-- Magical fletching -->
+  <polygon points="20,47 15,50 20,53 25,50" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <polygon points="22,47 17,50 22,53 27,50" fill="#ff5722" stroke="#d84315" stroke-width="1"/>
+  <polygon points="24,47 19,50 24,53 29,50" fill="#ff9800" stroke="#f57f17" stroke-width="1"/>
+  
+  <!-- Fletching flame effects -->
+  <circle cx="18" cy="50" r="2" fill="#ff5722" opacity="0.7"/>
+  <circle cx="16" cy="50" r="1.5" fill="#ffeb3b" opacity="0.5"/>
+  <circle cx="14" cy="50" r="1" fill="#fff" opacity="0.3"/>
+  
+  <!-- Fire trail behind arrow -->
+  <ellipse cx="10" cy="50" rx="4" ry="3" fill="url(#trailGrad)" opacity="0.8"/>
+  <ellipse cx="6" cy="50" rx="3" ry="2.5" fill="#ff9800" opacity="0.6"/>
+  <ellipse cx="3" cy="50" rx="2" ry="2" fill="#ffeb3b" opacity="0.4"/>
+  <ellipse cx="1" cy="50" rx="1" ry="1.5" fill="#fff" opacity="0.2"/>
+  
+  <!-- Sparks and embers -->
+  <circle cx="25" cy="45" r="1" fill="#ff5722"/>
+  <circle cx="30" cy="55" r="0.8" fill="#ff9800"/>
+  <circle cx="40" cy="44" r="1.2" fill="#ffeb3b"/>
+  <circle cx="50" cy="56" r="0.6" fill="#ff5722"/>
+  <circle cx="60" cy="43" r="0.9" fill="#ff9800"/>
+  <circle cx="70" cy="57" r="1.1" fill="#ffeb3b"/>
+  <circle cx="85" cy="45" r="0.7" fill="#ff5722"/>
+  <circle cx="90" cy="55" r="1.3" fill="#ff9800"/>
+  
+  <!-- Flame wisps -->
+  <path d="M12 47 Q8 44 5 47" stroke="#ff5722" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M12 53 Q8 56 5 53" stroke="#ff5722" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M20 46 Q16 43 13 46" stroke="#ff9800" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M20 54 Q16 57 13 54" stroke="#ff9800" stroke-width="1.5" fill="none" opacity="0.6"/>
+  
+  <!-- Magical runes on shaft -->
+  <polygon points="38,49 36,50 38,51 40,50" fill="#ff5722" opacity="0.8"/>
+  <polygon points="48,49 46,50 48,51 50,50" fill="#ff9800" opacity="0.8"/>
+  <polygon points="58,49 56,50 58,51 60,50" fill="#ffeb3b" opacity="0.8"/>
+  <polygon points="68,49 66,50 68,51 70,50" fill="#ff5722" opacity="0.8"/>
+  
+  <!-- Heat distortion around arrow -->
+  <ellipse cx="50" cy="45" rx="15" ry="2" fill="none" stroke="#ff9800" stroke-width="1" opacity="0.3"/>
+  <ellipse cx="50" cy="55" rx="15" ry="2" fill="none" stroke="#ff9800" stroke-width="1" opacity="0.3"/>
+  <ellipse cx="50" cy="42" rx="10" ry="1.5" fill="none" stroke="#ffeb3b" stroke-width="1" opacity="0.2"/>
+  <ellipse cx="50" cy="58" rx="10" ry="1.5" fill="none" stroke="#ffeb3b" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Fire projectile impact area -->
+  <circle cx="95" cy="35" r="3" fill="#ff5722" opacity="0.6"/>
+  <circle cx="95" cy="35" r="5" fill="#ff9800" opacity="0.4"/>
+  <circle cx="95" cy="65" r="3" fill="#ff5722" opacity="0.6"/>
+  <circle cx="95" cy="65" r="5" fill="#ff9800" opacity="0.4"/>
+  
+  <!-- Trajectory flame trail -->
+  <circle cx="88" cy="48" r="1.5" fill="#ff5722" opacity="0.8"/>
+  <circle cx="85" cy="46" r="1.2" fill="#ff9800" opacity="0.7"/>
+  <circle cx="82" cy="44" r="1" fill="#ffeb3b" opacity="0.6"/>
+  <circle cx="

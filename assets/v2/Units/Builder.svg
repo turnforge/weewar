@@ -1,0 +1,162 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leatherGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a1887f"/>
+      <stop offset="50%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#5d4037"/>
+    </linearGradient>
+    <linearGradient id="clothGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8bc34a"/>
+      <stop offset="50%" stop-color="#689f38"/>
+      <stop offset="100%" stop-color="#33691e"/>
+    </linearGradient>
+    <linearGradient id="toolGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="50%" stop-color="#616161"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bcaaa4"/>
+      <stop offset="100%" stop-color="#6d4c41"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Builder - Engineer equivalent -->
+  
+  <!-- Head with work cap -->
+  <circle cx="50" cy="25" r="6" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Work cap -->
+  <path d="M44 18 Q50 14 56 18 Q58 22 56 25 Q50 27 44 25 Q42 22 44 18" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Cap visor -->
+  <ellipse cx="50" cy="28" rx="8" ry="3" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Eyes -->
+  <circle cx="47" cy="24" r="1.5" fill="#1976d2"/>
+  <circle cx="53" cy="24" r="1.5" fill="#1976d2"/>
+  <!-- Nose -->
+  <circle cx="50" cy="26" r="0.8" fill="#e8b896"/>
+  <!-- Mouth with concentration -->
+  <path d="M48 28 Q50 29 52 28" stroke="#8d4a47" stroke-width="1" fill="none"/>
+  
+  <!-- Work shirt -->
+  <rect x="44" y="31" width="12" height="20" fill="url(#clothGrad)" stroke="#2e7d32" stroke-width="1" rx="2"/>
+  <!-- Shirt details -->
+  <rect x="45" y="33" width="10" height="2" fill="#558b2f"/>
+  <circle cx="47" cy="37" r="1" fill="#795548"/>
+  <circle cx="53" cy="37" r="1" fill="#795548"/>
+  <circle cx="50" cy="42" r="1" fill="#795548"/>
+  <!-- Pocket with tools -->
+  <rect x="46" y="45" width="4" height="4" fill="#4caf50" stroke="#2e7d32" stroke-width="1"/>
+  <rect x="47" y="43" width="1" height="3" fill="url(#toolGrad)"/>
+  <rect x="49" y="43" width="1" height="3" fill="url(#toolGrad)"/>
+  
+  <!-- Work apron -->
+  <path d="M42 40 Q50 38 58 40 Q58 55 50 57 Q42 55 42 40" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Apron ties -->
+  <path d="M42 42 Q35 40 32 45" stroke="#6d4c41" stroke-width="2" fill="none"/>
+  <path d="M58 42 Q65 40 68 45" stroke="#6d4c41" stroke-width="2" fill="none"/>
+  <!-- Tool loops on apron -->
+  <rect x="44" y="44" width="2" height="1" fill="#3e2723"/>
+  <rect x="48" y="44" width="2" height="1" fill="#3e2723"/>
+  <rect x="52" y="44" width="2" height="1" fill="#3e2723"/>
+  
+  <!-- Arms with detailed sleeves -->
+  <ellipse cx="38" cy="38" rx="4" ry="8" fill="url(#clothGrad)" stroke="#2e7d32" stroke-width="1"/>
+  <ellipse cx="62" cy="38" rx="4" ry="8" fill="url(#clothGrad)" stroke="#2e7d32" stroke-width="1"/>
+  <!-- Rolled up sleeves -->
+  <rect x="36" y="42" width="4" height="3" fill="#4caf50"/>
+  <rect x="60" y="42" width="4" height="3" fill="#4caf50"/>
+  <!-- Hands -->
+  <circle cx="35" cy="46" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <circle cx="65" cy="46" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  
+  <!-- Work pants -->
+  <rect x="46" y="51" width="4" height="18" fill="#6d4c41" stroke="#3e2723" stroke-width="1"/>
+  <rect x="50" y="51" width="4" height="18" fill="#6d4c41" stroke="#3e2723" stroke-width="1"/>
+  <!-- Knee patches -->
+  <rect x="46" y="60" width="4" height="4" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="50" y="60" width="4" height="4" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Work boots -->
+  <ellipse cx="48" cy="72" rx="3" ry="2" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <ellipse cx="52" cy="72" rx="3" ry="2" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Boot laces -->
+  <line x1="46" y1="70" x2="50" y2="70" stroke="#3e2723" stroke-width="1"/>
+  <line x1="50" y1="70" x2="54" y2="70" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Main tool - Hammer -->
+  <rect x="25" y="30" width="3" height="20" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="22" y="32" width="9" height="6" fill="url(#toolGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Hammer head details -->
+  <rect x="23" y="33" width="7" height="2" fill="#757575"/>
+  <rect x="23" y="36" width="7" height="2" fill="#757575"/>
+  <!-- Handle grip -->
+  <rect x="25.5" y="40" width="2" height="8" fill="#8d6e63"/>
+  
+  <!-- Tool belt with detailed tools -->
+  <rect x="40" y="48" width="20" height="3" fill="url(#leatherGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Belt buckle -->
+  <rect x="58" y="48" width="3" height="3" fill="url(#toolGrad)" stroke="#000" stroke-width="1"/>
+  <circle cx="59.5" cy="49.5" r="0.8" fill="#424242"/>
+  
+  <!-- Tools hanging from belt -->
+  <!-- Chisel -->
+  <rect x="42" y="51" width="1" height="8" fill="url(#toolGrad)"/>
+  <rect x="41.5" y="51" width="2" height="2" fill="#616161"/>
+  
+  <!-- Small hammer -->
+  <rect x="45" y="51" width="1" height="6" fill="url(#woodGrad)"/>
+  <rect x="44" y="52" width="3" height="2" fill="url(#toolGrad)"/>
+  
+  <!-- Measuring square -->
+  <path d="M47 51 L47 57 L50 57" stroke="url(#toolGrad)" stroke-width="2" fill="none"/>
+  
+  <!-- Plumb bob -->
+  <line x1="53" y1="51" x2="53" y2="57" stroke="#8d6e63" stroke-width="1"/>
+  <polygon points="53,57 51,59 55,59" fill="url(#toolGrad)"/>
+  
+  <!-- Blueprint scroll -->
+  <rect x="70" y="40" width="8" height="12" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Blueprint lines -->
+  <line x1="71" y1="42" x2="77" y2="42" stroke="#2196f3" stroke-width="0.5"/>
+  <line x1="71" y1="44" x2="77" y2="44" stroke="#2196f3" stroke-width="0.5"/>
+  <line x1="71" y1="46" x2="77" y2="46" stroke="#2196f3" stroke-width="0.5"/>
+  <line x1="71" y1="48" x2="77" y2="48" stroke="#2196f3" stroke-width="0.5"/>
+  <line x1="71" y1="50" x2="77" y2="50" stroke="#2196f3" stroke-width="0.5"/>
+  <!-- Blueprint structure diagram -->
+  <rect x="72" y="43" width="4" height="6" fill="none" stroke="#1976d2" stroke-width="0.5"/>
+  <line x1="74" y1="43" x2="74" y2="49" stroke="#1976d2" stroke-width="0.5"/>
+  
+  <!-- Building materials pile -->
+  <!-- Stone blocks -->
+  <rect x="15" y="60" width="6" height="4" fill="#bcaaa4" stroke="#8d6e63" stroke-width="1"/>
+  <rect x="15" y="64" width="6" height="4" fill="#a1887f" stroke="#8d6e63" stroke-width="1"/>
+  <rect x="15" y="68" width="6" height="4" fill="#bcaaa4" stroke="#8d6e63" stroke-width="1"/>
+  <!-- Stone block details -->
+  <line x1="16" y1="62" x2="20" y2="62" stroke="#8d6e63" stroke-width="0.5"/>
+  <line x1="16" y1="66" x2="20" y2="66" stroke="#8d6e63" stroke-width="0.5"/>
+  <line x1="16" y1="70" x2="20" y2="70" stroke="#8d6e63" stroke-width="0.5"/>
+  
+  <!-- Wooden planks -->
+  <rect x="75" y="65" width="12" height="2" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="75" y="67" width="12" height="2" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="75" y="69" width="12" height="2" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Wood grain -->
+  <line x1="76" y1="66" x2="86" y2="66" stroke="#5d4037" stroke-width="0.5"/>
+  <line x1="76" y1="68" x2="86" y2="68" stroke="#5d4037" stroke-width="0.5"/>
+  <line x1="76" y1="70" x2="86" y2="70" stroke="#5d4037" stroke-width="0.5"/>
+  
+  <!-- Work in progress - partial wall -->
+  <rect x="80" y="25" width="15" height="20" fill="#bcaaa4" stroke="#8d6e63" stroke-width="2"/>
+  <!-- Mortar lines -->
+  <line x1="80" y1="30" x2="95" y2="30" stroke="#f5f5f5" stroke-width="2"/>
+  <line x1="80" y1="35" x2="95" y2="35" stroke="#f5f5f5" stroke-width="2"/>
+  <line x1="80" y1="40" x2="95" y2="40" stroke="#f5f5f5" stroke-width="2"/>
+  <line x1="87" y1="25" x2="87" y2="45" stroke="#f5f5f5" stroke-width="2"/>
+  
+  <!-- Mortar bucket -->
+  <ellipse cx="20" cy="50" rx="4" ry="3" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1"/>
+  <ellipse cx="20" cy="48" rx="3" ry="2" fill="#f5f5f5"/>
+  <!-- Trowel in bucket -->
+  <rect x="18" y="45" width="1" height="6" fill="url(#woodGrad)"/>
+  <polygon points="18,45 16,47 20,47" fill="url(#toolGrad)"/>
+</svg>

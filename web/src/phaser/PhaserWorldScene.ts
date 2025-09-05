@@ -9,6 +9,9 @@ import { EventBus } from '../../lib/EventBus';
 import { WorldEventType, WorldEventTypes } from '../events';
 import { AllowedUnitIDs } from "../ColorsAndNames";
 import { TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from '../World';
+import { AssetProvider } from './AssetProvider';
+import { PNGAssetProvider } from './PNGAssetProvider';
+import { TemplateSVGAssetProvider } from './TemplateSVGAssetProvider';
 
 export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     // Container element and lifecycle management
@@ -72,12 +75,56 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     
     // Camera drag zone
     private dragZone: Phaser.GameObjects.Zone | null = null;
+    
+    // Asset provider for loading and managing textures
+    private assetProvider: AssetProvider;
 
-    constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
+    constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false, assetProvider?: AssetProvider) {
         super('phaser-world-scene');
         this.containerElement = containerElement;
         this.eventBus = eventBus;
         this.debugMode = debugMode;
+        
+        // Initialize asset provider (default to PNG if not provided)
+        this.assetProvider = assetProvider || this.createDefaultAssetProvider();
+    }
+    
+    /**
+     * Create the default asset provider based on configuration
+     */
+    private createDefaultAssetProvider(): AssetProvider {
+        // Check URL parameters for asset configuration
+        const urlParams = new URLSearchParams(window.location.search);
+        const useSVG = urlParams.get('useSVG') === 'true';
+        const svgSize = urlParams.get('svgSize');
+        
+        if (useSVG) {
+            const rasterSize = svgSize ? parseInt(svgSize) : 160;
+            if (this.debugMode) {
+                console.log(`[PhaserWorldScene] Using TemplateSVGAssetProvider with size ${rasterSize}`);
+            }
+            return new TemplateSVGAssetProvider(rasterSize, true);
+        } else {
+            if (this.debugMode) {
+                console.log('[PhaserWorldScene] Using PNGAssetProvider');
+            }
+            return new PNGAssetProvider();
+        }
+    }
+    
+    /**
+     * Set a new asset provider (requires scene reload)
+     */
+    public setAssetProvider(provider: AssetProvider): void {
+        if (this.assetProvider) {
+            this.assetProvider.dispose?.();
+        }
+        this.assetProvider = provider;
+        
+        // Would need to reload the scene to apply new assets
+        if (this.debugMode) {
+            console.log('[PhaserWorldScene] Asset provider changed. Scene reload required.');
+        }
     }
 
     // =========================================================
@@ -358,8 +405,26 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }
     
     preload() {
+        // Configure asset provider
+        this.assetProvider.configure(this.load, this);
+        
+        // Set up progress tracking
+        this.assetProvider.onProgress = (progress: number) => {
+            if (this.debugMode) {
+                console.log(`[PhaserWorldScene] Loading assets: ${Math.round(progress * 100)}%`);
+            }
+        };
+        
         // Track when all assets are loaded
-        this.load.on('complete', () => {
+        this.load.on('complete', async () => {
+            // Perform post-processing if needed (e.g., for SVG templates)
+            if (this.assetProvider.postProcessAssets) {
+                if (this.debugMode) {
+                    console.log('[PhaserWorldScene] Post-processing assets...');
+                }
+                await this.assetProvider.postProcessAssets();
+            }
+            
             this.terrainsLoaded = true;
             this.unitsLoaded = true;
             if (this.assetsReadyResolver) {
@@ -367,11 +432,8 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             }
         });
         
-        // Load terrain assets
-        this.loadTerrainAssets();
-        
-        // Load unit assets (for future use)
-        this.loadUnitAssets();
+        // Load assets through provider
+        this.assetProvider.preloadAssets();
     }
     
     create() {
@@ -407,52 +469,8 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         }
     }
     
-    private loadTerrainAssets() {
-        // City/Player terrains (have color variations 0-12 for different players)
-        const cityTerrains = [1, 2, 3, 16, 20]; // Land Base, Naval Base, Airport Base, Missile Silo, Mines
-        
-        // Nature terrains (only have default texture, no player ownership)
-        const natureTerrains = [4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 17, 18, 19, 21, 22, 23, 25, 26];
-        
-        // Load city terrains with all color variations
-        cityTerrains.forEach(type => {
-            for (let color = 0; color <= 12; color++) {
-                const assetPath = `/static/assets/v1/Tiles/${type}/${color}.png`;
-                this.load.image(`terrain_${type}_${color}`, assetPath);
-                if (color === 0) {
-                    this.load.image(`terrain_${type}`, assetPath); // Default alias
-                }
-            }
-        });
-        
-        // Load nature terrains with only default texture
-        natureTerrains.forEach(type => {
-            const assetPath = `/static/assets/v1/Tiles/${type}/0.png`;
-            this.load.image(`terrain_${type}`, assetPath);
-            this.load.image(`terrain_${type}_0`, assetPath); // Color 0 alias for consistency
-        });
-    }
-    
-    private loadUnitAssets() {
-        // Load all available unit assets with player colors
-        AllowedUnitIDs.forEach(type => {
-            for (let color = 0; color <= 12; color++) {
-                const assetPath = `/static/assets/v1/Units/${type}/${color}.png`;
-                this.load.image(`unit_${type}_${color}`, assetPath);
-                if (color === 0) {
-                    this.load.image(`unit_${type}`, assetPath); // Default alias
-                }
-            }
-        });
-        
-        // Add completion handlers to track loading progress
-        // this.load.on('filecomplete-image', (key: string, type: string, data: any) => { });
-        
-        this.load.on('complete', () => {
-            // List first few unit textures to verify they're loaded
-            // const unitKeys = this.textures.getTextureKeys().filter(key => key.startsWith('unit_')).slice(0, 10);
-        });
-    }
+    // Asset loading is now handled by AssetProvider
+    // These methods are no longer needed as standalone functions
     
     private setupCameraControls() {
         // Create cursor keys for camera movement
@@ -730,25 +748,22 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             this.tileSprites.get(key)?.destroy();
         }
         
-        // Create new tile sprite
-        const textureKey = `terrain_${terrainType}_${color}`;
+        // Get texture key from asset provider
+        const textureKey = this.assetProvider.getTerrainTexture(terrainType, color);
         
         if (this.textures.exists(textureKey)) {
             const tileSprite = this.add.sprite(position.x, position.y, textureKey);
             tileSprite.setOrigin(0.5, 0.5);
             this.tileSprites.set(key, tileSprite); // Use coordinate key, not texture key
         } else {
-            // console.warn(`[PhaserWorldScene] Texture not found: ${textureKey}`);
-            // console.warn(`[PhaserWorldScene] Available textures:`, this.textures.list);
-            
-            // Try fallback to basic terrain texture without color
-            const fallbackKey = `terrain_${terrainType}`;
+            // Try fallback without player color
+            const fallbackKey = this.assetProvider.getTerrainTexture(terrainType, 0);
             if (this.textures.exists(fallbackKey)) {
                 const tileSprite = this.add.sprite(position.x, position.y, fallbackKey);
                 tileSprite.setOrigin(0.5, 0.5);
-                this.tileSprites.set(key, tileSprite); // Use coordinate key, not texture key
+                this.tileSprites.set(key, tileSprite);
             } else {
-                console.error(`[PhaserWorldScene] Fallback texture also not found: ${fallbackKey}`);
+                console.error(`[PhaserWorldScene] Texture not found: ${textureKey} or ${fallbackKey}`);
             }
         }
         
@@ -796,8 +811,8 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         }
         this.removeUnitLabels(key);
         
-        // Create new unit sprite
-        const textureKey = `unit_${unitType}_${color}`;
+        // Get texture key from asset provider
+        const textureKey = this.assetProvider.getUnitTexture(unitType, color);
         
         if (this.textures.exists(textureKey)) {
             const unitSprite = this.add.sprite(position.x, position.y, textureKey);
@@ -805,17 +820,15 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             unitSprite.setDepth(10); // Units render above tiles
             this.unitSprites.set(key, unitSprite);
         } else {
-            console.warn(`[PhaserWorldScene] Unit texture not found: ${textureKey}`);
-            
-            // Try fallback to basic unit texture without color
-            const fallbackKey = `unit_${unitType}`;
+            // Try fallback without player color
+            const fallbackKey = this.assetProvider.getUnitTexture(unitType, 0);
             if (this.textures.exists(fallbackKey)) {
                 const unitSprite = this.add.sprite(position.x, position.y, fallbackKey);
                 unitSprite.setOrigin(0.5, 0.5);
                 unitSprite.setDepth(10);
                 this.unitSprites.set(key, unitSprite);
             } else {
-                console.error(`[PhaserWorldScene] Fallback unit texture also not found: ${fallbackKey}`);
+                console.error(`[PhaserWorldScene] Unit texture not found: ${textureKey} or ${fallbackKey}`);
             }
         }
         

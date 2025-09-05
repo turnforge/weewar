@@ -1,0 +1,135 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e3f2fd"/>
+      <stop offset="30%" stop-color="#2196f3"/>
+      <stop offset="70%" stop-color="#1976d2"/>
+      <stop offset="100%" stop-color="#0d47a1"/>
+    </linearGradient>
+    <radialGradient id="energyGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#e3f2fd"/>
+      <stop offset="70%" stop-color="#2196f3"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </radialGradient>
+    <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#bbdefb"/>
+      <stop offset="100%" stop-color="#2196f3"/>
+    </linearGradient>
+    <radialGradient id="sparkGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#2196f3"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Lightning Bolt - Anti Aircraft Missile equivalent -->
+  
+  <!-- Main lightning bolt path -->
+  <path d="M15 20 L35 45 L25 50 L45 75 L55 65 L40 40 L50 35 L30 10 Z" fill="url(#boltGrad)" stroke="#0d47a1" stroke-width="2"/>
+  
+  <!-- Lightning core energy -->
+  <path d="M20 25 L30 40 L25 42 L35 55 L40 50 L32 38 L37 35 L27 20 Z" fill="url(#coreGrad)" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Bright inner core -->
+  <path d="M23 28 L28 35 L26 36 L30 43 L32 41 L29 36 L31 34 L26 27 Z" fill="#ffffff" opacity="0.9"/>
+  
+  <!-- Branching lightning -->
+  <path d="M30 30 L20 25 L18 28 L25 32" stroke="url(#boltGrad)" stroke-width="3" fill="none"/>
+  <path d="M35 50 L45 55 L47 52 L40 48" stroke="url(#boltGrad)" stroke-width="3" fill="none"/>
+  <path d="M25 40 L15 38 L13 41 L20 43" stroke="url(#boltGrad)" stroke-width="2" fill="none"/>
+  <path d="M40 60 L50 65 L52 62 L45 58" stroke="url(#boltGrad)" stroke-width="2" fill="none"/>
+  
+  <!-- Secondary branches -->
+  <path d="M22 27 L12 22" stroke="#2196f3" stroke-width="2" fill="none"/>
+  <path d="M18 26 L8 28" stroke="#2196f3" stroke-width="1.5" fill="none"/>
+  <path d="M44 57 L54 62" stroke="#2196f3" stroke-width="2" fill="none"/>
+  <path d="M48 60 L58 58" stroke="#2196f3" stroke-width="1.5" fill="none"/>
+  <path d="M32 45 L42 40" stroke="#2196f3" stroke-width="1.5" fill="none"/>
+  <path d="M28 48 L38 53" stroke="#2196f3" stroke-width="1" fill="none"/>
+  
+  <!-- Electrical discharge effects -->
+  <circle cx="15" cy="20" r="3" fill="url(#energyGrad)"/>
+  <circle cx="25" cy="50" r="2.5" fill="url(#energyGrad)"/>
+  <circle cx="45" cy="75" r="3" fill="url(#energyGrad)"/>
+  <circle cx="50" cy="35" r="2" fill="url(#energyGrad)"/>
+  
+  <!-- Sparks and electrical arcs -->
+  <circle cx="12" cy="22" r="1.5" fill="url(#sparkGrad)"/>
+  <circle cx="8" cy="28" r="1" fill="url(#sparkGrad)"/>
+  <circle cx="54" cy="62" r="1.5" fill="url(#sparkGrad)"/>
+  <circle cx="58" cy="58" r="1" fill="url(#sparkGrad)"/>
+  <circle cx="42" cy="40" r="1.2" fill="url(#sparkGrad)"/>
+  <circle cx="38" cy="53" r="0.8" fill="url(#sparkGrad)"/>
+  
+  <!-- Electrical field distortion -->
+  <ellipse cx="30" cy="42" rx="15" ry="25" fill="none" stroke="#2196f3" stroke-width="1" opacity="0.3"/>
+  <ellipse cx="32" cy="40" rx="20" ry="30" fill="none" stroke="#e3f2fd" stroke-width="1" opacity="0.2"/>
+  <ellipse cx="28" cy="44" rx="10" ry="20" fill="none" stroke="#1976d2" stroke-width="1" opacity="0.4"/>
+  
+  <!-- Crackling energy around bolt -->
+  <path d="M18 15 Q16 18 20 20" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M22 12 Q20 15 24 17" stroke="#bbdefb" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M47 70 Q50 73 52 70" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M44 73 Q47 76 49 73" stroke="#bbdefb" stroke-width="1.5" fill="none" opacity="0.6"/>
+  
+  <!-- Electrical charge buildup -->
+  <circle cx="10" cy="25" r="2" fill="#e3f2fd" opacity="0.6"/>
+  <circle cx="7" cy="23" r="1.5" fill="#ffffff" opacity="0.8"/>
+  <circle cx="52" cy="67" r="2" fill="#e3f2fd" opacity="0.6"/>
+  <circle cx="55" cy="69" r="1.5" fill="#ffffff" opacity="0.8"/>
+  
+  <!-- Storm cloud source -->
+  <ellipse cx="25" cy="5" rx="8" ry="4" fill="#616161" stroke="#424242" stroke-width="1"/>
+  <ellipse cx="20" cy="8" rx="6" ry="3" fill="#757575"/>
+  <ellipse cx="30" cy="8" rx="5" ry="3" fill="#757575"/>
+  
+  <!-- Cloud electrical activity -->
+  <path d="M22 7 L24 9 L20 11" stroke="#2196f3" stroke-width="1.5" fill="none"/>
+  <path d="M28 6 L30 8 L26 10" stroke="#e3f2fd" stroke-width="1" fill="none"/>
+  <circle cx="23" cy="8" r="1" fill="#ffffff" opacity="0.8"/>
+  <circle cx="27" cy="7" r="0.8" fill="#e3f2fd" opacity="0.6"/>
+  
+  <!-- Ground strike point -->
+  <circle cx="45" cy="80" r="4" fill="url(#energyGrad)"/>
+  <circle cx="45" cy="80" r="6" fill="#2196f3" opacity="0.6"/>
+  <circle cx="45" cy="80" r="8" fill="#e3f2fd" opacity="0.3"/>
+  
+  <!-- Electromagnetic pulse rings -->
+  <circle cx="45" cy="80" r="12" fill="none" stroke="#2196f3" stroke-width="2" opacity="0.4"/>
+  <circle cx="45" cy="80" r="16" fill="none" stroke="#e3f2fd" stroke-width="1.5" opacity="0.3"/>
+  <circle cx="45" cy="80" r="20" fill="none" stroke="#bbdefb" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Electrical discharge at impact -->
+  <path d="M40 82 L35 85" stroke="#2196f3" stroke-width="2" fill="none"/>
+  <path d="M50 82 L55 85" stroke="#2196f3" stroke-width="2" fill="none"/>
+  <path d="M43 78 L38 75" stroke="#e3f2fd" stroke-width="1.5" fill="none"/>
+  <path d="M47 78 L52 75" stroke="#e3f2fd" stroke-width="1.5" fill="none"/>
+  <path d="M45 75 L45 70" stroke="#ffffff" stroke-width="2" fill="none"/>
+  <path d="M45 85 L45 90" stroke="#2196f3" stroke-width="1.5" fill="none"/>
+  
+  <!-- Ozone effect -->
+  <circle cx="25" cy="30" r="1" fill="#e1f5fe" opacity="0.7"/>
+  <circle cx="35" cy="35" r="0.8" fill="#e1f5fe" opacity="0.6"/>
+  <circle cx="30" cy="55" r="1.2" fill="#e1f5fe" opacity="0.8"/>
+  <circle cx="40" cy="45" r="0.6" fill="#e1f5fe" opacity="0.5"/>
+  
+  <!-- Speed/trajectory lines -->
+  <path d="M5 15 Q2 13 5 10" stroke="#e3f2fd" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M7 18 Q4 16 7 13" stroke="#bbdefb" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M60 70 Q63 72 60 75" stroke="#e3f2fd" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M58 73 Q61 75 58 78" stroke="#bbdefb" stroke-width="1" fill="none" opacity="0.4"/>
+  
+  <!-- Anti-aircraft guidance system -->
+  <rect x="60" y="20" width="8" height="15" fill="#9e9e9e" stroke="#616161" stroke-width="1"/>
+  <circle cx="64" cy="27" r="3" fill="#2196f3" stroke="#1976d2" stroke-width="1"/>
+  <circle cx="64" cy="27" r="1.5" fill="#ffffff"/>
+  <!-- Tracking beam -->
+  <path d="M64 27 L35 45" stroke="#2196f3" stroke-width="1" opacity="0.6"/>
+  <path d="M64 27 L25 50" stroke="#e3f2fd" stroke-width="0.5" opacity="0.4"/>
+  
+  <!-- Electrical interference -->
+  <path d="M70 25 Q72 22 68 20" stroke="#2196f3" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M75 30 Q77 27 73 25" stroke="#e3f2fd" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <circle cx="72" cy="23" r="0.8" fill="#ffffff" opacity="0.7"/>
+</svg>

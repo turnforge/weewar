@@ -1,0 +1,9 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="#0d47a1" stroke="#01579b" stroke-width="2"/>
+  <!-- Deep water effects -->
+  <path d="M20 35 Q30 30 40 35 Q50 40 60 35 Q70 30 80 35" stroke="#1565c0" stroke-width="2" fill="none"/>
+  <path d="M15 50 Q25 45 35 50 Q45 55 55 50 Q65 45 75 50" stroke="#1565c0" stroke-width="2" fill="none"/>
+  <path d="M25 65 Q35 60 45 65 Q55 70 65 65" stroke="#1565c0" stroke-width="2" fill="none"/>
+  <!-- Darker depth indication -->
+  <ellipse cx="50" cy="50" rx="20" ry="15" fill="#000051" opacity="0.3"/>
+</svg>

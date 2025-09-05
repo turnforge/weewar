@@ -1,0 +1,19 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="forestGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#388e3c"/>
+      <stop offset="100%" stop-color="#1b5e20"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#forestGrad)" stroke="#1b5e20" stroke-width="2"/>
+  <!-- Trees -->
+  <circle cx="30" cy="40" r="8" fill="#4caf50"/>
+  <rect x="28" y="48" width="4" height="12" fill="#5d4037"/>
+  <circle cx="55" cy="35" r="10" fill="#388e3c"/>
+  <rect x="52" y="45" width="6" height="15" fill="#5d4037"/>
+  <circle cx="70" cy="50" r="7" fill="#4caf50"/>
+  <rect x="68" y="57" width="4" height="10" fill="#5d4037"/>
+  <circle cx="40" cy="60" r="6" fill="#66bb6a"/>
+  <rect x="38" y="66" width="4" height="8" fill="#5d4037"/>
+</svg>

@@ -1,0 +1,173 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="balloonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff5722"/>
+      <stop offset="30%" stop-color="#f44336"/>
+      <stop offset="70%" stop-color="#d32f2f"/>
+      <stop offset="100%" stop-color="#b71c1c"/>
+    </linearGradient>
+    <linearGradient id="gondolaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="50%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="sailGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#bdbdbd"/>
+    </linearGradient>
+    <radialGradient id="gasGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#ffeb3b"/>
+      <stop offset="50%" stop-color="#ff9800"/>
+      <stop offset="100%" stop-color="#ff5722"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Sky Galleon - Zeppelin equivalent -->
+  
+  <!-- Main balloon envelope -->
+  <ellipse cx="50" cy="25" rx="35" ry="15" fill="url(#balloonGrad)" stroke="#b71c1c" stroke-width="3"/>
+  
+  <!-- Balloon sectional panels -->
+  <path d="M20 25 Q25 20 30 25 Q25 30 20 25" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <path d="M30 20 Q35 18 40 20 Q35 25 30 25 Q30 20 30 20" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <path d="M40 18 Q50 15 60 18 Q50 22 40 22 Q40 18 40 18" fill="#ff5722" stroke="#d84315" stroke-width="1"/>
+  <path d="M60 18 Q65 18 70 20 Q65 25 60 25 Q60 20 60 18" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <path d="M70 20 Q75 20 80 25 Q75 30 70 25 Q70 20 70 20" fill="#f44336" stroke="#d32f2f" stroke-width="1"/>
+  <path d="M30 25 Q35 25 40 22 Q35 30 30 30 Q30 25 30 25" fill="#d32f2f" stroke="#b71c1c" stroke-width="1"/>
+  <path d="M40 22 Q50 22 60 18 Q50 32 40 32 Q40 22 40 22" fill="#ff5722" stroke="#d84315" stroke-width="1"/>
+  <path d="M60 18 Q65 25 70 25 Q65 32 60 32 Q60 25 60 18" fill="#d32f2f" stroke="#b71c1c" stroke-width="1"/>
+  
+  <!-- Gas valve -->
+  <rect x="48" y="10" width="4" height="5" fill="#424242" stroke="#000" stroke-width="1"/>
+  <circle cx="50" cy="12" r="1.5" fill="#616161"/>
+  
+  <!-- Hot air burner -->
+  <rect x="45" y="35" width="10" height="8" fill="#ff5722" stroke="#d84315" stroke-width="2"/>
+  <circle cx="50" cy="39" r="3" fill="url(#gasGrad)"/>
+  <circle cx="50" cy="39" r="5" fill="#ffeb3b" opacity="0.6"/>
+  <!-- Flame -->
+  <ellipse cx="50" cy="37" rx="2" ry="4" fill="#ffeb3b"/>
+  <ellipse cx="50" cy="35" rx="1.5" ry="3" fill="#fff" opacity="0.8"/>
+  
+  <!-- Balloon rigging -->
+  <line x1="20" y1="35" x2="30" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  <line x1="35" y1="38" x2="40" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  <line x1="50" y1="40" x2="50" y2="50" stroke="#8d6e63" stroke-width="3"/>
+  <line x1="65" y1="38" x2="60" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  <line x1="80" y1="35" x2="70" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  
+  <!-- Cross rigging -->
+  <line x1="20" y1="35" x2="80" y2="35" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="25" y1="40" x2="75" y2="40" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Ship gondola -->
+  <path d="M25 50 Q50 45 75 50 Q75 60 70 65 Q50 70 30 65 Q25 60 25 50" 
+        fill="url(#gondolaGrad)" stroke="#212121" stroke-width="2"/>
+  
+  <!-- Gondola deck -->
+  <ellipse cx="50" cy="52" rx="22" ry="3" fill="#a1887f" stroke="#6d4c41" stroke-width="1"/>
+  <!-- Deck planks -->
+  <line x1="30" y1="52" x2="70" y2="52" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="30" y1="53" x2="70" y2="53" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="30" y1="54" x2="70" y2="54" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Ship masts -->
+  <line x1="35" y1="35" x2="35" y2="52" stroke="#6d4c41" stroke-width="3"/>
+  <line x1="65" y1="35" x2="65" y2="52" stroke="#6d4c41" stroke-width="3"/>
+  
+  <!-- Sails -->
+  <rect x="25" y="35" width="20" height="15" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  <rect x="55" y="35" width="20" height="15" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  <!-- Sail details -->
+  <line x1="27" y1="38" x2="43" y2="38" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="27" y1="42" x2="43" y2="42" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="27" y1="46" x2="43" y2="46" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="57" y1="38" x2="73" y2="38" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="57" y1="42" x2="73" y2="42" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="57" y1="46" x2="73" y2="46" stroke="#bdbdbd" stroke-width="1"/>
+  
+  <!-- Crew quarters -->
+  <rect x="40" y="48" width="20" height="8" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  <!-- Windows -->
+  <rect x="42" y="50" width="3" height="3" fill="#81d4fa"/>
+  <rect x="47" y="50" width="3" height="3" fill="#81d4fa"/>
+  <rect x="52" y="50" width="3" height="3" fill="#81d4fa"/>
+  <rect x="57" y="50" width="3" height="3" fill="#81d4fa"/>
+  
+  <!-- Captain's wheel -->
+  <circle cx="35" cy="48" r="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="35" y1="45" x2="35" y2="51" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="32" y1="48" x2="38" y2="48" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="33" y1="46" x2="37" y2="50" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="37" y1="46" x2="33" y2="50" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Sky crew -->
+  <!-- Captain -->
+  <circle cx="35" cy="42" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Captain's hat -->
+  <path d="M32 37 Q35 34 38 37 Q38 42 35 42 Q32 42 32 37" fill="#1976d2" stroke="#0d47a1" stroke-width="1"/>
+  <circle cx="36" cy="39" r="0.8" fill="#ffc107"/>
+  <!-- Eyes -->
+  <circle cx="33" cy="40" r="1" fill="#1976d2"/>
+  <circle cx="37" cy="40" r="1" fill="#1976d2"/>
+  <!-- Uniform -->
+  <rect x="32" y="45" width="6" height="8" fill="#1976d2" stroke="#0d47a1" stroke-width="1"/>
+  
+  <!-- Crew member -->
+  <circle cx="65" cy="42" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <path d="M62 37 Q65 34 68 37" fill="#8d6e63"/>
+  <circle cx="63" cy="40" r="1" fill="#1976d2"/>
+  <circle cx="67" cy="40" r="1" fill="#1976d2"/>
+  <rect x="62" y="45" width="6" height="8" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Cargo -->
+  <rect x="30" y="54" width="6" height="5" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <rect x="64" y="54" width="6" height="5" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Navigation equipment -->
+  <rect x="45" y="55" width="4" height="3" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <circle cx="47" cy="53" r="1.5" fill="#81d4fa"/>
+  
+  <!-- Anchor -->
+  <path d="M20 55 Q18 57 20 59 Q22 57 20 55" fill="#424242"/>
+  <line x1="20" y1="55" x2="20" y2="52" stroke="#424242" stroke-width="2"/>
+  <line x1="18" y1="54" x2="22" y2="54" stroke="#424242" stroke-width="2"/>
+  
+  <!-- Sky trails -->
+  <ellipse cx="15" cy="25" rx="4" ry="2" fill="#e3f2fd" opacity="0.7"/>
+  <ellipse cx="10" cy="27" rx="3" ry="1.5" fill="#e3f2fd" opacity="0.5"/>
+  <ellipse cx="6" cy="29" rx="2" ry="1" fill="#e3f2fd" opacity="0.3"/>
+  <ellipse cx="85" cy="25" rx="4" ry="2" fill="#e3f2fd" opacity="0.7"/>
+  <ellipse cx="90" cy="27" rx="3" ry="1.5" fill="#e3f2fd" opacity="0.5"/>
+  <ellipse cx="94" cy="29" rx="2" ry="1" fill="#e3f2fd" opacity="0.3"/>
+  
+  <!-- Wind direction -->
+  <path d="M5 20 Q2 18 5 15" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  <path d="M7 25 Q4 23 7 20" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  <path d="M95 20 Q98 18 95 15" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  <path d="M93 25 Q96 23 93 20" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.8"/>
+  
+  <!-- Altitude lines -->
+  <path d="M15 35 Q10 33 15 30" stroke="#bbdefb" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M85 35 Q90 33 85 30" stroke="#bbdefb" stroke-width="1" fill="none" opacity="0.6"/>
+  
+  <!-- Flags -->
+  <line x1="35" y1="35" x2="35" y2="30" stroke="#6d4c41" stroke-width="2"/>
+  <polygon points="35,30 45,33 35,36" fill="#f44336"/>
+  <line x1="65" y1="35" x2="65" y2="30" stroke="#6d4c41" stroke-width="2"/>
+  <polygon points="65,30 75,33 65,36" fill="#1976d2"/>
+  
+  <!-- Balloon net -->
+  <path d="M20 20 Q30 18 40 20" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <path d="M60 20 Q70 18 80 20" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <path d="M20 30 Q30 32 40 30" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <path d="M60 30 Q70 32 80 30" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <line x1="25" y1="20" x2="25" y2="30" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="35" y1="18" x2="35" y2="32" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="65" y1="18" x2="65" y2="32" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="75" y1="20" x2="75" y2="30" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Shadow on ground -->
+  <ellipse cx="50" cy="85" rx="25" ry="8" fill="#424242" opacity="0.3"/>
+</svg>

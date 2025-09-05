@@ -1,0 +1,161 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="stoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bcaaa4"/>
+      <stop offset="50%" stop-color="#a1887f"/>
+      <stop offset="100%" stop-color="#6d4c41"/>
+    </linearGradient>
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="70%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#424242"/>
+    </linearGradient>
+    <radialGradient id="targetGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#d32f2f"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Archer Tower - Anti Aircraft Level 1 -->
+  
+  <!-- Tower base with detailed stonework -->
+  <rect x="35" y="60" width="30" height="25" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="2" rx="2"/>
+  <!-- Stone block lines -->
+  <line x1="37" y1="65" x2="63" y2="65" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="37" y1="70" x2="63" y2="70" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="37" y1="75" x2="63" y2="75" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="37" y1="80" x2="63" y2="80" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="42" y1="60" x2="42" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="50" y1="60" x2="50" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="58" y1="60" x2="58" y2="85" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Tower shaft -->
+  <rect x="40" y="25" width="20" height="35" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="2"/>
+  <!-- Tower stonework -->
+  <line x1="42" y1="30" x2="58" y2="30" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="42" y1="35" x2="58" y2="35" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="42" y1="40" x2="58" y2="40" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="42" y1="45" x2="58" y2="45" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="42" y1="50" x2="58" y2="50" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="42" y1="55" x2="58" y2="55" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="47" y1="25" x2="47" y2="60" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="53" y1="25" x2="53" y2="60" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Tower top platform -->
+  <rect x="35" y="20" width="30" height="5" fill="url(#woodGrad)" stroke="#212121" stroke-width="2"/>
+  <!-- Platform planks -->
+  <line x1="37" y1="22" x2="63" y2="22" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="37" y1="23" x2="63" y2="23" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Battlements -->
+  <rect x="35" y="18" width="4" height="5" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="42" y="18" width="4" height="5" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="49" y="18" width="4" height="5" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="56" y="18" width="4" height="5" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="63" y="18" width="2" height="5" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Archer with detailed equipment -->
+  <circle cx="50" cy="15" r="4" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Archer's hood -->
+  <path d="M46 9 Q50 6 54 9 Q54 16 50 16 Q46 16 46 9" fill="#4caf50" stroke="#2e7d32" stroke-width="1"/>
+  <!-- Eyes focused on target -->
+  <circle cx="48" cy="13" r="1" fill="#1976d2"/>
+  <circle cx="52" cy="13" r="1" fill="#1976d2"/>
+  <!-- Concentrated expression -->
+  <path d="M48 16 Q50 17 52 16" stroke="#8d4a47" stroke-width="1" fill="none"/>
+  
+  <!-- Archer's tunic -->
+  <rect x="46" y="19" width="8" height="10" fill="#4caf50" stroke="#2e7d32" stroke-width="1"/>
+  <circle cx="48" cy="22" r="0.8" fill="#2e7d32"/>
+  <circle cx="52" cy="22" r="0.8" fill="#2e7d32"/>
+  
+  <!-- Arms drawing bow -->
+  <ellipse cx="42" cy="23" rx="3" ry="5" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <ellipse cx="58" cy="23" rx="3" ry="5" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  
+  <!-- Longbow -->
+  <path d="M25 10 Q20 15 25 25 Q30 20 35 25" stroke="url(#woodGrad)" stroke-width="3" fill="none"/>
+  <!-- Bow string -->
+  <path d="M25 10 Q50 8 75 10" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M25 25 Q50 27 75 25" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  
+  <!-- Arrow nocked -->
+  <line x1="45" y1="17" x2="25" y2="17" stroke="url(#arrowGrad)" stroke-width="2"/>
+  <polygon points="25,17 20,19 25,15" fill="#424242"/>
+  <!-- Arrow fletching -->
+  <polygon points="45,16 47,17 45,18 43,17" fill="#f44336"/>
+  
+  <!-- Quiver on back -->
+  <rect x="52" y="12" width="3" height="12" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Arrows in quiver -->
+  <line x1="53" y1="12" x2="53" y2="8" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <line x1="54" y1="12" x2="54" y2="8" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <polygon points="53,8 52,9 54,9" fill="#424242"/>
+  <polygon points="54,8 53,9 55,9" fill="#424242"/>
+  
+  <!-- Arrow slits in tower -->
+  <rect x="43" y="32" width="2" height="6" fill="#212121"/>
+  <rect x="55" y="32" width="2" height="6" fill="#212121"/>
+  <rect x="43" y="42" width="2" height="6" fill="#212121"/>
+  <rect x="55" y="42" width="2" height="6" fill="#212121"/>
+  <rect x="49" y="52" width="2" height="6" fill="#212121"/>
+  
+  <!-- Ammunition storage -->
+  <rect x="20" y="70" width="8" height="12" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Arrow bundles -->
+  <line x1="22" y1="68" x2="22" y2="75" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <line x1="23" y1="68" x2="23" y2="75" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <line x1="24" y1="68" x2="24" y2="75" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <line x1="25" y1="68" x2="25" y2="75" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <line x1="26" y1="68" x2="26" y2="75" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <!-- Arrow tips -->
+  <polygon points="22,68 21,69 23,69" fill="#424242"/>
+  <polygon points="23,68 22,69 24,69" fill="#424242"/>
+  <polygon points="24,68 23,69 25,69" fill="#424242"/>
+  <polygon points="25,68 24,69 26,69" fill="#424242"/>
+  <polygon points="26,68 25,69 27,69" fill="#424242"/>
+  
+  <!-- Target practice dummy -->
+  <rect x="75" y="50" width="3" height="15" fill="url(#woodGrad)" stroke="#3e2723" stroke-width="1"/>
+  <circle cx="76.5" cy="45" r="4" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Target rings -->
+  <circle cx="76.5" cy="45" r="3" fill="none" stroke="#d32f2f" stroke-width="1"/>
+  <circle cx="76.5" cy="45" r="2" fill="none" stroke="#f44336" stroke-width="1"/>
+  <circle cx="76.5" cy="45" r="1" fill="url(#targetGrad)"/>
+  <!-- Arrow in target -->
+  <line x1="73" y1="44" x2="80" y2="46" stroke="url(#arrowGrad)" stroke-width="1"/>
+  <polygon points="80,46 81,47 80,45" fill="#424242"/>
+  
+  <!-- Trajectory line (dotted) -->
+  <circle cx="30" cy="17" r="0.5" fill="#ff5722" opacity="0.7"/>
+  <circle cx="35" cy="20" r="0.5" fill="#ff5722" opacity="0.6"/>
+  <circle cx="40" cy="25" r="0.5" fill="#ff5722" opacity="0.5"/>
+  <circle cx="45" cy="30" r="0.5" fill="#ff5722" opacity="0.4"/>
+  <circle cx="50" cy="35" r="0.5" fill="#ff5722" opacity="0.3"/>
+  <circle cx="55" cy="38" r="0.5" fill="#ff5722" opacity="0.3"/>
+  <circle cx="60" cy="40" r="0.5" fill="#ff5722" opacity="0.3"/>
+  <circle cx="65" cy="42" r="0.5" fill="#ff5722" opacity="0.3"/>
+  <circle cx="70" cy="43" r="0.5" fill="#ff5722" opacity="0.3"/>
+  
+  <!-- Tower door -->
+  <rect x="47" y="75" width="6" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="1" rx="3"/>
+  <circle cx="52" cy="80" r="1" fill="#424242"/>
+  
+  <!-- Foundation stones -->
+  <rect x="32" y="85" width="36" height="5" fill="url(#stoneGrad)" stroke="#3e2723" stroke-width="1"/>
+  <line x1="35" y1="87" x2="65" y2="87" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="40" y1="85" x2="40" y2="90" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="50" y1="85" x2="50" y2="90" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="60" y1="85" x2="60" y2="90" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Wind direction indicator -->
+  <line x1="15" y1="30" x2="20" y2="30" stroke="#81c784" stroke-width="2"/>
+  <polygon points="20,30 18,28 18,32" fill="#4caf50"/>
+  <!-- Leaves blowing -->
+  <ellipse cx="12" cy="32" rx="1" ry="2" fill="#4caf50" transform="rotate(25 12 32)"/>
+  <ellipse cx="14" cy="35" rx="1" ry="2" fill="#66bb6a" transform="rotate(-15 14 35)"/>
+</svg>

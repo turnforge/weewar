@@ -1,0 +1,74 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Wyvern Rider - Jetfighter equivalent -->
+  
+  <!-- Wyvern body -->
+  <ellipse cx="50" cy="45" rx="20" ry="8" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+  <!-- Body scales -->
+  <circle cx="45" cy="42" r="1" fill="#4caf50"/>
+  <circle cx="50" cy="42" r="1" fill="#4caf50"/>
+  <circle cx="55" cy="42" r="1" fill="#4caf50"/>
+  <circle cx="47" cy="47" r="1" fill="#4caf50"/>
+  <circle cx="53" cy="47" r="1" fill="#4caf50"/>
+  
+  <!-- Wyvern head -->
+  <ellipse cx="70" cy="40" rx="8" ry="6" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+  <!-- Wyvern eye -->
+  <circle cx="72" cy="38" r="2" fill="#ff5722"/>
+  <circle cx="72" cy="38" r="1" fill="#000"/>
+  <!-- Nostrils -->
+  <circle cx="76" cy="39" r="0.8" fill="#1b5e20"/>
+  <circle cx="76" cy="41" r="0.8" fill="#1b5e20"/>
+  <!-- Teeth -->
+  <polygon points="75,42 77,44 73,44" fill="#fff"/>
+  <polygon points="77,43 79,45 75,45" fill="#fff"/>
+  
+  <!-- Wings -->
+  <path d="M35 35 Q20 25 15 35 Q25 50 35 45 Z" fill="#388e3c" stroke="#2e7d32" stroke-width="2"/>
+  <path d="M65 35 Q80 25 85 35 Q75 50 65 45 Z" fill="#388e3c" stroke="#2e7d32" stroke-width="2"/>
+  <!-- Wing membranes -->
+  <path d="M30 38 Q22 32 18 38 Q25 45 30 42" fill="#4caf50" opacity="0.7"/>
+  <path d="M70 38 Q78 32 82 38 Q75 45 70 42" fill="#4caf50" opacity="0.7"/>
+  <!-- Wing claws -->
+  <polygon points="15,35 12,33 18,30" fill="#3e2723"/>
+  <polygon points="85,35 88,33 82,30" fill="#3e2723"/>
+  
+  <!-- Wyvern tail -->
+  <ellipse cx="25" cy="50" rx="8" ry="4" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+  <!-- Tail spikes -->
+  <polygon points="20,48 15,46 20,44" fill="#1b5e20"/>
+  <polygon points="22,52 17,54 22,56" fill="#1b5e20"/>
+  
+  <!-- Wyvern legs -->
+  <ellipse cx="45" cy="55" rx="3" ry="6" fill="#2e7d32"/>
+  <ellipse cx="55" cy="55" rx="3" ry="6" fill="#2e7d32"/>
+  <!-- Claws -->
+  <polygon points="43,61 41,63 45,63" fill="#3e2723"/>
+  <polygon points="47,61 45,63 49,63" fill="#3e2723"/>
+  <polygon points="53,61 51,63 55,63" fill="#3e2723"/>
+  <polygon points="57,61 55,63 59,63" fill="#3e2723"/>
+  
+  <!-- Rider -->
+  <circle cx="50" cy="30" r="4" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Rider's helmet -->
+  <path d="M46 25 Q50 22 54 25 Q54 30 50 30 Q46 30 46 25" fill="#616161" stroke="#424242" stroke-width="1"/>
+  <!-- Eye holes -->
+  <circle cx="48" cy="28" r="1" fill="#1976d2"/>
+  <circle cx="52" cy="28" r="1" fill="#1976d2"/>
+  <!-- Rider's body -->
+  <rect x="47" y="34" width="6" height="8" fill="#3f51b5"/>
+  <!-- Rider's arms -->
+  <ellipse cx="44" cy="37" rx="2" ry="4" fill="#ffdbcb"/>
+  <ellipse cx="56" cy="37" rx="2" ry="4" fill="#ffdbcb"/>
+  <!-- Reins -->
+  <path d="M44 37 Q55 35 65 38" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  <path d="M56 37 Q60 36 65 39" stroke="#8d6e63" stroke-width="1" fill="none"/>
+  
+  <!-- Saddle -->
+  <ellipse cx="50" cy="40" rx="6" ry="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Wind trails -->
+  <path d="M10 40 Q5 38 8 35" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M12 45 Q7 43 10 40" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M90 40 Q95 38 92 35" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+  <path d="M88 45 Q93 43 90 40" stroke="#e3f2fd" stroke-width="2" fill="none" opacity="0.7"/>
+</svg>

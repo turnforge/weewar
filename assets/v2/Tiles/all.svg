@@ -1,0 +1,367 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Hexagon clip path -->
+    <clipPath id="hexClip">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5"/>
+    </clipPath>
+    
+    <!-- Gradients for various effects -->
+    <radialGradient id="grassGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#7dd857"/>
+      <stop offset="100%" stop-color="#4a9c2d"/>
+    </radialGradient>
+    
+    <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8b7355"/>
+      <stop offset="70%" stop-color="#654832"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    
+    <radialGradient id="waterGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </radialGradient>
+    
+    <radialGradient id="forestGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#388e3c"/>
+      <stop offset="100%" stop-color="#1b5e20"/>
+    </radialGradient>
+    
+    <linearGradient id="desertGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+    
+    <radialGradient id="swampGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#689f38"/>
+      <stop offset="100%" stop-color="#33691e"/>
+    </radialGradient>
+    
+    <radialGradient id="lavaGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#bf360c"/>
+    </radialGradient>
+    
+    
+    <linearGradient id="roadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#5d4037"/>
+    </linearGradient>
+    
+    <!-- City tile gradients -->
+    <radialGradient id="cityGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#9e9e9e"/>
+      <stop offset="100%" stop-color="#424242"/>
+    </radialGradient>
+    
+    <linearGradient id="castleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#795548"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">Medieval Fantasy Hexagonal Tiles</text>
+  
+  <!-- NATURE TILES ROW 2 -->
+  <g transform="translate(50, 160)">
+  </g>
+  
+  <!-- BRIDGE AND ROAD TILES ROW 3 -->
+  <g transform="translate(50, 260)">
+    <!-- Bridge (Regular) -->
+    <g>
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#waterGrad)" stroke="#0d47a1" stroke-width="2"/>
+      <!-- Water base -->
+      <path d="M20 40 Q30 35 40 40 Q50 45 60 40 Q70 35 80 40" stroke="#81d4fa" stroke-width="2" fill="none"/>
+      <!-- Bridge -->
+      <rect x="15" y="45" width="70" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+      <rect x="20" y="47" width="60" height="6" fill="#8d6e63"/>
+      <!-- Bridge supports -->
+      <rect x="30" y="50" width="3" height="15" fill="#3e2723"/>
+      <rect x="45" y="50" width="3" height="15" fill="#3e2723"/>
+      <rect x="60" y="50" width="3" height="15" fill="#3e2723"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Bridge</text>
+    </g>
+    
+    <!-- Bridge (Shallow) -->
+    <g transform="translate(120, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="#4dd0e1" stroke="#0097a7" stroke-width="2"/>
+      <!-- Shallow water base -->
+      <path d="M20 45 Q30 40 40 45 Q50 50 60 45 Q70 40 80 45" stroke="#80deea" stroke-width="1.5" fill="none"/>
+      <!-- Bridge -->
+      <rect x="15" y="45" width="70" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+      <rect x="20" y="47" width="60" height="6" fill="#8d6e63"/>
+      <!-- Visible supports in shallow water -->
+      <rect x="30" y="50" width="3" height="10" fill="#3e2723"/>
+      <rect x="45" y="50" width="3" height="10" fill="#3e2723"/>
+      <rect x="60" y="50" width="3" height="10" fill="#3e2723"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Bridge Shallow</text>
+    </g>
+    
+    <!-- Bridge (Deep) -->
+    <g transform="translate(240, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="#0d47a1" stroke="#01579b" stroke-width="2"/>
+      <!-- Deep water base -->
+      <ellipse cx="50" cy="50" rx="20" ry="15" fill="#000051" opacity="0.3"/>
+      <path d="M20 35 Q30 30 40 35 Q50 40 60 35 Q70 30 80 35" stroke="#1565c0" stroke-width="2" fill="none"/>
+      <!-- Bridge -->
+      <rect x="15" y="45" width="70" height="10" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+      <rect x="20" y="47" width="60" height="6" fill="#8d6e63"/>
+      <!-- Longer supports for deep water -->
+      <rect x="25" y="50" width="3" height="20" fill="#3e2723"/>
+      <rect x="40" y="50" width="3" height="20" fill="#3e2723"/>
+      <rect x="55" y="50" width="3" height="20" fill="#3e2723"/>
+      <rect x="70" y="50" width="3" height="20" fill="#3e2723"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Bridge Deep</text>
+    </g>
+    
+    <!-- Road -->
+    <g transform="translate(360, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Grass background -->
+      <path d="M25 35 Q30 25 35 35" stroke="#4caf50" stroke-width="1.5" fill="none"/>
+      <path d="M65 35 Q70 25 75 35" stroke="#4caf50" stroke-width="1.5" fill="none"/>
+      <!-- Road -->
+      <rect x="15" y="45" width="70" height="10" fill="url(#roadGrad)" stroke="#3e2723" stroke-width="1"/>
+      <!-- Road markings -->
+      <rect x="47" y="48" width="6" height="1" fill="#fff"/>
+      <rect x="47" y="51" width="6" height="1" fill="#fff"/>
+      <!-- Road stones -->
+      <circle cx="25" cy="50" r="1" fill="#6d4c41"/>
+      <circle cx="75" cy="50" r="1" fill="#6d4c41"/>
+      <circle cx="35" cy="52" r="1" fill="#6d4c41"/>
+      <circle cx="65" cy="48" r="1" fill="#6d4c41"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Road</text>
+    </g>
+  </g>
+  
+  <!-- CITY TILES ROW 1 -->
+  <g transform="translate(50, 380)">
+    <!-- Land Base -->
+    <g>
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Fortified walls -->
+      <rect x="25" y="35" width="50" height="30" fill="url(#castleGrad)" stroke="#3e2723" stroke-width="2"/>
+      <!-- Battlements -->
+      <rect x="25" y="35" width="5" height="5" fill="#5d4037"/>
+      <rect x="35" y="35" width="5" height="5" fill="#5d4037"/>
+      <rect x="45" y="35" width="5" height="5" fill="#5d4037"/>
+      <rect x="55" y="35" width="5" height="5" fill="#5d4037"/>
+      <rect x="65" y="35" width="5" height="5" fill="#5d4037"/>
+      <!-- Gate -->
+      <rect x="45" y="55" width="10" height="10" fill="#3e2723"/>
+      <circle cx="50" cy="60" r="3" fill="#424242"/>
+      <!-- Towers -->
+      <rect x="20" y="30" width="8" height="15" fill="#5d4037"/>
+      <rect x="72" y="30" width="8" height="15" fill="#5d4037"/>
+      <!-- Flag -->
+      <line x1="50" y1="35" x2="50" y2="25" stroke="#3e2723" stroke-width="2"/>
+      <polygon points="50,25 58,28 50,31" fill="#f44336"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Land Base</text>
+    </g>
+    
+    <!-- Naval Base -->
+    <g transform="translate(120, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#waterGrad)" stroke="#0d47a1" stroke-width="2"/>
+      <!-- Dock -->
+      <rect x="20" y="45" width="60" height="8" fill="#5d4037"/>
+      <rect x="25" y="47" width="50" height="4" fill="#8d6e63"/>
+      <!-- Ship -->
+      <ellipse cx="50" cy="35" rx="15" ry="5" fill="#3e2723"/>
+      <rect x="45" y="25" width="10" height="8" fill="#5d4037"/>
+      <!-- Mast -->
+      <line x1="50" y1="25" x2="50" y2="15" stroke="#3e2723" stroke-width="2"/>
+      <!-- Sail -->
+      <polygon points="50,15 60,20 50,25" fill="#f5f5f5"/>
+      <!-- Anchor -->
+      <circle cx="35" cy="50" r="2" fill="#424242"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Naval Base</text>
+    </g>
+    
+    <!-- Airport -->
+    <g transform="translate(240, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Runway -->
+      <rect x="15" y="45" width="70" height="10" fill="#616161"/>
+      <rect x="47" y="48" width="6" height="1" fill="#fff"/>
+      <rect x="47" y="51" width="6" height="1" fill="#fff"/>
+      <!-- Control tower -->
+      <rect x="65" y="25" width="8" height="20" fill="#9e9e9e"/>
+      <rect x="67" y="22" width="4" height="3" fill="#424242"/>
+      <!-- Hangar -->
+      <path d="M25 40 Q30 30 35 40 L65 40 Q70 30 75 40 Z" fill="#757575"/>
+      <!-- Plane -->
+      <ellipse cx="50" cy="35" rx="8" ry="3" fill="#f5f5f5"/>
+      <rect x="48" y="32" width="4" height="6" fill="#f5f5f5"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Airport</text>
+    </g>
+    
+    <!-- Hospital -->
+    <g transform="translate(360, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Building -->
+      <rect x="30" y="35" width="40" height="30" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+      <!-- Red cross -->
+      <rect x="47" y="40" width="6" height="20" fill="#f44336"/>
+      <rect x="40" y="47" width="20" height="6" fill="#f44336"/>
+      <!-- Windows -->
+      <rect x="35" y="40" width="4" height="4" fill="#2196f3"/>
+      <rect x="61" y="40" width="4" height="4" fill="#2196f3"/>
+      <rect x="35" y="56" width="4" height="4" fill="#2196f3"/>
+      <rect x="61" y="56" width="4" height="4" fill="#2196f3"/>
+      <!-- Entrance -->
+      <rect x="45" y="60" width="10" height="5" fill="#424242"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Hospital</text>
+    </g>
+    
+    <!-- Missile Silo -->
+    <g transform="translate(480, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Silo structure -->
+      <circle cx="50" cy="50" r="20" fill="#616161" stroke="#424242" stroke-width="2"/>
+      <circle cx="50" cy="50" r="15" fill="#757575"/>
+      <!-- Missile -->
+      <rect x="47" y="30" width="6" height="25" fill="#9e9e9e"/>
+      <polygon points="50,25 53,30 47,30" fill="#ff5722"/>
+      <!-- Warning signs -->
+      <polygon points="35,40 40,35 40,45" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
+      <text x="37.5" y="42" font-size="6" fill="#000">!</text>
+      <polygon points="65,40 60,35 60,45" fill="#ffeb3b" stroke="#f57f17" stroke-width="1"/>
+      <text x="62.5" y="42" font-size="6" fill="#000">!</text>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Missile Silo</text>
+    </g>
+  </g>
+  
+  <!-- CITY TILES ROW 2 -->
+  <g transform="translate(50, 480)">
+    <!-- Mines -->
+    <g>
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#mountainGrad)" stroke="#3e2723" stroke-width="2"/>
+      <!-- Mine entrance -->
+      <rect x="35" y="45" width="30" height="20" fill="#212121"/>
+      <path d="M35 45 Q50 35 65 45" fill="#424242"/>
+      <!-- Mine cart tracks -->
+      <line x1="35" y1="62" x2="65" y2="62" stroke="#795548" stroke-width="2"/>
+      <line x1="37" y1="60" x2="37" y2="64" stroke="#795548" stroke-width="1"/>
+      <line x1="47" y1="60" x2="47" y2="64" stroke="#795548" stroke-width="1"/>
+      <line x1="57" y1="60" x2="57" y2="64" stroke="#795548" stroke-width="1"/>
+      <!-- Mine cart -->
+      <rect x="40" y="58" width="8" height="4" fill="#3e2723"/>
+      <!-- Ore pile -->
+      <circle cx="25" cy="60" r="4" fill="#ffc107"/>
+      <circle cx="75" cy="55" r="3" fill="#ff5722"/>
+      <!-- Pickaxe -->
+      <line x1="60" y1="35" x2="65" y2="40" stroke="#5d4037" stroke-width="2"/>
+      <polygon points="65,40 67,38 69,42 67,44" fill="#616161"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Mines</text>
+    </g>
+    
+    <!-- City -->
+    <g transform="translate(120, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Buildings -->
+      <rect x="25" y="40" width="12" height="25" fill="#9e9e9e"/>
+      <rect x="40" y="35" width="10" height="30" fill="#757575"/>
+      <rect x="53" y="42" width="8" height="23" fill="#9e9e9e"/>
+      <rect x="64" y="38" width="10" height="27" fill="#757575"/>
+      <!-- Windows -->
+      <rect x="27" y="45" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="31" y="45" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="27" y="52" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="42" y="40" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="46" y="40" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="55" y="47" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="66" y="43" width="2" height="2" fill="#ffeb3b"/>
+      <rect x="70" y="43" width="2" height="2" fill="#ffeb3b"/>
+      <!-- Chimneys with smoke -->
+      <rect x="30" y="38" width="2" height="4" fill="#5d4037"/>
+      <circle cx="31" cy="36" r="1.5" fill="#e0e0e0" opacity="0.7"/>
+      <circle cx="31" cy="33" r="1" fill="#e0e0e0" opacity="0.5"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">City</text>
+    </g>
+    
+    <!-- Guard Tower -->
+    <g transform="translate(240, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Tower base -->
+      <rect x="40" y="45" width="20" height="20" fill="url(#castleGrad)"/>
+      <!-- Tower -->
+      <rect x="45" y="25" width="10" height="25" fill="#5d4037"/>
+      <!-- Battlements -->
+      <rect x="43" y="25" width="3" height="3" fill="#5d4037"/>
+      <rect x="48" y="25" width="3" height="3" fill="#5d4037"/>
+      <rect x="53" y="25" width="3" height="3" fill="#5d4037"/>
+      <!-- Arrow slits -->
+      <rect x="48" y="35" width="1" height="4" fill="#212121"/>
+      <rect x="51" y="35" width="1" height="4" fill="#212121"/>
+      <!-- Archer -->
+      <circle cx="50" cy="22" r="2" fill="#ffdbcb"/>
+      <rect x="49" y="24" width="2" height="3" fill="#8d6e63"/>
+      <!-- Bow -->
+      <path d="M47 22 Q49 20 51 22" stroke="#5d4037" stroke-width="1" fill="none"/>
+      <!-- Fire beacon -->
+      <circle cx="50" cy="18" r="2" fill="#ff5722"/>
+      <circle cx="50" cy="16" r="1" fill="#ffeb3b"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Guard Tower</text>
+    </g>
+    
+    <!-- Barracks -->
+    <g transform="translate(360, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+      <!-- Barracks building -->
+      <rect x="25" y="35" width="50" height="25" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+      <!-- Roof -->
+      <polygon points="25,35 50,25 75,35" fill="#5d4037"/>
+      <!-- Entrance -->
+      <rect x="45" y="55" width="10" height="5" fill="#3e2723"/>
+      <!-- Windows -->
+      <rect x="30" y="45" width="4" height="4" fill="#424242"/>
+      <rect x="40" y="45" width="4" height="4" fill="#424242"/>
+      <rect x="56" y="45" width="4" height="4" fill="#424242"/>
+      <rect x="66" y="45" width="4" height="4" fill="#424242"/>
+      <!-- Training dummies -->
+      <rect x="20" y="50" width="2" height="10" fill="#8d6e63"/>
+      <circle cx="21" cy="48" r="2" fill="#ffdbcb"/>
+      <rect x="78" y="50" width="2" height="10" fill="#8d6e63"/>
+      <circle cx="79" cy="48" r="2" fill="#ffdbcb"/>
+      <!-- Weapons rack -->
+      <line x1="15" y1="45" x2="15" y2="55" stroke="#5d4037" stroke-width="2"/>
+      <line x1="13" y1="47" x2="17" y2="47" stroke="#616161" stroke-width="1"/>
+      <line x1="13" y1="50" x2="17" y2="50" stroke="#616161" stroke-width="1"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Barracks</text>
+    </g>
+    
+    <!-- Lumbermill -->
+    <g transform="translate(480, 0)">
+      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#waterGrad)" stroke="#1b5e20" stroke-width="2"/>
+      <!-- Mill building -->
+      <rect x="35" y="40" width="30" height="20" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+      <!-- Water wheel -->
+      <circle cx="30" cy="50" r="8" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+      <rect x="27" y="42" width="6" height="2" fill="#3e2723"/>
+      <rect x="27" y="56" width="6" height="2" fill="#3e2723"/>
+      <rect x="22" y="47" width="2" height="6" fill="#3e2723"/>
+      <rect x="34" y="47" width="2" height="6" fill="#3e2723"/>
+      <!-- Roof -->
+      <polygon points="35,40 50,30 65,40" fill="#5d4037"/>
+      <!-- Chimney -->
+      <rect x="55" y="28" width="3" height="8" fill="#424242"/>
+      <!-- Smoke -->
+      <circle cx="56.5" cy="25" r="1.5" fill="#e0e0e0" opacity="0.7"/>
+      <circle cx="57" cy="22" r="1" fill="#e0e0e0" opacity="0.5"/>
+      <!-- Log pile -->
+      <rect x="68" y="55" width="8" height="3" fill="#5d4037"/>
+      <rect x="70" y="52" width="6" height="3" fill="#8d6e63"/>
+      <rect x="72" y="49" width="4" height="3" fill="#5d4037"/>
+      <!-- Saw -->
+      <circle cx="75" cy="45" r="3" fill="#616161"/>
+      <path d="M72 45 L78 45" stroke="#424242" stroke-width="1"/>
+      <text x="50" y="95" text-anchor="middle" font-size="8" fill="#333">Lumbermill</text>
+    </g>
+  </g>
+  
+  <!-- Instructions -->
+  <text x="600" y="750" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">City tiles can be tinted with player colors when assigned. Nature tiles remain neutral.</text>
+  <text x="600" y="770" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Each tile is designed as an individual SVG element for easy extraction and use.</text>
+</svg>

@@ -1,0 +1,18 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="desertGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#desertGrad)" stroke="#e65100" stroke-width="2"/>
+  <!-- Sand dunes -->
+  <ellipse cx="30" cy="45" rx="12" ry="6" fill="#ffcc02" opacity="0.7"/>
+  <ellipse cx="55" cy="55" rx="15" ry="7" fill="#ffcc02" opacity="0.7"/>
+  <ellipse cx="70" cy="40" rx="10" ry="5" fill="#ffcc02" opacity="0.7"/>
+  <!-- Cactus -->
+  <rect x="45" y="50" width="4" height="20" fill="#2e7d32" rx="2"/>
+  <rect x="41" y="55" width="8" height="3" fill="#2e7d32" rx="1.5"/>
+  <circle cx="47" cy="48" r="1.5" fill="#4caf50"/>
+</svg>

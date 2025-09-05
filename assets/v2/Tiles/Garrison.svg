@@ -1,0 +1,30 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="grassGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#7dd857"/>
+      <stop offset="100%" stop-color="#4a9c2d"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+  <!-- Barracks building -->
+  <rect x="25" y="35" width="50" height="25" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <!-- Roof -->
+  <polygon points="25,35 50,25 75,35" fill="#5d4037"/>
+  <!-- Entrance -->
+  <rect x="45" y="55" width="10" height="5" fill="#3e2723"/>
+  <!-- Windows -->
+  <rect x="30" y="45" width="4" height="4" fill="#424242"/>
+  <rect x="40" y="45" width="4" height="4" fill="#424242"/>
+  <rect x="56" y="45" width="4" height="4" fill="#424242"/>
+  <rect x="66" y="45" width="4" height="4" fill="#424242"/>
+  <!-- Training dummies -->
+  <rect x="20" y="50" width="2" height="10" fill="#8d6e63"/>
+  <circle cx="21" cy="48" r="2" fill="#ffdbcb"/>
+  <rect x="78" y="50" width="2" height="10" fill="#8d6e63"/>
+  <circle cx="79" cy="48" r="2" fill="#ffdbcb"/>
+  <!-- Weapons rack -->
+  <line x1="15" y1="45" x2="15" y2="55" stroke="#5d4037" stroke-width="2"/>
+  <line x1="13" y1="47" x2="17" y2="47" stroke="#616161" stroke-width="1"/>
+  <line x1="13" y1="50" x2="17" y2="50" stroke="#616161" stroke-width="1"/>
+</svg>

@@ -1,0 +1,82 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- War Galleon - Battleship equivalent -->
+  
+  <!-- Ship hull -->
+  <path d="M15 55 Q50 45 85 55 Q85 65 80 70 Q50 75 20 70 Q15 65 15 55" fill="#8d6e63" stroke="#6d4c41" stroke-width="2"/>
+  <!-- Hull planks -->
+  <path d="M20 58 Q50 50 80 58" stroke="#6d4c41" stroke-width="1" fill="none"/>
+  <path d="M20 62 Q50 54 80 62" stroke="#6d4c41" stroke-width="1" fill="none"/>
+  <path d="M20 66 Q50 58 80 66" stroke="#6d4c41" stroke-width="1" fill="none"/>
+  
+  <!-- Ship deck -->
+  <ellipse cx="50" cy="52" rx="32" ry="6" fill="#a1887f" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Main mast -->
+  <line x1="50" y1="15" x2="50" y2="52" stroke="#6d4c41" stroke-width="3"/>
+  <!-- Main sail -->
+  <rect x="35" y="20" width="30" height="25" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Sail details -->
+  <line x1="38" y1="25" x2="62" y2="25" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="38" y1="30" x2="62" y2="30" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="38" y1="35" x2="62" y2="35" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="38" y1="40" x2="62" y2="40" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Heraldic symbol on sail -->
+  <polygon points="50,28 47,31 50,34 53,31" fill="#f44336"/>
+  
+  <!-- Forward mast -->
+  <line x1="25" y1="25" x2="25" y2="52" stroke="#6d4c41" stroke-width="2"/>
+  <!-- Forward sail -->
+  <rect x="15" y="30" width="20" height="15" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Rear mast -->
+  <line x1="75" y1="25" x2="75" y2="52" stroke="#6d4c41" stroke-width="2"/>
+  <!-- Rear sail -->
+  <rect x="65" y="30" width="20" height="15" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- Cannons -->
+  <circle cx="30" cy="52" r="2" fill="#424242"/>
+  <rect x="28" y="50" width="4" height="4" fill="#616161"/>
+  <circle cx="40" cy="52" r="2" fill="#424242"/>
+  <rect x="38" y="50" width="4" height="4" fill="#616161"/>
+  <circle cx="60" cy="52" r="2" fill="#424242"/>
+  <rect x="58" y="50" width="4" height="4" fill="#616161"/>
+  <circle cx="70" cy="52" r="2" fill="#424242"/>
+  <rect x="68" y="50" width="4" height="4" fill="#616161"/>
+  
+  <!-- Captain's quarters -->
+  <rect x="70" y="40" width="12" height="8" fill="#a1887f" stroke="#8d6e63" stroke-width="1"/>
+  <!-- Windows -->
+  <circle cx="74" cy="44" r="1.5" fill="#81d4fa"/>
+  <circle cx="78" cy="44" r="1.5" fill="#81d4fa"/>
+  
+  <!-- Crew members -->
+  <!-- Sailor 1 -->
+  <circle cx="35" cy="42" r="2.5" fill="#ffdbcb"/>
+  <path d="M32.5 39 Q35 37 37.5 39" fill="#8d6e63"/>
+  <rect x="33" y="44.5" width="4" height="6" fill="#1976d2"/>
+  
+  <!-- Sailor 2 -->
+  <circle cx="65" cy="42" r="2.5" fill="#ffdbcb"/>
+  <path d="M62.5 39 Q65 37 67.5 39" fill="#5d4037"/>
+  <rect x="63" y="44.5" width="4" height="6" fill="#1976d2"/>
+  
+  <!-- Ship's wheel -->
+  <circle cx="75" cy="35" r="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="75" y1="32" x2="75" y2="38" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="72" y1="35" x2="78" y2="35" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Flag -->
+  <line x1="50" y1="15" x2="50" y2="10" stroke="#6d4c41" stroke-width="2"/>
+  <polygon points="50,10 60,13 50,16" fill="#f44336"/>
+  
+  <!-- Anchor -->
+  <path d="M20 48 Q18 50 20 52 Q22 50 20 48" fill="#424242"/>
+  <line x1="20" y1="48" x2="20" y2="44" stroke="#424242" stroke-width="2"/>
+  <line x1="18" y1="46" x2="22" y2="46" stroke="#424242" stroke-width="2"/>
+  
+  <!-- Water splashes -->
+  <ellipse cx="12" cy="65" rx="3" ry="2" fill="#81d4fa" opacity="0.7"/>
+  <ellipse cx="88" cy="65" rx="3" ry="2" fill="#81d4fa" opacity="0.7"/>
+  <ellipse cx="15" cy="70" rx="2" ry="1" fill="#81d4fa" opacity="0.5"/>
+  <ellipse cx="85" cy="70" rx="2" ry="1" fill="#81d4fa" opacity="0.5"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="waterGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#waterGrad)" stroke="#0d47a1" stroke-width="2"/>
+  <!-- Waves -->
+  <path d="M20 40 Q30 35 40 40 Q50 45 60 40 Q70 35 80 40" stroke="#81d4fa" stroke-width="2" fill="none"/>
+  <path d="M15 55 Q25 50 35 55 Q45 60 55 55 Q65 50 75 55" stroke="#81d4fa" stroke-width="2" fill="none"/>
+  <path d="M25 65 Q35 60 45 65 Q55 70 65 65" stroke="#81d4fa" stroke-width="2" fill="none"/>
+</svg>

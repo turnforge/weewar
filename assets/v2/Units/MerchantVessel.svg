@@ -1,0 +1,191 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="50%" stop-color="#6d4c41"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+    <linearGradient id="sailGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="50%" stop-color="#e0e0e0"/>
+      <stop offset="100%" stop-color="#bdbdbd"/>
+    </linearGradient>
+    <linearGradient id="cargoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a1887f"/>
+      <stop offset="100%" stop-color="#5d4037"/>
+    </linearGradient>
+    <radialGradient id="coinGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#ffd54f"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Merchant Vessel - Sailboat equivalent -->
+  
+  <!-- Wide merchant hull -->
+  <path d="M15 58 Q50 48 85 58 Q85 68 80 73 Q50 78 20 73 Q15 68 15 58" fill="url(#hullGrad)" stroke="#212121" stroke-width="2"/>
+  <!-- Hull reinforcement planks -->
+  <path d="M18 60 Q50 52 82 60" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M18 64 Q50 56 82 64" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M18 68 Q50 60 82 68" stroke="#5d4037" stroke-width="1" fill="none"/>
+  <path d="M20 72 Q50 64 80 72" stroke="#5d4037" stroke-width="1" fill="none"/>
+  
+  <!-- Wide cargo deck -->
+  <ellipse cx="50" cy="55" rx="32" ry="6" fill="#a1887f" stroke="#6d4c41" stroke-width="1"/>
+  <!-- Deck planks -->
+  <line x1="20" y1="54" x2="80" y2="54" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="20" y1="56" x2="80" y2="56" stroke="#8d6e63" stroke-width="1"/>
+  <line x1="20" y1="58" x2="80" y2="58" stroke="#8d6e63" stroke-width="1"/>
+  
+  <!-- Main cargo mast -->
+  <line x1="50" y1="18" x2="50" y2="55" stroke="#6d4c41" stroke-width="4"/>
+  
+  <!-- Large merchant sail -->
+  <rect x="30" y="20" width="40" height="30" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  <!-- Sail patches and repairs -->
+  <rect x="35" y="25" width="8" height="6" fill="#e0e0e0" stroke="#bdbdbd" stroke-width="1"/>
+  <rect x="52" y="35" width="6" height="8" fill="#e0e0e0" stroke="#bdbdbd" stroke-width="1"/>
+  <!-- Sail reinforcement lines -->
+  <line x1="32" y1="25" x2="68" y2="25" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="32" y1="30" x2="68" y2="30" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="32" y1="35" x2="68" y2="35" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="32" y1="40" x2="68" y2="40" stroke="#bdbdbd" stroke-width="1"/>
+  <line x1="32" y1="45" x2="68" y2="45" stroke="#bdbdbd" stroke-width="1"/>
+  
+  <!-- Merchant guild symbol on sail -->
+  <circle cx="50" cy="32" r="6" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <polygon points="50,29 52,34 47,31 53,31 48,34" fill="#ff8f00"/>
+  
+  <!-- Forward sail -->
+  <polygon points="25,25 35,22 50,18 25,35" fill="url(#sailGrad)" stroke="#bdbdbd" stroke-width="1"/>
+  
+  <!-- Cargo holds -->
+  <rect x="25" y="50" width="12" height="8" fill="url(#cargoGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="40" y="50" width="12" height="8" fill="url(#cargoGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="55" y="50" width="12" height="8" fill="url(#cargoGrad)" stroke="#3e2723" stroke-width="1"/>
+  <rect x="70" y="50" width="8" height="8" fill="url(#cargoGrad)" stroke="#3e2723" stroke-width="1"/>
+  
+  <!-- Cargo - treasure chests -->
+  <rect x="27" y="48" width="8" height="5" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <rect x="42" y="48" width="8" height="5" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <rect x="57" y="48" width="8" height="5" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <!-- Chest metal bands -->
+  <rect x="27" y="49" width="8" height="1" fill="#424242"/>
+  <rect x="27" y="51" width="8" height="1" fill="#424242"/>
+  <rect x="42" y="49" width="8" height="1" fill="#424242"/>
+  <rect x="42" y="51" width="8" height="1" fill="#424242"/>
+  <rect x="57" y="49" width="8" height="1" fill="#424242"/>
+  <rect x="57" y="51" width="8" height="1" fill="#424242"/>
+  <!-- Chest locks -->
+  <circle cx="31" cy="50.5" r="1" fill="#ffc107"/>
+  <circle cx="46" cy="50.5" r="1" fill="#ffc107"/>
+  <circle cx="61" cy="50.5" r="1" fill="#ffc107"/>
+  
+  <!-- Loose coins spilling -->
+  <circle cx="26" cy="53" r="1" fill="url(#coinGrad)"/>
+  <circle cx="28" cy="54" r="1" fill="url(#coinGrad)"/>
+  <circle cx="30" cy="53" r="1" fill="url(#coinGrad)"/>
+  <circle cx="41" cy="53" r="1" fill="url(#coinGrad)"/>
+  <circle cx="43" cy="54" r="1" fill="url(#coinGrad)"/>
+  <circle cx="56" cy="53" r="1" fill="url(#coinGrad)"/>
+  <circle cx="58" cy="54" r="1" fill="url(#coinGrad)"/>
+  
+  <!-- Cargo - barrels -->
+  <ellipse cx="72" cy="52" rx="3" ry="4" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <ellipse cx="75" cy="52" rx="3" ry="4" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <!-- Barrel hoops -->
+  <ellipse cx="72" cy="50" rx="2.5" ry="1" fill="none" stroke="#424242" stroke-width="1"/>
+  <ellipse cx="72" cy="54" rx="2.5" ry="1" fill="none" stroke="#424242" stroke-width="1"/>
+  <ellipse cx="75" cy="50" rx="2.5" ry="1" fill="none" stroke="#424242" stroke-width="1"/>
+  <ellipse cx="75" cy="54" rx="2.5" ry="1" fill="none" stroke="#424242" stroke-width="1"/>
+  
+  <!-- Cargo - sacks -->
+  <ellipse cx="30" cy="54" rx="3" ry="2" fill="#a1887f" stroke="#8d6e63" stroke-width="1"/>
+  <ellipse cx="34" cy="55" rx="3" ry="2" fill="#a1887f" stroke="#8d6e63" stroke-width="1"/>
+  <ellipse cx="47" cy="54" rx="3" ry="2" fill="#a1887f" stroke="#8d6e63" stroke-width="1"/>
+  <!-- Sack ties -->
+  <line x1="30" y1="52" x2="30" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  <line x1="34" y1="53" x2="34" y2="51" stroke="#8d6e63" stroke-width="2"/>
+  <line x1="47" y1="52" x2="47" y2="50" stroke="#8d6e63" stroke-width="2"/>
+  
+  <!-- Merchant crew -->
+  <!-- Captain with fine clothes -->
+  <circle cx="65" cy="40" r="4" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Merchant hat -->
+  <path d="M61 35 Q65 32 69 35 Q69 40 65 40 Q61 40 61 35" fill="#9c27b0" stroke="#6a1b9a" stroke-width="1"/>
+  <circle cx="67" cy="37" r="1" fill="#ffc107"/>
+  <!-- Eyes -->
+  <circle cx="63" cy="38" r="1" fill="#1976d2"/>
+  <circle cx="67" cy="38" r="1" fill="#1976d2"/>
+  <!-- Mustache -->
+  <path d="M62 41 Q65 43 68 41" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <!-- Rich merchant robes -->
+  <rect x="61" y="44" width="8" height="12" fill="#9c27b0" stroke="#6a1b9a" stroke-width="1"/>
+  <rect x="62" y="46" width="6" height="2" fill="#ffc107"/>
+  <circle cx="63" cy="50" r="1" fill="#ffc107"/>
+  <circle cx="67" cy="50" r="1" fill="#ffc107"/>
+  
+  <!-- Sailor -->
+  <circle cx="35" cy="40" r="3" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <path d="M32 36 Q35 33 38 36" fill="#8d6e63"/>
+  <circle cx="33" cy="38" r="1" fill="#1976d2"/>
+  <circle cx="37" cy="38" r="1" fill="#1976d2"/>
+  <rect x="32" y="43" width="6" height="10" fill="#795548" stroke="#5d4037" stroke-width="1"/>
+  
+  <!-- Rigging and ropes -->
+  <path d="M25 25 Q37 20 50 18" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M25 35 Q37 30 50 28" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M30 50 Q40 45 50 42" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  <path d="M70 50 Q60 45 50 42" stroke="#8d6e63" stroke-width="2" fill="none"/>
+  
+  <!-- Ship's wheel -->
+  <circle cx="65" cy="48" r="3" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="65" y1="45" x2="65" y2="51" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="62" y1="48" x2="68" y2="48" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="63" y1="46" x2="67" y2="50" stroke="#6d4c41" stroke-width="1"/>
+  <line x1="67" y1="46" x2="63" y2="50" stroke="#6d4c41" stroke-width="1"/>
+  
+  <!-- Merchant flag -->
+  <line x1="50" y1="18" x2="50" y2="13" stroke="#6d4c41" stroke-width="2"/>
+  <rect x="50" y="13" width="12" height="8" fill="#9c27b0" stroke="#6a1b9a" stroke-width="1"/>
+  <circle cx="56" cy="17" r="2" fill="#ffc107"/>
+  
+  <!-- Navigation tools -->
+  <circle cx="70" cy="42" r="2" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <line x1="69" y1="41" x2="71" y2="43" stroke="#ff8f00" stroke-width="1"/>
+  <line x1="71" y1="41" x2="69" y2="43" stroke="#ff8f00" stroke-width="1"/>
+  
+  <!-- Ledger book -->
+  <rect x="68" y="52" width="4" height="3" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="69" y1="53" x2="71" y2="53" stroke="#1976d2" stroke-width="0.5"/>
+  <line x1="69" y1="54" x2="71" y2="54" stroke="#1976d2" stroke-width="0.5"/>
+  
+  <!-- Water splashes -->
+  <ellipse cx="12" cy="68" rx="3" ry="2" fill="#81d4fa" opacity="0.7"/>
+  <ellipse cx="88" cy="68" rx="3" ry="2" fill="#81d4fa" opacity="0.7"/>
+  <ellipse cx="15" cy="72" rx="2" ry="1" fill="#81d4fa" opacity="0.5"/>
+  <ellipse cx="85" cy="72" rx="2" ry="1" fill="#81d4fa" opacity="0.5"/>
+  
+  <!-- Wake -->
+  <ellipse cx="10" cy="70" rx="4" ry="2" fill="#4fc3f7" opacity="0.6"/>
+  <ellipse cx="8" cy="73" rx="3" ry="1.5" fill="#4fc3f7" opacity="0.4"/>
+  <ellipse cx="6" cy="75" rx="2" ry="1" fill="#4fc3f7" opacity="0.3"/>
+  
+  <!-- Anchor chain -->
+  <line x1="20" y1="55" x2="20" y2="65" stroke="#424242" stroke-width="2"/>
+  <circle cx="20" cy="65" r="1" fill="#424242"/>
+  <circle cx="20" cy="63" r="0.8" fill="#424242"/>
+  <circle cx="20" cy="61" r="0.8" fill="#424242"/>
+  <circle cx="20" cy="59" r="0.8" fill="#424242"/>
+  <circle cx="20" cy="57" r="0.8" fill="#424242"/>
+  
+  <!-- Ship's bell -->
+  <circle cx="45" cy="45" r="2" fill="#ffc107" stroke="#ff8f00" stroke-width="1"/>
+  <line x1="45" y1="43" x2="45" y2="41" stroke="#8d6e63" stroke-width="2"/>
+  
+  <!-- Trade route map -->
+  <rect x="55" y="45" width="6" height="4" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <line x1="56" y1="46" x2="60" y2="48" stroke="#d32f2f" stroke-width="1"/>
+  <line x1="57" y1="47" x2="59" y2="47" stroke="#1976d2" stroke-width="1"/>
+  <circle cx="58" cy="47" r="0.5" fill="#4caf50"/>
+</svg>

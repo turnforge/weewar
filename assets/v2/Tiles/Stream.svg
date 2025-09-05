@@ -1,0 +1,9 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="#4dd0e1" stroke="#0097a7" stroke-width="2"/>
+  <!-- Shallow water ripples -->
+  <path d="M20 45 Q30 40 40 45 Q50 50 60 45 Q70 40 80 45" stroke="#80deea" stroke-width="1.5" fill="none"/>
+  <path d="M15 60 Q25 55 35 60 Q45 65 55 60 Q65 55 75 60" stroke="#80deea" stroke-width="1.5" fill="none"/>
+  <!-- Visible bottom -->
+  <circle cx="35" cy="55" r="3" fill="#d7ccc8" opacity="0.6"/>
+  <circle cx="60" cy="45" r="2" fill="#d7ccc8" opacity="0.6"/>
+</svg>

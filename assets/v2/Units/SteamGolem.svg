@@ -1,0 +1,157 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffb74d"/>
+      <stop offset="50%" stop-color="#ff9800"/>
+      <stop offset="100%" stop-color="#e65100"/>
+    </linearGradient>
+    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a1887f"/>
+      <stop offset="50%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#5d4037"/>
+    </linearGradient>
+    <radialGradient id="steamGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="100%" stop-color="#e0e0e0"/>
+    </radialGradient>
+    <linearGradient id="coalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#424242"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Steam Golem - Mech equivalent -->
+  
+  <!-- Main chassis with riveted brass plating -->
+  <rect x="30" y="35" width="40" height="30" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2" rx="3"/>
+  <!-- Riveted plate details -->
+  <circle cx="35" cy="40" r="1.5" fill="#e65100"/>
+  <circle cx="42" cy="40" r="1.5" fill="#e65100"/>
+  <circle cx="49" cy="40" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="40" r="1.5" fill="#e65100"/>
+  <circle cx="63" cy="40" r="1.5" fill="#e65100"/>
+  <circle cx="35" cy="47" r="1.5" fill="#e65100"/>
+  <circle cx="42" cy="47" r="1.5" fill="#e65100"/>
+  <circle cx="49" cy="47" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="47" r="1.5" fill="#e65100"/>
+  <circle cx="63" cy="47" r="1.5" fill="#e65100"/>
+  <circle cx="35" cy="54" r="1.5" fill="#e65100"/>
+  <circle cx="42" cy="54" r="1.5" fill="#e65100"/>
+  <circle cx="49" cy="54" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="54" r="1.5" fill="#e65100"/>
+  <circle cx="63" cy="54" r="1.5" fill="#e65100"/>
+  <circle cx="35" cy="61" r="1.5" fill="#e65100"/>
+  <circle cx="42" cy="61" r="1.5" fill="#e65100"/>
+  <circle cx="49" cy="61" r="1.5" fill="#e65100"/>
+  <circle cx="56" cy="61" r="1.5" fill="#e65100"/>
+  <circle cx="63" cy="61" r="1.5" fill="#e65100"/>
+  
+  <!-- Head dome with viewing ports -->
+  <circle cx="50" cy="25" r="10" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2"/>
+  <!-- Viewing ports -->
+  <circle cx="47" cy="22" r="3" fill="#81d4fa" stroke="#0277bd" stroke-width="1"/>
+  <circle cx="53" cy="22" r="3" fill="#81d4fa" stroke="#0277bd" stroke-width="1"/>
+  <circle cx="47" cy="22" r="1.5" fill="#1976d2"/>
+  <circle cx="53" cy="22" r="1.5" fill="#1976d2"/>
+  <!-- Head rivets -->
+  <circle cx="43" cy="25" r="1" fill="#e65100"/>
+  <circle cx="57" cy="25" r="1" fill="#e65100"/>
+  <circle cx="50" cy="18" r="1" fill="#e65100"/>
+  <circle cx="50" cy="32" r="1" fill="#e65100"/>
+  
+  <!-- Steam stacks -->
+  <rect x="40" y="10" width="4" height="15" fill="url(#coalGrad)" stroke="#000" stroke-width="1"/>
+  <rect x="56" y="10" width="4" height="15" fill="url(#coalGrad)" stroke="#000" stroke-width="1"/>
+  <!-- Steam emissions -->
+  <circle cx="42" cy="8" r="2" fill="url(#steamGrad)" opacity="0.8"/>
+  <circle cx="41" cy="5" r="1.5" fill="url(#steamGrad)" opacity="0.6"/>
+  <circle cx="43" cy="3" r="1" fill="url(#steamGrad)" opacity="0.4"/>
+  <circle cx="58" cy="8" r="2" fill="url(#steamGrad)" opacity="0.8"/>
+  <circle cx="59" cy="5" r="1.5" fill="url(#steamGrad)" opacity="0.6"/>
+  <circle cx="57" cy="3" r="1" fill="url(#steamGrad)" opacity="0.4"/>
+  
+  <!-- Articulated arms with hydraulics -->
+  <rect x="15" y="30" width="15" height="8" fill="url(#copperGrad)" stroke="#3e2723" stroke-width="2" rx="2"/>
+  <rect x="70" y="30" width="15" height="8" fill="url(#copperGrad)" stroke="#3e2723" stroke-width="2" rx="2"/>
+  <!-- Hydraulic pistons -->
+  <rect x="17" y="32" width="3" height="4" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  <rect x="25" y="32" width="3" height="4" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  <rect x="72" y="32" width="3" height="4" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  <rect x="80" y="32" width="3" height="4" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  
+  <!-- Steam-powered fists -->
+  <circle cx="22" cy="45" r="6" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2"/>
+  <circle cx="78" cy="45" r="6" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="2"/>
+  <!-- Fist details -->
+  <circle cx="22" cy="45" r="3" fill="#e65100"/>
+  <circle cx="78" cy="45" r="3" fill="#e65100"/>
+  <!-- Steam vents on fists -->
+  <circle cx="20" cy="43" r="1" fill="#f5f5f5" opacity="0.7"/>
+  <circle cx="24" cy="47" r="1" fill="#f5f5f5" opacity="0.7"/>
+  <circle cx="76" cy="43" r="1" fill="#f5f5f5" opacity="0.7"/>
+  <circle cx="80" cy="47" r="1" fill="#f5f5f5" opacity="0.7"/>
+  
+  <!-- Pressure gauges -->
+  <circle cx="35" cy="45" r="3" fill="#f5f5f5" stroke="#616161" stroke-width="1"/>
+  <circle cx="65" cy="45" r="3" fill="#f5f5f5" stroke="#616161" stroke-width="1"/>
+  <!-- Gauge needles -->
+  <line x1="35" y1="45" x2="37" y2="43" stroke="#d32f2f" stroke-width="2"/>
+  <line x1="65" y1="45" x2="63" y2="47" stroke="#d32f2f" stroke-width="2"/>
+  <!-- Gauge markings -->
+  <circle cx="35" cy="45" r="2" fill="none" stroke="#424242" stroke-width="1"/>
+  <circle cx="65" cy="45" r="2" fill="none" stroke="#424242" stroke-width="1"/>
+  
+  <!-- Legs with steam-powered joints -->
+  <rect x="40" y="65" width="6" height="20" fill="url(#copperGrad)" stroke="#3e2723" stroke-width="2"/>
+  <rect x="54" y="65" width="6" height="20" fill="url(#copperGrad)" stroke="#3e2723" stroke-width="2"/>
+  <!-- Knee joints -->
+  <circle cx="43" cy="75" r="3" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="1"/>
+  <circle cx="57" cy="75" r="3" fill="url(#brassGrad)" stroke="#bf360c" stroke-width="1"/>
+  <!-- Joint rivets -->
+  <circle cx="41" cy="75" r="1" fill="#e65100"/>
+  <circle cx="45" cy="75" r="1" fill="#e65100"/>
+  <circle cx="55" cy="75" r="1" fill="#e65100"/>
+  <circle cx="59" cy="75" r="1" fill="#e65100"/>
+  
+  <!-- Heavy boots with treads -->
+  <ellipse cx="43" cy="88" rx="5" ry="3" fill="url(#coalGrad)" stroke="#000" stroke-width="2"/>
+  <ellipse cx="57" cy="88" rx="5" ry="3" fill="url(#coalGrad)" stroke="#000" stroke-width="2"/>
+  <!-- Tread pattern -->
+  <line x1="39" y1="88" x2="47" y2="88" stroke="#424242" stroke-width="1"/>
+  <line x1="53" y1="88" x2="61" y2="88" stroke="#424242" stroke-width="1"/>
+  
+  <!-- Central boiler -->
+  <circle cx="50" cy="50" r="6" fill="url(#coalGrad)" stroke="#000" stroke-width="2"/>
+  <!-- Boiler glow -->
+  <circle cx="50" cy="50" r="4" fill="#ff5722" opacity="0.8"/>
+  <circle cx="50" cy="50" r="2" fill="#ffeb3b"/>
+  <!-- Safety valve -->
+  <rect x="48" y="44" width="4" height="2" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  
+  <!-- Control panel -->
+  <rect x="45" y="55" width="10" height="6" fill="url(#copperGrad)" stroke="#3e2723" stroke-width="1"/>
+  <!-- Control buttons -->
+  <circle cx="47" cy="57" r="1" fill="#f44336"/>
+  <circle cx="50" cy="57" r="1" fill="#4caf50"/>
+  <circle cx="53" cy="57" r="1" fill="#2196f3"/>
+  <!-- Control levers -->
+  <rect x="46" y="59" width="1" height="2" fill="#424242"/>
+  <rect x="49" y="59" width="1" height="2" fill="#424242"/>
+  <rect x="52" y="59" width="1" height="2" fill="#424242"/>
+  
+  <!-- Steam wisps around entire golem -->
+  <circle cx="20" cy="30" r="1.5" fill="url(#steamGrad)" opacity="0.5"/>
+  <circle cx="80" cy="35" r="1.5" fill="url(#steamGrad)" opacity="0.5"/>
+  <circle cx="25" cy="60" r="1.5" fill="url(#steamGrad)" opacity="0.5"/>
+  <circle cx="75" cy="65" r="1.5" fill="url(#steamGrad)" opacity="0.5"/>
+  <circle cx="15" cy="50" r="1" fill="url(#steamGrad)" opacity="0.4"/>
+  <circle cx="85" cy="55" r="1" fill="url(#steamGrad)" opacity="0.4"/>
+  
+  <!-- Gear mechanisms visible -->
+  <circle cx="38" cy="52" r="2" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  <circle cx="62" cy="52" r="2" fill="url(#brassGrad)" stroke="#e65100" stroke-width="1"/>
+  <!-- Gear teeth -->
+  <polygon points="38,50 39,51 38,52 37,51" fill="#e65100"/>
+  <polygon points="40,52 39,53 38,54 39,53" fill="#e65100"/>
+  <polygon points="62,50 63,51 62,52 61,51" fill="#e65100"/>
+  <polygon points="64,52 63,53 62,54 63,53" fill="#e65100"/>

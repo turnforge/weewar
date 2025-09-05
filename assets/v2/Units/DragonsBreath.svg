@@ -1,0 +1,154 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="coreGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="20%" stop-color="#ffeb3b"/>
+      <stop offset="50%" stop-color="#ff5722"/>
+      <stop offset="80%" stop-color="#d84315"/>
+      <stop offset="100%" stop-color="#bf360c"/>
+    </radialGradient>
+    <radialGradient id="fireGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffeb3b"/>
+      <stop offset="40%" stop-color="#ff9800"/>
+      <stop offset="70%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#d84315"/>
+    </radialGradient>
+    <linearGradient id="plasmaGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="30%" stop-color="#ffeb3b"/>
+      <stop offset="60%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#3f51b5"/>
+    </linearGradient>
+    <radialGradient id="explosionGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#ffeb3b"/>
+      <stop offset="60%" stop-color="#ff5722"/>
+      <stop offset="85%" stop-color="#9c27b0"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </radialGradient>
+    <linearGradient id="magmaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff9800"/>
+      <stop offset="50%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#3e2723"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Dragon's Breath - Nuclear Missile equivalent -->
+  
+  <!-- Massive fiery orb core -->
+  <circle cx="50" cy="50" r="15" fill="url(#coreGrad)" stroke="#d84315" stroke-width="3"/>
+  <circle cx="50" cy="50" r="10" fill="#ffffff" opacity="0.8"/>
+  <circle cx="50" cy="50" r="6" fill="#ffeb3b"/>
+  
+  <!-- Swirling fire patterns -->
+  <path d="M35 40 Q45 35 55 40 Q60 50 55 60 Q45 65 35 60 Q30 50 35 40" fill="url(#fireGrad)" opacity="0.8"/>
+  <path d="M40 45 Q48 42 56 45 Q58 50 56 55 Q48 58 40 55 Q38 50 40 45" fill="#ff5722" opacity="0.6"/>
+  
+  <!-- Dragon skull within the fire -->
+  <ellipse cx="50" cy="48" rx="8" ry="6" fill="#8d4a47" stroke="#5d2f23" stroke-width="1" opacity="0.7"/>
+  <!-- Skull eye sockets -->
+  <circle cx="47" cy="46" r="2" fill="#ff5722"/>
+  <circle cx="53" cy="46" r="2" fill="#ff5722"/>
+  <circle cx="47" cy="46" r="1" fill="#ffeb3b"/>
+  <circle cx="53" cy="46" r="1" fill="#ffeb3b"/>
+  <!-- Skull jaw -->
+  <path d="M45 50 Q50 53 55 50" stroke="#8d4a47" stroke-width="2" fill="none"/>
+  <!-- Dragon teeth -->
+  <polygon points="46,51 47,53 45,53" fill="#f5f5f5"/>
+  <polygon points="49,52 50,54 48,54" fill="#f5f5f5"/>
+  <polygon points="52,52 53,54 51,54" fill="#f5f5f5"/>
+  <polygon points="55,51 56,53 54,53" fill="#f5f5f5"/>
+  
+  <!-- Plasma energy spirals -->
+  <path d="M20 30 Q30 20 50 25 Q70 30 80 50 Q75 70 50 75 Q25 70 20 50 Q25 30 20 30" 
+        fill="none" stroke="url(#plasmaGrad)" stroke-width="3" opacity="0.8"/>
+  <path d="M25 35 Q35 28 50 32 Q65 35 75 50 Q70 65 50 68 Q30 65 25 50 Q30 35 25 35" 
+        fill="none" stroke="#9c27b0" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Outer explosion rings -->
+  <circle cx="50" cy="50" r="20" fill="none" stroke="url(#fireGrad)" stroke-width="4" opacity="0.7"/>
+  <circle cx="50" cy="50" r="25" fill="none" stroke="#ff5722" stroke-width="3" opacity="0.5"/>
+  <circle cx="50" cy="50" r="30" fill="none" stroke="#ff9800" stroke-width="2" opacity="0.4"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="#ffeb3b" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Magical runes around perimeter -->
+  <polygon points="50,15 48,18 52,18" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="85,50 82,48 82,52" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="50,85 48,82 52,82" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="15,50 18,48 18,52" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="73,27 71,29 75,29" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="73,73 71,71 75,71" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="27,73 29,71 29,75" fill="#9c27b0" opacity="0.8"/>
+  <polygon points="27,27 29,29 29,25" fill="#9c27b5" opacity="0.8"/>
+  
+  <!-- Molten projectiles -->
+  <circle cx="35" cy="25" r="3" fill="url(#magmaGrad)" stroke="#bf360c" stroke-width="1"/>
+  <circle cx="75" cy="35" r="2.5" fill="url(#magmaGrad)" stroke="#bf360c" stroke-width="1"/>
+  <circle cx="65" cy="75" r="3.5" fill="url(#magmaGrad)" stroke="#bf360c" stroke-width="1"/>
+  <circle cx="25" cy="65" r="2" fill="url(#magmaGrad)" stroke="#bf360c" stroke-width="1"/>
+  
+  <!-- Lava trails -->
+  <path d="M35 25 Q30 20 25 18" stroke="#ff5722" stroke-width="2" fill="none"/>
+  <path d="M75 35 Q80 30 85 28" stroke="#ff5722" stroke-width="2" fill="none"/>
+  <path d="M65 75 Q70 80 75 82" stroke="#ff5722" stroke-width="2" fill="none"/>
+  <path d="M25 65 Q20 70 15 72" stroke="#ff5722" stroke-width="2" fill="none"/>
+  
+  <!-- Heat distortion waves -->
+  <ellipse cx="50" cy="40" rx="25" ry="3" fill="none" stroke="#ff9800" stroke-width="1" opacity="0.4"/>
+  <ellipse cx="50" cy="60" rx="25" ry="3" fill="none" stroke="#ff9800" stroke-width="1" opacity="0.4"/>
+  <ellipse cx="50" cy="35" rx="20" ry="2" fill="none" stroke="#ffeb3b" stroke-width="1" opacity="0.3"/>
+  <ellipse cx="50" cy="65" rx="20" ry="2" fill="none" stroke="#ffeb3b" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Magical energy discharge -->
+  <path d="M50 20 L50 5" stroke="#9c27b0" stroke-width="3"/>
+  <path d="M80 50 L95 50" stroke="#9c27b0" stroke-width="3"/>
+  <path d="M50 80 L50 95" stroke="#9c27b0" stroke-width="3"/>
+  <path d="M20 50 L5 50" stroke="#9c27b0" stroke-width="3"/>
+  
+  <!-- Energy beam endpoints -->
+  <circle cx="50" cy="5" r="2" fill="#e1bee7"/>
+  <circle cx="95" cy="50" r="2" fill="#e1bee7"/>
+  <circle cx="50" cy="95" r="2" fill="#e1bee7"/>
+  <circle cx="5" cy="50" r="2" fill="#e1bee7"/>
+  
+  <!-- Secondary explosions -->
+  <circle cx="70" cy="30" r="4" fill="url(#explosionGrad)" opacity="0.8"/>
+  <circle cx="30" cy="70" r="5" fill="url(#explosionGrad)" opacity="0.8"/>
+  <circle cx="30" cy="30" r="3" fill="url(#explosionGrad)" opacity="0.8"/>
+  <circle cx="70" cy="70" r="4" fill="url(#explosionGrad)" opacity="0.8"/>
+  
+  <!-- Shockwave ripples -->
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+  <circle cx="50" cy="50" r="45" fill="none" stroke="#e1bee7" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="50" cy="50" r="50" fill="none" stroke="#9c27b0" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Arcane symbols in the energy -->
+  <path d="M45 45 L50 40 L55 45 L50 50 Z" fill="#9c27b0" opacity="0.7"/>
+  <circle cx="50" cy="45" r="2" fill="#e1bee7" opacity="0.8"/>
+  <path d="M42 50 L46 46 L50 50 L46 54 Z" fill="#673ab7" opacity="0.6"/>
+  <path d="M58 50 L54 46 L50 50 L54 54 Z" fill="#673ab7" opacity="0.6"/>
+  
+  <!-- Sparks and embers -->
+  <circle cx="60" cy="40" r="1" fill="#ffeb3b"/>
+  <circle cx="40" cy="40" r="1.2" fill="#ff9800"/>
+  <circle cx="60" cy="60" r="0.8" fill="#ff5722"/>
+  <circle cx="40" cy="60" r="1.5" fill="#ffeb3b"/>
+  <circle cx="55" cy="35" r="0.6" fill="#ffffff"/>
+  <circle cx="45" cy="65" r="1.1" fill="#ff9800"/>
+  <circle cx="65" cy="55" r="0.9" fill="#ff5722"/>
+  <circle cx="35" cy="45" r="1.3" fill="#ffeb3b"/>
+  
+  <!-- Apocalyptic ground effect -->
+  <ellipse cx="50" cy="90" rx="30" ry="5" fill="#d84315" opacity="0.6"/>
+  <ellipse cx="50" cy="92" rx="25" ry="3" fill="#ff5722" opacity="0.5"/>
+  <ellipse cx="50" cy="94" rx="20" ry="2" fill="#ff9800" opacity="0.4"/>
+  
+  <!-- Radiation symbol (subtle) -->
+  <circle cx="50" cy="50" r="8" fill="none" stroke="#9c27b0" stroke-width="1" opacity="0.3"/>
+  <path d="M50 42 L50 46" stroke="#9c27b0" stroke-width="2" opacity="0.4"/>
+  <path d="M50 54 L50 58" stroke="#9c27b0" stroke-width="2" opacity="0.4"/>
+  <path d="M54 46 L57 43" stroke="#9c27b0" stroke-width="2" opacity="0.4"/>
+  <path d="M43 57 L46 54" stroke="#9c27b0" stroke-width="2" opacity="0.4"/>
+  <path d="M46 46 L43 43" stroke="#9c27b0" stroke-width="2" opacity="0.4"/>
+  <path d="M54 54 L57 57" stroke="#9c27b0" stroke-width="2" opacity="0.4"/>
+</svg>

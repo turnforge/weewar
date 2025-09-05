@@ -1,0 +1,74 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Healer - Medic equivalent -->
+  
+  <!-- Head -->
+  <circle cx="50" cy="25" r="7" fill="#ffdbcb" stroke="#d4a574" stroke-width="1"/>
+  <!-- Hair (with hood) -->
+  <path d="M43 18 Q50 12 57 18 Q57 30 50 32 Q43 30 43 18" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Face -->
+  <circle cx="47" cy="23" r="1.5" fill="#1976d2"/>
+  <circle cx="53" cy="23" r="1.5" fill="#1976d2"/>
+  <path d="M48 27 Q50 28 52 27" stroke="#8d4a47" stroke-width="1" fill="none"/>
+  
+  <!-- Robes -->
+  <path d="M43 32 Q50 30 57 32 Q60 50 57 68 Q50 70 43 68 Q40 50 43 32" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Robe trim -->
+  <path d="M43 35 Q50 33 57 35" stroke="#ffc107" stroke-width="2" fill="none"/>
+  <path d="M43 65 Q50 67 57 65" stroke="#ffc107" stroke-width="2" fill="none"/>
+  
+  <!-- Arms -->
+  <ellipse cx="38" cy="40" rx="4" ry="8" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <ellipse cx="62" cy="40" rx="4" ry="8" fill="#f5f5f5" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Hands -->
+  <circle cx="36" cy="48" r="3" fill="#ffdbcb"/>
+  <circle cx="64" cy="48" r="3" fill="#ffdbcb"/>
+  
+  <!-- Staff of healing -->
+  <line x1="25" y1="15" x2="25" y2="55" stroke="#8d6e63" stroke-width="3"/>
+  <!-- Crystal on top -->
+  <polygon points="25,15 22,18 25,21 28,18" fill="#e1bee7"/>
+  <circle cx="25" cy="18" r="3" fill="#9c27b0" opacity="0.7"/>
+  <!-- Staff ornaments -->
+  <circle cx="25" cy="25" r="1.5" fill="#ffc107"/>
+  <circle cx="25" cy="30" r="1.5" fill="#ffc107"/>
+  <circle cx="25" cy="35" r="1.5" fill="#ffc107"/>
+  
+  <!-- Medical bag -->
+  <rect x="70" y="45" width="8" height="6" fill="#8d6e63" stroke="#6d4c41" stroke-width="1" rx="1"/>
+  <rect x="72" y="47" width="4" height="2" fill="#f5f5f5"/>
+  <line x1="74" y1="46" x2="74" y2="50" stroke="#f44336" stroke-width="2"/>
+  <line x1="72" y1="48" x2="76" y2="48" stroke="#f44336" stroke-width="2"/>
+  
+  <!-- Healing potions -->
+  <circle cx="80" cy="40" r="2" fill="#4caf50"/>
+  <rect x="79" y="38" width="2" height="2" fill="#2e7d32"/>
+  <circle cx="85" cy="45" r="2" fill="#2196f3"/>
+  <rect x="84" y="43" width="2" height="2" fill="#1565c0"/>
+  <circle cx="75" cy="35" r="2" fill="#ff5722"/>
+  <rect x="74" y="33" width="2" height="2" fill="#d84315"/>
+  
+  <!-- Legs -->
+  <rect x="47" y="68" width="3" height="12" fill="#f5f5f5"/>
+  <rect x="50" y="68" width="3" height="12" fill="#f5f5f5"/>
+  <!-- Sandals -->
+  <ellipse cx="48.5" cy="82" rx="2.5" ry="1.5" fill="#8d6e63"/>
+  <ellipse cx="51.5" cy="82" rx="2.5" ry="1.5" fill="#8d6e63"/>
+  
+  <!-- Holy symbol pendant -->
+  <circle cx="50" cy="42" r="3" fill="none" stroke="#ffc107" stroke-width="2"/>
+  <line x1="50" y1="39" x2="50" y2="45" stroke="#ffc107" stroke-width="2"/>
+  <line x1="47" y1="42" x2="53" y2="42" stroke="#ffc107" stroke-width="2"/>
+  
+  <!-- Healing aura -->
+  <circle cx="50" cy="45" r="15" fill="none" stroke="#4caf50" stroke-width="1" opacity="0.5"/>
+  <circle cx="50" cy="45" r="20" fill="none" stroke="#4caf50" stroke-width="1" opacity="0.3"/>
+  <circle cx="50" cy="45" r="25" fill="none" stroke="#4caf50" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Healing sparkles -->
+  <circle cx="35" cy="30" r="1" fill="#4caf50" opacity="0.8"/>
+  <circle cx="65" cy="35" r="1" fill="#4caf50" opacity="0.8"/>
+  <circle cx="30" cy="50" r="1" fill="#4caf50" opacity="0.8"/>
+  <circle cx="70" cy="55" r="1" fill="#4caf50" opacity="0.8"/>
+  <circle cx="40" cy="60" r="1" fill="#4caf50" opacity="0.8"/>
+  <circle cx="60" cy="25" r="1" fill="#4caf50" opacity="0.8"/>
+</svg>

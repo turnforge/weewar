@@ -1,0 +1,32 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="forestGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#388e3c"/>
+      <stop offset="100%" stop-color="#1b5e20"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#forestGrad)" stroke="#1b5e20" stroke-width="2"/>
+  <!-- Mill building -->
+  <rect x="35" y="40" width="30" height="20" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <!-- Water wheel -->
+  <circle cx="30" cy="50" r="8" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>
+  <rect x="27" y="42" width="6" height="2" fill="#3e2723"/>
+  <rect x="27" y="56" width="6" height="2" fill="#3e2723"/>
+  <rect x="22" y="47" width="2" height="6" fill="#3e2723"/>
+  <rect x="34" y="47" width="2" height="6" fill="#3e2723"/>
+  <!-- Roof -->
+  <polygon points="35,40 50,30 65,40" fill="#5d4037"/>
+  <!-- Chimney -->
+  <rect x="55" y="28" width="3" height="8" fill="#424242"/>
+  <!-- Smoke -->
+  <circle cx="56.5" cy="25" r="1.5" fill="#e0e0e0" opacity="0.7"/>
+  <circle cx="57" cy="22" r="1" fill="#e0e0e0" opacity="0.5"/>
+  <!-- Log pile -->
+  <rect x="68" y="55" width="8" height="3" fill="#5d4037"/>
+  <rect x="70" y="52" width="6" height="3" fill="#8d6e63"/>
+  <rect x="72" y="49" width="4" height="3" fill="#5d4037"/>
+  <!-- Saw -->
+  <circle cx="75" cy="45" r="3" fill="#616161"/>
+  <path d="M72 45 L78 45" stroke="#424242" stroke-width="1"/>
+</svg>

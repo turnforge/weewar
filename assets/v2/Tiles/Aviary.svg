@@ -1,0 +1,34 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="grassGrad" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#7dd857"/>
+      <stop offset="100%" stop-color="#4a9c2d"/>
+    </radialGradient>
+  </defs>
+  
+  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#grassGrad)" stroke="#2e7d32" stroke-width="2"/>
+  <!-- Large perch/roost structure -->
+  <rect x="40" y="40" width="20" height="25" fill="#8d6e63" stroke="#5d4037" stroke-width="1"/>
+  <!-- Peaked roof -->
+  <polygon points="40,40 50,25 60,40" fill="#5d4037"/>
+  <!-- Tall perch posts -->
+  <line x1="25" y1="65" x2="25" y2="35" stroke="#5d4037" stroke-width="3"/>
+  <line x1="75" y1="65" x2="75" y2="35" stroke="#5d4037" stroke-width="3"/>
+  <line x1="20" y1="35" x2="30" y2="35" stroke="#5d4037" stroke-width="2"/>
+  <line x1="70" y1="35" x2="80" y2="35" stroke="#5d4037" stroke-width="2"/>
+  <!-- Flying griffin/bird -->
+  <ellipse cx="35" cy="25" rx="6" ry="3" fill="#8d6e63"/>
+  <polygon points="35,22 38,20 32,20" fill="#8d6e63"/>
+  <path d="M29 25 Q32 23 35 25" stroke="#6d4c41" stroke-width="1" fill="none"/>
+  <path d="M35 25 Q38 23 41 25" stroke="#6d4c41" stroke-width="1" fill="none"/>
+  <!-- Perched creature -->
+  <ellipse cx="75" cy="33" rx="3" ry="2" fill="#795548"/>
+  <circle cx="76" cy="32" r="1" fill="#ff8f00"/>
+  <!-- Nest -->
+  <ellipse cx="50" cy="60" rx="8" ry="4" fill="#8d6e63"/>
+  <circle cx="48" cy="58" r="1.5" fill="#f5f5f5"/>
+  <circle cx="52" cy="58" r="1.5" fill="#f5f5f5"/>
+  <!-- Feathers on ground -->
+  <ellipse cx="30" cy="65" rx="2" ry="1" fill="#8d6e63" transform="rotate(45 30 65)"/>
+  <ellipse cx="70" cy="62" rx="2" ry="1" fill="#795548" transform="rotate(-30 70 62)"/>
+</svg>

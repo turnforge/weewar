@@ -38,6 +38,9 @@ export abstract class HexHighlightLayer extends BaseLayer {
         // Create new highlight positioned directly in world coordinates (like tiles/units)
         const highlight = this.scene.add.graphics();
         
+        // Add to container so it respects layer depth
+        this.container.add(highlight);
+        
         // Set fill style
         highlight.fillStyle(color, alpha);
         if (strokeColor !== undefined && strokeWidth !== undefined) {
@@ -47,7 +50,6 @@ export abstract class HexHighlightLayer extends BaseLayer {
         // Get world position and set highlight position directly
         const position = hexToPixel(q, r);
         highlight.setPosition(position.x, position.y);
-        highlight.setDepth(this.depth);
 
         const points: Phaser.Geom.Point[] = [];
         const halfWidth = 32
@@ -268,8 +270,10 @@ export class MovementHighlightLayer extends HexHighlightLayer {
             fontFamily: 'Arial'
         });
         
+        // Add to container so it respects layer depth
+        this.container.add(text);
+        
         text.setOrigin(0.5, 0.5);
-        text.setDepth(this.depth + 1); // Above the highlight
         
         this.coordinateTexts.set(key, text);
     }

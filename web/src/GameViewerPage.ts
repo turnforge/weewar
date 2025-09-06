@@ -1201,6 +1201,14 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             return;
         }
 
+        // Check if clicking on the same position as the selected unit (deselection)
+        if (this.selectedUnitCoord.q === q && this.selectedUnitCoord.r === r) {
+            console.log('[GameViewerPage] Clicked on selected unit position - deselecting');
+            this.clearSelection();
+            this.clearAllHighlights();
+            return;
+        }
+
         // Execute the move
         this.executeMove(this.selectedUnitCoord, { q, r }, moveOption);
     }

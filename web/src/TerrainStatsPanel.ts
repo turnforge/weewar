@@ -1,7 +1,7 @@
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
-import { CityTerrainIds, AllowedUnitIDs, TERRAIN_NAMES } from './ColorsAndNames';
+import { CityTerrainIds, AllowedUnitIDs } from './ColorsAndNames';
 import { TerrainStats , RulesTable } from './RulesTable';
 
 
@@ -135,7 +135,7 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
         const descElement = this.findElement('#terrain-description');
 
         if (iconElement) {
-            const terrainData = TERRAIN_NAMES[terrainStats.id] || { icon: '🎨' };
+            const terrainData = { icon: '🎨' };
             iconElement.textContent = terrainData.icon;
         }
 

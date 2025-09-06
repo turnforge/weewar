@@ -34,6 +34,22 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 
 ## Recent Major Achievements
 
+### Theme and Asset Provider Architecture Refactoring
+
+**Achievement**: Simplified and clarified the separation between Theme configuration and AssetProvider functionality.
+
+**Key Changes**:
+1. **Single AssetProvider**: Replaced multiple provider classes (PNGAssetProvider, TemplateSVGAssetProvider, ThemeAssetProvider) with one unified AssetProvider
+2. **Theme as Pure Data**: Themes now only provide configuration (paths, names, whether tinting is needed) without handling any Phaser operations
+3. **Clean Separation**: AssetProvider handles all Phaser operations (loading, post-processing, texture management) based on theme configuration
+4. **Removed Global Dependencies**: Eliminated hardcoded UNIT_NAMES and TERRAIN_NAMES constants, now retrieved from themes or backend templates
+
+**Architecture Benefits**:
+- Theme = "What assets exist and where they are"
+- AssetProvider = "How to load and process them for Phaser"
+- No more duplication between Theme and AssetProvider responsibilities
+- Easy to add new themes by just providing configuration
+
 ### 🎉 Multiplayer Coordination Framework (Current Session)
 
 **Achievement**: Implemented distributed validation architecture where WASM clients validate moves locally with server-side coordination for consensus.

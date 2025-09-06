@@ -1,7 +1,6 @@
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
-import { UNIT_NAMES } from './ColorsAndNames';
 import { RulesTable } from './RulesTable';
 
 interface UnitData {
@@ -150,7 +149,7 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
 
         if (nameElement) {
             const unitDef = this.rulesTable.getUnitDefinition(unit.unitType);
-            const unitName = unitDef?.name || UNIT_NAMES[unit.unitType]?.name || `Unit ${unit.unitType}`;
+            const unitName = unitDef?.name || `Unit ${unit.unitType}`;
             nameElement.textContent = unitName;
         }
 

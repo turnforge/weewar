@@ -1,5 +1,29 @@
 # Next Steps - WeeWar Development
 
+## Immediate Issues to Fix
+
+### Highlight Layer Visibility Bug
+- **Issue**: Highlight layer not showing after recent refactoring
+- **Impact**: Cannot see movement options when selecting units
+- **Investigation Needed**: Check layer ordering and asset provider changes
+
+## 🎉 Major Milestone Completed: Theme and Asset Architecture Refactoring
+
+### ✅ Recently Completed (Current Session)
+
+**Clean Architecture Separation - COMPLETED**
+- **Single AssetProvider**: Unified all asset loading into one clean provider class
+- **Theme as Configuration**: Themes now only provide data (paths, names, tinting needs)
+- **Removed Duplication**: Eliminated overlap between Theme and AssetProvider responsibilities
+- **No Global State**: Removed hardcoded UNIT_NAMES/TERRAIN_NAMES constants
+- **Backend Integration**: UI gets names from backend templates, no duplication in frontend
+
+**Benefits Achieved**
+- Easy to add new themes - just provide configuration
+- Clean separation: Theme = "what", AssetProvider = "how"
+- TypeScript compilation now clean with no errors
+- Simplified codebase with less redundancy
+
 ## 🎉 Major Milestone Completed: Multiplayer Coordination Framework
 
 ### ✅ Recently Completed (Current Session)

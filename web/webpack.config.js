@@ -9,6 +9,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const SRC_FOLDERS = [
   "./src",
+  "./assets",
+  "./static/assets",
   "./lib",
   "./gen"
 ];

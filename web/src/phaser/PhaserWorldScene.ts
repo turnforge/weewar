@@ -9,9 +9,7 @@ import { EventBus } from '../../lib/EventBus';
 import { WorldEventType, WorldEventTypes } from '../events';
 import { AllowedUnitIDs } from "../ColorsAndNames";
 import { TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from '../World';
-import { AssetProvider } from './AssetProvider';
-import { PNGAssetProvider } from './PNGAssetProvider';
-import { TemplateSVGAssetProvider } from './TemplateSVGAssetProvider';
+import { AssetProvider } from '../../assets/providers/AssetProvider';
 
 const UNIT_TILE_RATIO = 0.8
 
@@ -97,22 +95,15 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private createDefaultAssetProvider(): AssetProvider {
         // Check URL parameters for asset configuration
         const urlParams = new URLSearchParams(window.location.search);
-        const usePNG = urlParams.get('usePNG') === 'true';
         const themeName = urlParams.get('theme') || 'fantasy';
         const svgSize = urlParams.get('svgSize');
         
-        if (usePNG) {
-            if (this.debugMode) {
-                console.log('[PhaserWorldScene] Using PNGAssetProvider');
-            }
-            return new PNGAssetProvider();
-        } else {
-            const rasterSize = svgSize ? parseInt(svgSize) : 160;
-            if (this.debugMode) {
-                console.log(`[PhaserWorldScene] Using TemplateSVGAssetProvider with theme '${themeName}' and size ${rasterSize}`);
-            }
-            return new TemplateSVGAssetProvider(themeName, rasterSize, true);
+        if (this.debugMode) {
+            console.log(`[PhaserWorldScene] Using theme: ${themeName}`);
         }
+        
+        const rasterSize = svgSize ? parseInt(svgSize) : 160;
+        return new AssetProvider(themeName, rasterSize, this.debugMode);
     }
     
     /**

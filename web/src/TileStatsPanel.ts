@@ -3,7 +3,7 @@ import { Unit, Tile, World, WorldEvent, TilesChangedEventData, UnitsChangedEvent
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
-import { TERRAIN_NAMES, UNIT_NAMES, PLAYER_COLORS } from './ColorsAndNames'
+import { PLAYER_COLORS } from './ColorsAndNames'
 
 /**
  * TileStatsPanel displays statistics about tiles and units on the world
@@ -319,7 +319,7 @@ export class TileStatsPanel extends BaseComponent {
         let terrainHTML = '';
         Object.entries(terrainCounts).forEach(([terrain, count]) => {
             const terrainNum = parseInt(terrain);
-            const terrainInfo = TERRAIN_NAMES[terrainNum] || { name: `Terrain ${terrain}`, icon: '🎨', color: 'text-gray-600 dark:text-gray-400' };
+            const terrainInfo = { name: `Terrain ${terrain}`, icon: '🎨', color: 'text-gray-600 dark:text-gray-400' };
             
             terrainHTML += `
                 <div class="flex justify-between items-center py-1">
@@ -354,7 +354,7 @@ export class TileStatsPanel extends BaseComponent {
         let unitHTML = '';
         Object.entries(unitCounts).forEach(([unitType, count]) => {
             const unitNum = parseInt(unitType);
-            const unitInfo = UNIT_NAMES[unitNum] || { name: `Unit ${unitType}`, icon: '🪖' };
+            const unitInfo = { name: `Unit ${unitType}`, icon: '🪖' };
             
             unitHTML += `
                 <div class="flex justify-between items-center py-1">
@@ -438,7 +438,7 @@ export class TileStatsPanel extends BaseComponent {
         // Generate HTML for terrain stats
         let terrainHTML = '';
         Object.entries(terrainCounts).forEach(([terrainType, count]) => {
-            const terrain = TERRAIN_NAMES[parseInt(terrainType)];
+            const terrain = { name: `Terrain ${terrainType}`, icon: '🎨', color: 'text-gray-600' };
             if (terrain) {
                 terrainHTML += `
                     <div class="flex justify-between items-center py-1">
@@ -473,7 +473,7 @@ export class TileStatsPanel extends BaseComponent {
         // Generate HTML for unit stats
         let unitHTML = '';
         Object.entries(unitCounts).forEach(([unitType, count]) => {
-            const unit = UNIT_NAMES[parseInt(unitType)] || { name: `Unit ${unitType}`, icon: '🪖', color: 'text-gray-600 dark:text-gray-400' };
+            const unit = { name: `Unit ${unitType}`, icon: '🪖' };
             unitHTML += `
                 <div class="flex justify-between items-center py-1">
                     <span class="text-sm text-gray-700 dark:text-gray-300">

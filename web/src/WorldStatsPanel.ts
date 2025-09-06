@@ -2,7 +2,6 @@ import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
 import { WorldEventTypes, WorldDataLoadedPayload, WorldStatsUpdatedPayload } from './events';
-import { TERRAIN_NAMES } from './ColorsAndNames';
 
 /**
  * WorldStatsPanel Component - Manages world statistics display
@@ -153,7 +152,7 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             terrainDistribution[terrainNum] = {
                 count: count,
                 percentage: percentage,
-                name: TERRAIN_NAMES[terrainNum].name
+                name: `Terrain ${terrainNum}`
             };
         });
         

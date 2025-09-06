@@ -3,7 +3,7 @@ import { EventBus } from '../lib/EventBus';
 import { EditorEventTypes } from './events';
 import { WorldEditorPageState } from './WorldEditorPageState';
 import { LCMComponent } from '../lib/LCMComponent';
-import { BRUSH_SIZE_NAMES, TERRAIN_NAMES, UNIT_NAMES } from './ColorsAndNames'
+import { BRUSH_SIZE_NAMES } from './ColorsAndNames'
 
 /**
  * EditorToolsPanel Component - State generator and DOM owner for editor tools with tabbed interface
@@ -350,7 +350,9 @@ export class EditorToolsPanel extends BaseComponent {
                 
                 if (terrain) {
                     const terrainValue = parseInt(terrain);
-                    const terrainName = TERRAIN_NAMES[terrainValue].name
+                    // Get terrain name from button's title or text content
+                    const terrainButton = clickedButton.querySelector('.text-xs.truncate');
+                    const terrainName = terrainButton?.textContent || clickedButton.title.split('(')[0].trim() || `Terrain ${terrainValue}`;
                     
                     if (terrainValue === 0) {
                         // Clear mode
@@ -397,7 +399,9 @@ export class EditorToolsPanel extends BaseComponent {
                 
                 if (unit) {
                     const unitValue = parseInt(unit);
-                    const unitName = UNIT_NAMES[unitValue].name;
+                    // Get unit name from button's text content
+                    const unitButton = clickedButton.querySelector('.text-xs.truncate');
+                    const unitName = unitButton?.textContent || `Unit ${unitValue}`;
                     
                     this.executeWhenReady(() => {
                         this.updateButtonSelection(clickedButton);

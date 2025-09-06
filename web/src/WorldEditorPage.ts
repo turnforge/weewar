@@ -12,7 +12,7 @@ import { EditorToolsPanel } from './EditorToolsPanel';
 import { ReferenceImagePanel } from './ReferenceImagePanel';
 import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
-import { BRUSH_SIZE_NAMES , TERRAIN_NAMES } from "./ColorsAndNames"
+import { BRUSH_SIZE_NAMES } from "./ColorsAndNames"
 
 /**
  * World Editor page with unified World architecture and centralized page state
@@ -1022,7 +1022,7 @@ class WorldEditorPage extends BasePage {
         if (brushInfo) {
             const currentTerrain = this.pageState?.getToolState().selectedTerrain || 1;
             const currentBrushSize = this.pageState?.getToolState().brushSize || 0;
-            brushInfo.textContent = `Current: ${TERRAIN_NAMES[currentTerrain]}, ${BRUSH_SIZE_NAMES[currentBrushSize]}`;
+            brushInfo.textContent = `Current: Terrain ${currentTerrain}, ${BRUSH_SIZE_NAMES[currentBrushSize]}`;
         }
     }
 

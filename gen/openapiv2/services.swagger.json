@@ -2104,6 +2104,10 @@
           "type": "integer",
           "format": "int32",
           "title": "Whether the tile itself belongs to a player"
+        },
+        "shortcut": {
+          "type": "string",
+          "title": "A short cut like A1 or S2 etc for quick access"
         }
       }
     },
@@ -2126,6 +2130,10 @@
         "unitType": {
           "type": "integer",
           "format": "int32"
+        },
+        "shortcut": {
+          "type": "string",
+          "title": "A short cut like A1 or S2 etc for quick access"
         },
         "availableHealth": {
           "type": "integer",

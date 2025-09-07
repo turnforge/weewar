@@ -515,7 +515,8 @@ type Tile struct {
 	R        int32 `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
 	TileType int32 `protobuf:"varint,3,opt,name=tile_type,json=tileType,proto3" json:"tile_type,omitempty"` // Tile type
 	// Whether the tile itself belongs to a player
-	Player        int32 `protobuf:"varint,4,opt,name=player,proto3" json:"player,omitempty"`
+	Player        int32  `protobuf:"varint,4,opt,name=player,proto3" json:"player,omitempty"`
+	Shortcut      string `protobuf:"bytes,5,opt,name=shortcut,proto3" json:"shortcut,omitempty"` // A short cut like A1 or S2 etc for quick access
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -578,17 +579,25 @@ func (x *Tile) GetPlayer() int32 {
 	return 0
 }
 
+func (x *Tile) GetShortcut() string {
+	if x != nil {
+		return x.Shortcut
+	}
+	return ""
+}
+
 type Unit struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Q and R in Cubed coordinates
-	Q        int32 `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
-	R        int32 `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
-	Player   int32 `protobuf:"varint,3,opt,name=player,proto3" json:"player,omitempty"`
-	UnitType int32 `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
+	Q        int32  `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
+	R        int32  `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
+	Player   int32  `protobuf:"varint,3,opt,name=player,proto3" json:"player,omitempty"`
+	UnitType int32  `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
+	Shortcut string `protobuf:"bytes,5,opt,name=shortcut,proto3" json:"shortcut,omitempty"` // A short cut like A1 or S2 etc for quick access
 	// Runtime state fields
-	AvailableHealth int32 `protobuf:"varint,5,opt,name=available_health,json=availableHealth,proto3" json:"available_health,omitempty"` // Current health points
-	DistanceLeft    int32 `protobuf:"varint,6,opt,name=distance_left,json=distanceLeft,proto3" json:"distance_left,omitempty"`          // Movement points remaining this turn
-	TurnCounter     int32 `protobuf:"varint,7,opt,name=turn_counter,json=turnCounter,proto3" json:"turn_counter,omitempty"`             // Which turn this unit was created/last acted
+	AvailableHealth int32 `protobuf:"varint,6,opt,name=available_health,json=availableHealth,proto3" json:"available_health,omitempty"` // Current health points
+	DistanceLeft    int32 `protobuf:"varint,7,opt,name=distance_left,json=distanceLeft,proto3" json:"distance_left,omitempty"`          // Movement points remaining this turn
+	TurnCounter     int32 `protobuf:"varint,8,opt,name=turn_counter,json=turnCounter,proto3" json:"turn_counter,omitempty"`             // Which turn this unit was created/last acted
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -649,6 +658,13 @@ func (x *Unit) GetUnitType() int32 {
 		return x.UnitType
 	}
 	return 0
+}
+
+func (x *Unit) GetShortcut() string {
+	if x != nil {
+		return x.Shortcut
+	}
+	return ""
 }
 
 func (x *Unit) GetAvailableHealth() int32 {
@@ -2724,20 +2740,22 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	" \x01(\v2\x14.weewar.v1.WorldDataR\tworldData\"Y\n" +
 	"\tWorldData\x12%\n" +
 	"\x05tiles\x18\x01 \x03(\v2\x0f.weewar.v1.TileR\x05tiles\x12%\n" +
-	"\x05units\x18\x02 \x03(\v2\x0f.weewar.v1.UnitR\x05units\"W\n" +
+	"\x05units\x18\x02 \x03(\v2\x0f.weewar.v1.UnitR\x05units\"s\n" +
 	"\x04Tile\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
 	"\ttile_type\x18\x03 \x01(\x05R\btileType\x12\x16\n" +
-	"\x06player\x18\x04 \x01(\x05R\x06player\"\xca\x01\n" +
+	"\x06player\x18\x04 \x01(\x05R\x06player\x12\x1a\n" +
+	"\bshortcut\x18\x05 \x01(\tR\bshortcut\"\xe6\x01\n" +
 	"\x04Unit\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n" +
 	"\x06player\x18\x03 \x01(\x05R\x06player\x12\x1b\n" +
-	"\tunit_type\x18\x04 \x01(\x05R\bunitType\x12)\n" +
-	"\x10available_health\x18\x05 \x01(\x05R\x0favailableHealth\x12#\n" +
-	"\rdistance_left\x18\x06 \x01(\x05R\fdistanceLeft\x12!\n" +
-	"\fturn_counter\x18\a \x01(\x05R\vturnCounter\"\xad\x02\n" +
+	"\tunit_type\x18\x04 \x01(\x05R\bunitType\x12\x1a\n" +
+	"\bshortcut\x18\x05 \x01(\tR\bshortcut\x12)\n" +
+	"\x10available_health\x18\x06 \x01(\x05R\x0favailableHealth\x12#\n" +
+	"\rdistance_left\x18\a \x01(\x05R\fdistanceLeft\x12!\n" +
+	"\fturn_counter\x18\b \x01(\x05R\vturnCounter\"\xad\x02\n" +
 	"\x11TerrainDefinition\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +

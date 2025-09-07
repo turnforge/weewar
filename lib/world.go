@@ -7,6 +7,7 @@ import (
 	"maps"
 	"math"
 	"slices"
+	"strconv"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
@@ -39,6 +40,10 @@ type World struct {
 	unitsByPlayer [][]*v1.Unit            `json:"-"` // All units in the game world by player ID
 	unitsByCoord  map[AxialCoord]*v1.Unit `json:"-"` // All units in the game world by player ID
 	tilesByCoord  map[AxialCoord]*v1.Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
+	
+	// Unit shortcut tracking (A1, B12, C3, etc.)
+	unitsByShortcut      map[string]*v1.Unit `json:"-"` // Quick lookup by shortcut
+	unitCountersByPlayer map[int32]int32     `json:"-"` // Next unit number for each player
 
 	// In case we are pushed environment this will tell us
 	// if a unit was "deleted" in this layer so not to recurse
@@ -73,11 +78,13 @@ type World struct {
 // NewWorld creates a new game world with the specified parameters
 func NewWorld(name string, protoWorld *v1.WorldData) *World {
 	w := &World{
-		Name:         name,
-		tilesByCoord: map[AxialCoord]*v1.Tile{},
-		unitsByCoord: map[AxialCoord]*v1.Unit{},
-		tileDeleted:  map[AxialCoord]bool{},
-		unitDeleted:  map[AxialCoord]bool{},
+		Name:                 name,
+		tilesByCoord:         map[AxialCoord]*v1.Tile{},
+		unitsByCoord:         map[AxialCoord]*v1.Unit{},
+		unitsByShortcut:      map[string]*v1.Unit{},
+		unitCountersByPlayer: map[int32]int32{},
+		tileDeleted:          map[AxialCoord]bool{},
+		unitDeleted:          map[AxialCoord]bool{},
 	}
 
 	// Convert protobuf tiles to runtime tiles
@@ -88,6 +95,25 @@ func NewWorld(name string, protoWorld *v1.WorldData) *World {
 		}
 
 		// Convert protobuf units to runtime units
+		// First pass: track existing shortcuts and find max counters
+		for _, protoUnit := range protoWorld.Units {
+			if protoUnit.Shortcut != "" {
+				// Parse existing shortcut to update counter
+				if len(protoUnit.Shortcut) >= 2 {
+					playerLetter := protoUnit.Shortcut[0]
+					if playerLetter >= 'A' && playerLetter <= 'Z' {
+						if num, err := strconv.Atoi(protoUnit.Shortcut[1:]); err == nil {
+							playerID := int32(playerLetter - 'A')
+							if current, ok := w.unitCountersByPlayer[playerID]; !ok || int32(num) >= current {
+								w.unitCountersByPlayer[playerID] = int32(num + 1)
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// Second pass: add units (AddUnit will generate shortcuts for those without)
 		for _, protoUnit := range protoWorld.Units {
 			coord := AxialCoord{Q: int(protoUnit.Q), R: int(protoUnit.R)}
 			fmt.Printf("NewWorld: Converting unit at (%d, %d), saved DistanceLeft=%d, AvailableHealth=%d\n",
@@ -97,6 +123,7 @@ func NewWorld(name string, protoWorld *v1.WorldData) *World {
 				Q:               int32(coord.Q),
 				R:               int32(coord.R),
 				Player:          protoUnit.Player,
+				Shortcut:        protoUnit.Shortcut, // Preserve existing shortcut
 				AvailableHealth: protoUnit.AvailableHealth,
 				DistanceLeft:    protoUnit.DistanceLeft, // Preserve saved movement points
 				TurnCounter:     protoUnit.TurnCounter,
@@ -111,6 +138,10 @@ func NewWorld(name string, protoWorld *v1.WorldData) *World {
 func (w *World) Push() *World {
 	out := NewWorld(w.Name, nil)
 	out.parent = w
+	// Inherit unit counters from parent
+	for playerID, counter := range w.unitCountersByPlayer {
+		out.unitCountersByPlayer[playerID] = counter
+	}
 	return out
 }
 
@@ -183,6 +214,36 @@ func (w *World) NumUnits() int32 {
 	}
 	// Root layer: just count the units in this layer
 	return int32(len(w.unitsByCoord))
+}
+
+// GenerateUnitShortcut creates a new shortcut for a unit of the given player
+func (w *World) GenerateUnitShortcut(playerID int32) string {
+	if playerID < 0 || playerID > 25 {
+		return "" // Only support A-Z for now
+	}
+	
+	// Get next counter for this player
+	counter := w.unitCountersByPlayer[playerID]
+	w.unitCountersByPlayer[playerID] = counter + 1
+	
+	// Generate shortcut: A1, B12, etc.
+	playerLetter := string(rune('A' + playerID))
+	return fmt.Sprintf("%s%d", playerLetter, counter+1)
+}
+
+// GetUnitByShortcut returns a unit by its shortcut (e.g., "A1", "B12")
+func (w *World) GetUnitByShortcut(shortcut string) *v1.Unit {
+	// Check current layer first
+	if unit, ok := w.unitsByShortcut[shortcut]; ok {
+		return unit
+	}
+	
+	// Check parent layer if exists
+	if w.parent != nil {
+		return w.parent.GetUnitByShortcut(shortcut)
+	}
+	
+	return nil
 }
 
 func (w *World) UnitsByCoord() iter.Seq2[AxialCoord, *v1.Unit] {
@@ -316,12 +377,25 @@ func (w *World) AddUnit(unit *v1.Unit) (oldunit *v1.Unit, err error) {
 				}
 			}
 		}
+		// Remove old unit from shortcut map
+		if oldunit.Shortcut != "" {
+			delete(w.unitsByShortcut, oldunit.Shortcut)
+		}
+	}
+
+	// Generate shortcut if not already set
+	if unit.Shortcut == "" {
+		unit.Shortcut = w.GenerateUnitShortcut(unit.Player)
+	}
+	
+	// Add to shortcut map
+	if unit.Shortcut != "" {
+		w.unitsByShortcut[unit.Shortcut] = unit
 	}
 
 	w.unitsByPlayer[playerID] = append(w.unitsByPlayer[playerID], unit)
 	w.unitsByCoord[coord] = unit
 
-	// Now give this unit a unique ID
 	return
 }
 
@@ -348,6 +422,11 @@ func (w *World) RemoveUnit(unit *v1.Unit) error {
 	}
 
 	delete(w.unitsByCoord, coord)
+	
+	// Remove from shortcut map
+	if unit.Shortcut != "" {
+		delete(w.unitsByShortcut, unit.Shortcut)
+	}
 
 	// Remove from player's unit list if it exists
 	if p < len(w.unitsByPlayer) && w.unitsByPlayer[p] != nil {

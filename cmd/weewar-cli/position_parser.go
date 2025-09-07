@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -57,35 +56,8 @@ func parseUnitID(game *weewar.Game, input string) (*ParseTarget, error) {
 		return nil, fmt.Errorf("unit ID too short")
 	}
 
-	// Extract player letter and unit number
-	playerLetter := input[0]
-	unitNumberStr := input[1:]
-
-	if playerLetter < 'A' || playerLetter > 'Z' {
-		return nil, fmt.Errorf("invalid player letter: %c", playerLetter)
-	}
-
-	unitNumber, err := strconv.Atoi(unitNumberStr)
-	if err != nil || unitNumber < 1 {
-		return nil, fmt.Errorf("invalid unit number: %s", unitNumberStr)
-	}
-
-	playerID := int32(playerLetter - 'A')
-	log.Println("Looking for player ID: ", playerID)
-
-	// Find the unit by counting units for this player
-	if playerID > game.World.PlayerCount() {
-		return nil, fmt.Errorf("player %c does not exist", playerLetter)
-	}
-
-	playerUnits := game.World.GetPlayerUnits(int(playerID))
-	if unitNumber > len(playerUnits) {
-		return nil, fmt.Errorf("player %c only has %d units, requested unit %d",
-			playerLetter, len(playerUnits), unitNumber)
-	}
-
-	// Units are 1-indexed in the ID system
-	unit := playerUnits[unitNumber-1]
+	// Use the shortcut lookup directly
+	unit := game.World.GetUnitByShortcut(input)
 	if unit == nil {
 		return nil, fmt.Errorf("unit %s does not exist", input)
 	}

@@ -377,6 +377,7 @@ func (b *BaseGamesServiceImpl) convertRuntimeWorldToProto(world *weewar.World) *
 			R:               int32(coord.R),
 			Player:          int32(unit.Player),
 			UnitType:        int32(unit.UnitType),
+			Shortcut:        unit.Shortcut, // Preserve shortcut
 			AvailableHealth: int32(unit.AvailableHealth),
 			DistanceLeft:    int32(unit.DistanceLeft),
 			TurnCounter:     int32(unit.TurnCounter),

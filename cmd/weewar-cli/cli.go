@@ -220,7 +220,11 @@ func (cli *CLI) handleOptions(args []string) string {
 
 	// Show what's at this position
 	if target.IsUnit && target.Unit != nil {
-		fmt.Printf("\nUnit %s at %s:\n", target.Raw, coord.String())
+		unitID := target.Unit.Shortcut
+		if unitID == "" {
+			unitID = target.Raw
+		}
+		fmt.Printf("\nUnit %s at %s:\n", unitID, coord.String())
 		fmt.Printf("  Type: %d, HP: %d, Moves: %d\n",
 			target.Unit.UnitType, target.Unit.AvailableHealth, target.Unit.DistanceLeft)
 	} else {
@@ -510,9 +514,14 @@ func (cli *CLI) handleUnits() string {
 		playerLetter := string(rune('A' + playerID))
 		result.WriteString(fmt.Sprintf("Player %s units:\n", playerLetter))
 
-		for i, unit := range units {
+		for _, unit := range units {
 			coord := weewar.CoordFromInt32(unit.Q, unit.R)
-			unitID := fmt.Sprintf("%s%d", playerLetter, i+1)
+			// Use the actual shortcut from the unit
+			unitID := unit.Shortcut
+			if unitID == "" {
+				// Fallback if no shortcut (shouldn't happen)
+				unitID = fmt.Sprintf("%s?", playerLetter)
+			}
 			result.WriteString(fmt.Sprintf("  %s: Type %d at %s (HP: %d, Moves: %d)\n",
 				unitID, unit.UnitType, coord.String(),
 				unit.AvailableHealth, unit.DistanceLeft))

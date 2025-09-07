@@ -8,7 +8,7 @@ import (
 
 // Test basic MoveUnit behavior on root world (no transactions)
 func TestMoveUnitBasic(t *testing.T) {
-	world := NewWorld("test")
+	world := NewWorld("test", nil)
 
 	// Add a unit at (1,2)
 	unit := CreateTestUnit(1, 2, 1, 1)
@@ -58,7 +58,7 @@ func TestMoveUnitBasic(t *testing.T) {
 
 // Test MoveUnit with existing unit at destination (replacement)
 func TestMoveUnitReplacement(t *testing.T) {
-	world := NewWorld("test")
+	world := NewWorld("test", nil)
 
 	// Add two units
 	unit1 := CreateTestUnit(1, 2, 1, 1)
@@ -103,7 +103,7 @@ func TestMoveUnitReplacement(t *testing.T) {
 
 // Test AddUnit behavior when replacing existing unit
 func TestAddUnitReplacement(t *testing.T) {
-	world := NewWorld("test")
+	world := NewWorld("test", nil)
 
 	// Add initial unit
 	unit1 := CreateTestUnit(1, 2, 1, 1)
@@ -153,7 +153,7 @@ func TestAddUnitReplacement(t *testing.T) {
 // Test MoveUnit in transaction layer
 func TestMoveUnitTransaction(t *testing.T) {
 	// Create base world with unit
-	baseWorld := NewWorld("base")
+	baseWorld := NewWorld("base", nil)
 	unit := CreateTestUnit(1, 2, 1, 1)
 	baseWorld.AddUnit(unit)
 
@@ -201,7 +201,7 @@ func TestMoveUnitTransaction(t *testing.T) {
 
 // Test RemoveUnit and AddUnit sequence (what MoveUnit does internally)
 func TestRemoveAddSequence(t *testing.T) {
-	world := NewWorld("test")
+	world := NewWorld("test", nil)
 
 	// Add unit
 	unit := CreateTestUnit(1, 2, 1, 1)
@@ -254,7 +254,7 @@ func TestRemoveAddSequence(t *testing.T) {
 
 // Test the exact scenario from ProcessMoves integration test
 func TestMoveUnitExactProcessMovesScenario(t *testing.T) {
-	world := NewWorld("test")
+	world := NewWorld("test", nil)
 
 	// Create unit at (1,2) exactly like ProcessMoves test
 	unit := &v1.Unit{
@@ -314,7 +314,7 @@ func TestMoveUnitExactProcessMovesScenario(t *testing.T) {
 // Test the exact transaction flow from ProcessMoves
 func TestProcessMovesTransactionFlow(t *testing.T) {
 	// Step 1: Create original world with unit (simulates runtime game state)
-	originalWorld := NewWorld("test")
+	originalWorld := NewWorld("test", nil)
 	unit := &v1.Unit{
 		Q:               1,
 		R:               2,
@@ -325,73 +325,73 @@ func TestProcessMovesTransactionFlow(t *testing.T) {
 		TurnCounter:     1,
 	}
 	originalWorld.AddUnit(unit)
-	
+
 	t.Logf("Original world setup:")
 	t.Logf("  NumUnits: %d", originalWorld.NumUnits())
 	for coord, u := range originalWorld.UnitsByCoord() {
 		t.Logf("  Unit at (%d,%d) player=%d", coord.Q, coord.R, u.Player)
 	}
-	
+
 	// Step 2: Create transaction snapshot (simulates ProcessMoves transaction)
 	transactionWorld := originalWorld.Push()
-	
+
 	t.Logf("Transaction world created:")
 	t.Logf("  NumUnits: %d", transactionWorld.NumUnits())
-	
+
 	// Step 3: Do move processing on transaction layer (simulates move processor)
 	transactionUnit := transactionWorld.UnitAt(AxialCoord{Q: 1, R: 2})
 	if transactionUnit == nil {
 		t.Fatal("Unit not found in transaction layer")
 	}
-	
+
 	// Update unit state (simulates move processor changes)
 	transactionUnit.DistanceLeft = 2
 	transactionUnit.TurnCounter = 2
-	
+
 	err := transactionWorld.MoveUnit(transactionUnit, AxialCoord{Q: 1, R: 1})
 	if err != nil {
 		t.Fatalf("Transaction move failed: %v", err)
 	}
-	
+
 	t.Logf("After transaction move:")
 	t.Logf("  Transaction NumUnits: %d", transactionWorld.NumUnits())
 	t.Logf("  Original NumUnits: %d", originalWorld.NumUnits())
-	
+
 	// Step 4: Roll back to original world (simulates ApplyChangeResults rollback)
 	currentWorld := originalWorld // Switch back to original world
-	
+
 	t.Logf("After rollback to original:")
 	t.Logf("  NumUnits: %d", currentWorld.NumUnits())
 	for coord, u := range currentWorld.UnitsByCoord() {
 		t.Logf("  Unit at (%d,%d) player=%d distanceLeft=%d unitCoords=(%d,%d)", coord.Q, coord.R, u.Player, u.DistanceLeft, u.Q, u.R)
 	}
-	
+
 	// Step 5: Apply changes to original world (simulates applyUnitMoved)
 	unitToMove := currentWorld.UnitAt(AxialCoord{Q: 1, R: 2})
 	if unitToMove == nil {
 		t.Fatal("Unit not found in original world after rollback")
 	}
-	
+
 	// Update unit state from change (simulates applyUnitMoved updates)
 	unitToMove.DistanceLeft = 2
 	unitToMove.TurnCounter = 2
-	
+
 	err = currentWorld.MoveUnit(unitToMove, AxialCoord{Q: 1, R: 1})
 	if err != nil {
 		t.Fatalf("Final move failed: %v", err)
 	}
-	
+
 	t.Logf("After final move application:")
 	t.Logf("  NumUnits: %d", currentWorld.NumUnits())
 	for coord, u := range currentWorld.UnitsByCoord() {
 		t.Logf("  Unit at (%d,%d) player=%d distanceLeft=%d", coord.Q, coord.R, u.Player, u.DistanceLeft)
 	}
-	
+
 	// CRITICAL TESTS: Should have 1 unit at new position
 	if currentWorld.NumUnits() != 1 {
 		t.Errorf("DUPLICATION BUG: Expected 1 unit after transaction flow, got %d", currentWorld.NumUnits())
 	}
-	
+
 	if currentWorld.UnitAt(AxialCoord{Q: 1, R: 2}) != nil {
 		t.Error("Unit still found at old position (1,2) after transaction flow")
 	}

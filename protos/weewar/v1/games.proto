@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package weewar.v1;
 
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 import "weewar/v1/models.proto";
 import "google/api/annotations.proto";
@@ -362,6 +361,38 @@ message GetOptionsAtResponse {
   repeated GameOption options = 1;
   int32 current_player = 2; // debug: current player in game
   bool game_initialized = 3; // debug: whether game is properly initialized
+
+  // A Path from source to dest along with cost on each tile for tracking
+  AllPaths all_paths = 5;
+}
+
+// Compact representation of all reachable paths from a source
+message AllPaths {
+  // Starting coordinate for all paths
+  int32 source_q = 1;
+  int32 source_r = 2;
+  
+  // Map of edges: key is "toQ,toR" for quick parent lookup
+  // Each edge represents the optimal way to reach 'to' from its parent
+  map<string, PathEdge> edges = 3;
+}
+
+// A single edge in a path with movement details
+message PathEdge {
+  int32 from_q = 1;            // Parent coordinate Q
+  int32 from_r = 2;            // Parent coordinate R
+  int32 to_q = 3;              // Destination coordinate Q
+  int32 to_r = 4;              // Destination coordinate R
+  float movement_cost = 5;     // Cost to move from 'from' to 'to' (edge cost)
+  float total_cost = 6;        // Total cumulative cost from source to 'to'
+  string terrain_type = 7;     // e.g., "mountain", "plains", "forest"
+  string explanation = 8;      // e.g., "Mountain costs Soldier 4 movement points"
+}
+
+// Full path from source to destination (constructed on-demand from AllPaths)
+message Path {
+  repeated PathEdge edges = 1;  // Edges in order from source to destination
+  float total_cost = 2;         // Sum of all edge costs
 }
 
 /**

@@ -1048,6 +1048,28 @@
       },
       "additionalProperties": {}
     },
+    "v1AllPaths": {
+      "type": "object",
+      "properties": {
+        "sourceQ": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Starting coordinate for all paths"
+        },
+        "sourceR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "edges": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/v1PathEdge"
+          },
+          "title": "Map of edges: key is \"toQ,toR\" for quick parent lookup\nEach edge represents the optimal way to reach 'to' from its parent"
+        }
+      },
+      "title": "Compact representation of all reachable paths from a source"
+    },
     "v1AttackOption": {
       "type": "object",
       "properties": {
@@ -1658,6 +1680,10 @@
         "gameInitialized": {
           "type": "boolean",
           "title": "debug: whether game is properly initialized"
+        },
+        "allPaths": {
+          "$ref": "#/definitions/v1AllPaths",
+          "title": "A Path from source to dest along with cost on each tile for tracking"
         }
       },
       "title": "*\nResponse with all available options at a position"
@@ -1841,6 +1867,50 @@
         }
       },
       "title": "*\nMove unit from one position to another"
+    },
+    "v1PathEdge": {
+      "type": "object",
+      "properties": {
+        "fromQ": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Parent coordinate Q"
+        },
+        "fromR": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Parent coordinate R"
+        },
+        "toQ": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Destination coordinate Q"
+        },
+        "toR": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Destination coordinate R"
+        },
+        "movementCost": {
+          "type": "number",
+          "format": "float",
+          "title": "Cost to move from 'from' to 'to' (edge cost)"
+        },
+        "totalCost": {
+          "type": "number",
+          "format": "float",
+          "title": "Total cumulative cost from source to 'to'"
+        },
+        "terrainType": {
+          "type": "string",
+          "title": "e.g., \"mountain\", \"plains\", \"forest\""
+        },
+        "explanation": {
+          "type": "string",
+          "title": "e.g., \"Mountain costs Soldier 4 movement points\""
+        }
+      },
+      "title": "A single edge in a path with movement details"
     },
     "v1PendingValidation": {
       "type": "object",

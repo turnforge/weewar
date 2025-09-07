@@ -517,22 +517,21 @@ func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {
 }
 
 // GetMovementOptions returns movement options for unit at given coordinates with full validation
-func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) (distances map[AxialCoord]float64, parents map[AxialCoord]AxialCoord, err error) {
+func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) (*v1.AllPaths, error) {
 	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
-		return nil, nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
+		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
 	}
 	if unit.Player != game.CurrentPlayer {
-		return nil, nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
 	}
 	if unit.AvailableHealth <= 0 {
-		return nil, nil, fmt.Errorf("unit has no health remaining")
+		return nil, fmt.Errorf("unit has no health remaining")
 	}
 	if unit.DistanceLeft <= 0 {
-		return nil, nil, fmt.Errorf("unit has no movement points remaining")
+		return nil, fmt.Errorf("unit has no movement points remaining")
 	}
-	distances, parents, err = game.rulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft))
-	return
+	return game.rulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft))
 }
 
 // GetAttackOptions returns attack options for unit at given coordinates with full validation

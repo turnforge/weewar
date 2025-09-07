@@ -1,6 +1,22 @@
 # Next Steps - WeeWar Development
 
-## ✅ Recent Bug Fixes (Current Session)
+## ✅ Path Tracking and Movement Explainability (Current Session)
+
+### Implementation Completed - DONE
+- **AllPaths Proto Structure**: Created compact path representation with parent map
+- **Rich Path Information**: Each PathEdge contains costs, terrain type, and explanations
+- **dijkstraMovement Refactoring**: Now returns AllPaths directly for unified data
+- **GetOptionsAt Integration**: Response includes AllPaths for client-side visualization
+- **Path Utilities**: ReconstructPath, GetReachableDestinations, GetMovementCostTo functions
+- **Test Fixes**: Updated all tests to work with new AllPaths API
+
+### Next Steps for Path Visualization
+- [ ] Frontend integration to display path previews on hover
+- [ ] Path animation showing unit movement along reconstructed path
+- [ ] Terrain cost breakdown UI showing why certain paths are expensive
+- [ ] Alternative path suggestions when multiple routes exist
+
+## ✅ Recent Bug Fixes (Previous Session)
 
 ### Movement Points Preservation Bug - FIXED
 - **Issue**: Units lost movement points when loading saved game state

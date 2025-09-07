@@ -106,20 +106,20 @@ func (re *RulesEngine) GetTerrainData(terrainID int32) (*v1.TerrainDefinition, e
 }
 
 // GetMovementOptions returns all EMPTY tiles a unit can move to using Dijkstra's algorithm
-// Only returns tiles without units (movement destinations)
-func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remainingMovement int) (distances map[AxialCoord]float64, parents map[AxialCoord]AxialCoord, err error) {
+// Returns AllPaths structure containing all reachable tiles and path information
+func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remainingMovement int) (*v1.AllPaths, error) {
 	if unit == nil {
-		return nil, nil, fmt.Errorf("unit is nil")
+		return nil, fmt.Errorf("unit is nil")
 	}
 
-	_, err = re.GetUnitData(unit.UnitType)
+	_, err := re.GetUnitData(unit.UnitType)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get unit data: %w", err)
+		return nil, fmt.Errorf("failed to get unit data: %w", err)
 	}
 
 	unitCoord := UnitGetCoord(unit)
-	distances, parents = re.dijkstraMovement(world, unit.UnitType, unitCoord, float64(remainingMovement))
-	return
+	allPaths := re.dijkstraMovement(world, unit.UnitType, unitCoord, float64(remainingMovement))
+	return allPaths, nil
 }
 
 // GetMovementCost calculates movement cost for a unit to move to a specific destination
@@ -135,14 +135,16 @@ func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoor
 	}
 
 	// Use dijkstraMovement to get accurate costs
-	distances, _ := re.dijkstraMovement(world, unit.UnitType, from, float64(unit.DistanceLeft))
+	allPaths := re.dijkstraMovement(world, unit.UnitType, from, float64(unit.DistanceLeft))
 
-	cost, exists := distances[to]
+	// Look up the destination in AllPaths
+	key := fmt.Sprintf("%d,%d", to.Q, to.R)
+	edge, exists := allPaths.Edges[key]
 	if !exists {
 		return 0, fmt.Errorf("destination %v is not reachable from %v", to, from)
 	}
 
-	return cost, nil
+	return float64(edge.TotalCost), nil
 }
 
 // calculatePathCost uses dijkstraMovement to find minimum cost path
@@ -156,14 +158,16 @@ func (re *RulesEngine) calculatePathCost(world *World, unitType int32, from, to 
 	// Use the unit's maximum movement points as limit
 	maxMovement := float64(unitData.MovementPoints)
 
-	distances, _ := re.dijkstraMovement(world, unitType, from, maxMovement)
+	allPaths := re.dijkstraMovement(world, unitType, from, maxMovement)
 
-	cost, exists := distances[to]
+	// Look up the destination in AllPaths
+	key := fmt.Sprintf("%d,%d", to.Q, to.R)
+	edge, exists := allPaths.Edges[key]
 	if !exists {
 		return 0, fmt.Errorf("destination %v is not reachable from %v with %d movement points", to, from, unitData.MovementPoints)
 	}
 
-	return cost, nil
+	return float64(edge.TotalCost), nil
 }
 
 // =============================================================================
@@ -273,10 +277,19 @@ func (re *RulesEngine) ValidateRules() error {
 // =============================================================================
 
 // dijkstraMovement implements Dijkstra's algorithm to find all reachable EMPTY tiles with minimum cost
-func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord AxialCoord, maxMovement float64) (distances map[AxialCoord]float64, parents map[AxialCoord]AxialCoord) {
-	// Distance map: coord -> minimum cost to reach
-	distances = map[AxialCoord]float64{}
-	parents = map[AxialCoord]AxialCoord{}
+func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord AxialCoord, maxMovement float64) *v1.AllPaths {
+	// Initialize AllPaths
+	allPaths := &v1.AllPaths{
+		SourceQ: int32(startCoord.Q),
+		SourceR: int32(startCoord.R),
+		Edges:   make(map[string]*v1.PathEdge),
+	}
+	
+	// Track visited nodes and their costs
+	visited := make(map[AxialCoord]float64)
+	
+	// Get unit data for explanations
+	unitData, _ := re.GetUnitData(unitType)
 
 	// Priority queue for Dijkstra (simple implementation)
 	type queueItem struct {
@@ -285,7 +298,7 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 	}
 
 	queue := []queueItem{{coord: startCoord, cost: 0}}
-	distances[startCoord] = 0
+	visited[startCoord] = 0
 
 	popMinCoord := func() queueItem {
 		minIdx := 0
@@ -307,7 +320,7 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 		current := popMinCoord()
 
 		// Skip if we've already processed this with lower cost
-		if cost, exists := distances[current.coord]; exists && current.cost > cost {
+		if cost, exists := visited[current.coord]; exists && current.cost > cost {
 			continue
 		}
 
@@ -326,21 +339,45 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 
 			newCost := current.cost + moveCost
 
-			// terrain, _ := re.GetTerrainData(tile.TileType)
-			// fmt.Printf("From: %s, To: %s, TileType: %s, Cost: %f, Error: %v\n", current.coord, neighborCoord, terrain.Name, moveCost, err)
 			if newCost <= maxMovement {
 				// Check if this is a better path to the neighbor
-				if existingCost, exists := distances[neighborCoord]; !exists || newCost < existingCost {
-					distances[neighborCoord] = newCost
-					parents[neighborCoord] = current.coord
+				if existingCost, exists := visited[neighborCoord]; !exists || newCost < existingCost {
+					visited[neighborCoord] = newCost
+					
+					// Get terrain data for explanation
+					terrainData, _ := re.GetTerrainData(tile.TileType)
+					terrainName := "unknown"
+					if terrainData != nil {
+						terrainName = terrainData.Name
+					}
+					
+					// Create explanation
+					unitName := "Unit"
+					if unitData != nil {
+						unitName = unitData.Name
+					}
+					explanation := fmt.Sprintf("%s costs %s %.0f movement points", terrainName, unitName, moveCost)
+					
+					// Create PathEdge and add to AllPaths
+					key := fmt.Sprintf("%d,%d", neighborCoord.Q, neighborCoord.R)
+					allPaths.Edges[key] = &v1.PathEdge{
+						FromQ:        int32(current.coord.Q),
+						FromR:        int32(current.coord.R),
+						ToQ:          int32(neighborCoord.Q),
+						ToR:          int32(neighborCoord.R),
+						MovementCost: float32(moveCost),
+						TotalCost:    float32(newCost),
+						TerrainType:  terrainName,
+						Explanation:  explanation,
+					}
+					
 					queue = append(queue, queueItem{coord: neighborCoord, cost: newCost})
 				}
 			}
 		}
 	}
 
-	// Convert distances map to TileOption slice (excluding start position)
-	return distances, parents
+	return allPaths
 }
 
 // getUnitTerrainCost returns movement cost for unit type on terrain type (internal helper)

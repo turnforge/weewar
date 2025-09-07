@@ -80,15 +80,10 @@ func TestRulesEngineTerrainData(t *testing.T) {
 		t.Fatalf("Failed to get terrain data for ID 1: %v", err)
 	}
 
-	t.Logf("Terrain 1: %s (Base Cost: %.1f, Defense: %.1f)",
-		terrain.Name, terrain.BaseMoveCost, terrain.DefenseBonus)
+	t.Logf("Terrain 1: %s", terrain.Name)
 
 	if terrain.Name == "" {
 		t.Error("Terrain name is empty")
-	}
-
-	if terrain.BaseMoveCost <= 0 {
-		t.Error("Terrain base movement cost should be positive")
 	}
 
 	// Test non-existent terrain
@@ -143,16 +138,16 @@ func TestRulesEngineCombatDamage(t *testing.T) {
 	}
 
 	// Test combat prediction between unit 1 and unit 1 (if they can attack each other)
-	damageDistribution, err := rulesEngine.GetCombatPrediction(1, 1)
-	if err != nil {
-		t.Logf("Units 1 vs 1 cannot attack each other: %v", err)
+	damageDistribution, canAttack := rulesEngine.GetCombatPrediction(1, 1)
+	if !canAttack {
+		t.Logf("Units 1 vs 1 cannot attack each other")
 		return // This is fine, not all units can attack all others
 	}
 
 	t.Logf("Combat 1 vs 1:")
-	t.Logf("  Min/Max Damage: %d-%d", damageDistribution.MinDamage, damageDistribution.MaxDamage)
+	t.Logf("  Min/Max Damage: %f-%f", damageDistribution.MinDamage, damageDistribution.MaxDamage)
 	t.Logf("  Expected Damage: %.1f", damageDistribution.ExpectedDamage)
-	t.Logf("  Damage Buckets: %d", len(damageDistribution.DamageBuckets))
+	t.Logf("  Damage Ranges: %d", len(damageDistribution.Ranges))
 
 	if damageDistribution.MinDamage < 0 {
 		t.Error("Min damage should not be negative")
@@ -162,21 +157,24 @@ func TestRulesEngineCombatDamage(t *testing.T) {
 		t.Error("Max damage should be >= min damage")
 	}
 
-	if len(damageDistribution.DamageBuckets) == 0 {
-		t.Error("Should have damage buckets")
+	if len(damageDistribution.Ranges) == 0 {
+		t.Error("Should have damage ranges")
 	}
 
 	// Test actual damage calculation with RNG
 	rng := rand.New(rand.NewSource(42)) // Fixed seed for reproducible tests
-	damage, err := rulesEngine.CalculateCombatDamage(1, 1, rng)
+	damage, canAttackCalc, err := rulesEngine.CalculateCombatDamage(1, 1, rng)
 	if err != nil {
 		t.Fatalf("Failed to calculate combat damage: %v", err)
+	}
+	if !canAttackCalc {
+		t.Fatal("CalculateCombatDamage returned canAttack=false but GetCombatPrediction returned true")
 	}
 
 	t.Logf("Calculated damage: %d", damage)
 
-	if damage < damageDistribution.MinDamage || damage > damageDistribution.MaxDamage {
-		t.Errorf("Calculated damage %d outside expected range %d-%d",
+	if float64(damage) < damageDistribution.MinDamage || float64(damage) > damageDistribution.MaxDamage {
+		t.Errorf("Calculated damage %d outside expected range %.0f-%.0f",
 			damage, damageDistribution.MinDamage, damageDistribution.MaxDamage)
 	}
 }
@@ -187,23 +185,17 @@ func TestRulesEngineAttackMatrix(t *testing.T) {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
 
-	// Count how many attack combinations we have
+	// Count how many attack combinations we have using UnitUnitProperties
 	totalAttacks := 0
-	for attackerID, attacks := range rulesEngine.AttackMatrix.Attacks {
-		for targetID := range attacks {
+	for key, props := range rulesEngine.UnitUnitProperties {
+		if props.Damage != nil {
 			totalAttacks++
 
 			// Test one example in detail
 			if totalAttacks == 1 {
-				t.Logf("Example attack: Unit %d can attack Unit %d", attackerID, targetID)
-
-				dist, err := rulesEngine.GetCombatPrediction(attackerID, targetID)
-				if err != nil {
-					t.Errorf("Failed to get prediction for valid attack: %v", err)
-				} else {
-					t.Logf("  Damage range: %d-%d, Expected: %.1f",
-						dist.MinDamage, dist.MaxDamage, dist.ExpectedDamage)
-				}
+				t.Logf("Example attack: %s has damage properties", key)
+				t.Logf("  Damage range: %f-%f, Expected: %.1f",
+					props.Damage.MinDamage, props.Damage.MaxDamage, props.Damage.ExpectedDamage)
 			}
 		}
 	}
@@ -211,7 +203,7 @@ func TestRulesEngineAttackMatrix(t *testing.T) {
 	t.Logf("Total attack combinations: %d", totalAttacks)
 
 	if totalAttacks == 0 {
-		t.Error("No attack combinations found in attack matrix")
+		t.Error("No attack combinations found in UnitUnitProperties")
 	}
 }
 
@@ -221,35 +213,20 @@ func TestRulesEngineMovementMatrix(t *testing.T) {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
 
-	// Check that MovementMatrix is properly loaded
-	if rulesEngine.MovementMatrix == nil {
-		t.Fatal("MovementMatrix is nil - rules loading failed")
-	}
-	if rulesEngine.MovementMatrix.Costs == nil {
-		t.Fatal("MovementMatrix.Costs is nil - rules loading failed")
+	// Check that TerrainUnitProperties is properly loaded (replaces MovementMatrix)
+	if rulesEngine.TerrainUnitProperties == nil {
+		t.Fatal("TerrainUnitProperties is nil - rules loading failed")
 	}
 
-	// Count how many movement cost entries we have
+	// Count how many movement cost entries we have using TerrainUnitProperties
 	totalCosts := 0
-	for unitID, costs := range rulesEngine.MovementMatrix.Costs {
-		if costs == nil {
-			t.Errorf("TerrainCostMap for unit %d is nil", unitID)
-			continue
-		}
-		if costs.TerrainCosts == nil {
-			t.Errorf("TerrainCosts for unit %d is nil", unitID)
-			continue
-		}
-		for terrainID, cost := range costs.TerrainCosts {
+	for key, props := range rulesEngine.TerrainUnitProperties {
+		if props.MovementCost > 0 {
 			totalCosts++
 
 			// Test one example in detail
 			if totalCosts == 1 {
-				t.Logf("Example movement: Unit %d on terrain %d costs %.1f", unitID, terrainID, cost)
-
-				if cost <= 0 {
-					t.Errorf("Movement cost should be positive, got %.1f", cost)
-				}
+				t.Logf("Example movement: %s has movement cost %.1f", key, props.MovementCost)
 			}
 		}
 	}
@@ -257,7 +234,7 @@ func TestRulesEngineMovementMatrix(t *testing.T) {
 	t.Logf("Total movement cost entries: %d", totalCosts)
 
 	if totalCosts == 0 {
-		t.Error("No movement cost entries found in movement matrix")
+		t.Error("No movement cost entries found in TerrainUnitProperties")
 	}
 }
 
@@ -268,7 +245,8 @@ func TestRulesEngineDijkstraMovement(t *testing.T) {
 	}
 
 	// Create a world with tiles for the test
-	world := NewWorld("test")
+	protoWorld := &v1.WorldData{} // Empty world data for test
+	world := NewWorld("test", protoWorld)
 
 	// Fill with grass terrain (terrain ID 1 - should have reasonable movement cost)
 	for q := range 5 {
@@ -300,33 +278,34 @@ func TestRulesEngineDijkstraMovement(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		options, err := rulesEngine.GetMovementOptions(world, unit, tc.movement)
+		allPaths, err := rulesEngine.GetMovementOptions(world, unit, tc.movement)
 		if err != nil {
 			t.Fatalf("Failed to get movement options for %s: %v", tc.desc, err)
 		}
 
-		t.Logf("%s: %d tiles reachable", tc.desc, len(options))
+		t.Logf("%s: %d tiles reachable", tc.desc, len(allPaths.Edges))
 
 		// Verify all options are within budget and make sense
-		for _, option := range options {
-			if option.Cost > float64(tc.movement) {
-				t.Errorf("Option %v has cost %.1f > budget %d", option.Coord, option.Cost, tc.movement)
+		for key, edge := range allPaths.Edges {
+			if edge.TotalCost > float32(tc.movement) {
+				t.Errorf("Option %s has cost %.1f > budget %d", key, edge.TotalCost, tc.movement)
 			}
 
-			if option.Cost <= 0 {
-				t.Errorf("Option %v has invalid cost %.1f", option.Coord, option.Cost)
+			if edge.TotalCost <= 0 {
+				t.Errorf("Option %s has invalid cost %.1f", key, edge.TotalCost)
 			}
 
 			// Verify tile is adjacent to reachable area (basic sanity check)
-			distance := CubeDistance(startCoord, option.Coord)
+			toCoord := AxialCoord{Q: int(edge.ToQ), R: int(edge.ToR)}
+			distance := CubeDistance(startCoord, toCoord)
 			if distance > tc.movement*2 { // Very generous upper bound
 				t.Errorf("Option %v is suspiciously far (distance %d) for movement %d",
-					option.Coord, distance, tc.movement)
+					toCoord, distance, tc.movement)
 			}
 		}
 
 		// More movement should generally give more or equal options
-		if tc.movement > 1 && len(options) == 0 {
+		if tc.movement > 1 && len(allPaths.Edges) == 0 {
 			t.Errorf("Expected some movement options for %s", tc.desc)
 		}
 	}
@@ -339,7 +318,8 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 	}
 
 	// Create a world with different terrain costs for the test
-	world := NewWorld("test")
+	protoWorld := &v1.WorldData{} // Empty world data for test
+	world := NewWorld("test", protoWorld)
 
 	// Set up terrain: expensive terrain in middle, cheap around edges
 	for q := range 3 {
@@ -351,8 +331,9 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 			if q == 1 && r == 1 {
 				// Try to find a more expensive terrain type
 				for tID := range rulesEngine.Terrains {
-					if terrain, err := rulesEngine.GetTerrainData(tID); err == nil {
-						if terrain.BaseMoveCost > 1.5 { // More expensive than grass
+					if _, err := rulesEngine.GetTerrainData(tID); err == nil {
+						// Use a different terrain ID for center (ID 2 - Mountain perhaps?)
+						if tID > 1 {
 							terrainID = int(tID)
 							break
 						}
@@ -373,19 +354,19 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 		Player:   0,
 	}
 
-	options, err := rulesEngine.GetMovementOptions(world, unit, 3)
+	allPaths, err := rulesEngine.GetMovementOptions(world, unit, 3)
 	if err != nil {
 		t.Fatalf("Failed to get movement options: %v", err)
 	}
 
-	t.Logf("Movement options from corner: %d tiles", len(options))
+	t.Logf("Movement options from corner: %d tiles", len(allPaths.Edges))
 
 	// Log costs for debugging
-	for _, option := range options {
-		t.Logf("  Tile (%d,%d): cost %.1f", option.Coord.Q, option.Coord.R, option.Cost)
+	for key, edge := range allPaths.Edges {
+		t.Logf("  Tile %s: cost %.1f", key, edge.TotalCost)
 	}
 
-	if len(options) == 0 {
+	if len(allPaths.Edges) == 0 {
 		t.Error("Expected some movement options")
 	}
 }

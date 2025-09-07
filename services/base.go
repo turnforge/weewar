@@ -135,6 +135,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 	}
 
 	var options []*v1.GameOption
+	var allPaths *v1.AllPaths
 
 	// Check what's at this position
 	unit := rtGame.World.UnitAt(weewar.AxialCoord{Q: int(req.Q), R: int(req.R)})
@@ -161,27 +162,31 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 		// Get movement options if unit has movement left
 		if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 {
-			distances, _, err := dmp.GetMovementOptions(rtGame, req.Q, req.R)
+			pathsResult, err := dmp.GetMovementOptions(rtGame, req.Q, req.R)
 			if err == nil {
-				for toCoord, cost := range distances {
+				allPaths = pathsResult
+				
+				// Create move options from AllPaths
+				for key, edge := range allPaths.Edges {
 					// Create ready-to-use MoveUnitAction
 					moveAction := &v1.MoveUnitAction{
 						FromQ: req.Q,
 						FromR: req.R,
-						ToQ:   int32(toCoord.Q),
-						ToR:   int32(toCoord.R),
+						ToQ:   edge.ToQ,
+						ToR:   edge.ToR,
 					}
 
 					options = append(options, &v1.GameOption{
 						OptionType: &v1.GameOption_Move{
 							Move: &v1.MoveOption{
-								Q:            int32(toCoord.Q),
-								R:            int32(toCoord.R),
-								MovementCost: int32(cost),
+								Q:            edge.ToQ,
+								R:            edge.ToR,
+								MovementCost: int32(edge.TotalCost),
 								Action:       moveAction,
 							},
 						},
 					})
+					_ = key // Using key just to avoid unused variable warning
 				}
 			}
 		}
@@ -238,6 +243,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 		Options:         options,
 		CurrentPlayer:   rtGame.CurrentPlayer,
 		GameInitialized: rtGame != nil && rtGame.World != nil,
+		AllPaths:        allPaths,
 	}, nil
 }
 

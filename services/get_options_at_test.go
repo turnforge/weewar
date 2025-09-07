@@ -62,11 +62,14 @@ func setupGetOptionsAtTest(t *testing.T, scenario GetOptionsAtTestScenario) *Sin
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
 
-	// Create runtime game
-	rtGame, err := weewar.NewGame(rtWorld, rulesEngine, 12345)
-	if err != nil {
-		t.Fatalf("Failed to create game: %v", err)
+	// Create game and state objects for NewGame
+	game := &v1.Game{
+		Id:   "test-game-" + scenario.WorldId,
+		Name: "Test Game - " + scenario.WorldId,
 	}
+	
+	// Create runtime game
+	rtGame := weewar.NewGame(game, gameState, rtWorld, rulesEngine, 12345)
 
 	// Apply scenario overrides
 	if scenario.CurrentPlayer > 0 {

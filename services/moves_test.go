@@ -11,7 +11,8 @@ import (
 
 func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServiceImpl {
 	// 1. Create test world with 3 units
-	world := weewar.NewWorld("test")
+	protoWorld := &v1.WorldData{} // Empty world data for test
+	world := weewar.NewWorld("test", protoWorld)
 	// Add some tiles for movement
 	for q := range nq {
 		for r := range nr {
@@ -31,11 +32,19 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
 
-	// Create runtime game
-	rtGame, err := weewar.NewGame(world, rulesEngine, 12345)
-	if err != nil {
-		t.Fatalf("Failed to create game: %v", err)
+	// Create game and state objects for NewGame
+	game := &v1.Game{
+		Id:   "test-game",
+		Name: "Test Game",
 	}
+	
+	gameState := &v1.GameState{
+		CurrentPlayer: 1,
+		TurnCounter:   1,
+	}
+	
+	// Create runtime game
+	rtGame := weewar.NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Set current player to 1 for move validation
 	rtGame.CurrentPlayer = 1
@@ -52,16 +61,12 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 	// Create SingletonGamesService and set up singleton data
 	wasmService := NewSingletonGamesServiceImpl()
 
-	// Set up the singleton objects
-	wasmService.SingletonGame = &v1.Game{
-		Id:   "test-game",
-		Name: "Test Game",
-	}
+	// Set up the singleton objects (reuse the ones we created)
+	wasmService.SingletonGame = game
 
-	wasmService.SingletonGameState = &v1.GameState{
-		WorldData: convertRuntimeWorldToProto(world),
-		UpdatedAt: timestamppb.Now(),
-	}
+	wasmService.SingletonGameState = gameState
+	wasmService.SingletonGameState.WorldData = convertRuntimeWorldToProto(world)
+	wasmService.SingletonGameState.UpdatedAt = timestamppb.Now()
 
 	wasmService.SingletonGameMoveHistory = &v1.GameMoveHistory{
 		Groups: []*v1.GameMoveGroup{},

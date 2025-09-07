@@ -22,14 +22,13 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 from google.protobuf import field_mask_pb2 as google_dot_protobuf_dot_field__mask__pb2
 from weewar.v1 import models_pb2 as weewar_dot_v1_dot_models__pb2
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from protoc_gen_openapiv2.options import annotations_pb2 as protoc__gen__openapiv2_dot_options_dot_annotations__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15weewar/v1/games.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\x1a\x16weewar/v1/models.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xd7\x01\n\x08GameInfo\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\x12\x1a\n\x08\x63\x61tegory\x18\x04 \x01(\tR\x08\x63\x61tegory\x12\x1e\n\ndifficulty\x18\x05 \x01(\tR\ndifficulty\x12\x12\n\x04tags\x18\x06 \x03(\tR\x04tags\x12\x12\n\x04icon\x18\x07 \x01(\tR\x04icon\x12!\n\x0clast_updated\x18\x08 \x01(\tR\x0blastUpdated\"d\n\x10ListGamesRequest\x12\x35\n\npagination\x18\x01 \x01(\x0b\x32\x15.weewar.v1.PaginationR\npagination\x12\x19\n\x08owner_id\x18\x02 \x01(\tR\x07ownerId\"y\n\x11ListGamesResponse\x12%\n\x05items\x18\x01 \x03(\x0b\x32\x0f.weewar.v1.GameR\x05items\x12=\n\npagination\x18\x02 \x01(\x0b\x32\x1d.weewar.v1.PaginationResponseR\npagination\":\n\x0eGetGameRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n\x07version\x18\x02 \x01(\tR\x07version\"\x98\x01\n\x0fGetGameResponse\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game\x12*\n\x05state\x18\x02 \x01(\x0b\x32\x14.weewar.v1.GameStateR\x05state\x12\x34\n\x07history\x18\x03 \x01(\x0b\x32\x1a.weewar.v1.GameMoveHistoryR\x07history\"A\n\x15GetGameContentRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n\x07version\x18\x02 \x01(\tR\x07version\"\x8d\x01\n\x16GetGameContentResponse\x12%\n\x0eweewar_content\x18\x01 \x01(\tR\rweewarContent\x12%\n\x0erecipe_content\x18\x02 \x01(\tR\rrecipeContent\x12%\n\x0ereadme_content\x18\x03 \x01(\tR\rreadmeContent\"\x9f\x02\n\x11UpdateGameRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12*\n\x08new_game\x18\x02 \x01(\x0b\x32\x0f.weewar.v1.GameR\x07newGame\x12\x31\n\tnew_state\x18\x03 \x01(\x0b\x32\x14.weewar.v1.GameStateR\x08newState\x12;\n\x0bnew_history\x18\x04 \x01(\x0b\x32\x1a.weewar.v1.GameMoveHistoryR\nnewHistory\x12;\n\x0bupdate_mask\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskR\nupdateMask:\x18\x92\x41\x15\n\x13*\x11UpdateGameRequest\"T\n\x12UpdateGameResponse\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game:\x19\x92\x41\x16\n\x14*\x12UpdateGameResponse\"#\n\x11\x44\x65leteGameRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\"\x14\n\x12\x44\x65leteGameResponse\"#\n\x0fGetGamesRequest\x12\x10\n\x03ids\x18\x01 \x03(\tR\x03ids\"\x9b\x01\n\x10GetGamesResponse\x12<\n\x05games\x18\x01 \x03(\x0b\x32&.weewar.v1.GetGamesResponse.GamesEntryR\x05games\x1aI\n\nGamesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12%\n\x05value\x18\x02 \x01(\x0b\x32\x0f.weewar.v1.GameR\x05value:\x02\x38\x01\"8\n\x11\x43reateGameRequest\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game\"\x81\x02\n\x12\x43reateGameResponse\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game\x12\x33\n\ngame_state\x18\x02 \x01(\x0b\x32\x14.weewar.v1.GameStateR\tgameState\x12Q\n\x0c\x66ield_errors\x18\x03 \x03(\x0b\x32..weewar.v1.CreateGameResponse.FieldErrorsEntryR\x0b\x66ieldErrors\x1a>\n\x10\x46ieldErrorsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\"\xa7\x01\n\x13ProcessMovesRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12)\n\x05moves\x18\x03 \x03(\x0b\x32\x13.weewar.v1.GameMoveR\x05moves\x12L\n\x11\x65xpected_response\x18\x02 \x01(\x0b\x32\x1f.weewar.v1.ProcessMovesResponseR\x10\x65xpectedResponse\"\x86\x01\n\x14ProcessMovesResponse\x12<\n\x0cmove_results\x18\x01 \x03(\x0b\x32\x19.weewar.v1.GameMoveResultR\x0bmoveResults\x12\x30\n\x07\x63hanges\x18\x02 \x03(\x0b\x32\x16.weewar.v1.WorldChangeR\x07\x63hanges\".\n\x13GetGameStateRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"B\n\x14GetGameStateResponse\x12*\n\x05state\x18\x01 \x01(\x0b\x32\x14.weewar.v1.GameStateR\x05state\"Z\n\x10ListMovesRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x16\n\x06offset\x18\x02 \x01(\x05R\x06offset\x12\x15\n\x06last_n\x18\x03 \x01(\x05R\x05lastN\"i\n\x11ListMovesResponse\x12\x19\n\x08has_more\x18\x01 \x01(\x08R\x07hasMore\x12\x39\n\x0bmove_groups\x18\x02 \x03(\x0b\x32\x18.weewar.v1.GameMoveGroupR\nmoveGroups\"J\n\x13GetOptionsAtRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x0c\n\x01q\x18\x02 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x03 \x01(\x05R\x01r\"\x99\x01\n\x14GetOptionsAtResponse\x12/\n\x07options\x18\x01 \x03(\x0b\x32\x15.weewar.v1.GameOptionR\x07options\x12%\n\x0e\x63urrent_player\x18\x02 \x01(\x05R\rcurrentPlayer\x12)\n\x10game_initialized\x18\x03 \x01(\x08R\x0fgameInitialized\"\xa4\x02\n\nGameOption\x12+\n\x04move\x18\x01 \x01(\x0b\x32\x15.weewar.v1.MoveOptionH\x00R\x04move\x12\x31\n\x06\x61ttack\x18\x02 \x01(\x0b\x32\x17.weewar.v1.AttackOptionH\x00R\x06\x61ttack\x12\x35\n\x08\x65nd_turn\x18\x03 \x01(\x0b\x32\x18.weewar.v1.EndTurnOptionH\x00R\x07\x65ndTurn\x12\x32\n\x05\x62uild\x18\x04 \x01(\x0b\x32\x1a.weewar.v1.BuildUnitOptionH\x00R\x05\x62uild\x12<\n\x07\x63\x61pture\x18\x05 \x01(\x0b\x32 .weewar.v1.CaptureBuildingOptionH\x00R\x07\x63\x61ptureB\r\n\x0boption_type\"\x0f\n\rEndTurnOption\"\x80\x01\n\nMoveOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12#\n\rmovement_cost\x18\x03 \x01(\x05R\x0cmovementCost\x12\x31\n\x06\x61\x63tion\x18\x04 \x01(\x0b\x32\x19.weewar.v1.MoveUnitActionR\x06\x61\x63tion\"\xff\x01\n\x0c\x41ttackOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12(\n\x10target_unit_type\x18\x03 \x01(\x05R\x0etargetUnitType\x12,\n\x12target_unit_health\x18\x04 \x01(\x05R\x10targetUnitHealth\x12\x1d\n\ncan_attack\x18\x05 \x01(\x08R\tcanAttack\x12\'\n\x0f\x64\x61mage_estimate\x18\x06 \x01(\x05R\x0e\x64\x61mageEstimate\x12\x33\n\x06\x61\x63tion\x18\x07 \x01(\x0b\x32\x1b.weewar.v1.AttackUnitActionR\x06\x61\x63tion\"i\n\x0f\x42uildUnitOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n\ttile_type\x18\x03 \x01(\x05R\x08tileType\x12\x1d\n\nbuild_cost\x18\x04 \x01(\x05R\tbuildCost\"P\n\x15\x43\x61ptureBuildingOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n\ttile_type\x18\x03 \x01(\x05R\x08tileType2\xab\x08\n\x0cGamesService\x12_\n\nCreateGame\x12\x1c.weewar.v1.CreateGameRequest\x1a\x1d.weewar.v1.CreateGameResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\"\t/v1/games:\x01*\x12_\n\x08GetGames\x12\x1a.weewar.v1.GetGamesRequest\x1a\x1b.weewar.v1.GetGamesResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/games:batchGet\x12Y\n\tListGames\x12\x1b.weewar.v1.ListGamesRequest\x1a\x1c.weewar.v1.ListGamesResponse\"\x11\x82\xd3\xe4\x93\x02\x0b\x12\t/v1/games\x12X\n\x07GetGame\x12\x19.weewar.v1.GetGameRequest\x1a\x1a.weewar.v1.GetGameResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/games/{id}\x12\x63\n\nDeleteGame\x12\x1c.weewar.v1.DeleteGameRequest\x1a\x1d.weewar.v1.DeleteGameResponse\"\x18\x82\xd3\xe4\x93\x02\x12*\x10/v1/games/{id=*}\x12k\n\nUpdateGame\x12\x1c.weewar.v1.UpdateGameRequest\x1a\x1d.weewar.v1.UpdateGameResponse\" \x82\xd3\xe4\x93\x02\x1a\x32\x15/v1/games/{game_id=*}:\x01*\x12r\n\x0cGetGameState\x12\x1e.weewar.v1.GetGameStateRequest\x1a\x1f.weewar.v1.GetGameStateResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/games/{game_id}/state\x12i\n\tListMoves\x12\x1b.weewar.v1.ListMovesRequest\x1a\x1c.weewar.v1.ListMovesResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/games/{game_id}/moves\x12u\n\x0cProcessMoves\x12\x1e.weewar.v1.ProcessMovesRequest\x1a\x1f.weewar.v1.ProcessMovesResponse\"$\x82\xd3\xe4\x93\x02\x1e\"\x19/v1/games/{game_id}/moves:\x01*\x12|\n\x0cGetOptionsAt\x12\x1e.weewar.v1.GetOptionsAtRequest\x1a\x1f.weewar.v1.GetOptionsAtResponse\"+\x82\xd3\xe4\x93\x02%\x12#/v1/games/{game_id}/options/{q}/{r}B\x9c\x01\n\rcom.weewar.v1B\nGamesProtoP\x01Z:github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15weewar/v1/games.proto\x12\tweewar.v1\x1a google/protobuf/field_mask.proto\x1a\x16weewar/v1/models.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xd7\x01\n\x08GameInfo\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04name\x18\x02 \x01(\tR\x04name\x12 \n\x0b\x64\x65scription\x18\x03 \x01(\tR\x0b\x64\x65scription\x12\x1a\n\x08\x63\x61tegory\x18\x04 \x01(\tR\x08\x63\x61tegory\x12\x1e\n\ndifficulty\x18\x05 \x01(\tR\ndifficulty\x12\x12\n\x04tags\x18\x06 \x03(\tR\x04tags\x12\x12\n\x04icon\x18\x07 \x01(\tR\x04icon\x12!\n\x0clast_updated\x18\x08 \x01(\tR\x0blastUpdated\"d\n\x10ListGamesRequest\x12\x35\n\npagination\x18\x01 \x01(\x0b\x32\x15.weewar.v1.PaginationR\npagination\x12\x19\n\x08owner_id\x18\x02 \x01(\tR\x07ownerId\"y\n\x11ListGamesResponse\x12%\n\x05items\x18\x01 \x03(\x0b\x32\x0f.weewar.v1.GameR\x05items\x12=\n\npagination\x18\x02 \x01(\x0b\x32\x1d.weewar.v1.PaginationResponseR\npagination\":\n\x0eGetGameRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n\x07version\x18\x02 \x01(\tR\x07version\"\x98\x01\n\x0fGetGameResponse\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game\x12*\n\x05state\x18\x02 \x01(\x0b\x32\x14.weewar.v1.GameStateR\x05state\x12\x34\n\x07history\x18\x03 \x01(\x0b\x32\x1a.weewar.v1.GameMoveHistoryR\x07history\"A\n\x15GetGameContentRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n\x07version\x18\x02 \x01(\tR\x07version\"\x8d\x01\n\x16GetGameContentResponse\x12%\n\x0eweewar_content\x18\x01 \x01(\tR\rweewarContent\x12%\n\x0erecipe_content\x18\x02 \x01(\tR\rrecipeContent\x12%\n\x0ereadme_content\x18\x03 \x01(\tR\rreadmeContent\"\x9f\x02\n\x11UpdateGameRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12*\n\x08new_game\x18\x02 \x01(\x0b\x32\x0f.weewar.v1.GameR\x07newGame\x12\x31\n\tnew_state\x18\x03 \x01(\x0b\x32\x14.weewar.v1.GameStateR\x08newState\x12;\n\x0bnew_history\x18\x04 \x01(\x0b\x32\x1a.weewar.v1.GameMoveHistoryR\nnewHistory\x12;\n\x0bupdate_mask\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskR\nupdateMask:\x18\x92\x41\x15\n\x13*\x11UpdateGameRequest\"T\n\x12UpdateGameResponse\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game:\x19\x92\x41\x16\n\x14*\x12UpdateGameResponse\"#\n\x11\x44\x65leteGameRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\"\x14\n\x12\x44\x65leteGameResponse\"#\n\x0fGetGamesRequest\x12\x10\n\x03ids\x18\x01 \x03(\tR\x03ids\"\x9b\x01\n\x10GetGamesResponse\x12<\n\x05games\x18\x01 \x03(\x0b\x32&.weewar.v1.GetGamesResponse.GamesEntryR\x05games\x1aI\n\nGamesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12%\n\x05value\x18\x02 \x01(\x0b\x32\x0f.weewar.v1.GameR\x05value:\x02\x38\x01\"8\n\x11\x43reateGameRequest\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game\"\x81\x02\n\x12\x43reateGameResponse\x12#\n\x04game\x18\x01 \x01(\x0b\x32\x0f.weewar.v1.GameR\x04game\x12\x33\n\ngame_state\x18\x02 \x01(\x0b\x32\x14.weewar.v1.GameStateR\tgameState\x12Q\n\x0c\x66ield_errors\x18\x03 \x03(\x0b\x32..weewar.v1.CreateGameResponse.FieldErrorsEntryR\x0b\x66ieldErrors\x1a>\n\x10\x46ieldErrorsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\"\xa7\x01\n\x13ProcessMovesRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12)\n\x05moves\x18\x03 \x03(\x0b\x32\x13.weewar.v1.GameMoveR\x05moves\x12L\n\x11\x65xpected_response\x18\x02 \x01(\x0b\x32\x1f.weewar.v1.ProcessMovesResponseR\x10\x65xpectedResponse\"\x86\x01\n\x14ProcessMovesResponse\x12<\n\x0cmove_results\x18\x01 \x03(\x0b\x32\x19.weewar.v1.GameMoveResultR\x0bmoveResults\x12\x30\n\x07\x63hanges\x18\x02 \x03(\x0b\x32\x16.weewar.v1.WorldChangeR\x07\x63hanges\".\n\x13GetGameStateRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"B\n\x14GetGameStateResponse\x12*\n\x05state\x18\x01 \x01(\x0b\x32\x14.weewar.v1.GameStateR\x05state\"Z\n\x10ListMovesRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x16\n\x06offset\x18\x02 \x01(\x05R\x06offset\x12\x15\n\x06last_n\x18\x03 \x01(\x05R\x05lastN\"i\n\x11ListMovesResponse\x12\x19\n\x08has_more\x18\x01 \x01(\x08R\x07hasMore\x12\x39\n\x0bmove_groups\x18\x02 \x03(\x0b\x32\x18.weewar.v1.GameMoveGroupR\nmoveGroups\"J\n\x13GetOptionsAtRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x0c\n\x01q\x18\x02 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x03 \x01(\x05R\x01r\"\xcb\x01\n\x14GetOptionsAtResponse\x12/\n\x07options\x18\x01 \x03(\x0b\x32\x15.weewar.v1.GameOptionR\x07options\x12%\n\x0e\x63urrent_player\x18\x02 \x01(\x05R\rcurrentPlayer\x12)\n\x10game_initialized\x18\x03 \x01(\x08R\x0fgameInitialized\x12\x30\n\tall_paths\x18\x05 \x01(\x0b\x32\x13.weewar.v1.AllPathsR\x08\x61llPaths\"\xc5\x01\n\x08\x41llPaths\x12\x19\n\x08source_q\x18\x01 \x01(\x05R\x07sourceQ\x12\x19\n\x08source_r\x18\x02 \x01(\x05R\x07sourceR\x12\x34\n\x05\x65\x64ges\x18\x03 \x03(\x0b\x32\x1e.weewar.v1.AllPaths.EdgesEntryR\x05\x65\x64ges\x1aM\n\nEdgesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x13.weewar.v1.PathEdgeR\x05value:\x02\x38\x01\"\xe7\x01\n\x08PathEdge\x12\x15\n\x06\x66rom_q\x18\x01 \x01(\x05R\x05\x66romQ\x12\x15\n\x06\x66rom_r\x18\x02 \x01(\x05R\x05\x66romR\x12\x11\n\x04to_q\x18\x03 \x01(\x05R\x03toQ\x12\x11\n\x04to_r\x18\x04 \x01(\x05R\x03toR\x12#\n\rmovement_cost\x18\x05 \x01(\x02R\x0cmovementCost\x12\x1d\n\ntotal_cost\x18\x06 \x01(\x02R\ttotalCost\x12!\n\x0cterrain_type\x18\x07 \x01(\tR\x0bterrainType\x12 \n\x0b\x65xplanation\x18\x08 \x01(\tR\x0b\x65xplanation\"P\n\x04Path\x12)\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x13.weewar.v1.PathEdgeR\x05\x65\x64ges\x12\x1d\n\ntotal_cost\x18\x02 \x01(\x02R\ttotalCost\"\xa4\x02\n\nGameOption\x12+\n\x04move\x18\x01 \x01(\x0b\x32\x15.weewar.v1.MoveOptionH\x00R\x04move\x12\x31\n\x06\x61ttack\x18\x02 \x01(\x0b\x32\x17.weewar.v1.AttackOptionH\x00R\x06\x61ttack\x12\x35\n\x08\x65nd_turn\x18\x03 \x01(\x0b\x32\x18.weewar.v1.EndTurnOptionH\x00R\x07\x65ndTurn\x12\x32\n\x05\x62uild\x18\x04 \x01(\x0b\x32\x1a.weewar.v1.BuildUnitOptionH\x00R\x05\x62uild\x12<\n\x07\x63\x61pture\x18\x05 \x01(\x0b\x32 .weewar.v1.CaptureBuildingOptionH\x00R\x07\x63\x61ptureB\r\n\x0boption_type\"\x0f\n\rEndTurnOption\"\x80\x01\n\nMoveOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12#\n\rmovement_cost\x18\x03 \x01(\x05R\x0cmovementCost\x12\x31\n\x06\x61\x63tion\x18\x04 \x01(\x0b\x32\x19.weewar.v1.MoveUnitActionR\x06\x61\x63tion\"\xff\x01\n\x0c\x41ttackOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12(\n\x10target_unit_type\x18\x03 \x01(\x05R\x0etargetUnitType\x12,\n\x12target_unit_health\x18\x04 \x01(\x05R\x10targetUnitHealth\x12\x1d\n\ncan_attack\x18\x05 \x01(\x08R\tcanAttack\x12\'\n\x0f\x64\x61mage_estimate\x18\x06 \x01(\x05R\x0e\x64\x61mageEstimate\x12\x33\n\x06\x61\x63tion\x18\x07 \x01(\x0b\x32\x1b.weewar.v1.AttackUnitActionR\x06\x61\x63tion\"i\n\x0f\x42uildUnitOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n\ttile_type\x18\x03 \x01(\x05R\x08tileType\x12\x1d\n\nbuild_cost\x18\x04 \x01(\x05R\tbuildCost\"P\n\x15\x43\x61ptureBuildingOption\x12\x0c\n\x01q\x18\x01 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n\ttile_type\x18\x03 \x01(\x05R\x08tileType2\xab\x08\n\x0cGamesService\x12_\n\nCreateGame\x12\x1c.weewar.v1.CreateGameRequest\x1a\x1d.weewar.v1.CreateGameResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\"\t/v1/games:\x01*\x12_\n\x08GetGames\x12\x1a.weewar.v1.GetGamesRequest\x1a\x1b.weewar.v1.GetGamesResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/games:batchGet\x12Y\n\tListGames\x12\x1b.weewar.v1.ListGamesRequest\x1a\x1c.weewar.v1.ListGamesResponse\"\x11\x82\xd3\xe4\x93\x02\x0b\x12\t/v1/games\x12X\n\x07GetGame\x12\x19.weewar.v1.GetGameRequest\x1a\x1a.weewar.v1.GetGameResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/games/{id}\x12\x63\n\nDeleteGame\x12\x1c.weewar.v1.DeleteGameRequest\x1a\x1d.weewar.v1.DeleteGameResponse\"\x18\x82\xd3\xe4\x93\x02\x12*\x10/v1/games/{id=*}\x12k\n\nUpdateGame\x12\x1c.weewar.v1.UpdateGameRequest\x1a\x1d.weewar.v1.UpdateGameResponse\" \x82\xd3\xe4\x93\x02\x1a\x32\x15/v1/games/{game_id=*}:\x01*\x12r\n\x0cGetGameState\x12\x1e.weewar.v1.GetGameStateRequest\x1a\x1f.weewar.v1.GetGameStateResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/games/{game_id}/state\x12i\n\tListMoves\x12\x1b.weewar.v1.ListMovesRequest\x1a\x1c.weewar.v1.ListMovesResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/games/{game_id}/moves\x12u\n\x0cProcessMoves\x12\x1e.weewar.v1.ProcessMovesRequest\x1a\x1f.weewar.v1.ProcessMovesResponse\"$\x82\xd3\xe4\x93\x02\x1e\"\x19/v1/games/{game_id}/moves:\x01*\x12|\n\x0cGetOptionsAt\x12\x1e.weewar.v1.GetOptionsAtRequest\x1a\x1f.weewar.v1.GetOptionsAtResponse\"+\x82\xd3\xe4\x93\x02%\x12#/v1/games/{game_id}/options/{q}/{r}B\x9c\x01\n\rcom.weewar.v1B\nGamesProtoP\x01Z:github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -45,6 +44,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETGAMESRESPONSE_GAMESENTRY']._serialized_options = b'8\001'
   _globals['_CREATEGAMERESPONSE_FIELDERRORSENTRY']._loaded_options = None
   _globals['_CREATEGAMERESPONSE_FIELDERRORSENTRY']._serialized_options = b'8\001'
+  _globals['_ALLPATHS_EDGESENTRY']._loaded_options = None
+  _globals['_ALLPATHS_EDGESENTRY']._serialized_options = b'8\001'
   _globals['_GAMESSERVICE'].methods_by_name['CreateGame']._loaded_options = None
   _globals['_GAMESSERVICE'].methods_by_name['CreateGame']._serialized_options = b'\202\323\344\223\002\016\"\t/v1/games:\001*'
   _globals['_GAMESSERVICE'].methods_by_name['GetGames']._loaded_options = None
@@ -65,68 +66,76 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GAMESSERVICE'].methods_by_name['ProcessMoves']._serialized_options = b'\202\323\344\223\002\036\"\031/v1/games/{game_id}/moves:\001*'
   _globals['_GAMESSERVICE'].methods_by_name['GetOptionsAt']._loaded_options = None
   _globals['_GAMESSERVICE'].methods_by_name['GetOptionsAt']._serialized_options = b'\202\323\344\223\002%\022#/v1/games/{game_id}/options/{q}/{r}'
-  _globals['_GAMEINFO']._serialized_start=206
-  _globals['_GAMEINFO']._serialized_end=421
-  _globals['_LISTGAMESREQUEST']._serialized_start=423
-  _globals['_LISTGAMESREQUEST']._serialized_end=523
-  _globals['_LISTGAMESRESPONSE']._serialized_start=525
-  _globals['_LISTGAMESRESPONSE']._serialized_end=646
-  _globals['_GETGAMEREQUEST']._serialized_start=648
-  _globals['_GETGAMEREQUEST']._serialized_end=706
-  _globals['_GETGAMERESPONSE']._serialized_start=709
-  _globals['_GETGAMERESPONSE']._serialized_end=861
-  _globals['_GETGAMECONTENTREQUEST']._serialized_start=863
-  _globals['_GETGAMECONTENTREQUEST']._serialized_end=928
-  _globals['_GETGAMECONTENTRESPONSE']._serialized_start=931
-  _globals['_GETGAMECONTENTRESPONSE']._serialized_end=1072
-  _globals['_UPDATEGAMEREQUEST']._serialized_start=1075
-  _globals['_UPDATEGAMEREQUEST']._serialized_end=1362
-  _globals['_UPDATEGAMERESPONSE']._serialized_start=1364
-  _globals['_UPDATEGAMERESPONSE']._serialized_end=1448
-  _globals['_DELETEGAMEREQUEST']._serialized_start=1450
-  _globals['_DELETEGAMEREQUEST']._serialized_end=1485
-  _globals['_DELETEGAMERESPONSE']._serialized_start=1487
-  _globals['_DELETEGAMERESPONSE']._serialized_end=1507
-  _globals['_GETGAMESREQUEST']._serialized_start=1509
-  _globals['_GETGAMESREQUEST']._serialized_end=1544
-  _globals['_GETGAMESRESPONSE']._serialized_start=1547
-  _globals['_GETGAMESRESPONSE']._serialized_end=1702
-  _globals['_GETGAMESRESPONSE_GAMESENTRY']._serialized_start=1629
-  _globals['_GETGAMESRESPONSE_GAMESENTRY']._serialized_end=1702
-  _globals['_CREATEGAMEREQUEST']._serialized_start=1704
-  _globals['_CREATEGAMEREQUEST']._serialized_end=1760
-  _globals['_CREATEGAMERESPONSE']._serialized_start=1763
-  _globals['_CREATEGAMERESPONSE']._serialized_end=2020
-  _globals['_CREATEGAMERESPONSE_FIELDERRORSENTRY']._serialized_start=1958
-  _globals['_CREATEGAMERESPONSE_FIELDERRORSENTRY']._serialized_end=2020
-  _globals['_PROCESSMOVESREQUEST']._serialized_start=2023
-  _globals['_PROCESSMOVESREQUEST']._serialized_end=2190
-  _globals['_PROCESSMOVESRESPONSE']._serialized_start=2193
-  _globals['_PROCESSMOVESRESPONSE']._serialized_end=2327
-  _globals['_GETGAMESTATEREQUEST']._serialized_start=2329
-  _globals['_GETGAMESTATEREQUEST']._serialized_end=2375
-  _globals['_GETGAMESTATERESPONSE']._serialized_start=2377
-  _globals['_GETGAMESTATERESPONSE']._serialized_end=2443
-  _globals['_LISTMOVESREQUEST']._serialized_start=2445
-  _globals['_LISTMOVESREQUEST']._serialized_end=2535
-  _globals['_LISTMOVESRESPONSE']._serialized_start=2537
-  _globals['_LISTMOVESRESPONSE']._serialized_end=2642
-  _globals['_GETOPTIONSATREQUEST']._serialized_start=2644
-  _globals['_GETOPTIONSATREQUEST']._serialized_end=2718
-  _globals['_GETOPTIONSATRESPONSE']._serialized_start=2721
-  _globals['_GETOPTIONSATRESPONSE']._serialized_end=2874
-  _globals['_GAMEOPTION']._serialized_start=2877
-  _globals['_GAMEOPTION']._serialized_end=3169
-  _globals['_ENDTURNOPTION']._serialized_start=3171
-  _globals['_ENDTURNOPTION']._serialized_end=3186
-  _globals['_MOVEOPTION']._serialized_start=3189
-  _globals['_MOVEOPTION']._serialized_end=3317
-  _globals['_ATTACKOPTION']._serialized_start=3320
-  _globals['_ATTACKOPTION']._serialized_end=3575
-  _globals['_BUILDUNITOPTION']._serialized_start=3577
-  _globals['_BUILDUNITOPTION']._serialized_end=3682
-  _globals['_CAPTUREBUILDINGOPTION']._serialized_start=3684
-  _globals['_CAPTUREBUILDINGOPTION']._serialized_end=3764
-  _globals['_GAMESSERVICE']._serialized_start=3767
-  _globals['_GAMESSERVICE']._serialized_end=4834
+  _globals['_GAMEINFO']._serialized_start=173
+  _globals['_GAMEINFO']._serialized_end=388
+  _globals['_LISTGAMESREQUEST']._serialized_start=390
+  _globals['_LISTGAMESREQUEST']._serialized_end=490
+  _globals['_LISTGAMESRESPONSE']._serialized_start=492
+  _globals['_LISTGAMESRESPONSE']._serialized_end=613
+  _globals['_GETGAMEREQUEST']._serialized_start=615
+  _globals['_GETGAMEREQUEST']._serialized_end=673
+  _globals['_GETGAMERESPONSE']._serialized_start=676
+  _globals['_GETGAMERESPONSE']._serialized_end=828
+  _globals['_GETGAMECONTENTREQUEST']._serialized_start=830
+  _globals['_GETGAMECONTENTREQUEST']._serialized_end=895
+  _globals['_GETGAMECONTENTRESPONSE']._serialized_start=898
+  _globals['_GETGAMECONTENTRESPONSE']._serialized_end=1039
+  _globals['_UPDATEGAMEREQUEST']._serialized_start=1042
+  _globals['_UPDATEGAMEREQUEST']._serialized_end=1329
+  _globals['_UPDATEGAMERESPONSE']._serialized_start=1331
+  _globals['_UPDATEGAMERESPONSE']._serialized_end=1415
+  _globals['_DELETEGAMEREQUEST']._serialized_start=1417
+  _globals['_DELETEGAMEREQUEST']._serialized_end=1452
+  _globals['_DELETEGAMERESPONSE']._serialized_start=1454
+  _globals['_DELETEGAMERESPONSE']._serialized_end=1474
+  _globals['_GETGAMESREQUEST']._serialized_start=1476
+  _globals['_GETGAMESREQUEST']._serialized_end=1511
+  _globals['_GETGAMESRESPONSE']._serialized_start=1514
+  _globals['_GETGAMESRESPONSE']._serialized_end=1669
+  _globals['_GETGAMESRESPONSE_GAMESENTRY']._serialized_start=1596
+  _globals['_GETGAMESRESPONSE_GAMESENTRY']._serialized_end=1669
+  _globals['_CREATEGAMEREQUEST']._serialized_start=1671
+  _globals['_CREATEGAMEREQUEST']._serialized_end=1727
+  _globals['_CREATEGAMERESPONSE']._serialized_start=1730
+  _globals['_CREATEGAMERESPONSE']._serialized_end=1987
+  _globals['_CREATEGAMERESPONSE_FIELDERRORSENTRY']._serialized_start=1925
+  _globals['_CREATEGAMERESPONSE_FIELDERRORSENTRY']._serialized_end=1987
+  _globals['_PROCESSMOVESREQUEST']._serialized_start=1990
+  _globals['_PROCESSMOVESREQUEST']._serialized_end=2157
+  _globals['_PROCESSMOVESRESPONSE']._serialized_start=2160
+  _globals['_PROCESSMOVESRESPONSE']._serialized_end=2294
+  _globals['_GETGAMESTATEREQUEST']._serialized_start=2296
+  _globals['_GETGAMESTATEREQUEST']._serialized_end=2342
+  _globals['_GETGAMESTATERESPONSE']._serialized_start=2344
+  _globals['_GETGAMESTATERESPONSE']._serialized_end=2410
+  _globals['_LISTMOVESREQUEST']._serialized_start=2412
+  _globals['_LISTMOVESREQUEST']._serialized_end=2502
+  _globals['_LISTMOVESRESPONSE']._serialized_start=2504
+  _globals['_LISTMOVESRESPONSE']._serialized_end=2609
+  _globals['_GETOPTIONSATREQUEST']._serialized_start=2611
+  _globals['_GETOPTIONSATREQUEST']._serialized_end=2685
+  _globals['_GETOPTIONSATRESPONSE']._serialized_start=2688
+  _globals['_GETOPTIONSATRESPONSE']._serialized_end=2891
+  _globals['_ALLPATHS']._serialized_start=2894
+  _globals['_ALLPATHS']._serialized_end=3091
+  _globals['_ALLPATHS_EDGESENTRY']._serialized_start=3014
+  _globals['_ALLPATHS_EDGESENTRY']._serialized_end=3091
+  _globals['_PATHEDGE']._serialized_start=3094
+  _globals['_PATHEDGE']._serialized_end=3325
+  _globals['_PATH']._serialized_start=3327
+  _globals['_PATH']._serialized_end=3407
+  _globals['_GAMEOPTION']._serialized_start=3410
+  _globals['_GAMEOPTION']._serialized_end=3702
+  _globals['_ENDTURNOPTION']._serialized_start=3704
+  _globals['_ENDTURNOPTION']._serialized_end=3719
+  _globals['_MOVEOPTION']._serialized_start=3722
+  _globals['_MOVEOPTION']._serialized_end=3850
+  _globals['_ATTACKOPTION']._serialized_start=3853
+  _globals['_ATTACKOPTION']._serialized_end=4108
+  _globals['_BUILDUNITOPTION']._serialized_start=4110
+  _globals['_BUILDUNITOPTION']._serialized_end=4215
+  _globals['_CAPTUREBUILDINGOPTION']._serialized_start=4217
+  _globals['_CAPTUREBUILDINGOPTION']._serialized_end=4297
+  _globals['_GAMESSERVICE']._serialized_start=4300
+  _globals['_GAMESSERVICE']._serialized_end=5367
 # @@protoc_insertion_point(module_scope)

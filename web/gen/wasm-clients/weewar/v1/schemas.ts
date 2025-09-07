@@ -1695,6 +1695,110 @@ export const GetOptionsAtResponseSchema: MessageSchema = {
       type: FieldType.BOOLEAN,
       id: 3,
     },
+    {
+      name: "allPaths",
+      type: FieldType.MESSAGE,
+      id: 5,
+      messageType: "weewar.v1.AllPaths",
+    },
+  ],
+};
+
+
+/**
+ * Schema for AllPaths message
+ */
+export const AllPathsSchema: MessageSchema = {
+  name: "AllPaths",
+  fields: [
+    {
+      name: "sourceQ",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "sourceR",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "edges",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "weewar.v1.EdgesEntry",
+    },
+  ],
+};
+
+
+/**
+ * Schema for PathEdge message
+ */
+export const PathEdgeSchema: MessageSchema = {
+  name: "PathEdge",
+  fields: [
+    {
+      name: "fromQ",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "fromR",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "toQ",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "toR",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
+    {
+      name: "movementCost",
+      type: FieldType.NUMBER,
+      id: 5,
+    },
+    {
+      name: "totalCost",
+      type: FieldType.NUMBER,
+      id: 6,
+    },
+    {
+      name: "terrainType",
+      type: FieldType.STRING,
+      id: 7,
+    },
+    {
+      name: "explanation",
+      type: FieldType.STRING,
+      id: 8,
+    },
+  ],
+};
+
+
+/**
+ * Schema for Path message
+ */
+export const PathSchema: MessageSchema = {
+  name: "Path",
+  fields: [
+    {
+      name: "edges",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.PathEdge",
+      repeated: true,
+    },
+    {
+      name: "totalCost",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
   ],
 };
 
@@ -2555,6 +2659,9 @@ export const WeewarV1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.ListMovesResponse": ListMovesResponseSchema,
   "weewar.v1.GetOptionsAtRequest": GetOptionsAtRequestSchema,
   "weewar.v1.GetOptionsAtResponse": GetOptionsAtResponseSchema,
+  "weewar.v1.AllPaths": AllPathsSchema,
+  "weewar.v1.PathEdge": PathEdgeSchema,
+  "weewar.v1.Path": PathSchema,
   "weewar.v1.GameOption": GameOptionSchema,
   "weewar.v1.EndTurnOption": EndTurnOptionSchema,
   "weewar.v1.MoveOption": MoveOptionSchema,

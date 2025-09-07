@@ -748,6 +748,45 @@ export interface GetOptionsAtResponse {
   options?: GameOption[];
   currentPlayer: number;
   gameInitialized: boolean;
+  /** A Path from source to dest along with cost on each tile for tracking */
+  allPaths?: AllPaths;
+}
+
+
+/**
+ * Compact representation of all reachable paths from a source
+ */
+export interface AllPaths {
+  /** Starting coordinate for all paths */
+  sourceQ: number;
+  sourceR: number;
+  /** Map of edges: key is "toQ,toR" for quick parent lookup
+ Each edge represents the optimal way to reach 'to' from its parent */
+  edges?: Map<string, PathEdge>;
+}
+
+
+/**
+ * A single edge in a path with movement details
+ */
+export interface PathEdge {
+  fromQ: number;
+  fromR: number;
+  toQ: number;
+  toR: number;
+  movementCost: number;
+  totalCost: number;
+  terrainType: string;
+  explanation: string;
+}
+
+
+/**
+ * Full path from source to destination (constructed on-demand from AllPaths)
+ */
+export interface Path {
+  edges?: PathEdge[];
+  totalCost: number;
 }
 
 

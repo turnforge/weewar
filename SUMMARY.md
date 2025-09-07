@@ -98,10 +98,25 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - **Transaction Safe**: Child worlds inherit parent counters properly
 
 **Implementation Details**:
-- Enhanced World structure with unitsByShortcut map and unitCountersByPlayer tracking
-- AddUnit method generates shortcuts for units without them
-- Position parser uses direct shortcut lookup instead of counting
-- CLI displays actual shortcuts in all unit listings
+- Players tracked using index-based letters (Player 1 = A, Player 2 = B, etc.)
+- World maintains nextShortcutNumber tracking per player
+- Debug rendering shows shortcuts over units on game board
+
+### Path Tracking and Movement Explainability
+
+**Achievement**: Implemented comprehensive path tracking system that provides full movement paths and terrain cost explanations in GetOptionsAt RPC.
+
+**Key Features**:
+- **AllPaths Structure**: Compact representation of all reachable paths from a source using parent map
+- **Rich Path Information**: Each PathEdge contains movement costs, terrain type, and explanations
+- **Efficient Storage**: Parent map keyed by "q,r" for O(1) lookups and path reconstruction
+- **On-Demand Path Reconstruction**: Utility functions to build full paths from AllPaths when needed
+
+**Implementation Details**:
+- dijkstraMovement now returns AllPaths directly instead of separate distances/parents maps
+- Each edge includes from/to coordinates, edge cost, total cost, terrain type, and explanation
+- GetOptionsAt includes AllPaths in response for client-side path visualization
+- Path reconstruction utilities for building complete paths and extracting reachable destinations
 
 ### Previous Foundation
 

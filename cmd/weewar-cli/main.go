@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"log"
-	"os"
 	"strings"
+
+	"github.com/chzyer/readline"
 )
 
 // Version information
@@ -43,9 +44,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize CLI: %v", err)
 	}
+	defer cli.Close()
 
 	fmt.Printf("WeeWar CLI - Game %s loaded\n", gameID)
 	fmt.Println("Type 'help' for available commands, 'quit' to exit")
+	fmt.Println("Use ↑/↓ arrow keys to navigate command history")
 
 	// Execute any remaining command line arguments as commands
 	if len(flag.Args()) > 1 {
@@ -110,20 +113,23 @@ func showHelp() {
 	fmt.Println("  - Game files are stored in storage/games/<gameid>/")
 }
 
-// startREPL starts the interactive REPL
+// startREPL starts the interactive REPL with readline support
 func startREPL(cli *CLI) {
-	scanner := bufio.NewScanner(os.Stdin)
-
 	for {
-		// Show prompt
-		fmt.Print("> ")
-
-		// Read input
-		if !scanner.Scan() {
-			break // EOF or error
+		// Read input with history support
+		line, err := cli.readline.Readline()
+		if err != nil {
+			if err == readline.ErrInterrupt {
+				continue
+			} else if err == io.EOF {
+				fmt.Println("\nGoodbye!")
+				break
+			}
+			log.Printf("Error reading input: %v", err)
+			break
 		}
 
-		command := strings.TrimSpace(scanner.Text())
+		command := strings.TrimSpace(line)
 		if command == "" {
 			continue
 		}
@@ -140,10 +146,5 @@ func startREPL(cli *CLI) {
 		// Show result
 		fmt.Println(result)
 		fmt.Println()
-	}
-
-	// Check for scanner errors
-	if err := scanner.Err(); err != nil {
-		log.Printf("Error reading input: %v", err)
 	}
 }

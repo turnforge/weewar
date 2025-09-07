@@ -1,13 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/chzyer/readline"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"github.com/panyam/turnengine/games/weewar/services"
@@ -15,9 +17,9 @@ import (
 
 // CLI is a headless command processor for WeeWar games
 type CLI struct {
-	gameID  string
-	service *services.FSGamesServiceImpl
-	scanner *bufio.Scanner // For reading user input
+	gameID   string
+	service  *services.FSGamesServiceImpl
+	readline *readline.Instance // For reading user input with history
 }
 
 // NewCLI creates a new CLI instance
@@ -31,11 +33,61 @@ func NewCLI(gameID string) (*CLI, error) {
 		return nil, fmt.Errorf("failed to load game %s: %w", gameID, err)
 	}
 
+	// Set up history file path
+	homeDir, _ := os.UserHomeDir()
+	historyFile := filepath.Join(homeDir, ".weewar_cli_history")
+
+	// Configure readline with auto-complete for commands
+	completer := readline.NewPrefixCompleter(
+		readline.PcItem("options"),
+		readline.PcItem("move"),
+		readline.PcItem("attack"),
+		readline.PcItem("end"),
+		readline.PcItem("status"),
+		readline.PcItem("units"),
+		readline.PcItem("player"),
+		readline.PcItem("help"),
+		readline.PcItem("quit"),
+		readline.PcItem("exit"),
+	)
+
+	// Create readline instance
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:          fmt.Sprintf("weewar[%s]> ", gameID),
+		HistoryFile:     historyFile,
+		AutoComplete:    completer,
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+
+		HistorySearchFold:   true,
+		FuncFilterInputRune: filterInput,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create readline: %w", err)
+	}
+
 	return &CLI{
-		gameID:  gameID,
-		service: service,
-		scanner: bufio.NewScanner(os.Stdin),
+		gameID:   gameID,
+		service:  service,
+		readline: rl,
 	}, nil
+}
+
+// filterInput allows special characters in readline
+func filterInput(r rune) (rune, bool) {
+	switch r {
+	case readline.CharCtrlZ:
+		return r, false
+	}
+	return r, true
+}
+
+// Close cleans up the CLI resources
+func (cli *CLI) Close() error {
+	if cli.readline != nil {
+		return cli.readline.Close()
+	}
+	return nil
 }
 
 // ExecuteCommand processes a command and returns the result
@@ -179,14 +231,20 @@ func (cli *CLI) handleOptions(args []string) string {
 	for _, item := range menuItems {
 		fmt.Println(item)
 	}
-	fmt.Print("\nSelect an option (1-", len(menuItems), ") or press Enter to cancel: ")
+	// Temporarily change prompt for selection
+	oldPrompt := cli.readline.Config.Prompt
+	defer cli.readline.SetPrompt(oldPrompt)
+	cli.readline.SetPrompt(fmt.Sprintf("Select option (1-%d) or Enter to cancel: ", len(menuItems)))
 
 	// Read user selection
-	if !cli.scanner.Scan() {
+	selection, err := cli.readline.Readline()
+	if err != nil {
+		if err == readline.ErrInterrupt || err == io.EOF {
+			return "Cancelled"
+		}
 		return "Failed to read input"
 	}
-
-	selection := strings.TrimSpace(cli.scanner.Text())
+	selection = strings.TrimSpace(selection)
 	if selection == "" {
 		return "Cancelled"
 	}

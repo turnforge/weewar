@@ -86,6 +86,23 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - All tests passing with correct unit movement and no duplication
 - Transaction flow simulation tests validating copy-on-write semantics
 
+### Unit Shortcut System Implementation
+
+**Achievement**: Implemented automatic unit shortcuts (A1, B12, C3) for easy identification and reference throughout the game lifecycle.
+
+**Key Features**:
+- **Automatic Generation**: Units automatically receive shortcuts when created (Player letter A-Z + sequential number)
+- **Persistent IDs**: Shortcuts are saved with game state and preserved across save/load cycles
+- **Fast Lookup**: O(1) access via unitsByShortcut map instead of O(n) iteration
+- **No ID Reuse**: Counters only increment, ensuring unique IDs even after units die
+- **Transaction Safe**: Child worlds inherit parent counters properly
+
+**Implementation Details**:
+- Enhanced World structure with unitsByShortcut map and unitCountersByPlayer tracking
+- AddUnit method generates shortcuts for units without them
+- Position parser uses direct shortcut lookup instead of counting
+- CLI displays actual shortcuts in all unit listings
+
 ### Previous Foundation
 
 **Interactive Unit Movement System**: Complete end-to-end functionality from unit selection to server validation and visual updates.
@@ -101,6 +118,8 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
   - Interactive options menu system with numbered selections
   - Direct integration with FSGamesServiceImpl with caching
   - Supports both coordinate (3,4) and unit shortcut (A1) formats
+  - Unit shortcuts now use direct O(1) lookup via World.GetUnitByShortcut()
+  - Command history with up/down arrow navigation (readline support)
   - All actions go through ProcessMoves RPC for consistency
   - Auto-saves state for immediate browser visibility
 

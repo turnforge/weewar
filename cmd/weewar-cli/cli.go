@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -172,12 +173,17 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 		return fmt.Sprintf("Failed to get options: %v", err)
 	}
 
+	// Sort options using our sorting utility
+	sort.Slice(resp.Options, func(i, j int) bool {
+		return weewar.GameOptionLess(resp.Options[i], resp.Options[j])
+	})
+
 	// Build menu of options
 	var menuItems []string
 	var actions []*v1.GameMove
 	menuIndex := 1
 
-	// Process all options
+	// Process sorted options
 	for _, option := range resp.Options {
 		switch opt := option.OptionType.(type) {
 		case *v1.GameOption_Move:

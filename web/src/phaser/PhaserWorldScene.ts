@@ -1252,13 +1252,13 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         
         // Create a simple pattern with different terrain types
         const patterns = [
-            { q: 0, r: 0, tileType: 1, player: 0 },     // Grass
-            { q: 1, r: 0, tileType: 2, player: 0 },     // Desert
-            { q: -1, r: 0, tileType: 3, player: 0 },    // Water
-            { q: 0, r: 1, tileType: 16, player: 0 },    // Mountain
-            { q: 0, r: -1, tileType: 20, player: 0 }, // Rock
-            { q: 1, r: -1, tileType: 1, player: 1 },    // Grass (different player)
-            { q: -1, r: 1, tileType: 2, player: 2 },    // Desert (different player)
+            { q: 0, r: 0, tileType: 1, player: 0, shortcut: "" },     // Grass
+            { q: 1, r: 0, tileType: 2, player: 0, shortcut: "" },     // Desert
+            { q: -1, r: 0, tileType: 3, player: 0, shortcut: "" },    // Water
+            { q: 0, r: 1, tileType: 16, player: 0, shortcut: "" },    // Mountain
+            { q: 0, r: -1, tileType: 20, player: 0, shortcut: "" }, // Rock
+            { q: 1, r: -1, tileType: 1, player: 1, shortcut: "" },    // Grass (different player)
+            { q: -1, r: 1, tileType: 2, player: 2, shortcut: "" },    // Desert (different player)
         ];
         
         patterns.forEach(pattern => { this.setTile(pattern); });

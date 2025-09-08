@@ -671,7 +671,7 @@ export class World {
                 return; // Skip invalid tile
             }
             
-            const tile: Tile = { q, r, tileType, player };
+            const tile: Tile = { q, r, tileType, player, shortcut: "" };
             this.tiles[key] = tile;
             tileChanges.push({ q, r, tile });
         });

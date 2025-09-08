@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <clipPath id="hexClip">
-      <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5"/>
+      <polygon points="50,0 100,17.5 100,82.5 50,100 0,82.5 0,17.5"/>
     </clipPath>
     <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#d4d4d8"/>
@@ -35,7 +35,7 @@
   
   <g clip-path="url(#hexClip)">
     <!-- Mountain base with gradient -->
-    <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#mountainGrad)"/>
+    <polygon points="50,0 100,17.5 100,82.5 50,100 0,82.5 0,17.5" fill="url(#mountainGrad)" />
     
     <!-- Main mountain peaks -->
     <g opacity="0.9">
@@ -134,6 +134,6 @@
     </g>
     
     <!-- Rock texture overlay -->
-    <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#rockTexture)" filter="url(#roughen)" opacity="0.3"/>
+    <polygon points="50,0 100,17.5 100,82.5 50,100 0,82.5 0,17.5" fill="url(#rockTexture)" filter="url(#roughen)" opacity="0.3"/>
   </g>
 </svg>

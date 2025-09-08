@@ -33,7 +33,7 @@
   </defs>
   
   <!-- Ocean base - fills entire hex -->
-  <polygon points="50,15 85,32.5 85,67.5 50,85 15,67.5 15,32.5" fill="url(#oceanGrad)"/>
+  <polygon points="50,0 100,17.5 100,82.5 50,100 0,82.5 0,17.5" fill="url(#oceanGrad)" />
   
   <!-- Large wave formations across hex -->
   <g opacity="0.4">

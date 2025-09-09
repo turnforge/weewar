@@ -1,10 +1,9 @@
-package main
+package weewar
 
 import (
 	"fmt"
 	"strings"
 	
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
@@ -16,16 +15,16 @@ func FormatPathCompact(path *v1.Path) string {
 	
 	var parts []string
 	for i, edge := range path.Edges {
-		fromCoord := weewar.AxialCoord{Q: int(edge.FromQ), R: int(edge.FromR)}
-		toCoord := weewar.AxialCoord{Q: int(edge.ToQ), R: int(edge.ToR)}
+		fromCoord := AxialCoord{Q: int(edge.FromQ), R: int(edge.FromR)}
+		toCoord := AxialCoord{Q: int(edge.ToQ), R: int(edge.ToR)}
 		
-		dir := weewar.GetDirection(fromCoord, toCoord)
-		arrow := weewar.DirectionToString(dir)
+		dir := GetDirection(fromCoord, toCoord)
+		arrow := DirectionToString(dir)
 		
 		// Format: arrow (q,r,terrain,cost)
 		part := fmt.Sprintf("%s (%d,%d,%s,%.0f)", 
 			arrow, edge.ToQ, edge.ToR, 
-			shortenTerrain(edge.TerrainType), edge.MovementCost)
+			ShortenTerrain(edge.TerrainType), edge.MovementCost)
 		parts = append(parts, part)
 		
 		// Limit to first 5 steps for very long paths
@@ -48,12 +47,12 @@ func FormatPathDetailed(path *v1.Path, indent string) string {
 	lines = append(lines, fmt.Sprintf("%sPath (total cost: %.0f):", indent, path.TotalCost))
 	
 	for i, edge := range path.Edges {
-		fromCoord := weewar.AxialCoord{Q: int(edge.FromQ), R: int(edge.FromR)}
-		toCoord := weewar.AxialCoord{Q: int(edge.ToQ), R: int(edge.ToR)}
+		fromCoord := AxialCoord{Q: int(edge.FromQ), R: int(edge.FromR)}
+		toCoord := AxialCoord{Q: int(edge.ToQ), R: int(edge.ToR)}
 		
-		dir := weewar.GetDirection(fromCoord, toCoord)
-		arrow := weewar.DirectionToString(dir)
-		dirLong := weewar.DirectionToLongString(dir)
+		dir := GetDirection(fromCoord, toCoord)
+		arrow := DirectionToString(dir)
+		dirLong := DirectionToLongString(dir)
 		
 		// Format each step with arrow
 		line := fmt.Sprintf("%s  %d. %s %s to (%d,%d) - %s (cost: %.0f)",
@@ -71,8 +70,8 @@ func FormatPathDetailed(path *v1.Path, indent string) string {
 	return strings.Join(lines, "\n")
 }
 
-// shortenTerrain shortens terrain names for compact display
-func shortenTerrain(terrain string) string {
+// ShortenTerrain shortens terrain names for compact display
+func ShortenTerrain(terrain string) string {
 	// Common terrain abbreviations
 	switch strings.ToLower(terrain) {
 	case "grass", "plains":

@@ -156,7 +156,7 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 	}
 
 	// Parse position (could be coordinate or unit ID)
-	target, err := ParsePositionOrUnit(rtGame, position)
+	target, err := weewar.ParsePositionOrUnit(rtGame, position)
 	if err != nil {
 		return fmt.Sprintf("Invalid position: %v", err)
 	}
@@ -199,10 +199,10 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 				path, err := weewar.ReconstructPath(resp.AllPaths, moveOpt.Q, moveOpt.R)
 				if err == nil && path != nil {
 					if detailed {
-						pathStr := FormatPathDetailed(path, "   ")
+						pathStr := weewar.FormatPathDetailed(path, "   ")
 						menuItem += "\n" + pathStr
 					} else {
-						pathStr := FormatPathCompact(path)
+						pathStr := weewar.FormatPathCompact(path)
 						menuItem += fmt.Sprintf("\n   Path: %s", pathStr)
 					}
 				}
@@ -322,13 +322,13 @@ func (cli *CLI) handleMove(args []string) string {
 	}
 
 	// Parse from position
-	fromTarget, err := ParsePositionOrUnit(rtGame, args[0])
+	fromTarget, err := weewar.ParsePositionOrUnit(rtGame, args[0])
 	if err != nil {
 		return fmt.Sprintf("Invalid from position: %v", err)
 	}
 
 	// Parse to position
-	toTarget, err := ParsePositionOrUnit(rtGame, args[1])
+	toTarget, err := weewar.ParsePositionOrUnit(rtGame, args[1])
 	if err != nil {
 		return fmt.Sprintf("Invalid to position: %v", err)
 	}
@@ -366,13 +366,13 @@ func (cli *CLI) handleAttack(args []string) string {
 	}
 
 	// Parse attacker position
-	attackerTarget, err := ParsePositionOrUnit(rtGame, args[0])
+	attackerTarget, err := weewar.ParsePositionOrUnit(rtGame, args[0])
 	if err != nil {
 		return fmt.Sprintf("Invalid attacker position: %v", err)
 	}
 
 	// Parse target position
-	targetTarget, err := ParsePositionOrUnit(rtGame, args[1])
+	targetTarget, err := weewar.ParsePositionOrUnit(rtGame, args[1])
 	if err != nil {
 		return fmt.Sprintf("Invalid target position: %v", err)
 	}

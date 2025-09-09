@@ -1,4 +1,4 @@
-package main
+package weewar
 
 import (
 	"fmt"
@@ -6,22 +6,21 @@ import (
 	"strings"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 
 // ParseTarget represents either a unit ID or a coordinate position
 type ParseTarget struct {
-	IsUnit     bool              // true if this represents a unit, false if coordinate
-	Unit       *v1.Unit          // the unit if IsUnit is true
-	Coordinate weewar.AxialCoord // the coordinate if IsUnit is false
-	Raw        string            // original input string
+	IsUnit     bool       // true if this represents a unit, false if coordinate
+	Unit       *v1.Unit   // the unit if IsUnit is true
+	Coordinate AxialCoord // the coordinate if IsUnit is false
+	Raw        string     // original input string
 }
 
 // ParsePositionOrUnit parses a string that can be either:
 // - Unit ID: A1, B12, C2 (PlayerLetter + UnitNumber)
 // - Q/R Coordinate: 3,4 or 5,-2
 // - Row/Col Coordinate: r4,5 (prefixed with 'r')
-func ParsePositionOrUnit(game *weewar.Game, input string) (target *ParseTarget, err error) {
+func ParsePositionOrUnit(game *Game, input string) (target *ParseTarget, err error) {
 	input = strings.TrimSpace(input)
 	if input == "" {
 		return nil, fmt.Errorf("empty input")
@@ -50,7 +49,7 @@ func ParsePositionOrUnit(game *weewar.Game, input string) (target *ParseTarget, 
 }
 
 // parseUnitID parses unit ID format: A1, B12, C2, etc.
-func parseUnitID(game *weewar.Game, input string) (*ParseTarget, error) {
+func parseUnitID(game *Game, input string) (*ParseTarget, error) {
 	input = strings.ToUpper(strings.TrimSpace(input))
 	if len(input) < 2 {
 		return nil, fmt.Errorf("unit ID too short")
@@ -65,7 +64,7 @@ func parseUnitID(game *weewar.Game, input string) (*ParseTarget, error) {
 	return &ParseTarget{
 		IsUnit:     true,
 		Unit:       unit,
-		Coordinate: weewar.CoordFromInt32(unit.Q, unit.R), // Also provide the coordinate for convenience
+		Coordinate: CoordFromInt32(unit.Q, unit.R), // Also provide the coordinate for convenience
 		Raw:        input,
 	}, nil
 }
@@ -87,7 +86,7 @@ func parseQRCoordinate(input string) (*ParseTarget, error) {
 		return nil, fmt.Errorf("invalid R coordinate: %s", parts[1])
 	}
 
-	coord := weewar.AxialCoord{Q: q, R: r}
+	coord := AxialCoord{Q: q, R: r}
 
 	return &ParseTarget{
 		IsUnit:     false,
@@ -115,7 +114,7 @@ func parseRowColCoordinate(input string) (*ParseTarget, error) {
 	}
 
 	// Convert row/col to Q/R using the hex coordinate system
-	coord := weewar.RowColToHex(row, col)
+	coord := RowColToHex(row, col)
 
 	return &ParseTarget{
 		IsUnit:     false,
@@ -134,7 +133,7 @@ func (t *ParseTarget) String() string {
 }
 
 // GetCoordinate returns the coordinate for this target (works for both units and positions)
-func (t *ParseTarget) GetCoordinate() weewar.AxialCoord {
+func (t *ParseTarget) GetCoordinate() AxialCoord {
 	return t.Coordinate
 }
 

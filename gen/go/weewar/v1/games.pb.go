@@ -7,15 +7,14 @@
 package v1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -1936,8 +1935,8 @@ type BuildUnitOption struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Q             int32                  `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
 	R             int32                  `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
-	TileType      int32                  `protobuf:"varint,3,opt,name=tile_type,json=tileType,proto3" json:"tile_type,omitempty"`
-	BuildCost     int32                  `protobuf:"varint,4,opt,name=build_cost,json=buildCost,proto3" json:"build_cost,omitempty"`
+	UnitType      int32                  `protobuf:"varint,3,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
+	Cost          int32                  `protobuf:"varint,4,opt,name=cost,proto3" json:"cost,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1986,16 +1985,16 @@ func (x *BuildUnitOption) GetR() int32 {
 	return 0
 }
 
-func (x *BuildUnitOption) GetTileType() int32 {
+func (x *BuildUnitOption) GetUnitType() int32 {
 	if x != nil {
-		return x.TileType
+		return x.UnitType
 	}
 	return 0
 }
 
-func (x *BuildUnitOption) GetBuildCost() int32 {
+func (x *BuildUnitOption) GetCost() int32 {
 	if x != nil {
-		return x.BuildCost
+		return x.Cost
 	}
 	return 0
 }
@@ -2208,13 +2207,12 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"\n" +
 	"can_attack\x18\x05 \x01(\bR\tcanAttack\x12'\n" +
 	"\x0fdamage_estimate\x18\x06 \x01(\x05R\x0edamageEstimate\x123\n" +
-	"\x06action\x18\a \x01(\v2\x1b.weewar.v1.AttackUnitActionR\x06action\"i\n" +
+	"\x06action\x18\a \x01(\v2\x1b.weewar.v1.AttackUnitActionR\x06action\"^\n" +
 	"\x0fBuildUnitOption\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
-	"\ttile_type\x18\x03 \x01(\x05R\btileType\x12\x1d\n" +
-	"\n" +
-	"build_cost\x18\x04 \x01(\x05R\tbuildCost\"P\n" +
+	"\tunit_type\x18\x03 \x01(\x05R\bunitType\x12\x12\n" +
+	"\x04cost\x18\x04 \x01(\x05R\x04cost\"P\n" +
 	"\x15CaptureBuildingOption\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +

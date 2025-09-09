@@ -1138,11 +1138,11 @@
           "type": "integer",
           "format": "int32"
         },
-        "tileType": {
+        "unitType": {
           "type": "integer",
           "format": "int32"
         },
-        "buildCost": {
+        "cost": {
           "type": "integer",
           "format": "int32"
         }

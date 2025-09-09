@@ -11,6 +11,9 @@ package main
 import (
 	// Import the generated WASM package - UPDATE THIS PATH
 	"your-module/path-to-generated/services"
+	
+	// Import the same protobuf types as the generated WASM file
+	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
 func main() {
@@ -38,10 +41,10 @@ func main() {
 		//     config: appConfig,
 		// },
 	}
-
+	
 	// Register the JavaScript API
 	exports.RegisterAPI()
-
+	
 	// Keep the WASM module running
 	select {}
 }

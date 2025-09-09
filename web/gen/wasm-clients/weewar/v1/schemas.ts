@@ -1953,12 +1953,12 @@ export const BuildUnitOptionSchema: MessageSchema = {
       id: 2,
     },
     {
-      name: "tileType",
+      name: "unitType",
       type: FieldType.NUMBER,
       id: 3,
     },
     {
-      name: "buildCost",
+      name: "cost",
       type: FieldType.NUMBER,
       id: 4,
     },

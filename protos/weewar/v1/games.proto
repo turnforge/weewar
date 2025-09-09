@@ -447,8 +447,8 @@ message AttackOption {
 message BuildUnitOption {
   int32 q = 1;
   int32 r = 2;
-  int32 tile_type = 3;
-  int32 build_cost = 4;
+  int32 unit_type = 3;
+  int32 cost = 4;
 }
 
 /**

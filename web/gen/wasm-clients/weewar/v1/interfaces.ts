@@ -848,8 +848,8 @@ export interface AttackOption {
 export interface BuildUnitOption {
   q: number;
   r: number;
-  tileType: number;
-  buildCost: number;
+  unitType: number;
+  cost: number;
 }
 
 

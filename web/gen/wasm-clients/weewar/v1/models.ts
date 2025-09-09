@@ -1711,8 +1711,8 @@ export class BuildUnitOption implements BuildUnitOptionInterface {
 
   q: number = 0;
   r: number = 0;
-  tileType: number = 0;
-  buildCost: number = 0;
+  unitType: number = 0;
+  cost: number = 0;
 
   /**
    * Create and deserialize an instance from raw data

@@ -1,6 +1,22 @@
 # Next Steps - WeeWar Development
 
-## ✅ Path Tracking and Movement Explainability (Current Session)
+## ✅ Turn Options Panel and Path Visualization (Current Session)
+
+### Implementation Completed - DONE
+- **Library Refactoring**: Moved position_parser.go, path_display.go from CLI to lib/ for WASM accessibility
+- **Options Formatter**: Created options_formatter.go in lib/ for consistent option formatting
+- **TurnOptionsPanel Component**: New dockable panel showing available actions when units are selected
+- **Path Visualization**: Added addPath(), removePath(), clearAllPaths() methods to HexHighlightLayer
+- **Proto Integration**: Direct use of GameOption, MoveOption, AttackOption types without redundant conversions
+- **Path Extraction**: Properly extracting path coordinates from MoveOption.reconstructedPath.edges
+
+### Next Steps for Turn Options
+- [ ] Show path preview on hover over move options (not just on click)
+- [ ] Add keyboard shortcuts for selecting options (1-9 keys)
+- [ ] Display more detailed information (terrain types along path)
+- [ ] Add option filtering (show only moves, only attacks, etc.)
+
+## ✅ Path Tracking and Movement Explainability (Previous Session)
 
 ### Implementation Completed - DONE
 - **AllPaths Proto Structure**: Created compact path representation with parent map
@@ -9,12 +25,6 @@
 - **GetOptionsAt Integration**: Response includes AllPaths for client-side visualization
 - **Path Utilities**: ReconstructPath, GetReachableDestinations, GetMovementCostTo functions
 - **Test Fixes**: Updated all tests to work with new AllPaths API
-
-### Next Steps for Path Visualization
-- [ ] Frontend integration to display path previews on hover
-- [ ] Path animation showing unit movement along reconstructed path
-- [ ] Terrain cost breakdown UI showing why certain paths are expensive
-- [ ] Alternative path suggestions when multiple routes exist
 
 ## ✅ Recent Bug Fixes (Previous Session)
 

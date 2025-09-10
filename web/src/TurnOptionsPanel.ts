@@ -3,18 +3,15 @@ import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
 import { GameState } from './GameState';
 import { World } from './World';
-import { Unit } from '../gen/wasm-clients/weewar/v1/models';
-
-interface TurnOption {
-    type: 'move' | 'attack' | 'endTurn' | 'build' | 'capture';
-    description: string;
-    target?: { q: number; r: number };
-    cost?: number;
-    damage?: number;
-    unitType?: number;
-    path?: string;
-    action?: any; // The actual GameMove action to execute
-}
+import { 
+    Unit, 
+    GameOption,
+    MoveOption,
+    AttackOption,
+    EndTurnOption,
+    BuildUnitOption,
+    CaptureBuildingOption
+} from '../gen/wasm-clients/weewar/v1/models';
 
 /**
  * TurnOptionsPanel displays available turn options at a selected position
@@ -33,7 +30,7 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     private isActivated = false;
     private gameState: GameState | null = null;
     private world: World | null = null;
-    private currentOptions: TurnOption[] = [];
+    private currentOptions: GameOption[] = [];
     private selectedPosition: { q: number; r: number } | null = null;
     private selectedUnit: Unit | null = null;
 
@@ -159,36 +156,9 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
      * Process options from the server response
      */
     private processOptions(response: any): void {
-        this.currentOptions = [];
+        // Options are already sorted by the server
+        this.currentOptions = response.options || [];
         
-        const options = response.options || [];
-        const allPaths = response.allPaths;
-        
-        // Sort options using the same logic as CLI
-        options.sort((a: any, b: any) => {
-            // Priority order: Move, Attack, EndTurn, Build, Capture
-            const typeOrder: { [key: string]: number } = {
-                'move': 0,
-                'attack': 1,
-                'endTurn': 2,
-                'build': 3,
-                'capture': 4
-            };
-            
-            const aType = this.getOptionType(a);
-            const bType = this.getOptionType(b);
-            
-            return (typeOrder[aType] || 99) - (typeOrder[bType] || 99);
-        });
-
-        // Convert options to our internal format
-        for (const option of options) {
-            const turnOption = this.convertOption(option, allPaths);
-            if (turnOption) {
-                this.currentOptions.push(turnOption);
-            }
-        }
-
         // Display the processed options
         this.displayOptions();
     }
@@ -206,74 +176,27 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     }
 
     /**
-     * Convert a server option to our internal format
+     * Extract path coordinates from a MoveOption
      */
-    private convertOption(option: any, allPaths: any): TurnOption | null {
-        if (option.move) {
-            const moveOpt = option.move;
-            return {
-                type: 'move',
-                description: `Move to (${moveOpt.q}, ${moveOpt.r})`,
-                target: { q: moveOpt.q, r: moveOpt.r },
-                cost: moveOpt.movementCost,
-                path: this.formatPath(allPaths, moveOpt.q, moveOpt.r),
-                action: moveOpt.action
-            };
+    private extractPathCoords(moveOption: MoveOption): number[] | undefined {
+        if (!moveOption.reconstructedPath || !moveOption.reconstructedPath.edges) {
+            return undefined;
         }
         
-        if (option.attack) {
-            const attackOpt = option.attack;
-            return {
-                type: 'attack',
-                description: `Attack unit at (${attackOpt.q}, ${attackOpt.r})`,
-                target: { q: attackOpt.q, r: attackOpt.r },
-                damage: attackOpt.damageEstimate,
-                unitType: attackOpt.targetUnitType,
-                action: attackOpt.action
-            };
+        const coords: number[] = [];
+        const edges = moveOption.reconstructedPath.edges;
+        
+        // Add the starting position (from the first edge)
+        if (edges.length > 0) {
+            coords.push(edges[0].fromQ, edges[0].fromR);
+            
+            // Add all the destination positions
+            for (const edge of edges) {
+                coords.push(edge.toQ, edge.toR);
+            }
         }
         
-        if (option.endTurn) {
-            return {
-                type: 'endTurn',
-                description: 'End Turn',
-                action: option.endTurn
-            };
-        }
-        
-        if (option.build) {
-            const buildOpt = option.build;
-            return {
-                type: 'build',
-                description: `Build unit (type ${buildOpt.unitType})`,
-                unitType: buildOpt.unitType,
-                cost: buildOpt.cost,
-                action: buildOpt.action
-            };
-        }
-        
-        if (option.capture) {
-            return {
-                type: 'capture',
-                description: 'Capture',
-                action: option.capture
-            };
-        }
-        
-        return null;
-    }
-
-    /**
-     * Format a path for display (simplified version)
-     */
-    private formatPath(allPaths: any, targetQ: number, targetR: number): string {
-        // This is a simplified version - in a real implementation,
-        // we would use the WASM-exported path formatting functions
-        if (!allPaths || !allPaths.paths) return '';
-        
-        // Try to find the path to this target
-        // This is a placeholder - actual implementation would reconstruct the path
-        return 'Path available';
+        return coords.length >= 4 ? coords : undefined;
     }
 
     /**
@@ -304,28 +227,42 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         // Build options HTML
         let optionsHTML = '';
         this.currentOptions.forEach((option, index) => {
-            const iconClass = this.getOptionIcon(option.type);
-            const colorClass = this.getOptionColor(option.type);
+            const optionType = this.getOptionType(option);
+            const iconClass = this.getOptionIcon(optionType);
+            const colorClass = this.getOptionColor(optionType);
             
+            let description = '';
             let details = '';
-            if (option.cost !== undefined) {
-                details += `<span class="text-xs text-gray-500 dark:text-gray-400">Cost: ${option.cost}</span>`;
-            }
-            if (option.damage !== undefined) {
-                details += `<span class="text-xs text-red-500 dark:text-red-400">Damage: ~${option.damage}</span>`;
-            }
-            if (option.path) {
-                details += `<span class="text-xs text-blue-500 dark:text-blue-400">${option.path}</span>`;
+            
+            if (option.move) {
+                description = `Move to (${option.move.q}, ${option.move.r})`;
+                if (option.move.movementCost !== undefined) {
+                    details += `<span class="text-xs text-gray-500 dark:text-gray-400">Cost: ${option.move.movementCost}</span>`;
+                }
+            } else if (option.attack) {
+                description = `Attack unit at (${option.attack.q}, ${option.attack.r})`;
+                if (option.attack.damageEstimate !== undefined) {
+                    details += `<span class="text-xs text-red-500 dark:text-red-400">Damage: ~${option.attack.damageEstimate}</span>`;
+                }
+            } else if (option.endTurn) {
+                description = 'End Turn';
+            } else if (option.build) {
+                description = `Build unit (type ${option.build.unitType})`;
+                if (option.build.cost !== undefined) {
+                    details += `<span class="text-xs text-gray-500 dark:text-gray-400">Cost: ${option.build.cost}</span>`;
+                }
+            } else if (option.capture) {
+                description = 'Capture';
             }
 
             optionsHTML += `
                 <div class="option-item p-3 mb-2 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition-colors"
                      data-option-index="${index}">
                     <div class="flex items-start">
-                        <span class="${iconClass} ${colorClass} mr-3 text-lg">${this.getOptionEmoji(option.type)}</span>
+                        <span class="${iconClass} ${colorClass} mr-3 text-lg">${this.getOptionEmoji(optionType)}</span>
                         <div class="flex-1">
                             <div class="font-medium text-sm text-gray-900 dark:text-white">
-                                ${option.description}
+                                ${description}
                             </div>
                             ${details ? `<div class="mt-1">${details}</div>` : ''}
                         </div>
@@ -387,7 +324,23 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         const option = this.currentOptions[index];
         if (!option) return;
 
-        this.log(`Option clicked: ${option.description}`);
+        const optionType = this.getOptionType(option);
+        this.log(`Option clicked: ${optionType}`);
+        
+        // Clear any existing paths
+        this.eventBus.emit('clear-path-visualization', {}, this, null);
+        
+        // If this is a move option with a reconstructed path, visualize it
+        if (option.move) {
+            const pathCoords = this.extractPathCoords(option.move);
+            if (pathCoords && pathCoords.length >= 4) {
+                this.eventBus.emit('show-path-visualization', {
+                    coords: pathCoords,
+                    color: 0x00ff00, // Green for movement
+                    thickness: 4
+                }, this, null);
+            }
+        }
         
         // Emit event for the game to handle the action
         this.eventBus.emit('turn-option-selected', {
@@ -405,6 +358,9 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         this.selectedPosition = null;
         this.selectedUnit = null;
         this.showEmptyState();
+        
+        // Clear any path visualization
+        this.eventBus.emit('clear-path-visualization', {}, this, null);
     }
 
     /**

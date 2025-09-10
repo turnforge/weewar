@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
@@ -165,7 +166,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 			pathsResult, err := dmp.GetMovementOptions(rtGame, req.Q, req.R)
 			if err == nil {
 				allPaths = pathsResult
-				
+
 				// Create move options from AllPaths
 				for key, edge := range allPaths.Edges {
 					// Create ready-to-use MoveUnitAction
@@ -176,13 +177,18 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 						ToR:   edge.ToR,
 					}
 
+					path, err := weewar.ReconstructPath(allPaths, edge.ToQ, edge.ToR)
+					if err != nil {
+						panic(err)
+					}
 					options = append(options, &v1.GameOption{
 						OptionType: &v1.GameOption_Move{
 							Move: &v1.MoveOption{
-								Q:            edge.ToQ,
-								R:            edge.ToR,
-								MovementCost: int32(edge.TotalCost),
-								Action:       moveAction,
+								Q:                 edge.ToQ,
+								R:                 edge.ToR,
+								MovementCost:      int32(edge.TotalCost),
+								Action:            moveAction,
+								ReconstructedPath: path,
 							},
 						},
 					})
@@ -238,6 +244,10 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 			},
 		})
 	}
+	// Sort it for convinience too
+	sort.Slice(options, func(i, j int) bool {
+		return weewar.GameOptionLess(options[i], options[j])
+	})
 
 	return &v1.GetOptionsAtResponse{
 		Options:         options,

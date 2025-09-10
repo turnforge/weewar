@@ -118,6 +118,22 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - GetOptionsAt includes AllPaths in response for client-side path visualization
 - Path reconstruction utilities for building complete paths and extracting reachable destinations
 
+### Turn Options Panel Implementation
+
+**Achievement**: Implemented interactive turn options panel similar to CLI's "options" command for displaying available actions when units are selected.
+
+**Key Changes**:
+1. **Library Refactoring**: Moved position_parser.go, path_display.go, and created options_formatter.go in lib/ for WASM accessibility
+2. **TurnOptionsPanel Component**: New dockable panel displaying move, attack, build, capture, and end turn options
+3. **Path Visualization**: Added path drawing capabilities to HexHighlightLayer with addPath(), removePath(), clearAllPaths() methods
+4. **Proto Integration**: Direct use of GameOption, MoveOption, AttackOption proto types without redundant conversions
+
+**Implementation Details**:
+- Options are pre-sorted by server, no client-side sorting needed
+- Move options display reconstructed paths from PathEdge data
+- Path visualization shows green lines when move options are selected
+- Integrated into dockview layout system alongside other game panels
+
 ### Previous Foundation
 
 **Interactive Unit Movement System**: Complete end-to-end functionality from unit selection to server validation and visual updates.

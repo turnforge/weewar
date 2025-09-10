@@ -15,6 +15,17 @@ export enum GameStatus {
 }
 
 
+export enum PathDirection {
+  PATH_DIRECTION_UNSPECIFIED = 0,
+  PATH_DIRECTION_LEFT = 1,
+  PATH_DIRECTION_TOP_LEFT = 2,
+  PATH_DIRECTION_TOP_RIGHT = 3,
+  PATH_DIRECTION_RIGHT = 4,
+  PATH_DIRECTION_BOTTOM_RIGHT = 5,
+  PATH_DIRECTION_BOTTOM_LEFT = 6,
+}
+
+
 
 export interface User {
   createdAt?: Date;
@@ -785,7 +796,12 @@ export interface PathEdge {
  * Full path from source to destination (constructed on-demand from AllPaths)
  */
 export interface Path {
+  /** Edges in order from source to destination */
   edges?: PathEdge[];
+  /** len(directions) = len(edges) - 1
+ and directions[i] = direction from edge[i - 1] -> edge[i] */
+  directions: PathDirection[];
+  /** Sum of all edge costs */
   totalCost: number;
 }
 
@@ -821,6 +837,8 @@ export interface MoveOption {
   movementCost: number;
   /** Ready-to-use action object for ProcessMoves */
   action?: MoveUnitAction;
+  /** Debug fields */
+  reconstructedPath?: Path;
 }
 
 

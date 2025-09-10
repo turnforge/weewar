@@ -19,6 +19,7 @@ import { MoveOption, AttackOption } from '../../../gen/wasm-clients/weewar/v1/mo
  */
 export abstract class HexHighlightLayer extends BaseLayer {
     protected highlights = new Map<string, Phaser.GameObjects.Graphics>();
+    protected paths: Phaser.GameObjects.Graphics[] = [];
     protected tileWidth: number;
     
     constructor(scene: Phaser.Scene, config: LayerConfig & { tileWidth: number }) {
@@ -106,9 +107,80 @@ export abstract class HexHighlightLayer extends BaseLayer {
         this.highlights.clear();
     }
     
+    /**
+     * Add a path through hex coordinates
+     * @param coords Array of coordinates as [q1, r1, q2, r2, ...]
+     * @param color Hex color for the path
+     * @param thickness Line thickness
+     * @returns Index of the added path
+     */
+    public addPath(coords: number[], color: number = 0x00ff00, thickness: number = 3): number {
+        if (coords.length < 4) {
+            console.warn('Path needs at least 2 points (4 coordinates)');
+            return -1;
+        }
+        
+        // Create graphics object for the path
+        const pathGraphics = this.scene.add.graphics();
+        this.container.add(pathGraphics);
+        
+        // Set line style
+        pathGraphics.lineStyle(thickness, color, 1.0);
+        
+        // Start the path
+        const startPos = hexToPixel(coords[0], coords[1]);
+        pathGraphics.moveTo(startPos.x, startPos.y);
+        
+        // Draw lines through each coordinate pair
+        for (let i = 2; i < coords.length; i += 2) {
+            const pos = hexToPixel(coords[i], coords[i + 1]);
+            pathGraphics.lineTo(pos.x, pos.y);
+        }
+        
+        // Stroke the path
+        pathGraphics.strokePath();
+        
+        // Add small circles at each waypoint for clarity
+        pathGraphics.fillStyle(color, 0.8);
+        for (let i = 0; i < coords.length; i += 2) {
+            const pos = hexToPixel(coords[i], coords[i + 1]);
+            pathGraphics.fillCircle(pos.x, pos.y, thickness * 1.5);
+        }
+        
+        // Store and return index
+        this.paths.push(pathGraphics);
+        return this.paths.length - 1;
+    }
+    
+    /**
+     * Remove a path by index
+     * @param index Index of the path to remove
+     */
+    public removePath(index: number): void {
+        if (index >= 0 && index < this.paths.length) {
+            const path = this.paths[index];
+            if (path) {
+                path.destroy();
+                this.paths.splice(index, 1);
+            }
+        }
+    }
+    
+    /**
+     * Clear all paths
+     */
+    public clearAllPaths(): void {
+        for (const path of this.paths) {
+            if (path) {
+                path.destroy();
+            }
+        }
+        this.paths = [];
+    }
     
     public destroy(): void {
         this.clearHighlights();
+        this.clearAllPaths();
         super.destroy();
     }
 }

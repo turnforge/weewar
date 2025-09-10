@@ -1842,6 +1842,10 @@
         "action": {
           "$ref": "#/definitions/v1MoveUnitAction",
           "title": "Ready-to-use action object for ProcessMoves"
+        },
+        "reconstructedPath": {
+          "$ref": "#/definitions/v1Path",
+          "title": "Debug fields"
         }
       },
       "title": "*\nOption to move to a specific coordinate"
@@ -1867,6 +1871,45 @@
         }
       },
       "title": "*\nMove unit from one position to another"
+    },
+    "v1Path": {
+      "type": "object",
+      "properties": {
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1PathEdge"
+          },
+          "title": "Edges in order from source to destination"
+        },
+        "directions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1PathDirection"
+          },
+          "title": "len(directions) = len(edges) - 1\nand directions[i] = direction from edge[i - 1] -\u003e edge[i]"
+        },
+        "totalCost": {
+          "type": "number",
+          "format": "float",
+          "title": "Sum of all edge costs"
+        }
+      },
+      "title": "Full path from source to destination (constructed on-demand from AllPaths)"
+    },
+    "v1PathDirection": {
+      "type": "string",
+      "enum": [
+        "PATH_DIRECTION_UNSPECIFIED",
+        "PATH_DIRECTION_LEFT",
+        "PATH_DIRECTION_TOP_LEFT",
+        "PATH_DIRECTION_TOP_RIGHT",
+        "PATH_DIRECTION_RIGHT",
+        "PATH_DIRECTION_BOTTOM_RIGHT",
+        "PATH_DIRECTION_BOTTOM_LEFT"
+      ],
+      "default": "PATH_DIRECTION_UNSPECIFIED"
     },
     "v1PathEdge": {
       "type": "object",

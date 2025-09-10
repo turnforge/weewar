@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -173,11 +172,6 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 		return fmt.Sprintf("Failed to get options: %v", err)
 	}
 
-	// Sort options using our sorting utility
-	sort.Slice(resp.Options, func(i, j int) bool {
-		return weewar.GameOptionLess(resp.Options[i], resp.Options[j])
-	})
-
 	// Build menu of options
 	var menuItems []string
 	var actions []*v1.GameMove
@@ -189,15 +183,15 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 		case *v1.GameOption_Move:
 			moveOpt := opt.Move
 			targetCoord := weewar.CoordFromInt32(moveOpt.Q, moveOpt.R)
-			
+
 			// Build the menu item with path if available
 			menuItem := fmt.Sprintf("%d. move to %s (cost: %d)",
 				menuIndex, targetCoord.String(), moveOpt.MovementCost)
-			
+
 			// Add path visualization if AllPaths is available
 			if resp.AllPaths != nil {
-				path, err := weewar.ReconstructPath(resp.AllPaths, moveOpt.Q, moveOpt.R)
-				if err == nil && path != nil {
+				path := moveOpt.ReconstructedPath // weewar.ReconstructPath(resp.AllPaths, moveOpt.Q, moveOpt.R)
+				if path != nil {
 					if detailed {
 						pathStr := weewar.FormatPathDetailed(path, "   ")
 						menuItem += "\n" + pathStr
@@ -207,7 +201,7 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 					}
 				}
 			}
-			
+
 			menuItems = append(menuItems, menuItem)
 
 			// Create the move action using the provided action

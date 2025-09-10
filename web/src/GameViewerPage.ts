@@ -223,7 +223,42 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     async activate(): Promise<void> {
         // Bind events now that all components are ready
         this.bindGameSpecificEvents();
+        
+        // Subscribe to path visualization events
+        this.eventBus.addSubscription('show-path-visualization', null, this);
+        this.eventBus.addSubscription('clear-path-visualization', null, this);
+        
         this.checkAndLoadWorldIntoViewer();
+    }
+    
+    
+    /**
+     * Show path visualization on the game scene
+     */
+    private showPathVisualization(coords: number[], color: number, thickness: number): void {
+        if (!this.gameScene) return;
+        
+        // Get the movement highlight layer (or selection layer) to draw paths
+        const movementLayer = this.gameScene.movementHighlightLayer;
+        if (movementLayer) {
+            // Clear any existing paths first
+            movementLayer.clearAllPaths();
+            // Add the new path
+            movementLayer.addPath(coords, color, thickness);
+        }
+    }
+    
+    /**
+     * Clear path visualization from the game scene
+     */
+    private clearPathVisualization(): void {
+        if (!this.gameScene) return;
+        
+        // Clear paths from movement layer
+        const movementLayer = this.gameScene.movementHighlightLayer;
+        if (movementLayer) {
+            movementLayer.clearAllPaths();
+        }
     }
 
     /*
@@ -304,6 +339,14 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                 
                 // Check if both viewer and game data are ready
                 this.checkAndLoadWorldIntoViewer();
+                break;
+            
+            case 'show-path-visualization':
+                this.showPathVisualization(data.coords, data.color, data.thickness);
+                break;
+                
+            case 'clear-path-visualization':
+                this.clearPathVisualization();
                 break;
             
             case 'unit-moved':

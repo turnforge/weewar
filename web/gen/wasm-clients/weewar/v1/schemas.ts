@@ -1795,9 +1795,15 @@ export const PathSchema: MessageSchema = {
       repeated: true,
     },
     {
+      name: "directions",
+      type: FieldType.REPEATED,
+      id: 2,
+      repeated: true,
+    },
+    {
       name: "totalCost",
       type: FieldType.NUMBER,
-      id: 2,
+      id: 3,
     },
   ],
 };
@@ -1885,6 +1891,12 @@ export const MoveOptionSchema: MessageSchema = {
       type: FieldType.MESSAGE,
       id: 4,
       messageType: "weewar.v1.MoveUnitAction",
+    },
+    {
+      name: "reconstructedPath",
+      type: FieldType.MESSAGE,
+      id: 5,
+      messageType: "weewar.v1.Path",
     },
   ],
 };

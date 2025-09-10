@@ -14,6 +14,7 @@ import { UnitStatsPanel } from './UnitStatsPanel';
 import { DamageDistributionPanel } from './DamageDistributionPanel';
 import { GameLogPanel } from './GameLogPanel';
 import { GameActionsPanel, GameActionsCallbacks } from './GameActionsPanel';
+import { TurnOptionsPanel } from './TurnOptionsPanel';
 import { GameEventTypes, WorldEventTypes } from './events';
 import { RulesTable, TerrainStats } from './RulesTable';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
@@ -72,6 +73,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private damageDistributionPanel: DamageDistributionPanel
     private gameLogPanel: GameLogPanel
     private gameActionsPanel: GameActionsPanel
+    private turnOptionsPanel: TurnOptionsPanel
     private rulesTable: RulesTable = new RulesTable();
     
     // Dockview interface
@@ -375,6 +377,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                         return this.createUnitStatsComponent();
                     case 'damage-distribution':
                         return this.createDamageDistributionComponent();
+                    case 'turn-options':
+                        return this.createTurnOptionsComponent();
                     case 'game-actions':
                         return this.createGameActionsComponent();
                     case 'game-log':
@@ -452,6 +456,17 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             position: { 
                 direction: 'below',
                 referencePanel: 'unit-stats-panel'
+            }
+        });
+
+        // Add turn options panel (below damage distribution panel)
+        this.dockview.addPanel({
+            id: 'turn-options-panel',
+            component: 'turn-options',
+            title: 'Turn Options',
+            position: { 
+                direction: 'below',
+                referencePanel: 'damage-distribution-panel'
             }
         });
 
@@ -594,6 +609,38 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             },
             dispose: () => {
                 // UnitStatsPanel cleanup will be handled by LCM lifecycle
+                // Component disposal is managed by DockView
+            }
+        };
+    }
+
+    /**
+     * Create turn options component
+     */
+    private createTurnOptionsComponent() {
+        const template = document.getElementById('turn-options-panel-template');
+        if (!template) {
+            throw new Error('turn-options-panel-template not found');
+        }
+
+        const element = template.cloneNode(true) as HTMLElement;
+        element.style.display = 'block';
+
+        return {
+            element,
+            init: () => {
+                // Create TurnOptionsPanel with the cloned element
+                this.turnOptionsPanel = new TurnOptionsPanel(element, this.eventBus, true);
+                // Set dependencies
+                if (this.gameState) {
+                    this.turnOptionsPanel.setGameState(this.gameState);
+                }
+                if (this.world) {
+                    this.turnOptionsPanel.setWorld(this.world);
+                }
+            },
+            dispose: () => {
+                // TurnOptionsPanel cleanup will be handled by LCM lifecycle
                 // Component disposal is managed by DockView
             }
         };
@@ -1148,9 +1195,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.availableMovementOptions = [];
         
         // Hide unit info via GameActionsPanel
-        if (this.gameActionsPanel) {
-            this.gameActionsPanel.hideSelectedUnit();
-        }
+        this.gameActionsPanel?.hideSelectedUnit();
     }
 
     /**
@@ -1311,8 +1356,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         
         // Show selected unit in GameActionsPanel
         const selectedUnit = this.world?.getUnitAt(q, r);
-        if (this.gameActionsPanel && selectedUnit) {
-            this.gameActionsPanel.showSelectedUnit(selectedUnit);
+        if (selectedUnit) {
+            this.gameActionsPanel?.showSelectedUnit(selectedUnit);
+            this.turnOptionsPanel?.handleUnitSelection(q, r, selectedUnit)
         }
         
         // Update GameViewer to show highlights using layer-based approach  

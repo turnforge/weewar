@@ -1,6 +1,21 @@
 import { EventBus } from '../lib/EventBus';
 import Weewar_v1_servicesClient from '../gen/wasm-clients/weewar/v1/servicesClient.client';
-import { ProcessMovesRequest, ProcessMovesResponse, GetGameRequest, GetGameStateRequest, GetOptionsAtRequest, GameMove, WorldChange, MoveUnitAction, AttackUnitAction, EndTurnAction, GameState as ProtoGameState, Game as ProtoGame, WorldData } from '../gen/wasm-clients/weewar/v1/models'
+import { 
+    ProcessMovesRequest, 
+    ProcessMovesResponse, 
+    GetGameRequest, 
+    GetGameStateRequest, 
+    GetOptionsAtRequest, 
+    GetOptionsAtResponse,
+    GameMove, 
+    WorldChange, 
+    MoveUnitAction, 
+    AttackUnitAction, 
+    EndTurnAction, 
+    GameState as ProtoGameState, 
+    Game as ProtoGame, 
+    WorldData 
+} from '../gen/wasm-clients/weewar/v1/models'
 import { create } from '@bufbuild/protobuf';
 
 /**
@@ -334,11 +349,15 @@ export class GameState {
     /**
      * ✅ Get all options at a position (core WASM method)
      */
-    public async getOptionsAt(q: number, r: number): Promise<any> {
+    public async getOptionsAt(q: number, r: number): Promise<GetOptionsAtResponse> {
         const client = await this.ensureWASMLoaded();
         
         if (!this.gameId) {
-            return { options: [], currentPlayer: 0, gameInitialized: false };
+            return GetOptionsAtResponse.from({ 
+                options: [], 
+                currentPlayer: 0, 
+                gameInitialized: false 
+            });
         }
 
         const request = GetOptionsAtRequest.from({

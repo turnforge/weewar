@@ -3,7 +3,16 @@ import { EventBus } from '../lib/EventBus';
 import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
 import { GameState } from './GameState';
-import { GameState as ProtoGameState, Game as ProtoGame, GameConfiguration as ProtoGameConfiguration, MoveOption, AttackOption, GameMove } from '../gen/wasm-clients/weewar/v1/models';
+import { 
+    GameState as ProtoGameState, 
+    Game as ProtoGame, 
+    GameConfiguration as ProtoGameConfiguration, 
+    MoveOption, 
+    AttackOption, 
+    GameMove,
+    GetOptionsAtResponse,
+    GameOption
+} from '../gen/wasm-clients/weewar/v1/models';
 import { WeewarV1Deserializer } from '../gen/wasm-clients/weewar/v1/deserializer';
 import { create } from '@bufbuild/protobuf';
 import { LCMComponent } from '../lib/LCMComponent';
@@ -1267,7 +1276,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     private handleUnitClick(q: number, r: number): void {
         // Handle async unit interaction using unified getOptionsAt
-        this.gameState.getOptionsAt(q, r).then(async response => {
+        this.gameState.getOptionsAt(q, r).then(async (response: GetOptionsAtResponse) => {
             // ✅ Use shared World for fast unit query
             const unit = this.world?.getUnitAt(q, r);
             
@@ -1281,13 +1290,13 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             
             const options = response.options || [];
             
-            const hasMovementOptions = options.some((opt: any) => opt.move !== undefined);
-            const hasAttackOptions = options.some((opt: any) => opt.attack !== undefined);
+            const hasMovementOptions = options.some(opt => opt.move !== undefined);
+            const hasAttackOptions = options.some(opt => opt.attack !== undefined);
             const hasOnlyEndTurn = options.length === 1 && options[0].endTurn !== undefined;
             
             if (hasMovementOptions || hasAttackOptions) {
-                // This unit has actionable options - select it
-                this.selectUnitAt(q, r); // Use unified method
+                // This unit has actionable options - process it directly (no duplicate RPC)
+                this.processUnitSelection(q, r, options, response);
             } else if (hasOnlyEndTurn) {
                 // This position only has endTurn option - could be empty tile, enemy unit, or friendly unit with no actions
                 
@@ -1383,15 +1392,18 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     /**
      * Process unit selection with unified options format
      */
-    private processUnitSelection(q: number, r: number, options: any[]): void {
+    private processUnitSelection(q: number, r: number, options: GameOption[], fullResponse?: GetOptionsAtResponse): void {
         // Extract movement and attack options from the unified options
         // Note: protobuf oneof fields become direct properties (e.g., option.move, option.attack)
         const movementOptions = options.filter(opt => opt.move !== undefined);
         const attackOptions = options.filter(opt => opt.attack !== undefined);
         
+        // Log to verify we're getting all options
+        console.log(`[GameViewerPage] Processing selection: ${options.length} total, ${movementOptions.length} moves, ${attackOptions.length} attacks`);
+        
         // Extract MoveOption and AttackOption objects from the unified options
-        const moveOptionObjects = movementOptions.map((option: any) => option.move);
-        const attackOptionObjects = attackOptions.map((option: any) => option.attack);
+        const moveOptionObjects = movementOptions.map(option => option.move!);
+        const attackOptionObjects = attackOptions.map(option => option.attack!);
         
         // Store selected unit info and available options for move execution
         this.selectedUnitCoord = { q, r };
@@ -1401,7 +1413,13 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         const selectedUnit = this.world?.getUnitAt(q, r);
         if (selectedUnit) {
             this.gameActionsPanel?.showSelectedUnit(selectedUnit);
-            this.turnOptionsPanel?.handleUnitSelection(q, r, selectedUnit)
+            // Pass the full response to TurnOptionsPanel to avoid duplicate RPC
+            if (fullResponse) {
+                this.turnOptionsPanel?.handleUnitSelectionWithOptions(q, r, selectedUnit, fullResponse);
+            } else {
+                // Fallback if no response provided (shouldn't happen)
+                this.turnOptionsPanel?.handleUnitSelection(q, r, selectedUnit);
+            }
         }
         
         // Update GameViewer to show highlights using layer-based approach  

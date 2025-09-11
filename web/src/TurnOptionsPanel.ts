@@ -10,7 +10,8 @@ import {
     AttackOption,
     EndTurnOption,
     BuildUnitOption,
-    CaptureBuildingOption
+    CaptureBuildingOption,
+    GetOptionsAtResponse
 } from '../gen/wasm-clients/weewar/v1/models';
 
 /**
@@ -105,7 +106,24 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     }
 
     /**
-     * Handle unit selection - fetch and display options
+     * Handle unit selection with pre-fetched options (avoids duplicate RPC)
+     */
+    public handleUnitSelectionWithOptions(q: number, r: number, unit: Unit, response: GetOptionsAtResponse): void {
+        this.log(`Unit selected at (${q}, ${r}) with pre-fetched options`);
+        this.selectedPosition = { q, r };
+        this.selectedUnit = unit;
+        
+        if (!response || !response.options) {
+            this.showEmptyOptions();
+            return;
+        }
+        
+        // Process and display options
+        this.processOptions(response);
+    }
+    
+    /**
+     * Handle unit selection - fetch and display options (legacy, makes own RPC)
      */
     public async handleUnitSelection(q: number, r: number, unit: Unit): Promise<void> {
         this.log(`Unit selected at (${q}, ${r})`);
@@ -155,7 +173,7 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     /**
      * Process options from the server response
      */
-    private processOptions(response: any): void {
+    private processOptions(response: GetOptionsAtResponse): void {
         // Options are already sorted by the server
         this.currentOptions = response.options || [];
         

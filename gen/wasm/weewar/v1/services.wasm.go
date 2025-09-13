@@ -19,9 +19,10 @@ import (
 
 // ServicesServicesExports provides WASM exports for dependency injection
 type ServicesServicesExports struct {
-	GamesService  weewarv1.GamesServiceServer
-	UsersService  weewarv1.UsersServiceServer
-	WorldsService weewarv1.WorldsServiceServer
+	GamesService             weewarv1.GamesServiceServer
+	GameViewPresenterService weewarv1.GameViewPresenterServiceServer
+	UsersService             weewarv1.UsersServiceServer
+	WorldsService            weewarv1.WorldsServiceServer
 }
 
 // RegisterAPI registers the services with the JavaScript global namespace
@@ -59,6 +60,14 @@ func (exports *ServicesServicesExports) RegisterAPI() {
 			}),
 			"getOptionsAt": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gamesServiceGetOptionsAt(this, args)
+			}),
+		},
+		"gameViewPresenterService": map[string]interface{}{
+			"tileClicked": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gameViewPresenterServiceTileClicked(this, args)
+			}),
+			"turnOptionClicked": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gameViewPresenterServiceTurnOptionClicked(this, args)
 			}),
 		},
 		"usersService": map[string]interface{}{
@@ -583,6 +592,104 @@ func (exports *ServicesServicesExports) gamesServiceGetOptionsAt(this js.Value, 
 
 	// Call service method
 	resp, err := exports.GamesService.GetOptionsAt(ctx, req)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// gameViewPresenterServiceTileClicked handles the TileClicked method for GameViewPresenterService
+func (exports *ServicesServicesExports) gameViewPresenterServiceTileClicked(this js.Value, args []js.Value) any {
+	if exports.GameViewPresenterService == nil {
+		return createJSResponse(false, "GameViewPresenterService not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return createJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return createJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &weewarv1.TileClickedRequest{}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.GameViewPresenterService.TileClicked(ctx, req)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: false, // Don't emit zero values
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// gameViewPresenterServiceTurnOptionClicked handles the TurnOptionClicked method for GameViewPresenterService
+func (exports *ServicesServicesExports) gameViewPresenterServiceTurnOptionClicked(this js.Value, args []js.Value) any {
+	if exports.GameViewPresenterService == nil {
+		return createJSResponse(false, "GameViewPresenterService not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return createJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return createJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &weewarv1.TurnOptionClickedRequest{}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.GameViewPresenterService.TurnOptionClicked(ctx, req)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

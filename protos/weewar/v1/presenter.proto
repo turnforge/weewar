@@ -1,0 +1,72 @@
+
+syntax = "proto3";
+
+package weewar.v1;
+
+import "google/protobuf/field_mask.proto";
+import "weewar/v1/models.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
+
+// Presenter service is the P in Model View Presenter
+// We noticed that the front end was getting very bloated with not just views but also the 
+// cycles of interactions across various components.   So a MVP is being adopted where
+// the frontend/views are being as dumb as possible.  They will just react to commands
+// and state changes but not be responsible for handling user interactions.  They will just
+// present them to the Presenter who will handle the UI logic between the view and the backend (model)
+//
+// This will also help us mock out the views as we see fit for testing and also have various kinds of views
+// eg a Text based views, Typescript views, views over websocket to remote clients etc
+//
+// The other advantage is we can also change presenters to suit various looks/feels.
+// Note that our Presenter service is GameViewPresenter service.  This way we can create one presenter
+// per "page" so each page (which is heavy weight and needs wasm) can create one of these.
+service GameViewPresenterService {
+  /**
+   * This is called when the user clicks a tile on the Game Scene
+   * The tile can have a unit or just be a plain tile.  It is upto the presenter to
+   * change the various view states
+   */
+  rpc TileClicked(TileClickedRequest) returns (TileClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:tileClicked/{game_id}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Called when a particular turn option is clicked in the TurnOptionsPanel
+   * Note how we have a strong coupling between what the page elements do and which presenter elements they call
+   */
+  rpc TurnOptionClicked(TurnOptionClickedRequest) returns (TurnOptionClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:turnOptionClicked/{game_id}",
+      body: "*",
+    };
+  }
+}
+
+// GameInfo represents a game in the catalog
+message TurnOptionClickedRequest {
+  string game_id = 1;
+}
+
+// Response of a turn option click
+message TurnOptionClickedResponse {
+  string game_id = 1;
+}
+
+// 
+message TileClickedRequest {
+  string game_id = 1;
+  int32 q = 2;
+  int32 r = 3;
+}
+
+// Response of a turn option click
+message TileClickedResponse {
+  string game_id = 1;
+}
+

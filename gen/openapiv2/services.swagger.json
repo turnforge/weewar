@@ -12,6 +12,9 @@
       "name": "GamesService"
     },
     {
+      "name": "GameViewPresenterService"
+    },
+    {
       "name": "UsersService"
     },
     {
@@ -449,6 +452,95 @@
         ],
         "tags": [
           "GamesService"
+        ]
+      }
+    },
+    "/v1/presenters/gameview/action:tileClicked/{game_id}": {
+      "post": {
+        "summary": "*\nThis is called when the user clicks a tile on the Game Scene\nThe tile can have a unit or just be a plain tile.  It is upto the presenter to\nchange the various view states",
+        "operationId": "GameViewPresenterService_TileClicked",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TileClickedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "q": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "r": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "GameViewPresenterService"
+        ]
+      }
+    },
+    "/v1/presenters/gameview/action:turnOptionClicked/{game_id}": {
+      "post": {
+        "summary": "*\nCalled when a particular turn option is clicked in the TurnOptionsPanel\nNote how we have a strong coupling between what the page elements do and which presenter elements they call",
+        "operationId": "GameViewPresenterService_TurnOptionClicked",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TurnOptionClickedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "title": "GameInfo represents a game in the catalog"
+            }
+          }
+        ],
+        "tags": [
+          "GameViewPresenterService"
         ]
       }
     },
@@ -2223,6 +2315,24 @@
           "title": "A short cut like A1 or S2 etc for quick access"
         }
       }
+    },
+    "v1TileClickedResponse": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "string"
+        }
+      },
+      "title": "Response of a turn option click"
+    },
+    "v1TurnOptionClickedResponse": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "string"
+        }
+      },
+      "title": "Response of a turn option click"
     },
     "v1Unit": {
       "type": "object",

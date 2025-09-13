@@ -23,6 +23,13 @@ func main() {
 		//     auth: authService,
 		//     config: appConfig,
 		// },
+		// TODO: Replace with your actual GameViewPresenterService implementation
+		// GameViewPresenterService: &yourGameViewPresenterServiceImplementation{
+		//     // Initialize with database, config, etc.
+		//     db: database,
+		//     auth: authService,
+		//     config: appConfig,
+		// },
 		// TODO: Replace with your actual UsersService implementation
 		// UsersService: &yourUsersServiceImplementation{
 		//     // Initialize with database, config, etc.

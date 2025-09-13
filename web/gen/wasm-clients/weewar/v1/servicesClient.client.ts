@@ -36,6 +36,14 @@ export interface GamesServiceMethods {
 	getOptionsAt(request: any): Promise<any>;
 }
 /**
+ * GameViewPresenterService service client interface
+ * Uses any types since we generate our own TypeScript interfaces
+ */
+export interface GameViewPresenterServiceMethods {
+	tileClicked(request: any): Promise<any>;
+	turnOptionClicked(request: any): Promise<any>;
+}
+/**
  * UsersService service client interface
  * Uses any types since we generate our own TypeScript interfaces
  */
@@ -70,11 +78,13 @@ export class ServicesClient {
 
     // Service-specific clients
     public readonly gamesService: GamesServiceClientImpl;
+    public readonly gameViewPresenterService: GameViewPresenterServiceClientImpl;
     public readonly usersService: UsersServiceClientImpl;
     public readonly worldsService: WorldsServiceClientImpl;
 
     constructor() {
         this.gamesService = new GamesServiceClientImpl(this);
+        this.gameViewPresenterService = new GameViewPresenterServiceClientImpl(this);
         this.usersService = new UsersServiceClientImpl(this);
         this.worldsService = new WorldsServiceClientImpl(this);
     }
@@ -312,6 +322,18 @@ class GamesServiceClientImpl implements GamesServiceMethods {
     }
     async getOptionsAt(request: any): Promise<any> {
         return this.parent.callMethod('gamesService.getOptionsAt', request);
+    }
+}
+/**
+ * GameViewPresenterService service client implementation
+ */
+class GameViewPresenterServiceClientImpl implements GameViewPresenterServiceMethods {
+    constructor(private parent: ServicesClient) {}
+    async tileClicked(request: any): Promise<any> {
+        return this.parent.callMethod('gameViewPresenterService.tileClicked', request);
+    }
+    async turnOptionClicked(request: any): Promise<any> {
+        return this.parent.callMethod('gameViewPresenterService.turnOptionClicked', request);
     }
 }
 /**

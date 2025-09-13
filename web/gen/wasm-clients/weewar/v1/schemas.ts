@@ -2004,6 +2004,76 @@ export const CaptureBuildingOptionSchema: MessageSchema = {
 
 
 /**
+ * Schema for TurnOptionClickedRequest message
+ */
+export const TurnOptionClickedRequestSchema: MessageSchema = {
+  name: "TurnOptionClickedRequest",
+  fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+  ],
+};
+
+
+/**
+ * Schema for TurnOptionClickedResponse message
+ */
+export const TurnOptionClickedResponseSchema: MessageSchema = {
+  name: "TurnOptionClickedResponse",
+  fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+  ],
+};
+
+
+/**
+ * Schema for TileClickedRequest message
+ */
+export const TileClickedRequestSchema: MessageSchema = {
+  name: "TileClickedRequest",
+  fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "q",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "r",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+  ],
+};
+
+
+/**
+ * Schema for TileClickedResponse message
+ */
+export const TileClickedResponseSchema: MessageSchema = {
+  name: "TileClickedResponse",
+  fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+  ],
+};
+
+
+/**
  * Schema for UserInfo message
  */
 export const UserInfoSchema: MessageSchema = {
@@ -2680,6 +2750,10 @@ export const WeewarV1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.AttackOption": AttackOptionSchema,
   "weewar.v1.BuildUnitOption": BuildUnitOptionSchema,
   "weewar.v1.CaptureBuildingOption": CaptureBuildingOptionSchema,
+  "weewar.v1.TurnOptionClickedRequest": TurnOptionClickedRequestSchema,
+  "weewar.v1.TurnOptionClickedResponse": TurnOptionClickedResponseSchema,
+  "weewar.v1.TileClickedRequest": TileClickedRequestSchema,
+  "weewar.v1.TileClickedResponse": TileClickedResponseSchema,
   "weewar.v1.UserInfo": UserInfoSchema,
   "weewar.v1.ListUsersRequest": ListUsersRequestSchema,
   "weewar.v1.ListUsersResponse": ListUsersResponseSchema,

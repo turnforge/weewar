@@ -883,6 +883,38 @@ export interface CaptureBuildingOption {
 
 
 /**
+ * GameInfo represents a game in the catalog
+ */
+export interface TurnOptionClickedRequest {
+  gameId: string;
+}
+
+
+/**
+ * Response of a turn option click
+ */
+export interface TurnOptionClickedResponse {
+  gameId: string;
+}
+
+
+
+export interface TileClickedRequest {
+  gameId: string;
+  q: number;
+  r: number;
+}
+
+
+/**
+ * Response of a turn option click
+ */
+export interface TileClickedResponse {
+  gameId: string;
+}
+
+
+/**
  * UserInfo represents a user in the catalog
  */
 export interface UserInfo {

@@ -7,3 +7,9 @@ deps:
   - name: buf.build/grpc-ecosystem/grpc-gateway
     commit: 4c5ba75caaf84e928b7137ae5c18c26a
     digest: b5:c113e62fb3b29289af785866cae062b55ec8ae19ab3f08f3004098928fbca657730a06810b2012951294326b95669547194fa84476b9e9b688d4f8bf77a0691d
+  - name: buf.build/panyam/protoc-gen-go-wasmjs
+    commit: 13089b8b995c4288925caef8744de40d
+    digest: b5:f825b0a9de63c0d32f2f3841db90831b530cfd35fdf6ff27cff73d5a5491043b2cb5367c83bc2c5f928590552a03b0a50d44b29a0f4a5bb4fbeccfc81b2b0854
+  - name: buf.build/protocolbuffers/wellknowntypes
+    commit: a4aee59cf3714106961b09d99b349cd1
+    digest: b5:0bcf938c1c604919ccc4bee0b72b56ffe049fd043837b80aca7c89a984979e9b4913b4973166fa6e7895995b30da23daab6c83d9ba21d9d16ddc414bf25e3288

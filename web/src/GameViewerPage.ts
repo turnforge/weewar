@@ -108,6 +108,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     performLocalInit(): LCMComponent[] {
         // Load game config first
         this.currentGameId = (document.getElementById("gameIdInput") as HTMLInputElement).value.trim()
+        if (!this.currentGameId) {
+          throw new Error("Game Id Not Found")
+        }
         
         // Subscribe to events BEFORE creating components
         this.subscribeToGameStateEvents();
@@ -118,9 +121,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.updateGameStatus('Game Loading...');
         
         // Start WASM and game data loading early (parallel to WorldViewer initialization)
-        if (!this.currentGameId) {
-          throw new Error("Game Id Not Found")
-        }
         this.initializeGameWithWASM().then(() => {
             // Emit event to indicate game data is ready
             this.eventBus.emit(GameEventTypes.GAME_DATA_LOADED, { gameId: this.currentGameId }, this, this);

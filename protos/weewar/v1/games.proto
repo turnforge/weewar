@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package weewar.v1;
 
-import "google/protobuf/field_mask.proto";
-import "weewar/v1/models.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/field_mask.proto";
+import "weewar/v1/models.proto";
 
 option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
 

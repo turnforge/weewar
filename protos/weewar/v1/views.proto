@@ -1,0 +1,45 @@
+
+syntax = "proto3";
+
+package browser.v1;
+
+import "wasmjs/v1/annotations.proto";
+
+option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
+
+// BrowserAPI provides access to browser functionality from WASM
+service TerrainStatsPanel {
+    option (wasmjs.v1.browser_provided) = true;
+}
+
+// Unit Stats panel
+service UnitStatsPanel {
+    option (wasmjs.v1.browser_provided) = true;
+    rpc Empty(EmptyRequest) returns (EmptyResponse);
+}
+
+service DamageDistributionPanel {
+    option (wasmjs.v1.browser_provided) = true;
+    rpc Empty(EmptyRequest) returns (EmptyResponse);
+}
+
+// Specific map viewer and controls
+service GameScene {
+    option (wasmjs.v1.browser_provided) = true;
+
+    // Fetch makes an HTTP request from the browser
+    // rpc Fetch(FetchRequest) returns (FetchResponse);
+    rpc Empty(EmptyRequest) returns (EmptyResponse);
+}
+
+// Over all game view page elements
+service GameViewPage {
+    option (wasmjs.v1.browser_provided) = true;
+
+    // Fetch makes an HTTP request from the browser
+    // rpc Fetch(FetchRequest) returns (FetchResponse);
+    rpc Empty(EmptyRequest) returns (EmptyResponse);
+}
+
+message EmptyRequest {}
+message EmptyResponse {}

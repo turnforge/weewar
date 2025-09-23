@@ -19,9 +19,7 @@ test:
 	cd lib && go test . -cover
 	# cd cmd/weewar-cli && go test ./...
 
-buf:
-	rm -Rf gen 
-	rm -Rf web/gen
+buf: ensureenv clean
 	buf generate
 	goimports -w `find gen | grep "\.go"`
 
@@ -60,3 +58,33 @@ install-tools:
 	go install connectrpc.com/connect/cmd/protoc-gen-connect-go@latest
 	npm install --force -g  @bufbuild/buf @bufbuild/protobuf @bufbuild/protoc-gen-es @bufbuild/protoc-gen-connect-es
 	@echo "✓ Go tools installed"
+
+clean:
+	rm -Rf gen
+	rm -Rf web/gen
+	rm -f buf.lock
+
+cleanall: clean remove-proto-symlinks
+	rm -f buf.yaml
+	rm -f buf.gen.yaml
+
+setupdev: cleanall symlink-protos
+	ln -s buf.gen.yaml.dev buf.gen.yaml
+	ln -s buf.yaml.dev buf.yaml
+
+setupprod: cleanall remove-proto-symlinks
+	ln -s buf.gen.yaml.prod buf.gen.yaml
+	ln -s buf.yaml.prod buf.yaml
+
+ensureenv:
+	@test -f buf.yaml && test -f buf.gen.yaml && echo "buf.yaml does not exist.  Run 'make setupdev' or 'make setupprod' to setup your environment..."
+
+# Create symlink to wasmjs annotations for development
+symlink-protos: remove-proto-symlinks
+	echo "Creating turnengine symlink for development..."
+	ln -s ../../../engine/protos/turnengine protos/turnengine
+
+# Remove symlink (for switching back to production mode)
+remove-proto-symlinks:
+	echo "Removing turnengine proto symlink..."
+	rm -Rf protos/wasmjs protos/turnengine

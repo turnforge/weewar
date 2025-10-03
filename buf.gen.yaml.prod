@@ -11,7 +11,7 @@ managed:
   override:
     - file_option: go_package_prefix
       value: github.com/panyam/turnengine/games/weewar/gen/go
- plugins:
+plugins:
   - remote: buf.build/protocolbuffers/go
     out: ./gen/go
     opt: paths=source_relative

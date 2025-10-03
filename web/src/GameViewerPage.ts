@@ -11,8 +11,10 @@ import {
     AttackOption, 
     GameMove,
     GetOptionsAtResponse,
-    GameOption
+    GameOption,
+    WorldData
 } from '../gen/wasmjs/weewar/v1/interfaces';
+import * as models from '../gen/wasmjs/weewar/v1/models';
 import { create } from '@bufbuild/protobuf';
 import { LCMComponent } from '../lib/LCMComponent';
 import { LifecycleController } from '../lib/LifecycleController';
@@ -171,11 +173,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         // Set up scene click callback now that gameScene is initialized
         this.gameScene.sceneClickedCallback = (context: any, layer: string, extra?: any): void => {
-            if (!this.gameState?.isReady()) {
-                console.warn('[GameViewerPage] Game not ready for map clicks');
-                return;
-            }
-
             const { hexQ: q, hexR: r } = context;
             
             // Get tile and unit data from World using coordinates
@@ -838,8 +835,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             throw new Error('GameState component not initialized');
         }
 
-        // Wait for WASM to be ready (only async part)
-        await this.gameState.waitUntilReady();
+        // TODO - Come back to this Wait for WASM to be ready (only async part)
+        // await this.gameState.waitUntilReady();
         
         // Load game data into WASM singletons and create World object in GameState
         await this.gameState.loadGameDataToWasm();
@@ -908,15 +905,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     async selectUnitAt(q: number, r: number): Promise<ActionResult> {
         try {
-            if (!this.gameState?.isReady()) {
-                const error = {
-                    success: false,
-                    message: 'Game not ready',
-                    error: 'Game state not initialized or WASM not loaded'
-                } as ActionResult;
-                return error;
-            }
-
             // Check if there's a unit at this position
             const unit = this.world?.getUnitAt(q, r);
             if (!unit) {
@@ -985,14 +973,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     async moveSelectedUnitTo(q: number, r: number): Promise<ActionResult> {
         try {
-            if (!this.gameState?.isReady()) {
-                return {
-                    success: false,
-                    message: 'Game not ready',
-                    error: 'Game state not initialized'
-                };
-            }
-
             if (!this.selectedUnitCoord) {
                 return {
                     success: false,
@@ -1062,14 +1042,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     async endCurrentPlayerTurn(): Promise<ActionResult> {
         try {
-            if (!this.gameState?.isReady()) {
-                return {
-                    success: false,
-                    message: 'Game not ready',
-                    error: 'Game state not initialized'
-                } as ActionResult;
-            }
-
             const currentPlayer = this.gameState.getCurrentPlayer();
             const currentTurn = this.gameState.getTurnCounter();
 
@@ -1116,17 +1088,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     async getGameState(): Promise<GameStateInfo> {
         try {
-            if (!this.gameState?.isReady() || !this.world) {
-                return {
-                    gameId: this.currentGameId || 'unknown',
-                    currentPlayer: -1,
-                    turnCounter: -1,
-                    selectedUnit: undefined,
-                    unitsCount: 0,
-                    tilesCount: 0
-                };
-            }
-
             const gameState = await this.gameState.getCurrentGameState();
             
             return {
@@ -1189,10 +1150,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     }
 
     private showAllPlayerUnits(): void {
-        if (!this.gameState?.isReady()) {
-            return;
-        }
-
         // ✅ Use GameState metadata
         const currentPlayer = this.gameState.getCurrentPlayer();
         
@@ -1463,7 +1420,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             // ✅ Get current player from move option or query WASM
             const currentGameState = await this.gameState!.getCurrentGameState();
             
-            const gameMove= GameMove.from({
+            const gameMove= models.GameMove.from({
                 player: currentGameState.currentPlayer,
                 moveUnit: moveOption.action,
             })!;
@@ -1515,9 +1472,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
       }
 
       // Enhanced world data validation
-      const backendWorldData = backendState.worldData!;
-      const backendTiles = backendWorldData.tiles
-      const backendUnits = backendWorldData.units
+      const backendWorldData = backendState.worldData as WorldData;
+      const backendTiles = backendWorldData.tiles || []
+      const backendUnits = backendWorldData.units || []
       
       if (backendTiles.length != Object.keys(this.world.tiles).length) {
         throw new Error(`Backend Tile Count (${backendTiles.length}) != this.tileCount(${Object.keys(this.world.tiles).length})`)

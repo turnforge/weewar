@@ -2,8 +2,8 @@ version: v2
 modules:
   - path: protos
 deps:
-  - buf.build/googleapis/googleapis
   - buf.build/protocolbuffers/wellknowntypes
+  - buf.build/googleapis/googleapis
   - buf.build/grpc-ecosystem/grpc-gateway
   - buf.build/panyam/protoc-gen-go-wasmjs
   - buf.build/panyam/turnengine

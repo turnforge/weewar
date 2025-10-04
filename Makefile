@@ -83,9 +83,9 @@ ensureenv:
 # Create symlink to wasmjs annotations for development
 symlink-protos: remove-proto-symlinks
 	echo "Creating turnengine symlink for development..."
-	ln -s ../../../engine/protos/turnengine protos/turnengine
+	# ln -s ../../../engine/protos/turnengine protos/turnengine
 
 # Remove symlink (for switching back to production mode)
 remove-proto-symlinks:
 	echo "Removing turnengine proto symlink..."
-	rm -Rf protos/wasmjs protos/turnengine
+	# rm -Rf protos/wasmjs protos/turnengine

@@ -10,6 +10,9 @@ deps:
   - name: buf.build/panyam/protoc-gen-go-wasmjs
     commit: 13089b8b995c4288925caef8744de40d
     digest: b5:f825b0a9de63c0d32f2f3841db90831b530cfd35fdf6ff27cff73d5a5491043b2cb5367c83bc2c5f928590552a03b0a50d44b29a0f4a5bb4fbeccfc81b2b0854
+  - name: buf.build/panyam/turnengine
+    commit: ab3ddf9b669d49b5bd95c111268b255a
+    digest: b5:dd7888e0b5171321d9d29308c8b8bdd4307fd356ab2dafbcda6c01fd557f39650faa62da6e0649eea074c24c99faebb1171605b307600cd255c7312ed148ab5d
   - name: buf.build/protocolbuffers/wellknowntypes
     commit: a4aee59cf3714106961b09d99b349cd1
     digest: b5:0bcf938c1c604919ccc4bee0b72b56ffe049fd043837b80aca7c89a984979e9b4913b4973166fa6e7895995b30da23daab6c83d9ba21d9d16ddc414bf25e3288

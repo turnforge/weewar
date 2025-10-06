@@ -1,0 +1,68 @@
+
+syntax = "proto3";
+
+package weewar.v1;
+
+import "wasmjs/v1/annotations.proto";
+
+option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
+
+// All methods needed to control the TurnOptionsPanel
+service TurnOptionsPanel {
+    option (wasmjs.v1.browser_provided) = true;
+
+    // Fetch makes an HTTP request from the browser
+    rpc SetContent(SetContentRequest) returns (SetContentResponse);
+}
+
+// All methods needed to control the GameLogPanel
+service GameLogPanel {
+    option (wasmjs.v1.browser_provided) = true;
+
+    rpc SetContent(SetContentRequest) returns (SetContentResponse);
+}
+
+// All methods needed to control the UnitStatsPanel
+service UnitStatsPanel {
+    option (wasmjs.v1.browser_provided) = true;
+
+    rpc SetContent(SetContentRequest) returns (SetContentResponse);
+}
+
+// All methods needed to control the UnitStatsPanel
+service TerrainStatsPanel {
+    option (wasmjs.v1.browser_provided) = true;
+
+    rpc SetContent(SetContentRequest) returns (SetContentResponse);
+}
+
+service DamageDistributionPanel {
+    option (wasmjs.v1.browser_provided) = true;
+    rpc SetContent(SetContentRequest) returns (SetContentResponse);
+}
+
+// Specific map viewer and controls
+service GameScene {
+    option (wasmjs.v1.browser_provided) = true;
+
+    rpc Empty(EmptyRequest) returns (EmptyResponse);
+}
+
+// Over all game view page elements
+service GameViewPage {
+    option (wasmjs.v1.browser_provided) = true;
+
+    rpc Empty(EmptyRequest) returns (EmptyResponse);
+}
+
+message EmptyRequest {}
+message EmptyResponse {}
+
+// Request to fetch data from a URL
+message SetContentRequest {
+    string inner_html = 1;
+}
+
+// Response from fetch
+message SetContentResponse {
+}

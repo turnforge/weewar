@@ -29,20 +29,31 @@ service GameViewPresenterService {
    * The tile can have a unit or just be a plain tile.  It is upto the presenter to
    * change the various view states
    */
-  rpc TileClicked(TileClickedRequest) returns (TileClickedResponse) {
+  rpc SceneClicked(SceneClickedRequest) returns (SceneClickedResponse) {
     option (google.api.http) = {
-      post: "/v1/presenters/gameview/action:tileClicked/{game_id}",
+      post: "/v1/presenters/gameview/action:clicked:scene/{game_id}",
       body: "*",
     };
   }
 
   /**
    * Called when a particular turn option is clicked in the TurnOptionsPanel
-   * Note how we have a strong coupling between what the page elements do and which presenter elements they call
+   * Note how we have a strong coupling between what the page elements do and which
+   * presenter elements they call
    */
   rpc TurnOptionClicked(TurnOptionClickedRequest) returns (TurnOptionClickedResponse) {
     option (google.api.http) = {
-      post: "/v1/presenters/gameview/action:turnOptionClicked/{game_id}",
+      post: "/v1/presenters/gameview/action:clicked:turnOption/{game_id}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Called when user clicked the EndTurn button
+   */
+  rpc EndTurnButtonClicked(EndTurnButtonClickedRequest) returns (EndTurnButtonClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}",
       body: "*",
     };
   }
@@ -58,15 +69,25 @@ message TurnOptionClickedResponse {
   string game_id = 1;
 }
 
-// 
-message TileClickedRequest {
+// Called when the scene was clicked
+message SceneClickedRequest {
   string game_id = 1;
   int32 q = 2;
   int32 r = 3;
 }
 
 // Response of a turn option click
-message TileClickedResponse {
+message SceneClickedResponse {
+  string game_id = 1;
+}
+
+// Called when the end turn button was clicked
+message EndTurnButtonClickedRequest {
+  string game_id = 1;
+}
+
+// Response of a turn option click
+message EndTurnButtonClickedResponse {
   string game_id = 1;
 }
 

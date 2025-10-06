@@ -2,7 +2,7 @@
 
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
-import "turnengine/v1/coordinator.proto";
+//import "turnengine/v1/coordinator.proto";
 option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
 package weewar.v1;
 
@@ -329,7 +329,7 @@ message GameState {
   WorldData world_data = 6;
 
   // Proposal tracking for multiplayer coordination (from TurnEngine)
-  turnengine.v1.ProposalTrackingInfo proposal_info = 7;
+  // turnengine.v1.ProposalTrackingInfo proposal_info = 7;
 
   // Current state hash for validation
   string state_hash = 8;

@@ -33,7 +33,9 @@ func main() {
 		GameViewPresenterService: wasmGameViewPresenterService,
 		UsersService:             services.NewUsersService(),
 		WorldsService:            wasmWorldsService,
+		GameViewerPage:           weewar_v1_services.NewGameViewerPageClient(),
 	}
+	wasmGameViewPresenterService.GameViewerPage = exports.GameViewerPage
 
 	// Register the JavaScript API using generated exports
 	exports.RegisterAPI()

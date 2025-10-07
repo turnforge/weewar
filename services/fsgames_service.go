@@ -403,7 +403,7 @@ func (s *FSGamesServiceImpl) OnProposalAccepted(gameID string, proposal *turneng
 	}
 
 	// Clear proposal info and update state hash
-	gameState.ProposalInfo = nil
+	// gameState.ProposalInfo = nil
 	gameState.StateHash = proposal.ToStateHash
 
 	// Save the state
@@ -419,7 +419,7 @@ func (s *FSGamesServiceImpl) OnProposalFailed(gameID string, proposal *turnengin
 	}
 
 	// Clear proposal info
-	gameState.ProposalInfo = nil
+	// gameState.ProposalInfo = nil
 
 	// Save the state
 	return s.storage.SaveArtifact(gameID, "state", gameState)

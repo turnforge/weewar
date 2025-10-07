@@ -27,7 +27,6 @@ import {
  * of all available actions at the current position.
  */
 export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
-    private isUIBound = false;
     private isActivated = false;
     private gameState: GameState | null = null;
     private world: World | null = null;
@@ -41,16 +40,6 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
 
     // LCMComponent Phase 1: Initialize DOM structure
     public performLocalInit(): LCMComponent[] {
-        if (this.isUIBound) {
-            this.log('Already bound to DOM, skipping');
-            return [];
-        }
-
-        this.log('Binding TurnOptionsPanel to DOM using template');
-        this.isUIBound = true;
-        
-        this.log('TurnOptionsPanel bound to DOM successfully');
-        
         // This is a leaf component - no children
         return [];
     }
@@ -58,9 +47,6 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     // Phase 2: Setup dependencies
     public setupDependencies(): void {
         this.log('Setting up TurnOptionsPanel dependencies');
-        
-        // Dependencies will be set by parent component
-        // GameState and World are managed by GameViewerPage
     }
     
     /**

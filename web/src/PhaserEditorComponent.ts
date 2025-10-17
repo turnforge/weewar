@@ -84,14 +84,6 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         this.log('PhaserEditorComponent: activation complete');
     }
 
-    /**
-     * Cleanup phase
-     */
-    public deactivate(): void {
-        this.log('PhaserEditorComponent: deactivate() - cleanup');
-        this.destroy();
-    }
-
     // Explicit dependency setters
     public setPageState(pageState: WorldEditorPageState): void {
         this.pageState = pageState;
@@ -198,12 +190,13 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         }
     }
     
+    /*
     protected destroyComponent(): void {
         this.log('Destroying PhaserEditorComponent');
         
         // Destroy Phaser editor
         if (this.editorScene) {
-            this.editorScene.destroy();
+            this.editorScene.deactivate();
             this.editorScene = null as any;
         }
         
@@ -216,6 +209,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         this.isInitialized = false;
         this.log('PhaserEditorComponent destroyed');
     }
+   */
     
     /**
      * Bind toolbar event handlers

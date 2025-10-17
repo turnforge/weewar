@@ -1,8 +1,11 @@
- import { BasePage } from '../lib/BasePage';
+import { BasePage } from '../lib/BasePage';
+import WeewarBundle from '../gen/wasmjs';
+import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
+import { GameViewerPageMethods, GameViewerPageServiceClient as GameViewerPageClient } from '../gen/wasmjs/weewar/v1/gameViewerPageClient';
+import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
 import { EventBus } from '../lib/EventBus';
 import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
-import { GameState } from './GameState';
 import { 
     GameState as ProtoGameState, 
     Game as ProtoGame, 
@@ -12,7 +15,9 @@ import {
     GameMove,
     GetOptionsAtResponse,
     GameOption,
-    WorldData
+    WorldData,
+    SetContentRequest, SetContentResponse,
+	  LogMessageRequest, LogMessageResponse,
 } from '../gen/wasmjs/weewar/v1/interfaces';
 import * as models from '../gen/wasmjs/weewar/v1/models';
 import { create } from '@bufbuild/protobuf';
@@ -56,11 +61,6 @@ export interface GameStateInfo {
  * These methods provide high-level game actions that can be easily tested
  */
 export interface GameViewerCommands {
-    selectUnitAt(q: number, r: number): Promise<ActionResult>;
-    moveSelectedUnitTo(q: number, r: number): Promise<ActionResult>;
-    attackWithSelectedUnit(q: number, r: number): Promise<ActionResult>;
-    endCurrentPlayerTurn(): Promise<ActionResult>;
-    getGameState(): Promise<GameStateInfo>;
     clearSelection(): ActionResult;
 }
 
@@ -73,10 +73,12 @@ export interface GameViewerCommands {
  * - Handling player interactions (unit selection, movement, attacks)
  * - Providing game controls and UI feedback
  */
-export class GameViewerPage extends BasePage implements LCMComponent, GameViewerCommands {
+export class GameViewerPage extends BasePage implements LCMComponent, GameViewerCommands, GameViewerPageMethods {
+    private wasmBundle: WeewarBundle;
+    private gamesServiceClient: GamesServiceServiceClient;
+    private gameViewPresenterClient: GameViewPresenterClient;
     private currentGameId: string | null;
     private gameScene: PhaserGameScene
-    private gameState: GameState
     private world: World  // ✅ Shared World component
     private terrainStatsPanel: TerrainStatsPanel
     private unitStatsPanel: UnitStatsPanel
@@ -106,7 +108,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     /**
      * Phase 1: Initialize DOM and discover child components
      */
-    performLocalInit(): LCMComponent[] {
+    async performLocalInit(): Promise<LCMComponent[]> {
         // Load game config first
         this.currentGameId = (document.getElementById("gameIdInput") as HTMLInputElement).value.trim()
         if (!this.currentGameId) {
@@ -120,26 +122,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.createComponents();
         
         this.updateGameStatus('Game Loading...');
-        
-        // Start WASM and game data loading early (parallel to WorldViewer initialization)
-        this.initializeGameWithWASM().then(() => {
-            // Emit event to indicate game data is ready
-            this.eventBus.emit(GameEventTypes.GAME_DATA_LOADED, { gameId: this.currentGameId }, this, this);
-        }).catch(error => {
-            console.error('GameViewerPage: WASM initialization failed:', error);
-            this.updateGameStatus('WASM initialization failed');
-        });
 
-        console.assert(this.gameScene != null, "Game scene could not be created")
-        console.assert(this.gameState != null, "gameState could not be created")
-        console.assert(this.world != null, "World could not be created")
-        console.assert(this.terrainStatsPanel != null, "terrainStatsPanel could not be created")
-        console.assert(this.unitStatsPanel != null, "unitStatsPanel could not be created")
-        console.assert(this.damageDistributionPanel != null, "damageDistributionPanel could not be created")
-        console.assert(this.gameLogPanel != null, "gameLogPanel could not be created")
-        console.assert(this.gameActionsPanel != null, "gameActionsPanel could not be created")
-        console.assert(this.rulesTable != null, "rulesTable could not be created")
-        
+        await this.loadWASM() // kick off loading
+
         // Return child components for lifecycle management
         // Note: World and GameState don't extend BaseComponent, so not included in lifecycle
         return [
@@ -173,52 +158,12 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         // Set up scene click callback now that gameScene is initialized
         this.gameScene.sceneClickedCallback = (context: any, layer: string, extra?: any): void => {
-            const { hexQ: q, hexR: r } = context;
-            
-            // Get tile and unit data from World using coordinates
-            switch (layer) {
-                case 'movement-highlight':
-                    // Get moveOption from the layer itself
-                    const movementLayer = this.gameScene.movementHighlightLayer;
-                    const moveOption = movementLayer?.getMoveOptionAt(q, r);
-                    this.handleMovementClick(q, r, moveOption);
-                    break;
-                    
-                case 'base-map':
-                    const unit = this.world?.getUnitAt(q, r);
-                    const tile = this.world?.getTileAt(q, r);
-                    
-                    // Always show terrain info (even when unit is present)
-                    this.handleTileClick(q, r, tile);
-                    
-                    // If there's a unit, also handle unit logic and show unit info in unit panel
-                    if (unit) {
-                        this.handleUnitClick(q, r);
-                        // Update unit stats panel with unit info
-                        if (this.unitStatsPanel) {
-                            this.unitStatsPanel.updateUnitInfo(unit);
-                        }
-                        // Update damage distribution panel with unit info
-                        if (this.damageDistributionPanel) {
-                            this.damageDistributionPanel.updateUnitInfo(unit);
-                        }
-                    } else {
-                        // Empty tile clicked - clear selection
-                        this.clearSelection();
-                        // Clear unit info from unit stats panel when no unit
-                        if (this.unitStatsPanel) {
-                            this.unitStatsPanel.clearUnitInfo();
-                        }
-                        // Clear unit info from damage distribution panel when no unit
-                        if (this.damageDistributionPanel) {
-                            this.damageDistributionPanel.clearUnitInfo();
-                        }
-                    }
-                    break;
-                    
-                default:
-                    console.log(`[GameViewerPage] Unhandled layer click: ${layer}`);
-            }
+          this.gameViewPresenterClient.sceneClicked({
+            gameId: this.currentGameId || "",
+            q: context.q,
+            r: context.r,
+            layer: layer,
+          })
         };
     }
 
@@ -233,7 +178,12 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.eventBus.addSubscription('show-path-visualization', null, this);
         this.eventBus.addSubscription('clear-path-visualization', null, this);
         
-        this.checkAndLoadWorldIntoViewer();
+        // TODO _ this will be done by initialize WASM
+        // this.checkAndLoadWorldIntoViewer();
+        this.wasmBundle.registerBrowserService('GameViewerPage', this)
+        
+        // Initialize the presenter by setting it game data now that all UI components are ready
+        await this.initializePresenter()
     }
     
     
@@ -331,19 +281,15 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.addSubscription('turn-ended', this);
     }
 
-    // State tracking for initialization
-    private gameDataReady = false;
-
     /**
      * Handle events from the EventBus
      */
     public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
         switch(eventType) {
             case GameEventTypes.GAME_DATA_LOADED:
-                this.gameDataReady = true;
-                
                 // Check if both viewer and game data are ready
-                this.checkAndLoadWorldIntoViewer();
+                // TODO - Let the presenter load this when it is called with initialize
+                // this.checkAndLoadWorldIntoViewer();
                 break;
             
             case 'show-path-visualization':
@@ -378,9 +324,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private createComponents(): void {
         // ✅ Create shared World component first (subscribes first to server-changes)
         this.world = new World(this.eventBus, 'Game World');
-
-        // ✅ Create GameState with direct EventBus connection (no DOM element needed)
-        this.gameState = new GameState(this.eventBus);
 
         // Initialize DockView layout
         this.initializeDockView();
@@ -679,13 +622,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             init: () => {
                 // Create TurnOptionsPanel with the cloned element
                 this.turnOptionsPanel = new TurnOptionsPanel(element, this.eventBus, true);
-                // Set dependencies
-                if (this.gameState) {
-                    this.turnOptionsPanel.setGameState(this.gameState);
-                }
-                if (this.world) {
-                    this.turnOptionsPanel.setWorld(this.world);
-                }
             },
             dispose: () => {
                 // TurnOptionsPanel cleanup will be handled by LCM lifecycle
@@ -732,21 +668,11 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         element.style.display = 'block';
         // Keep the template ID, don't create wrapper instance
 
-        // Create callbacks object for GameActionsPanel
-        const callbacks: GameActionsCallbacks = {
-            onEndTurn: () => this.endCurrentPlayerTurn(),
-            onShowAllUnits: () => this.showAllPlayerUnits(),
-            onCenterOnAction: () => this.centerOnAction(),
-            onMoveUnit: () => this.selectMoveMode(),
-            onAttackUnit: () => this.selectAttackMode(),
-            onUndo: () => this.undoMove()
-        };
-
         return {
             element,
             init: () => {
                 // Create GameActionsPanel with the cloned element and callbacks
-                this.gameActionsPanel = new GameActionsPanel(element, this.eventBus, callbacks);
+                this.gameActionsPanel = new GameActionsPanel(element, this.eventBus, {} as GameActionsCallbacks);
             },
             dispose: () => {
                 // GameActionsPanel cleanup will be handled by LCM lifecycle
@@ -780,71 +706,42 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         };
     }
 
-
-    /**
-     * Check if both WorldViewer and game data are ready, then load world into viewer
-     */
-    private async checkAndLoadWorldIntoViewer(): Promise<void> {
-        if (!this.gameDataReady) {
-            console.warn('GameViewerPage: Waiting for both viewer and game data to be ready', {
-                gameDataReady: this.gameDataReady
-            });
-            return;
-        }
-        
-        try {
-            // ✅ Get world data from WASM and load into shared World component
-            const worldData = await this.gameState.getWorldData();
-            const game = await this.gameState.getCurrentGame();
-            
-            // Load data into shared World component
-            this.world.loadTilesAndUnits(worldData.tiles || [], worldData.units || []);
-            this.world.setName(game.name || 'Untitled Game');
-            
-            // Load world into viewer using shared World
-            if (this.gameScene && this.world) {
-                await this.gameScene.loadWorld(this.world);
-                this.showToast('Success', `Game loaded: ${game.name || this.world.getName() || 'Untitled'}`, 'success');
-                
-                // Hide the loading overlay now that the game is loaded
-                this.hideLoadingOverlay();
-                
-                // Ensure the game canvas is properly sized after loading
-                this.resizeGameCanvas();
-                
-                // Update UI with loaded game state
-                const gameState = await this.gameState.getCurrentGameState();
-                this.updateGameUIFromState(gameState);
-                this.gameLogPanel.logGameEvent(`Game loaded: ${gameState.gameId}`, 'system');
-            } else {
-                throw new Error('GameScene or World not available');
-            }
-        } catch (error) {
-            console.error('GameViewerPage: Failed to load world into viewer:', error);
-            this.updateGameStatus('Failed to load world');
-            this.showToast('Error', 'Failed to load world', 'error');
-        }
+    private async loadWASM(): Promise<void> {
+        // Create base bundle with module configuration
+        this.wasmBundle  = new WeewarBundle();
+        await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
+        await this.wasmBundle.waitUntilReady()
     }
 
     /**
      * Initialize game using WASM game engine
      * This now handles both WASM loading and World creation in GameState
      */
-    private async initializeGameWithWASM(): Promise<void> {
-        if (!this.gameState) {
-            throw new Error('GameState component not initialized');
+    private async initializePresenter(): Promise<void> {
+        this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
+        this.gameViewPresenterClient = new GameViewPresenterClient(this.wasmBundle);
+        
+        // Get raw JSON data from page elements
+        const gameElement = document.getElementById('game.data-json');
+        const gameStateElement = document.getElementById('game-state-data-json');
+        const historyElement = document.getElementById('game-history-data-json');
+        
+        if (!gameElement?.textContent || gameElement.textContent.trim() === 'null') {
+            throw new Error('No game data found in page elements');
+        }
+        // 3. Call presenter to initialize (ONE proto RPC call does everything!)
+        const response = await this.gameViewPresenterClient.initializeGame({
+          gameData: gameElement.textContent,
+          gameState: gameStateElement?.textContent || '{}',
+          moveHistory: historyElement?.textContent || '{"gameId":"","groups":[]}'
+        });
+        
+        if (!response.success) {
+            throw new Error(`WASM load failed: ${response.error}`);
         }
 
-        // TODO - Come back to this Wait for WASM to be ready (only async part)
-        // await this.gameState.waitUntilReady();
-        
-        // Load game data into WASM singletons and create World object in GameState
-        await this.gameState.loadGameDataToWasm();
-        
-        // Refresh unit labels in Phaser scene with the loaded World data
-        if (this.world && this.gameScene) {
-            this.gameScene.refreshUnitLabels(this.world);
-        }
+        // Emit event to indicate WASM data is loaded and ready for queries
+        this.eventBus.emit('wasm-data-loaded', { gameId: this.currentGameId }, this, this);
     }
 
     /**
@@ -862,7 +759,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         const endTurnBtn = document.getElementById('end-turn-btn');
         if (endTurnBtn) {
             endTurnBtn.addEventListener('click', () => {
-                this.endCurrentPlayerTurn(); // Use unified method
+                // TODO call the presenter instead
+                // this.endCurrentPlayerTurn(); // Use unified method
             });
         }
 
@@ -883,12 +781,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             attackUnitBtn.addEventListener('click', this.selectAttackMode.bind(this));
         }
 
-        // Utility buttons
-        const showAllUnitsBtn = document.getElementById('select-all-units-btn');
-        if (showAllUnitsBtn) {
-            showAllUnitsBtn.addEventListener('click', this.showAllPlayerUnits.bind(this));
-        }
-
         const centerActionBtn = document.getElementById('center-on-action-btn');
         if (centerActionBtn) {
             centerActionBtn.addEventListener('click', this.centerOnAction.bind(this));
@@ -903,6 +795,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      * Select a unit at the given coordinates
      * This is the unified method used by both UI clicks and command interface
      */
+    /*
     async selectUnitAt(q: number, r: number): Promise<ActionResult> {
         try {
             // Check if there's a unit at this position
@@ -967,150 +860,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             } as ActionResult;
         }
     }
-
-    /**
-     * Move the currently selected unit to target coordinates
-     */
-    async moveSelectedUnitTo(q: number, r: number): Promise<ActionResult> {
-        try {
-            if (!this.selectedUnitCoord) {
-                return {
-                    success: false,
-                    message: 'No unit selected',
-                    error: 'Must select a unit before moving'
-                };
-            }
-
-            if (this.isProcessingMove) {
-                return {
-                    success: false,
-                    message: 'Move already in progress',
-                    error: 'Another move is being processed'
-                };
-            }
-
-            // Find the move option for this target
-            const moveOption = this.availableMovementOptions.find(opt => opt.q === q && opt.r === r);
-            if (!moveOption) {
-                return {
-                    success: false,
-                    message: `Cannot move to (${q}, ${r}) - not a valid move target`,
-                    error: 'Invalid move target',
-                    data: { 
-                        selectedUnit: this.selectedUnitCoord,
-                        availableMoves: this.availableMovementOptions.map(opt => ({q: opt.q, r: opt.r}))
-                    }
-                };
-            }
-
-            // Execute the move using existing logic
-            const fromCoord = this.selectedUnitCoord;
-            await this.executeMove(fromCoord, { q, r }, moveOption, false); // Skip validation for command interface
-
-            return {
-                success: true,
-                message: `Unit moved from (${fromCoord.q}, ${fromCoord.r}) to (${q}, ${r})`,
-                data: { from: fromCoord, to: { q, r } }
-            };
-
-        } catch (error) {
-            return {
-                success: false,
-                message: `Failed to move unit to (${q}, ${r})`,
-                error: error instanceof Error ? error.message : String(error)
-            };
-        }
-    }
-
-    /**
-     * Attack with the currently selected unit
-     */
-    async attackWithSelectedUnit(q: number, r: number): Promise<ActionResult> {
-        // TODO: Implement attack functionality
-        // For now, return not implemented
-        return {
-            success: false,
-            message: 'Attack functionality not yet implemented',
-            error: 'Feature not implemented',
-            data: { targetPosition: { q, r } }
-        };
-    }
-
-    /**
-     * End the current player's turn 
-     * This is the unified method used by both UI clicks and command interface
-     */
-    async endCurrentPlayerTurn(): Promise<ActionResult> {
-        try {
-            const currentPlayer = this.gameState.getCurrentPlayer();
-            const currentTurn = this.gameState.getTurnCounter();
-
-            // Execute the turn end logic
-            await this.gameState.endTurn(currentPlayer);
-            
-            // Update UI state
-            const newPlayer = this.gameState.getCurrentPlayer();
-            const newTurn = this.gameState.getTurnCounter();
-            
-            this.updateGameStatus(`Ready - Player ${newPlayer}'s Turn`, newPlayer);
-            this.updateTurnCounter(newTurn);
-            this.clearUnitSelection();
-            
-            if (this.gameLogPanel) {
-                this.gameLogPanel.logGameEvent(`Player ${newPlayer}'s turn begins`, 'system');
-            }
-            this.showToast('Info', `Player ${newPlayer}'s turn`, 'info');
-
-            return {
-                success: true,
-                message: `Turn ended. Now Player ${newPlayer}'s turn`,
-                data: { 
-                    previousPlayer: currentPlayer,
-                    currentPlayer: newPlayer,
-                    previousTurn: currentTurn,
-                    currentTurn: newTurn
-                }
-            } as ActionResult;
-
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : String(error);
-            this.showToast('Error', errorMsg, 'error');
-            return {
-                success: false,
-                message: 'Failed to end turn',
-                error: errorMsg
-            } as ActionResult;
-        }
-    }
-
-    /**
-     * Get current game state information
-     */
-    async getGameState(): Promise<GameStateInfo> {
-        try {
-            const gameState = await this.gameState.getCurrentGameState();
-            
-            return {
-                gameId: gameState.gameId || this.currentGameId || 'unknown',
-                currentPlayer: gameState.currentPlayer,
-                turnCounter: gameState.turnCounter,
-                selectedUnit: this.selectedUnitCoord || undefined,
-                unitsCount: Object.keys(this.world.units).length,
-                tilesCount: Object.keys(this.world.tiles).length
-            };
-
-        } catch (error) {
-            console.error('Failed to get game state:', error);
-            return {
-                gameId: this.currentGameId || 'unknown',
-                currentPlayer: -1,
-                turnCounter: -1,
-                selectedUnit: undefined,
-                unitsCount: 0,
-                tilesCount: 0
-            };
-        }
-    }
+   */
 
     /**
      * Clear current unit selection
@@ -1147,14 +897,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
     private selectAttackMode(): void {
         this.showToast('Info', 'Click on a highlighted enemy to attack', 'info');
-    }
-
-    private showAllPlayerUnits(): void {
-        // ✅ Use GameState metadata
-        const currentPlayer = this.gameState.getCurrentPlayer();
-        
-        // TODO: Highlight all player units and center camera
-        this.showToast('Info', `Showing all Player ${currentPlayer} units`, 'info');
     }
 
     private centerOnAction(): void {
@@ -1228,126 +970,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     }
 
     /**
-     * Handle unit clicks - select unit or show unit info
-     */
-    private handleUnitClick(q: number, r: number): void {
-        // Handle async unit interaction using unified getOptionsAt
-        this.gameState.getOptionsAt(q, r).then(async (response: GetOptionsAtResponse) => {
-            // ✅ Use shared World for fast unit query
-            const unit = this.world?.getUnitAt(q, r);
-            
-            // Debug logging
-            console.log(`[GameViewerPage] Unit click at (${q}, ${r}):`, {
-                unit: unit,
-                response: response,
-                currentPlayer: this.gameState.getCurrentPlayer(),
-                turnCounter: this.gameState.getTurnCounter()
-            });
-            
-            const options = response.options || [];
-            
-            const hasMovementOptions = options.some(opt => opt.move !== undefined);
-            const hasAttackOptions = options.some(opt => opt.attack !== undefined);
-            const hasOnlyEndTurn = options.length === 1 && options[0].endTurn !== undefined;
-            
-            if (hasMovementOptions || hasAttackOptions) {
-                // This unit has actionable options - process it directly (no duplicate RPC)
-                this.processUnitSelection(q, r, options, response);
-            } else if (hasOnlyEndTurn) {
-                // This position only has endTurn option - could be empty tile, enemy unit, or friendly unit with no actions
-                
-                // ✅ Use shared World for fast queries
-                const tileUnit = this.world?.getUnitAt(q, r);
-                
-                if (tileUnit) {
-                    // Get current player to check ownership
-                    this.gameState.getCurrentGameState().then(gameState => {
-                        const currentPlayer = gameState.currentPlayer;
-                        
-                        console.log(`[GameViewerPage] Unit details:`, {
-                            unitPlayer: tileUnit.player,
-                            currentPlayer: currentPlayer,
-                            distanceLeft: tileUnit.distanceLeft,
-                            availableHealth: tileUnit.availableHealth,
-                            turnCounter: tileUnit.turnCounter,
-                            gameTurnCounter: gameState.turnCounter
-                        });
-                        
-                        if (tileUnit.player === currentPlayer) {
-                            // This is our unit but it has no available actions
-                            this.showToast('Info', `No actions available for unit at (${q}, ${r})`, 'info');
-                        } else {
-                            // This is an enemy unit
-                            this.showToast('Info', `Enemy unit at (${q}, ${r})`, 'info');
-                        }
-                    }).catch(error => {
-                        console.error('Failed to get current game state:', error);
-                    });
-                } else {
-                    this.showToast('Info', `Empty tile at (${q}, ${r})`, 'info');
-                }
-            }
-        }).catch(error => {
-            console.error('[GameViewerPage] Failed to get options at position:', error);
-        });
-    }
-
-    /**
-     * Handle movement clicks - execute actual unit moves
-     */
-    private handleMovementClick(q: number, r: number, moveOption: any): void {
-        if (this.isProcessingMove) {
-            console.warn('[GameViewerPage] Already processing a move, ignoring click');
-            this.showToast('Warning', 'Move in progress...', 'warning');
-            return;
-        }
-
-        if (!this.selectedUnitCoord) {
-            console.warn('[GameViewerPage] No unit selected for movement');
-            return;
-        }
-
-        // Check if clicking on the same position as the selected unit (deselection)
-        if (this.selectedUnitCoord.q === q && this.selectedUnitCoord.r === r) {
-            console.log('[GameViewerPage] Clicked on selected unit position - deselecting');
-            this.clearSelection();
-            this.clearAllHighlights();
-            return;
-        }
-
-        // Execute the move
-        this.executeMove(this.selectedUnitCoord, { q, r }, moveOption);
-    }
-
-    /**
-     * Handle tile clicks - show terrain info in TerrainStatsPanel
-     */
-    private handleTileClick(q: number, r: number, tile: any): void {
-        if (!this.terrainStatsPanel) {
-            console.warn('[GameViewerPage] TerrainStatsPanel not available');
-            return;
-        }
-
-        // Show terrain info using shared World
-        if (tile) {
-            const terrainStats = this.rulesTable.getTerrainStatsAt(tile.tileType, tile.player);
-            if (terrainStats) {
-                // Update with actual coordinates
-                const terrainStatsWithCoords = new TerrainStats(
-                    terrainStats.terrainDefinition, 
-                    q, 
-                    r, 
-                    tile.player
-                );
-                this.terrainStatsPanel.updateTerrainStats(terrainStatsWithCoords);
-            }
-        }
-    }
-
-
-    /**
      * Process unit selection with unified options format
      */
+    /*
     private processUnitSelection(q: number, r: number, options: GameOption[], fullResponse?: GetOptionsAtResponse): void {
         // Extract movement and attack options from the unified options
         // Note: protobuf oneof fields become direct properties (e.g., option.move, option.attack)
@@ -1402,10 +1027,12 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
         this.showToast('Success', `Unit selected at (${q}, ${r}) - ${movementOptions.length} moves, ${attackOptions.length} attacks available`, 'success');
     }
+   */
 
     /**
      * Execute a unit move using ProcessMoves API
      */
+    /*
     private async executeMove(fromCoord: { q: number, r: number }, toCoord: { q: number, r: number }, moveOption: MoveOption, validateStates=true): Promise<void> {
         // Set processing state to prevent concurrent moves
         this.isProcessingMove = true;
@@ -1523,6 +1150,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         }
       }
     }
+   */
 
     /**
      * Hide the loading overlay in the main game panel
@@ -1594,6 +1222,32 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         }
     }
 
+  async setTurnOptionsContent(request: SetContentRequest) {
+    console.log("setTurnOptionsContent called on the browser: ", request)
+    this.turnOptionsPanel.innerHTML = request.innerHtml
+    return {}
+  }
+
+	async setUnitStatsContent(request: SetContentRequest) {
+    console.log("setUnitStatsContent called on the browser")
+    this.unitStatsPanel.innerHTML = request.innerHtml
+    return {}
+  }
+
+	async setDamageDistributionContent(request: SetContentRequest) {
+    console.log("setDamageDistributionContent called on the browser")
+    this.damageDistributionPanel.innerHTML = request.innerHtml
+    return {}
+  }
+	async setTerrainStatsContent(request: SetContentRequest) {
+    console.log("setTerrainStatsContent called on the browser")
+    this.terrainStatsPanel.innerHTML = request.innerHtml
+    return {}
+  }
+	async logMessage(request: LogMessageRequest) {
+    console.log("logMessage called on the browser")
+    return {}
+  }
 }
 
 // Initialize page when DOM is ready using LifecycleController

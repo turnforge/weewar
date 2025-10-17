@@ -34,7 +34,7 @@ export class GameState {
     private gamesServiceClient: GamesServiceServiceClient;
     private eventBus: EventBus;
     
-    // ✅ Lightweight game metadata only
+    // Lightweight game metadata only
     private gameId: string = '';
     public currentPlayer: number = 1;
     public turnCounter: number = 1;
@@ -85,34 +85,8 @@ export class GameState {
      */
     private async loadWASMModule(): Promise<void> {
         await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
-        
-        // Wait for Go-exported functions to be available on window.weewar
-        await this.waitForGoFunctions();
-        
-        this.eventBus.emit('wasm-loaded', { success: true }, this, this);
     }
-    
-    /**
-     * Wait for Go-exported functions to be available on window.weewar
-     */
-    private async waitForGoFunctions(): Promise<void> {
-        const maxWaitTime = 10000; // 10 seconds
-        const checkInterval = 100; // 100ms
-        let elapsed = 0;
-        
-        while (elapsed < maxWaitTime) {
-            const weewar = (window as any).weewar;
-            if (weewar && weewar.loadGameData) {
-                return;
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, checkInterval));
-            elapsed += checkInterval;
-        }
-        
-        throw new Error('Timeout waiting for Go-exported functions to be available');
-    }
-    
+
     /**
      * Get the current game ID
      */

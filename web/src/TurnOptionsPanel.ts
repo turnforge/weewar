@@ -3,6 +3,7 @@ import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
 import { GameState } from './GameState';
 import { World } from './World';
+import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
 import { 
     Unit, 
     GameOption,
@@ -27,8 +28,8 @@ import {
  * of all available actions at the current position.
  */
 export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
+    private gameViewPresenterClient: GameViewPresenterClient;
     private isActivated = false;
-    private gameState: GameState | null = null;
     private world: World | null = null;
     private currentOptions: GameOption[] = [];
     private selectedPosition: { q: number; r: number } | null = null;
@@ -47,14 +48,6 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     // Phase 2: Setup dependencies
     public setupDependencies(): void {
         this.log('Setting up TurnOptionsPanel dependencies');
-    }
-    
-    /**
-     * Set the GameState dependency
-     */
-    public setGameState(gameState: GameState): void {
-        this.gameState = gameState;
-        this.log('GameState dependency set');
     }
     
     /**
@@ -107,54 +100,6 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         // Process and display options
         this.processOptions(response);
     }
-    
-    /**
-     * Handle unit selection - fetch and display options (legacy, makes own RPC)
-     */
-    public async handleUnitSelection(q: number, r: number, unit: Unit): Promise<void> {
-        this.log(`Unit selected at (${q}, ${r})`);
-        this.selectedPosition = { q, r };
-        this.selectedUnit = unit;
-        
-        // Show loading state
-        this.showLoadingState();
-        
-        try {
-            // Get options from GameState
-            if (!this.gameState) {
-                this.showError('GameState not available');
-                return;
-            }
-
-            const response = await this.gameState.getOptionsAt(q, r);
-            
-            if (!response || !response.options) {
-                this.showEmptyOptions();
-                return;
-            }
-
-            // Process and display options
-            this.processOptions(response);
-        } catch (error) {
-            this.log('Error fetching options:', error);
-            this.showError('Failed to fetch options');
-        }
-    }
-
-    /**
-     * Handle tile selection - fetch and display options if there's a unit
-     */
-    public async handleTileSelection(q: number, r: number): Promise<void> {
-        this.log(`Tile selected at (${q}, ${r})`);
-        
-        // Check if there's a unit at this position
-        const unit = this.world?.getUnitAt(q, r);
-        if (unit) {
-            await this.handleUnitSelection(q, r, unit);
-        } else {
-            this.clearOptions();
-        }
-    }
 
     /**
      * Process options from the server response
@@ -164,7 +109,7 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         this.currentOptions = response.options || [];
         
         // Display the processed options
-        this.displayOptions();
+        // this.displayOptions();
     }
 
     /**
@@ -201,124 +146,6 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         }
         
         return coords.length >= 4 ? coords : undefined;
-    }
-
-    /**
-     * Display the current options
-     */
-    private displayOptions(): void {
-        const container = this.findElement('#options-list');
-        if (!container) return;
-
-        if (this.currentOptions.length === 0) {
-            this.showEmptyOptions();
-            return;
-        }
-
-        // Hide empty state, show options
-        const emptyState = this.findElement('#no-options-selected');
-        const optionsContainer = this.findElement('#options-container');
-        if (emptyState) emptyState.classList.add('hidden');
-        if (optionsContainer) optionsContainer.classList.remove('hidden');
-
-        // Update header
-        const headerElement = this.findElement('#options-header');
-        if (headerElement && this.selectedPosition) {
-            const unitText = this.selectedUnit ? ` (Unit ${this.selectedUnit.unitType})` : '';
-            headerElement.textContent = `Options at (${this.selectedPosition.q}, ${this.selectedPosition.r})${unitText}`;
-        }
-
-        // Build options HTML
-        let optionsHTML = '';
-        this.currentOptions.forEach((option, index) => {
-            const optionType = this.getOptionType(option);
-            const iconClass = this.getOptionIcon(optionType);
-            const colorClass = this.getOptionColor(optionType);
-            
-            let description = '';
-            let details = '';
-            
-            if (option.move) {
-                description = `Move to (${option.move.q || 0}, ${option.move.r || 0})`;
-                if (option.move.movementCost !== undefined) {
-                    details += `<span class="text-xs text-gray-500 dark:text-gray-400">Cost: ${option.move.movementCost}</span>`;
-                }
-            } else if (option.attack) {
-                description = `Attack unit at (${option.attack.q || 0}, ${option.attack.r || 0})`;
-                if (option.attack.damageEstimate !== undefined) {
-                    details += `<span class="text-xs text-red-500 dark:text-red-400">Damage: ~${option.attack.damageEstimate}</span>`;
-                }
-            } else if (option.endTurn) {
-                description = 'End Turn';
-            } else if (option.build) {
-                description = `Build unit (type ${option.build.unitType})`;
-                if (option.build.cost !== undefined) {
-                    details += `<span class="text-xs text-gray-500 dark:text-gray-400">Cost: ${option.build.cost}</span>`;
-                }
-            } else if (option.capture) {
-                description = 'Capture';
-            }
-
-            optionsHTML += `
-                <div class="option-item p-3 mb-2 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition-colors"
-                     data-option-index="${index}">
-                    <div class="flex items-start">
-                        <span class="${iconClass} ${colorClass} mr-3 text-lg">${this.getOptionEmoji(optionType)}</span>
-                        <div class="flex-1">
-                            <div class="font-medium text-sm text-gray-900 dark:text-white">
-                                ${description}
-                            </div>
-                            ${details ? `<div class="mt-1">${details}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        container.innerHTML = optionsHTML;
-
-        // Add click handlers
-        container.querySelectorAll('.option-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const index = parseInt((e.currentTarget as HTMLElement).dataset.optionIndex || '0');
-                this.handleOptionClick(index);
-            });
-        });
-    }
-
-    /**
-     * Get icon for option type
-     */
-    private getOptionIcon(type: string): string {
-        switch (type) {
-            case 'move': return 'text-blue-500';
-            case 'attack': return 'text-red-500';
-            case 'endTurn': return 'text-green-500';
-            case 'build': return 'text-yellow-500';
-            case 'capture': return 'text-purple-500';
-            default: return 'text-gray-500';
-        }
-    }
-
-    /**
-     * Get color class for option type
-     */
-    private getOptionColor(type: string): string {
-        return this.getOptionIcon(type);
-    }
-
-    /**
-     * Get emoji for option type
-     */
-    private getOptionEmoji(type: string): string {
-        switch (type) {
-            case 'move': return '➡️';
-            case 'attack': return '⚔️';
-            case 'endTurn': return '✅';
-            case 'build': return '🏗️';
-            case 'capture': return '🏳️';
-            default: return '❓';
-        }
     }
 
     /**
@@ -419,7 +246,5 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
         }
     }
 
-    protected destroyComponent(): void {
-        this.deactivate();
-    }
+    // protected destroyComponent(): void { this.deactivate(); }
 }

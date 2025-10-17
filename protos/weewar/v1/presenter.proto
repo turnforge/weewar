@@ -23,7 +23,13 @@ option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 // The other advantage is we can also change presenters to suit various looks/feels.
 // Note that our Presenter service is GameViewPresenter service.  This way we can create one presenter
 // per "page" so each page (which is heavy weight and needs wasm) can create one of these.
-service GameViewPresenterService {
+service GameViewPresenter {
+  /**
+   * Called on first init based on the game and world data
+   */
+  rpc InitializeGame(InitializeGameRequest) returns (InitializeGameResponse) {
+  }
+
   /**
    * This is called when the user clicks a tile on the Game Scene
    * The tile can have a unit or just be a plain tile.  It is upto the presenter to
@@ -74,6 +80,7 @@ message SceneClickedRequest {
   string game_id = 1;
   int32 q = 2;
   int32 r = 3;
+  string layer = 4;
 }
 
 // Response of a turn option click
@@ -91,3 +98,24 @@ message EndTurnButtonClickedResponse {
   string game_id = 1;
 }
 
+
+// Called when the end turn button was clicked
+message InitializeGameRequest {
+  string game_data = 1;
+  string game_state = 2;
+  string move_history = 3;
+}
+
+// Response of a turn option click
+message InitializeGameResponse {
+  bool success = 1;
+  string error = 2;
+  // Initial UI state information
+  int32 current_player = 3;
+  int32 turn_counter = 4;
+  string game_name = 5;
+
+  // Game game = 6;
+  // GameState state = 7;
+  // GameMoveHistory history = 8;
+}

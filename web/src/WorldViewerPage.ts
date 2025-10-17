@@ -81,7 +81,22 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         // Remove event subscriptions
         this.removeSubscription(WorldEventTypes.WORLD_VIEWER_READY, null);
         
-        this.destroy();
+        // Clean up components
+        if (this.worldScene) {
+            this.worldScene.activate();
+            // Force set as null.  We are pushing for fail fast on values
+            // that should NOT be null
+            this.worldScene = null as any;
+        }
+        
+        if (this.worldStatsPanel) {
+            this.worldStatsPanel.activate();
+            this.worldStatsPanel = null as any;
+        }
+        
+        // Clean up world data
+        this.world = null as any
+        this.currentWorldId = null;
     }
 
     /**
@@ -130,25 +145,6 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         // Navigate to editor page with copy mode
         const copyUrl = `/worlds/new?copy=${this.currentWorldId}`;
         window.location.href = copyUrl;
-    }
-
-    public destroy(): void {
-        // Clean up components
-        if (this.worldScene) {
-            this.worldScene.destroy();
-            // Force set as null.  We are pushing for fail fast on values
-            // that should NOT be null
-            this.worldScene = null as any;
-        }
-        
-        if (this.worldStatsPanel) {
-            this.worldStatsPanel.destroy();
-            this.worldStatsPanel = null as any;
-        }
-        
-        // Clean up world data
-        this.world = null as any
-        this.currentWorldId = null;
     }
 }
 

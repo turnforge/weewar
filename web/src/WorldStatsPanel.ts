@@ -111,10 +111,6 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
         this.log('DOM structure validated successfully');
     }
     
-    protected destroyComponent(): void {
-        this.deactivate();
-    }
-    
     /**
      * Handle world data loaded event
      */

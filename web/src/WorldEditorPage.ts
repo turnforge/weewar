@@ -181,8 +181,26 @@ class WorldEditorPage extends BasePage {
      * Phase 4: Deactivate and cleanup
      */
     public deactivate(): void {
-        // Use existing destroy method for cleanup
-        this.destroy();
+        // Save layout before destroying
+        this.saveDockviewLayout();
+        
+        // Dispose dockview
+        if (this.dockview) {
+            this.dockview.dispose();
+        }
+        
+        // Destroy Phaser component if it exists (will be handled by dockview component disposal)
+        // this.phaserEditorComponent cleanup is handled in createPhaserComponent dispose callback
+        
+        // Destroy TileStats panel if it exists
+        if (this.tileStatsPanel) {
+            this.tileStatsPanel.destroy();
+        }
+        
+        // Destroy keyboard shortcut manager if it exists
+        if (this.keyboardShortcutManager) {
+            this.keyboardShortcutManager.destroy();
+        }
     }
     
     // Dependencies are set directly using explicit setters - no ComponentDependencyDeclaration needed
@@ -1108,7 +1126,7 @@ class WorldEditorPage extends BasePage {
             },
             dispose: () => {
                 if (this.phaserEditorComponent) {
-                    this.phaserEditorComponent.destroy();
+                    this.phaserEditorComponent.deactivate();
                     this.phaserEditorComponent = null as any;
                 }
             }
@@ -1356,29 +1374,6 @@ class WorldEditorPage extends BasePage {
                 saveButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                 saveButton.setAttribute('disabled', 'true');
             }
-        }
-    }
-
-    public destroy(): void {
-        // Save layout before destroying
-        this.saveDockviewLayout();
-        
-        // Dispose dockview
-        if (this.dockview) {
-            this.dockview.dispose();
-        }
-        
-        // Destroy Phaser component if it exists (will be handled by dockview component disposal)
-        // this.phaserEditorComponent cleanup is handled in createPhaserComponent dispose callback
-        
-        // Destroy TileStats panel if it exists
-        if (this.tileStatsPanel) {
-            this.tileStatsPanel.destroy();
-        }
-        
-        // Destroy keyboard shortcut manager if it exists
-        if (this.keyboardShortcutManager) {
-            this.keyboardShortcutManager.destroy();
         }
     }
     

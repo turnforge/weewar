@@ -26,7 +26,7 @@ export interface Component {
      * Clean up the component and release resources
      * Should unsubscribe from events, clean up DOM, and release memory
      */
-    destroy(): void;
+    // destroy(): void;
 }
 
 /**
@@ -57,18 +57,6 @@ export abstract class BaseComponent implements Component, LCMComponent, EventSub
         
         // Note: In pure LCMComponent approach, re-binding should be handled
         // by the component's LCMComponent lifecycle methods if needed
-    }
-    
-    public destroy(): void {
-        this.log('Destroying component...');
-        
-        // Call component-specific cleanup
-        this.destroyComponent();
-        
-        // Remove component marker from DOM
-        this.rootElement?.removeAttribute('data-component');
-        
-        this.log('Component destroyed successfully');
     }
     
     /**
@@ -134,7 +122,12 @@ export abstract class BaseComponent implements Component, LCMComponent, EventSub
      * Component-specific cleanup logic
      * Called during destroy before base cleanup
      */
-    protected abstract destroyComponent(): void;
+    // protected abstract destroyComponent(): void;
+
+    set innerHTML(innerHTML: string) {
+      this.rootElement.innerHTML = innerHTML
+      // TODO - reset listeners etc
+    }
     
     // LCMComponent implementation with default empty methods
     // Components can override these when they need coordination with other components
@@ -169,7 +162,9 @@ export abstract class BaseComponent implements Component, LCMComponent, EventSub
      * Override this if your component needs cleanup during lifecycle management
      */
     public deactivate(): void | Promise<void> {
-        // Default: use standard destroy method
-        this.destroy();
+        // Remove component marker from DOM
+        this.rootElement?.removeAttribute('data-component');
+        
+        this.log('Component deactivated successfully');
     }
 }

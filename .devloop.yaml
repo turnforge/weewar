@@ -84,34 +84,6 @@ rules:
       - "echo '⚡ Building frontend...'"
       - "npm run build"
 
-  - name: "fetests"
-    workdir: "./web"
-    disable: true
-    watch:
-      - action: "exclude"
-        patterns:
-          - "frontend/gen/**"
-          - "**/*.log"
-          - "node_modules/**"
-          - "dist/**"
-          - "test-results/**"
-          - "playwright-report/**"
-          - "node_modules"
-      - action: "include"
-        patterns:
-          - "**/*.ts"
-          - "**/*.css"
-          - "**/*.html"
-          - "**/*.spec.ts"
-          - "**/*.test.ts"
-          - "package.json"
-          - "vite.config.ts"
-          - "tsconfig.json"
-    commands:
-      - "echo '🧪 Running frontend tests...'"
-      # - "npm run test"
-      - "npm run test:e2e"
-
   # Protocol Buffers (affects both Go and Web)
   - name: "protobuf"
     color: "magenta"

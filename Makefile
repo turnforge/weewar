@@ -8,6 +8,9 @@ buildweb:
 binlocal: 
 	go build -ldflags "$(LDFLAGS)" -o ./bin/weewar ./main.go
 
+serve:
+	go run main.go
+
 vars:
 	go env GOROOT
 	find `go env GOROOT` -name "wasm_exec.js" 2>/dev/null | head -1

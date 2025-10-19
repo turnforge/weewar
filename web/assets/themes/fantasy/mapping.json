@@ -41,7 +41,7 @@
     "4": { "old": "Tank (Advanced)", "name": "Siege Engine", "image": "Units/SiegeEngine.svg" },
     "40": { "old": "Miner", "name": "Miner", "image": "Units/Prospector.svg" },
     "41": { "old": "Paratrooper", "name": "Sky Warrior", "image": "Units/SkyWarrior.svg" },
-    "44": { "old": "Anti-aircraft (Advanced)", "name": "Crossbow Tower", "image": "Units/Crossbow Tower.svg" },
+    "44": { "old": "Anti-aircraft (Advanced)", "name": "Crossbow Tower", "image": "Units/CrossbowTower.svg" },
     "5": { "old": "Striker", "name": "Armored Charriot", "image": "Units/ArmoredCharriot.svg" },
     "6": { "old": "Anti-aircraft (Basic)", "name": "Archer Tower", "image": "Units/ArcherTower.svg" },
     "7": { "old": "Hovercraft", "name": "Wind Rider", "image": "Units/WindRider.svg" },

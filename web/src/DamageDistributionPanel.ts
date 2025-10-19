@@ -3,6 +3,7 @@ import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
 import { RulesTable } from './RulesTable';
 import { ITheme } from '../assets/themes/BaseTheme';
+import { ThemeUtils } from './ThemeUtils';
 
 interface UnitData {
     unitType: number;
@@ -76,7 +77,51 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
     }
 
     /**
+     * Hydrate theme images and histograms after Go template renders HTML
+     * Call this after the HTML content is injected by the Go backend
+     */
+    public async hydrateThemeImages(): Promise<void> {
+        await ThemeUtils.hydrateThemeImages(this.rootElement, this.theme, this.debugMode);
+        this.hydrateHistograms();
+    }
+
+    /**
+     * Hydrate damage distribution histograms from data attributes
+     * Reads data-damage-dist JSON and generates SVG histograms
+     */
+    private hydrateHistograms(): void {
+        const rows = this.rootElement.querySelectorAll('tr[data-damage-dist]');
+
+        rows.forEach(row => {
+            const damageDistJson = row.getAttribute('data-damage-dist');
+            if (!damageDistJson) return;
+
+            try {
+                const damageDistribution = JSON.parse(damageDistJson);
+                const histogramCell = row.querySelector('.damage-histogram-cell');
+
+                if (histogramCell) {
+                    // Handle both camelCase (TS) and PascalCase (Go proto) field names
+                    const minDamage = damageDistribution.minDamage ?? damageDistribution.MinDamage ?? 0;
+                    const maxDamage = damageDistribution.maxDamage ?? damageDistribution.MaxDamage ?? 0;
+                    const expectedDamage = damageDistribution.expectedDamage ?? damageDistribution.ExpectedDamage ?? 0;
+
+                    const histogram = this.createDamageHistogram(damageDistribution);
+                    const summaryText = `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Range: ${Math.round(minDamage)}-${Math.round(maxDamage)},
+                        Avg: ${expectedDamage.toFixed(0)}
+                    </div>`;
+                    histogramCell.innerHTML = `<div>${histogram}${summaryText}</div>`;
+                }
+            } catch (error) {
+                console.error('Failed to parse damage distribution:', error, 'JSON:', damageDistJson);
+            }
+        });
+    }
+
+    /**
      * Update the panel with damage distributions for a selected unit
+     * NOTE: This method is being phased out in favor of Go template rendering
      */
     public updateUnitInfo(unit: UnitData): void {
         if (!this.isActivated) {
@@ -89,15 +134,12 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
         // Hide no-selection state and show distributions
         const noSelectionDiv = this.findElement('#no-unit-selected');
         const distributionsDiv = this.findElement('#damage-distributions');
-        
+
         if (noSelectionDiv) noSelectionDiv.classList.add('hidden');
         if (distributionsDiv) distributionsDiv.classList.remove('hidden');
-        
+
         // Update header with current unit info
         this.updateUnitHeader(unit);
-        
-        // Generate damage distribution table
-        this.generateUnitCombatTable(unit.unitType);
     }
 
     /**
@@ -136,11 +178,12 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
      * Generate SVG histogram for damage distribution
      */
     private createDamageHistogram(damageDistribution: any): string {
-        if (!damageDistribution || !damageDistribution.ranges || damageDistribution.ranges.length === 0) {
+        // Handle both camelCase (TS) and PascalCase (Go proto) field names
+        const ranges = damageDistribution.ranges ?? damageDistribution.Ranges;
+
+        if (!damageDistribution || !ranges || ranges.length === 0) {
             return '<div class="text-gray-400 text-xs">No data</div>';
         }
-
-        const ranges = damageDistribution.ranges;
         const width = 220;
         const height = 50;
         const topPadding = 5;
@@ -148,21 +191,23 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
         const chartHeight = height - topPadding - bottomPadding;
         const barSpacing = 1;
         const barWidth = (width / ranges.length) - barSpacing;
-        
-        // Find max probability for scaling
-        const maxProbability = Math.max(...ranges.map((r: any) => r.probability || 0));
+
+        // Find max probability for scaling (handle both camelCase and PascalCase)
+        const maxProbability = Math.max(...ranges.map((r: any) => r.probability ?? r.Probability ?? 0));
         
         // Create SVG with x-axis labels
         let svg = `<svg width="${width}" height="${height}" class="inline-block">`;
         
         ranges.forEach((range: any, index: number) => {
-            const probability = range.probability || 0;
+            // Handle both camelCase and PascalCase field names
+            const probability = range.probability ?? range.Probability ?? 0;
             const barHeight = (probability / maxProbability) * chartHeight;
             const x = index * (barWidth + barSpacing);
             const y = topPadding + chartHeight - barHeight;
-            
+
             // Use the actual damage value (assuming minValue = maxValue for each bucket)
-            const damageValue = Math.round(range.minValue);
+            const minValue = range.minValue ?? range.MinValue ?? 0;
+            const damageValue = Math.round(minValue);
             
             // Determine color based on damage value
             let fillColor = 'rgb(156, 163, 175)'; // gray-400
@@ -200,105 +245,22 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
         });
         
         // Add baseline
-        svg += `<line x1="0" y1="${topPadding + chartHeight}" x2="${width}" y2="${topPadding + chartHeight}" 
+        svg += `<line x1="0" y1="${topPadding + chartHeight}" x2="${width}" y2="${topPadding + chartHeight}"
                      stroke="currentColor" stroke-opacity="0.3" stroke-width="1"/>`;
-        
+
         // Add expected damage marker if it exists
-        if (damageDistribution.expectedDamage !== undefined) {
-            const expectedX = (damageDistribution.expectedDamage / 100) * width;
-            svg += `<line x1="${expectedX}" y1="${topPadding}" x2="${expectedX}" y2="${topPadding + chartHeight}" 
+        const expectedDamage = damageDistribution.expectedDamage ?? damageDistribution.ExpectedDamage;
+        if (expectedDamage !== undefined) {
+            const expectedX = (expectedDamage / 100) * width;
+            svg += `<line x1="${expectedX}" y1="${topPadding}" x2="${expectedX}" y2="${topPadding + chartHeight}"
                          stroke="rgb(239, 68, 68)" stroke-width="2" stroke-dasharray="2,2" opacity="0.6">
-                      <title>Expected: ${damageDistribution.expectedDamage.toFixed(1)}</title>
+                      <title>Expected: ${expectedDamage.toFixed(1)}</title>
                     </line>`;
         }
         
         svg += '</svg>';
         
         return svg;
-    }
-
-    /**
-     * Generate unit-unit combat damage distribution table
-     */
-    private generateUnitCombatTable(unitId: number): void {
-        const container = this.findElement('#unit-combat-properties');
-        if (!container) return;
-
-        // Get the table template
-        const tableTemplate = document.getElementById('unit-combat-table-template') as HTMLTemplateElement;
-        const rowTemplate = document.getElementById('combat-row-template') as HTMLTemplateElement;
-        
-        if (!tableTemplate || !rowTemplate) {
-            console.warn('Unit combat table templates not found');
-            return;
-        }
-        
-        // Clear existing content
-        container.innerHTML = '';
-        
-        // Clone the table template
-        const tableElement = tableTemplate.content.cloneNode(true) as DocumentFragment;
-        const tbody = tableElement.querySelector('tbody');
-        
-        if (!tbody) {
-            console.warn('Table body not found in template');
-            return;
-        }
-        
-        // Get all available units for combat comparison
-        const commonUnitIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        let hasAnyCombat = false;
-        
-        commonUnitIds.forEach(targetUnitId => {
-            const targetUnitDef = this.rulesTable.getUnitDefinition(targetUnitId);
-            if (targetUnitDef && targetUnitDef.name) {
-                // Get unit-unit combat properties
-                const combatProps = this.rulesTable.getUnitUnitProperties(unitId, targetUnitId);
-                
-                if (combatProps && combatProps.damage) {
-                    // Clone the row template
-                    const rowElement = rowTemplate.content.cloneNode(true) as DocumentFragment;
-                    const row = rowElement.querySelector('tr');
-                    
-                    if (row) {
-                        // Fill in the row data
-                        const targetNameCell = row.querySelector('[data-target-name]');
-                        const damageHistogramCell = row.querySelector('[data-damage-histogram]');
-                        
-                        // Use theme-specific unit name if available
-                        const targetUnitName = this.theme?.getUnitName(targetUnitId) || targetUnitDef.name;
-                        if (targetNameCell) targetNameCell.textContent = targetUnitName;
-                        
-                        // Create histogram visualization
-                        if (damageHistogramCell) {
-                            const damageDistribution = combatProps.damage;
-                            const histogram = this.createDamageHistogram(damageDistribution);
-                            const summaryText = `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Range: ${Math.round(damageDistribution.minDamage)}-${Math.round(damageDistribution.maxDamage)}, 
-                                Avg: ${damageDistribution.expectedDamage.toFixed(0)}
-                            </div>`;
-                            damageHistogramCell.innerHTML = `<div>${histogram}${summaryText}</div>`;
-                        }
-                        
-                        // Add alternating row colors
-                        if (tbody.children.length % 2 === 1) {
-                            row.classList.add('bg-gray-50', 'dark:bg-gray-700');
-                        }
-                        
-                        tbody.appendChild(rowElement);
-                        hasAnyCombat = true;
-                    }
-                }
-            }
-        });
-        
-        // Only append the table if we have combat data to show
-        if (hasAnyCombat) {
-            container.appendChild(tableElement);
-        } else {
-            // Show a message if no combat data available
-            container.innerHTML = '<div class="text-sm text-gray-500 dark:text-gray-400 italic p-4">No combat data available for this unit</div>';
-        }
     }
 
     /**

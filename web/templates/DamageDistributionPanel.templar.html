@@ -5,6 +5,98 @@
 >
   <h4 class="font-medium text-gray-900 dark:text-white mb-3">⚔️ Damage Distribution</h4>
 
+{{ if .Unit }}
+  <!-- Selected Unit Damage Distributions -->
+  <div id="damage-distributions" class="nothidden">
+    <!-- Current Unit Header -->
+    <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl w-14">
+          <!-- Theme-based attacking unit image - will be populated by TypeScript -->
+          <img class="theme-unit-image w-8 h-8 object-contain"
+               data-unit-id="{{ .Unit.UnitType }}"
+               data-player-id="{{ .Unit.Player }}"
+               alt="{{ .Theme.GetUnitName .Unit.UnitType }}"
+               style="image-rendering: pixelated;"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"/>
+          <span style="display:none;">⚔️</span>
+        </span>
+        <div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Damage dealt by:</div>
+          <h5 id="selected-unit-name" class="font-medium text-gray-900 dark:text-white">
+            {{ .Theme.GetUnitName .Unit.UnitType }}
+          </h5>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unit-Unit Combat Properties Section -->
+    <div id="unit-combat-properties" class="mb-4">
+      {{/* Generate combat damage table */}}
+      {{ $attackerUnitId := .Unit.UnitType }}
+      {{ $attackerPlayer := .Unit.Player }}
+      {{ $rulesTable := .RulesTable }}
+      {{ $theme := .Theme }}
+      {{/* Get unit IDs from theme - ensures consistency and allows theme customization */}}
+      {{ $unitIds := $theme.GetAvailableUnits }}
+
+      <div class="mt-4">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600" style="width: 30%">
+                  vs Target
+                </th>
+                <th class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white" style="width: 70%">
+                  Damage Distribution
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+              {{/* Iterate over unit IDs from theme */}}
+              {{ range $index, $targetUnitId := $unitIds }}
+                {{/* Get unit-unit combat properties using key format "attackerUnitId:targetUnitId" */}}
+                {{ $key := printf "%d:%d" $attackerUnitId $targetUnitId }}
+                {{ $combatProps := index $rulesTable.UnitUnitProperties $key }}
+                {{ $targetUnitDef := index $rulesTable.Units $targetUnitId }}
+
+                {{/* Only show row if target unit exists and has combat data */}}
+                {{ if and $targetUnitDef $combatProps }}
+                  {{ if $combatProps.Damage }}
+                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 {{ if (Modulo $index 2) }}bg-gray-50 dark:bg-gray-700{{ end }}"
+                      data-damage-dist="{{ ToJson $combatProps.Damage }}">
+                    <td class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium align-top">
+                      <div class="flex items-center gap-2">
+                        <!-- Theme-based target unit image - will be populated by TypeScript -->
+                        <span class="w-6">
+                          <img class="theme-unit-image w-6 h-6 object-contain"
+                               data-unit-id="{{ $targetUnitId }}"
+                               data-player-id="{{ $attackerPlayer }}"
+                               alt="{{ $theme.GetUnitName $targetUnitId }}"
+                               style="image-rendering: pixelated;"
+                               onerror="this.style.display='none';"/>
+                        </span>
+                        <span>
+                          {{/* Use theme-specific unit name */}}
+                          {{ $theme.GetUnitName $targetUnitId }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-2 py-3 text-left text-gray-900 dark:text-white damage-histogram-cell">
+                      <!-- Histogram will be populated by TypeScript -->
+                    </td>
+                  </tr>
+                  {{ end }}
+                {{ end }}
+              {{ end }}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{{ else }}
   <!-- No Selection State -->
   <div id="no-unit-selected" class="text-center py-8">
     <div class="text-gray-400 dark:text-gray-500 mb-2">
@@ -18,71 +110,5 @@
       Select a unit to view<br />damage distributions
     </p>
   </div>
-
-  <!-- Selected Unit Damage Distributions -->
-  <div id="damage-distributions" class="hidden">
-    <!-- Current Unit Header -->
-    <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-      <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Damage dealt by:</div>
-      <h5 id="selected-unit-name" class="font-medium text-gray-900 dark:text-white">
-        Unit Name
-      </h5>
-    </div>
-
-    <!-- Unit-Unit Combat Properties Section -->
-    <div id="unit-combat-properties" class="mb-4">
-      <!-- Combat table will be populated dynamically -->
-    </div>
-  </div>
+{{ end }}
 </div>
-
-<!-- Unit Combat Table Template -->
-<template id="unit-combat-table-template">
-  <div class="mt-4">
-    <div class="overflow-x-auto">
-      <table
-        class="min-w-full text-xs border border-gray-200 dark:border-gray-600 rounded-lg"
-      >
-        <thead class="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th
-              class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600"
-              style="width: 30%"
-            >
-              vs Target
-            </th>
-            <th
-              class="px-2 py-2 text-left font-medium text-gray-900 dark:text-white"
-              style="width: 70%"
-            >
-              Damage Distribution
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600"
-        >
-          <!-- Rows will be populated dynamically -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-</template>
-
-<!-- Combat Row Template for Unit Combat Table -->
-<template id="combat-row-template">
-  <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-    <td
-      class="px-2 py-2 text-left text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 font-medium align-top"
-      data-target-name
-    >
-      Target Unit
-    </td>
-    <td
-      class="px-2 py-3 text-left text-gray-900 dark:text-white"
-      data-damage-histogram
-    >
-      <!-- Histogram will be populated here -->
-    </td>
-  </tr>
-</template>

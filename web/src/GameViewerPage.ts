@@ -1132,6 +1132,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 	async setDamageDistributionContent(request: SetContentRequest) {
     console.log("setDamageDistributionContent called on the browser")
     this.damageDistributionPanel.innerHTML = request.innerHtml
+    await this.damageDistributionPanel.hydrateThemeImages()
     return {}
   }
 	async setTerrainStatsContent(request: SetContentRequest) {

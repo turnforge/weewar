@@ -116,22 +116,6 @@ export abstract class BaseComponent implements Component, LCMComponent, EventSub
         }
     }
     
-    // Abstract methods that components must implement
-    
-    /**
-     * Component-specific cleanup logic
-     * Called during destroy before base cleanup
-     */
-    // protected abstract destroyComponent(): void;
-
-    set innerHTML(innerHTML: string) {
-      this.rootElement.innerHTML = innerHTML
-      // TODO - reset listeners etc
-    }
-    
-    // LCMComponent implementation with default empty methods
-    // Components can override these when they need coordination with other components
-    
     /**
      * Default lifecycle method: discover and return child components
      * Override this if your component creates child components that need lifecycle management
@@ -167,4 +151,28 @@ export abstract class BaseComponent implements Component, LCMComponent, EventSub
         
         this.log('Component deactivated successfully');
     }
+
+    set innerHTML(innerHTML: string) {
+      const [newHTML, allow] = this.shouldUpdateHtml(innerHTML)
+      if (allow) {
+        this.rootElement.innerHTML = newHTML
+        this.htmlUpdated(newHTML)
+      }
+    }
+
+    // Called BEFORE the HTML is about to be updated.  This is an opportunity
+    // for subclasses to fix/tweak html being updated and also ignore an update
+    // just in case.  Default behavior is to return the html as is
+    shouldUpdateHtml(html: string): [string, boolean] {
+      return [html, true]
+    }
+
+    // Called after the HTML for the component has been updated.
+    // This is an opportunity to rebind any event listeners etc
+    htmlUpdated(html: string) {
+      // Do nothing
+    }
+    
+    // LCMComponent implementation with default empty methods
+    // Components can override these when they need coordination with other components
 }

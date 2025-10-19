@@ -145,9 +145,11 @@ func (s *SingletonGameViewPresenterImpl) SetUnitStats(ctx context.Context, unit 
 }
 
 func (s *SingletonGameViewPresenterImpl) SetUnitDamageDistribution(ctx context.Context, unit *v1.Unit) {
-	content := "<div class='text-center text-gray-500'>No unit selected.......</div>"
-	if unit != nil {
-	}
+	content := s.renderPanelTemplate(ctx, "DamageDistributionPanel.templar.html", map[string]any{
+		"Unit":       unit,
+		"RulesTable": s.RulesEngine,
+		"Theme":      s.Theme, // Pass theme to template
+	})
 	s.GameViewerPage.SetDamageDistributionContent(ctx, &v1.SetContentRequest{
 		InnerHtml: content,
 	})

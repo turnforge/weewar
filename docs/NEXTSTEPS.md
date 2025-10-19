@@ -365,6 +365,27 @@
 - **Session Recording**: Capture interesting game scenarios for documentation and bug reproduction
 - **Complete Documentation**: USER_GUIDE.md covers all commands, position formats, and workflow patterns
 
+### 34. Hybrid Go/TypeScript Panel Migration Complete (v11.0) ✅ COMPLETED
+**Completed**: Migration of all panels to hybrid Go/TypeScript rendering pattern with data quality fixes
+**Key Achievements**:
+- **UnitStatsPanel Migration**: Complete template-based rendering with theme image hydration
+- **TerrainStatsPanel Migration**: Full Go template integration with movement cost tables
+- **DamageDistributionPanel Migration**: Histogram generation in TypeScript with data from Go templates
+- **Duplicate Data Fix**: Added deduplication in rules loader to handle legacy data with duplicate damage ranges
+- **Rules Data Extractor Enhancement**: Updated extract-rules-data tool with deduplication logic for future data generation
+- **Code Cleanup**: Removed ~260 lines of deprecated TypeScript table generation code
+- **Data Quality**: Damage distribution ranges reduced from 16 to 10 by eliminating duplicates at load time
+
+### 35. Data Deduplication Architecture (v11.0) ✅ COMPLETED
+**Completed**: Comprehensive deduplication strategy across multiple layers
+**Technical Improvements**:
+- **Go-Side Deduplication**: `deduplicateDamageRanges()` in rules_loader.go filters duplicates when loading rules data
+- **Extract Tool Enhancement**: Added deduplication in extract-rules-data/main.go using map-based filtering
+- **Early Filtering**: Duplicates removed at data load time, ensuring clean data throughout application lifecycle
+- **Backward Compatibility**: Handles both legacy data files with duplicates and clean regenerated data
+- **Field Name Handling**: TypeScript supports both camelCase and PascalCase proto field names for robustness
+- **Visual Quality**: Histogram rendering now shows correct damage distributions without duplicate bars
+
 ## Current Development Focus
 
 ### Phase 15: Interactive Unit Movement & Combat Implementation 🎯 NEXT

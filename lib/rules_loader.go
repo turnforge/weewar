@@ -120,6 +120,8 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 				DiscardUnknown: true,
 			}
 			if err := unmarshaler.Unmarshal(propBytes, props); err == nil {
+				// Deduplicate damage ranges (source data may have duplicates)
+				deduplicateDamageRanges(props.Damage)
 				rulesEngine.UnitUnitProperties[key] = props
 			}
 		}
@@ -155,4 +157,32 @@ func SaveRulesEngineToFile(rulesEngine *RulesEngine, filename string) error {
 	}
 
 	return nil
+}
+
+// deduplicateDamageRanges removes duplicate damage values from DamageDistribution
+// This handles legacy data files that may have duplicate ranges
+func deduplicateDamageRanges(damage *v1.DamageDistribution) {
+	if damage == nil || len(damage.Ranges) == 0 {
+		return
+	}
+
+	seenDamageValues := make(map[float64]bool)
+	uniqueRanges := make([]*v1.DamageRange, 0, len(damage.Ranges))
+
+	for _, damageRange := range damage.Ranges {
+		// Skip empty ranges or ranges without valid damage values
+		if damageRange == nil {
+			continue
+		}
+
+		damageValue := damageRange.MinValue
+
+		// Only add if we haven't seen this damage value before
+		if !seenDamageValues[damageValue] {
+			seenDamageValues[damageValue] = true
+			uniqueRanges = append(uniqueRanges, damageRange)
+		}
+	}
+
+	damage.Ranges = uniqueRanges
 }

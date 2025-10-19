@@ -62,7 +62,7 @@ func main() {
 	}
 
 	// Write output
-	outputPath := "weewar-rules.json"
+	outputPath := "weewar-rules-new.json"
 	jsonData, err := json.MarshalIndent(rulesData, "", "  ")
 	if err != nil {
 		fmt.Printf("Error marshaling JSON: %v\n", err)
@@ -526,6 +526,9 @@ func extractDamageDistribution(card *html.Node) *weewarv1.DamageDistribution {
 		Ranges: []*weewarv1.DamageRange{},
 	}
 
+	// Use a map to deduplicate damage values (HTML may have duplicate tooltips)
+	damageMap := make(map[int]*weewarv1.DamageRange)
+
 	// Extract damage probabilities from tooltip data
 	var traverse func(*html.Node)
 	traverse = func(n *html.Node) {
@@ -537,16 +540,21 @@ func extractDamageDistribution(card *html.Node) *weewarv1.DamageDistribution {
 						if prob, err := strconv.ParseFloat(matches[1], 64); err == nil {
 							if dmg, err := strconv.Atoi(matches[2]); err == nil {
 								dmgFloat := float64(dmg)
-								damage.Ranges = append(damage.Ranges, &weewarv1.DamageRange{
-									MinValue:    dmgFloat,
-									MaxValue:    dmgFloat,
-									Probability: prob / 100.0, // Convert percentage to decimal
-								})
-								if damage.MinDamage == 0 || dmgFloat < damage.MinDamage {
-									damage.MinDamage = dmgFloat
-								}
-								if dmgFloat > damage.MaxDamage {
-									damage.MaxDamage = dmgFloat
+
+								// Only add if we haven't seen this damage value before
+								if _, exists := damageMap[dmg]; !exists {
+									damageMap[dmg] = &weewarv1.DamageRange{
+										MinValue:    dmgFloat,
+										MaxValue:    dmgFloat,
+										Probability: prob / 100.0, // Convert percentage to decimal
+									}
+
+									if damage.MinDamage == 0 || dmgFloat < damage.MinDamage {
+										damage.MinDamage = dmgFloat
+									}
+									if dmgFloat > damage.MaxDamage {
+										damage.MaxDamage = dmgFloat
+									}
 								}
 							}
 						}
@@ -560,8 +568,15 @@ func extractDamageDistribution(card *html.Node) *weewarv1.DamageDistribution {
 	}
 	traverse(card)
 
-	if len(damage.Ranges) == 0 {
+	if len(damageMap) == 0 {
 		return nil // No damage data found
+	}
+
+	// Convert map to sorted slice by damage value
+	for dmg := int(damage.MinDamage); dmg <= int(damage.MaxDamage); dmg++ {
+		if damageRange, exists := damageMap[dmg]; exists {
+			damage.Ranges = append(damage.Ranges, damageRange)
+		}
 	}
 
 	return damage

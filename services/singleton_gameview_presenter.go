@@ -68,7 +68,6 @@ func (s *SingletonGameViewPresenterImpl) InitializeGame(ctx context.Context, req
 }
 
 func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *v1.SceneClickedRequest) (resp *v1.SceneClickedResponse, err error) {
-	fmt.Println("Ok Scene Clicked", req)
 	resp = &v1.SceneClickedResponse{}
 	game := s.GamesService.SingletonGame
 	gameState := s.GamesService.SingletonGameState
@@ -124,7 +123,6 @@ func (s *SingletonGameViewPresenterImpl) renderPanelTemplate(_ context.Context, 
 		err = tmpls.Templates.RenderHtmlTemplate(buf, tmpl[0], "", data, nil)
 		if err == nil {
 			content = buf.String()
-			fmt.Println("Contents: ", content)
 		}
 	}
 	if err != nil {

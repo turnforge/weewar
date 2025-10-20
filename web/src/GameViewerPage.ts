@@ -6,12 +6,12 @@ import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../g
 import { EventBus } from '../lib/EventBus';
 import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
-import { 
-    GameState as ProtoGameState, 
-    Game as ProtoGame, 
-    GameConfiguration as ProtoGameConfiguration, 
-    MoveOption, 
-    AttackOption, 
+import {
+    GameState as ProtoGameState,
+    Game as ProtoGame,
+    GameConfiguration as ProtoGameConfiguration,
+    MoveOption,
+    AttackOption,
     GameMove,
     GetOptionsAtResponse,
     GameOption,
@@ -19,6 +19,10 @@ import {
     SetGameStateRequest, SetGameStateResponse,
     SetContentRequest, SetContentResponse,
 	  LogMessageRequest, LogMessageResponse,
+    ShowHighlightsRequest, ShowHighlightsResponse,
+    ClearHighlightsRequest, ClearHighlightsResponse,
+    ShowPathRequest, ShowPathResponse,
+    ClearPathsRequest, ClearPathsResponse,
 } from '../gen/wasmjs/weewar/v1/interfaces';
 import * as models from '../gen/wasmjs/weewar/v1/models';
 import { create } from '@bufbuild/protobuf';
@@ -1147,7 +1151,32 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     await this.terrainStatsPanel.hydrateThemeImages()
     return {}
   }
-	async logMessage(request: LogMessageRequest) {
+	// Visualization command methods
+  async showHighlights(request: ShowHighlightsRequest) {
+    console.log("showHighlights called:", request);
+    // TODO Phase 4: Implement actual highlighting
+    return {}
+  }
+
+  async clearHighlights(request: ClearHighlightsRequest) {
+    console.log("clearHighlights called:", request);
+    // TODO Phase 4: Implement clearing
+    return {}
+  }
+
+  async showPath(request: ShowPathRequest) {
+    console.log("showPath called:", request);
+    // TODO Phase 4: Implement path drawing
+    return {}
+  }
+
+  async clearPaths(request: ClearPathsRequest) {
+    console.log("clearPaths called:", request);
+    // TODO Phase 4: Implement path clearing
+    return {}
+  }
+
+  async logMessage(request: LogMessageRequest) {
     console.log("logMessage called on the browser")
     return {}
   }

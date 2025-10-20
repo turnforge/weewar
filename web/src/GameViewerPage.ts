@@ -161,6 +161,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         }
 
         // Set up scene click callback now that gameScene is initialized
+        this.gameScene.gameViewPresenterClient = this.gameViewPresenterClient
         this.gameScene.sceneClickedCallback = (context: any, layer: string, extra?: any): void => {
           this.gameViewPresenterClient.sceneClicked({
             gameId: this.currentGameId || "",

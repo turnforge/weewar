@@ -4,6 +4,7 @@ import { hexToPixel } from './hexUtils';
 import { World } from '../World';
 import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer } from './layers/HexHighlightLayer';
 import { EventBus } from '../../lib/EventBus';
+import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/gameViewPresenterClient';
 
 /**
  * PhaserGameScene extends PhaserWorldScene with game-specific interactive features.
@@ -26,6 +27,7 @@ import { EventBus } from '../../lib/EventBus';
  */
 export class PhaserGameScene extends PhaserWorldScene {
     // Game-specific state
+    public gameViewPresenterClient: GameViewPresenterClient;
     private selectedUnit: { q: number; r: number; unitData: any } | null = null;
     private gameMode: 'select' | 'move' | 'attack' = 'select';
     private currentPlayer: number = 1;

@@ -702,7 +702,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     /**
      * Handle tap events (clicks without drag)
      */
-    private handleTap(pointer: Phaser.Input.Pointer): void {
+    protected handleTap(pointer: Phaser.Input.Pointer): void {
         // Use layer system for hit testing, then send to callback
         if (this.layerManager && this.sceneClickedCallback) {
             const clickContext = this.layerManager.getClickContext(pointer);

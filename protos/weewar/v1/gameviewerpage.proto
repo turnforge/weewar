@@ -11,6 +11,7 @@ option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 service GameViewerPage {
     option (wasmjs.v1.browser_provided) = true;
 
+    // Content update methods
     rpc SetTurnOptionsContent(SetContentRequest) returns (SetContentResponse);
 
     rpc SetUnitStatsContent(SetContentRequest) returns (SetContentResponse);
@@ -19,9 +20,19 @@ service GameViewerPage {
 
     rpc SetTerrainStatsContent(SetContentRequest) returns (SetContentResponse);
 
-    rpc LogMessage(LogMessageRequest) returns (LogMessageResponse);
-
     rpc SetGameState(SetGameStateRequest) returns (SetGameStateResponse);
+
+    // Visualization command methods
+    rpc ShowHighlights(ShowHighlightsRequest) returns (ShowHighlightsResponse);
+
+    rpc ClearHighlights(ClearHighlightsRequest) returns (ClearHighlightsResponse);
+
+    rpc ShowPath(ShowPathRequest) returns (ShowPathResponse);
+
+    rpc ClearPaths(ClearPathsRequest) returns (ClearPathsResponse);
+
+    // Utility methods
+    rpc LogMessage(LogMessageRequest) returns (LogMessageResponse);
 }
 
 message EmptyRequest {}
@@ -53,4 +64,49 @@ message SetGameStateRequest {
 
 // Response from fetch
 message SetGameStateResponse {
+}
+
+// ============================================================================
+// Visualization Command Messages
+// ============================================================================
+
+// Request to show highlights on the game board
+message ShowHighlightsRequest {
+    repeated HighlightSpec highlights = 1;
+}
+
+message ShowHighlightsResponse {
+}
+
+// Specification for a single highlight
+message HighlightSpec {
+    int32 q = 1;
+    int32 r = 2;
+    string type = 3; // "selection", "movement", "attack"
+}
+
+// Request to clear highlights
+message ClearHighlightsRequest {
+    repeated string types = 1; // Empty = clear all, otherwise clear specific types
+}
+
+message ClearHighlightsResponse {
+}
+
+// Request to show a path on the game board
+message ShowPathRequest {
+    repeated int32 coords = 1; // Flat array: [q1, r1, q2, r2, q3, r3, ...]
+    uint32 color = 2; // Hex color (e.g., 0x00FF00 for green)
+    int32 thickness = 3; // Line thickness in pixels
+}
+
+message ShowPathResponse {
+}
+
+// Request to clear paths
+message ClearPathsRequest {
+    // Empty = clear all paths
+}
+
+message ClearPathsResponse {
 }

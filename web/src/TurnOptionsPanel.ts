@@ -30,7 +30,7 @@ import {
  * of all available actions at the current position.
  */
 export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
-    private gameViewPresenterClient: GameViewPresenterClient;
+    public gameViewPresenterClient: GameViewPresenterClient;
     private world: World | null = null;
     private theme: ITheme | null = null;
     private currentOptions: GameOption[] = [];
@@ -80,13 +80,14 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
 
                 this.log(`Option clicked: type=${optionType}, index=${optionIndex}, position=(${q},${r})`);
 
-                // Emit event for the game to handle the action
-                this.eventBus.emit('turn-option-clicked', {
-                    optionIndex,
-                    optionType,
-                    q,
-                    r
-                }, this, null);
+                // Call presenter directly
+                this.gameViewPresenterClient.turnOptionClicked({
+                    gameId: "",
+                    optionIndex: optionIndex,
+                    optionType: optionType || "",
+                    q: q,
+                    r: r,
+                });
             });
         });
     }

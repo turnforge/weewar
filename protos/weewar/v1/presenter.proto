@@ -65,9 +65,13 @@ service GameViewPresenter {
   }
 }
 
-// GameInfo represents a game in the catalog
+// Called when a turn option is clicked in TurnOptionsPanel
 message TurnOptionClickedRequest {
   string game_id = 1;
+  int32 option_index = 2;  // Index of the option in the options array
+  string option_type = 3;   // Type of option: "move", "attack", "endTurn", etc.
+  int32 q = 4;              // Target Q coordinate
+  int32 r = 5;              // Target R coordinate
 }
 
 // Response of a turn option click

@@ -157,8 +157,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             }
         }
 
-        // Set presenter client on gameScene so it can call presenter directly
+        // Set presenter client on components so they can call presenter directly
         this.gameScene.gameViewPresenterClient = this.gameViewPresenterClient;
+        this.turnOptionsPanel.gameViewPresenterClient = this.gameViewPresenterClient;
     }
 
     /**

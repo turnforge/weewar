@@ -19,8 +19,8 @@ type SingletonGameViewPresenterImpl struct {
 	Theme          themes.Theme
 
 	// State tracking for current selection
-	selectedQ    *int32  // nil = no selection
-	selectedR    *int32  // nil = no selection
+	selectedQ     *int32 // nil = no selection
+	selectedR     *int32 // nil = no selection
 	hasHighlights bool   // Track if highlights are currently shown
 }
 
@@ -202,6 +202,7 @@ func (s *SingletonGameViewPresenterImpl) SetTurnOptions(ctx context.Context, res
 
 // clearHighlightsAndSelection clears highlights if any are currently shown
 func (s *SingletonGameViewPresenterImpl) clearHighlightsAndSelection(ctx context.Context) {
+	s.GameViewerPage.ClearPaths(ctx, &v1.ClearPathsRequest{})
 	if s.hasHighlights {
 		s.GameViewerPage.ClearHighlights(ctx, &v1.ClearHighlightsRequest{
 			Types: []string{}, // Empty = clear all
@@ -248,4 +249,63 @@ func buildHighlightSpecs(optionsResp *v1.GetOptionsAtResponse, selectedQ, select
 	}
 
 	return highlights
+}
+
+// TurnOptionClicked handles when user clicks on a turn option in the TurnOptionsPanel
+func (s *SingletonGameViewPresenterImpl) TurnOptionClicked(ctx context.Context, req *v1.TurnOptionClickedRequest) (resp *v1.TurnOptionClickedResponse, err error) {
+	resp = &v1.TurnOptionClickedResponse{}
+
+	// For now, just show path visualization for move options
+	// In the future, this could execute the actual move/attack
+	go func() {
+		// Always clear previous paths first
+		s.GameViewerPage.ClearPaths(ctx, &v1.ClearPathsRequest{})
+
+		if req.OptionType == "move" && s.selectedQ != nil && s.selectedR != nil {
+			// Get the options again to extract the path for this specific move
+			optionsResp, err := s.GamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+				Q: *s.selectedQ,
+				R: *s.selectedR,
+			})
+
+			if err == nil && optionsResp != nil && int(req.OptionIndex) < len(optionsResp.Options) {
+				option := optionsResp.Options[req.OptionIndex]
+				if moveOpt := option.GetMove(); moveOpt != nil && moveOpt.ReconstructedPath != nil {
+					// Extract path coordinates from the reconstructed path
+					coords := extractPathCoords(moveOpt.ReconstructedPath)
+					if len(coords) >= 4 {
+						// Show green path for movement
+						s.GameViewerPage.ShowPath(ctx, &v1.ShowPathRequest{
+							Coords:    coords,
+							Color:     0x00ff00, // Green for movement
+							Thickness: 4,
+						})
+					}
+				}
+			}
+		}
+	}()
+
+	return
+}
+
+// extractPathCoords converts a Path to a flat coordinate array
+func extractPathCoords(path *v1.Path) []int32 {
+	if path == nil || len(path.Edges) == 0 {
+		return nil
+	}
+
+	coords := make([]int32, 0, len(path.Edges)*2+2)
+
+	// Add starting position from first edge
+	if len(path.Edges) > 0 {
+		coords = append(coords, path.Edges[0].FromQ, path.Edges[0].FromR)
+	}
+
+	// Add all destination positions
+	for _, edge := range path.Edges {
+		coords = append(coords, edge.ToQ, edge.ToR)
+	}
+
+	return coords
 }

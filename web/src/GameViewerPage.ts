@@ -647,6 +647,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private async loadWASM(): Promise<void> {
         // Create base bundle with module configuration
         this.wasmBundle  = new WeewarBundle();
+        this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
+        this.gameViewPresenterClient = new GameViewPresenterClient(this.wasmBundle);
         await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
         await this.wasmBundle.waitUntilReady()
     }
@@ -656,9 +658,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      * This now handles both WASM loading and World creation in GameState
      */
     private async initializePresenter(): Promise<void> {
-        this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
-        this.gameViewPresenterClient = new GameViewPresenterClient(this.wasmBundle);
-        
         // Get raw JSON data from page elements
         const gameElement = document.getElementById('game.data-json');
         const gameStateElement = document.getElementById('game-state-data-json');

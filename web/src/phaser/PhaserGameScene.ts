@@ -535,6 +535,25 @@ export class PhaserGameScene extends PhaserWorldScene {
     }
 
     /**
+     * Override handleTap to call presenter directly instead of callback
+     */
+    protected handleTap(pointer: Phaser.Input.Pointer): void {
+        // Use layer system for hit testing
+        if (this.layerManager && this.gameViewPresenterClient) {
+            const clickContext = this.layerManager.getClickContext(pointer);
+            if (clickContext) {
+                // Call presenter directly
+                this.gameViewPresenterClient.sceneClicked({
+                    gameId: "", // Will be filled by presenter
+                    q: clickContext.hexQ,
+                    r: clickContext.hexR,
+                    layer: clickContext.layer || 'unknown',
+                });
+            }
+        }
+    }
+
+    /**
      * Manual cleanup when scene is destroyed
      */
     public destroy(): void {

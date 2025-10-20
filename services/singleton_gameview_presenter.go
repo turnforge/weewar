@@ -98,6 +98,18 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 			s.SetTerrainStats(ctx, tile)
 			s.SetUnitStats(ctx, unit)
 			s.SetUnitDamageDistribution(ctx, unit)
+
+			// Get options at this position and update TurnOptionsPanel
+			optionsResp, err := s.GamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+				Q: q,
+				R: r,
+			})
+			if err == nil && optionsResp != nil {
+				s.SetTurnOptions(ctx, optionsResp, unit, &v1.AxialCoord{Q: q, R: r})
+			} else {
+				// Clear options panel if there's an error or no options
+				s.SetTurnOptions(ctx, &v1.GetOptionsAtResponse{Options: nil}, nil, &v1.AxialCoord{Q: q, R: r})
+			}
 		}()
 
 		// If there's a unit, also handle unit logic and show unit info in unit panel
@@ -160,6 +172,18 @@ func (s *SingletonGameViewPresenterImpl) SetTerrainStats(ctx context.Context, ti
 		"Theme":      s.Theme, // Pass theme to template
 	})
 	s.GameViewerPage.SetTerrainStatsContent(ctx, &v1.SetContentRequest{
+		InnerHtml: content,
+	})
+}
+
+func (s *SingletonGameViewPresenterImpl) SetTurnOptions(ctx context.Context, response *v1.GetOptionsAtResponse, unit *v1.Unit, position *v1.AxialCoord) {
+	content := s.renderPanelTemplate(ctx, "TurnOptionsPanel.templar.html", map[string]any{
+		"Options":  response.GetOptions(),
+		"Unit":     unit,
+		"Position": position,
+		"Theme":    s.Theme,
+	})
+	s.GameViewerPage.SetTurnOptionsContent(ctx, &v1.SetContentRequest{
 		InnerHtml: content,
 	})
 }

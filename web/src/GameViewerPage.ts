@@ -155,6 +155,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             if (this.damageDistributionPanel) {
                 this.damageDistributionPanel.setTheme(theme);
             }
+            if (this.turnOptionsPanel) {
+                this.turnOptionsPanel.setTheme(theme);
+            }
         }
 
         // Set up scene click callback now that gameScene is initialized
@@ -1118,6 +1121,8 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
   async setTurnOptionsContent(request: SetContentRequest) {
     console.log("setTurnOptionsContent called on the browser: ", request)
     this.turnOptionsPanel.innerHTML = request.innerHtml
+    // Hydrate theme images and setup click handlers after Go template renders HTML
+    await this.turnOptionsPanel.hydrateThemeImages()
     return {}
   }
 

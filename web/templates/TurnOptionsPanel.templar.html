@@ -1,0 +1,134 @@
+{{ if .Options }}
+  <!-- Options Header with Unit Info -->
+  <div class="mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+    {{ if .Unit }}
+      <div class="flex items-center gap-2 mb-2">
+        <img class="theme-unit-image w-6 h-6 object-contain"
+             data-unit-id="{{ .Unit.UnitType }}"
+             data-player-id="{{ .Unit.Player }}"
+             style="image-rendering: pixelated;" />
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {{ $theme.GetUnitName .Unit.UnitType }} at ({{ .Position.Q }}, {{ .Position.R }})
+        </span>
+      </div>
+    {{ end }}
+    <div class="text-xs text-gray-500 dark:text-gray-400">
+      {{ len .Options }} option{{ if ne (len .Options) 1 }}s{{ end }} available
+    </div>
+  </div>
+
+  <!-- Options List -->
+  <div class="space-y-2">
+    {{ range $index, $option := .Options }}
+      {{ if $option.Move }}
+        <!-- Move Option -->
+        <button
+          class="turn-option-button w-full text-left p-3 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-800 transition-colors"
+          data-option-index="{{ $index }}"
+          data-option-type="move"
+          data-q="{{ $option.Move.Q }}"
+          data-r="{{ $option.Move.R }}">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-green-600 dark:text-green-400 text-lg">➜</span>
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">Move to ({{ $option.Move.Q }}, {{ $option.Move.R }})</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Cost: {{ $option.Move.MovementCost }} MP</div>
+              </div>
+            </div>
+          </div>
+        </button>
+      {{ else if $option.Attack }}
+        <!-- Attack Option -->
+        <button
+          class="turn-option-button w-full text-left p-3 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
+          data-option-index="{{ $index }}"
+          data-option-type="attack"
+          data-q="{{ $option.Attack.Q }}"
+          data-r="{{ $option.Attack.R }}">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-red-600 dark:text-red-400 text-lg">⚔️</span>
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">Attack at ({{ $option.Attack.Q }}, {{ $option.Attack.R }})</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Target: {{ $theme.GetUnitName $option.Attack.TargetUnitType }} (HP: {{ $option.Attack.TargetUnitHealth }})
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+      {{ else if $option.EndTurn }}
+        <!-- End Turn Option -->
+        <button
+          class="turn-option-button w-full text-left p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors"
+          data-option-index="{{ $index }}"
+          data-option-type="endTurn">
+          <div class="flex items-center gap-2">
+            <span class="text-blue-600 dark:text-blue-400 text-lg">⏭️</span>
+            <div class="font-medium text-gray-900 dark:text-white">End Turn</div>
+          </div>
+        </button>
+      {{ else if $option.Build }}
+        <!-- Build Option -->
+        <button
+          class="turn-option-button w-full text-left p-3 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-800 transition-colors"
+          data-option-index="{{ $index }}"
+          data-option-type="build">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-yellow-600 dark:text-yellow-400 text-lg">🏗️</span>
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">Build Unit</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ $theme.GetUnitName $option.Build.UnitType }} - {{ $option.Build.Cost }} coins
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+      {{ else if $option.Capture }}
+        <!-- Capture Option -->
+        <button
+          class="turn-option-button w-full text-left p-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg border border-purple-200 dark:border-purple-800 transition-colors"
+          data-option-index="{{ $index }}"
+          data-option-type="capture"
+          data-q="{{ $option.Capture.Q }}"
+          data-r="{{ $option.Capture.R }}">
+          <div class="flex items-center gap-2">
+            <span class="text-purple-600 dark:text-purple-400 text-lg">🏁</span>
+            <div class="font-medium text-gray-900 dark:text-white">Capture Building</div>
+          </div>
+        </button>
+      {{ end }}
+    {{ end }}
+  </div>
+
+  <!-- Options Help -->
+  <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-xs text-blue-700 dark:text-blue-200">
+          Click an option to execute it, or use the game board to select it visually.
+        </p>
+      </div>
+    </div>
+  </div>
+{{ else }}
+  <!-- No options / empty state -->
+  <div class="text-center py-8">
+    <div class="text-gray-400 dark:text-gray-500 mb-2">
+      <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      Select a unit to view<br />available actions
+    </p>
+  </div>
+{{ end }}

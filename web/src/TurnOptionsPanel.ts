@@ -4,8 +4,10 @@ import { LCMComponent } from '../lib/LCMComponent';
 import { GameState } from './GameState';
 import { World } from './World';
 import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
-import { 
-    Unit, 
+import { ITheme } from '../assets/themes/BaseTheme';
+import { ThemeUtils } from './ThemeUtils';
+import {
+    Unit,
     GameOption,
     MoveOption,
     AttackOption,
@@ -31,6 +33,7 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     private gameViewPresenterClient: GameViewPresenterClient;
     private isActivated = false;
     private world: World | null = null;
+    private theme: ITheme | null = null;
     private currentOptions: GameOption[] = [];
     private selectedPosition: { q: number; r: number } | null = null;
     private selectedUnit: Unit | null = null;
@@ -56,6 +59,48 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
     public setWorld(world: World): void {
         this.world = world;
         this.log('World dependency set');
+    }
+
+    /**
+     * Set the theme for getting unit names and images
+     */
+    public setTheme(theme: ITheme): void {
+        this.theme = theme;
+    }
+
+    /**
+     * Hydrate theme images after Go template renders HTML
+     * Call this after the HTML content is injected by the Go backend
+     */
+    public async hydrateThemeImages(): Promise<void> {
+        await ThemeUtils.hydrateThemeImages(this.rootElement, this.theme, this.debugMode);
+        this.setupOptionClickHandlers();
+    }
+
+    /**
+     * Setup click handlers for option buttons
+     */
+    private setupOptionClickHandlers(): void {
+        const buttons = this.rootElement.querySelectorAll('.turn-option-button');
+        buttons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const target = e.currentTarget as HTMLElement;
+                const optionIndex = parseInt(target.getAttribute('data-option-index') || '-1');
+                const optionType = target.getAttribute('data-option-type');
+                const q = parseInt(target.getAttribute('data-q') || '0');
+                const r = parseInt(target.getAttribute('data-r') || '0');
+
+                this.log(`Option clicked: type=${optionType}, index=${optionIndex}, position=(${q},${r})`);
+
+                // Emit event for the game to handle the action
+                this.eventBus.emit('turn-option-clicked', {
+                    optionIndex,
+                    optionType,
+                    q,
+                    r
+                }, this, null);
+            });
+        });
     }
 
     // Phase 3: Activate component

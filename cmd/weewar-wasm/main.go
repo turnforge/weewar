@@ -35,6 +35,35 @@ func main() {
 		GameViewerPage:    weewar_v1_services.NewGameViewerPageClient(),
 	}
 	wasmGameViewPresenter.GameViewerPage = exports.GameViewerPage
+	wasmGameViewPresenter.DamageDistributionPanel = &services.BrowserDamageDistributionPanel{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.DamageDistributionPanel.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.DamageDistributionPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
+
+	wasmGameViewPresenter.UnitStatsPanel = &services.BrowserUnitStatsPanel{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.UnitStatsPanel.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.UnitStatsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
+
+	wasmGameViewPresenter.TerrainStatsPanel = &services.BrowserTerrainStatsPanel{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.TerrainStatsPanel.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.TerrainStatsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
+
+	wasmGameViewPresenter.GameScene = &services.BrowserGameScene{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.GameScene.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.GameScene.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
+
+	wasmGameViewPresenter.TurnOptionsPanel = &services.BrowserTurnOptionsPanel{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.TurnOptionsPanel.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.TurnOptionsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
 	// Register the JavaScript API using generated exports
 	exports.RegisterAPI()

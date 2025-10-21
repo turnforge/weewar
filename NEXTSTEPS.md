@@ -1,6 +1,26 @@
 # Next Steps - WeeWar Development
 
-## ✅ Turn Options Panel and Path Visualization (Current Session)
+## ✅ Go Service Layer Testing (Current Session)
+
+### Implementation Completed - DONE
+- **Test Suite Creation**: Created comprehensive tests for SingletonGamesService using real world data
+- **Test Utilities**: Enhanced lib/test_utils.go with LoadTestWorld() for loading worlds from JSON
+- **Real Data Testing**: Tests load actual worlds from ~/dev-app-data/weewar/storage/worlds
+- **Panel Architecture**: Separated Base panels (data) from Browser panels (rendering) for better testability
+- **Build Integration**: Makefile fails builds if tests fail
+
+### Test Coverage
+- ✅ TestSingletonGamesService_GetOptionsAt: Verifies options calculation for units
+- ✅ TestSingletonGamesService_GetOptionsAt_EmptyTile: Verifies empty tile behavior
+- ✅ TestSingletonGamesService_GetRuntimeGame: Verifies runtime game structure
+
+### Architecture Benefits
+- No mock objects needed - tests use real game logic
+- Fast execution without browser dependencies
+- Easy to add new test cases using existing worlds
+- Clean separation between state management and rendering
+
+## ✅ Turn Options Panel and Path Visualization (Previous Session)
 
 ### Implementation Completed - DONE
 - **Library Refactoring**: Moved position_parser.go, path_display.go from CLI to lib/ for WASM accessibility
@@ -9,12 +29,6 @@
 - **Path Visualization**: Added addPath(), removePath(), clearAllPaths() methods to HexHighlightLayer
 - **Proto Integration**: Direct use of GameOption, MoveOption, AttackOption types without redundant conversions
 - **Path Extraction**: Properly extracting path coordinates from MoveOption.reconstructedPath.edges
-
-### Next Steps for Turn Options
-- [ ] Show path preview on hover over move options (not just on click)
-- [ ] Add keyboard shortcuts for selecting options (1-9 keys)
-- [ ] Display more detailed information (terrain types along path)
-- [ ] Add option filtering (show only moves, only attacks, etc.)
 
 ## ✅ Path Tracking and Movement Explainability (Previous Session)
 

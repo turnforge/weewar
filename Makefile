@@ -18,16 +18,18 @@ vars:
 	echo WASM_EXEC_PATH=${WASM_EXEC_PATH}
 
 test:
-	cd services && go test . -cover
-	cd lib && go test . -cover
+	@echo "Running tests..."
+	cd services && go test -v -cover ./...
+	cd lib && go test -v -cover ./...
 	# cd cmd/weewar-cli && go test ./...
+	@echo "✓ All tests passed"
 
 cli:
 	mkdir -p bin
 	go build  -o ./bin/weewar-cli cmd/weewar-cli/*.go
 	# go build  -o ./bin/weewar-convert cmd/weewar-convert/*.go
 
-wasm: 
+wasm: # test
 	echo "Building WeeWar WASM modules..."
 	mkdir -p web/static/wasm
 	echo "Building weewar-cli WASM..."

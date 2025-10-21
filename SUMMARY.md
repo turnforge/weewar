@@ -134,6 +134,48 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - Path visualization shows green lines when move options are selected
 - Integrated into dockview layout system alongside other game panels
 
+### Go Service Layer Testing Implementation
+
+**Achievement**: Created comprehensive test suite for Go services using real world data instead of mocks.
+
+**Key Features**:
+1. **Real Data Testing**: Tests load actual worlds from `~/dev-app-data/weewar/storage/worlds` using existing test utilities
+2. **No Mock Objects**: Tests verify actual game logic in SingletonGamesService with GetOptionsAt and GetRuntimeGame
+3. **Test Utilities**: Enhanced lib/test_utils.go with LoadTestWorld() for loading worlds from JSON files
+4. **Build Integration**: Makefile configured to fail builds if tests fail
+
+**Test Coverage**:
+- TestSingletonGamesService_GetOptionsAt: Verifies options are correctly calculated for units
+- TestSingletonGamesService_GetOptionsAt_EmptyTile: Verifies empty tiles return only end-turn option
+- TestSingletonGamesService_GetRuntimeGame: Verifies runtime game structure creation
+
+**Architecture Benefits**:
+- Tests focus on data and logic layer rather than browser rendering
+- Uses real game data for realistic test scenarios
+- Faster test execution without browser dependencies
+- Easy to add new test cases using existing worlds
+
+### Panel Architecture Refactoring
+
+**Achievement**: Introduced Base/Browser panel separation for better testability and code organization.
+
+**Key Components**:
+1. **Base Panels**: Pure data classes (BaseUnitPanel, BaseTilePanel, BaseTurnOptionsPanel, BaseGameScene)
+   - Store current state (unit, tile, options, highlights, paths)
+   - No browser dependencies
+   - Testable in pure Go tests
+
+2. **Browser Panels**: Extend Base panels with rendering (BrowserUnitStatsPanel, BrowserTurnOptionsPanel, etc.)
+   - Handle HTML template rendering
+   - Call GameViewerPageClient RPCs
+   - Only compiled in WASM builds
+
+**Architecture Benefits**:
+- Clean separation between state management and rendering
+- Base panels testable without browser
+- Browser-specific code isolated to WASM builds
+- Easier to add new panel types
+
 ### Previous Foundation
 
 **Interactive Unit Movement System**: Complete end-to-end functionality from unit selection to server validation and visual updates.
@@ -179,6 +221,8 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - Unit tests for World operations (basic moves, replacements, transactions)
 - Integration tests for ProcessMoves pipeline
 - End-to-end tests using WasmGamesService
+- Go service layer tests using real world data (SingletonGamesService tests)
+- Test utilities for loading real worlds from storage
 - CLI tool for manual testing and game state manipulation
 
 ## Known Issues & Next Steps

@@ -1,22 +1,68 @@
+//go:build js && wasm
+// +build js,wasm
+
 package services
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	lib "github.com/panyam/turnengine/games/weewar/lib"
 	"github.com/panyam/turnengine/games/weewar/web/assets/themes"
-	tmpls "github.com/panyam/turnengine/games/weewar/web/templates"
 )
+
+type BasePanel interface {
+	SetTheme(t themes.Theme)
+	SetRulesEngine(t *v1.RulesEngine)
+}
+
+type TurnOptionsPanel interface {
+	BasePanel
+	CurrentOptions() *v1.GetOptionsAtResponse
+	CurrentUnit() *v1.Unit
+	SetCurrentUnit(context.Context, *v1.Unit, *v1.GetOptionsAtResponse)
+}
+
+type UnitStatsPanel interface {
+	BasePanel
+	CurrentUnit() *v1.Unit
+	SetCurrentUnit(context.Context, *v1.Unit)
+}
+
+type DamageDistributionPanel interface {
+	BasePanel
+	CurrentUnit() *v1.Unit
+	SetCurrentUnit(context.Context, *v1.Unit)
+}
+
+type TerrainStatsPanel interface {
+	BasePanel
+	CurrentTile() *v1.Tile
+	SetCurrentTile(context.Context, *v1.Tile)
+}
+
+type GameScene interface {
+	BasePanel
+	ClearPaths(context.Context)
+	ClearHighlights(context.Context)
+	ShowPath(context.Context, *v1.ShowPathRequest)
+	ShowHighlights(context.Context, *v1.ShowHighlightsRequest)
+}
 
 type SingletonGameViewPresenterImpl struct {
 	BaseGameViewPresenterImpl
-	GameViewerPage v1.GameViewerPageClient
-	GamesService   *SingletonGamesServiceImpl
-	RulesEngine    *v1.RulesEngine
-	Theme          themes.Theme
+	GamesService *SingletonGamesServiceImpl
+	RulesEngine  *v1.RulesEngine
+	Theme        themes.Theme
+
+	// All the "UI Elements" we will change state of
+	GameViewerPage          v1.GameViewerPageClient
+	TurnOptionsPanel        TurnOptionsPanel
+	UnitStatsPanel          UnitStatsPanel
+	DamageDistributionPanel DamageDistributionPanel
+	TerrainStatsPanel       TerrainStatsPanel
+	GameScene               GameScene
 
 	// State tracking for current selection
 	selectedQ     *int32 // nil = no selection
@@ -48,18 +94,16 @@ func (s *SingletonGameViewPresenterImpl) InitializeGame(ctx context.Context, req
 	// Fire all the browser changes here - we dont really care about waiting for them
 	// And more importantly we cannot block for them on the thread that called us
 	go func() {
-		resp, err := s.GameViewerPage.SetTurnOptionsContent(ctx, &v1.SetContentRequest{
-			InnerHtml: "<div class='text-center text-gray-500'>Select a unit to see options</div>",
-		})
+		s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
 		fmt.Println("setTurnOpt Resp, Err: ", resp, err)
 
 		s.GameViewerPage.SetGameState(ctx, &v1.SetGameStateRequest{
 			Game:  game,
 			State: gameState,
 		})
-		s.SetTerrainStats(ctx, nil)
-		s.SetUnitStats(ctx, nil)
-		s.SetUnitDamageDistribution(ctx, nil)
+		s.TerrainStatsPanel.SetCurrentTile(ctx, nil)
+		s.UnitStatsPanel.SetCurrentUnit(ctx, nil)
+		s.DamageDistributionPanel.SetCurrentUnit(ctx, nil)
 	}()
 
 	// Response state
@@ -100,9 +144,9 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 			tile := wd.TileAt(coord)
 
 			// Always show terrain and unit info (methods handle nil)
-			s.SetTerrainStats(ctx, tile)
-			s.SetUnitStats(ctx, unit)
-			s.SetUnitDamageDistribution(ctx, unit)
+			s.TerrainStatsPanel.SetCurrentTile(ctx, tile)
+			s.UnitStatsPanel.SetCurrentUnit(ctx, unit)
+			s.DamageDistributionPanel.SetCurrentUnit(ctx, unit)
 
 			// Only proceed with options and highlights if there's a unit
 			if unit != nil {
@@ -112,12 +156,12 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 					R: r,
 				})
 				if err == nil && optionsResp != nil && len(optionsResp.Options) > 0 {
-					s.SetTurnOptions(ctx, optionsResp, unit)
+					s.TurnOptionsPanel.SetCurrentUnit(ctx, unit, optionsResp)
 
 					// Send visualization commands to show highlights
 					highlights := buildHighlightSpecs(optionsResp, q, r)
 					if len(highlights) > 0 {
-						s.GameViewerPage.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
+						s.GameScene.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
 							Highlights: highlights,
 						})
 						s.hasHighlights = true
@@ -126,12 +170,12 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 					}
 				} else {
 					// Unit exists but no options available
-					s.SetTurnOptions(ctx, &v1.GetOptionsAtResponse{Options: nil}, nil)
+					s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
 					s.clearHighlightsAndSelection(ctx)
 				}
 			} else {
 				// No unit at clicked position - clear options and highlights
-				s.SetTurnOptions(ctx, &v1.GetOptionsAtResponse{Options: nil}, nil)
+				s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
 				s.clearHighlightsAndSelection(ctx)
 			}
 		}()
@@ -141,72 +185,11 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 	return
 }
 
-func (s *SingletonGameViewPresenterImpl) renderPanelTemplate(_ context.Context, templatefile string, data any) (content string) {
-	tmpl, err := tmpls.Templates.Loader.Load(templatefile, "")
-	if err == nil {
-		buf := bytes.NewBufferString("")
-		err = tmpls.Templates.RenderHtmlTemplate(buf, tmpl[0], "", data, nil)
-		if err == nil {
-			content = buf.String()
-		}
-	}
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-func (s *SingletonGameViewPresenterImpl) SetUnitStats(ctx context.Context, unit *v1.Unit) {
-	content := s.renderPanelTemplate(ctx, "UnitStatsPanel.templar.html", map[string]any{
-		"Unit":       unit,
-		"RulesTable": s.RulesEngine,
-		"Theme":      s.Theme, // Pass theme to template
-	})
-	s.GameViewerPage.SetUnitStatsContent(ctx, &v1.SetContentRequest{
-		InnerHtml: content,
-	})
-}
-
-func (s *SingletonGameViewPresenterImpl) SetUnitDamageDistribution(ctx context.Context, unit *v1.Unit) {
-	content := s.renderPanelTemplate(ctx, "DamageDistributionPanel.templar.html", map[string]any{
-		"Unit":       unit,
-		"RulesTable": s.RulesEngine,
-		"Theme":      s.Theme, // Pass theme to template
-	})
-	s.GameViewerPage.SetDamageDistributionContent(ctx, &v1.SetContentRequest{
-		InnerHtml: content,
-	})
-}
-
-func (s *SingletonGameViewPresenterImpl) SetTerrainStats(ctx context.Context, tile *v1.Tile) {
-	content := s.renderPanelTemplate(ctx, "TerrainStatsPanel.templar.html", map[string]any{
-		"Tile":       tile,
-		"RulesTable": s.RulesEngine,
-		"Theme":      s.Theme, // Pass theme to template
-	})
-	s.GameViewerPage.SetTerrainStatsContent(ctx, &v1.SetContentRequest{
-		InnerHtml: content,
-	})
-}
-
-func (s *SingletonGameViewPresenterImpl) SetTurnOptions(ctx context.Context, response *v1.GetOptionsAtResponse, unit *v1.Unit) {
-	content := s.renderPanelTemplate(ctx, "TurnOptionsPanel.templar.html", map[string]any{
-		"Options": response.GetOptions(),
-		"Unit":    unit,
-		"Theme":   s.Theme,
-	})
-	s.GameViewerPage.SetTurnOptionsContent(ctx, &v1.SetContentRequest{
-		InnerHtml: content,
-	})
-}
-
 // clearHighlightsAndSelection clears highlights if any are currently shown
 func (s *SingletonGameViewPresenterImpl) clearHighlightsAndSelection(ctx context.Context) {
-	s.GameViewerPage.ClearPaths(ctx, &v1.ClearPathsRequest{})
+	s.GameScene.ClearPaths(ctx)
 	if s.hasHighlights {
-		s.GameViewerPage.ClearHighlights(ctx, &v1.ClearHighlightsRequest{
-			Types: []string{}, // Empty = clear all
-		})
+		s.GameScene.ClearHighlights(ctx)
 		s.hasHighlights = false
 		s.selectedQ = nil
 		s.selectedR = nil
@@ -259,7 +242,7 @@ func (s *SingletonGameViewPresenterImpl) TurnOptionClicked(ctx context.Context, 
 	// In the future, this could execute the actual move/attack
 	go func() {
 		// Always clear previous paths first
-		s.GameViewerPage.ClearPaths(ctx, &v1.ClearPathsRequest{})
+		s.GameScene.ClearPaths(ctx)
 
 		if req.OptionType == "move" && s.selectedQ != nil && s.selectedR != nil {
 			// Get the options again to extract the path for this specific move
@@ -275,7 +258,7 @@ func (s *SingletonGameViewPresenterImpl) TurnOptionClicked(ctx context.Context, 
 					coords := extractPathCoords(moveOpt.ReconstructedPath)
 					if len(coords) >= 4 {
 						// Show green path for movement
-						s.GameViewerPage.ShowPath(ctx, &v1.ShowPathRequest{
+						s.GameScene.ShowPath(ctx, &v1.ShowPathRequest{
 							Coords:    coords,
 							Color:     0x00ff00, // Green for movement
 							Thickness: 4,

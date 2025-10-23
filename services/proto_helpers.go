@@ -31,10 +31,6 @@ func NewUnit(unitType, player int, coord AxialCoord) *v1.Unit {
 		R:        int32(coord.R),
 		Player:   int32(player),
 		UnitType: int32(unitType),
-		// Initialize runtime state
-		AvailableHealth: 100, // Will be set by rules engine
-		DistanceLeft:    0,   // Will be set by rules engine
-		TurnCounter:     0,
 	}
 }
 

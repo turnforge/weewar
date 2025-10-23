@@ -255,11 +255,11 @@ export class PhaserEditorScene extends PhaserWorldScene {
         
         // Create test tiles
         const testTiles = [
-            { q: 0, r: 0, tileType: 5, player: 0, shortcut: "" },   // Grass
-            { q: 1, r: 0, tileType: 6, player: 0, shortcut: "" },   // Desert
-            { q: -1, r: 0, tileType: 7, player: 0, shortcut: "" },  // Water
-            { q: 0, r: 1, tileType: 1, player: 1, shortcut: "" },   // Base
-            { q: 0, r: -1, tileType: 2, player: 2, shortcut: "" },  // Factory
+            { q: 0, r: 0, tileType: 5, player: 0, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 },   // Grass
+            { q: 1, r: 0, tileType: 6, player: 0, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 },   // Desert
+            { q: -1, r: 0, tileType: 7, player: 0, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 },  // Water
+            { q: 0, r: 1, tileType: 1, player: 1, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 },   // Base
+            { q: 0, r: -1, tileType: 2, player: 2, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 },  // Factory
         ];
 
         testTiles.forEach(tile => this.setTile(tile));
@@ -368,7 +368,7 @@ export class PhaserEditorScene extends PhaserWorldScene {
         // For now, implement a simple pattern
         for (let q = -20; q <= 20; q++) {
             for (let r = -20; r <= 20; r++) {
-                this.setTile({ q, r, tileType: terrain, player: color, shortcut: "" });
+                this.setTile({ q, r, tileType: terrain, player: color, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 });
             }
         }
         
@@ -386,7 +386,7 @@ export class PhaserEditorScene extends PhaserWorldScene {
         for (let q = -20; q <= 20; q++) {
             for (let r = -20; r <= 20; r++) {
                 const randomTerrain = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
-                this.setTile({ q, r, tileType: randomTerrain, player: 0, shortcut: "" });
+                this.setTile({ q, r, tileType: randomTerrain, player: 0, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 });
             }
         }
         
@@ -409,7 +409,7 @@ export class PhaserEditorScene extends PhaserWorldScene {
                 
                 if (distance <= radius) {
                     const terrainType = distance <= radius - 2 ? 5 : 7; // Grass or water
-                    this.setTile({ q, r, tileType: terrainType, player: 0, shortcut: "" });
+                    this.setTile({ q, r, tileType: terrainType, player: 0, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 });
                 }
             }
         }

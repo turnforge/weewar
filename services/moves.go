@@ -71,10 +71,6 @@ func (m *DefaultMoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action
 	previousPlayer := g.CurrentPlayer
 	previousTurn := g.TurnCounter
 
-	if err := g.resetPlayerUnits(previousPlayer); err != nil {
-		return nil, fmt.Errorf("failed to reset player units: %w", err)
-	}
-
 	// Capture the reset units AFTER reset (with refreshed movement points)
 	var resetUnits []*v1.Unit
 	playerUnits := g.World.GetPlayerUnits(int(previousPlayer))
@@ -83,13 +79,14 @@ func (m *DefaultMoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action
 		fmt.Printf("ProcessEndTurn: Adding resetUnit at (%d, %d) player=%d, distanceLeft=%d\n",
 			unit.Q, unit.R, unit.Player, unit.DistanceLeft)
 		resetUnit := &v1.Unit{
-			Q:               unit.Q,
-			R:               unit.R,
-			Player:          unit.Player,
-			UnitType:        unit.UnitType,
-			AvailableHealth: unit.AvailableHealth,
-			DistanceLeft:    unit.DistanceLeft,
-			TurnCounter:     unit.TurnCounter,
+			Q:                unit.Q,
+			R:                unit.R,
+			Player:           unit.Player,
+			UnitType:         unit.UnitType,
+			AvailableHealth:  unit.AvailableHealth,
+			DistanceLeft:     unit.DistanceLeft,
+			LastActedTurn:    unit.LastActedTurn,
+			LastToppedupTurn: unit.LastToppedupTurn,
 		}
 		resetUnits = append(resetUnits, resetUnit)
 	}
@@ -199,13 +196,14 @@ func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, actio
 
 	// Capture unit state before move
 	previousUnit := &v1.Unit{
-		Q:               unit.Q,
-		R:               unit.R,
-		Player:          unit.Player,
-		UnitType:        unit.UnitType,
-		AvailableHealth: unit.AvailableHealth,
-		DistanceLeft:    unit.DistanceLeft,
-		TurnCounter:     unit.TurnCounter,
+		Q:                unit.Q,
+		R:                unit.R,
+		Player:           unit.Player,
+		UnitType:         unit.UnitType,
+		AvailableHealth:  unit.AvailableHealth,
+		DistanceLeft:     unit.DistanceLeft,
+		LastActedTurn:    unit.LastActedTurn,
+		LastToppedupTurn: unit.LastToppedupTurn,
 	}
 
 	// Move unit using World unit management
@@ -225,13 +223,14 @@ func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, actio
 
 	// Capture unit state after move (using the moved unit, not the original)
 	updatedUnit := &v1.Unit{
-		Q:               movedUnit.Q,
-		R:               movedUnit.R,
-		Player:          movedUnit.Player,
-		UnitType:        movedUnit.UnitType,
-		AvailableHealth: movedUnit.AvailableHealth,
-		DistanceLeft:    movedUnit.DistanceLeft,
-		TurnCounter:     movedUnit.TurnCounter,
+		Q:                movedUnit.Q,
+		R:                movedUnit.R,
+		Player:           movedUnit.Player,
+		UnitType:         movedUnit.UnitType,
+		AvailableHealth:  movedUnit.AvailableHealth,
+		DistanceLeft:     movedUnit.DistanceLeft,
+		LastActedTurn:    unit.LastActedTurn,
+		LastToppedupTurn: unit.LastToppedupTurn,
 	}
 
 	// Update timestamp
@@ -323,24 +322,26 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	if defenderDamage > 0 {
 		// Capture defender state before damage
 		defenderPreviousUnit := &v1.Unit{
-			Q:               defender.Q,
-			R:               defender.R,
-			Player:          defender.Player,
-			UnitType:        defender.UnitType,
-			AvailableHealth: defenderOriginalHealth,
-			DistanceLeft:    defender.DistanceLeft,
-			TurnCounter:     defender.TurnCounter,
+			Q:                defender.Q,
+			R:                defender.R,
+			Player:           defender.Player,
+			UnitType:         defender.UnitType,
+			AvailableHealth:  defenderOriginalHealth,
+			DistanceLeft:     defender.DistanceLeft,
+			LastActedTurn:    defender.LastActedTurn,
+			LastToppedupTurn: defender.LastToppedupTurn,
 		}
 
 		// Capture defender state after damage
 		defenderUpdatedUnit := &v1.Unit{
-			Q:               defender.Q,
-			R:               defender.R,
-			Player:          defender.Player,
-			UnitType:        defender.UnitType,
-			AvailableHealth: defender.AvailableHealth,
-			DistanceLeft:    defender.DistanceLeft,
-			TurnCounter:     defender.TurnCounter,
+			Q:                defender.Q,
+			R:                defender.R,
+			Player:           defender.Player,
+			UnitType:         defender.UnitType,
+			AvailableHealth:  defender.AvailableHealth,
+			DistanceLeft:     defender.DistanceLeft,
+			LastActedTurn:    defender.LastActedTurn,
+			LastToppedupTurn: defender.LastToppedupTurn,
 		}
 
 		change := &v1.WorldChange{
@@ -357,24 +358,26 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	if attackerDamage > 0 {
 		// Capture attacker state before damage
 		attackerPreviousUnit := &v1.Unit{
-			Q:               attacker.Q,
-			R:               attacker.R,
-			Player:          attacker.Player,
-			UnitType:        attacker.UnitType,
-			AvailableHealth: attackerOriginalHealth,
-			DistanceLeft:    attacker.DistanceLeft,
-			TurnCounter:     attacker.TurnCounter,
+			Q:                attacker.Q,
+			R:                attacker.R,
+			Player:           attacker.Player,
+			UnitType:         attacker.UnitType,
+			AvailableHealth:  attackerOriginalHealth,
+			DistanceLeft:     attacker.DistanceLeft,
+			LastActedTurn:    attacker.LastActedTurn,
+			LastToppedupTurn: attacker.LastToppedupTurn,
 		}
 
 		// Capture attacker state after damage
 		attackerUpdatedUnit := &v1.Unit{
-			Q:               attacker.Q,
-			R:               attacker.R,
-			Player:          attacker.Player,
-			UnitType:        attacker.UnitType,
-			AvailableHealth: attacker.AvailableHealth,
-			DistanceLeft:    attacker.DistanceLeft,
-			TurnCounter:     attacker.TurnCounter,
+			Q:                attacker.Q,
+			R:                attacker.R,
+			Player:           attacker.Player,
+			UnitType:         attacker.UnitType,
+			AvailableHealth:  attacker.AvailableHealth,
+			DistanceLeft:     attacker.DistanceLeft,
+			LastActedTurn:    attacker.LastActedTurn,
+			LastToppedupTurn: attacker.LastToppedupTurn,
 		}
 
 		change := &v1.WorldChange{
@@ -392,13 +395,14 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	if defenderKilled {
 		// Capture defender state before being killed (use original health before damage)
 		defenderPreviousUnit := &v1.Unit{
-			Q:               defender.Q,
-			R:               defender.R,
-			Player:          defender.Player,
-			UnitType:        defender.UnitType,
-			AvailableHealth: defenderOriginalHealth,
-			DistanceLeft:    defender.DistanceLeft,
-			TurnCounter:     defender.TurnCounter,
+			Q:                defender.Q,
+			R:                defender.R,
+			Player:           defender.Player,
+			UnitType:         defender.UnitType,
+			AvailableHealth:  defenderOriginalHealth,
+			DistanceLeft:     defender.DistanceLeft,
+			LastActedTurn:    defender.LastActedTurn,
+			LastToppedupTurn: defender.LastToppedupTurn,
 		}
 
 		change := &v1.WorldChange{
@@ -415,13 +419,14 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	if attackerKilled {
 		// Capture attacker state before being killed (use original health before damage)
 		attackerPreviousUnit := &v1.Unit{
-			Q:               attacker.Q,
-			R:               attacker.R,
-			Player:          attacker.Player,
-			UnitType:        attacker.UnitType,
-			AvailableHealth: attackerOriginalHealth,
-			DistanceLeft:    attacker.DistanceLeft,
-			TurnCounter:     attacker.TurnCounter,
+			Q:                attacker.Q,
+			R:                attacker.R,
+			Player:           attacker.Player,
+			UnitType:         attacker.UnitType,
+			AvailableHealth:  attackerOriginalHealth,
+			DistanceLeft:     attacker.DistanceLeft,
+			LastActedTurn:    attacker.LastActedTurn,
+			LastToppedupTurn: attacker.LastToppedupTurn,
 		}
 
 		change := &v1.WorldChange{

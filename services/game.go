@@ -108,53 +108,41 @@ func (g *Game) ArePlayersOnSameTeam(playerID1, playerID2 int) bool {
 // Helper Functions
 // =============================================================================
 
-// initializeStartingUnits initializes stats for units already in the World
-func (g *Game) initializeStartingUnits() error {
-	// Get unit stats from rules engine (required)
+// topUpUnitIfNeeded performs lazy top-up of unit stats if the unit hasn't been refreshed this turn
+// This checks if unit.LastToppedupTurn < game.TurnCounter and if so:
+// - Restores movement points to max
+// - Sets available health to max (for new units) or applies healing
+// - Updates unit.LastToppedupTurn to game.TurnCounter
+func (g *Game) topUpUnitIfNeeded(unit *v1.Unit) error {
+	// Check if unit needs top-up (hasn't been refreshed this turn)
+	if unit.LastToppedupTurn >= g.TurnCounter {
+		return nil // Already topped up this turn
+	}
+
+	// Get unit definition from rules engine
 	if g.rulesEngine == nil {
-		return fmt.Errorf("rules engine not set - required for unit initialization")
+		return fmt.Errorf("rules engine not set")
 	}
 
-	// Initialize stats for existing units in the world
-	for playerID := int32(1); playerID <= g.World.PlayerCount(); playerID++ {
-		for _, unit := range g.World.unitsByPlayer[playerID] {
-			// Get unit data from rules engine
-			unitData, err := g.rulesEngine.GetUnitData(unit.UnitType)
-			if err != nil {
-				return fmt.Errorf("failed to get unit data for type %d: %w", unit.UnitType, err)
-			}
-
-			// Initialize unit stats from rules data
-			unit.AvailableHealth = unitData.Health
-			unit.DistanceLeft = unitData.MovementPoints
-			unit.TurnCounter = g.TurnCounter
-		}
+	unitData, err := g.rulesEngine.GetUnitData(unit.UnitType)
+	if err != nil {
+		return fmt.Errorf("failed to get unit data for type %d: %w", unit.UnitType, err)
 	}
 
-	return nil
-}
+	// Top-up movement points
+	unit.DistanceLeft = unitData.MovementPoints
 
-// resetPlayerUnits resets movement and actions for a player's units
-func (g *Game) resetPlayerUnits(playerID int32) error {
-	if playerID <= 0 || playerID > g.World.PlayerCount() {
-		return fmt.Errorf("invalid player ID: %d", playerID)
+	// Top-up health (for new units or apply healing)
+	if unit.AvailableHealth == 0 {
+		// New unit - set to max health
+		unit.AvailableHealth = unitData.Health
+	} else {
+		// Existing unit - apply healing from terrain (TODO: implement terrain healing)
+		// For now, keep current health
 	}
 
-	if g.rulesEngine == nil {
-		return fmt.Errorf("rules engine not set - required for unit reset")
-	}
-
-	for _, unit := range g.World.unitsByPlayer[playerID] {
-		// Get unit data from rules engine
-		unitData, err := g.rulesEngine.GetUnitData(unit.UnitType)
-		if err != nil {
-			return fmt.Errorf("failed to get unit data for type %d: %w", unit.UnitType, err)
-		}
-
-		// Reset movement points from rules data
-		unit.DistanceLeft = int32(unitData.MovementPoints)
-		unit.TurnCounter = int32(g.TurnCounter)
-	}
+	// Mark unit as topped-up for this turn
+	unit.LastToppedupTurn = g.TurnCounter
 
 	return nil
 }

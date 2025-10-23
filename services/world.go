@@ -118,14 +118,15 @@ func NewWorld(name string, protoWorld *v1.WorldData) *World {
 			fmt.Printf("NewWorld: Converting unit at (%d, %d), saved DistanceLeft=%d, AvailableHealth=%d\n",
 				coord.Q, coord.R, protoUnit.DistanceLeft, protoUnit.AvailableHealth)
 			unit := &v1.Unit{
-				UnitType:        protoUnit.UnitType,
-				Q:               int32(coord.Q),
-				R:               int32(coord.R),
-				Player:          protoUnit.Player,
-				Shortcut:        protoUnit.Shortcut, // Preserve existing shortcut
-				AvailableHealth: protoUnit.AvailableHealth,
-				DistanceLeft:    protoUnit.DistanceLeft, // Preserve saved movement points
-				TurnCounter:     protoUnit.TurnCounter,
+				UnitType:         protoUnit.UnitType,
+				Q:                int32(coord.Q),
+				R:                int32(coord.R),
+				Player:           protoUnit.Player,
+				Shortcut:         protoUnit.Shortcut, // Preserve existing shortcut
+				AvailableHealth:  protoUnit.AvailableHealth,
+				DistanceLeft:     protoUnit.DistanceLeft, // Preserve saved movement points
+				LastActedTurn:    protoUnit.LastActedTurn,
+				LastToppedupTurn: protoUnit.LastToppedupTurn,
 			}
 			w.AddUnit(unit)
 		}
@@ -455,13 +456,14 @@ func (w *World) MoveUnit(unit *v1.Unit, newCoord AxialCoord) error {
 		if _, existsInCurrentLayer := w.unitsByCoord[currentCoord]; !existsInCurrentLayer {
 			// Unit comes from parent layer - make a copy to avoid modifying parent objects
 			unitToMove = &v1.Unit{
-				Q:               unit.Q,
-				R:               unit.R,
-				Player:          unit.Player,
-				UnitType:        unit.UnitType,
-				AvailableHealth: unit.AvailableHealth,
-				DistanceLeft:    unit.DistanceLeft,
-				TurnCounter:     unit.TurnCounter,
+				Q:                unit.Q,
+				R:                unit.R,
+				Player:           unit.Player,
+				UnitType:         unit.UnitType,
+				AvailableHealth:  unit.AvailableHealth,
+				DistanceLeft:     unit.DistanceLeft,
+				LastActedTurn:    unit.LastActedTurn,
+				LastToppedupTurn: unit.LastToppedupTurn,
 			}
 		}
 	}
@@ -511,13 +513,14 @@ func (w *World) Clone() *World {
 		if unit != nil {
 			// Create a copy of the proto unit
 			clonedUnit := &v1.Unit{
-				Q:               unit.Q,
-				R:               unit.R,
-				Player:          unit.Player,
-				UnitType:        unit.UnitType,
-				AvailableHealth: unit.AvailableHealth,
-				DistanceLeft:    unit.DistanceLeft,
-				TurnCounter:     unit.TurnCounter,
+				Q:                unit.Q,
+				R:                unit.R,
+				Player:           unit.Player,
+				UnitType:         unit.UnitType,
+				AvailableHealth:  unit.AvailableHealth,
+				DistanceLeft:     unit.DistanceLeft,
+				LastActedTurn:    unit.LastActedTurn,
+				LastToppedupTurn: unit.LastToppedupTurn,
 			}
 			out.AddUnit(clonedUnit)
 		}

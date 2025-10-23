@@ -320,7 +320,7 @@ export class World {
     
     public setTileAt(q: number, r: number, tileType: number, player: number): void {
         const key = `${q},${r}`;
-        const tile = { q, r, tileType, player, number: 0, shortcut: "" } as Tile;
+        const tile = { q, r, tileType, player, number: 0, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0} as Tile;
         this.tiles[key] = tile;
         this.addTileChange(q, r, tile);
     }
@@ -419,7 +419,8 @@ export class World {
                 player: unitData.player,
                 availableHealth: unitData.availableHealth,
                 distanceLeft: unitData.distanceLeft,
-                turnCounter: unitData.turnCounter,
+                lastActedTurn: unitData.lastActedTurn,
+                lastToppedupTurn: unitData.lastToppedupTurn,
             }));
         });
         
@@ -672,7 +673,7 @@ export class World {
                 return; // Skip invalid tile
             }
             
-            const tile: Tile = { q, r, tileType, player, shortcut: "" };
+            const tile: Tile = { q, r, tileType, player, shortcut: "", lastActedTurn: 0, lastToppedupTurn: 0 };
             this.tiles[key] = tile;
             tileChanges.push({ q, r, tile });
         });

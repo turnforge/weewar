@@ -140,6 +140,17 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 	// Check what's at this position
 	unit := rtGame.World.UnitAt(AxialCoord{Q: int(req.Q), R: int(req.R)})
 
+	// Lazy top-up: If this is a unit, ensure it's refreshed for the current turn
+	if unit != nil {
+		if err := rtGame.topUpUnitIfNeeded(unit); err != nil {
+			return &v1.GetOptionsAtResponse{
+				Options:         []*v1.GameOption{},
+				CurrentPlayer:   gameresp.State.CurrentPlayer,
+				GameInitialized: false,
+			}, fmt.Errorf("failed to top-up unit: %w", err)
+		}
+	}
+
 	if unit == nil {
 		// Empty tile - check for building/capture options, then end turn
 		// TODO: Add building construction options if this is a city/factory tile
@@ -313,7 +324,8 @@ func (b *BaseGamesServiceImpl) applyUnitMoved(change *v1.UnitMovedChange, rtGame
 	// Update unit with complete state from the change
 	unit.AvailableHealth = change.UpdatedUnit.AvailableHealth
 	unit.DistanceLeft = change.UpdatedUnit.DistanceLeft
-	unit.TurnCounter = change.UpdatedUnit.TurnCounter
+	unit.LastActedTurn = change.UpdatedUnit.LastActedTurn
+	unit.LastToppedupTurn = change.UpdatedUnit.LastToppedupTurn
 
 	// Remove from old position and add to new position
 	return rtGame.World.MoveUnit(unit, toCoord)
@@ -335,7 +347,8 @@ func (b *BaseGamesServiceImpl) applyUnitDamaged(change *v1.UnitDamagedChange, rt
 	// Update unit with complete state from the change
 	unit.AvailableHealth = change.UpdatedUnit.AvailableHealth
 	unit.DistanceLeft = change.UpdatedUnit.DistanceLeft
-	unit.TurnCounter = change.UpdatedUnit.TurnCounter
+	unit.LastActedTurn = change.UpdatedUnit.LastActedTurn
+	unit.LastToppedupTurn = change.UpdatedUnit.LastToppedupTurn
 	return nil
 }
 
@@ -388,14 +401,15 @@ func (b *BaseGamesServiceImpl) convertRuntimeWorldToProto(world *World) *v1.Worl
 	// Convert runtime units to protobuf units
 	for coord, unit := range world.UnitsByCoord() {
 		protoUnit := &v1.Unit{
-			Q:               int32(coord.Q),
-			R:               int32(coord.R),
-			Player:          int32(unit.Player),
-			UnitType:        int32(unit.UnitType),
-			Shortcut:        unit.Shortcut, // Preserve shortcut
-			AvailableHealth: int32(unit.AvailableHealth),
-			DistanceLeft:    int32(unit.DistanceLeft),
-			TurnCounter:     int32(unit.TurnCounter),
+			Q:                int32(coord.Q),
+			R:                int32(coord.R),
+			Player:           int32(unit.Player),
+			UnitType:         int32(unit.UnitType),
+			Shortcut:         unit.Shortcut, // Preserve shortcut
+			AvailableHealth:  int32(unit.AvailableHealth),
+			DistanceLeft:     int32(unit.DistanceLeft),
+			LastActedTurn:    int32(unit.LastActedTurn),
+			LastToppedupTurn: int32(unit.LastToppedupTurn),
 		}
 		worldData.Units = append(worldData.Units, protoUnit)
 	}

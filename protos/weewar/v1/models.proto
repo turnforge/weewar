@@ -120,13 +120,14 @@ message Tile {
   int32 player = 4;
   string shortcut = 5;  // A short cut like A1 or S2 etc for quick access
 
-  // Keep track of the last turn the move was made on/for this tile.
+  // Keep track of turns when the move was last made and when a "top up" was last done on/for this tile.
   // This helps us not having to "top up" or "reset" the stats at the end
   // of each turn.  Instead as the game turn is incremented we can do a 
-  // lazy reset for any unit or tile where unit_or_tile.current_turn < game.curent_turn
+  // lazy reset for any unit or tile where unit_or_tile.last_toppedup_turn < game.curent_turn
   // So we just have to increment the game_turn and the unit is automaticaly flagged as
   // needing a top up of its health/balance/movement etc
-  int32 current_turn = 6;
+  int32 last_acted_turn = 6;      // Which turn this unit was created/last acted on (ie movemade)
+  int32 last_toppedup_turn = 7;   // When the last top up happened
 }
 
 message Unit {
@@ -140,15 +141,15 @@ message Unit {
   // Runtime state fields
   int32 available_health = 6; // Current health points
   int32 distance_left = 7;    // Movement points remaining this turn
-  int32 turn_counter = 8;     // Which turn this unit was created/last acted
 
-  // Keep track of the last turn the move was made on/for this tile.
+  // Keep track of turns when the move was last made and when a "top up" was last done on/for this tile.
   // This helps us not having to "top up" or "reset" the stats at the end
   // of each turn.  Instead as the game turn is incremented we can do a 
-  // lazy reset for any unit or tile where unit_or_tile.current_turn < game.curent_turn
+  // lazy reset for any unit or tile where unit_or_tile.last_toppedup_turn < game.curent_turn
   // So we just have to increment the game_turn and the unit is automaticaly flagged as
   // needing a top up of its health/balance/movement etc
-  int32 current_turn = 9;
+  int32 last_acted_turn = 8;      // Which turn this unit was created/last acted on (ie movemade)
+  int32 last_toppedup_turn = 9;   // When the last top up happened
 }
 
 ///////// Rules Engine Definitions

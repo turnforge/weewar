@@ -99,27 +99,13 @@ func (s *FSGamesServiceImpl) CreateGame(ctx context.Context, req *v1.CreateGameR
 	gs := &v1.GameState{
 		GameId:        req.Game.Id,
 		CurrentPlayer: 1, // Game starts with player 1
-		TurnCounter:   1, // First turn
+		TurnCounter:   1, // First turn starts at 1 for lazy top-up pattern
 		WorldData:     world.WorldData,
 	}
 
-	// Initialize units with default stats from rules engine for new games
-	if gs.WorldData != nil && gs.WorldData.Units != nil {
-		rulesEngine := DefaultRulesEngine()
-		for _, unit := range gs.WorldData.Units {
-			// Get unit defaults from rules engine
-			unitData, err := rulesEngine.GetUnitData(unit.UnitType)
-			if err != nil {
-				log.Printf("Warning: failed to get unit data for type %d: %v", unit.UnitType, err)
-				continue // Skip this unit but don't fail the entire game creation
-			}
-
-			// Set default health and movement points for new game
-			unit.AvailableHealth = unitData.Health
-			unit.DistanceLeft = unitData.MovementPoints
-			unit.TurnCounter = gs.TurnCounter
-		}
-	}
+	// Units start with default zero values (current_turn=0, distance_left=0, available_health=0)
+	// They will be lazily topped-up when accessed if unit.current_turn < game.turn_counter
+	// This eliminates the need to initialize all units at game creation
 	if err := s.storage.SaveArtifact(req.Game.Id, "state", gs); err != nil {
 		log.Printf("Failed to create state for game %s: %v", req.Game.Id, err)
 	}

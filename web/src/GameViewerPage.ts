@@ -41,28 +41,6 @@ import { RulesTable, TerrainStats } from './RulesTable';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 
 /**
- * Result of a game action command - used for testing and accessibility
- */
-export interface ActionResult {
-    success: boolean;
-    message: string;
-    data?: any;
-    error?: string;
-}
-
-/**
- * Game state information for testing and debugging
- */
-export interface GameStateInfo {
-    gameId: string;
-    currentPlayer: number;
-    turnCounter: number;
-    selectedUnit?: { q: number, r: number };
-    unitsCount: number;
-    tilesCount: number;
-}
-
-/**
  * Game Viewer Page - Interactive game play interface
  * Responsible for:
  * - Loading world as a game instance

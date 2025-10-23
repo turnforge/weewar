@@ -11,8 +11,8 @@ import (
 
 	"github.com/chzyer/readline"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"github.com/panyam/turnengine/games/weewar/services"
+	weewar "github.com/panyam/turnengine/games/weewar/services"
 )
 
 // CLI is a headless command processor for WeeWar games

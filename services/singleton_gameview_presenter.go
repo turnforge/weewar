@@ -129,7 +129,6 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 		go func() {
 			s.executeMovementAction(ctx, q, r)
 		}()
-		break
 	case "base-map":
 		go func() {
 			rg, err := s.GamesService.GetRuntimeGame(game, gameState)

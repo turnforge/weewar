@@ -7,7 +7,8 @@ import (
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
-var RULES_DATA_FILE = DevDataPath("data/weewar-rules.json")
+// var RULES_DATA_FILE = DevDataPath("assets/weewar-rules.json")
+var RULES_DATA_FILE = "../assets/weewar-rules.json"
 
 func TestRulesEngineLoading(t *testing.T) {
 	// Load rules from converted data

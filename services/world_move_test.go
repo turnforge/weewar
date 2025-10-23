@@ -264,7 +264,7 @@ func TestMoveUnitExactProcessMovesScenario(t *testing.T) {
 		UnitType:        1,
 		AvailableHealth: 100,
 		DistanceLeft:    3,
-		TurnCounter:     1,
+		// TurnCounter removed: Units will be lazily topped-up when accessed
 	}
 
 	// Add unit to world
@@ -322,7 +322,7 @@ func TestProcessMovesTransactionFlow(t *testing.T) {
 		UnitType:        1,
 		AvailableHealth: 100,
 		DistanceLeft:    3,
-		TurnCounter:     1,
+		// TurnCounter removed: Units will be lazily topped-up when accessed
 	}
 	originalWorld.AddUnit(unit)
 
@@ -346,7 +346,7 @@ func TestProcessMovesTransactionFlow(t *testing.T) {
 
 	// Update unit state (simulates move processor changes)
 	transactionUnit.DistanceLeft = 2
-	transactionUnit.TurnCounter = 2
+	transactionUnit.LastActedTurn = 2
 
 	err := transactionWorld.MoveUnit(transactionUnit, AxialCoord{Q: 1, R: 1})
 	if err != nil {
@@ -374,7 +374,7 @@ func TestProcessMovesTransactionFlow(t *testing.T) {
 
 	// Update unit state from change (simulates applyUnitMoved updates)
 	unitToMove.DistanceLeft = 2
-	unitToMove.TurnCounter = 2
+	unitToMove.LastActedTurn = 2
 
 	err = currentWorld.MoveUnit(unitToMove, AxialCoord{Q: 1, R: 1})
 	if err != nil {

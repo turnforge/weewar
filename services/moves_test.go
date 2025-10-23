@@ -97,7 +97,7 @@ func TestProcessMovesNoDuplication(t *testing.T) {
 			UnitType:        1,
 			AvailableHealth: 100,
 			DistanceLeft:    3,
-			TurnCounter:     1,
+			// TurnCounter removed: Units will be lazily topped-up when accessed
 		},
 		{
 			Q:               3,
@@ -106,7 +106,7 @@ func TestProcessMovesNoDuplication(t *testing.T) {
 			UnitType:        1,
 			AvailableHealth: 100,
 			DistanceLeft:    3,
-			TurnCounter:     1,
+			// TurnCounter removed: Units will be lazily topped-up when accessed
 		},
 		{
 			Q:               0,
@@ -115,7 +115,7 @@ func TestProcessMovesNoDuplication(t *testing.T) {
 			UnitType:        1,
 			AvailableHealth: 100,
 			DistanceLeft:    3,
-			TurnCounter:     1,
+			// TurnCounter removed: Units will be lazily topped-up when accessed
 		}}
 
 	svc := setupTest(t, 5, 5, units)

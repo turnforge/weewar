@@ -45,7 +45,7 @@ func createTestWorld(name string, units []TestUnit, tiles []TestTile) *World {
 			UnitType:        unit.UnitType,
 			AvailableHealth: unit.Health,
 			DistanceLeft:    unit.DistanceLeft,
-			TurnCounter:     1,
+			// TurnCounter removed: Units will be lazily topped-up when accessed
 		}
 		world.AddUnit(protoUnit)
 	}
@@ -62,7 +62,7 @@ func createTestUnit(q, r int, player, unitType int32) *v1.Unit {
 		UnitType:        unitType,
 		AvailableHealth: 100,
 		DistanceLeft:    3,
-		TurnCounter:     1,
+		// TurnCounter removed: Units will be lazily topped-up when accessed
 	}
 }
 

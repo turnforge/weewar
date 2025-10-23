@@ -1,6 +1,46 @@
 # Next Steps - WeeWar Development
 
-## ✅ Code Organization and Theme Bug Fix (Current Session)
+## ✅ Incremental UI Updates & Turn Management (Current Session - COMPLETED)
+
+### Incremental Update Architecture - DONE
+- **SetTileAt/SetUnitAt Methods**: Added presenter interface methods for direct World updates
+- **RemoveTileAt/RemoveUnitAt Methods**: Explicit removal methods for clearer intent
+- **UpdateGameStatus Method**: Separate UI updates for player turn and turn counter display
+- **applyIncrementalChanges Function**: Processes WorldChange deltas from ProcessMoves
+- **EventBus Integration**: World updates trigger automatic UI refreshes via events
+
+### End Turn Implementation - DONE
+- **EndTurnButtonClicked RPC**: Wired End Turn button to presenter
+- **Button State Management**: Enable/disable based on current player (hardcoded to Player 1 for now)
+- **Turn Transition Handling**: Automatic UI updates when PlayerChanged event occurs
+- **Unit Reset Processing**: All units properly reset for new turn via incremental updates
+
+### World Transaction Layer Fix - DONE
+- **GetPlayerUnits Fallback**: Fixed to check parent layer when transaction layer is empty
+- **Transaction Safety**: World.Push() creates empty transaction layers that fall back to parent data
+- **ProcessEndTurn Bug Fix**: No more index out of range panic when ending turns
+
+### UI Simplification - DONE
+- **GameActionsPanel Removal**: Eliminated unnecessary panel cluttering the UI
+- **Direct Button Wiring**: End Turn button directly calls presenter
+- **Streamlined Layout**: Cleaner dockview with Game Log on left side
+
+### CLI Direction Shortcuts - DONE
+- **ParseDirection Function**: Parse L, R, TL, TR, BL, BR to NeighborDirection enum
+- **Context-Aware Parsing**: ParsePositionOrUnitWithContext for relative position resolution
+- **Move Command Enhancement**: `move A1 R` or `move A1 TL` for neighbor moves
+- **Attack Command Enhancement**: `attack A1 BR` or `attack 3,4 L` for neighbor attacks
+- **Multiple Naming Conventions**: Supports TL/UL/LU, TR/UR/RU, BL/DL/LD, BR/DR/RD variations
+- **Updated Help Text**: Comprehensive documentation with direction examples
+
+### Benefits Achieved
+- **Performance**: No more full SetGameState calls - only deltas after moves
+- **Responsiveness**: Faster UI updates with targeted changes
+- **User Experience**: Intuitive CLI shortcuts for rapid gameplay
+- **Clean Architecture**: Presenter orchestrates all UI updates through well-defined methods
+- **Maintainability**: Clear separation between full refresh (initial load) and incremental updates (gameplay)
+
+## ✅ Code Organization and Theme Bug Fix (Previous Session)
 
 ### Code Simplification - DONE
 - **lib/ → services/ Merge**: Consolidated all library code into services package

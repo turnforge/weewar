@@ -596,8 +596,44 @@ const response = await client.gamesService.createGame(request);
 - **Better Scaling**: SVG rasterization at higher resolutions improves zoom quality
 - **Testable Architecture**: Clean interface allows mocking for tests
 
-**Last Updated**: 2025-01-22  
-**Current Focus**: AssetProvider architecture complete, ready for SVG template creation  
-**Next Milestone**: Create SVG templates and test high-resolution asset rendering
+## ✅ Phase 13: Incremental UI Updates & Turn Management (Completed)
+**Status**: Production-ready
+**Timeline**: Completed January 2025
 
-**Major Achievement**: Complete AssetProvider architecture with PNGAssetProvider working in production. System supports both PNG and SVG assets with dynamic resolution configuration. Ready for SVG template creation and testing.
+### Incremental Update Architecture ✅
+- [x] **SetTileAt/SetUnitAt Methods**: Direct incremental updates to World without full refresh
+- [x] **RemoveTileAt/RemoveUnitAt Methods**: Explicit entity removal with clear intent
+- [x] **UpdateGameStatus Method**: Separate UI status updates for player turn and turn counter
+- [x] **World Transaction Layer Fix**: GetPlayerUnits properly falls back to parent layer for transactional operations
+- [x] **Presenter Delta Processing**: applyIncrementalChanges processes WorldChange events from ProcessMoves
+
+### End Turn Functionality ✅
+- [x] **EndTurnButtonClicked RPC**: Wire up End Turn button to presenter
+- [x] **End Turn Button State Management**: Enable/disable based on current player turn
+- [x] **Turn Transition Updates**: Automatic UI updates when player changes
+- [x] **Unit Reset Handling**: PlayerChanged events properly reset all units for new turn
+
+### UI Simplification ✅
+- [x] **GameActionsPanel Removal**: Eliminated unnecessary panel for cleaner UI
+- [x] **Direct Button Wiring**: End Turn button directly wired to presenter
+- [x] **Streamlined Layout**: Simplified dockview layout with fewer panels
+
+### CLI Enhancement ✅
+- [x] **Direction Shortcuts**: Support for L, R, TL, TR, BL, BR in move/attack commands
+- [x] **ParseDirection Function**: Parse direction strings to NeighborDirection enum
+- [x] **Context-Aware Parsing**: ParsePositionOrUnitWithContext for relative position resolution
+- [x] **Multiple Naming Conventions**: Support TL/UL/LU variations for user convenience
+- [x] **Updated Help Text**: Comprehensive documentation of direction shortcuts
+
+### Technical Achievements ✅
+- **Efficient Updates**: No more full SetGameState calls after moves - only deltas
+- **EventBus Integration**: World changes trigger EventBus events for automatic UI updates
+- **Transaction Safety**: World layering properly supports transactional game operations
+- **User Experience**: Faster, more intuitive CLI with hex neighbor shortcuts
+- **Clean Architecture**: Presenter drives all UI updates through well-defined methods
+
+**Last Updated**: 2025-01-23
+**Current Focus**: Interactive gameplay with incremental updates and turn management complete
+**Next Milestone**: Attack implementation and full move execution
+
+**Major Achievement**: Complete incremental update system replacing full-state refreshes. End turn functionality working with proper UI state management. CLI enhanced with direction shortcuts for rapid gameplay.

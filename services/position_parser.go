@@ -21,9 +21,31 @@ type ParseTarget struct {
 // - Q/R Coordinate: 3,4 or 5,-2
 // - Row/Col Coordinate: r4,5 (prefixed with 'r')
 func ParsePositionOrUnit(game *Game, input string) (target *ParseTarget, err error) {
+	return ParsePositionOrUnitWithContext(game, input, nil)
+}
+
+// ParsePositionOrUnitWithContext parses position formats with optional base coordinate for relative directions
+// Supports all formats from ParsePositionOrUnit, plus:
+// - Direction: L, R, TL, TR, BL, BR (when baseCoord is provided)
+func ParsePositionOrUnitWithContext(game *Game, input string, baseCoord *AxialCoord) (target *ParseTarget, err error) {
 	input = strings.TrimSpace(input)
 	if input == "" {
 		return nil, fmt.Errorf("empty input")
+	}
+
+	// Check if it's a direction (only if baseCoord is provided)
+	if baseCoord != nil {
+		dir, dirErr := ParseDirection(input)
+		if dirErr == nil {
+			// It's a valid direction, calculate neighbor
+			neighborCoord := baseCoord.Neighbor(dir)
+			return &ParseTarget{
+				IsUnit:     false,
+				Unit:       game.World.UnitAt(neighborCoord),
+				Coordinate: neighborCoord,
+				Raw:        input,
+			}, nil
+		}
 	}
 
 	// Check if it's a row/col coordinate (starts with 'r')

@@ -268,6 +268,17 @@ func (s *SingletonGameViewPresenterImpl) TurnOptionClicked(ctx context.Context, 
 	return
 }
 
+// EndTurnButtonClicked handles when user clicks the end turn button
+func (s *SingletonGameViewPresenterImpl) EndTurnButtonClicked(ctx context.Context, req *v1.EndTurnButtonClickedRequest) (resp *v1.EndTurnButtonClickedResponse, err error) {
+	resp = &v1.EndTurnButtonClickedResponse{}
+
+	go func() {
+		s.executeEndTurnAction(ctx)
+	}()
+
+	return
+}
+
 // extractPathCoords converts a Path to a flat coordinate array
 func extractPathCoords(path *v1.Path) []int32 {
 	if path == nil || len(path.Edges) == 0 {
@@ -341,7 +352,7 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 		gameState.CurrentPlayer)
 
 	// Call ProcessMoves to execute the move
-	_, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
 		Moves: []*v1.GameMove{gameMove},
 	})
 
@@ -356,12 +367,8 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 	s.clearHighlightsAndSelection(ctx)
 	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
 
-	// Update UI with fresh game state
-	updatedGameState := s.GamesService.SingletonGameState
-	s.GameViewerPage.SetGameState(ctx, &v1.SetGameStateRequest{
-		Game:  s.GamesService.SingletonGame,
-		State: updatedGameState,
-	})
+	// Apply incremental updates from the move results
+	s.applyIncrementalChanges(ctx, resp.MoveResults)
 }
 
 // executeEndTurnAction executes the end turn action
@@ -383,7 +390,7 @@ func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Contex
 	}
 
 	// Call ProcessMoves to execute end turn
-	_, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
 		Moves: []*v1.GameMove{gameMove},
 	})
 
@@ -398,10 +405,72 @@ func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Contex
 	s.clearHighlightsAndSelection(ctx)
 	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
 
-	// Update UI with fresh game state
-	updatedGameState := s.GamesService.SingletonGameState
-	s.GameViewerPage.SetGameState(ctx, &v1.SetGameStateRequest{
-		Game:  s.GamesService.SingletonGame,
-		State: updatedGameState,
-	})
+	// Apply incremental updates from the move results
+	s.applyIncrementalChanges(ctx, resp.MoveResults)
+}
+
+// applyIncrementalChanges processes WorldChange objects and calls incremental browser update methods
+func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Context, moveResults []*v1.GameMoveResult) {
+	for _, result := range moveResults {
+		for _, change := range result.Changes {
+			switch changeType := change.ChangeType.(type) {
+			case *v1.WorldChange_UnitMoved:
+				// Remove unit from previous position
+				if changeType.UnitMoved.PreviousUnit != nil {
+					s.GameViewerPage.RemoveUnitAt(ctx, &v1.RemoveUnitAtRequest{
+						Q: changeType.UnitMoved.PreviousUnit.Q,
+						R: changeType.UnitMoved.PreviousUnit.R,
+					})
+				}
+				// Add unit at new position
+				if changeType.UnitMoved.UpdatedUnit != nil {
+					s.GameViewerPage.SetUnitAt(ctx, &v1.SetUnitAtRequest{
+						Q:    changeType.UnitMoved.UpdatedUnit.Q,
+						R:    changeType.UnitMoved.UpdatedUnit.R,
+						Unit: changeType.UnitMoved.UpdatedUnit,
+					})
+				}
+
+			case *v1.WorldChange_UnitDamaged:
+				// Update unit with new health
+				if changeType.UnitDamaged.UpdatedUnit != nil {
+					s.GameViewerPage.SetUnitAt(ctx, &v1.SetUnitAtRequest{
+						Q:    changeType.UnitDamaged.UpdatedUnit.Q,
+						R:    changeType.UnitDamaged.UpdatedUnit.R,
+						Unit: changeType.UnitDamaged.UpdatedUnit,
+					})
+				}
+
+			case *v1.WorldChange_UnitKilled:
+				// Remove killed unit
+				if changeType.UnitKilled.PreviousUnit != nil {
+					s.GameViewerPage.RemoveUnitAt(ctx, &v1.RemoveUnitAtRequest{
+						Q: changeType.UnitKilled.PreviousUnit.Q,
+						R: changeType.UnitKilled.PreviousUnit.R,
+					})
+				}
+
+			case *v1.WorldChange_PlayerChanged:
+				// Reset all units for new turn (lazy top-up pattern)
+				if changeType.PlayerChanged.ResetUnits != nil {
+					for _, resetUnit := range changeType.PlayerChanged.ResetUnits {
+						s.GameViewerPage.SetUnitAt(ctx, &v1.SetUnitAtRequest{
+							Q:    resetUnit.Q,
+							R:    resetUnit.R,
+							Unit: resetUnit,
+						})
+					}
+				}
+				// Update game UI status with new current player and turn counter
+				gameState := s.GamesService.SingletonGameState
+				s.GameViewerPage.UpdateGameStatus(ctx, &v1.UpdateGameStatusRequest{
+					CurrentPlayer: gameState.CurrentPlayer,
+					TurnCounter:   gameState.TurnCounter,
+				})
+
+			default:
+				fmt.Printf("[Presenter] Unknown world change type: %T\n", changeType)
+			}
+		}
+	}
 }

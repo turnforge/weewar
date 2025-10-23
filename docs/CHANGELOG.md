@@ -2,6 +2,54 @@
 
 All notable changes to the WeeWar project are documented in this file.
 
+## [6.0.0] - 2025-01-23
+
+### 🎮 INCREMENTAL UI UPDATES & TURN MANAGEMENT ✅
+
+#### Incremental Update Architecture
+- **NEW**: `SetTileAt()` / `SetUnitAt()` presenter methods for direct World updates
+- **NEW**: `RemoveTileAt()` / `RemoveUnitAt()` for explicit entity removal
+- **NEW**: `UpdateGameStatus()` for separate UI status updates (player turn, turn counter)
+- **NEW**: `applyIncrementalChanges()` processes WorldChange deltas from ProcessMoves
+- **IMPROVED**: Replaced full `SetGameState()` calls with targeted incremental updates after moves
+- **BENEFIT**: Significant performance improvement - only updates changed entities
+
+#### End Turn Functionality
+- **NEW**: `EndTurnButtonClicked` RPC handler in presenter
+- **NEW**: End Turn button state management (enable/disable based on current player)
+- **NEW**: Automatic UI updates on turn transitions via `UpdateGameStatus()`
+- **FIXED**: `GetPlayerUnits()` now properly falls back to parent layer in transactions
+- **FIXED**: Index out of range panic when ending turns (World transaction layer fix)
+
+#### UI Simplification
+- **REMOVED**: GameActionsPanel - eliminated unnecessary UI clutter
+- **IMPROVED**: Direct End Turn button wiring to presenter
+- **IMPROVED**: Streamlined dockview layout with Game Log on left side
+
+#### CLI Direction Shortcuts
+- **NEW**: `ParseDirection()` function supporting L, R, TL, TR, BL, BR directions
+- **NEW**: `ParsePositionOrUnitWithContext()` for relative position resolution
+- **IMPROVED**: Move command now supports `move A1 R` or `move A1 TL`
+- **IMPROVED**: Attack command now supports `attack A1 BR` or `attack 3,4 L`
+- **SUPPORT**: Multiple naming conventions (TL/UL/LU, TR/UR/RU, etc.)
+- **DOCUMENTATION**: Updated help text with comprehensive direction examples
+
+#### Technical Improvements
+- **ARCHITECTURE**: Clean separation between full refresh (initial) and incremental updates (gameplay)
+- **PERFORMANCE**: EventBus-driven updates trigger only necessary UI refreshes
+- **MAINTAINABILITY**: Clear presenter orchestration of all UI state changes
+- **USER EXPERIENCE**: Faster UI response, intuitive CLI shortcuts for rapid gameplay
+
+#### Files Modified
+- `protos/weewar/v1/gameviewerpage.proto` - Added SetTileAt, SetUnitAt, RemoveTileAt, RemoveUnitAt, UpdateGameStatus RPCs
+- `web/src/GameViewerPage.ts` - Implemented incremental update methods, End Turn button handling
+- `web/src/World.ts` - Added setTileDirect() method
+- `services/singleton_gameview_presenter.go` - Implemented EndTurnButtonClicked, applyIncrementalChanges
+- `services/world.go` - Fixed GetPlayerUnits() to fall back to parent layer
+- `services/hex_coords.go` - Added ParseDirection() function
+- `services/position_parser.go` - Added ParsePositionOrUnitWithContext()
+- `cmd/cligame/cli.go` - Updated move/attack commands, enhanced help text
+
 ## [5.0.1] - 2025-07-12
 
 ### 🎯 PLATFORM UNIFICATION: Complete Rendering Architecture ✅

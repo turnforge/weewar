@@ -324,7 +324,16 @@ export class World {
         this.tiles[key] = tile;
         this.addTileChange(q, r, tile);
     }
-    
+
+    /**
+     * Set a tile directly with full Tile object (preserves all runtime state)
+     */
+    public setTileDirect(tile: Tile): void {
+        const key = `${tile.q},${tile.r}`;
+        this.tiles[key] = tile;
+        this.addTileChange(tile.q, tile.r, tile);
+    }
+
     public removeTileAt(q: number, r: number): boolean {
         const key = `${q},${r}`;
         if (key in this.tiles) {
@@ -361,6 +370,16 @@ export class World {
         return this.units[key] || null;
     }
     
+    /**
+     * Set a unit directly with full Unit object (preserves all runtime state)
+     */
+    public setUnitDirect(unit: Unit): void {
+        const key = `${unit.q},${unit.r}`;
+        const existingUnit = this.units[key];
+        this.units[key] = unit;
+        this.addUnitChange(unit.q, unit.r, unit);
+    }
+    
     public setUnitAt(q: number, r: number, unitType: number, player: number): void {
         // Ensure there's a tile at this location - auto-place grass if none exists
         if (!this.tileExistsAt(q, r)) {
@@ -394,18 +413,6 @@ export class World {
         }
         
         return false;
-    }
-    
-    /**
-     * Set a unit directly with full Unit object (preserves all runtime state)
-     */
-    public setUnitDirect(unit: Unit): void {
-        const key = `${unit.q},${unit.r}`;
-        const existingUnit = this.units[key];
-        
-        this.units[key] = unit;
-        
-        this.addUnitChange(unit.q, unit.r, unit);
     }
     
     public getAllUnits(): Array<Unit> {

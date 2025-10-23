@@ -304,7 +304,7 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 // handleMove processes move command
 func (cli *CLI) handleMove(args []string) string {
 	if len(args) != 2 {
-		return "Usage: move <from> <to>\nExample: move A1 5,6 or move 3,4 5,6"
+		return "Usage: move <from> <to>\nExample: move A1 5,6 or move A1 R or move 3,4 L"
 	}
 
 	ctx := context.Background()
@@ -321,13 +321,14 @@ func (cli *CLI) handleMove(args []string) string {
 		return fmt.Sprintf("Invalid from position: %v", err)
 	}
 
-	// Parse to position
-	toTarget, err := weewar.ParsePositionOrUnit(rtGame, args[1])
+	fromCoord := fromTarget.GetCoordinate()
+
+	// Parse to position with context (supports directions like L, R, TL, etc.)
+	toTarget, err := weewar.ParsePositionOrUnitWithContext(rtGame, args[1], &fromCoord)
 	if err != nil {
 		return fmt.Sprintf("Invalid to position: %v", err)
 	}
 
-	fromCoord := fromTarget.GetCoordinate()
 	toCoord := toTarget.GetCoordinate()
 
 	// Create move action
@@ -348,7 +349,7 @@ func (cli *CLI) handleMove(args []string) string {
 // handleAttack processes attack command
 func (cli *CLI) handleAttack(args []string) string {
 	if len(args) != 2 {
-		return "Usage: attack <attacker> <target>\nExample: attack A1 B2 or attack 3,4 5,6"
+		return "Usage: attack <attacker> <target>\nExample: attack A1 B2 or attack A1 R or attack 3,4 TL"
 	}
 
 	ctx := context.Background()
@@ -365,13 +366,14 @@ func (cli *CLI) handleAttack(args []string) string {
 		return fmt.Sprintf("Invalid attacker position: %v", err)
 	}
 
-	// Parse target position
-	targetTarget, err := weewar.ParsePositionOrUnit(rtGame, args[1])
+	attackerCoord := attackerTarget.GetCoordinate()
+
+	// Parse target position with context (supports directions like L, R, TL, etc.)
+	targetTarget, err := weewar.ParsePositionOrUnitWithContext(rtGame, args[1], &attackerCoord)
 	if err != nil {
 		return fmt.Sprintf("Invalid target position: %v", err)
 	}
 
-	attackerCoord := attackerTarget.GetCoordinate()
 	targetCoord := targetTarget.GetCoordinate()
 
 	// Create attack action
@@ -619,8 +621,8 @@ func (cli *CLI) handleHelp() string {
 	return `Available commands:
   options <pos>        - Show available actions at position (interactive menu)
   optionsd <pos>       - Show available actions with detailed path info
-  move <from> <to>     - Move unit (e.g. "move A1 5,6" or "move 3,4 5,6")
-  attack <att> <tgt>   - Attack target (e.g. "attack A1 B2" or "attack 3,4 5,6")  
+  move <from> <to>     - Move unit (e.g. "move A1 5,6" or "move A1 R")
+  attack <att> <tgt>   - Attack target (e.g. "attack A1 B2" or "attack A1 TL")
   end                  - End current player's turn
   status               - Show game status
   units                - Show all units
@@ -632,13 +634,22 @@ Position formats:
   - Unit ID: A1, B12, C2 (Player letter + unit number)
   - Q,R coordinate: 3,4 or -1,2
   - Row/col coordinate: r4,5 (prefix with 'r')
+  - Direction: L, R, TL, TR, BL, BR (relative to from position)
+
+Direction codes (for move/attack targets):
+  L  = Left            R  = Right
+  TL = Top-Left        TR = Top-Right
+  BL = Bottom-Left     BR = Bottom-Right
 
 Examples:
   options A1           # Show menu of available actions for unit A1
   optionsd A1          # Show detailed menu with path breakdowns
   options 3,4          # Show menu of available actions at position 3,4
   move A1 5,6          # Move unit A1 to position 5,6
+  move A1 R            # Move unit A1 to the right
+  move A1 TL           # Move unit A1 to top-left neighbor
   attack A1 B2         # Attack unit B2 with unit A1
+  attack A1 TR         # Attack top-right neighbor with unit A1
   attack 3,4 5,6       # Attack position 5,6 with unit at 3,4
   end                  # End current turn`
 }

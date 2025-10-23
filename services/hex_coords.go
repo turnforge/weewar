@@ -1,6 +1,9 @@
 package services
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Position represents a coordinate position (row, col)
 type Position = AxialCoord
@@ -202,6 +205,33 @@ func DirectionToCode(dir NeighborDirection) string {
 		return "LD"
 	default:
 		return "?"
+	}
+}
+
+// ParseDirection parses a direction string (L, R, UL, UR, DL, DR, etc.) to NeighborDirection
+// Supports multiple naming conventions:
+//   - L, R (original)
+//   - TL, TR, BL, BR (consistent with optionsd output)
+//   - UL, UR, DL, DR (user-friendly aliases for upper/down)
+//   - LU, RU, LD, RD (alternative notation)
+func ParseDirection(input string) (NeighborDirection, error) {
+	input = strings.ToUpper(strings.TrimSpace(input))
+
+	switch input {
+	case "L", "LEFT":
+		return LEFT, nil
+	case "TL", "LU", "UL", "TOPLEFT", "UPPERLEFT":
+		return TOP_LEFT, nil
+	case "TR", "RU", "UR", "TOPRIGHT", "UPPERRIGHT":
+		return TOP_RIGHT, nil
+	case "R", "RIGHT":
+		return RIGHT, nil
+	case "BR", "RD", "DR", "BOTTOMRIGHT", "DOWNRIGHT":
+		return BOTTOM_RIGHT, nil
+	case "BL", "LD", "DL", "BOTTOMLEFT", "DOWNLEFT":
+		return BOTTOM_LEFT, nil
+	default:
+		return -1, fmt.Errorf("invalid direction: %s (valid: L, R, TL, TR, BL, BR)", input)
 	}
 }
 

@@ -294,9 +294,18 @@ func (w *World) TileAt(coord AxialCoord) (out *v1.Tile) {
 
 // GetPlayerUnits returns all units belonging to the specified player
 func (w *World) GetPlayerUnits(playerID int) []*v1.Unit {
-	// TODO - handle the case of doing a "merged" iteration with parents if anything is missing here
-	// or conversely iterate parent and only return parent's K,V value if it is not in this layer
-	return w.unitsByPlayer[playerID]
+	// Check current layer first
+	if playerID >= 0 && playerID < len(w.unitsByPlayer) && w.unitsByPlayer[playerID] != nil {
+		return w.unitsByPlayer[playerID]
+	}
+
+	// Fall back to parent layer if available
+	if w.parent != nil {
+		return w.parent.GetPlayerUnits(playerID)
+	}
+
+	// No units found in any layer
+	return nil
 }
 
 // =============================================================================

@@ -1,6 +1,4 @@
 data
-gen
-web/gen
 bin
 logs
 dist

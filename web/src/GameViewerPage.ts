@@ -34,7 +34,6 @@ import { TerrainStatsPanel } from './TerrainStatsPanel';
 import { UnitStatsPanel } from './UnitStatsPanel';
 import { DamageDistributionPanel } from './DamageDistributionPanel';
 import { GameLogPanel } from './GameLogPanel';
-import { GameActionsPanel, GameActionsCallbacks } from './GameActionsPanel';
 import { TurnOptionsPanel } from './TurnOptionsPanel';
 import { GameEventTypes, WorldEventTypes } from './events';
 import { RulesTable, TerrainStats } from './RulesTable';
@@ -60,7 +59,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private unitStatsPanel: UnitStatsPanel
     private damageDistributionPanel: DamageDistributionPanel
     private gameLogPanel: GameLogPanel
-    private gameActionsPanel: GameActionsPanel
     private turnOptionsPanel: TurnOptionsPanel
     private rulesTable: RulesTable = new RulesTable();
     
@@ -97,7 +95,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         // Create child components
         this.createComponents();
         
-        this.updateGameStatus('Game Loading...');
+        this.updateGameStatusBanner('Game Loading...');
 
         await this.loadWASM() // kick off loading
 
@@ -109,7 +107,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             this.unitStatsPanel,
             this.damageDistributionPanel,
             this.gameLogPanel,
-            this.gameActionsPanel,
         ]
     }
 
@@ -287,8 +284,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
                         return this.createDamageDistributionComponent();
                     case 'turn-options':
                         return this.createTurnOptionsComponent();
-                    case 'game-actions':
-                        return this.createGameActionsComponent();
                     case 'game-log':
                         return this.createGameLogComponent();
                     default:
@@ -372,39 +367,27 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             id: 'turn-options-panel',
             component: 'turn-options',
             title: 'Turn Options',
-            position: { 
+            position: {
                 direction: 'below',
                 referencePanel: 'damage-distribution-panel'
             }
         });
 
-        // Add game actions panel (left side)
-        this.dockview.addPanel({
-            id: 'game-actions-panel',
-            component: 'game-actions', 
-            title: 'Actions',
-            position: { 
-                direction: 'left',
-                referencePanel: 'main-game-panel'
-            }
-        });
-
-        // Add game log panel (bottom of actions panel)
+        // Add game log panel (left side)
         this.dockview.addPanel({
             id: 'game-log-panel',
             component: 'game-log',
-            title: 'Game Log', 
-            position: { 
-                direction: 'below',
-                referencePanel: 'game-actions-panel'
+            title: 'Game Log',
+            position: {
+                direction: 'left',
+                referencePanel: 'main-game-panel'
             }
         });
 
         // Set panel sizes for optimal viewing
         setTimeout(() => {
             this.dockview.getPanel('terrain-stats-panel')?.api.setSize({ width: 320 });
-            this.dockview.getPanel('game-actions-panel')?.api.setSize({ width: 280 });
-            this.dockview.getPanel('game-log-panel')?.api.setSize({ height: 200 });
+            this.dockview.getPanel('game-log-panel')?.api.setSize({ width: 280 });
         }, 100);
     }
 
@@ -573,31 +556,6 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     }
 
     /**
-     * Create game actions component
-     */
-    private createGameActionsComponent() {
-        const template = document.getElementById('game-actions-panel-template');
-        if (!template) {
-            throw new Error('game-actions-panel-template not found');
-        }
-
-        const element = template.cloneNode(true) as HTMLElement;
-        element.style.display = 'block';
-        // Keep the template ID, don't create wrapper instance
-
-        return {
-            element,
-            init: () => {
-                // Create GameActionsPanel with the cloned element and callbacks
-                this.gameActionsPanel = new GameActionsPanel(element, this.eventBus, {} as GameActionsCallbacks);
-            },
-            dispose: () => {
-                // GameActionsPanel cleanup will be handled by LCM lifecycle
-            }
-        };
-    }
-
-    /**
      * Create game log component
      */
     private createGameLogComponent() {
@@ -662,13 +620,27 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     private bindGameSpecificEvents(): void {
         // End Turn button
-        const endTurnBtn = document.getElementById('end-turn-btn');
-        if (endTurnBtn) {
-            endTurnBtn.addEventListener('click', () => {
-                // TODO call the presenter instead
-                // this.endCurrentPlayerTurn(); // Use unified method
-            });
+        const endTurnBtn = document.getElementById('end-turn-btn')!;
+        endTurnBtn.addEventListener('click', () => {
+          this.gameViewPresenterClient.endTurnButtonClicked({
+              gameId: this.currentGameId || ""
+          });
+        });
+    }
+
+    /**
+     * Handle End Turn button click
+     */
+    private async handleEndTurnClick(): Promise<void> {
+        if (!this.currentGameId) {
+            console.error('No game ID available');
+            return;
         }
+
+        // Call presenter
+        await this.gameViewPresenterClient.endTurnButtonClicked({
+            gameId: this.currentGameId
+        });
     }
 
 
@@ -711,11 +683,11 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     /**
      * UI update functions
      */
-    private updateGameStatus(status: string, currentPlayer?: number): void {
+    private updateGameStatusBanner(status: string, currentPlayer?: number): void {
         const statusElement = document.getElementById('game-status');
         if (statusElement) {
             statusElement.textContent = status;
-            
+
             // Use player-specific background color, fallback to green for general messages
             const playerColorClass = currentPlayer ? PLAYER_BG_COLORS[currentPlayer] : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
             statusElement.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${playerColorClass}`;
@@ -724,15 +696,10 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
     private updateGameUIFromState(gameState: ProtoGameState): void {
         // Update game status with player-specific color - use player ID directly
-        this.updateGameStatus(`Ready - Player ${gameState.currentPlayer}'s Turn`, gameState.currentPlayer);
+        this.updateGameStatusBanner(`Ready - Player ${gameState.currentPlayer}'s Turn`, gameState.currentPlayer);
         
         // Update turn counter
         this.updateTurnCounter(gameState.turnCounter);
-        
-        // Update game actions panel with current game state
-        if (this.gameActionsPanel) {
-            this.gameActionsPanel.updateGameStatus(gameState.currentPlayer, gameState.turnCounter);
-        }
     }
     
     private updateTurnCounter(turnCounter: number): void {
@@ -826,6 +793,65 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     this.updateGameUIFromState(req.state!);
     this.gameLogPanel.logGameEvent(`Game loaded: ${req.state!.gameId}`, 'system');
     return {}
+  }
+
+  // Incremental update methods
+  async setTileAt(request: { q: number, r: number, tile: Tile }) {
+    console.log("setTileAt called on the browser:", request);
+    this.world.setTileDirect(request.tile);
+    return {}
+  }
+
+  async setUnitAt(request: { q: number, r: number, unit: Unit }) {
+    console.log("setUnitAt called on the browser:", request);
+    this.world.setUnitDirect(request.unit);
+    return {}
+  }
+
+  async removeTileAt(request: { q: number, r: number }) {
+    console.log("removeTileAt called on the browser:", request);
+    this.world.removeTileAt(request.q, request.r);
+    return {}
+  }
+
+  async removeUnitAt(request: { q: number, r: number }) {
+    console.log("removeUnitAt called on the browser:", request);
+    this.world.removeUnitAt(request.q, request.r);
+    return {}
+  }
+
+  async updateGameStatus(request: { currentPlayer: number, turnCounter: number }) {
+    console.log("updateGameStatus called on the browser:", request);
+    // Update the game status banner
+    this.updateGameStatusBanner(`Ready - Player ${request.currentPlayer}'s Turn`, request.currentPlayer);
+    // Update turn counter
+    this.updateTurnCounter(request.turnCounter);
+    // Update End Turn button state (only enabled for Player 1 for now - TODO: make configurable)
+    this.updateEndTurnButtonState(request.currentPlayer);
+    return {}
+  }
+
+  /**
+   * Update End Turn button enabled/disabled state based on current player
+   */
+  private updateEndTurnButtonState(currentPlayer: number): void {
+    const endTurnBtn = document.getElementById('end-turn-btn') as HTMLButtonElement;
+    if (endTurnBtn) {
+      // TODO: Get the actual player ID from the game/user context
+      // For now, assume we're playing as Player 1
+      const isOurTurn = currentPlayer === 1;
+
+      endTurnBtn.disabled = !isOurTurn;
+
+      // Update visual state
+      if (isOurTurn) {
+        endTurnBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        endTurnBtn.classList.add('hover:bg-green-700');
+      } else {
+        endTurnBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        endTurnBtn.classList.remove('hover:bg-green-700');
+      }
+    }
   }
 }
 

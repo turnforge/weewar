@@ -22,6 +22,18 @@ service GameViewerPage {
 
     rpc SetGameState(SetGameStateRequest) returns (SetGameStateResponse);
 
+    // Update game UI metadata (current player, turn counter)
+    rpc UpdateGameStatus(UpdateGameStatusRequest) returns (UpdateGameStatusResponse);
+
+    // Incremental update methods
+    rpc SetTileAt(SetTileAtRequest) returns (SetTileAtResponse);
+
+    rpc SetUnitAt(SetUnitAtRequest) returns (SetUnitAtResponse);
+
+    rpc RemoveTileAt(RemoveTileAtRequest) returns (RemoveTileAtResponse);
+
+    rpc RemoveUnitAt(RemoveUnitAtRequest) returns (RemoveUnitAtResponse);
+
     // Visualization command methods
     rpc ShowHighlights(ShowHighlightsRequest) returns (ShowHighlightsResponse);
 
@@ -64,6 +76,53 @@ message SetGameStateRequest {
 
 // Response from fetch
 message SetGameStateResponse {
+}
+
+// Request to update game UI status (current player, turn counter)
+message UpdateGameStatusRequest {
+    int32 current_player = 1;
+    int32 turn_counter = 2;
+}
+
+message UpdateGameStatusResponse {
+}
+
+// Request to set a tile at a specific coordinate
+message SetTileAtRequest {
+    int32 q = 1;
+    int32 r = 2;
+    Tile tile = 3;
+}
+
+message SetTileAtResponse {
+}
+
+// Request to set a unit at a specific coordinate
+message SetUnitAtRequest {
+    int32 q = 1;
+    int32 r = 2;
+    Unit unit = 3;
+}
+
+message SetUnitAtResponse {
+}
+
+// Request to remove a tile at a specific coordinate
+message RemoveTileAtRequest {
+    int32 q = 1;
+    int32 r = 2;
+}
+
+message RemoveTileAtResponse {
+}
+
+// Request to remove a unit at a specific coordinate
+message RemoveUnitAtRequest {
+    int32 q = 1;
+    int32 r = 2;
+}
+
+message RemoveUnitAtResponse {
 }
 
 // ============================================================================

@@ -13,7 +13,7 @@ import (
 	"sort"
 
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
+	weewar "github.com/panyam/turnengine/games/weewar/services"
 )
 
 // Toolbar buttons on the editor page

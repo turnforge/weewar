@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -26,10 +25,10 @@ type GetOptionsAtExpectation struct {
 	TotalOptionCount  int
 
 	// Specific coordinate checks for movement options
-	ExpectedMoveCoords []weewar.AxialCoord
+	ExpectedMoveCoords []AxialCoord
 
 	// Specific coordinate checks for attack options
-	ExpectedAttackCoords []weewar.AxialCoord
+	ExpectedAttackCoords []AxialCoord
 
 	// Game state expectations
 	CurrentPlayer   int32
@@ -57,7 +56,7 @@ func setupGetOptionsAtTest(t *testing.T, scenario GetOptionsAtTestScenario) *Sin
 	}
 
 	// Load rules engine
-	rulesEngine, err := weewar.LoadRulesEngineFromFile(weewar.DevDataPath("data/rules-data.json"))
+	rulesEngine, err := LoadRulesEngineFromFile(DevDataPath("data/rules-data.json"))
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -67,9 +66,9 @@ func setupGetOptionsAtTest(t *testing.T, scenario GetOptionsAtTestScenario) *Sin
 		Id:   "test-game-" + scenario.WorldId,
 		Name: "Test Game - " + scenario.WorldId,
 	}
-	
+
 	// Create runtime game
-	rtGame := weewar.NewGame(game, gameState, rtWorld, rulesEngine, 12345)
+	rtGame := NewGame(game, gameState, rtWorld, rulesEngine, 12345)
 
 	// Apply scenario overrides
 	if scenario.CurrentPlayer > 0 {
@@ -142,20 +141,20 @@ func runGetOptionsAtTest(t *testing.T, svc *SingletonGamesServiceImpl, testCase 
 		attackCount := 0
 		endTurnCount := 0
 
-		moveCoords := []weewar.AxialCoord{}
-		attackCoords := []weewar.AxialCoord{}
+		moveCoords := []AxialCoord{}
+		attackCoords := []AxialCoord{}
 
 		for _, option := range resp.Options {
 			switch optionType := option.OptionType.(type) {
 			case *v1.GameOption_Move:
 				moveCount++
-				moveCoords = append(moveCoords, weewar.AxialCoord{
+				moveCoords = append(moveCoords, AxialCoord{
 					Q: int(optionType.Move.Q),
 					R: int(optionType.Move.R),
 				})
 			case *v1.GameOption_Attack:
 				attackCount++
-				attackCoords = append(attackCoords, weewar.AxialCoord{
+				attackCoords = append(attackCoords, AxialCoord{
 					Q: int(optionType.Attack.Q),
 					R: int(optionType.Attack.R),
 				})
@@ -209,7 +208,7 @@ func runGetOptionsAtTest(t *testing.T, svc *SingletonGamesServiceImpl, testCase 
 
 // TestGetOptionsAtWithRealWorlds runs GetOptionsAt tests using real world data from storage
 func TestGetOptionsAtWithRealWorlds(t *testing.T) {
-	worldsStorageDir := weewar.DevDataPath("storage/worlds")
+	worldsStorageDir := DevDataPath("storage/worlds")
 
 	scenarios := []GetOptionsAtTestScenario{
 		{
@@ -321,14 +320,14 @@ func TestGetOptionsAtWithRealWorlds(t *testing.T) {
 }
 
 // Helper function to compare coordinate slices
-func coordSlicesEqual(a, b []weewar.AxialCoord) bool {
+func coordSlicesEqual(a, b []AxialCoord) bool {
 	if len(a) != len(b) {
 		return false
 	}
 
 	// Convert to sets for comparison (order doesn't matter)
-	setA := make(map[weewar.AxialCoord]bool)
-	setB := make(map[weewar.AxialCoord]bool)
+	setA := make(map[AxialCoord]bool)
+	setB := make(map[AxialCoord]bool)
 
 	for _, coord := range a {
 		setA[coord] = true

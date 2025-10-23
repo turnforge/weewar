@@ -1,4 +1,4 @@
-package weewar
+package services
 
 import (
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
@@ -54,4 +54,28 @@ func ProtoInt32(val int) int32 {
 
 func ProtoInt(val int32) int {
 	return int(val)
+}
+
+// ProtoToRuntimeGame converts protobuf game/state to runtime game
+// This is WeeWar-specific and doesn't belong in TurnEngine
+func ProtoToRuntimeGame(game *v1.Game, gameState *v1.GameState) *Game {
+	// Create the runtime game from the protobuf data
+	world := NewWorld(game.Name, gameState.WorldData)
+
+	// Create the runtime game with loaded default rules engine
+	rulesEngine := DefaultRulesEngine() // Use loaded default rules engine
+
+	// Use NewGameFromState instead of NewGame to preserve unit stats
+	return NewGame(game, gameState, world, rulesEngine, 12345) // Default seed
+}
+
+// RuntimeGameToProto returns the proto state from a runtime game
+// Since runtime game already embeds the proto objects, we just return the pointer
+func RuntimeGameToProto(rtGame *Game) *v1.GameState {
+	if rtGame == nil || rtGame.GameState == nil {
+		return nil
+	}
+
+	// Just return the embedded proto state - it's already being updated by the runtime game
+	return rtGame.GameState
 }

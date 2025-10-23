@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	lib "github.com/panyam/turnengine/games/weewar/lib"
 	"github.com/panyam/turnengine/games/weewar/web/assets/themes"
 )
 
@@ -77,7 +76,7 @@ func NewSingletonGameViewPresenterImpl() *SingletonGameViewPresenterImpl {
 		BaseGameViewPresenterImpl: BaseGameViewPresenterImpl{
 			// WorldsService: SingletonWorldsService
 		},
-		RulesEngine: lib.DefaultRulesEngine().RulesEngine,
+		RulesEngine: DefaultRulesEngine().RulesEngine,
 		Theme:       themes.NewDefaultTheme(), // Start with default theme
 	}
 	return w
@@ -121,7 +120,7 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 	game := s.GamesService.SingletonGame
 	gameState := s.GamesService.SingletonGameState
 	q, r := req.Q, req.R
-	coord := lib.CoordFromInt32(q, r)
+	coord := CoordFromInt32(q, r)
 
 	// Get tile and unit data from World using coordinates
 	switch req.Layer {

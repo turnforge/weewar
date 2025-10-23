@@ -2,7 +2,6 @@ package services
 
 import (
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	pj "google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -11,7 +10,7 @@ type SingletonWorldsServiceImpl struct {
 	SingletonWorld     *v1.World
 	SingletonWorldData *v1.WorldData
 
-	RuntimeWorld *weewar.World
+	RuntimeWorld *World
 }
 
 // NOTE - ONly API really needed here are "getters" and "move processors" so no Creations, Deletions, Listing or even
@@ -28,7 +27,7 @@ func NewSingletonWorldsServiceImpl() *SingletonWorldsServiceImpl {
 	return w
 }
 
-func (w *SingletonWorldsServiceImpl) GetRuntimeWorld(gameId string) (*weewar.World, error) {
+func (w *SingletonWorldsServiceImpl) GetRuntimeWorld(gameId string) (*World, error) {
 	return w.RuntimeWorld, nil
 }
 

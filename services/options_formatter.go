@@ -1,4 +1,4 @@
-package weewar
+package services
 
 import (
 	"fmt"
@@ -32,11 +32,11 @@ func (f *OptionFormatter) FormatOption(option *v1.GameOption, allPaths *v1.AllPa
 // FormatMoveOption formats a movement option with optional path visualization
 func (f *OptionFormatter) FormatMoveOption(moveOpt *v1.MoveOption, allPaths *v1.AllPaths) string {
 	targetCoord := CoordFromInt32(moveOpt.Q, moveOpt.R)
-	
+
 	// Basic format: "move to (q,r) (cost: X)"
-	result := fmt.Sprintf("move to %s (cost: %d)", 
+	result := fmt.Sprintf("move to %s (cost: %d)",
 		targetCoord.String(), moveOpt.MovementCost)
-	
+
 	// Add path visualization if available and requested
 	if f.ShowPaths && allPaths != nil {
 		path, err := ReconstructPath(allPaths, moveOpt.Q, moveOpt.R)
@@ -50,17 +50,17 @@ func (f *OptionFormatter) FormatMoveOption(moveOpt *v1.MoveOption, allPaths *v1.
 			}
 		}
 	}
-	
+
 	return result
 }
 
 // FormatAttackOption formats an attack option with damage estimate
 func (f *OptionFormatter) FormatAttackOption(attackOpt *v1.AttackOption) string {
 	targetCoord := CoordFromInt32(attackOpt.Q, attackOpt.R)
-	
+
 	// Include target unit type and damage estimate
 	result := fmt.Sprintf("attack %s", targetCoord.String())
-	
+
 	if attackOpt.TargetUnitType > 0 {
 		result += fmt.Sprintf(" (type %d", attackOpt.TargetUnitType)
 		if attackOpt.DamageEstimate > 0 {
@@ -68,7 +68,7 @@ func (f *OptionFormatter) FormatAttackOption(attackOpt *v1.AttackOption) string 
 		}
 		result += ")"
 	}
-	
+
 	return result
 }
 
@@ -77,22 +77,22 @@ func (f *OptionFormatter) FormatBuildOption(buildOpt *v1.BuildUnitOption) string
 	if buildOpt == nil {
 		return "build"
 	}
-	
+
 	// Format based on what building information is available
 	var parts []string
-	
+
 	if buildOpt.UnitType > 0 {
 		parts = append(parts, fmt.Sprintf("unit type %d", buildOpt.UnitType))
 	}
-	
+
 	if buildOpt.Cost > 0 {
 		parts = append(parts, fmt.Sprintf("cost: %d", buildOpt.Cost))
 	}
-	
+
 	if len(parts) > 0 {
 		return fmt.Sprintf("build (%s)", strings.Join(parts, ", "))
 	}
-	
+
 	return "build"
 }
 

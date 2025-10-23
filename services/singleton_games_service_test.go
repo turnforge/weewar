@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	lib "github.com/panyam/turnengine/games/weewar/lib"
 )
 
 // Test that we can load a game and get options for units
@@ -45,7 +44,7 @@ func TestSingletonGamesService_GetOptionsAt(t *testing.T) {
 
 	// Find a unit in the world
 	var testUnit *v1.Unit
-	var testCoord lib.AxialCoord
+	var testCoord AxialCoord
 
 	for coord, unit := range world.UnitsByCoord() {
 		testUnit = unit

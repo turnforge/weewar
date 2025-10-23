@@ -11,7 +11,6 @@ import (
 	turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1"
 	"github.com/panyam/turnengine/engine/storage"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"google.golang.org/protobuf/proto"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -28,13 +27,13 @@ type FSGamesServiceImpl struct {
 	gameCache    map[string]*v1.Game
 	stateCache   map[string]*v1.GameState
 	historyCache map[string]*v1.GameMoveHistory
-	runtimeCache map[string]*weewar.Game
+	runtimeCache map[string]*Game
 }
 
 // NewGamesService creates a new GamesService implementation for server mode
 func NewFSGamesService() *FSGamesServiceImpl {
 	if GAMES_STORAGE_DIR == "" {
-		GAMES_STORAGE_DIR = weewar.DevDataPath("storage/games")
+		GAMES_STORAGE_DIR = DevDataPath("storage/games")
 	}
 	service := &FSGamesServiceImpl{
 		BaseGamesServiceImpl: BaseGamesServiceImpl{},
@@ -43,7 +42,7 @@ func NewFSGamesService() *FSGamesServiceImpl {
 		gameCache:            make(map[string]*v1.Game),
 		stateCache:           make(map[string]*v1.GameState),
 		historyCache:         make(map[string]*v1.GameMoveHistory),
-		runtimeCache:         make(map[string]*weewar.Game),
+		runtimeCache:         make(map[string]*Game),
 	}
 	service.Self = service
 
@@ -106,7 +105,7 @@ func (s *FSGamesServiceImpl) CreateGame(ctx context.Context, req *v1.CreateGameR
 
 	// Initialize units with default stats from rules engine for new games
 	if gs.WorldData != nil && gs.WorldData.Units != nil {
-		rulesEngine := weewar.DefaultRulesEngine()
+		rulesEngine := DefaultRulesEngine()
 		for _, unit := range gs.WorldData.Units {
 			// Get unit defaults from rules engine
 			unitData, err := rulesEngine.GetUnitData(unit.UnitType)
@@ -249,12 +248,12 @@ func (s *FSGamesServiceImpl) UpdateGame(ctx context.Context, req *v1.UpdateGameR
 }
 
 // GetRuntimeGame implements the interface method (for compatibility)
-func (s *FSGamesServiceImpl) GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*weewar.Game, error) {
+func (s *FSGamesServiceImpl) GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*Game, error) {
 	return ProtoToRuntimeGame(game, gameState), nil
 }
 
 // GetRuntimeGameByID returns a cached runtime game instance for the given game ID
-func (s *FSGamesServiceImpl) GetRuntimeGameByID(ctx context.Context, gameID string) (*weewar.Game, error) {
+func (s *FSGamesServiceImpl) GetRuntimeGameByID(ctx context.Context, gameID string) (*Game, error) {
 	// Check runtime cache first
 	if rtGame, ok := s.runtimeCache[gameID]; ok {
 		return rtGame, nil

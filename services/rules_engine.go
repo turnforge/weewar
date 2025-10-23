@@ -1,4 +1,4 @@
-package weewar
+package services
 
 import (
 	"fmt"
@@ -284,10 +284,10 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 		SourceR: int32(startCoord.R),
 		Edges:   make(map[string]*v1.PathEdge),
 	}
-	
+
 	// Track visited nodes and their costs
 	visited := make(map[AxialCoord]float64)
-	
+
 	// Get unit data for explanations
 	unitData, _ := re.GetUnitData(unitType)
 
@@ -343,21 +343,21 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 				// Check if this is a better path to the neighbor
 				if existingCost, exists := visited[neighborCoord]; !exists || newCost < existingCost {
 					visited[neighborCoord] = newCost
-					
+
 					// Get terrain data for explanation
 					terrainData, _ := re.GetTerrainData(tile.TileType)
 					terrainName := "unknown"
 					if terrainData != nil {
 						terrainName = terrainData.Name
 					}
-					
+
 					// Create explanation
 					unitName := "Unit"
 					if unitData != nil {
 						unitName = unitData.Name
 					}
 					explanation := fmt.Sprintf("%s costs %s %.0f movement points", terrainName, unitName, moveCost)
-					
+
 					// Create PathEdge and add to AllPaths
 					key := fmt.Sprintf("%d,%d", neighborCoord.Q, neighborCoord.R)
 					allPaths.Edges[key] = &v1.PathEdge{
@@ -370,7 +370,7 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 						TerrainType:  terrainName,
 						Explanation:  explanation,
 					}
-					
+
 					queue = append(queue, queueItem{coord: neighborCoord, cost: newCost})
 				}
 			}

@@ -1,4 +1,4 @@
-package weewar
+package services
 
 // =============================================================================
 // Helper methods to convert row/col to and from Q/R

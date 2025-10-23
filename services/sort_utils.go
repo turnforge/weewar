@@ -1,4 +1,4 @@
-package weewar
+package services
 
 import (
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
@@ -11,11 +11,11 @@ func GameOptionLess(a, b *v1.GameOption) bool {
 	// Get option type priorities
 	aPriority := getOptionTypePriority(a)
 	bPriority := getOptionTypePriority(b)
-	
+
 	if aPriority != bPriority {
 		return aPriority < bPriority
 	}
-	
+
 	// Same type, use type-specific comparison
 	switch aOpt := a.OptionType.(type) {
 	case *v1.GameOption_Move:
@@ -27,7 +27,7 @@ func GameOptionLess(a, b *v1.GameOption) bool {
 			return AttackOptionLess(aOpt.Attack, bOpt.Attack)
 		}
 	}
-	
+
 	return false
 }
 
@@ -56,16 +56,16 @@ func MoveOptionLess(a, b *v1.MoveOption) bool {
 	if a.MovementCost != b.MovementCost {
 		return a.MovementCost < b.MovementCost
 	}
-	
+
 	// Same cost, compare by direction
 	fromA := CoordFromInt32(a.Action.FromQ, a.Action.FromR)
 	toA := CoordFromInt32(a.Action.ToQ, a.Action.ToR)
 	dirA := GetDirection(fromA, toA)
-	
+
 	fromB := CoordFromInt32(b.Action.FromQ, b.Action.FromR)
 	toB := CoordFromInt32(b.Action.ToQ, b.Action.ToR)
 	dirB := GetDirection(fromB, toB)
-	
+
 	return dirA < dirB
 }
 
@@ -76,20 +76,20 @@ func AttackOptionLess(a, b *v1.AttackOption) bool {
 	attackerA := CoordFromInt32(a.Action.AttackerQ, a.Action.AttackerR)
 	targetA := CoordFromInt32(a.Action.DefenderQ, a.Action.DefenderR)
 	distA := attackerA.Distance(targetA)
-	
+
 	attackerB := CoordFromInt32(b.Action.AttackerQ, b.Action.AttackerR)
 	targetB := CoordFromInt32(b.Action.DefenderQ, b.Action.DefenderR)
 	distB := attackerB.Distance(targetB)
-	
+
 	if distA != distB {
 		return distA < distB
 	}
-	
+
 	// Same distance, compare by target health (lower health first)
 	if a.TargetUnitHealth != b.TargetUnitHealth {
 		return a.TargetUnitHealth < b.TargetUnitHealth
 	}
-	
+
 	// Same health, compare by unit type
 	return a.TargetUnitType < b.TargetUnitType
 }

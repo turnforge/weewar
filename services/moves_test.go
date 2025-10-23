@@ -5,19 +5,18 @@ import (
 	"testing"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServiceImpl {
 	// 1. Create test world with 3 units
 	protoWorld := &v1.WorldData{} // Empty world data for test
-	world := weewar.NewWorld("test", protoWorld)
+	world := NewWorld("test", protoWorld)
 	// Add some tiles for movement
 	for q := range nq {
 		for r := range nr {
-			coord := weewar.AxialCoord{Q: q, R: r}
-			tile := weewar.NewTile(coord, 1) // Grass terrain
+			coord := AxialCoord{Q: q, R: r}
+			tile := NewTile(coord, 1) // Grass terrain
 			world.AddTile(tile)
 		}
 	}
@@ -27,7 +26,7 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 	}
 
 	// Load rules engine
-	rulesEngine, err := weewar.LoadRulesEngineFromFile(weewar.DevDataPath("data/rules-data.json"))
+	rulesEngine, err := LoadRulesEngineFromFile(DevDataPath("data/rules-data.json"))
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -37,14 +36,14 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 		Id:   "test-game",
 		Name: "Test Game",
 	}
-	
+
 	gameState := &v1.GameState{
 		CurrentPlayer: 1,
 		TurnCounter:   1,
 	}
-	
+
 	// Create runtime game
-	rtGame := weewar.NewGame(game, gameState, world, rulesEngine, 12345)
+	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Set current player to 1 for move validation
 	rtGame.CurrentPlayer = 1
@@ -52,7 +51,7 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 	t.Logf("Game setup: CurrentPlayer=%d, TurnCounter=%d", rtGame.CurrentPlayer, rtGame.TurnCounter)
 
 	// Debug: Check if destination tile exists
-	destTile := world.TileAt(weewar.AxialCoord{Q: 2, R: 3})
+	destTile := world.TileAt(AxialCoord{Q: 2, R: 3})
 	if destTile == nil {
 		t.Logf("WARNING: No tile at destination (2,3)")
 	} else {
@@ -160,10 +159,10 @@ func TestProcessMovesNoDuplication(t *testing.T) {
 	}
 
 	// Verify the unit moved correctly
-	if rtGame.World.UnitAt(weewar.AxialCoord{Q: 1, R: 2}) != nil {
+	if rtGame.World.UnitAt(AxialCoord{Q: 1, R: 2}) != nil {
 		t.Error("Unit still found at old position (1,2)")
 	}
-	if rtGame.World.UnitAt(weewar.AxialCoord{Q: 1, R: 1}) == nil {
+	if rtGame.World.UnitAt(AxialCoord{Q: 1, R: 1}) == nil {
 		t.Error("Unit not found at new position (1,1)")
 	}
 
@@ -179,7 +178,7 @@ func TestProcessMovesNoDuplication(t *testing.T) {
 }
 
 // Helper function to convert runtime World to proto (simplified version)
-func convertRuntimeWorldToProto(world *weewar.World) *v1.WorldData {
+func convertRuntimeWorldToProto(world *World) *v1.WorldData {
 	worldData := &v1.WorldData{
 		Units: []*v1.Unit{},
 		Tiles: []*v1.Tile{},

@@ -7,13 +7,12 @@ import (
 	"time"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type GamesServiceImpl interface {
 	v1.GamesServiceServer
-	GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*weewar.Game, error)
+	GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*Game, error)
 }
 
 type BaseGamesServiceImpl struct {
@@ -64,7 +63,7 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 	// success only if all moves succeeds etc.  Note that at this point the game
 	// state has not changed and neither has the Runtime Game object.  Both the
 	// GameState and the Runtime Game are checkpointed at before the moves started
-	var dmp weewar.DefaultMoveProcessor
+	var dmp DefaultMoveProcessor
 	results, err := dmp.ProcessMoves(rtGame, req.Moves)
 	if err != nil {
 		return nil, err
@@ -139,7 +138,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 	var allPaths *v1.AllPaths
 
 	// Check what's at this position
-	unit := rtGame.World.UnitAt(weewar.AxialCoord{Q: int(req.Q), R: int(req.R)})
+	unit := rtGame.World.UnitAt(AxialCoord{Q: int(req.Q), R: int(req.R)})
 
 	if unit == nil {
 		// Empty tile - check for building/capture options, then end turn
@@ -159,7 +158,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 		})
 	} else {
 		// Our unit - get all available options
-		var dmp weewar.DefaultMoveProcessor
+		var dmp DefaultMoveProcessor
 
 		// Get movement options if unit has movement left
 		if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 {
@@ -177,7 +176,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 						ToR:   edge.ToR,
 					}
 
-					path, err := weewar.ReconstructPath(allPaths, edge.ToQ, edge.ToR)
+					path, err := ReconstructPath(allPaths, edge.ToQ, edge.ToR)
 					if err != nil {
 						panic(err)
 					}
@@ -246,7 +245,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 	}
 	// Sort it for convinience too
 	sort.Slice(options, func(i, j int) bool {
-		return weewar.GameOptionLess(options[i], options[j])
+		return GameOptionLess(options[i], options[j])
 	})
 
 	return &v1.GetOptionsAtResponse{
@@ -257,7 +256,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 	}, nil
 }
 
-func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, rtGame *weewar.Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
+func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, rtGame *Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
 
 	// TRANSACTIONAL FIX: Temporary rollback to original world for ordered application
 	if parent := rtGame.World.Pop(); parent != nil {
@@ -281,7 +280,7 @@ func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, 
 }
 
 // applyWorldChange applies a single WorldChange to both runtime game and protobuf state
-func (b *BaseGamesServiceImpl) applyWorldChange(change *v1.WorldChange, rtGame *weewar.Game, state *v1.GameState) error {
+func (b *BaseGamesServiceImpl) applyWorldChange(change *v1.WorldChange, rtGame *Game, state *v1.GameState) error {
 	switch changeType := change.ChangeType.(type) {
 	case *v1.WorldChange_UnitMoved:
 		return b.applyUnitMoved(changeType.UnitMoved, rtGame)
@@ -297,13 +296,13 @@ func (b *BaseGamesServiceImpl) applyWorldChange(change *v1.WorldChange, rtGame *
 }
 
 // applyUnitMoved moves a unit in the runtime game
-func (b *BaseGamesServiceImpl) applyUnitMoved(change *v1.UnitMovedChange, rtGame *weewar.Game) error {
+func (b *BaseGamesServiceImpl) applyUnitMoved(change *v1.UnitMovedChange, rtGame *Game) error {
 	if change.PreviousUnit == nil || change.UpdatedUnit == nil {
 		return fmt.Errorf("missing unit data in UnitMovedChange")
 	}
 
-	fromCoord := weewar.AxialCoord{Q: int(change.PreviousUnit.Q), R: int(change.PreviousUnit.R)}
-	toCoord := weewar.AxialCoord{Q: int(change.UpdatedUnit.Q), R: int(change.UpdatedUnit.R)}
+	fromCoord := AxialCoord{Q: int(change.PreviousUnit.Q), R: int(change.PreviousUnit.R)}
+	toCoord := AxialCoord{Q: int(change.UpdatedUnit.Q), R: int(change.UpdatedUnit.R)}
 
 	// Move unit in runtime game
 	unit := rtGame.World.UnitAt(fromCoord)
@@ -321,12 +320,12 @@ func (b *BaseGamesServiceImpl) applyUnitMoved(change *v1.UnitMovedChange, rtGame
 }
 
 // applyUnitDamaged updates unit health in the runtime game
-func (b *BaseGamesServiceImpl) applyUnitDamaged(change *v1.UnitDamagedChange, rtGame *weewar.Game) error {
+func (b *BaseGamesServiceImpl) applyUnitDamaged(change *v1.UnitDamagedChange, rtGame *Game) error {
 	if change.UpdatedUnit == nil {
 		return fmt.Errorf("missing updated unit data in UnitDamagedChange")
 	}
 
-	coord := weewar.AxialCoord{Q: int(change.UpdatedUnit.Q), R: int(change.UpdatedUnit.R)}
+	coord := AxialCoord{Q: int(change.UpdatedUnit.Q), R: int(change.UpdatedUnit.R)}
 
 	unit := rtGame.World.UnitAt(coord)
 	if unit == nil {
@@ -341,12 +340,12 @@ func (b *BaseGamesServiceImpl) applyUnitDamaged(change *v1.UnitDamagedChange, rt
 }
 
 // applyUnitKilled removes a unit from the runtime game
-func (b *BaseGamesServiceImpl) applyUnitKilled(change *v1.UnitKilledChange, rtGame *weewar.Game) error {
+func (b *BaseGamesServiceImpl) applyUnitKilled(change *v1.UnitKilledChange, rtGame *Game) error {
 	if change.PreviousUnit == nil {
 		return fmt.Errorf("missing previous unit data in UnitKilledChange")
 	}
 
-	coord := weewar.AxialCoord{Q: int(change.PreviousUnit.Q), R: int(change.PreviousUnit.R)}
+	coord := AxialCoord{Q: int(change.PreviousUnit.Q), R: int(change.PreviousUnit.R)}
 	unit := rtGame.World.UnitAt(coord)
 
 	err := rtGame.World.RemoveUnit(unit)
@@ -357,7 +356,7 @@ func (b *BaseGamesServiceImpl) applyUnitKilled(change *v1.UnitKilledChange, rtGa
 }
 
 // applyPlayerChanged updates game state for turn/player changes
-func (b *BaseGamesServiceImpl) applyPlayerChanged(change *v1.PlayerChangedChange, rtGame *weewar.Game, state *v1.GameState) error {
+func (b *BaseGamesServiceImpl) applyPlayerChanged(change *v1.PlayerChangedChange, rtGame *Game, state *v1.GameState) error {
 	rtGame.CurrentPlayer = change.NewPlayer
 	rtGame.TurnCounter = change.NewTurn
 
@@ -369,7 +368,7 @@ func (b *BaseGamesServiceImpl) applyPlayerChanged(change *v1.PlayerChangedChange
 }
 
 // convertRuntimeWorldToProto converts runtime world state to protobuf WorldData
-func (b *BaseGamesServiceImpl) convertRuntimeWorldToProto(world *weewar.World) *v1.WorldData {
+func (b *BaseGamesServiceImpl) convertRuntimeWorldToProto(world *World) *v1.WorldData {
 	worldData := &v1.WorldData{
 		Tiles: []*v1.Tile{},
 		Units: []*v1.Unit{},

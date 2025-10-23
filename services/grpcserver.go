@@ -11,7 +11,6 @@ import (
 	"github.com/panyam/turnengine/engine/coordination"
 	turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -29,14 +28,14 @@ func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool
 
 	// Create GamesService
 	gamesService := NewFSGamesService()
-	
+
 	// Create coordination storage
-	coordStorageDir := weewar.DevDataPath("storage/coordination")
+	coordStorageDir := DevDataPath("storage/coordination")
 	coordStorage, err := coordination.NewFileCoordinationStorage(coordStorageDir)
 	if err != nil {
 		return fmt.Errorf("failed to create coordination storage: %w", err)
 	}
-	
+
 	// Create coordinator service with games service as callback
 	coordConfig := coordination.Config{
 		RequiredValidators: 1, // Start with 1 for testing

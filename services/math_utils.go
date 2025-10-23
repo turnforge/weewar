@@ -1,4 +1,4 @@
-package weewar
+package services
 
 // max returns the maximum of two integers
 func Max(a, b int) int {

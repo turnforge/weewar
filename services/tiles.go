@@ -1,4 +1,4 @@
-package weewar
+package services
 
 // TerrainType represents whether terrain is nature or player-controllable
 type TerrainType int32

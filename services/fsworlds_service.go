@@ -6,9 +6,8 @@ import (
 	"log"
 	"time"
 
-	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
 	"github.com/panyam/turnengine/engine/storage"
+	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -23,7 +22,7 @@ type FSWorldsServiceImpl struct {
 // NewFSWorldsService creates a new FSWorldsService implementation
 func NewFSWorldsService() *FSWorldsServiceImpl {
 	if WORLDS_STORAGE_DIR == "" {
-		WORLDS_STORAGE_DIR = weewar.DevDataPath("storage/worlds")
+		WORLDS_STORAGE_DIR = DevDataPath("storage/worlds")
 	}
 	service := &FSWorldsServiceImpl{storage: storage.NewFileStorage(WORLDS_STORAGE_DIR)}
 	return service

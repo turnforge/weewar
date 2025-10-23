@@ -1,7 +1,8 @@
-package weewar
+package services
 
 import (
 	"fmt"
+
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
@@ -16,7 +17,7 @@ func ReconstructPath(allPaths *v1.AllPaths, destQ, destR int32) (*v1.Path, error
 	destKey := fmt.Sprintf("%d,%d", destQ, destR)
 	_, exists := allPaths.Edges[destKey]
 	if !exists {
-		return nil, fmt.Errorf("destination (%d,%d) not reachable from source (%d,%d)", 
+		return nil, fmt.Errorf("destination (%d,%d) not reachable from source (%d,%d)",
 			destQ, destR, allPaths.SourceQ, allPaths.SourceR)
 	}
 
@@ -37,11 +38,11 @@ func ReconstructPath(allPaths *v1.AllPaths, destQ, destR int32) (*v1.Path, error
 		// Add edge to path (we'll reverse later)
 		pathEdges = append(pathEdges, edge)
 		totalCost = edge.TotalCost // Total cost is stored in the final edge
-		
+
 		// Move to parent
 		currentQ = edge.FromQ
 		currentR = edge.FromR
-		
+
 		// Check if we've reached the source
 		if currentQ == allPaths.SourceQ && currentR == allPaths.SourceR {
 			break

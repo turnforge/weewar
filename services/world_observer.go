@@ -1,4 +1,4 @@
-package weewar
+package services
 
 import v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 

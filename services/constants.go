@@ -1,4 +1,4 @@
-package weewar
+package services
 
 import (
 	"path/filepath"

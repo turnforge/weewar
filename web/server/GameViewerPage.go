@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	protos "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	weewar "github.com/panyam/turnengine/games/weewar/lib"
+	weewar "github.com/panyam/turnengine/games/weewar/services"
 )
 
 type GameViewerPage struct {
@@ -79,13 +79,13 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 // GetTerrainDataJSON returns terrain data from rules engine as JSON string
 func (p *GameViewerPage) GetTerrainDataJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	
+
 	// Marshal each terrain definition using protojson with EmitUnpopulated for all fields
 	marshaler := protojson.MarshalOptions{
 		EmitUnpopulated: true,
 		UseProtoNames:   false, // Use JSON names (camelCase)
 	}
-	
+
 	terrainMap := make(map[string]json.RawMessage)
 	for id, terrain := range rulesEngine.Terrains {
 		terrainJSON, err := marshaler.Marshal(terrain)
@@ -95,7 +95,7 @@ func (p *GameViewerPage) GetTerrainDataJSON() string {
 		}
 		terrainMap[fmt.Sprintf("%d", id)] = json.RawMessage(terrainJSON)
 	}
-	
+
 	terrainData, err := json.Marshal(terrainMap)
 	if err != nil {
 		log.Printf("Error marshaling terrain data: %v", err)
@@ -107,13 +107,13 @@ func (p *GameViewerPage) GetTerrainDataJSON() string {
 // GetUnitDataJSON returns unit data from rules engine as JSON string
 func (p *GameViewerPage) GetUnitDataJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	
+
 	// Marshal each unit definition using protojson with EmitUnpopulated for all fields
 	marshaler := protojson.MarshalOptions{
 		EmitUnpopulated: true,
 		UseProtoNames:   false, // Use JSON names (camelCase)
 	}
-	
+
 	unitMap := make(map[string]json.RawMessage)
 	for id, unit := range rulesEngine.Units {
 		unitJSON, err := marshaler.Marshal(unit)
@@ -123,7 +123,7 @@ func (p *GameViewerPage) GetUnitDataJSON() string {
 		}
 		unitMap[fmt.Sprintf("%d", id)] = json.RawMessage(unitJSON)
 	}
-	
+
 	unitData, err := json.Marshal(unitMap)
 	if err != nil {
 		log.Printf("Error marshaling unit data: %v", err)
@@ -135,13 +135,13 @@ func (p *GameViewerPage) GetUnitDataJSON() string {
 // GetTerrainUnitPropertiesJSON returns terrain-unit interaction properties as JSON string
 func (p *GameViewerPage) GetTerrainUnitPropertiesJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	
+
 	// Marshal each terrain-unit property using protojson with camelCase
 	marshaler := protojson.MarshalOptions{
 		EmitUnpopulated: true,
 		UseProtoNames:   false, // Use JSON names (camelCase)
 	}
-	
+
 	terrainUnitMap := make(map[string]json.RawMessage)
 	for key, props := range rulesEngine.TerrainUnitProperties {
 		propsJSON, err := marshaler.Marshal(props)
@@ -151,7 +151,7 @@ func (p *GameViewerPage) GetTerrainUnitPropertiesJSON() string {
 		}
 		terrainUnitMap[key] = json.RawMessage(propsJSON)
 	}
-	
+
 	terrainUnitData, err := json.Marshal(terrainUnitMap)
 	if err != nil {
 		log.Printf("Error marshaling terrain-unit properties: %v", err)
@@ -163,13 +163,13 @@ func (p *GameViewerPage) GetTerrainUnitPropertiesJSON() string {
 // GetUnitUnitPropertiesJSON returns unit-vs-unit combat properties as JSON string
 func (p *GameViewerPage) GetUnitUnitPropertiesJSON() string {
 	rulesEngine := weewar.DefaultRulesEngine()
-	
+
 	// Marshal each unit-unit property using protojson with camelCase
 	marshaler := protojson.MarshalOptions{
 		EmitUnpopulated: true,
 		UseProtoNames:   false, // Use JSON names (camelCase)
 	}
-	
+
 	unitUnitMap := make(map[string]json.RawMessage)
 	for key, props := range rulesEngine.UnitUnitProperties {
 		propsJSON, err := marshaler.Marshal(props)
@@ -179,7 +179,7 @@ func (p *GameViewerPage) GetUnitUnitPropertiesJSON() string {
 		}
 		unitUnitMap[key] = json.RawMessage(propsJSON)
 	}
-	
+
 	unitUnitData, err := json.Marshal(unitUnitMap)
 	if err != nil {
 		log.Printf("Error marshaling unit-unit properties: %v", err)

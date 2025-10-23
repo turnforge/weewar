@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"iter"
 	"maps"
-	"math"
 	"slices"
 	"strconv"
 
@@ -40,7 +39,7 @@ type World struct {
 	unitsByPlayer [][]*v1.Unit            `json:"-"` // All units in the game world by player ID
 	unitsByCoord  map[AxialCoord]*v1.Unit `json:"-"` // All units in the game world by player ID
 	tilesByCoord  map[AxialCoord]*v1.Tile `json:"-"` // Direct cube coordinate lookup (custom JSON handling)
-	
+
 	// Unit shortcut tracking (A1, B12, C3, etc.)
 	unitsByShortcut      map[string]*v1.Unit `json:"-"` // Quick lookup by shortcut
 	unitCountersByPlayer map[int32]int32     `json:"-"` // Next unit number for each player
@@ -112,7 +111,7 @@ func NewWorld(name string, protoWorld *v1.WorldData) *World {
 				}
 			}
 		}
-		
+
 		// Second pass: add units (AddUnit will generate shortcuts for those without)
 		for _, protoUnit := range protoWorld.Units {
 			coord := AxialCoord{Q: int(protoUnit.Q), R: int(protoUnit.R)}
@@ -221,11 +220,11 @@ func (w *World) GenerateUnitShortcut(playerID int32) string {
 	if playerID < 0 || playerID > 25 {
 		return "" // Only support A-Z for now
 	}
-	
+
 	// Get next counter for this player
 	counter := w.unitCountersByPlayer[playerID]
 	w.unitCountersByPlayer[playerID] = counter + 1
-	
+
 	// Generate shortcut: A1, B12, etc.
 	playerLetter := string(rune('A' + playerID))
 	return fmt.Sprintf("%s%d", playerLetter, counter+1)
@@ -237,12 +236,12 @@ func (w *World) GetUnitByShortcut(shortcut string) *v1.Unit {
 	if unit, ok := w.unitsByShortcut[shortcut]; ok {
 		return unit
 	}
-	
+
 	// Check parent layer if exists
 	if w.parent != nil {
 		return w.parent.GetUnitByShortcut(shortcut)
 	}
-	
+
 	return nil
 }
 
@@ -387,7 +386,7 @@ func (w *World) AddUnit(unit *v1.Unit) (oldunit *v1.Unit, err error) {
 	if unit.Shortcut == "" {
 		unit.Shortcut = w.GenerateUnitShortcut(unit.Player)
 	}
-	
+
 	// Add to shortcut map
 	if unit.Shortcut != "" {
 		w.unitsByShortcut[unit.Shortcut] = unit
@@ -422,7 +421,7 @@ func (w *World) RemoveUnit(unit *v1.Unit) error {
 	}
 
 	delete(w.unitsByCoord, coord)
-	
+
 	// Remove from shortcut map
 	if unit.Shortcut != "" {
 		delete(w.unitsByShortcut, unit.Shortcut)
@@ -530,60 +529,6 @@ func (w *World) Clone() *World {
 // World Loading Methods
 // =============================================================================
 
-// GetAllTiles returns all tiles as a map from cube coordinates to tiles
-func (w *World) CopyAllTiles() map[AxialCoord]*v1.Tile {
-	// Return a copy to prevent external modification
-	result := make(map[AxialCoord]*v1.Tile)
-	for coord, tile := range w.tilesByCoord {
-		result[coord] = tile
-	}
-	return result
-}
-
-/*
-// ViewState represents UI-specific state that doesn't affect game logic.
-// This includes visual concerns like selections, highlights, and camera position.
-type ViewState struct {
-	// Selection and highlighting
-	SelectedUnit    *v1.Unit   `json:"selectedUnit"`    // Currently selected unit
-	HoveredTile     *v1.Tile   `json:"hoveredTile"`     // Tile under cursor
-	MovableTiles    []Position `json:"movableTiles"`    // Highlighted movement tiles
-	AttackableTiles []Position `json:"attackableTiles"` // Highlighted attack tiles
-
-	// Visual settings
-	ShowGrid        bool `json:"showGrid"`        // Whether to show hex grid lines
-	ShowCoordinates bool `json:"showCoordinates"` // Whether to show coordinate labels
-	ShowPaths       bool `json:"showPaths"`       // Whether to show movement paths
-
-	// Camera and viewport
-	CameraX   float64 `json:"cameraX"`   // Camera X position
-	CameraY   float64 `json:"cameraY"`   // Camera Y position
-	ZoomLevel float64 `json:"zoomLevel"` // Zoom level (1.0 = normal)
-
-	// Editor-specific state
-	BrushTerrain int `json:"brushTerrain"` // Current terrain type for painting
-	BrushSize    int `json:"brushSize"`    // Brush radius (0 = single hex)
-}
-
-// NewViewState creates a new view state with default settings
-func NewViewState() *ViewState {
-	return &ViewState{
-		SelectedUnit:    nil,
-		HoveredTile:     nil,
-		MovableTiles:    make([]Position, 0),
-		AttackableTiles: make([]Position, 0),
-		ShowGrid:        true,
-		ShowCoordinates: false,
-		ShowPaths:       true,
-		CameraX:         0.0,
-		CameraY:         0.0,
-		ZoomLevel:       1.0,
-		BrushTerrain:    1, // Default to grass
-		BrushSize:       0, // Single hex brush
-	}
-}
-*/
-
 // =============================================================================
 // JSON Serialization Methods
 // =============================================================================
@@ -625,291 +570,4 @@ func (w *World) UnmarshalJSON(data []byte) error {
 	}
 	w.boundsChanged = true
 	return nil
-}
-
-// =============================================================================
-// ViewState Management
-// =============================================================================
-
-// ClearSelection clears the current unit selection and highlights
-func (vs *ViewState) ClearSelection() {
-	vs.SelectedUnit = nil
-	vs.MovableTiles = make([]Position, 0)
-	vs.AttackableTiles = make([]Position, 0)
-}
-
-// SetSelection sets the selected unit and updates related highlights
-func (vs *ViewState) SetSelection(unit *v1.Unit, movableTiles, attackableTiles []Position) {
-	vs.SelectedUnit = unit
-	vs.MovableTiles = movableTiles
-	vs.AttackableTiles = attackableTiles
-}
-
-// SetCamera updates the camera position and zoom
-func (vs *ViewState) SetCamera(x, y, zoom float64) {
-	vs.CameraX = x
-	vs.CameraY = y
-	vs.ZoomLevel = zoom
-}
-
-// SetBrush updates the brush settings for terrain editing
-func (vs *ViewState) SetBrush(terrainType, brushSize int) {
-	vs.BrushTerrain = terrainType
-	vs.BrushSize = brushSize
-}
-
-// ViewState represents UI-specific state that doesn't affect game logic.
-// This includes visual concerns like selections, highlights, and camera position.
-type ViewState struct {
-	// Selection and highlighting
-	SelectedUnit    *v1.Unit   `json:"selectedUnit"`    // Currently selected unit
-	HoveredTile     *v1.Tile   `json:"hoveredTile"`     // Tile under cursor
-	MovableTiles    []Position `json:"movableTiles"`    // Highlighted movement tiles
-	AttackableTiles []Position `json:"attackableTiles"` // Highlighted attack tiles
-
-	// Visual settings
-	ShowGrid        bool `json:"showGrid"`        // Whether to show hex grid lines
-	ShowCoordinates bool `json:"showCoordinates"` // Whether to show coordinate labels
-	ShowPaths       bool `json:"showPaths"`       // Whether to show movement paths
-
-	// Camera and viewport
-	CameraX   float64 `json:"cameraX"`   // Camera X position
-	CameraY   float64 `json:"cameraY"`   // Camera Y position
-	ZoomLevel float64 `json:"zoomLevel"` // Zoom level (1.0 = normal)
-
-	// Editor-specific state
-	BrushTerrain int `json:"brushTerrain"` // Current terrain type for painting
-	BrushSize    int `json:"brushSize"`    // Brush radius (0 = single hex)
-}
-
-// NewViewState creates a new view state with default settings
-func NewViewState() *ViewState {
-	return &ViewState{
-		SelectedUnit:    nil,
-		HoveredTile:     nil,
-		MovableTiles:    make([]Position, 0),
-		AttackableTiles: make([]Position, 0),
-		ShowGrid:        true,
-		ShowCoordinates: false,
-		ShowPaths:       true,
-		CameraX:         0.0,
-		CameraY:         0.0,
-		ZoomLevel:       1.0,
-		BrushTerrain:    1, // Default to grass
-		BrushSize:       0, // Single hex brush
-	}
-}
-
-// CenterXYForTile converts cube coordinates directly to pixel center x,y coordinates for rendering
-// Uses odd-r layout (odd rows offset) as our fixed, consistent layout
-// Based on formulas from redblobgames.com for pointy-topped hexagons
-func (m *World) CenterXYForTile(coord AxialCoord, tileWidth, tileHeight, yIncrement float64) (x, y float64) {
-	// Direct cube coordinate to pixel conversion using proper hex math
-	if false {
-		q := float64(coord.Q)
-		r := float64(coord.R)
-
-		// For pointy-topped hexagons with odd-r layout:
-		// x = size * sqrt(3) * (q + r/2)
-		// y = size * 3/2 * r
-		size := tileWidth / SQRT3
-
-		// Convert normalized origin to pixel coordinates
-		// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
-
-		// tileWidth = size * SQRT3
-		x = tileWidth * (q + r/2.0) // 1.732050808 ≈ sqrt(3)
-		y = size * 1.5 * r
-	} else {
-		row, col := HexToRowCol(coord)
-		y = yIncrement * float64(row)  // + (tileHeight / 2)
-		x = tileWidth * (float64(col)) //  + 0.5)
-		if (row & 1) == 1 {
-			x += tileWidth / 2
-		}
-
-		// x = tileWidth * (float64(col) + 0.5*float64(row&1))
-	}
-
-	return x, y
-}
-
-// XYToQR converts screen coordinates to cube coordinates for the map
-// Given x,y screen coordinates and tile size properties, returns the AxialCoord
-// Uses the privateMap's normalized OriginX/OriginY for proper coordinate translation
-// Based on formulas from redblobgames.com for pointy-topped hexagons with odd-r layout
-func (m *World) XYToQR(x, y, tileWidth, tileHeight, yIncrement float64) (coord AxialCoord) {
-	if false {
-		// Convert normalized origin to pixel coordinates
-		// Note: Both OriginX and OriginY are in tile width units for consistency with hex geometry
-		originPixelX := 0.0 // m.OriginX * tileWidth
-		originPixelY := 0.0 // m.OriginY * tilHeight
-
-		// Translate screen coordinates to hex coordinate space by removing origin offset
-		hexX := x - originPixelX
-		hexY := y - originPixelY
-
-		// For pointy-topped hexagons, convert pixel coordinates to fractional hex coordinates
-		// Using inverse of the hex-to-pixel conversion formulas:
-		// x = size * sqrt(3) * (q + r/2)  =>  q = (sqrt(3) * x) / (y * 3)
-		// y = size * 3/2 * r             =>  r = (y * 2.0 / 3.0)
-		size := tileWidth / SQRT3
-
-		// Calculate fractional q coordinate
-		fractionalQ := (hexX*SQRT3 - y) / (size * 3.0)
-
-		// Calculate fractional r coordinate
-		fractionalR := (hexY * 2.0) / (3.0 * size)
-
-		// Round to nearest integer coordinates using cube coordinate rounding
-		// This ensures we get the correct hex tile even for coordinates near boundaries
-		coord = roundAxialCoord(fractionalQ, fractionalR)
-	} else { // given we can have non "equal" side length hexagons, easier to do this by converting to row/col first
-		row := int((y + tileHeight/2) / yIncrement)
-
-		halfDists := int(1 + math.Abs(x*2/tileWidth))
-		if (row & 1) != 0 {
-			halfDists = int(1 + math.Abs((x-tileWidth/2)*2/tileWidth))
-		}
-		col := halfDists / 2
-		if x < 0 {
-			col = -col
-		}
-		// col := int((x + tileWidth/2) / tileWidth)
-		coord = RowColToHex(row, col)
-	}
-	return
-}
-
-// roundAxialCoord rounds fractional cube coordinates to the nearest integer cube coordinate
-// Uses the cube coordinate constraint (q + r + s = 0) to ensure valid hex coordinates
-// Reference: https://www.redblobgames.com/grids/hexagons-v1/#rounding
-func roundAxialCoord(fractionalQ, fractionalR float64) AxialCoord {
-	// Calculate s from the cube coordinate constraint: s = -q - r
-	fractionalS := -fractionalQ - fractionalR
-
-	// Round each coordinate to nearest integer
-	roundedQ := int(fractionalQ + 0.5)
-	roundedR := int(fractionalR + 0.5)
-	roundedS := int(fractionalS + 0.5)
-
-	// Calculate rounding deltas
-	deltaQ := math.Abs(float64(roundedQ) - fractionalQ)
-	deltaR := math.Abs(float64(roundedR) - fractionalR)
-	deltaS := math.Abs(float64(roundedS) - fractionalS)
-
-	// Fix the coordinate with the largest rounding error to maintain constraint
-	if deltaQ > deltaR && deltaQ > deltaS {
-		roundedQ = -roundedR - roundedS
-	} else if deltaR > deltaS {
-		roundedR = -roundedQ - roundedS
-	} else {
-		roundedS = -roundedQ - roundedR
-	}
-
-	// Return the rounded cube coordinate (s is implicit)
-	return AxialCoord{Q: roundedQ, R: roundedR}
-}
-
-// getprivateMapBounds calculates the pixel bounds of the entire map
-// TODO - cache this and only update when bounds changed beyond min/max Q/R
-func (m *World) GetWorldBounds(tileWidth, tileHeight, yIncrement float64) WorldBounds {
-	if true || !m.boundsChanged {
-		// TODO - return last avlues
-		// m.boundsChanged = false
-		minX := math.Inf(1)
-		minY := math.Inf(1)
-		maxX := math.Inf(-1)
-		maxY := math.Inf(-1)
-		minQ := int(math.Inf(1))
-		minR := int(math.Inf(1))
-		maxQ := int(math.Inf(-1))
-		maxR := int(math.Inf(-1))
-		startingX := 0.0
-		var minXCoord, minYCoord, maxXCoord, maxYCoord, startingCoord AxialCoord
-
-		for coord := range m.tilesByCoord {
-			// Use origin at (0,0) for bounds calculation
-			x, y := m.CenterXYForTile(coord, tileWidth, tileHeight, yIncrement)
-
-			if coord.Q < minQ {
-				minQ = coord.Q
-			}
-			if coord.Q > maxQ {
-				maxQ = coord.Q
-			}
-			if coord.R < minR {
-				minR = coord.R
-			}
-			if coord.R > maxR {
-				maxR = coord.R
-			}
-			if x < minX {
-				minX = x
-				minXCoord = coord
-			}
-			if y < minY {
-				minY = y
-				minYCoord = coord
-			}
-			if x+tileWidth > maxX {
-				maxX = x + tileWidth
-				maxXCoord = coord
-			}
-			if y+tileHeight > maxY {
-				maxY = y + tileHeight
-				maxYCoord = coord
-			}
-		}
-
-		// Now that we have minY and minX coords, we can findout starting by walking "left" from minYCoord and "up" from
-		// minXcoord and see where they meet
-		// NOTE - the rows "decrease" as we go up vertically
-		minYRow := minYCoord.R // S coord is same in a row for pointy-top hexes
-		minXRow := minXCoord.R // S coord is same in a row for pointy-top hexes
-
-		// if minx == miny or both minXCoord and minYCoord are in the same row then easy
-		startingCoord = minXCoord
-		startingX = minX
-
-		if minXCoord != minYCoord || minXRow != minYRow {
-			// The hard case
-			if minXRow < minYRow {
-				// because X should be "below" Y so it should have a higher row number than minYCoord
-				panic(fmt.Sprintf("minXRow (%d, %f) cannot be less than minYRow (%d, %f)??", minXRow, minX, minYRow, minY))
-			}
-			startingCoord = minXCoord
-			for i := minXRow; i >= minYRow; i-- {
-				if (i & 1) == 0 {
-					// Always take the "Right" path first so we are guaranteed
-					// to always be on a tile whose X Coordinate is >= minX
-					startingCoord = startingCoord.Neighbor(TOP_RIGHT)
-				} else {
-					startingCoord = startingCoord.Neighbor(TOP_LEFT)
-				}
-			}
-		}
-
-		// If distance was odd then we would have a half tile width shift to the right
-		if ((minXRow - minYRow) & 1) == 0 {
-			startingX += tileWidth / 2.0
-		}
-		// startingX, _ = m.CenterXYForTile(startingCoord, tileWidth, tileHeight, yIncrement)
-
-		m.lastWorldBounds.MinX = minX
-		m.lastWorldBounds.MinY = minY
-		m.lastWorldBounds.MaxX = maxX
-		m.lastWorldBounds.MaxY = maxY
-		m.lastWorldBounds.MinQ = minQ
-		m.lastWorldBounds.MinR = minR
-		m.lastWorldBounds.MaxQ = maxQ
-		m.lastWorldBounds.MaxR = maxR
-		m.lastWorldBounds.StartingX = startingX
-		m.lastWorldBounds.MinXCoord = minXCoord
-		m.lastWorldBounds.MinYCoord = minYCoord
-		m.lastWorldBounds.MaxXCoord = maxXCoord
-		m.lastWorldBounds.MaxYCoord = maxYCoord
-		m.lastWorldBounds.StartingCoord = startingCoord
-	}
-	return m.lastWorldBounds
 }

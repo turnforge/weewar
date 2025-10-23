@@ -15,6 +15,13 @@
 - **Files Changed**: `web/server/WorldEditorPage.go`
 - **Result**: Button panel now correctly responds to theme query parameter (default, fantasy, modern)
 
+### StartGamePage Nil Pointer Bug - FIXED
+- **Issue**: Template render error when clicking "Create new" from ListGames page
+- **Root Cause**: Template accessed `.World.Name` without checking if `.World` is nil
+- **Solution**: Changed all `.World.Name` checks to `and .World .World.Name` pattern
+- **Files Changed**: `web/templates/StartGamePage.html` (5 locations)
+- **Result**: Page correctly displays "Select a world" UI when no worldId provided
+
 ## ✅ Go Service Layer Testing (Previous Session)
 
 ### Implementation Completed - DONE

@@ -301,35 +301,45 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 	return cli.processMoves([]*v1.GameMove{selectedAction})
 }
 
+func (cli *CLI) ParseFromAndToCoords(arg0, arg1 string) (fromCoord services.AxialCoord, toCoord services.AxialCoord, err error) {
+	// Get runtime game for parsing
+	ctx := context.Background()
+	rtGame, err := cli.service.GetRuntimeGameByID(ctx, cli.gameID)
+	if err != nil {
+		err = fmt.Errorf("Failed to get game: %v", err)
+		return
+	}
+
+	// Parse from position
+	fromTarget, err := weewar.ParsePositionOrUnit(rtGame, arg0)
+	if err != nil {
+		err = fmt.Errorf("Invalid from position: %v", err)
+		return
+	}
+
+	fromCoord = fromTarget.GetCoordinate()
+
+	// Parse to position with context (supports directions like L, R, TL, etc.)
+	toTarget, err := weewar.ParsePositionOrUnitWithContext(rtGame, arg1, &fromCoord)
+	if err != nil {
+		err = fmt.Errorf("Invalid to position: %v", err)
+		return
+	}
+
+	toCoord = toTarget.GetCoordinate()
+	return
+}
+
 // handleMove processes move command
 func (cli *CLI) handleMove(args []string) string {
 	if len(args) != 2 {
 		return "Usage: move <from> <to>\nExample: move A1 5,6 or move A1 R or move 3,4 L"
 	}
 
-	ctx := context.Background()
-
-	// Get runtime game for parsing
-	rtGame, err := cli.service.GetRuntimeGameByID(ctx, cli.gameID)
+	fromCoord, toCoord, err := cli.ParseFromAndToCoords(args[0], args[1])
 	if err != nil {
-		return fmt.Sprintf("Failed to get game: %v", err)
+		return fmt.Sprintf("%v", err)
 	}
-
-	// Parse from position
-	fromTarget, err := weewar.ParsePositionOrUnit(rtGame, args[0])
-	if err != nil {
-		return fmt.Sprintf("Invalid from position: %v", err)
-	}
-
-	fromCoord := fromTarget.GetCoordinate()
-
-	// Parse to position with context (supports directions like L, R, TL, etc.)
-	toTarget, err := weewar.ParsePositionOrUnitWithContext(rtGame, args[1], &fromCoord)
-	if err != nil {
-		return fmt.Sprintf("Invalid to position: %v", err)
-	}
-
-	toCoord := toTarget.GetCoordinate()
 
 	// Create move action
 	move := &v1.GameMove{
@@ -352,29 +362,10 @@ func (cli *CLI) handleAttack(args []string) string {
 		return "Usage: attack <attacker> <target>\nExample: attack A1 B2 or attack A1 R or attack 3,4 TL"
 	}
 
-	ctx := context.Background()
-
-	// Get runtime game for parsing
-	rtGame, err := cli.service.GetRuntimeGameByID(ctx, cli.gameID)
+	attackerCoord, targetCoord, err := cli.ParseFromAndToCoords(args[0], args[1])
 	if err != nil {
-		return fmt.Sprintf("Failed to get game: %v", err)
+		return fmt.Sprintf("%v", err)
 	}
-
-	// Parse attacker position
-	attackerTarget, err := weewar.ParsePositionOrUnit(rtGame, args[0])
-	if err != nil {
-		return fmt.Sprintf("Invalid attacker position: %v", err)
-	}
-
-	attackerCoord := attackerTarget.GetCoordinate()
-
-	// Parse target position with context (supports directions like L, R, TL, etc.)
-	targetTarget, err := weewar.ParsePositionOrUnitWithContext(rtGame, args[1], &attackerCoord)
-	if err != nil {
-		return fmt.Sprintf("Invalid target position: %v", err)
-	}
-
-	targetCoord := targetTarget.GetCoordinate()
 
 	// Create attack action
 	move := &v1.GameMove{

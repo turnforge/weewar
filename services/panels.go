@@ -8,6 +8,7 @@ import (
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	"github.com/panyam/turnengine/games/weewar/web/assets/themes"
 	tmpls "github.com/panyam/turnengine/games/weewar/web/templates"
+	"google.golang.org/grpc"
 )
 
 // Data-Only panel implementations
@@ -32,13 +33,13 @@ type BaseGameState struct {
 	State *v1.GameState
 }
 
-func (b *BaseGameState) SetGameState(_ context.Context, req *v1.SetGameStateRequest) (*v1.SetGameStateRequest, error) {
+func (b *BaseGameState) SetGameState(_ context.Context, req *v1.SetGameStateRequest, _ ...grpc.CallOption) (*v1.SetGameStateResponse, error) {
 	b.Game = req.Game
 	b.State = req.State
-	return req, nil
+	return nil, nil
 }
 
-func (b *BaseGameState) SetUnitAt(_ context.Context, req *v1.SetUnitAtRequest) (*v1.SetGameStateRequest, error) {
+func (b *BaseGameState) SetUnitAt(_ context.Context, req *v1.SetUnitAtRequest, _ ...grpc.CallOption) (*v1.SetUnitAtResponse, error) {
 	if b.State == nil || b.State.WorldData == nil {
 		return nil, fmt.Errorf("game state not initialized")
 	}
@@ -60,7 +61,7 @@ func (b *BaseGameState) SetUnitAt(_ context.Context, req *v1.SetUnitAtRequest) (
 	return nil, nil
 }
 
-func (b *BaseGameState) RemoveUnitAt(_ context.Context, req *v1.RemoveUnitAtRequest) (*v1.SetGameStateRequest, error) {
+func (b *BaseGameState) RemoveUnitAt(_ context.Context, req *v1.RemoveUnitAtRequest, _ ...grpc.CallOption) (*v1.RemoveUnitAtResponse, error) {
 	if b.State == nil || b.State.WorldData == nil {
 		return nil, fmt.Errorf("game state not initialized")
 	}
@@ -76,7 +77,7 @@ func (b *BaseGameState) RemoveUnitAt(_ context.Context, req *v1.RemoveUnitAtRequ
 	return nil, nil
 }
 
-func (b *BaseGameState) UpdateGameStatus(_ context.Context, req *v1.UpdateGameStatusRequest) (*v1.SetGameStateRequest, error) {
+func (b *BaseGameState) UpdateGameStatus(_ context.Context, req *v1.UpdateGameStatusRequest, _ ...grpc.CallOption) (*v1.UpdateGameStatusResponse, error) {
 	if b.State == nil {
 		return nil, fmt.Errorf("game state not initialized")
 	}

@@ -63,7 +63,7 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 	// success only if all moves succeeds etc.  Note that at this point the game
 	// state has not changed and neither has the Runtime Game object.  Both the
 	// GameState and the Runtime Game are checkpointed at before the moves started
-	var dmp DefaultMoveProcessor
+	var dmp MoveProcessor
 	results, err := dmp.ProcessMoves(rtGame, req.Moves)
 	if err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 		})
 	} else {
 		// Our unit - get all available options
-		var dmp DefaultMoveProcessor
+		var dmp MoveProcessor
 
 		// Get movement options if unit has movement left
 		if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 {

@@ -8,15 +8,11 @@ import (
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type MoveProcessor interface {
-	ProcessMoves(game *Game, moves []*v1.GameMove) (results *v1.GameMoveResult, err error)
-}
-
-type DefaultMoveProcessor struct {
+type MoveProcessor struct {
 }
 
 // Process a set of moves in a transaction and returns a "log entry" of the changes as a result
-func (m *DefaultMoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (results []*v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (results []*v1.GameMoveResult, err error) {
 	results = []*v1.GameMoveResult{}
 	for _, move := range moves {
 		result, err := m.ProcessMove(game, move)
@@ -38,7 +34,7 @@ func (m *DefaultMoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (r
 // For example we may have 3 moves where first two units are moved to a common location
 // and then they attack another unit.  Here If we treat it as a single unit attacking it
 // will have different outcomes than a "combined" attack.
-func (m *DefaultMoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (results *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (results *v1.GameMoveResult, err error) {
 	if move.MoveType == nil {
 		return nil, fmt.Errorf("move type is nil")
 	}
@@ -58,7 +54,7 @@ func (m *DefaultMoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (resul
 // EndTurn advances to next player's turn
 // For now a player can just end turn but in other games there may be some mandatory
 // moves left
-func (m *DefaultMoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.EndTurnAction) (results *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.EndTurnAction) (results *v1.GameMoveResult, err error) {
 	// Initialize the result object
 	results = &v1.GameMoveResult{
 		IsPermanent: false,
@@ -157,7 +153,7 @@ func (g *Game) IsValidMove(from, to AxialCoord) bool {
 }
 
 // MoveUnit executes unit movement using cube coordinates
-func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction) (result *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction) (result *v1.GameMoveResult, err error) {
 	// Initialize the result object
 	result = &v1.GameMoveResult{
 		IsPermanent: false,
@@ -171,6 +167,11 @@ func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, actio
 	unit := g.World.UnitAt(from)
 	if unit == nil {
 		return nil, fmt.Errorf("unit is nil")
+	}
+
+	// Apply lazy top-up pattern - ensure unit has current turn's movement points
+	if err := g.topUpUnitIfNeeded(unit); err != nil {
+		return nil, fmt.Errorf("failed to top-up unit: %w", err)
 	}
 
 	// Check if it's the correct player's turn
@@ -251,7 +252,7 @@ func (m *DefaultMoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, actio
 }
 
 // AttackUnit executes combat between units
-func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1.AttackUnitAction) (result *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1.AttackUnitAction) (result *v1.GameMoveResult, err error) {
 	// Initialize the result object
 	result = &v1.GameMoveResult{
 		IsPermanent: true, // Attacks are permanent (cannot be undone)
@@ -264,6 +265,14 @@ func (m *DefaultMoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, act
 	defender := g.World.UnitAt(CoordFromInt32(action.DefenderQ, action.DefenderR))
 	if attacker == nil || defender == nil {
 		return nil, fmt.Errorf("attacker or defender is nil")
+	}
+
+	// Apply lazy top-up pattern for both units
+	if err := g.topUpUnitIfNeeded(attacker); err != nil {
+		return nil, fmt.Errorf("failed to top-up attacker: %w", err)
+	}
+	if err := g.topUpUnitIfNeeded(defender); err != nil {
+		return nil, fmt.Errorf("failed to top-up defender: %w", err)
 	}
 
 	// Check if it's the correct player's turn
@@ -522,7 +531,7 @@ func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {
 }
 
 // GetMovementOptions returns movement options for unit at given coordinates with full validation
-func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) (*v1.AllPaths, error) {
+func (m *MoveProcessor) GetMovementOptions(game *Game, q, r int32) (*v1.AllPaths, error) {
 	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
@@ -540,7 +549,7 @@ func (m *DefaultMoveProcessor) GetMovementOptions(game *Game, q, r int32) (*v1.A
 }
 
 // GetAttackOptions returns attack options for unit at given coordinates with full validation
-func (m *DefaultMoveProcessor) GetAttackOptions(game *Game, q, r int32) ([]AxialCoord, error) {
+func (m *MoveProcessor) GetAttackOptions(game *Game, q, r int32) ([]AxialCoord, error) {
 	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
@@ -555,7 +564,7 @@ func (m *DefaultMoveProcessor) GetAttackOptions(game *Game, q, r int32) ([]Axial
 }
 
 // CanSelectUnit validates if unit at given coordinates can be selected by current player
-func (m *DefaultMoveProcessor) CanSelectUnit(game *Game, q, r int32) (bool, string) {
+func (m *MoveProcessor) CanSelectUnit(game *Game, q, r int32) (bool, string) {
 	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return false, fmt.Sprintf("no unit found at position (%d, %d)", q, r)

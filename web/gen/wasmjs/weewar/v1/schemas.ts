@@ -297,6 +297,48 @@ export const UnitSchema: MessageSchema = {
       type: FieldType.NUMBER,
       id: 9,
     },
+    {
+      name: "attacksReceivedThisTurn",
+      type: FieldType.NUMBER,
+      id: 10,
+    },
+    {
+      name: "attackHistory",
+      type: FieldType.MESSAGE,
+      id: 11,
+      messageType: "weewar.v1.AttackRecord",
+      repeated: true,
+    },
+  ],
+};
+
+
+/**
+ * Schema for AttackRecord message
+ */
+export const AttackRecordSchema: MessageSchema = {
+  name: "AttackRecord",
+  fields: [
+    {
+      name: "q",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "r",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "isRanged",
+      type: FieldType.BOOLEAN,
+      id: 3,
+    },
+    {
+      name: "turnNumber",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
   ],
 };
 
@@ -373,30 +415,50 @@ export const UnitDefinitionSchema: MessageSchema = {
       id: 6,
     },
     {
-      name: "attackRange",
+      name: "defense",
       type: FieldType.NUMBER,
       id: 7,
     },
     {
-      name: "minAttackRange",
+      name: "attackRange",
       type: FieldType.NUMBER,
       id: 8,
     },
     {
-      name: "splashDamage",
+      name: "minAttackRange",
       type: FieldType.NUMBER,
       id: 9,
     },
     {
+      name: "splashDamage",
+      type: FieldType.NUMBER,
+      id: 10,
+    },
+    {
       name: "terrainProperties",
       type: FieldType.STRING,
-      id: 10,
+      id: 11,
     },
     {
       name: "properties",
       type: FieldType.REPEATED,
-      id: 11,
+      id: 12,
       repeated: true,
+    },
+    {
+      name: "unitClass",
+      type: FieldType.STRING,
+      id: 13,
+    },
+    {
+      name: "unitTerrain",
+      type: FieldType.STRING,
+      id: 14,
+    },
+    {
+      name: "attackVsClass",
+      type: FieldType.STRING,
+      id: 15,
     },
   ],
 };
@@ -479,12 +541,27 @@ export const UnitUnitPropertiesSchema: MessageSchema = {
       id: 2,
     },
     {
+      name: "attackOverride",
+      type: FieldType.STRING,
+      id: 3,
+      oneofGroup: "_attack_override",
+      optional: true,
+    },
+    {
+      name: "defenseOverride",
+      type: FieldType.STRING,
+      id: 4,
+      oneofGroup: "_defense_override",
+      optional: true,
+    },
+    {
       name: "damage",
       type: FieldType.MESSAGE,
-      id: 3,
+      id: 5,
       messageType: "weewar.v1.DamageDistribution",
     },
   ],
+  oneofGroups: ["_attack_override", "_defense_override"],
 };
 
 
@@ -3348,6 +3425,7 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.WorldData": WorldDataSchema,
   "weewar.v1.Tile": TileSchema,
   "weewar.v1.Unit": UnitSchema,
+  "weewar.v1.AttackRecord": AttackRecordSchema,
   "weewar.v1.TerrainDefinition": TerrainDefinitionSchema,
   "weewar.v1.UnitDefinition": UnitDefinitionSchema,
   "weewar.v1.TerrainUnitProperties": TerrainUnitPropertiesSchema,

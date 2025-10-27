@@ -1254,6 +1254,30 @@
       },
       "title": "*\nA possible attack target"
     },
+    "v1AttackRecord": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Attacker's Q coordinate"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Attacker's R coordinate"
+        },
+        "isRanged": {
+          "type": "boolean",
+          "title": "Whether attacker is ranged 2+ tiles away"
+        },
+        "turnNumber": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Which turn this attack occured"
+        }
+      }
+    },
     "v1AttackUnitAction": {
       "type": "object",
       "properties": {
@@ -2345,6 +2369,20 @@
           "type": "integer",
           "format": "int32",
           "title": "When the last top up happened"
+        },
+        "attacksReceivedThisTurn": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of attacks received this turn",
+          "title": "Details around wound bonus tracking for this turn"
+        },
+        "attackHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1AttackRecord"
+          },
+          "title": "Detailed attack history for wound bonus calculation"
         }
       }
     },

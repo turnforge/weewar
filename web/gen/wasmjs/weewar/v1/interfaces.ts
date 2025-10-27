@@ -158,6 +158,18 @@ export interface Unit {
  needing a top up of its health/balance/movement etc */
   lastActedTurn: number;
   lastToppedupTurn: number;
+  /** Details around wound bonus tracking for this turn */
+  attacksReceivedThisTurn: number;
+  attackHistory?: AttackRecord[];
+}
+
+
+
+export interface AttackRecord {
+  q: number;
+  r: number;
+  isRanged: boolean;
+  turnNumber: number;
 }
 
 
@@ -186,11 +198,19 @@ export interface UnitDefinition {
   health: number;
   coins: number;
   movementPoints: number;
+  defense: number;
   attackRange: number;
   minAttackRange: number;
   splashDamage: number;
   terrainProperties: Record<number, TerrainUnitProperties>;
   properties: string[];
+  /** Unit classification for attack calculations */
+  unitClass: string;
+  unitTerrain: string;
+  /** Attack table: base attack values against different unit classes
+ Key format: "Light:Air", "Heavy:Land", "Stealth:Water", etc.
+ Value 0 or missing key means "n/a" (cannot attack) */
+  attackVsClass: Record<string, number>;
 }
 
 
@@ -217,6 +237,8 @@ export interface TerrainUnitProperties {
 export interface UnitUnitProperties {
   attackerId: number;
   defenderId: number;
+  attackOverride?: number | undefined;
+  defenseOverride?: number | undefined;
   damage?: DamageDistribution;
 }
 

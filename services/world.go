@@ -115,8 +115,7 @@ func NewWorld(name string, protoWorld *v1.WorldData) *World {
 		// Second pass: add units (AddUnit will generate shortcuts for those without)
 		for _, protoUnit := range protoWorld.Units {
 			coord := AxialCoord{Q: int(protoUnit.Q), R: int(protoUnit.R)}
-			fmt.Printf("NewWorld: Converting unit at (%d, %d), saved DistanceLeft=%d, AvailableHealth=%d\n",
-				coord.Q, coord.R, protoUnit.DistanceLeft, protoUnit.AvailableHealth)
+			// fmt.Printf("NewWorld: Converting unit at (%d, %d), saved DistanceLeft=%d, AvailableHealth=%d\n", coord.Q, coord.R, protoUnit.DistanceLeft, protoUnit.AvailableHealth)
 			unit := &v1.Unit{
 				UnitType:         protoUnit.UnitType,
 				Q:                int32(coord.Q),

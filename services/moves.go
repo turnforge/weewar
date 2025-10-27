@@ -180,7 +180,7 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	}
 
 	// Apply lazy top-up pattern - ensure unit has current turn's movement points
-	if err := g.topUpUnitIfNeeded(unit); err != nil {
+	if err := g.TopUpUnitIfNeeded(unit); err != nil {
 		return nil, fmt.Errorf("failed to top-up unit: %w", err)
 	}
 
@@ -261,10 +261,10 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 	}
 
 	// Apply lazy top-up pattern for both units
-	if err := g.topUpUnitIfNeeded(attacker); err != nil {
+	if err := g.TopUpUnitIfNeeded(attacker); err != nil {
 		return nil, fmt.Errorf("failed to top-up attacker: %w", err)
 	}
-	if err := g.topUpUnitIfNeeded(defender); err != nil {
+	if err := g.TopUpUnitIfNeeded(defender); err != nil {
 		return nil, fmt.Errorf("failed to top-up defender: %w", err)
 	}
 

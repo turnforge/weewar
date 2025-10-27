@@ -301,28 +301,6 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 		return
 	}
 
-	// Find the move option that matches the clicked coordinates
-	var moveOption *v1.MoveOption
-	for _, option := range currentOptions.Options {
-		if opt := option.GetMove(); opt != nil {
-			if opt.Action.ToQ == targetQ && opt.Action.ToR == targetR {
-				moveOption = opt
-				break
-			}
-		}
-	}
-
-	if moveOption == nil {
-		fmt.Printf("[Presenter] No move option found for coordinates (%d, %d)\n", targetQ, targetR)
-		return
-	}
-
-	// Verify the action is present
-	if moveOption.Action == nil {
-		fmt.Println("[Presenter] Move option does not contain action object")
-		return
-	}
-
 	// Get current game state
 	gameState := s.GamesService.SingletonGameState
 	if gameState == nil {
@@ -330,18 +308,44 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 		return
 	}
 
-	// Create GameMove with the ready-to-use action from moveOption
-	gameMove := &v1.GameMove{
-		Player: gameState.CurrentPlayer,
-		MoveType: &v1.GameMove_MoveUnit{
-			MoveUnit: moveOption.Action,
-		},
+	// Find the move option that matches the clicked coordinates
+	var gameMove *v1.GameMove
+	for _, option := range currentOptions.Options {
+		if opt := option.GetMove(); opt != nil {
+			if opt.Action.ToQ == targetQ && opt.Action.ToR == targetR {
+				gameMove = &v1.GameMove{
+					Player: gameState.CurrentPlayer,
+					MoveType: &v1.GameMove_MoveUnit{
+						MoveUnit: opt.Action,
+					},
+				}
+				fmt.Printf("[Presenter] Executing move from (%d,%d) to (%d,%d) for player %d\n",
+					opt.Action.FromQ, opt.Action.FromR,
+					opt.Action.ToQ, opt.Action.ToR,
+					gameState.CurrentPlayer)
+				break
+			}
+		} else if opt := option.GetAttack(); opt != nil {
+			if opt.Action.DefenderQ == targetQ && opt.Action.DefenderR == targetR {
+				gameMove = &v1.GameMove{
+					Player: gameState.CurrentPlayer,
+					MoveType: &v1.GameMove_AttackUnit{
+						AttackUnit: opt.Action,
+					},
+				}
+				fmt.Printf("[Presenter] Executing attack from (%d,%d) to (%d,%d) for player %d\n",
+					opt.Action.AttackerQ, opt.Action.AttackerR,
+					opt.Action.DefenderQ, opt.Action.DefenderR,
+					gameState.CurrentPlayer)
+				break
+			}
+		}
 	}
 
-	fmt.Printf("[Presenter] Executing move from (%d,%d) to (%d,%d) for player %d\n",
-		moveOption.Action.FromQ, moveOption.Action.FromR,
-		moveOption.Action.ToQ, moveOption.Action.ToR,
-		gameState.CurrentPlayer)
+	if gameMove == nil {
+		fmt.Println("[Presenter] Move/Attack option does not contain action object")
+		return
+	}
 
 	// Call ProcessMoves to execute the move
 	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{

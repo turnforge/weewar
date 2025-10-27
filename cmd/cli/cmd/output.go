@@ -87,7 +87,7 @@ func FormatOptions(pc *PresenterContext, position string) string {
 		unit := pc.TurnOptions.Unit
 		coord := services.CoordFromInt32(unit.Q, unit.R)
 		sb.WriteString(fmt.Sprintf("Unit %s at %s:\n", position, coord.String()))
-		sb.WriteString(fmt.Sprintf("  Type: %d, HP: %d, Moves: %d\n\n",
+		sb.WriteString(fmt.Sprintf("  Type: %d, HP: %d, Moves: %f\n\n",
 			unit.UnitType, unit.AvailableHealth, unit.DistanceLeft))
 	}
 
@@ -104,7 +104,7 @@ func FormatOptions(pc *PresenterContext, position string) string {
 		case *v1.GameOption_Move:
 			moveOpt := opt.Move
 			targetCoord := services.CoordFromInt32(moveOpt.Action.ToQ, moveOpt.Action.ToR)
-			sb.WriteString(fmt.Sprintf("%d. move to %s (cost: %d)\n",
+			sb.WriteString(fmt.Sprintf("%d. move to %s (cost: %f)\n",
 				i+1, targetCoord.String(), moveOpt.MovementCost))
 
 			// Add path if available
@@ -143,9 +143,16 @@ func FormatGameStatus(state *v1.GameState) string {
 }
 
 // FormatUnits formats all units as text
-func FormatUnits(state *v1.GameState) string {
+func FormatUnits(pc *PresenterContext, state *v1.GameState) string {
 	if state.WorldData == nil || len(state.WorldData.Units) == 0 {
 		return "No units found\n"
+	}
+
+	rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
+		pc.Presenter.GamesService.SingletonGame,
+		pc.Presenter.GamesService.SingletonGameState)
+	if err != nil {
+		panic(err)
 	}
 
 	// Group units by player
@@ -154,6 +161,9 @@ func FormatUnits(state *v1.GameState) string {
 
 	for _, unit := range state.WorldData.Units {
 		if unit != nil {
+			if err := rtGame.TopUpUnitIfNeeded(unit); err != nil {
+				panic(err)
+			}
 			unitsByPlayer[unit.Player] = append(unitsByPlayer[unit.Player], unit)
 			if unit.Player > numPlayers {
 				numPlayers = unit.Player

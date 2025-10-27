@@ -71,6 +71,6 @@ func runUnits(cmd *cobra.Command, args []string) error {
 	}
 
 	// Text output
-	text := FormatUnits(pc.GameState.State)
+	text := FormatUnits(pc, pc.GameState.State)
 	return formatter.PrintText(text)
 }

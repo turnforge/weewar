@@ -142,7 +142,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 	// Lazy top-up: If this is a unit, ensure it's refreshed for the current turn
 	if unit != nil {
-		if err := rtGame.topUpUnitIfNeeded(unit); err != nil {
+		if err := rtGame.TopUpUnitIfNeeded(unit); err != nil {
 			return &v1.GetOptionsAtResponse{
 				Options:         []*v1.GameOption{},
 				CurrentPlayer:   gameresp.State.CurrentPlayer,

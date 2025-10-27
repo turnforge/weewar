@@ -1507,8 +1507,8 @@ type PathEdge struct {
 	FromR         int32                  `protobuf:"varint,2,opt,name=from_r,json=fromR,proto3" json:"from_r,omitempty"`                       // Parent coordinate R
 	ToQ           int32                  `protobuf:"varint,3,opt,name=to_q,json=toQ,proto3" json:"to_q,omitempty"`                             // Destination coordinate Q
 	ToR           int32                  `protobuf:"varint,4,opt,name=to_r,json=toR,proto3" json:"to_r,omitempty"`                             // Destination coordinate R
-	MovementCost  float32                `protobuf:"fixed32,5,opt,name=movement_cost,json=movementCost,proto3" json:"movement_cost,omitempty"` // Cost to move from 'from' to 'to' (edge cost)
-	TotalCost     float32                `protobuf:"fixed32,6,opt,name=total_cost,json=totalCost,proto3" json:"total_cost,omitempty"`          // Total cumulative cost from source to 'to'
+	MovementCost  float64                `protobuf:"fixed64,5,opt,name=movement_cost,json=movementCost,proto3" json:"movement_cost,omitempty"` // Cost to move from 'from' to 'to' (edge cost)
+	TotalCost     float64                `protobuf:"fixed64,6,opt,name=total_cost,json=totalCost,proto3" json:"total_cost,omitempty"`          // Total cumulative cost from source to 'to'
 	TerrainType   string                 `protobuf:"bytes,7,opt,name=terrain_type,json=terrainType,proto3" json:"terrain_type,omitempty"`      // e.g., "mountain", "plains", "forest"
 	Explanation   string                 `protobuf:"bytes,8,opt,name=explanation,proto3" json:"explanation,omitempty"`                         // e.g., "Mountain costs Soldier 4 movement points"
 	unknownFields protoimpl.UnknownFields
@@ -1573,14 +1573,14 @@ func (x *PathEdge) GetToR() int32 {
 	return 0
 }
 
-func (x *PathEdge) GetMovementCost() float32 {
+func (x *PathEdge) GetMovementCost() float64 {
 	if x != nil {
 		return x.MovementCost
 	}
 	return 0
 }
 
-func (x *PathEdge) GetTotalCost() float32 {
+func (x *PathEdge) GetTotalCost() float64 {
 	if x != nil {
 		return x.TotalCost
 	}
@@ -1610,7 +1610,7 @@ type Path struct {
 	// and directions[i] = direction from edge[i - 1] -> edge[i]
 	Directions []PathDirection `protobuf:"varint,2,rep,packed,name=directions,proto3,enum=weewar.v1.PathDirection" json:"directions,omitempty"`
 	// Sum of all edge costs
-	TotalCost     float32 `protobuf:"fixed32,3,opt,name=total_cost,json=totalCost,proto3" json:"total_cost,omitempty"`
+	TotalCost     float64 `protobuf:"fixed64,3,opt,name=total_cost,json=totalCost,proto3" json:"total_cost,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1659,7 +1659,7 @@ func (x *Path) GetDirections() []PathDirection {
 	return nil
 }
 
-func (x *Path) GetTotalCost() float32 {
+func (x *Path) GetTotalCost() float64 {
 	if x != nil {
 		return x.TotalCost
 	}
@@ -1840,7 +1840,7 @@ func (*EndTurnOption) Descriptor() ([]byte, []int) {
 // Option to move to a specific coordinate
 type MoveOption struct {
 	state        protoimpl.MessageState `protogen:"open.v1"`
-	MovementCost int32                  `protobuf:"varint,3,opt,name=movement_cost,json=movementCost,proto3" json:"movement_cost,omitempty"`
+	MovementCost float64                `protobuf:"fixed64,3,opt,name=movement_cost,json=movementCost,proto3" json:"movement_cost,omitempty"`
 	// Ready-to-use action object for ProcessMoves
 	Action *MoveUnitAction `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
 	// Debug fields
@@ -1879,7 +1879,7 @@ func (*MoveOption) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_games_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *MoveOption) GetMovementCost() int32 {
+func (x *MoveOption) GetMovementCost() float64 {
 	if x != nil {
 		return x.MovementCost
 	}
@@ -2226,9 +2226,9 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"\x06from_r\x18\x02 \x01(\x05R\x05fromR\x12\x11\n" +
 	"\x04to_q\x18\x03 \x01(\x05R\x03toQ\x12\x11\n" +
 	"\x04to_r\x18\x04 \x01(\x05R\x03toR\x12#\n" +
-	"\rmovement_cost\x18\x05 \x01(\x02R\fmovementCost\x12\x1d\n" +
+	"\rmovement_cost\x18\x05 \x01(\x01R\fmovementCost\x12\x1d\n" +
 	"\n" +
-	"total_cost\x18\x06 \x01(\x02R\ttotalCost\x12!\n" +
+	"total_cost\x18\x06 \x01(\x01R\ttotalCost\x12!\n" +
 	"\fterrain_type\x18\a \x01(\tR\vterrainType\x12 \n" +
 	"\vexplanation\x18\b \x01(\tR\vexplanation\"\x8a\x01\n" +
 	"\x04Path\x12)\n" +
@@ -2237,7 +2237,7 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"directions\x18\x02 \x03(\x0e2\x18.weewar.v1.PathDirectionR\n" +
 	"directions\x12\x1d\n" +
 	"\n" +
-	"total_cost\x18\x03 \x01(\x02R\ttotalCost\"\xa4\x02\n" +
+	"total_cost\x18\x03 \x01(\x01R\ttotalCost\"\xa4\x02\n" +
 	"\n" +
 	"GameOption\x12+\n" +
 	"\x04move\x18\x01 \x01(\v2\x15.weewar.v1.MoveOptionH\x00R\x04move\x121\n" +
@@ -2249,7 +2249,7 @@ const file_weewar_v1_games_proto_rawDesc = "" +
 	"\rEndTurnOption\"\xa4\x01\n" +
 	"\n" +
 	"MoveOption\x12#\n" +
-	"\rmovement_cost\x18\x03 \x01(\x05R\fmovementCost\x121\n" +
+	"\rmovement_cost\x18\x03 \x01(\x01R\fmovementCost\x121\n" +
 	"\x06action\x18\x04 \x01(\v2\x19.weewar.v1.MoveUnitActionR\x06action\x12>\n" +
 	"\x12reconstructed_path\x18\x05 \x01(\v2\x0f.weewar.v1.PathR\x11reconstructedPath\"\xe3\x01\n" +
 	"\fAttackOption\x12(\n" +

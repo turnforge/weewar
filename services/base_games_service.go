@@ -194,7 +194,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 					options = append(options, &v1.GameOption{
 						OptionType: &v1.GameOption_Move{
 							Move: &v1.MoveOption{
-								MovementCost:      int32(edge.TotalCost),
+								MovementCost:      edge.TotalCost,
 								Action:            moveAction,
 								ReconstructedPath: path,
 							},

@@ -2003,8 +2003,8 @@
       "type": "object",
       "properties": {
         "movementCost": {
-          "type": "integer",
-          "format": "int32"
+          "type": "number",
+          "format": "double"
         },
         "action": {
           "$ref": "#/definitions/v1MoveUnitAction",
@@ -2101,7 +2101,7 @@
         },
         "totalCost": {
           "type": "number",
-          "format": "float",
+          "format": "double",
           "title": "Sum of all edge costs"
         }
       },
@@ -2145,12 +2145,12 @@
         },
         "movementCost": {
           "type": "number",
-          "format": "float",
+          "format": "double",
           "title": "Cost to move from 'from' to 'to' (edge cost)"
         },
         "totalCost": {
           "type": "number",
-          "format": "float",
+          "format": "double",
           "title": "Total cumulative cost from source to 'to'"
         },
         "terrainType": {

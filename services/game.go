@@ -56,7 +56,7 @@ func NewGame(game *v1.Game, state *v1.GameState, world *World, rulesEngine *Rule
 			units := out.World.GetPlayerUnits(playerId)
 			fmt.Printf("NewGame: After NewGame - Player %d has %d units\n", playerId, len(units))
 			for _, unit := range units {
-				fmt.Printf("NewGame: Player %d unit at (%d, %d) - DistanceLeft=%d, AvailableHealth=%d\n",
+				fmt.Printf("NewGame: Player %d unit at (%d, %d) - DistanceLeft=%f, AvailableHealth=%d\n",
 					playerId, unit.Q, unit.R, unit.DistanceLeft, unit.AvailableHealth)
 			}
 		}

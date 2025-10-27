@@ -383,8 +383,8 @@ message PathEdge {
   int32 from_r = 2;            // Parent coordinate R
   int32 to_q = 3;              // Destination coordinate Q
   int32 to_r = 4;              // Destination coordinate R
-  float movement_cost = 5;     // Cost to move from 'from' to 'to' (edge cost)
-  float total_cost = 6;        // Total cumulative cost from source to 'to'
+  double movement_cost = 5;     // Cost to move from 'from' to 'to' (edge cost)
+  double total_cost = 6;        // Total cumulative cost from source to 'to'
   string terrain_type = 7;     // e.g., "mountain", "plains", "forest"
   string explanation = 8;      // e.g., "Mountain costs Soldier 4 movement points"
 }
@@ -399,7 +399,7 @@ message Path {
   repeated PathDirection directions = 2;
 
   // Sum of all edge costs
-  float total_cost = 3;
+  double total_cost = 3;
 }
 
 enum PathDirection {
@@ -436,7 +436,7 @@ message EndTurnOption {
  * Option to move to a specific coordinate
  */
 message MoveOption {
-  int32 movement_cost = 3;
+  double movement_cost = 3;
   // Ready-to-use action object for ProcessMoves
   MoveUnitAction action = 4;
 

@@ -365,8 +365,8 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 						FromR:        int32(current.coord.R),
 						ToQ:          int32(neighborCoord.Q),
 						ToR:          int32(neighborCoord.R),
-						MovementCost: float32(moveCost),
-						TotalCost:    float32(newCost),
+						MovementCost: moveCost,
+						TotalCost:    newCost,
 						TerrainType:  terrainName,
 						Explanation:  explanation,
 					}

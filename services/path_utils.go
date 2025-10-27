@@ -24,7 +24,7 @@ func ReconstructPath(allPaths *v1.AllPaths, destQ, destR int32) (*v1.Path, error
 	// Build path by walking backwards from destination to source
 	var pathEdges []*v1.PathEdge
 	currentQ, currentR := destQ, destR
-	totalCost := float32(0)
+	totalCost := 0.0
 
 	for {
 		// Get edge leading to current position
@@ -63,12 +63,12 @@ func ReconstructPath(allPaths *v1.AllPaths, destQ, destR int32) (*v1.Path, error
 
 // GetReachableDestinations extracts all reachable destinations from AllPaths
 // Returns a map of destination coordinates to their total movement costs
-func GetReachableDestinations(allPaths *v1.AllPaths) map[string]float32 {
+func GetReachableDestinations(allPaths *v1.AllPaths) map[string]float64 {
 	if allPaths == nil || allPaths.Edges == nil {
-		return make(map[string]float32)
+		return make(map[string]float64)
 	}
 
-	destinations := make(map[string]float32)
+	destinations := make(map[string]float64)
 	for key, edge := range allPaths.Edges {
 		destinations[key] = edge.TotalCost
 	}
@@ -77,7 +77,7 @@ func GetReachableDestinations(allPaths *v1.AllPaths) map[string]float32 {
 
 // GetMovementCostTo returns the total movement cost to reach a specific destination
 // Returns -1 if the destination is not reachable
-func GetMovementCostTo(allPaths *v1.AllPaths, destQ, destR int32) float32 {
+func GetMovementCostTo(allPaths *v1.AllPaths, destQ, destR int32) float64 {
 	if allPaths == nil || allPaths.Edges == nil {
 		return -1
 	}

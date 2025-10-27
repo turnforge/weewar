@@ -6,6 +6,7 @@
       "health": 100,
       "coins": 75,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "10": {
@@ -14,19 +15,21 @@
       "health": 100,
       "coins": 200,
       "movement_points": 4,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "11": {
       "id": 11,
       "name": "Capturing",
-      "health": 100,
-      "min_attack_range": 1
+      "health": 100
     },
     "12": {
       "id": 12,
       "name": "Battleship",
       "health": 100,
+      "coins": 2000,
       "movement_points": 2,
+      "attack_range": 5,
       "min_attack_range": 1
     },
     "13": {
@@ -35,6 +38,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 4,
+      "attack_range": 3,
       "min_attack_range": 1
     },
     "14": {
@@ -43,6 +47,7 @@
       "health": 100,
       "coins": 800,
       "movement_points": 6,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "15": {
@@ -51,13 +56,16 @@
       "health": 100,
       "coins": 400,
       "movement_points": 3,
+      "attack_range": 2,
       "min_attack_range": 1
     },
     "16": {
       "id": 16,
       "name": "Submarine",
       "health": 100,
+      "coins": 1000,
       "movement_points": 3,
+      "attack_range": 2,
       "min_attack_range": 1
     },
     "17": {
@@ -66,6 +74,7 @@
       "health": 100,
       "coins": 600,
       "movement_points": 5,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "18": {
@@ -74,6 +83,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 5,
+      "attack_range": 2,
       "min_attack_range": 1
     },
     "19": {
@@ -82,6 +92,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "2": {
@@ -90,6 +101,7 @@
       "health": 100,
       "coins": 150,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "20": {
@@ -98,6 +110,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "21": {
@@ -105,14 +118,16 @@
       "name": "Missile (Standard)",
       "health": 100,
       "coins": 150,
-      "min_attack_range": 1
+      "attack_range": 5,
+      "min_attack_range": 2
     },
     "22": {
       "id": 22,
       "name": "Missile (Nuclear)",
       "health": 100,
       "coins": 300,
-      "min_attack_range": 1
+      "attack_range": 6,
+      "min_attack_range": 3
     },
     "24": {
       "id": 24,
@@ -120,14 +135,17 @@
       "health": 100,
       "coins": 300,
       "movement_points": 2,
+      "attack_range": 2,
       "min_attack_range": 1
     },
     "25": {
       "id": 25,
       "name": "Artillery (Mega)",
       "health": 100,
+      "coins": 1200,
       "movement_points": 2,
-      "min_attack_range": 1
+      "attack_range": 5,
+      "min_attack_range": 2
     },
     "26": {
       "id": 26,
@@ -135,6 +153,7 @@
       "health": 100,
       "coins": 400,
       "movement_points": 4,
+      "attack_range": 2,
       "min_attack_range": 1
     },
     "27": {
@@ -143,6 +162,7 @@
       "health": 100,
       "coins": 125,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "28": {
@@ -151,6 +171,7 @@
       "health": 100,
       "coins": 700,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "29": {
@@ -159,6 +180,7 @@
       "health": 100,
       "coins": 175,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "3": {
@@ -167,6 +189,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "30": {
@@ -175,6 +198,7 @@
       "health": 100,
       "coins": 50,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "31": {
@@ -183,6 +207,7 @@
       "health": 100,
       "coins": 500,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "32": {
@@ -191,6 +216,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "33": {
@@ -199,20 +225,24 @@
       "health": 100,
       "coins": 150,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "37": {
       "id": 37,
       "name": "Cruiser",
       "health": 100,
+      "coins": 1000,
       "movement_points": 3,
-      "min_attack_range": 1
+      "attack_range": 4,
+      "min_attack_range": 2
     },
     "38": {
       "id": 38,
       "name": "Missile (Anti-aircraft)",
       "health": 100,
       "coins": 200,
+      "attack_range": 6,
       "min_attack_range": 1
     },
     "39": {
@@ -221,6 +251,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 2,
+      "attack_range": 2,
       "min_attack_range": 1
     },
     "4": {
@@ -229,6 +260,7 @@
       "health": 100,
       "coins": 600,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "40": {
@@ -237,6 +269,7 @@
       "health": 100,
       "coins": 175,
       "movement_points": 2,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "41": {
@@ -245,6 +278,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 3,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "44": {
@@ -253,6 +287,7 @@
       "health": 100,
       "coins": 500,
       "movement_points": 3,
+      "attack_range": 3,
       "min_attack_range": 1
     },
     "5": {
@@ -261,6 +296,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 4,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "6": {
@@ -269,6 +305,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 3,
+      "attack_range": 3,
       "min_attack_range": 1
     },
     "7": {
@@ -277,6 +314,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 4,
+      "attack_range": 1,
       "min_attack_range": 1
     },
     "8": {
@@ -285,7 +323,8 @@
       "health": 100,
       "coins": 200,
       "movement_points": 3,
-      "min_attack_range": 1
+      "attack_range": 3,
+      "min_attack_range": 2
     },
     "9": {
       "id": 9,
@@ -293,7 +332,8 @@
       "health": 100,
       "coins": 600,
       "movement_points": 2,
-      "min_attack_range": 1
+      "attack_range": 4,
+      "min_attack_range": 3
     }
   },
   "terrains": {

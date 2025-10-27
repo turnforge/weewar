@@ -335,13 +335,17 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 				// Two formats:
 				//   1. Single value: "1 (adjacent enemy units)" -> AttackRange=1, MinAttackRange=1
 				//   2. Range: "2 - 3" -> AttackRange=3 (max), MinAttackRange=2
+				log.Println("Attack Range text: ", text)
 				lines := strings.Split(text, "\n")
 				for i, line := range lines {
 					if strings.Contains(line, "Attack Range") && i+1 < len(lines) {
-						nextLine := strings.TrimSpace(lines[i+1])
+						// nextLine := strings.TrimSpace(lines[i+1])
+						nextLine := strings.TrimSpace(strings.TrimSpace(strings.Join(lines[i+1:], "\n")))
+						log.Println("Attack Range - Next line: ", nextLine)
 
 						// Check for range format: "2 - 3"
 						if matches := regexp.MustCompile(`^(\d+)\s*-\s*(\d+)`).FindStringSubmatch(nextLine); len(matches) > 2 {
+							log.Println("Matched range format: ", matches)
 							if minRng, err := strconv.Atoi(matches[1]); err == nil {
 								unitDef.MinAttackRange = int32(minRng)
 							}
@@ -350,10 +354,13 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 							}
 						} else if matches := regexp.MustCompile(`^(\d+)`).FindStringSubmatch(nextLine); len(matches) > 1 {
 							// Single value format: "1 (adjacent...)"
+							log.Println("Matched single value format: ", matches)
 							if rng, err := strconv.Atoi(matches[1]); err == nil {
 								unitDef.AttackRange = int32(rng)
 								unitDef.MinAttackRange = int32(rng) // Min and max are the same
 							}
+						} else {
+							log.Println("NO MATCH for Attack Range!")
 						}
 						break
 					}
@@ -362,7 +369,7 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 				// Extract coin cost - the number appears after the coin image
 				lines := strings.Split(text, "\n")
 				for _, line := range lines {
-					line = strings.TrimSpace(line)
+					line = strings.Replace(strings.TrimSpace(line), ",", "", -1)
 					if matches := regexp.MustCompile(`^\d+$`).FindStringSubmatch(line); len(matches) > 0 {
 						if cost, err := strconv.Atoi(matches[0]); err == nil {
 							unitDef.Coins = int32(cost)

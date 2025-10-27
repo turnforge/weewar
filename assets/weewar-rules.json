@@ -28,7 +28,7 @@
       "name": "Battleship",
       "health": 100,
       "coins": 2000,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 5,
       "min_attack_range": 1
     },
@@ -109,7 +109,7 @@
       "name": "Mech",
       "health": 100,
       "coins": 900,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -134,7 +134,7 @@
       "name": "Sailboat",
       "health": 100,
       "coins": 300,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -143,7 +143,7 @@
       "name": "Artillery (Mega)",
       "health": 100,
       "coins": 1200,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 5,
       "min_attack_range": 2
     },
@@ -250,7 +250,7 @@
       "name": "Aircraft Carrier",
       "health": 100,
       "coins": 900,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -259,7 +259,7 @@
       "name": "Tank (Advanced)",
       "health": 100,
       "coins": 600,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -331,7 +331,7 @@
       "name": "Artillery (Advanced)",
       "health": 100,
       "coins": 600,
-      "movement_points": 2,
+      "movement_points": 2.25,
       "attack_range": 4,
       "min_attack_range": 3
     }

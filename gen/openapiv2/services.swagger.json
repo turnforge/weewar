@@ -2331,8 +2331,8 @@
           "title": "Runtime state fields"
         },
         "distanceLeft": {
-          "type": "integer",
-          "format": "int32",
+          "type": "number",
+          "format": "double",
           "title": "Movement points remaining this turn"
         },
         "lastActedTurn": {

@@ -403,7 +403,7 @@ func (b *BaseGamesServiceImpl) convertRuntimeWorldToProto(world *World) *v1.Worl
 			UnitType:         int32(unit.UnitType),
 			Shortcut:         unit.Shortcut, // Preserve shortcut
 			AvailableHealth:  int32(unit.AvailableHealth),
-			DistanceLeft:     int32(unit.DistanceLeft),
+			DistanceLeft:     unit.DistanceLeft,
 			LastActedTurn:    int32(unit.LastActedTurn),
 			LastToppedupTurn: int32(unit.LastToppedupTurn),
 		}

@@ -196,13 +196,12 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	}
 
 	// Get movement cost using RulesEngine
-	costFloat, err := g.rulesEngine.GetMovementCost(g.World, unit, to)
+	cost, err := g.rulesEngine.GetMovementCost(g.World, unit, to)
 	if err != nil {
 		return nil, fmt.Errorf("failed to calculate movement cost: %w", err)
 	}
-	cost := int(costFloat + 0.5) // Round to nearest integer
-	if cost > int(unit.DistanceLeft) {
-		return nil, fmt.Errorf("insufficient movement points: need %d, have %d", cost, unit.DistanceLeft)
+	if cost > unit.DistanceLeft {
+		return nil, fmt.Errorf("insufficient movement points: need %f, have %f", cost, unit.DistanceLeft)
 	}
 
 	// Capture unit state before move
@@ -221,7 +220,7 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	}
 
 	// Update unit stats on the moved unit
-	movedUnit.DistanceLeft -= int32(cost)
+	movedUnit.DistanceLeft -= cost
 
 	// Capture unit state after move (using the moved unit, not the original)
 	updatedUnit := copyUnit(movedUnit)

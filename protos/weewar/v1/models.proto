@@ -140,7 +140,7 @@ message Unit {
   
   // Runtime state fields
   int32 available_health = 6; // Current health points
-  int32 distance_left = 7;    // Movement points remaining this turn
+  double distance_left = 7;    // Movement points remaining this turn
 
   // Keep track of turns when the move was last made and when a "top up" was last done on/for this tile.
   // This helps us not having to "top up" or "reset" the stats at the end
@@ -174,7 +174,7 @@ message UnitDefinition {
   string description = 3;        //
   int32 health = 4;             // Maximum health points
   int32 coins = 5;              // how much it costs to build
-  int32 movement_points = 6;     // Maximum movement per turn
+  double movement_points = 6;     // Maximum movement per turn
   int32 attack_range = 7;        // Max Attack range in tiles
   int32 min_attack_range = 8;        // Minimum attack range in tile radius if specified (otherwise - will be 1
   int32 splash_damage = 9;

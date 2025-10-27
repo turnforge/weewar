@@ -11,6 +11,7 @@ package main
 import (
 	// Import the generated WASM package - UPDATE THIS PATH
 	"your-module/path-to-generated/weewar"
+	// Import the same protobuf types as the generated WASM file
 )
 
 func main() {

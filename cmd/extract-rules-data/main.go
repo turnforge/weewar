@@ -318,14 +318,10 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 				for i, line := range lines {
 					if strings.Contains(line, "Movement") && i+1 < len(lines) {
 						nextLine := strings.TrimSpace(strings.TrimSpace(strings.Join(lines[i+1:], "\n")))
-						matches := regexp.MustCompile(`^(\d+)`).FindStringSubmatch(nextLine)
-						log.Println("Here???, ", lines[i], "Next: ", nextLine, "Matches: ", matches)
+						matches := regexp.MustCompile(`(\d+(?:\.\d+)?)`).FindStringSubmatch(nextLine)
+						log.Println("Here???, ", lines[i], "Next: ", nextLine, "Matches: ", matches, "Matches[1]: ", matches[1], matches[0])
 						if len(matches) > 1 {
-							if mov, err := strconv.Atoi(matches[1]); err == nil {
-								unitDef.MovementPoints = int32(mov)
-							} else {
-								panic(err)
-							}
+							unitDef.MovementPoints = parseMovementCost(matches[1])
 						}
 						break
 					}

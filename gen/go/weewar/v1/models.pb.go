@@ -616,8 +616,8 @@ type Unit struct {
 	UnitType int32  `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
 	Shortcut string `protobuf:"bytes,5,opt,name=shortcut,proto3" json:"shortcut,omitempty"` // A short cut like A1 or S2 etc for quick access
 	// Runtime state fields
-	AvailableHealth int32 `protobuf:"varint,6,opt,name=available_health,json=availableHealth,proto3" json:"available_health,omitempty"` // Current health points
-	DistanceLeft    int32 `protobuf:"varint,7,opt,name=distance_left,json=distanceLeft,proto3" json:"distance_left,omitempty"`          // Movement points remaining this turn
+	AvailableHealth int32   `protobuf:"varint,6,opt,name=available_health,json=availableHealth,proto3" json:"available_health,omitempty"` // Current health points
+	DistanceLeft    float64 `protobuf:"fixed64,7,opt,name=distance_left,json=distanceLeft,proto3" json:"distance_left,omitempty"`         // Movement points remaining this turn
 	// Keep track of turns when the move was last made and when a "top up" was last done on/for this tile.
 	// This helps us not having to "top up" or "reset" the stats at the end
 	// of each turn.  Instead as the game turn is incremented we can do a
@@ -702,7 +702,7 @@ func (x *Unit) GetAvailableHealth() int32 {
 	return 0
 }
 
-func (x *Unit) GetDistanceLeft() int32 {
+func (x *Unit) GetDistanceLeft() float64 {
 	if x != nil {
 		return x.DistanceLeft
 	}
@@ -811,7 +811,7 @@ type UnitDefinition struct {
 	Description       string                           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                                //
 	Health            int32                            `protobuf:"varint,4,opt,name=health,proto3" json:"health,omitempty"`                                         // Maximum health points
 	Coins             int32                            `protobuf:"varint,5,opt,name=coins,proto3" json:"coins,omitempty"`                                           // how much it costs to build
-	MovementPoints    int32                            `protobuf:"varint,6,opt,name=movement_points,json=movementPoints,proto3" json:"movement_points,omitempty"`   // Maximum movement per turn
+	MovementPoints    float64                          `protobuf:"fixed64,6,opt,name=movement_points,json=movementPoints,proto3" json:"movement_points,omitempty"`  // Maximum movement per turn
 	AttackRange       int32                            `protobuf:"varint,7,opt,name=attack_range,json=attackRange,proto3" json:"attack_range,omitempty"`            // Max Attack range in tiles
 	MinAttackRange    int32                            `protobuf:"varint,8,opt,name=min_attack_range,json=minAttackRange,proto3" json:"min_attack_range,omitempty"` // Minimum attack range in tile radius if specified (otherwise - will be 1
 	SplashDamage      int32                            `protobuf:"varint,9,opt,name=splash_damage,json=splashDamage,proto3" json:"splash_damage,omitempty"`
@@ -886,7 +886,7 @@ func (x *UnitDefinition) GetCoins() int32 {
 	return 0
 }
 
-func (x *UnitDefinition) GetMovementPoints() int32 {
+func (x *UnitDefinition) GetMovementPoints() float64 {
 	if x != nil {
 		return x.MovementPoints
 	}
@@ -2790,7 +2790,7 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\tunit_type\x18\x04 \x01(\x05R\bunitType\x12\x1a\n" +
 	"\bshortcut\x18\x05 \x01(\tR\bshortcut\x12)\n" +
 	"\x10available_health\x18\x06 \x01(\x05R\x0favailableHealth\x12#\n" +
-	"\rdistance_left\x18\a \x01(\x05R\fdistanceLeft\x12&\n" +
+	"\rdistance_left\x18\a \x01(\x01R\fdistanceLeft\x12&\n" +
 	"\x0flast_acted_turn\x18\b \x01(\x05R\rlastActedTurn\x12,\n" +
 	"\x12last_toppedup_turn\x18\t \x01(\x05R\x10lastToppedupTurn\"\xad\x02\n" +
 	"\x11TerrainDefinition\x12\x0e\n" +
@@ -2808,7 +2808,7 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
 	"\x06health\x18\x04 \x01(\x05R\x06health\x12\x14\n" +
 	"\x05coins\x18\x05 \x01(\x05R\x05coins\x12'\n" +
-	"\x0fmovement_points\x18\x06 \x01(\x05R\x0emovementPoints\x12!\n" +
+	"\x0fmovement_points\x18\x06 \x01(\x01R\x0emovementPoints\x12!\n" +
 	"\fattack_range\x18\a \x01(\x05R\vattackRange\x12(\n" +
 	"\x10min_attack_range\x18\b \x01(\x05R\x0eminAttackRange\x12#\n" +
 	"\rsplash_damage\x18\t \x01(\x05R\fsplashDamage\x12_\n" +

@@ -313,15 +313,33 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 			// Extract different properties based on <strong> labels
 			if strings.Contains(text, "Movement") && !strings.Contains(text, "Build Percentage") {
 				// Extract movement points - the number appears after <br>
-				log.Println("Lines: ", text)
 				lines := strings.Split(text, "\n")
 				for i, line := range lines {
 					if strings.Contains(line, "Movement") && i+1 < len(lines) {
 						nextLine := strings.TrimSpace(strings.TrimSpace(strings.Join(lines[i+1:], "\n")))
 						matches := regexp.MustCompile(`(\d+(?:\.\d+)?)`).FindStringSubmatch(nextLine)
-						log.Println("Here???, ", lines[i], "Next: ", nextLine, "Matches: ", matches, "Matches[1]: ", matches[1], matches[0])
 						if len(matches) > 1 {
 							unitDef.MovementPoints = parseMovementCost(matches[1])
+						}
+						break
+					}
+				}
+			} else if strings.Contains(text, "Splash Damage") {
+				// Extract attack range - the number appears after <br>
+				// Two formats:
+				//   1. Single value: "1 (adjacent enemy units)" -> AttackRange=1, MinAttackRange=1
+				//   2. Range: "2 - 3" -> AttackRange=3 (max), MinAttackRange=2
+				log.Println("Splash text: ", text)
+				lines := strings.Split(text, "\n")
+				for i, line := range lines {
+					if strings.Contains(line, "Splash Damage") && i+1 < len(lines) {
+						// nextLine := strings.TrimSpace(lines[i+1])
+						line := strings.TrimSpace(strings.TrimSpace(strings.Join(lines[i+1:], "\n")))
+						if matches := regexp.MustCompile(`^\d+$`).FindStringSubmatch(line); len(matches) > 0 {
+							if cost, err := strconv.Atoi(matches[0]); err == nil {
+								unitDef.SplashDamage = int32(cost)
+								break
+							}
 						}
 						break
 					}
@@ -337,11 +355,8 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 					if strings.Contains(line, "Attack Range") && i+1 < len(lines) {
 						// nextLine := strings.TrimSpace(lines[i+1])
 						nextLine := strings.TrimSpace(strings.TrimSpace(strings.Join(lines[i+1:], "\n")))
-						log.Println("Attack Range - Next line: ", nextLine)
-
 						// Check for range format: "2 - 3"
 						if matches := regexp.MustCompile(`^(\d+)\s*-\s*(\d+)`).FindStringSubmatch(nextLine); len(matches) > 2 {
-							log.Println("Matched range format: ", matches)
 							if minRng, err := strconv.Atoi(matches[1]); err == nil {
 								unitDef.MinAttackRange = int32(minRng)
 							}
@@ -350,7 +365,6 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 							}
 						} else if matches := regexp.MustCompile(`^(\d+)`).FindStringSubmatch(nextLine); len(matches) > 1 {
 							// Single value format: "1 (adjacent...)"
-							log.Println("Matched single value format: ", matches)
 							if rng, err := strconv.Atoi(matches[1]); err == nil {
 								unitDef.AttackRange = int32(rng)
 								unitDef.MinAttackRange = int32(rng) // Min and max are the same

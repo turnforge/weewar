@@ -119,7 +119,8 @@
       "health": 100,
       "coins": 150,
       "attack_range": 5,
-      "min_attack_range": 2
+      "min_attack_range": 2,
+      "splash_damage": 2
     },
     "22": {
       "id": 22,
@@ -127,7 +128,8 @@
       "health": 100,
       "coins": 300,
       "attack_range": 6,
-      "min_attack_range": 3
+      "min_attack_range": 3,
+      "splash_damage": 6
     },
     "24": {
       "id": 24,
@@ -145,7 +147,8 @@
       "coins": 1200,
       "movement_points": 2.25,
       "attack_range": 5,
-      "min_attack_range": 2
+      "min_attack_range": 2,
+      "splash_damage": 1
     },
     "26": {
       "id": 26,
@@ -154,7 +157,8 @@
       "coins": 400,
       "movement_points": 4,
       "attack_range": 2,
-      "min_attack_range": 1
+      "min_attack_range": 1,
+      "splash_damage": 1
     },
     "27": {
       "id": 27,
@@ -199,7 +203,8 @@
       "coins": 50,
       "movement_points": 2,
       "attack_range": 1,
-      "min_attack_range": 1
+      "min_attack_range": 1,
+      "splash_damage": 2
     },
     "31": {
       "id": 31,
@@ -217,7 +222,8 @@
       "coins": 200,
       "movement_points": 2,
       "attack_range": 1,
-      "min_attack_range": 1
+      "min_attack_range": 1,
+      "splash_damage": 2
     },
     "33": {
       "id": 33,
@@ -324,7 +330,8 @@
       "coins": 200,
       "movement_points": 3,
       "attack_range": 3,
-      "min_attack_range": 2
+      "min_attack_range": 2,
+      "splash_damage": 1
     },
     "9": {
       "id": 9,
@@ -333,7 +340,8 @@
       "coins": 600,
       "movement_points": 2.25,
       "attack_range": 4,
-      "min_attack_range": 3
+      "min_attack_range": 3,
+      "splash_damage": 1
     }
   },
   "terrains": {

@@ -5,7 +5,6 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    SceneClickedResponse,
     TurnOptionClickedRequest,
     TurnOptionClickedResponse,
     EndTurnButtonClickedRequest,
@@ -13,6 +12,7 @@ import {
     InitializeGameRequest,
     InitializeGameResponse,
     SceneClickedRequest,
+    SceneClickedResponse,
 } from './interfaces';
 /**
  * GameViewPresenter service client interface

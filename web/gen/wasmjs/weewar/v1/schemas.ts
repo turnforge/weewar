@@ -383,14 +383,19 @@ export const UnitDefinitionSchema: MessageSchema = {
       id: 8,
     },
     {
+      name: "splashDamage",
+      type: FieldType.NUMBER,
+      id: 9,
+    },
+    {
       name: "terrainProperties",
       type: FieldType.STRING,
-      id: 9,
+      id: 10,
     },
     {
       name: "properties",
       type: FieldType.REPEATED,
-      id: 10,
+      id: 11,
       repeated: true,
     },
   ],

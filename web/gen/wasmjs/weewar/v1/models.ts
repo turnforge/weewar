@@ -276,6 +276,7 @@ export class UnitDefinition implements UnitDefinitionInterface {
   movementPoints: number = 0;
   attackRange: number = 0;
   minAttackRange: number = 0;
+  splashDamage: number = 0;
   terrainProperties: Record<number, TerrainUnitProperties> = {};
   properties: string[] = [];
 

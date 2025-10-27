@@ -484,17 +484,25 @@ export class PhaserGameScene extends PhaserWorldScene {
                 movementCost: 0, // Cost not available in HighlightSpec
             }));
             this._movementHighlightLayer.showMovementOptions(moveOptions);
-           /*
-            const mhl = this._movementHighlightLayer;
-            movements.forEach(h => {
-                mhl.addHighlight(h.q, h.r, 0x00FF00, 0.2, 0x00FF00, 2);
-            })
-           */
         }
 
         // Apply attack highlights
         if (this._attackHighlightLayer && attacks.length > 0) {
             const attackCoords = attacks.map(h => ({ q: h.q, r: h.r }));
+            /*
+            const attackCoords: AttackOption[] = attacks.map(h => ({
+              targetUnitType: 0,
+              targetUnitHealth: 0,
+              canAttack: true,
+              damageEstimate: 0,
+              action: {
+                  attackerQ: h.q,
+                  attackerR: h.r,
+                  defenderQ: h.q,
+                  defenderR: h.r,
+              }
+            }));
+            */
             this._attackHighlightLayer.showAttackOptions(attackCoords);
         }
     }

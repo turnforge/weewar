@@ -299,9 +299,9 @@ func extractUnitRowData(row *html.Node, terrainID int32, columnHeaders []string,
 
 func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefinition, error) {
 	unitDef := &weewarv1.UnitDefinition{
-		Id:             unitID,
-		Health:         100, // Always 100 in WeeWar
-		MinAttackRange: 1,   // Default minimum attack range
+		Id:     unitID,
+		Health: 100, // Always 100 in WeeWar
+		// MinAttackRange and AttackRange will be extracted from HTML
 	}
 
 	// Extract basic properties from the sidebar
@@ -332,13 +332,27 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 				}
 			} else if strings.Contains(text, "Attack Range") {
 				// Extract attack range - the number appears after <br>
+				// Two formats:
+				//   1. Single value: "1 (adjacent enemy units)" -> AttackRange=1, MinAttackRange=1
+				//   2. Range: "2 - 3" -> AttackRange=3 (max), MinAttackRange=2
 				lines := strings.Split(text, "\n")
 				for i, line := range lines {
 					if strings.Contains(line, "Attack Range") && i+1 < len(lines) {
 						nextLine := strings.TrimSpace(lines[i+1])
-						if matches := regexp.MustCompile(`^(\d+)`).FindStringSubmatch(nextLine); len(matches) > 1 {
+
+						// Check for range format: "2 - 3"
+						if matches := regexp.MustCompile(`^(\d+)\s*-\s*(\d+)`).FindStringSubmatch(nextLine); len(matches) > 2 {
+							if minRng, err := strconv.Atoi(matches[1]); err == nil {
+								unitDef.MinAttackRange = int32(minRng)
+							}
+							if maxRng, err := strconv.Atoi(matches[2]); err == nil {
+								unitDef.AttackRange = int32(maxRng)
+							}
+						} else if matches := regexp.MustCompile(`^(\d+)`).FindStringSubmatch(nextLine); len(matches) > 1 {
+							// Single value format: "1 (adjacent...)"
 							if rng, err := strconv.Atoi(matches[1]); err == nil {
 								unitDef.AttackRange = int32(rng)
+								unitDef.MinAttackRange = int32(rng) // Min and max are the same
 							}
 						}
 						break

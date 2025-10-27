@@ -188,6 +188,7 @@ export interface UnitDefinition {
   movementPoints: number;
   attackRange: number;
   minAttackRange: number;
+  splashDamage: number;
   terrainProperties: Record<number, TerrainUnitProperties>;
   properties: string[];
 }

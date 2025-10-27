@@ -177,8 +177,9 @@ message UnitDefinition {
   int32 movement_points = 6;     // Maximum movement per turn
   int32 attack_range = 7;        // Max Attack range in tiles
   int32 min_attack_range = 8;        // Minimum attack range in tile radius if specified (otherwise - will be 1
-  map<int32, TerrainUnitProperties> terrain_properties = 9;
-  repeated string properties = 10; // Special properties/abilities
+  int32 splash_damage = 9;
+  map<int32, TerrainUnitProperties> terrain_properties = 10;
+  repeated string properties = 11; // Special properties/abilities
 }
 
 // Properties that are specific to unit on a particular terrain

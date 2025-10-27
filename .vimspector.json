@@ -7,7 +7,7 @@
     "Console": { "pos": "bottom", "height": 12 }
   },
   "configurations": {
-    "Debug ww units": {
+    "Debug 'ww move B1 BR,BR'": {
       "adapter": "vscode-go",
       "configuration": {
         "request": "launch",
@@ -15,8 +15,9 @@
         "mode": "debug",
         "args": ["--game-id", "c5380903", "move", "b1", "BR,BR", "--dryrun"]
       }
-    },
-    "Launch Web Server": {
+    }
+    /*
+    ,"Launch Web Server": {
       "adapter": "vscode-go",
       "configuration": {
         "request": "launch",
@@ -24,16 +25,16 @@
         "mode": "debug",
         "args": []
       }
-    },
-    "Debug current file": {
+    }
+    ,"Debug current file": {
       "adapter": "vscode-go",
       "configuration": {
         "request": "launch",
         "program": "${file}",
         "mode": "debug"
       }
-    },
-    "Attach to running process": {
+    }
+    ,"Attach to running process": {
       "adapter": "vscode-go",
       "configuration": {
         "request": "attach",
@@ -41,5 +42,6 @@
         "processId": "${processId}"
       }
     }
+    */
   }
 }

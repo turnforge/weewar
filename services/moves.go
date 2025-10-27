@@ -190,8 +190,8 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	}
 
 	// Check if move is valid
-	unitCoord := UnitGetCoord(unit)
-	if !g.IsValidMove(unitCoord, to) {
+	if !g.CanMoveUnit(unit, to) {
+		unitCoord := UnitGetCoord(unit)
 		return nil, fmt.Errorf("invalid move from %v to %v", unitCoord, to)
 	}
 
@@ -399,7 +399,8 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 	return result, nil
 }
 
-// CanMoveUnit validates potential movement using cube coordinates
+// CanMoveUnit validates potential movement using Dijkstra-based pathfinding
+// This checks if the target is reachable given terrain costs and available movement points
 func (g *Game) CanMoveUnit(unit *v1.Unit, to AxialCoord) bool {
 	if unit == nil {
 		return false
@@ -410,9 +411,22 @@ func (g *Game) CanMoveUnit(unit *v1.Unit, to AxialCoord) bool {
 		return false
 	}
 
-	// Check if move is valid
-	unitCoord := UnitGetCoord(unit)
-	return g.IsValidMove(unitCoord, to)
+	// Check if destination is occupied by another unit
+	destUnit := g.World.UnitAt(to)
+	if destUnit != nil {
+		return false
+	}
+
+	// Use Dijkstra to compute all reachable tiles based on terrain and movement points
+	allPaths, err := g.rulesEngine.GetMovementOptions(g.World, unit, int(unit.DistanceLeft))
+	if err != nil {
+		return false
+	}
+
+	// Check if target coordinate is in the reachable tiles
+	key := fmt.Sprintf("%d,%d", to.Q, to.R)
+	_, reachable := allPaths.Edges[key]
+	return reachable
 }
 
 // CanAttackUnit validates potential attack
@@ -438,26 +452,6 @@ func (g *Game) CanAttackUnit(attacker, defender *v1.Unit) bool {
 	}
 	return canAttack
 }
-
-// AttackUnitAt executes combat between units at the given coordinates
-/* TODO -
-func (g *Game) AttackUnitAt(attackerPos, targetPos AxialCoord) (*CombatResult, error) {
-	// Find attacker unit using World
-	attacker := g.World.UnitAt(attackerPos)
-	if attacker == nil {
-		return nil, fmt.Errorf("no unit at attacker position %v", attackerPos)
-	}
-
-	// Find target unit using World
-	target := g.World.UnitAt(targetPos)
-	if target == nil {
-		return nil, fmt.Errorf("no unit at target position %v", targetPos)
-	}
-
-	// Use existing AttackUnit method
-	return nil, nil // g.AttackUnit(attacker, target)
-}
-*/
 
 // CanAttack validates potential attack using position coordinates
 func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {

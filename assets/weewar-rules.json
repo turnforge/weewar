@@ -6,6 +6,7 @@
       "health": 100,
       "coins": 75,
       "movement_points": 3,
+      "defense": 6,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -15,13 +16,15 @@
       "health": 100,
       "coins": 200,
       "movement_points": 4,
+      "defense": 6,
       "attack_range": 1,
       "min_attack_range": 1
     },
     "11": {
       "id": 11,
       "name": "Capturing",
-      "health": 100
+      "health": 100,
+      "defense": 2
     },
     "12": {
       "id": 12,
@@ -29,6 +32,7 @@
       "health": 100,
       "coins": 2000,
       "movement_points": 2.25,
+      "defense": 14,
       "attack_range": 5,
       "min_attack_range": 1
     },
@@ -38,6 +42,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 4,
+      "defense": 12,
       "attack_range": 3,
       "min_attack_range": 1
     },
@@ -47,6 +52,7 @@
       "health": 100,
       "coins": 800,
       "movement_points": 6,
+      "defense": 10,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -56,6 +62,7 @@
       "health": 100,
       "coins": 400,
       "movement_points": 3,
+      "defense": 8,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -65,6 +72,7 @@
       "health": 100,
       "coins": 1000,
       "movement_points": 3,
+      "defense": 10,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -74,6 +82,7 @@
       "health": 100,
       "coins": 600,
       "movement_points": 5,
+      "defense": 10,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -83,6 +92,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 5,
+      "defense": 10,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -92,6 +102,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 3,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -101,6 +112,7 @@
       "health": 100,
       "coins": 150,
       "movement_points": 2,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -110,6 +122,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 2.25,
+      "defense": 14,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -118,6 +131,7 @@
       "name": "Missile (Standard)",
       "health": 100,
       "coins": 150,
+      "defense": 3,
       "attack_range": 5,
       "min_attack_range": 2,
       "splash_damage": 2
@@ -127,6 +141,7 @@
       "name": "Missile (Nuclear)",
       "health": 100,
       "coins": 300,
+      "defense": 4,
       "attack_range": 6,
       "min_attack_range": 3,
       "splash_damage": 6
@@ -137,6 +152,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 2.25,
+      "defense": 6,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -146,6 +162,7 @@
       "health": 100,
       "coins": 1200,
       "movement_points": 2.25,
+      "defense": 4,
       "attack_range": 5,
       "min_attack_range": 2,
       "splash_damage": 1
@@ -156,6 +173,7 @@
       "health": 100,
       "coins": 400,
       "movement_points": 4,
+      "defense": 6,
       "attack_range": 2,
       "min_attack_range": 1,
       "splash_damage": 1
@@ -166,6 +184,7 @@
       "health": 100,
       "coins": 125,
       "movement_points": 2,
+      "defense": 4,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -175,6 +194,7 @@
       "health": 100,
       "coins": 700,
       "movement_points": 3,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -184,6 +204,7 @@
       "health": 100,
       "coins": 175,
       "movement_points": 2,
+      "defense": 4,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -193,6 +214,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 3,
+      "defense": 10,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -202,6 +224,7 @@
       "health": 100,
       "coins": 50,
       "movement_points": 2,
+      "defense": 2,
       "attack_range": 1,
       "min_attack_range": 1,
       "splash_damage": 2
@@ -212,6 +235,7 @@
       "health": 100,
       "coins": 500,
       "movement_points": 3,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -221,6 +245,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 2,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1,
       "splash_damage": 2
@@ -231,6 +256,7 @@
       "health": 100,
       "coins": 150,
       "movement_points": 3,
+      "defense": 6,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -240,6 +266,7 @@
       "health": 100,
       "coins": 1000,
       "movement_points": 3,
+      "defense": 12,
       "attack_range": 4,
       "min_attack_range": 2
     },
@@ -248,6 +275,7 @@
       "name": "Missile (Anti-aircraft)",
       "health": 100,
       "coins": 200,
+      "defense": 4,
       "attack_range": 6,
       "min_attack_range": 1
     },
@@ -257,6 +285,7 @@
       "health": 100,
       "coins": 900,
       "movement_points": 2.25,
+      "defense": 10,
       "attack_range": 2,
       "min_attack_range": 1
     },
@@ -266,6 +295,7 @@
       "health": 100,
       "coins": 600,
       "movement_points": 2.25,
+      "defense": 14,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -275,6 +305,7 @@
       "health": 100,
       "coins": 175,
       "movement_points": 2,
+      "defense": 4,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -284,6 +315,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 3,
+      "defense": 6,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -293,6 +325,7 @@
       "health": 100,
       "coins": 500,
       "movement_points": 3,
+      "defense": 6,
       "attack_range": 3,
       "min_attack_range": 1
     },
@@ -302,6 +335,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 4,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -311,6 +345,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 3,
+      "defense": 4,
       "attack_range": 3,
       "min_attack_range": 1
     },
@@ -320,6 +355,7 @@
       "health": 100,
       "coins": 300,
       "movement_points": 4,
+      "defense": 8,
       "attack_range": 1,
       "min_attack_range": 1
     },
@@ -329,6 +365,7 @@
       "health": 100,
       "coins": 200,
       "movement_points": 3,
+      "defense": 3,
       "attack_range": 3,
       "min_attack_range": 2,
       "splash_damage": 1
@@ -339,6 +376,7 @@
       "health": 100,
       "coins": 600,
       "movement_points": 2.25,
+      "defense": 4,
       "attack_range": 4,
       "min_attack_range": 3,
       "splash_damage": 1

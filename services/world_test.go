@@ -6,48 +6,18 @@ import (
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 )
 
-// Test helper types for easier test setup
-type TestUnit struct {
-	Q, R         int
-	Player       int32
-	UnitType     int32
-	Health       int32
-	DistanceLeft int32
-}
-
-type TestTile struct {
-	Q, R     int
-	TileType int32
-	Player   int32
-}
-
 // Helper function to create a test world with units and tiles
-func createTestWorld(name string, units []TestUnit, tiles []TestTile) *World {
+func createTestWorld(name string, units []*v1.Unit, tiles []*v1.Tile) *World {
 	world := NewWorld(name, nil)
 
 	// Add tiles
 	for _, tile := range tiles {
-		protoTile := &v1.Tile{
-			Q:        int32(tile.Q),
-			R:        int32(tile.R),
-			TileType: tile.TileType,
-			Player:   tile.Player,
-		}
-		world.AddTile(protoTile)
+		world.AddTile(tile)
 	}
 
 	// Add units
 	for _, unit := range units {
-		protoUnit := &v1.Unit{
-			Q:               int32(unit.Q),
-			R:               int32(unit.R),
-			Player:          unit.Player,
-			UnitType:        unit.UnitType,
-			AvailableHealth: unit.Health,
-			DistanceLeft:    unit.DistanceLeft,
-			// TurnCounter removed: Units will be lazily topped-up when accessed
-		}
-		world.AddUnit(protoUnit)
+		world.AddUnit(unit)
 	}
 
 	return world
@@ -61,8 +31,7 @@ func createTestUnit(q, r int, player, unitType int32) *v1.Unit {
 		Player:          player,
 		UnitType:        unitType,
 		AvailableHealth: 100,
-		DistanceLeft:    3,
-		// TurnCounter removed: Units will be lazily topped-up when accessed
+		DistanceLeft:    3.0,
 	}
 }
 
@@ -112,7 +81,7 @@ func TestWorldBasicOperations(t *testing.T) {
 
 func TestWorldMoveUnit(t *testing.T) {
 	// Create world with one unit at (1,2)
-	units := []TestUnit{{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3}}
+	units := []*v1.Unit{createTestUnit(1, 2, 1, 1)}
 	world := createTestWorld("test", units, nil)
 
 	unit := world.UnitAt(AxialCoord{Q: 1, R: 2})
@@ -152,7 +121,7 @@ func TestWorldMoveUnit(t *testing.T) {
 
 func TestWorldRemoveUnit(t *testing.T) {
 	// Create world with one unit
-	units := []TestUnit{{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3}}
+	units := []*v1.Unit{createTestUnit(1, 2, 1, 1)}
 	world := createTestWorld("test", units, nil)
 
 	unit := world.UnitAt(AxialCoord{Q: 1, R: 2})
@@ -177,7 +146,7 @@ func TestWorldRemoveUnit(t *testing.T) {
 
 func TestWorldPushPop(t *testing.T) {
 	// Create base world with a unit
-	units := []TestUnit{{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3}}
+	units := []*v1.Unit{createTestUnit(1, 2, 1, 1)}
 	baseWorld := createTestWorld("base", units, nil)
 
 	// Create transaction layer
@@ -217,7 +186,7 @@ func TestWorldPushPop(t *testing.T) {
 
 func TestWorldTransactionIsolation(t *testing.T) {
 	// Create base world with a unit
-	units := []TestUnit{{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3}}
+	units := []*v1.Unit{createTestUnit(1, 2, 1, 1)}
 	baseWorld := createTestWorld("base", units, nil)
 
 	// Create transaction layer
@@ -253,7 +222,7 @@ func TestWorldTransactionIsolation(t *testing.T) {
 
 func TestWorldUnitDeletion(t *testing.T) {
 	// Create base world with a unit
-	units := []TestUnit{{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3}}
+	units := []*v1.Unit{createTestUnit(1, 2, 1, 1)}
 	baseWorld := createTestWorld("base", units, nil)
 
 	// Create transaction layer
@@ -289,9 +258,9 @@ func TestWorldUnitDeletion(t *testing.T) {
 
 func TestWorldMergedIteration(t *testing.T) {
 	// Create base world with units
-	baseUnits := []TestUnit{
-		{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3},
-		{Q: 3, R: 4, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3},
+	baseUnits := []*v1.Unit{
+		createTestUnit(1, 2, 1, 1),
+		createTestUnit(3, 4, 1, 1),
 	}
 	baseWorld := createTestWorld("base", baseUnits, nil)
 
@@ -341,7 +310,7 @@ func TestWorldMergedIteration(t *testing.T) {
 // Test the specific move duplication bug we found
 func TestWorldMoveUnitNoDuplication(t *testing.T) {
 	// Create world with one unit
-	units := []TestUnit{{Q: 1, R: 2, Player: 1, UnitType: 1, Health: 100, DistanceLeft: 3}}
+	units := []*v1.Unit{createTestUnit(1, 2, 1, 1)}
 	world := createTestWorld("test", units, nil)
 
 	// Verify we have exactly 1 unit

@@ -202,6 +202,20 @@ message UnitDefinition {
   // Key format: "Light:Air", "Heavy:Land", "Stealth:Water", etc.
   // Value 0 or missing key means "n/a" (cannot attack)
   map<string, int32> attack_vs_class = 16;
+
+  // Ordered list of allowed actions this turn
+  // Examples:
+  //   ["move", "attack"] - can move then attack
+  //   ["move", "attack|capture"] - can move then either attack or capture
+  //   ["attack"] - can only attack (no movement)
+  // Default if empty: ["move", "attack|capture"]
+  repeated string action_order = 17;
+
+  // How many times each action type can be performed per turn
+  // Key: action name, Value: max count
+  // Example: {"attack": 2} means can attack twice
+  // Default if not specified: 1 per action type
+  map<string, int32> action_limits = 18;
 }
 
 // Properties that are specific to unit on a particular terrain

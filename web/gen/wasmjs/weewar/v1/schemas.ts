@@ -465,6 +465,17 @@ export const UnitDefinitionSchema: MessageSchema = {
       type: FieldType.STRING,
       id: 16,
     },
+    {
+      name: "actionOrder",
+      type: FieldType.REPEATED,
+      id: 17,
+      repeated: true,
+    },
+    {
+      name: "actionLimits",
+      type: FieldType.STRING,
+      id: 18,
+    },
   ],
 };
 

@@ -5,18 +5,18 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    GetWorldsRequest,
-    GetWorldsResponse,
-    UpdateWorldRequest,
+    DeleteWorldResponse,
     UpdateWorldResponse,
     CreateWorldRequest,
-    CreateWorldResponse,
-    ListWorldsRequest,
+    GetWorldsRequest,
     ListWorldsResponse,
+    DeleteWorldRequest,
+    UpdateWorldRequest,
+    CreateWorldResponse,
+    GetWorldsResponse,
+    ListWorldsRequest,
     GetWorldRequest,
     GetWorldResponse,
-    DeleteWorldRequest,
-    DeleteWorldResponse,
 } from './interfaces';
 /**
  * WorldsService service client interface

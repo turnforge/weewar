@@ -212,6 +212,18 @@ export interface UnitDefinition {
  Key format: "Light:Air", "Heavy:Land", "Stealth:Water", etc.
  Value 0 or missing key means "n/a" (cannot attack) */
   attackVsClass: Record<string, number>;
+  /** Ordered list of allowed actions this turn
+ Examples:
+   ["move", "attack"] - can move then attack
+   ["move", "attack|capture"] - can move then either attack or capture
+   ["attack"] - can only attack (no movement)
+ Default if empty: ["move", "attack|capture"] */
+  actionOrder: string[];
+  /** How many times each action type can be performed per turn
+ Key: action name, Value: max count
+ Example: {"attack": 2} means can attack twice
+ Default if not specified: 1 per action type */
+  actionLimits: Record<string, number>;
 }
 
 

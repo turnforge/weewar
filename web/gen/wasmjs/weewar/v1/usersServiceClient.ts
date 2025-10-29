@@ -8,15 +8,15 @@ import {
     ListUsersResponse,
     GetUserRequest,
     DeleteUserRequest,
-    UpdateUserResponse,
-    CreateUserRequest,
-    GetUsersResponse,
-    GetUserResponse,
     DeleteUserResponse,
-    UpdateUserRequest,
+    UpdateUserResponse,
     CreateUserResponse,
-    GetUsersRequest,
+    GetUsersResponse,
     ListUsersRequest,
+    GetUserResponse,
+    UpdateUserRequest,
+    CreateUserRequest,
+    GetUsersRequest,
 } from './interfaces';
 /**
  * UsersService service client interface

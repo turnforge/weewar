@@ -114,6 +114,39 @@
         ]
       }
     },
+    "/v1/games/simulate_attack": {
+      "post": {
+        "summary": "*\nSimulates combat between two units to generate damage distributions\nThis is a stateless utility method that doesn't require game state",
+        "operationId": "GamesService_SimulateAttack",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SimulateAttackResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SimulateAttackRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
     "/v1/games/{gameId}": {
       "patch": {
         "summary": "GetGame returns a specific game with metadata",
@@ -2275,6 +2308,83 @@
     },
     "v1ShowPathResponse": {
       "type": "object"
+    },
+    "v1SimulateAttackRequest": {
+      "type": "object",
+      "properties": {
+        "attackerUnitType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "attackerTerrain": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "attackerHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "defenderUnitType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "defenderTerrain": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "defenderHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "woundBonus": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numSimulations": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Default: 1000"
+        }
+      },
+      "title": "*\nRequest for simulating combat between two units"
+    },
+    "v1SimulateAttackResponse": {
+      "type": "object",
+      "properties": {
+        "attackerDamageDistribution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": "Damage distributions: damage_value -\u003e number_of_occurrences"
+        },
+        "defenderDamageDistribution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "attackerMeanDamage": {
+          "type": "number",
+          "format": "double",
+          "title": "Statistical summary"
+        },
+        "defenderMeanDamage": {
+          "type": "number",
+          "format": "double"
+        },
+        "attackerKillProbability": {
+          "type": "number",
+          "format": "double"
+        },
+        "defenderKillProbability": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "title": "*\nResponse containing damage distribution statistics"
     },
     "v1Tile": {
       "type": "object",

@@ -88,6 +88,17 @@ service GamesService {
       get: "/v1/games/{game_id}/options/{q}/{r}"
     };
   }
+
+  /**
+   * Simulates combat between two units to generate damage distributions
+   * This is a stateless utility method that doesn't require game state
+   */
+  rpc SimulateAttack(SimulateAttackRequest) returns (SimulateAttackResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/simulate_attack",
+      body: "*",
+    };
+  }
 }
 
 // GameInfo represents a game in the catalog
@@ -474,4 +485,33 @@ message CaptureBuildingOption {
   int32 q = 1;
   int32 r = 2;
   int32 tile_type = 3;
+}
+
+/**
+ * Request for simulating combat between two units
+ */
+message SimulateAttackRequest {
+  int32 attacker_unit_type = 1;
+  int32 attacker_terrain = 2;
+  int32 attacker_health = 3;
+  int32 defender_unit_type = 4;
+  int32 defender_terrain = 5;
+  int32 defender_health = 6;
+  int32 wound_bonus = 7;
+  int32 num_simulations = 8; // Default: 1000
+}
+
+/**
+ * Response containing damage distribution statistics
+ */
+message SimulateAttackResponse {
+  // Damage distributions: damage_value -> number_of_occurrences
+  map<int32, int32> attacker_damage_distribution = 1;
+  map<int32, int32> defender_damage_distribution = 2;
+
+  // Statistical summary
+  double attacker_mean_damage = 3;
+  double defender_mean_damage = 4;
+  double attacker_kill_probability = 5;
+  double defender_kill_probability = 6;
 }

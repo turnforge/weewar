@@ -65,6 +65,11 @@ class GamesServiceStub(object):
                 request_serializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtRequest.SerializeToString,
                 response_deserializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtResponse.FromString,
                 _registered_method=True)
+        self.SimulateAttack = channel.unary_unary(
+                '/weewar.v1.GamesService/SimulateAttack',
+                request_serializer=weewar_dot_v1_dot_games__pb2.SimulateAttackRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_games__pb2.SimulateAttackResponse.FromString,
+                _registered_method=True)
 
 
 class GamesServiceServicer(object):
@@ -142,6 +147,15 @@ class GamesServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SimulateAttack(self, request, context):
+        """*
+        Simulates combat between two units to generate damage distributions
+        This is a stateless utility method that doesn't require game state
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GamesServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -194,6 +208,11 @@ def add_GamesServiceServicer_to_server(servicer, server):
                     servicer.GetOptionsAt,
                     request_deserializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtRequest.FromString,
                     response_serializer=weewar_dot_v1_dot_games__pb2.GetOptionsAtResponse.SerializeToString,
+            ),
+            'SimulateAttack': grpc.unary_unary_rpc_method_handler(
+                    servicer.SimulateAttack,
+                    request_deserializer=weewar_dot_v1_dot_games__pb2.SimulateAttackRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_games__pb2.SimulateAttackResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -467,6 +486,33 @@ class GamesService(object):
             '/weewar.v1.GamesService/GetOptionsAt',
             weewar_dot_v1_dot_games__pb2.GetOptionsAtRequest.SerializeToString,
             weewar_dot_v1_dot_games__pb2.GetOptionsAtResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SimulateAttack(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/SimulateAttack',
+            weewar_dot_v1_dot_games__pb2.SimulateAttackRequest.SerializeToString,
+            weewar_dot_v1_dot_games__pb2.SimulateAttackResponse.FromString,
             options,
             channel_credentials,
             insecure,

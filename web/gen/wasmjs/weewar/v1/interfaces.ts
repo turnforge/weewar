@@ -922,6 +922,38 @@ export interface CaptureBuildingOption {
 }
 
 
+/**
+ * *
+ Request for simulating combat between two units
+ */
+export interface SimulateAttackRequest {
+  attackerUnitType: number;
+  attackerTerrain: number;
+  attackerHealth: number;
+  defenderUnitType: number;
+  defenderTerrain: number;
+  defenderHealth: number;
+  woundBonus: number;
+  numSimulations: number;
+}
+
+
+/**
+ * *
+ Response containing damage distribution statistics
+ */
+export interface SimulateAttackResponse {
+  /** Damage distributions: damage_value -> number_of_occurrences */
+  attackerDamageDistribution: Record<number, number>;
+  defenderDamageDistribution: Record<number, number>;
+  /** Statistical summary */
+  attackerMeanDamage: number;
+  defenderMeanDamage: number;
+  attackerKillProbability: number;
+  defenderKillProbability: number;
+}
+
+
 
 export interface EmptyRequest {
 }

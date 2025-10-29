@@ -22,11 +22,12 @@ type CombatContext struct {
 // CalculateHitProbability calculates the hit probability (p) using the attack formula
 // Formula: p = 0.05 * ( ( ( A + Ta ) - ( D + Td ) ) + B ) + 0.5
 // Where:
-//   A = Attack value of attacking unit
-//   Ta = Terrain attack bonus for attacker
-//   D = Defense value of defending unit
-//   Td = Terrain defense bonus for defender
-//   B = Wound bonus
+//
+//	A = Attack value of attacking unit
+//	Ta = Terrain attack bonus for attacker
+//	D = Defense value of defending unit
+//	Td = Terrain defense bonus for defender
+//	B = Wound bonus
 func (re *RulesEngine) CalculateHitProbability(ctx *CombatContext) (float64, error) {
 	// Get attacker unit definition
 	attackerDef, err := re.GetUnitData(ctx.Attacker.UnitType)
@@ -49,8 +50,8 @@ func (re *RulesEngine) CalculateHitProbability(ctx *CombatContext) (float64, err
 	}
 
 	// Get terrain bonuses
-	attackerTerrainProps := re.getTerrainUnitProperties(ctx.AttackerTile.TileType, ctx.Attacker.UnitType)
-	defenderTerrainProps := re.getTerrainUnitProperties(ctx.DefenderTile.TileType, ctx.Defender.UnitType)
+	attackerTerrainProps := re.GetTerrainUnitPropertiesForUnit(ctx.AttackerTile.TileType, ctx.Attacker.UnitType)
+	defenderTerrainProps := re.GetTerrainUnitPropertiesForUnit(ctx.DefenderTile.TileType, ctx.Defender.UnitType)
 
 	var Ta int32 = 0 // Terrain attack bonus for attacker
 	var Td int32 = 0 // Terrain defense bonus for defender
@@ -82,7 +83,8 @@ func (re *RulesEngine) CalculateHitProbability(ctx *CombatContext) (float64, err
 }
 
 // SimulateCombatDamage simulates combat damage by rolling dice according to the formula
-// For each health point (Ha) of the attacker, roll 6 dice
+// For each health unit (Ha) of the attacker, roll 6 dice
+// In WeeWar, each health unit = 10 HP, so 100 HP = 10 health units
 // Each die roll that's < p counts as a hit
 // Total damage = hits / 6
 func (re *RulesEngine) SimulateCombatDamage(ctx *CombatContext, rng *rand.Rand) (int32, error) {
@@ -91,14 +93,15 @@ func (re *RulesEngine) SimulateCombatDamage(ctx *CombatContext, rng *rand.Rand) 
 		return 0, err
 	}
 
-	// Roll 6 dice for each health point of the attacker
-	totalDice := ctx.AttackerHealth * 6
-	hits := int32(0)
+	// Roll 6 dice for each health unit of the attacker
+	hits := 0.0
 
-	for i := int32(0); i < totalDice; i++ {
-		roll := rng.Float64()
-		if roll < p {
-			hits++
+	for h := int32(0); h < ctx.AttackerHealth; h++ {
+		for i := 0; i < 6; i++ {
+			roll := rng.Float64()
+			if roll < p {
+				hits++
+			}
 		}
 	}
 
@@ -106,11 +109,11 @@ func (re *RulesEngine) SimulateCombatDamage(ctx *CombatContext, rng *rand.Rand) 
 	damage := hits / 6
 
 	// Cap damage at attacker's health (cannot deal more damage than you have health)
-	if damage > ctx.AttackerHealth {
-		damage = ctx.AttackerHealth
+	if damage > float64(ctx.AttackerHealth) {
+		return ctx.AttackerHealth, nil
 	}
 
-	return damage, nil
+	return int32(damage), nil
 }
 
 // GenerateDamageDistribution generates a damage distribution by running many simulations
@@ -177,8 +180,8 @@ func (re *RulesEngine) GenerateDamageDistribution(ctx *CombatContext, numSimulat
 	}, nil
 }
 
-// getTerrainUnitProperties is a helper to get terrain-unit properties
-func (re *RulesEngine) getTerrainUnitProperties(terrainID, unitID int32) *v1.TerrainUnitProperties {
+// GetTerrainUnitPropertiesForUnit is a helper to get terrain-unit properties
+func (re *RulesEngine) GetTerrainUnitPropertiesForUnit(terrainID, unitID int32) *v1.TerrainUnitProperties {
 	key := fmt.Sprintf("%d:%d", terrainID, unitID)
 	return re.TerrainUnitProperties[key]
 }

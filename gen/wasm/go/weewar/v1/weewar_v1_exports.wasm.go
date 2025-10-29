@@ -68,6 +68,9 @@ func (exports *Weewar_v1ServicesExports) RegisterAPI() {
 			"getOptionsAt": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gamesServiceGetOptionsAt(this, args)
 			}),
+			"simulateAttack": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gamesServiceSimulateAttack(this, args)
+			}),
 		},
 		"gameViewPresenter": map[string]interface{}{
 			"initializeGame": js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -605,6 +608,55 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetOptionsAt(this js.Value,
 
 	// Call service method
 	resp, err := exports.GamesService.GetOptionsAt(ctx, req)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: true,  // Emit zero values to avoid undefined in JavaScript
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// gamesServiceSimulateAttack handles the SimulateAttack method for GamesService
+func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Value, args []js.Value) any {
+	if exports.GamesService == nil {
+		return createJSResponse(false, "GamesService not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return createJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return createJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &weewarv1.SimulateAttackRequest{}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.GamesService.SimulateAttack(ctx, req)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

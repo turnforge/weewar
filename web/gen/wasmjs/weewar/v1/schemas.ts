@@ -2066,6 +2066,96 @@ export const CaptureBuildingOptionSchema: MessageSchema = {
 
 
 /**
+ * Schema for SimulateAttackRequest message
+ */
+export const SimulateAttackRequestSchema: MessageSchema = {
+  name: "SimulateAttackRequest",
+  fields: [
+    {
+      name: "attackerUnitType",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "attackerTerrain",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "attackerHealth",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "defenderUnitType",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
+    {
+      name: "defenderTerrain",
+      type: FieldType.NUMBER,
+      id: 5,
+    },
+    {
+      name: "defenderHealth",
+      type: FieldType.NUMBER,
+      id: 6,
+    },
+    {
+      name: "woundBonus",
+      type: FieldType.NUMBER,
+      id: 7,
+    },
+    {
+      name: "numSimulations",
+      type: FieldType.NUMBER,
+      id: 8,
+    },
+  ],
+};
+
+
+/**
+ * Schema for SimulateAttackResponse message
+ */
+export const SimulateAttackResponseSchema: MessageSchema = {
+  name: "SimulateAttackResponse",
+  fields: [
+    {
+      name: "attackerDamageDistribution",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "defenderDamageDistribution",
+      type: FieldType.STRING,
+      id: 2,
+    },
+    {
+      name: "attackerMeanDamage",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "defenderMeanDamage",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
+    {
+      name: "attackerKillProbability",
+      type: FieldType.NUMBER,
+      id: 5,
+    },
+    {
+      name: "defenderKillProbability",
+      type: FieldType.NUMBER,
+      id: 6,
+    },
+  ],
+};
+
+
+/**
  * Schema for EmptyRequest message
  */
 export const EmptyRequestSchema: MessageSchema = {
@@ -3483,6 +3573,8 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.AttackOption": AttackOptionSchema,
   "weewar.v1.BuildUnitOption": BuildUnitOptionSchema,
   "weewar.v1.CaptureBuildingOption": CaptureBuildingOptionSchema,
+  "weewar.v1.SimulateAttackRequest": SimulateAttackRequestSchema,
+  "weewar.v1.SimulateAttackResponse": SimulateAttackResponseSchema,
   "weewar.v1.EmptyRequest": EmptyRequestSchema,
   "weewar.v1.EmptyResponse": EmptyResponseSchema,
   "weewar.v1.SetContentRequest": SetContentRequestSchema,

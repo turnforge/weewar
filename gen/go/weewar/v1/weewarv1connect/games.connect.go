@@ -57,6 +57,9 @@ const (
 	// GamesServiceGetOptionsAtProcedure is the fully-qualified name of the GamesService's GetOptionsAt
 	// RPC.
 	GamesServiceGetOptionsAtProcedure = "/weewar.v1.GamesService/GetOptionsAt"
+	// GamesServiceSimulateAttackProcedure is the fully-qualified name of the GamesService's
+	// SimulateAttack RPC.
+	GamesServiceSimulateAttackProcedure = "/weewar.v1.GamesService/SimulateAttack"
 )
 
 // GamesServiceClient is a client for the weewar.v1.GamesService service.
@@ -82,6 +85,10 @@ type GamesServiceClient interface {
 	ListMoves(context.Context, *connect.Request[v1.ListMovesRequest]) (*connect.Response[v1.ListMovesResponse], error)
 	ProcessMoves(context.Context, *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error)
 	GetOptionsAt(context.Context, *connect.Request[v1.GetOptionsAtRequest]) (*connect.Response[v1.GetOptionsAtResponse], error)
+	// *
+	// Simulates combat between two units to generate damage distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateAttack(context.Context, *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error)
 }
 
 // NewGamesServiceClient constructs a client for the weewar.v1.GamesService service. By default, it
@@ -155,21 +162,28 @@ func NewGamesServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(gamesServiceMethods.ByName("GetOptionsAt")),
 			connect.WithClientOptions(opts...),
 		),
+		simulateAttack: connect.NewClient[v1.SimulateAttackRequest, v1.SimulateAttackResponse](
+			httpClient,
+			baseURL+GamesServiceSimulateAttackProcedure,
+			connect.WithSchema(gamesServiceMethods.ByName("SimulateAttack")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // gamesServiceClient implements GamesServiceClient.
 type gamesServiceClient struct {
-	createGame   *connect.Client[v1.CreateGameRequest, v1.CreateGameResponse]
-	getGames     *connect.Client[v1.GetGamesRequest, v1.GetGamesResponse]
-	listGames    *connect.Client[v1.ListGamesRequest, v1.ListGamesResponse]
-	getGame      *connect.Client[v1.GetGameRequest, v1.GetGameResponse]
-	deleteGame   *connect.Client[v1.DeleteGameRequest, v1.DeleteGameResponse]
-	updateGame   *connect.Client[v1.UpdateGameRequest, v1.UpdateGameResponse]
-	getGameState *connect.Client[v1.GetGameStateRequest, v1.GetGameStateResponse]
-	listMoves    *connect.Client[v1.ListMovesRequest, v1.ListMovesResponse]
-	processMoves *connect.Client[v1.ProcessMovesRequest, v1.ProcessMovesResponse]
-	getOptionsAt *connect.Client[v1.GetOptionsAtRequest, v1.GetOptionsAtResponse]
+	createGame     *connect.Client[v1.CreateGameRequest, v1.CreateGameResponse]
+	getGames       *connect.Client[v1.GetGamesRequest, v1.GetGamesResponse]
+	listGames      *connect.Client[v1.ListGamesRequest, v1.ListGamesResponse]
+	getGame        *connect.Client[v1.GetGameRequest, v1.GetGameResponse]
+	deleteGame     *connect.Client[v1.DeleteGameRequest, v1.DeleteGameResponse]
+	updateGame     *connect.Client[v1.UpdateGameRequest, v1.UpdateGameResponse]
+	getGameState   *connect.Client[v1.GetGameStateRequest, v1.GetGameStateResponse]
+	listMoves      *connect.Client[v1.ListMovesRequest, v1.ListMovesResponse]
+	processMoves   *connect.Client[v1.ProcessMovesRequest, v1.ProcessMovesResponse]
+	getOptionsAt   *connect.Client[v1.GetOptionsAtRequest, v1.GetOptionsAtResponse]
+	simulateAttack *connect.Client[v1.SimulateAttackRequest, v1.SimulateAttackResponse]
 }
 
 // CreateGame calls weewar.v1.GamesService.CreateGame.
@@ -222,6 +236,11 @@ func (c *gamesServiceClient) GetOptionsAt(ctx context.Context, req *connect.Requ
 	return c.getOptionsAt.CallUnary(ctx, req)
 }
 
+// SimulateAttack calls weewar.v1.GamesService.SimulateAttack.
+func (c *gamesServiceClient) SimulateAttack(ctx context.Context, req *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error) {
+	return c.simulateAttack.CallUnary(ctx, req)
+}
+
 // GamesServiceHandler is an implementation of the weewar.v1.GamesService service.
 type GamesServiceHandler interface {
 	// *
@@ -245,6 +264,10 @@ type GamesServiceHandler interface {
 	ListMoves(context.Context, *connect.Request[v1.ListMovesRequest]) (*connect.Response[v1.ListMovesResponse], error)
 	ProcessMoves(context.Context, *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error)
 	GetOptionsAt(context.Context, *connect.Request[v1.GetOptionsAtRequest]) (*connect.Response[v1.GetOptionsAtResponse], error)
+	// *
+	// Simulates combat between two units to generate damage distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateAttack(context.Context, *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error)
 }
 
 // NewGamesServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -314,6 +337,12 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(gamesServiceMethods.ByName("GetOptionsAt")),
 		connect.WithHandlerOptions(opts...),
 	)
+	gamesServiceSimulateAttackHandler := connect.NewUnaryHandler(
+		GamesServiceSimulateAttackProcedure,
+		svc.SimulateAttack,
+		connect.WithSchema(gamesServiceMethods.ByName("SimulateAttack")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/weewar.v1.GamesService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case GamesServiceCreateGameProcedure:
@@ -336,6 +365,8 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 			gamesServiceProcessMovesHandler.ServeHTTP(w, r)
 		case GamesServiceGetOptionsAtProcedure:
 			gamesServiceGetOptionsAtHandler.ServeHTTP(w, r)
+		case GamesServiceSimulateAttackProcedure:
+			gamesServiceSimulateAttackHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -383,4 +414,8 @@ func (UnimplementedGamesServiceHandler) ProcessMoves(context.Context, *connect.R
 
 func (UnimplementedGamesServiceHandler) GetOptionsAt(context.Context, *connect.Request[v1.GetOptionsAtRequest]) (*connect.Response[v1.GetOptionsAtResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.GetOptionsAt is not implemented"))
+}
+
+func (UnimplementedGamesServiceHandler) SimulateAttack(context.Context, *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.SimulateAttack is not implemented"))
 }

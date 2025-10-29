@@ -20,16 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GamesService_CreateGame_FullMethodName   = "/weewar.v1.GamesService/CreateGame"
-	GamesService_GetGames_FullMethodName     = "/weewar.v1.GamesService/GetGames"
-	GamesService_ListGames_FullMethodName    = "/weewar.v1.GamesService/ListGames"
-	GamesService_GetGame_FullMethodName      = "/weewar.v1.GamesService/GetGame"
-	GamesService_DeleteGame_FullMethodName   = "/weewar.v1.GamesService/DeleteGame"
-	GamesService_UpdateGame_FullMethodName   = "/weewar.v1.GamesService/UpdateGame"
-	GamesService_GetGameState_FullMethodName = "/weewar.v1.GamesService/GetGameState"
-	GamesService_ListMoves_FullMethodName    = "/weewar.v1.GamesService/ListMoves"
-	GamesService_ProcessMoves_FullMethodName = "/weewar.v1.GamesService/ProcessMoves"
-	GamesService_GetOptionsAt_FullMethodName = "/weewar.v1.GamesService/GetOptionsAt"
+	GamesService_CreateGame_FullMethodName     = "/weewar.v1.GamesService/CreateGame"
+	GamesService_GetGames_FullMethodName       = "/weewar.v1.GamesService/GetGames"
+	GamesService_ListGames_FullMethodName      = "/weewar.v1.GamesService/ListGames"
+	GamesService_GetGame_FullMethodName        = "/weewar.v1.GamesService/GetGame"
+	GamesService_DeleteGame_FullMethodName     = "/weewar.v1.GamesService/DeleteGame"
+	GamesService_UpdateGame_FullMethodName     = "/weewar.v1.GamesService/UpdateGame"
+	GamesService_GetGameState_FullMethodName   = "/weewar.v1.GamesService/GetGameState"
+	GamesService_ListMoves_FullMethodName      = "/weewar.v1.GamesService/ListMoves"
+	GamesService_ProcessMoves_FullMethodName   = "/weewar.v1.GamesService/ProcessMoves"
+	GamesService_GetOptionsAt_FullMethodName   = "/weewar.v1.GamesService/GetOptionsAt"
+	GamesService_SimulateAttack_FullMethodName = "/weewar.v1.GamesService/SimulateAttack"
 )
 
 // GamesServiceClient is the client API for GamesService service.
@@ -59,6 +60,10 @@ type GamesServiceClient interface {
 	ListMoves(ctx context.Context, in *ListMovesRequest, opts ...grpc.CallOption) (*ListMovesResponse, error)
 	ProcessMoves(ctx context.Context, in *ProcessMovesRequest, opts ...grpc.CallOption) (*ProcessMovesResponse, error)
 	GetOptionsAt(ctx context.Context, in *GetOptionsAtRequest, opts ...grpc.CallOption) (*GetOptionsAtResponse, error)
+	// *
+	// Simulates combat between two units to generate damage distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateAttack(ctx context.Context, in *SimulateAttackRequest, opts ...grpc.CallOption) (*SimulateAttackResponse, error)
 }
 
 type gamesServiceClient struct {
@@ -169,6 +174,16 @@ func (c *gamesServiceClient) GetOptionsAt(ctx context.Context, in *GetOptionsAtR
 	return out, nil
 }
 
+func (c *gamesServiceClient) SimulateAttack(ctx context.Context, in *SimulateAttackRequest, opts ...grpc.CallOption) (*SimulateAttackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SimulateAttackResponse)
+	err := c.cc.Invoke(ctx, GamesService_SimulateAttack_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GamesServiceServer is the server API for GamesService service.
 // All implementations should embed UnimplementedGamesServiceServer
 // for forward compatibility.
@@ -196,6 +211,10 @@ type GamesServiceServer interface {
 	ListMoves(context.Context, *ListMovesRequest) (*ListMovesResponse, error)
 	ProcessMoves(context.Context, *ProcessMovesRequest) (*ProcessMovesResponse, error)
 	GetOptionsAt(context.Context, *GetOptionsAtRequest) (*GetOptionsAtResponse, error)
+	// *
+	// Simulates combat between two units to generate damage distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateAttack(context.Context, *SimulateAttackRequest) (*SimulateAttackResponse, error)
 }
 
 // UnimplementedGamesServiceServer should be embedded to have
@@ -234,6 +253,9 @@ func (UnimplementedGamesServiceServer) ProcessMoves(context.Context, *ProcessMov
 }
 func (UnimplementedGamesServiceServer) GetOptionsAt(context.Context, *GetOptionsAtRequest) (*GetOptionsAtResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOptionsAt not implemented")
+}
+func (UnimplementedGamesServiceServer) SimulateAttack(context.Context, *SimulateAttackRequest) (*SimulateAttackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SimulateAttack not implemented")
 }
 func (UnimplementedGamesServiceServer) testEmbeddedByValue() {}
 
@@ -435,6 +457,24 @@ func _GamesService_GetOptionsAt_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GamesService_SimulateAttack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimulateAttackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).SimulateAttack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_SimulateAttack_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).SimulateAttack(ctx, req.(*SimulateAttackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GamesService_ServiceDesc is the grpc.ServiceDesc for GamesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -481,6 +521,10 @@ var GamesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOptionsAt",
 			Handler:    _GamesService_GetOptionsAt_Handler,
+		},
+		{
+			MethodName: "SimulateAttack",
+			Handler:    _GamesService_SimulateAttack_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

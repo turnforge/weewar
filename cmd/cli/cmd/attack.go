@@ -264,6 +264,118 @@ func generateCombatDiagnostics(
 		sb.WriteString(fmt.Sprintf("  Can Counter: NO (unit type cannot counter-attack)\n"))
 	}
 
+	// Formula-based calculations
+	sb.WriteString("\n" + strings.Repeat("-", 60) + "\n")
+	sb.WriteString("Formula-Based Calculations:\n")
+	sb.WriteString(strings.Repeat("-", 60) + "\n")
+
+	// Calculate wound bonus
+	woundBonus := rulesEngine.CalculateWoundBonus(defender, attackerCoord)
+
+	// Create combat context for attacker -> defender
+	attackerCtx := &services.CombatContext{
+		Attacker:       attacker,
+		AttackerTile:   attackerTile,
+		AttackerHealth: attackerHealth,
+		Defender:       defender,
+		DefenderTile:   defenderTile,
+		DefenderHealth: defenderHealth,
+		WoundBonus:     woundBonus,
+	}
+
+	// Calculate hit probability and show formula breakdown
+	p, err := rulesEngine.CalculateHitProbability(attackerCtx)
+	if err == nil {
+		sb.WriteString("\nAttacker -> Defender (Formula):\n")
+
+		// Get attack value from attack_vs_class table
+		attackKey := fmt.Sprintf("%s:%s", defenderData.UnitClass, defenderData.UnitTerrain)
+		baseAttack, hasAttack := attackerData.AttackVsClass[attackKey]
+
+		if hasAttack {
+			// Get terrain bonuses
+			attackerTerrainProps := rulesEngine.GetTerrainUnitPropertiesForUnit(attackerTile.TileType, attacker.UnitType)
+			defenderTerrainProps := rulesEngine.GetTerrainUnitPropertiesForUnit(defenderTile.TileType, defender.UnitType)
+
+			var attackBonus, defenseBonus int32
+			if attackerTerrainProps != nil {
+				attackBonus = attackerTerrainProps.AttackBonus
+			}
+			if defenderTerrainProps != nil {
+				defenseBonus = defenderTerrainProps.DefenseBonus
+			}
+
+			// Show formula breakdown
+			sb.WriteString("  Formula: p = 0.05 * (((A + Ta) - (D + Td)) + B) + 0.5\n")
+			sb.WriteString(fmt.Sprintf("    A (base attack vs %s:%s): %d\n", defenderData.UnitClass, defenderData.UnitTerrain, baseAttack))
+			sb.WriteString(fmt.Sprintf("    Ta (terrain attack bonus): %d\n", attackBonus))
+			sb.WriteString(fmt.Sprintf("    D (base defense): %d\n", defenderData.Defense))
+			sb.WriteString(fmt.Sprintf("    Td (terrain defense bonus): %d\n", defenseBonus))
+			sb.WriteString(fmt.Sprintf("    B (wound bonus): %d", woundBonus))
+			if woundBonus > 0 {
+				sb.WriteString(fmt.Sprintf(" [%d previous attack(s)]\n", len(defender.AttackHistory)))
+			} else {
+				sb.WriteString("\n")
+			}
+			sb.WriteString(fmt.Sprintf("  Hit Probability (p): %.2f (%.0f%%)\n", p, p*100))
+
+			// Expected damage calculation (health units = HP / 10)
+			healthUnits := attackerHealth / 10
+			if healthUnits == 0 {
+				healthUnits = 1
+			}
+			expectedHits := float64(healthUnits) * 6.0 * p
+			expectedDamage := expectedHits / 6.0
+			sb.WriteString(fmt.Sprintf("  Expected Damage: %.1f HP\n", expectedDamage))
+			sb.WriteString(fmt.Sprintf("    (%d HP = %d health units × 6 dice × %.2f = %.1f hits ÷ 6)\n",
+				attackerHealth, healthUnits, p, expectedHits))
+
+			// Compare with table-based prediction
+			if canAttack && attackDist != nil {
+				diff := expectedDamage - attackDist.ExpectedDamage
+				sb.WriteString(fmt.Sprintf("  Difference from table: %+.1f HP\n", diff))
+			}
+		} else {
+			sb.WriteString(fmt.Sprintf("  Cannot attack %s:%s units\n", defenderData.UnitClass, defenderData.UnitTerrain))
+		}
+	} else {
+		sb.WriteString(fmt.Sprintf("\n  Formula calculation error: %v\n", err))
+	}
+
+	// Counter-attack formula (no wound bonus)
+	if canCounter && counterDist != nil {
+		canReach, _ := rulesEngine.CanUnitAttackTarget(defender, attacker)
+		if canReach {
+			counterCtx := &services.CombatContext{
+				Attacker:       defender,
+				AttackerTile:   defenderTile,
+				AttackerHealth: defenderHealth,
+				Defender:       attacker,
+				DefenderTile:   attackerTile,
+				DefenderHealth: attackerHealth,
+				WoundBonus:     0, // No wound bonus for counter-attacks
+			}
+
+			counterP, err := rulesEngine.CalculateHitProbability(counterCtx)
+			if err == nil {
+				sb.WriteString("\nDefender -> Attacker (Counter Formula):\n")
+				sb.WriteString(fmt.Sprintf("  Hit Probability (p): %.2f (%.0f%%)\n", counterP, counterP*100))
+
+				counterHealthUnits := defenderHealth / 10
+				if counterHealthUnits == 0 {
+					counterHealthUnits = 1
+				}
+				counterExpectedHits := float64(counterHealthUnits) * 6.0 * counterP
+				counterExpectedDamage := counterExpectedHits / 6.0
+				sb.WriteString(fmt.Sprintf("  Expected Damage: %.1f HP\n", counterExpectedDamage))
+
+				// Compare with table
+				counterDiff := counterExpectedDamage - counterDist.ExpectedDamage
+				sb.WriteString(fmt.Sprintf("  Difference from table: %+.1f HP\n", counterDiff))
+			}
+		}
+	}
+
 	sb.WriteString("\n" + strings.Repeat("=", 60) + "\n\n")
 
 	return sb.String(), nil

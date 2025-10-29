@@ -29,22 +29,22 @@ func TestCalculateHitProbability(t *testing.T) {
 			name:         "Soldier vs Soldier on grass (no bonuses)",
 			attackerType: 1, // Soldier
 			defenderType: 1, // Soldier
-			attackerTile: 1, // Grass
-			defenderTile: 1, // Grass
+			attackerTile: 5, // Grass (was 1, should be 5)
+			defenderTile: 5, // Grass
 			woundBonus:   0,
-			// A=6 (Light:Land from soldier), Ta=0, D=3 (soldier defense), Td=0, B=0
-			// p = 0.05 * (((6+0)-(3+0))+0) + 0.5 = 0.05 * 3 + 0.5 = 0.65
-			expectedP: 0.65,
+			// A=6 (Light:Land from soldier), Ta=0, D=6 (soldier defense), Td=0, B=0
+			// p = 0.05 * (((6+0)-(6+0))+0) + 0.5 = 0.05 * 0 + 0.5 = 0.50
+			expectedP: 0.50,
 		},
 		{
 			name:         "Soldier vs Soldier with wound bonus",
 			attackerType: 1,
 			defenderType: 1,
-			attackerTile: 1,
-			defenderTile: 1,
+			attackerTile: 5,
+			defenderTile: 5,
 			woundBonus:   2,
-			// p = 0.05 * (((6+0)-(3+0))+2) + 0.5 = 0.05 * 5 + 0.5 = 0.75
-			expectedP: 0.75,
+			// p = 0.05 * (((6+0)-(6+0))+2) + 0.5 = 0.05 * 2 + 0.5 = 0.60
+			expectedP: 0.60,
 		},
 	}
 

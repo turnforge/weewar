@@ -5,26 +5,28 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    GetGameStateResponse,
-    CreateGameRequest,
-    CreateGameResponse,
-    GetGameStateRequest,
-    GetGamesResponse,
     UpdateGameResponse,
-    ListMovesRequest,
-    ProcessMovesRequest,
-    GetGamesRequest,
-    ListGamesResponse,
+    ListMovesResponse,
+    SimulateAttackResponse,
+    CreateGameRequest,
+    GetGamesResponse,
+    ListGamesRequest,
     DeleteGameRequest,
-    DeleteGameResponse,
     UpdateGameRequest,
+    GetGameStateRequest,
+    ListMovesRequest,
     ProcessMovesResponse,
+    CreateGameResponse,
+    GetGamesRequest,
+    GetGameRequest,
+    DeleteGameResponse,
+    GetGameStateResponse,
+    ProcessMovesRequest,
     GetOptionsAtRequest,
     GetOptionsAtResponse,
-    ListGamesRequest,
-    GetGameRequest,
+    ListGamesResponse,
     GetGameResponse,
-    ListMovesResponse,
+    SimulateAttackRequest,
 } from './interfaces';
 /**
  * GamesService service client interface
@@ -41,6 +43,7 @@ export interface GamesServiceMethods {
 	listMoves(request: ListMovesRequest): Promise<ListMovesResponse>;
 	processMoves(request: ProcessMovesRequest): Promise<ProcessMovesResponse>;
 	getOptionsAt(request: GetOptionsAtRequest): Promise<GetOptionsAtResponse>;
+	simulateAttack(request: SimulateAttackRequest): Promise<SimulateAttackResponse>;
 }
 /**
  * GamesService service client implementation
@@ -76,5 +79,8 @@ export class GamesServiceServiceClient extends ServiceClient implements GamesSer
     }
     async getOptionsAt(request: GetOptionsAtRequest): Promise<GetOptionsAtResponse> {
         return this.callMethod('gamesService.getOptionsAt', request);
+    }
+    async simulateAttack(request: SimulateAttackRequest): Promise<SimulateAttackResponse> {
+        return this.callMethod('gamesService.simulateAttack', request);
     }
 }

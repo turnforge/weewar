@@ -154,6 +154,11 @@ message Unit {
   // Details around wound bonus tracking for this turn
   int32 attacks_received_this_turn = 10;    // Total number of attacks received this turn
   repeated AttackRecord attack_history = 11; // Detailed attack history for wound bonus calculation
+
+  // Track actions performed this turn for progression (e.g., ["move", "attack"])
+  // Cleared on turn change via TopUpUnitIfNeeded()
+  // Used to determine which actions are still allowed based on UnitDefinition.action_order
+  repeated string actions_this_turn = 12;
 }
 
 message AttackRecord {

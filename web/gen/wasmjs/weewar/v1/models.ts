@@ -221,6 +221,10 @@ export class Unit implements UnitInterface {
   /** Details around wound bonus tracking for this turn */
   attacksReceivedThisTurn: number = 0;
   attackHistory: AttackRecord[] = [];
+  /** Track actions performed this turn for progression (e.g., ["move", "attack"])
+ Cleared on turn change via TopUpUnitIfNeeded()
+ Used to determine which actions are still allowed based on UnitDefinition.action_order */
+  actionsThisTurn: string[] = [];
 
   /**
    * Create and deserialize an instance from raw data

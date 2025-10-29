@@ -7,6 +7,14 @@
 package weewar
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"syscall/js"
+
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
+	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	wasm "github.com/panyam/protoc-gen-go-wasmjs/pkg/wasm"
 )
 

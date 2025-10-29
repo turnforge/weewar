@@ -8,10 +8,9 @@ package weewar
 
 import (
 	"context"
-
-	wasm "github.com/panyam/protoc-gen-go-wasmjs/pkg/wasm"
-	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	grpc "google.golang.org/grpc"
+	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
+	wasm "github.com/panyam/protoc-gen-go-wasmjs/pkg/wasm"
 )
 
 // =============================================================================

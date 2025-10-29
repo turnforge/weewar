@@ -309,6 +309,12 @@ export const UnitSchema: MessageSchema = {
       messageType: "weewar.v1.AttackRecord",
       repeated: true,
     },
+    {
+      name: "actionsThisTurn",
+      type: FieldType.REPEATED,
+      id: 12,
+      repeated: true,
+    },
   ],
 };
 

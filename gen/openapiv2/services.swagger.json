@@ -2493,6 +2493,13 @@
             "$ref": "#/definitions/v1AttackRecord"
           },
           "title": "Detailed attack history for wound bonus calculation"
+        },
+        "actionsThisTurn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Track actions performed this turn for progression (e.g., [\"move\", \"attack\"])\nCleared on turn change via TopUpUnitIfNeeded()\nUsed to determine which actions are still allowed based on UnitDefinition.action_order"
         }
       }
     },

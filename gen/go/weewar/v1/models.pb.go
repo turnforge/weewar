@@ -9,13 +9,12 @@
 package weewarv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -629,8 +628,12 @@ type Unit struct {
 	// Details around wound bonus tracking for this turn
 	AttacksReceivedThisTurn int32           `protobuf:"varint,10,opt,name=attacks_received_this_turn,json=attacksReceivedThisTurn,proto3" json:"attacks_received_this_turn,omitempty"` // Total number of attacks received this turn
 	AttackHistory           []*AttackRecord `protobuf:"bytes,11,rep,name=attack_history,json=attackHistory,proto3" json:"attack_history,omitempty"`                                    // Detailed attack history for wound bonus calculation
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	// Track actions performed this turn for progression (e.g., ["move", "attack"])
+	// Cleared on turn change via TopUpUnitIfNeeded()
+	// Used to determine which actions are still allowed based on UnitDefinition.action_order
+	ActionsThisTurn []string `protobuf:"bytes,12,rep,name=actions_this_turn,json=actionsThisTurn,proto3" json:"actions_this_turn,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Unit) Reset() {
@@ -736,6 +739,13 @@ func (x *Unit) GetAttacksReceivedThisTurn() int32 {
 func (x *Unit) GetAttackHistory() []*AttackRecord {
 	if x != nil {
 		return x.AttackHistory
+	}
+	return nil
+}
+
+func (x *Unit) GetActionsThisTurn() []string {
+	if x != nil {
+		return x.ActionsThisTurn
 	}
 	return nil
 }
@@ -2955,7 +2965,7 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\x06player\x18\x04 \x01(\x05R\x06player\x12\x1a\n" +
 	"\bshortcut\x18\x05 \x01(\tR\bshortcut\x12&\n" +
 	"\x0flast_acted_turn\x18\x06 \x01(\x05R\rlastActedTurn\x12,\n" +
-	"\x12last_toppedup_turn\x18\a \x01(\x05R\x10lastToppedupTurn\"\x96\x03\n" +
+	"\x12last_toppedup_turn\x18\a \x01(\x05R\x10lastToppedupTurn\"\xc2\x03\n" +
 	"\x04Unit\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x16\n" +
@@ -2968,7 +2978,8 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\x12last_toppedup_turn\x18\t \x01(\x05R\x10lastToppedupTurn\x12;\n" +
 	"\x1aattacks_received_this_turn\x18\n" +
 	" \x01(\x05R\x17attacksReceivedThisTurn\x12>\n" +
-	"\x0eattack_history\x18\v \x03(\v2\x17.weewar.v1.AttackRecordR\rattackHistory\"h\n" +
+	"\x0eattack_history\x18\v \x03(\v2\x17.weewar.v1.AttackRecordR\rattackHistory\x12*\n" +
+	"\x11actions_this_turn\x18\f \x03(\tR\x0factionsThisTurn\"h\n" +
 	"\fAttackRecord\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +

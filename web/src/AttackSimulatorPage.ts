@@ -4,6 +4,7 @@ import { LCMComponent } from '../lib/LCMComponent';
 import WeewarBundle from '../gen/wasmjs';
 import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
 import { SimulateAttackRequest, SimulateAttackResponse } from '../gen/wasmjs/weewar/v1/interfaces';
+import { LifecycleController } from '../lib/LifecycleController';
 import { ITheme } from '../assets/themes/BaseTheme';
 import DefaultTheme from '../assets/themes/default';
 
@@ -140,7 +141,7 @@ class AttackSimulatorPage extends BasePage {
             console.log('[AttackSimulator] Simulation result:', response);
 
             // Update visualizations
-            this.renderHexes(request);
+            await this.renderHexes(request);
             this.renderCharts(response);
             this.updateStats(response);
         } catch (error) {
@@ -150,6 +151,8 @@ class AttackSimulatorPage extends BasePage {
     }
 
     private async renderHexes(request: SimulateAttackRequest): Promise<void> {
+        console.log('[AttackSimulator] renderHexes - request:', request);
+
         // Clear containers
         this.attackerHexContainer.innerHTML = '';
         this.defenderHexContainer.innerHTML = '';
@@ -164,7 +167,9 @@ class AttackSimulatorPage extends BasePage {
         this.defenderHexContainer.appendChild(defenderTerrainDiv);
 
         // Render terrain tiles (player 0 = neutral for terrain)
+        console.log('[AttackSimulator] Loading attacker terrain:', request.attackerTerrain);
         await this.theme.setTileImage(request.attackerTerrain, 0, attackerTerrainDiv);
+        console.log('[AttackSimulator] Loading defender terrain:', request.defenderTerrain);
         await this.theme.setTileImage(request.defenderTerrain, 0, defenderTerrainDiv);
 
         // Create overlay divs for units on top of terrain
@@ -177,8 +182,11 @@ class AttackSimulatorPage extends BasePage {
         defenderTerrainDiv.appendChild(defenderUnitDiv);
 
         // Render unit images (player 1 = blue for attacker, player 2 = red for defender)
+        console.log('[AttackSimulator] Loading attacker unit:', request.attackerUnitType);
         await this.theme.setUnitImage(request.attackerUnitType, 1, attackerUnitDiv);
+        console.log('[AttackSimulator] Loading defender unit:', request.defenderUnitType);
         await this.theme.setUnitImage(request.defenderUnitType, 2, defenderUnitDiv);
+        console.log('[AttackSimulator] renderHexes complete');
 
         // Add health labels below the hex
         const attackerHealthLabel = document.createElement('div');
@@ -299,6 +307,12 @@ class AttackSimulatorPage extends BasePage {
 }
 
 // Initialize the page when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    (window as any).Page = new AttackSimulatorPage();
+document.addEventListener('DOMContentLoaded', async () => {
+    const page  = new AttackSimulatorPage();
+    
+    // Create lifecycle controller with debug logging
+    const lifecycleController = new LifecycleController(page.eventBus, LifecycleController.DefaultConfig)
+    
+    // Start breadth-first initialization
+    await lifecycleController.initializeFromRoot(page);
 });

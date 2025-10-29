@@ -305,21 +305,45 @@ func generateCombatDiagnostics(
 			}
 			sb.WriteString(fmt.Sprintf("  Hit Probability (p): %.2f (%.0f%%)\n", p, p*100))
 
-			// Expected damage calculation (health units = HP / 10)
-			healthUnits := attackerHealth / 10
-			if healthUnits == 0 {
-				healthUnits = 1
-			}
-			expectedHits := float64(healthUnits) * 6.0 * p
-			expectedDamage := expectedHits / 6.0
-			sb.WriteString(fmt.Sprintf("  Expected Damage: %.1f HP\n", expectedDamage))
-			sb.WriteString(fmt.Sprintf("    (%d HP = %d health units × 6 dice × %.2f = %.1f hits ÷ 6)\n",
-				attackerHealth, healthUnits, p, expectedHits))
+			// Generate damage distribution from simulations
+			dist, err := rulesEngine.GenerateDamageDistribution(attackerCtx, 10000)
+			if err == nil {
+				sb.WriteString(fmt.Sprintf("  Expected Damage: %.1f HP (from 10,000 simulations)\n", dist.ExpectedDamage))
+				sb.WriteString(fmt.Sprintf("  Damage Range: %.0f-%.0f HP\n", dist.MinDamage, dist.MaxDamage))
 
-			// Compare with table-based prediction
-			if canAttack && attackDist != nil {
-				diff := expectedDamage - attackDist.ExpectedDamage
-				sb.WriteString(fmt.Sprintf("  Difference from table: %+.1f HP\n", diff))
+				// Show top damage probabilities
+				if len(dist.Ranges) > 0 {
+					sb.WriteString("  Most Likely Outcomes:\n")
+					// Sort ranges by probability (descending) and show top 5
+					type rangeProb struct {
+						damage float64
+						prob   float64
+					}
+					sorted := make([]rangeProb, len(dist.Ranges))
+					for i, r := range dist.Ranges {
+						sorted[i] = rangeProb{damage: r.MinValue, prob: r.Probability}
+					}
+					// Simple bubble sort (good enough for small arrays)
+					for i := 0; i < len(sorted); i++ {
+						for j := i + 1; j < len(sorted); j++ {
+							if sorted[j].prob > sorted[i].prob {
+								sorted[i], sorted[j] = sorted[j], sorted[i]
+							}
+						}
+					}
+					// Show top 5
+					for i := 0; i < len(sorted) && i < 5; i++ {
+						sb.WriteString(fmt.Sprintf("    %.0f HP: %.1f%%\n", sorted[i].damage, sorted[i].prob*100))
+					}
+				}
+
+				// Compare with table-based prediction
+				if canAttack && attackDist != nil {
+					diff := dist.ExpectedDamage - attackDist.ExpectedDamage
+					sb.WriteString(fmt.Sprintf("  Difference from table: %+.1f HP\n", diff))
+				}
+			} else {
+				sb.WriteString(fmt.Sprintf("  Error generating distribution: %v\n", err))
 			}
 		} else {
 			sb.WriteString(fmt.Sprintf("  Cannot attack %s:%s units\n", defenderData.UnitClass, defenderData.UnitTerrain))
@@ -347,17 +371,22 @@ func generateCombatDiagnostics(
 				sb.WriteString("\nDefender -> Attacker (Counter Formula):\n")
 				sb.WriteString(fmt.Sprintf("  Hit Probability (p): %.2f (%.0f%%)\n", counterP, counterP*100))
 
-				counterHealthUnits := defenderHealth / 10
-				if counterHealthUnits == 0 {
-					counterHealthUnits = 1
-				}
-				counterExpectedHits := float64(counterHealthUnits) * 6.0 * counterP
-				counterExpectedDamage := counterExpectedHits / 6.0
-				sb.WriteString(fmt.Sprintf("  Expected Damage: %.1f HP\n", counterExpectedDamage))
+				// Generate counter damage distribution
+				counterDist, err := rulesEngine.GenerateDamageDistribution(counterCtx, 10000)
+				if err == nil {
+					sb.WriteString(fmt.Sprintf("  Expected Damage: %.1f HP (from 10,000 simulations)\n", counterDist.ExpectedDamage))
+					sb.WriteString(fmt.Sprintf("  Damage Range: %.0f-%.0f HP\n", counterDist.MinDamage, counterDist.MaxDamage))
 
-				// Compare with table
-				counterDiff := counterExpectedDamage - counterDist.ExpectedDamage
-				sb.WriteString(fmt.Sprintf("  Difference from table: %+.1f HP\n", counterDiff))
+					// Compare with table
+					if counterDist != nil {
+						// Get original table distribution
+						tableDist, _ := rulesEngine.GetCombatPrediction(defender.UnitType, attacker.UnitType)
+						if tableDist != nil {
+							diff := counterDist.ExpectedDamage - tableDist.ExpectedDamage
+							sb.WriteString(fmt.Sprintf("  Difference from table: %+.1f HP\n", diff))
+						}
+					}
+				}
 			}
 		}
 	}

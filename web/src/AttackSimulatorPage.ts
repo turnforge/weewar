@@ -4,6 +4,8 @@ import { LCMComponent } from '../lib/LCMComponent';
 import WeewarBundle from '../gen/wasmjs';
 import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
 import { SimulateAttackRequest, SimulateAttackResponse } from '../gen/wasmjs/weewar/v1/interfaces';
+import { ITheme } from '../assets/themes/BaseTheme';
+import DefaultTheme from '../assets/themes/default';
 
 /**
  * Attack Simulator Page - Interactive combat simulator
@@ -12,10 +14,11 @@ import { SimulateAttackRequest, SimulateAttackResponse } from '../gen/wasmjs/wee
 class AttackSimulatorPage extends BasePage {
     private wasmBundle: WeewarBundle | null = null;
     private gamesServiceClient: GamesServiceServiceClient | null = null;
+    private theme: ITheme;
 
-    // Canvas elements
-    private attackerHexCanvas: HTMLCanvasElement;
-    private defenderHexCanvas: HTMLCanvasElement;
+    // Canvas/container elements
+    private attackerHexContainer: HTMLElement;
+    private defenderHexContainer: HTMLElement;
     private attackerChartCanvas: HTMLCanvasElement;
     private defenderChartCanvas: HTMLCanvasElement;
 
@@ -38,13 +41,14 @@ class AttackSimulatorPage extends BasePage {
 
     constructor() {
         super('attack-simulator-page', new EventBus(), false);
+        this.theme = new DefaultTheme();
     }
 
     // Override lifecycle methods from BasePage
     protected override initializeSpecificComponents(): LCMComponent[] {
-        // Get canvas elements
-        this.attackerHexCanvas = document.getElementById('attacker-hex') as HTMLCanvasElement;
-        this.defenderHexCanvas = document.getElementById('defender-hex') as HTMLCanvasElement;
+        // Get container elements
+        this.attackerHexContainer = document.getElementById('attacker-hex-container')!;
+        this.defenderHexContainer = document.getElementById('defender-hex-container')!;
         this.attackerChartCanvas = document.getElementById('attacker-chart') as HTMLCanvasElement;
         this.defenderChartCanvas = document.getElementById('defender-chart') as HTMLCanvasElement;
 
@@ -145,89 +149,53 @@ class AttackSimulatorPage extends BasePage {
         }
     }
 
-    private renderHexes(request: SimulateAttackRequest): void {
-        // Render attacker hex
-        this.drawHex(
-            this.attackerHexCanvas,
-            this.getTerrainName(request.attackerTerrain),
-            this.getUnitName(request.attackerUnitType),
-            request.attackerHealth,
-            '#3b82f6' // Blue for attacker
-        );
+    private async renderHexes(request: SimulateAttackRequest): Promise<void> {
+        // Clear containers
+        this.attackerHexContainer.innerHTML = '';
+        this.defenderHexContainer.innerHTML = '';
 
-        // Render defender hex
-        this.drawHex(
-            this.defenderHexCanvas,
-            this.getTerrainName(request.defenderTerrain),
-            this.getUnitName(request.defenderUnitType),
-            request.defenderHealth,
-            '#ef4444' // Red for defender
-        );
-    }
+        // Create container divs for terrain and unit
+        const attackerTerrainDiv = document.createElement('div');
+        attackerTerrainDiv.className = 'relative w-32 h-32 mx-auto';
+        this.attackerHexContainer.appendChild(attackerTerrainDiv);
 
-    private drawHex(
-        canvas: HTMLCanvasElement,
-        terrainName: string,
-        unitName: string,
-        health: number,
-        color: string
-    ): void {
-        const ctx = canvas.getContext('2d')!;
-        const width = canvas.width;
-        const height = canvas.height;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const size = 60;
+        const defenderTerrainDiv = document.createElement('div');
+        defenderTerrainDiv.className = 'relative w-32 h-32 mx-auto';
+        this.defenderHexContainer.appendChild(defenderTerrainDiv);
 
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height);
+        // Render terrain tiles (player 0 = neutral for terrain)
+        await this.theme.setTileImage(request.attackerTerrain, 0, attackerTerrainDiv);
+        await this.theme.setTileImage(request.defenderTerrain, 0, defenderTerrainDiv);
 
-        // Draw hexagon
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 3) * i - Math.PI / 2;
-            const x = centerX + size * Math.cos(angle);
-            const y = centerY + size * Math.sin(angle);
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        }
-        ctx.closePath();
+        // Create overlay divs for units on top of terrain
+        const attackerUnitDiv = document.createElement('div');
+        attackerUnitDiv.className = 'absolute inset-0 w-full h-full';
+        attackerTerrainDiv.appendChild(attackerUnitDiv);
 
-        // Fill with terrain-based color
-        ctx.fillStyle = this.getTerrainColor(terrainName);
-        ctx.fill();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        const defenderUnitDiv = document.createElement('div');
+        defenderUnitDiv.className = 'absolute inset-0 w-full h-full';
+        defenderTerrainDiv.appendChild(defenderUnitDiv);
 
-        // Draw unit name
-        ctx.fillStyle = isDarkMode() ? '#fff' : '#000';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(unitName, centerX, centerY - 10);
+        // Render unit images (player 1 = blue for attacker, player 2 = red for defender)
+        await this.theme.setUnitImage(request.attackerUnitType, 1, attackerUnitDiv);
+        await this.theme.setUnitImage(request.defenderUnitType, 2, defenderUnitDiv);
 
-        // Draw health
-        ctx.font = '12px sans-serif';
-        ctx.fillText(`HP: ${health}`, centerX, centerY + 10);
-    }
+        // Add health labels below the hex
+        const attackerHealthLabel = document.createElement('div');
+        attackerHealthLabel.className = 'text-center mt-2 font-semibold text-gray-900 dark:text-white';
+        attackerHealthLabel.textContent = `HP: ${request.attackerHealth}`;
+        this.attackerHexContainer.appendChild(attackerHealthLabel);
 
-    private getTerrainColor(terrainName: string): string {
-        const colors: Record<string, string> = {
-            'Grass': '#90EE90',
-            'Mountain': '#A0522D',
-            'Water': '#4682B4',
-            'Desert': '#F4A460',
-            'Swamp': '#556B2F',
-            'Forest': '#228B22',
-        };
-        return colors[terrainName] || '#CCC';
+        const defenderHealthLabel = document.createElement('div');
+        defenderHealthLabel.className = 'text-center mt-2 font-semibold text-gray-900 dark:text-white';
+        defenderHealthLabel.textContent = `HP: ${request.defenderHealth}`;
+        this.defenderHexContainer.appendChild(defenderHealthLabel);
     }
 
     private renderCharts(response: SimulateAttackResponse): void {
+        console.log('[AttackSimulator] renderCharts - attacker dist:', response.attackerDamageDistribution);
+        console.log('[AttackSimulator] renderCharts - defender dist:', response.defenderDamageDistribution);
+
         // Render attacker damage distribution
         this.drawBarChart(
             this.attackerChartCanvas,
@@ -251,6 +219,8 @@ class AttackSimulatorPage extends BasePage {
         title: string,
         color: string
     ): void {
+        console.log(`[AttackSimulator] drawBarChart - ${title}:`, distribution);
+
         const ctx = canvas.getContext('2d')!;
         const width = canvas.width;
         const height = canvas.height;
@@ -263,7 +233,10 @@ class AttackSimulatorPage extends BasePage {
             .map(([damage, count]) => ({ damage: parseInt(damage), count }))
             .sort((a, b) => a.damage - b.damage);
 
+        console.log(`[AttackSimulator] drawBarChart - ${title} data array:`, data);
+
         if (data.length === 0) {
+            console.warn(`[AttackSimulator] drawBarChart - ${title} has no data!`);
             return;
         }
 
@@ -288,14 +261,14 @@ class AttackSimulatorPage extends BasePage {
             ctx.fillRect(x, y, barWidth * 0.8, barHeight);
 
             // Draw damage value below bar
-            ctx.fillStyle = isDarkMode() ? '#fff' : '#000';
+            ctx.fillStyle = this.isDarkMode() ? '#fff' : '#000';
             ctx.font = '10px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(d.damage.toString(), x + barWidth * 0.4, height - padding + 15);
         });
 
         // Draw axes
-        ctx.strokeStyle = isDarkMode() ? '#666' : '#ccc';
+        ctx.strokeStyle = this.isDarkMode() ? '#666' : '#ccc';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(padding, height - padding);
@@ -323,10 +296,6 @@ class AttackSimulatorPage extends BasePage {
                        this.defenderTerrainSelect.querySelector(`option[value="${terrainId}"]`);
         return option?.textContent || 'Unknown';
     }
-}
-
-function isDarkMode(): boolean {
-    return document.documentElement.classList.contains('dark');
 }
 
 // Initialize the page when DOM is ready

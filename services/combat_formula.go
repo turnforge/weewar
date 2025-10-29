@@ -96,8 +96,8 @@ func (re *RulesEngine) SimulateCombatDamage(ctx *CombatContext, rng *rand.Rand) 
 	// Roll 6 dice for each health unit of the attacker
 	hits := 0.0
 
-	for h := int32(0); h < ctx.AttackerHealth; h++ {
-		for i := 0; i < 6; i++ {
+	for range ctx.AttackerHealth {
+		for range 6 {
 			roll := rng.Float64()
 			if roll < p {
 				hits++
@@ -134,7 +134,7 @@ func (re *RulesEngine) GenerateDamageDistribution(ctx *CombatContext, numSimulat
 	damageCounts := make(map[int32]int)
 	totalDamage := float64(0)
 
-	for i := 0; i < numSimulations; i++ {
+	for range numSimulations {
 		damage, err := re.SimulateCombatDamage(ctx, simRng)
 		if err != nil {
 			return nil, err

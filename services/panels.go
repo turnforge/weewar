@@ -119,6 +119,31 @@ func (b *BaseGameScene) ShowHighlights(_ context.Context, h *v1.ShowHighlightsRe
 	b.CurrentHighlightsRequest = h
 }
 
+// Animation methods - no-ops for CLI
+func (b *BaseGameScene) MoveUnit(_ context.Context, _ *v1.MoveUnitAnimationRequest) (*v1.MoveUnitAnimationResponse, error) {
+	return &v1.MoveUnitAnimationResponse{}, nil
+}
+
+func (b *BaseGameScene) ShowAttackEffect(_ context.Context, _ *v1.ShowAttackEffectRequest) (*v1.ShowAttackEffectResponse, error) {
+	return &v1.ShowAttackEffectResponse{}, nil
+}
+
+func (b *BaseGameScene) ShowHealEffect(_ context.Context, _ *v1.ShowHealEffectRequest) (*v1.ShowHealEffectResponse, error) {
+	return &v1.ShowHealEffectResponse{}, nil
+}
+
+func (b *BaseGameScene) ShowCaptureEffect(_ context.Context, _ *v1.ShowCaptureEffectRequest) (*v1.ShowCaptureEffectResponse, error) {
+	return &v1.ShowCaptureEffectResponse{}, nil
+}
+
+func (b *BaseGameScene) SetUnitAt(_ context.Context, _ *v1.SetUnitAtAnimationRequest) (*v1.SetUnitAtAnimationResponse, error) {
+	return &v1.SetUnitAtAnimationResponse{}, nil
+}
+
+func (b *BaseGameScene) RemoveUnitAt(_ context.Context, _ *v1.RemoveUnitAtAnimationRequest) (*v1.RemoveUnitAtAnimationResponse, error) {
+	return &v1.RemoveUnitAtAnimationResponse{}, nil
+}
+
 type BaseTurnOptionsPanel struct {
 	BaseUnitPanel
 	Options *v1.GetOptionsAtResponse

@@ -34,6 +34,12 @@ const (
 	GameViewerPage_ClearHighlights_FullMethodName              = "/weewar.v1.GameViewerPage/ClearHighlights"
 	GameViewerPage_ShowPath_FullMethodName                     = "/weewar.v1.GameViewerPage/ShowPath"
 	GameViewerPage_ClearPaths_FullMethodName                   = "/weewar.v1.GameViewerPage/ClearPaths"
+	GameViewerPage_MoveUnitAnimation_FullMethodName            = "/weewar.v1.GameViewerPage/MoveUnitAnimation"
+	GameViewerPage_ShowAttackEffect_FullMethodName             = "/weewar.v1.GameViewerPage/ShowAttackEffect"
+	GameViewerPage_ShowHealEffect_FullMethodName               = "/weewar.v1.GameViewerPage/ShowHealEffect"
+	GameViewerPage_ShowCaptureEffect_FullMethodName            = "/weewar.v1.GameViewerPage/ShowCaptureEffect"
+	GameViewerPage_SetUnitAtAnimation_FullMethodName           = "/weewar.v1.GameViewerPage/SetUnitAtAnimation"
+	GameViewerPage_RemoveUnitAtAnimation_FullMethodName        = "/weewar.v1.GameViewerPage/RemoveUnitAtAnimation"
 	GameViewerPage_LogMessage_FullMethodName                   = "/weewar.v1.GameViewerPage/LogMessage"
 )
 
@@ -59,6 +65,13 @@ type GameViewerPageClient interface {
 	ClearHighlights(ctx context.Context, in *ClearHighlightsRequest, opts ...grpc.CallOption) (*ClearHighlightsResponse, error)
 	ShowPath(ctx context.Context, in *ShowPathRequest, opts ...grpc.CallOption) (*ShowPathResponse, error)
 	ClearPaths(ctx context.Context, in *ClearPathsRequest, opts ...grpc.CallOption) (*ClearPathsResponse, error)
+	// Animation methods
+	MoveUnitAnimation(ctx context.Context, in *MoveUnitAnimationRequest, opts ...grpc.CallOption) (*MoveUnitAnimationResponse, error)
+	ShowAttackEffect(ctx context.Context, in *ShowAttackEffectRequest, opts ...grpc.CallOption) (*ShowAttackEffectResponse, error)
+	ShowHealEffect(ctx context.Context, in *ShowHealEffectRequest, opts ...grpc.CallOption) (*ShowHealEffectResponse, error)
+	ShowCaptureEffect(ctx context.Context, in *ShowCaptureEffectRequest, opts ...grpc.CallOption) (*ShowCaptureEffectResponse, error)
+	SetUnitAtAnimation(ctx context.Context, in *SetUnitAtAnimationRequest, opts ...grpc.CallOption) (*SetUnitAtAnimationResponse, error)
+	RemoveUnitAtAnimation(ctx context.Context, in *RemoveUnitAtAnimationRequest, opts ...grpc.CallOption) (*RemoveUnitAtAnimationResponse, error)
 	// Utility methods
 	LogMessage(ctx context.Context, in *LogMessageRequest, opts ...grpc.CallOption) (*LogMessageResponse, error)
 }
@@ -211,6 +224,66 @@ func (c *gameViewerPageClient) ClearPaths(ctx context.Context, in *ClearPathsReq
 	return out, nil
 }
 
+func (c *gameViewerPageClient) MoveUnitAnimation(ctx context.Context, in *MoveUnitAnimationRequest, opts ...grpc.CallOption) (*MoveUnitAnimationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MoveUnitAnimationResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_MoveUnitAnimation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameViewerPageClient) ShowAttackEffect(ctx context.Context, in *ShowAttackEffectRequest, opts ...grpc.CallOption) (*ShowAttackEffectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShowAttackEffectResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_ShowAttackEffect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameViewerPageClient) ShowHealEffect(ctx context.Context, in *ShowHealEffectRequest, opts ...grpc.CallOption) (*ShowHealEffectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShowHealEffectResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_ShowHealEffect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameViewerPageClient) ShowCaptureEffect(ctx context.Context, in *ShowCaptureEffectRequest, opts ...grpc.CallOption) (*ShowCaptureEffectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShowCaptureEffectResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_ShowCaptureEffect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameViewerPageClient) SetUnitAtAnimation(ctx context.Context, in *SetUnitAtAnimationRequest, opts ...grpc.CallOption) (*SetUnitAtAnimationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetUnitAtAnimationResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_SetUnitAtAnimation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameViewerPageClient) RemoveUnitAtAnimation(ctx context.Context, in *RemoveUnitAtAnimationRequest, opts ...grpc.CallOption) (*RemoveUnitAtAnimationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveUnitAtAnimationResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_RemoveUnitAtAnimation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gameViewerPageClient) LogMessage(ctx context.Context, in *LogMessageRequest, opts ...grpc.CallOption) (*LogMessageResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LogMessageResponse)
@@ -243,6 +316,13 @@ type GameViewerPageServer interface {
 	ClearHighlights(context.Context, *ClearHighlightsRequest) (*ClearHighlightsResponse, error)
 	ShowPath(context.Context, *ShowPathRequest) (*ShowPathResponse, error)
 	ClearPaths(context.Context, *ClearPathsRequest) (*ClearPathsResponse, error)
+	// Animation methods
+	MoveUnitAnimation(context.Context, *MoveUnitAnimationRequest) (*MoveUnitAnimationResponse, error)
+	ShowAttackEffect(context.Context, *ShowAttackEffectRequest) (*ShowAttackEffectResponse, error)
+	ShowHealEffect(context.Context, *ShowHealEffectRequest) (*ShowHealEffectResponse, error)
+	ShowCaptureEffect(context.Context, *ShowCaptureEffectRequest) (*ShowCaptureEffectResponse, error)
+	SetUnitAtAnimation(context.Context, *SetUnitAtAnimationRequest) (*SetUnitAtAnimationResponse, error)
+	RemoveUnitAtAnimation(context.Context, *RemoveUnitAtAnimationRequest) (*RemoveUnitAtAnimationResponse, error)
 	// Utility methods
 	LogMessage(context.Context, *LogMessageRequest) (*LogMessageResponse, error)
 }
@@ -295,6 +375,24 @@ func (UnimplementedGameViewerPageServer) ShowPath(context.Context, *ShowPathRequ
 }
 func (UnimplementedGameViewerPageServer) ClearPaths(context.Context, *ClearPathsRequest) (*ClearPathsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearPaths not implemented")
+}
+func (UnimplementedGameViewerPageServer) MoveUnitAnimation(context.Context, *MoveUnitAnimationRequest) (*MoveUnitAnimationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveUnitAnimation not implemented")
+}
+func (UnimplementedGameViewerPageServer) ShowAttackEffect(context.Context, *ShowAttackEffectRequest) (*ShowAttackEffectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ShowAttackEffect not implemented")
+}
+func (UnimplementedGameViewerPageServer) ShowHealEffect(context.Context, *ShowHealEffectRequest) (*ShowHealEffectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ShowHealEffect not implemented")
+}
+func (UnimplementedGameViewerPageServer) ShowCaptureEffect(context.Context, *ShowCaptureEffectRequest) (*ShowCaptureEffectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ShowCaptureEffect not implemented")
+}
+func (UnimplementedGameViewerPageServer) SetUnitAtAnimation(context.Context, *SetUnitAtAnimationRequest) (*SetUnitAtAnimationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetUnitAtAnimation not implemented")
+}
+func (UnimplementedGameViewerPageServer) RemoveUnitAtAnimation(context.Context, *RemoveUnitAtAnimationRequest) (*RemoveUnitAtAnimationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveUnitAtAnimation not implemented")
 }
 func (UnimplementedGameViewerPageServer) LogMessage(context.Context, *LogMessageRequest) (*LogMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogMessage not implemented")
@@ -571,6 +669,114 @@ func _GameViewerPage_ClearPaths_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameViewerPage_MoveUnitAnimation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveUnitAnimationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).MoveUnitAnimation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_MoveUnitAnimation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).MoveUnitAnimation(ctx, req.(*MoveUnitAnimationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameViewerPage_ShowAttackEffect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShowAttackEffectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).ShowAttackEffect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_ShowAttackEffect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).ShowAttackEffect(ctx, req.(*ShowAttackEffectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameViewerPage_ShowHealEffect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShowHealEffectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).ShowHealEffect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_ShowHealEffect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).ShowHealEffect(ctx, req.(*ShowHealEffectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameViewerPage_ShowCaptureEffect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShowCaptureEffectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).ShowCaptureEffect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_ShowCaptureEffect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).ShowCaptureEffect(ctx, req.(*ShowCaptureEffectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameViewerPage_SetUnitAtAnimation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetUnitAtAnimationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).SetUnitAtAnimation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_SetUnitAtAnimation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).SetUnitAtAnimation(ctx, req.(*SetUnitAtAnimationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameViewerPage_RemoveUnitAtAnimation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveUnitAtAnimationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).RemoveUnitAtAnimation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_RemoveUnitAtAnimation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).RemoveUnitAtAnimation(ctx, req.(*RemoveUnitAtAnimationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GameViewerPage_LogMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LogMessageRequest)
 	if err := dec(in); err != nil {
@@ -651,6 +857,30 @@ var GameViewerPage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClearPaths",
 			Handler:    _GameViewerPage_ClearPaths_Handler,
+		},
+		{
+			MethodName: "MoveUnitAnimation",
+			Handler:    _GameViewerPage_MoveUnitAnimation_Handler,
+		},
+		{
+			MethodName: "ShowAttackEffect",
+			Handler:    _GameViewerPage_ShowAttackEffect_Handler,
+		},
+		{
+			MethodName: "ShowHealEffect",
+			Handler:    _GameViewerPage_ShowHealEffect_Handler,
+		},
+		{
+			MethodName: "ShowCaptureEffect",
+			Handler:    _GameViewerPage_ShowCaptureEffect_Handler,
+		},
+		{
+			MethodName: "SetUnitAtAnimation",
+			Handler:    _GameViewerPage_SetUnitAtAnimation_Handler,
+		},
+		{
+			MethodName: "RemoveUnitAtAnimation",
+			Handler:    _GameViewerPage_RemoveUnitAtAnimation_Handler,
 		},
 		{
 			MethodName: "LogMessage",

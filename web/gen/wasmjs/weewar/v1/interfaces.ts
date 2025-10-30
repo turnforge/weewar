@@ -1173,6 +1173,116 @@ export interface ClearPathsResponse {
 
 
 /**
+ * Request to animate unit movement along a path
+ */
+export interface MoveUnitAnimationRequest {
+  unit?: Unit;
+  path?: HexCoord[];
+}
+
+
+
+export interface MoveUnitAnimationResponse {
+}
+
+
+/**
+ * Hex coordinate for paths
+ */
+export interface HexCoord {
+  q: number;
+  r: number;
+}
+
+
+/**
+ * Request to show attack effect animation
+ */
+export interface ShowAttackEffectRequest {
+  fromQ: number;
+  fromR: number;
+  toQ: number;
+  toR: number;
+  damage: number;
+  splashTargets?: SplashTarget[];
+}
+
+
+
+export interface SplashTarget {
+  q: number;
+  r: number;
+  damage: number;
+}
+
+
+
+export interface ShowAttackEffectResponse {
+}
+
+
+/**
+ * Request to show heal effect animation
+ */
+export interface ShowHealEffectRequest {
+  q: number;
+  r: number;
+  amount: number;
+}
+
+
+
+export interface ShowHealEffectResponse {
+}
+
+
+/**
+ * Request to show capture effect animation
+ */
+export interface ShowCaptureEffectRequest {
+  q: number;
+  r: number;
+}
+
+
+
+export interface ShowCaptureEffectResponse {
+}
+
+
+/**
+ * Request to set unit with optional animation
+ */
+export interface SetUnitAtAnimationRequest {
+  q: number;
+  r: number;
+  unit?: Unit;
+  flash: boolean;
+  appear: boolean;
+}
+
+
+
+export interface SetUnitAtAnimationResponse {
+}
+
+
+/**
+ * Request to remove unit with optional animation
+ */
+export interface RemoveUnitAtAnimationRequest {
+  q: number;
+  r: number;
+  animate: boolean;
+}
+
+
+
+export interface RemoveUnitAtAnimationResponse {
+}
+
+
+/**
  * Called when a turn option is clicked in TurnOptionsPanel
  */
 export interface TurnOptionClickedRequest {

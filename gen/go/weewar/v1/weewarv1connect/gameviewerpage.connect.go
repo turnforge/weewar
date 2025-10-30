@@ -75,6 +75,24 @@ const (
 	// GameViewerPageClearPathsProcedure is the fully-qualified name of the GameViewerPage's ClearPaths
 	// RPC.
 	GameViewerPageClearPathsProcedure = "/weewar.v1.GameViewerPage/ClearPaths"
+	// GameViewerPageMoveUnitAnimationProcedure is the fully-qualified name of the GameViewerPage's
+	// MoveUnitAnimation RPC.
+	GameViewerPageMoveUnitAnimationProcedure = "/weewar.v1.GameViewerPage/MoveUnitAnimation"
+	// GameViewerPageShowAttackEffectProcedure is the fully-qualified name of the GameViewerPage's
+	// ShowAttackEffect RPC.
+	GameViewerPageShowAttackEffectProcedure = "/weewar.v1.GameViewerPage/ShowAttackEffect"
+	// GameViewerPageShowHealEffectProcedure is the fully-qualified name of the GameViewerPage's
+	// ShowHealEffect RPC.
+	GameViewerPageShowHealEffectProcedure = "/weewar.v1.GameViewerPage/ShowHealEffect"
+	// GameViewerPageShowCaptureEffectProcedure is the fully-qualified name of the GameViewerPage's
+	// ShowCaptureEffect RPC.
+	GameViewerPageShowCaptureEffectProcedure = "/weewar.v1.GameViewerPage/ShowCaptureEffect"
+	// GameViewerPageSetUnitAtAnimationProcedure is the fully-qualified name of the GameViewerPage's
+	// SetUnitAtAnimation RPC.
+	GameViewerPageSetUnitAtAnimationProcedure = "/weewar.v1.GameViewerPage/SetUnitAtAnimation"
+	// GameViewerPageRemoveUnitAtAnimationProcedure is the fully-qualified name of the GameViewerPage's
+	// RemoveUnitAtAnimation RPC.
+	GameViewerPageRemoveUnitAtAnimationProcedure = "/weewar.v1.GameViewerPage/RemoveUnitAtAnimation"
 	// GameViewerPageLogMessageProcedure is the fully-qualified name of the GameViewerPage's LogMessage
 	// RPC.
 	GameViewerPageLogMessageProcedure = "/weewar.v1.GameViewerPage/LogMessage"
@@ -100,6 +118,13 @@ type GameViewerPageClient interface {
 	ClearHighlights(context.Context, *connect.Request[v1.ClearHighlightsRequest]) (*connect.Response[v1.ClearHighlightsResponse], error)
 	ShowPath(context.Context, *connect.Request[v1.ShowPathRequest]) (*connect.Response[v1.ShowPathResponse], error)
 	ClearPaths(context.Context, *connect.Request[v1.ClearPathsRequest]) (*connect.Response[v1.ClearPathsResponse], error)
+	// Animation methods
+	MoveUnitAnimation(context.Context, *connect.Request[v1.MoveUnitAnimationRequest]) (*connect.Response[v1.MoveUnitAnimationResponse], error)
+	ShowAttackEffect(context.Context, *connect.Request[v1.ShowAttackEffectRequest]) (*connect.Response[v1.ShowAttackEffectResponse], error)
+	ShowHealEffect(context.Context, *connect.Request[v1.ShowHealEffectRequest]) (*connect.Response[v1.ShowHealEffectResponse], error)
+	ShowCaptureEffect(context.Context, *connect.Request[v1.ShowCaptureEffectRequest]) (*connect.Response[v1.ShowCaptureEffectResponse], error)
+	SetUnitAtAnimation(context.Context, *connect.Request[v1.SetUnitAtAnimationRequest]) (*connect.Response[v1.SetUnitAtAnimationResponse], error)
+	RemoveUnitAtAnimation(context.Context, *connect.Request[v1.RemoveUnitAtAnimationRequest]) (*connect.Response[v1.RemoveUnitAtAnimationResponse], error)
 	// Utility methods
 	LogMessage(context.Context, *connect.Request[v1.LogMessageRequest]) (*connect.Response[v1.LogMessageResponse], error)
 }
@@ -199,6 +224,42 @@ func NewGameViewerPageClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(gameViewerPageMethods.ByName("ClearPaths")),
 			connect.WithClientOptions(opts...),
 		),
+		moveUnitAnimation: connect.NewClient[v1.MoveUnitAnimationRequest, v1.MoveUnitAnimationResponse](
+			httpClient,
+			baseURL+GameViewerPageMoveUnitAnimationProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("MoveUnitAnimation")),
+			connect.WithClientOptions(opts...),
+		),
+		showAttackEffect: connect.NewClient[v1.ShowAttackEffectRequest, v1.ShowAttackEffectResponse](
+			httpClient,
+			baseURL+GameViewerPageShowAttackEffectProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("ShowAttackEffect")),
+			connect.WithClientOptions(opts...),
+		),
+		showHealEffect: connect.NewClient[v1.ShowHealEffectRequest, v1.ShowHealEffectResponse](
+			httpClient,
+			baseURL+GameViewerPageShowHealEffectProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("ShowHealEffect")),
+			connect.WithClientOptions(opts...),
+		),
+		showCaptureEffect: connect.NewClient[v1.ShowCaptureEffectRequest, v1.ShowCaptureEffectResponse](
+			httpClient,
+			baseURL+GameViewerPageShowCaptureEffectProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("ShowCaptureEffect")),
+			connect.WithClientOptions(opts...),
+		),
+		setUnitAtAnimation: connect.NewClient[v1.SetUnitAtAnimationRequest, v1.SetUnitAtAnimationResponse](
+			httpClient,
+			baseURL+GameViewerPageSetUnitAtAnimationProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("SetUnitAtAnimation")),
+			connect.WithClientOptions(opts...),
+		),
+		removeUnitAtAnimation: connect.NewClient[v1.RemoveUnitAtAnimationRequest, v1.RemoveUnitAtAnimationResponse](
+			httpClient,
+			baseURL+GameViewerPageRemoveUnitAtAnimationProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("RemoveUnitAtAnimation")),
+			connect.WithClientOptions(opts...),
+		),
 		logMessage: connect.NewClient[v1.LogMessageRequest, v1.LogMessageResponse](
 			httpClient,
 			baseURL+GameViewerPageLogMessageProcedure,
@@ -224,6 +285,12 @@ type gameViewerPageClient struct {
 	clearHighlights              *connect.Client[v1.ClearHighlightsRequest, v1.ClearHighlightsResponse]
 	showPath                     *connect.Client[v1.ShowPathRequest, v1.ShowPathResponse]
 	clearPaths                   *connect.Client[v1.ClearPathsRequest, v1.ClearPathsResponse]
+	moveUnitAnimation            *connect.Client[v1.MoveUnitAnimationRequest, v1.MoveUnitAnimationResponse]
+	showAttackEffect             *connect.Client[v1.ShowAttackEffectRequest, v1.ShowAttackEffectResponse]
+	showHealEffect               *connect.Client[v1.ShowHealEffectRequest, v1.ShowHealEffectResponse]
+	showCaptureEffect            *connect.Client[v1.ShowCaptureEffectRequest, v1.ShowCaptureEffectResponse]
+	setUnitAtAnimation           *connect.Client[v1.SetUnitAtAnimationRequest, v1.SetUnitAtAnimationResponse]
+	removeUnitAtAnimation        *connect.Client[v1.RemoveUnitAtAnimationRequest, v1.RemoveUnitAtAnimationResponse]
 	logMessage                   *connect.Client[v1.LogMessageRequest, v1.LogMessageResponse]
 }
 
@@ -297,6 +364,36 @@ func (c *gameViewerPageClient) ClearPaths(ctx context.Context, req *connect.Requ
 	return c.clearPaths.CallUnary(ctx, req)
 }
 
+// MoveUnitAnimation calls weewar.v1.GameViewerPage.MoveUnitAnimation.
+func (c *gameViewerPageClient) MoveUnitAnimation(ctx context.Context, req *connect.Request[v1.MoveUnitAnimationRequest]) (*connect.Response[v1.MoveUnitAnimationResponse], error) {
+	return c.moveUnitAnimation.CallUnary(ctx, req)
+}
+
+// ShowAttackEffect calls weewar.v1.GameViewerPage.ShowAttackEffect.
+func (c *gameViewerPageClient) ShowAttackEffect(ctx context.Context, req *connect.Request[v1.ShowAttackEffectRequest]) (*connect.Response[v1.ShowAttackEffectResponse], error) {
+	return c.showAttackEffect.CallUnary(ctx, req)
+}
+
+// ShowHealEffect calls weewar.v1.GameViewerPage.ShowHealEffect.
+func (c *gameViewerPageClient) ShowHealEffect(ctx context.Context, req *connect.Request[v1.ShowHealEffectRequest]) (*connect.Response[v1.ShowHealEffectResponse], error) {
+	return c.showHealEffect.CallUnary(ctx, req)
+}
+
+// ShowCaptureEffect calls weewar.v1.GameViewerPage.ShowCaptureEffect.
+func (c *gameViewerPageClient) ShowCaptureEffect(ctx context.Context, req *connect.Request[v1.ShowCaptureEffectRequest]) (*connect.Response[v1.ShowCaptureEffectResponse], error) {
+	return c.showCaptureEffect.CallUnary(ctx, req)
+}
+
+// SetUnitAtAnimation calls weewar.v1.GameViewerPage.SetUnitAtAnimation.
+func (c *gameViewerPageClient) SetUnitAtAnimation(ctx context.Context, req *connect.Request[v1.SetUnitAtAnimationRequest]) (*connect.Response[v1.SetUnitAtAnimationResponse], error) {
+	return c.setUnitAtAnimation.CallUnary(ctx, req)
+}
+
+// RemoveUnitAtAnimation calls weewar.v1.GameViewerPage.RemoveUnitAtAnimation.
+func (c *gameViewerPageClient) RemoveUnitAtAnimation(ctx context.Context, req *connect.Request[v1.RemoveUnitAtAnimationRequest]) (*connect.Response[v1.RemoveUnitAtAnimationResponse], error) {
+	return c.removeUnitAtAnimation.CallUnary(ctx, req)
+}
+
 // LogMessage calls weewar.v1.GameViewerPage.LogMessage.
 func (c *gameViewerPageClient) LogMessage(ctx context.Context, req *connect.Request[v1.LogMessageRequest]) (*connect.Response[v1.LogMessageResponse], error) {
 	return c.logMessage.CallUnary(ctx, req)
@@ -322,6 +419,13 @@ type GameViewerPageHandler interface {
 	ClearHighlights(context.Context, *connect.Request[v1.ClearHighlightsRequest]) (*connect.Response[v1.ClearHighlightsResponse], error)
 	ShowPath(context.Context, *connect.Request[v1.ShowPathRequest]) (*connect.Response[v1.ShowPathResponse], error)
 	ClearPaths(context.Context, *connect.Request[v1.ClearPathsRequest]) (*connect.Response[v1.ClearPathsResponse], error)
+	// Animation methods
+	MoveUnitAnimation(context.Context, *connect.Request[v1.MoveUnitAnimationRequest]) (*connect.Response[v1.MoveUnitAnimationResponse], error)
+	ShowAttackEffect(context.Context, *connect.Request[v1.ShowAttackEffectRequest]) (*connect.Response[v1.ShowAttackEffectResponse], error)
+	ShowHealEffect(context.Context, *connect.Request[v1.ShowHealEffectRequest]) (*connect.Response[v1.ShowHealEffectResponse], error)
+	ShowCaptureEffect(context.Context, *connect.Request[v1.ShowCaptureEffectRequest]) (*connect.Response[v1.ShowCaptureEffectResponse], error)
+	SetUnitAtAnimation(context.Context, *connect.Request[v1.SetUnitAtAnimationRequest]) (*connect.Response[v1.SetUnitAtAnimationResponse], error)
+	RemoveUnitAtAnimation(context.Context, *connect.Request[v1.RemoveUnitAtAnimationRequest]) (*connect.Response[v1.RemoveUnitAtAnimationResponse], error)
 	// Utility methods
 	LogMessage(context.Context, *connect.Request[v1.LogMessageRequest]) (*connect.Response[v1.LogMessageResponse], error)
 }
@@ -417,6 +521,42 @@ func NewGameViewerPageHandler(svc GameViewerPageHandler, opts ...connect.Handler
 		connect.WithSchema(gameViewerPageMethods.ByName("ClearPaths")),
 		connect.WithHandlerOptions(opts...),
 	)
+	gameViewerPageMoveUnitAnimationHandler := connect.NewUnaryHandler(
+		GameViewerPageMoveUnitAnimationProcedure,
+		svc.MoveUnitAnimation,
+		connect.WithSchema(gameViewerPageMethods.ByName("MoveUnitAnimation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	gameViewerPageShowAttackEffectHandler := connect.NewUnaryHandler(
+		GameViewerPageShowAttackEffectProcedure,
+		svc.ShowAttackEffect,
+		connect.WithSchema(gameViewerPageMethods.ByName("ShowAttackEffect")),
+		connect.WithHandlerOptions(opts...),
+	)
+	gameViewerPageShowHealEffectHandler := connect.NewUnaryHandler(
+		GameViewerPageShowHealEffectProcedure,
+		svc.ShowHealEffect,
+		connect.WithSchema(gameViewerPageMethods.ByName("ShowHealEffect")),
+		connect.WithHandlerOptions(opts...),
+	)
+	gameViewerPageShowCaptureEffectHandler := connect.NewUnaryHandler(
+		GameViewerPageShowCaptureEffectProcedure,
+		svc.ShowCaptureEffect,
+		connect.WithSchema(gameViewerPageMethods.ByName("ShowCaptureEffect")),
+		connect.WithHandlerOptions(opts...),
+	)
+	gameViewerPageSetUnitAtAnimationHandler := connect.NewUnaryHandler(
+		GameViewerPageSetUnitAtAnimationProcedure,
+		svc.SetUnitAtAnimation,
+		connect.WithSchema(gameViewerPageMethods.ByName("SetUnitAtAnimation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	gameViewerPageRemoveUnitAtAnimationHandler := connect.NewUnaryHandler(
+		GameViewerPageRemoveUnitAtAnimationProcedure,
+		svc.RemoveUnitAtAnimation,
+		connect.WithSchema(gameViewerPageMethods.ByName("RemoveUnitAtAnimation")),
+		connect.WithHandlerOptions(opts...),
+	)
 	gameViewerPageLogMessageHandler := connect.NewUnaryHandler(
 		GameViewerPageLogMessageProcedure,
 		svc.LogMessage,
@@ -453,6 +593,18 @@ func NewGameViewerPageHandler(svc GameViewerPageHandler, opts ...connect.Handler
 			gameViewerPageShowPathHandler.ServeHTTP(w, r)
 		case GameViewerPageClearPathsProcedure:
 			gameViewerPageClearPathsHandler.ServeHTTP(w, r)
+		case GameViewerPageMoveUnitAnimationProcedure:
+			gameViewerPageMoveUnitAnimationHandler.ServeHTTP(w, r)
+		case GameViewerPageShowAttackEffectProcedure:
+			gameViewerPageShowAttackEffectHandler.ServeHTTP(w, r)
+		case GameViewerPageShowHealEffectProcedure:
+			gameViewerPageShowHealEffectHandler.ServeHTTP(w, r)
+		case GameViewerPageShowCaptureEffectProcedure:
+			gameViewerPageShowCaptureEffectHandler.ServeHTTP(w, r)
+		case GameViewerPageSetUnitAtAnimationProcedure:
+			gameViewerPageSetUnitAtAnimationHandler.ServeHTTP(w, r)
+		case GameViewerPageRemoveUnitAtAnimationProcedure:
+			gameViewerPageRemoveUnitAtAnimationHandler.ServeHTTP(w, r)
 		case GameViewerPageLogMessageProcedure:
 			gameViewerPageLogMessageHandler.ServeHTTP(w, r)
 		default:
@@ -518,6 +670,30 @@ func (UnimplementedGameViewerPageHandler) ShowPath(context.Context, *connect.Req
 
 func (UnimplementedGameViewerPageHandler) ClearPaths(context.Context, *connect.Request[v1.ClearPathsRequest]) (*connect.Response[v1.ClearPathsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.ClearPaths is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) MoveUnitAnimation(context.Context, *connect.Request[v1.MoveUnitAnimationRequest]) (*connect.Response[v1.MoveUnitAnimationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.MoveUnitAnimation is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) ShowAttackEffect(context.Context, *connect.Request[v1.ShowAttackEffectRequest]) (*connect.Response[v1.ShowAttackEffectResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.ShowAttackEffect is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) ShowHealEffect(context.Context, *connect.Request[v1.ShowHealEffectRequest]) (*connect.Response[v1.ShowHealEffectResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.ShowHealEffect is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) ShowCaptureEffect(context.Context, *connect.Request[v1.ShowCaptureEffectRequest]) (*connect.Response[v1.ShowCaptureEffectResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.ShowCaptureEffect is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) SetUnitAtAnimation(context.Context, *connect.Request[v1.SetUnitAtAnimationRequest]) (*connect.Response[v1.SetUnitAtAnimationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.SetUnitAtAnimation is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) RemoveUnitAtAnimation(context.Context, *connect.Request[v1.RemoveUnitAtAnimationRequest]) (*connect.Response[v1.RemoveUnitAtAnimationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.RemoveUnitAtAnimation is not implemented"))
 }
 
 func (UnimplementedGameViewerPageHandler) LogMessage(context.Context, *connect.Request[v1.LogMessageRequest]) (*connect.Response[v1.LogMessageResponse], error) {

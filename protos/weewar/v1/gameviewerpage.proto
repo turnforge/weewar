@@ -43,6 +43,19 @@ service GameViewerPage {
 
     rpc ClearPaths(ClearPathsRequest) returns (ClearPathsResponse);
 
+    // Animation methods
+    rpc MoveUnitAnimation(MoveUnitAnimationRequest) returns (MoveUnitAnimationResponse);
+
+    rpc ShowAttackEffect(ShowAttackEffectRequest) returns (ShowAttackEffectResponse);
+
+    rpc ShowHealEffect(ShowHealEffectRequest) returns (ShowHealEffectResponse);
+
+    rpc ShowCaptureEffect(ShowCaptureEffectRequest) returns (ShowCaptureEffectResponse);
+
+    rpc SetUnitAtAnimation(SetUnitAtAnimationRequest) returns (SetUnitAtAnimationResponse);
+
+    rpc RemoveUnitAtAnimation(RemoveUnitAtAnimationRequest) returns (RemoveUnitAtAnimationResponse);
+
     // Utility methods
     rpc LogMessage(LogMessageRequest) returns (LogMessageResponse);
 }
@@ -168,4 +181,83 @@ message ClearPathsRequest {
 }
 
 message ClearPathsResponse {
+}
+
+// ============================================================================
+// Animation Command Messages
+// ============================================================================
+
+// Request to animate unit movement along a path
+message MoveUnitAnimationRequest {
+    Unit unit = 1; // Unit to animate
+    repeated HexCoord path = 2; // Path coordinates to animate along
+}
+
+message MoveUnitAnimationResponse {
+}
+
+// Hex coordinate for paths
+message HexCoord {
+    int32 q = 1;
+    int32 r = 2;
+}
+
+// Request to show attack effect animation
+message ShowAttackEffectRequest {
+    int32 from_q = 1; // Attacker Q coordinate
+    int32 from_r = 2; // Attacker R coordinate
+    int32 to_q = 3; // Defender Q coordinate
+    int32 to_r = 4; // Defender R coordinate
+    int32 damage = 5; // Damage amount for intensity scaling
+    repeated SplashTarget splash_targets = 6; // Additional splash damage targets
+}
+
+message SplashTarget {
+    int32 q = 1;
+    int32 r = 2;
+    int32 damage = 3;
+}
+
+message ShowAttackEffectResponse {
+}
+
+// Request to show heal effect animation
+message ShowHealEffectRequest {
+    int32 q = 1;
+    int32 r = 2;
+    int32 amount = 3; // Heal amount
+}
+
+message ShowHealEffectResponse {
+}
+
+// Request to show capture effect animation
+message ShowCaptureEffectRequest {
+    int32 q = 1;
+    int32 r = 2;
+}
+
+message ShowCaptureEffectResponse {
+}
+
+// Request to set unit with optional animation
+message SetUnitAtAnimationRequest {
+    int32 q = 1;
+    int32 r = 2;
+    Unit unit = 3;
+    bool flash = 4; // Flash animation (for damage)
+    bool appear = 5; // Appear/fade-in animation (for spawn)
+}
+
+message SetUnitAtAnimationResponse {
+}
+
+// Request to remove unit with optional animation
+message RemoveUnitAtAnimationRequest {
+    int32 q = 1;
+    int32 r = 2;
+    bool animate = 3; // Fade-out animation (for death)
+}
+
+message RemoveUnitAtAnimationResponse {
 }

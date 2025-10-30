@@ -5,30 +5,42 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    LogMessageRequest,
-    SetContentResponse,
-    UpdateGameStatusRequest,
-    UpdateGameStatusResponse,
-    RemoveTileAtResponse,
-    ShowHighlightsRequest,
-    ClearHighlightsResponse,
-    LogMessageResponse,
-    SetContentRequest,
-    SetTileAtRequest,
-    SetUnitAtRequest,
     SetUnitAtResponse,
-    RemoveTileAtRequest,
-    RemoveUnitAtResponse,
-    ClearHighlightsRequest,
-    ClearPathsResponse,
-    SetGameStateResponse,
-    RemoveUnitAtRequest,
-    ShowHighlightsResponse,
-    ShowPathRequest,
-    ShowPathResponse,
-    ClearPathsRequest,
+    MoveUnitAnimationResponse,
+    SetUnitAtRequest,
+    ShowHealEffectResponse,
+    ShowCaptureEffectResponse,
+    SetContentRequest,
     SetGameStateRequest,
+    SetGameStateResponse,
+    UpdateGameStatusResponse,
     SetTileAtResponse,
+    ShowPathRequest,
+    ShowCaptureEffectRequest,
+    ShowHealEffectRequest,
+    SetContentResponse,
+    ClearPathsResponse,
+    MoveUnitAnimationRequest,
+    LogMessageRequest,
+    UpdateGameStatusRequest,
+    RemoveTileAtRequest,
+    SetUnitAtAnimationRequest,
+    SetTileAtRequest,
+    RemoveTileAtResponse,
+    ClearHighlightsResponse,
+    RemoveUnitAtAnimationRequest,
+    ShowAttackEffectResponse,
+    RemoveUnitAtRequest,
+    RemoveUnitAtResponse,
+    ShowHighlightsRequest,
+    ShowPathResponse,
+    SetUnitAtAnimationResponse,
+    RemoveUnitAtAnimationResponse,
+    LogMessageResponse,
+    ShowAttackEffectRequest,
+    ShowHighlightsResponse,
+    ClearHighlightsRequest,
+    ClearPathsRequest,
 } from './interfaces';
 /**
  * GameViewerPage service client interface
@@ -49,6 +61,12 @@ export interface GameViewerPageMethods {
 	clearHighlights(request: ClearHighlightsRequest): Promise<ClearHighlightsResponse>;
 	showPath(request: ShowPathRequest): Promise<ShowPathResponse>;
 	clearPaths(request: ClearPathsRequest): Promise<ClearPathsResponse>;
+	moveUnitAnimation(request: MoveUnitAnimationRequest): Promise<MoveUnitAnimationResponse>;
+	showAttackEffect(request: ShowAttackEffectRequest): Promise<ShowAttackEffectResponse>;
+	showHealEffect(request: ShowHealEffectRequest): Promise<ShowHealEffectResponse>;
+	showCaptureEffect(request: ShowCaptureEffectRequest): Promise<ShowCaptureEffectResponse>;
+	setUnitAtAnimation(request: SetUnitAtAnimationRequest): Promise<SetUnitAtAnimationResponse>;
+	removeUnitAtAnimation(request: RemoveUnitAtAnimationRequest): Promise<RemoveUnitAtAnimationResponse>;
 	logMessage(request: LogMessageRequest): Promise<LogMessageResponse>;
 }
 /**
@@ -97,6 +115,24 @@ export class GameViewerPageServiceClient extends ServiceClient implements GameVi
     }
     async clearPaths(request: ClearPathsRequest): Promise<ClearPathsResponse> {
         return this.callMethod('gameViewerPage.clearPaths', request);
+    }
+    async moveUnitAnimation(request: MoveUnitAnimationRequest): Promise<MoveUnitAnimationResponse> {
+        return this.callMethod('gameViewerPage.moveUnitAnimation', request);
+    }
+    async showAttackEffect(request: ShowAttackEffectRequest): Promise<ShowAttackEffectResponse> {
+        return this.callMethod('gameViewerPage.showAttackEffect', request);
+    }
+    async showHealEffect(request: ShowHealEffectRequest): Promise<ShowHealEffectResponse> {
+        return this.callMethod('gameViewerPage.showHealEffect', request);
+    }
+    async showCaptureEffect(request: ShowCaptureEffectRequest): Promise<ShowCaptureEffectResponse> {
+        return this.callMethod('gameViewerPage.showCaptureEffect', request);
+    }
+    async setUnitAtAnimation(request: SetUnitAtAnimationRequest): Promise<SetUnitAtAnimationResponse> {
+        return this.callMethod('gameViewerPage.setUnitAtAnimation', request);
+    }
+    async removeUnitAtAnimation(request: RemoveUnitAtAnimationRequest): Promise<RemoveUnitAtAnimationResponse> {
+        return this.callMethod('gameViewerPage.removeUnitAtAnimation', request);
     }
     async logMessage(request: LogMessageRequest): Promise<LogMessageResponse> {
         return this.callMethod('gameViewerPage.logMessage', request);

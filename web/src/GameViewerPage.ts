@@ -24,6 +24,12 @@ import {
     ShowPathRequest, ShowPathResponse,
     ClearPathsRequest, ClearPathsResponse,
     HighlightSpec,
+    MoveUnitAnimationRequest, MoveUnitAnimationResponse,
+    ShowAttackEffectRequest, ShowAttackEffectResponse,
+    ShowHealEffectRequest, ShowHealEffectResponse,
+    ShowCaptureEffectRequest, ShowCaptureEffectResponse,
+    SetUnitAtAnimationRequest, SetUnitAtAnimationResponse,
+    RemoveUnitAtAnimationRequest, RemoveUnitAtAnimationResponse,
 } from '../gen/wasmjs/weewar/v1/interfaces';
 import * as models from '../gen/wasmjs/weewar/v1/models';
 import { create } from '@bufbuild/protobuf';
@@ -861,6 +867,58 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
 
   async removeUnitAt(request: { q: number, r: number }) {
     console.log("removeUnitAt called on the browser:", request);
+    this.world.removeUnitAt(request.q, request.r);
+    return {}
+  }
+
+  // Animation methods - delegate to PhaserGameScene
+  async moveUnitAnimation(request: MoveUnitAnimationRequest): Promise<MoveUnitAnimationResponse> {
+    console.log("moveUnitAnimation called on the browser:", request);
+    if (request.unit && request.path) {
+      await this.gameScene.moveUnit(request.unit, request.path);
+      // Update world after animation completes
+      this.world.setUnitDirect(request.unit);
+    }
+    return {}
+  }
+
+  async showAttackEffect(request: ShowAttackEffectRequest): Promise<ShowAttackEffectResponse> {
+    console.log("showAttackEffect called on the browser:", request);
+    await this.gameScene.showAttackEffect(
+      { q: request.fromQ, r: request.fromR },
+      { q: request.toQ, r: request.toR },
+      request.damage,
+      request.splashTargets
+    );
+    return {}
+  }
+
+  async showHealEffect(request: ShowHealEffectRequest): Promise<ShowHealEffectResponse> {
+    console.log("showHealEffect called on the browser:", request);
+    await this.gameScene.showHealEffect(request.q, request.r, request.amount);
+    return {}
+  }
+
+  async showCaptureEffect(request: ShowCaptureEffectRequest): Promise<ShowCaptureEffectResponse> {
+    console.log("showCaptureEffect called on the browser:", request);
+    await this.gameScene.showCaptureEffect(request.q, request.r);
+    return {}
+  }
+
+  async setUnitAtAnimation(request: SetUnitAtAnimationRequest): Promise<SetUnitAtAnimationResponse> {
+    console.log("setUnitAtAnimation called on the browser:", request);
+    if (request.unit) {
+      await this.gameScene.setUnit(request.unit, { flash: request.flash, appear: request.appear });
+      // Update world after animation completes
+      this.world.setUnitDirect(request.unit);
+    }
+    return {}
+  }
+
+  async removeUnitAtAnimation(request: RemoveUnitAtAnimationRequest): Promise<RemoveUnitAtAnimationResponse> {
+    console.log("removeUnitAtAnimation called on the browser:", request);
+    await this.gameScene.removeUnit(request.q, request.r, { animate: request.animate });
+    // Update world after animation completes
     this.world.removeUnitAt(request.q, request.r);
     return {}
   }

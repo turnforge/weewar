@@ -142,6 +142,54 @@ func (c *GameViewerPageClient) ClearPaths(ctx context.Context, req *weewarv1.Cle
 	)
 }
 
+// MoveUnitAnimation calls the browser-provided MoveUnitAnimation method
+func (c *GameViewerPageClient) MoveUnitAnimation(ctx context.Context, req *weewarv1.MoveUnitAnimationRequest, opts ...grpc.CallOption) (*weewarv1.MoveUnitAnimationResponse, error) {
+	// This is a synchronous browser method
+	return wasm.CallBrowserService[*weewarv1.MoveUnitAnimationRequest, *weewarv1.MoveUnitAnimationResponse](
+		c.channel, ctx, "GameViewerPage", "moveUnitAnimation", req,
+	)
+}
+
+// ShowAttackEffect calls the browser-provided ShowAttackEffect method
+func (c *GameViewerPageClient) ShowAttackEffect(ctx context.Context, req *weewarv1.ShowAttackEffectRequest, opts ...grpc.CallOption) (*weewarv1.ShowAttackEffectResponse, error) {
+	// This is a synchronous browser method
+	return wasm.CallBrowserService[*weewarv1.ShowAttackEffectRequest, *weewarv1.ShowAttackEffectResponse](
+		c.channel, ctx, "GameViewerPage", "showAttackEffect", req,
+	)
+}
+
+// ShowHealEffect calls the browser-provided ShowHealEffect method
+func (c *GameViewerPageClient) ShowHealEffect(ctx context.Context, req *weewarv1.ShowHealEffectRequest, opts ...grpc.CallOption) (*weewarv1.ShowHealEffectResponse, error) {
+	// This is a synchronous browser method
+	return wasm.CallBrowserService[*weewarv1.ShowHealEffectRequest, *weewarv1.ShowHealEffectResponse](
+		c.channel, ctx, "GameViewerPage", "showHealEffect", req,
+	)
+}
+
+// ShowCaptureEffect calls the browser-provided ShowCaptureEffect method
+func (c *GameViewerPageClient) ShowCaptureEffect(ctx context.Context, req *weewarv1.ShowCaptureEffectRequest, opts ...grpc.CallOption) (*weewarv1.ShowCaptureEffectResponse, error) {
+	// This is a synchronous browser method
+	return wasm.CallBrowserService[*weewarv1.ShowCaptureEffectRequest, *weewarv1.ShowCaptureEffectResponse](
+		c.channel, ctx, "GameViewerPage", "showCaptureEffect", req,
+	)
+}
+
+// SetUnitAtAnimation calls the browser-provided SetUnitAtAnimation method
+func (c *GameViewerPageClient) SetUnitAtAnimation(ctx context.Context, req *weewarv1.SetUnitAtAnimationRequest, opts ...grpc.CallOption) (*weewarv1.SetUnitAtAnimationResponse, error) {
+	// This is a synchronous browser method
+	return wasm.CallBrowserService[*weewarv1.SetUnitAtAnimationRequest, *weewarv1.SetUnitAtAnimationResponse](
+		c.channel, ctx, "GameViewerPage", "setUnitAtAnimation", req,
+	)
+}
+
+// RemoveUnitAtAnimation calls the browser-provided RemoveUnitAtAnimation method
+func (c *GameViewerPageClient) RemoveUnitAtAnimation(ctx context.Context, req *weewarv1.RemoveUnitAtAnimationRequest, opts ...grpc.CallOption) (*weewarv1.RemoveUnitAtAnimationResponse, error) {
+	// This is a synchronous browser method
+	return wasm.CallBrowserService[*weewarv1.RemoveUnitAtAnimationRequest, *weewarv1.RemoveUnitAtAnimationResponse](
+		c.channel, ctx, "GameViewerPage", "removeUnitAtAnimation", req,
+	)
+}
+
 // LogMessage calls the browser-provided LogMessage method
 func (c *GameViewerPageClient) LogMessage(ctx context.Context, req *weewarv1.LogMessageRequest, opts ...grpc.CallOption) (*weewarv1.LogMessageResponse, error) {
 	// This is a synchronous browser method

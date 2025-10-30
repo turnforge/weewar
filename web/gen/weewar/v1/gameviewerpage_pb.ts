@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/gameviewerpage.proto.
  */
 export const file_weewar_v1_gameviewerpage: GenFile = /*@__PURE__*/
-  fileDesc("Ch53ZWV3YXIvdjEvZ2FtZXZpZXdlcnBhZ2UucHJvdG8SCXdlZXdhci52MSIOCgxFbXB0eVJlcXVlc3QiDwoNRW1wdHlSZXNwb25zZSInChFTZXRDb250ZW50UmVxdWVzdBISCgppbm5lcl9odG1sGAEgASgJIhQKElNldENvbnRlbnRSZXNwb25zZSIkChFMb2dNZXNzYWdlUmVxdWVzdBIPCgdtZXNzYWdlGAEgASgJIhQKEkxvZ01lc3NhZ2VSZXNwb25zZSJZChNTZXRHYW1lU3RhdGVSZXF1ZXN0Eh0KBGdhbWUYASABKAsyDy53ZWV3YXIudjEuR2FtZRIjCgVzdGF0ZRgCIAEoCzIULndlZXdhci52MS5HYW1lU3RhdGUiFgoUU2V0R2FtZVN0YXRlUmVzcG9uc2UiRwoXVXBkYXRlR2FtZVN0YXR1c1JlcXVlc3QSFgoOY3VycmVudF9wbGF5ZXIYASABKAUSFAoMdHVybl9jb3VudGVyGAIgASgFIhoKGFVwZGF0ZUdhbWVTdGF0dXNSZXNwb25zZSJHChBTZXRUaWxlQXRSZXF1ZXN0EgkKAXEYASABKAUSCQoBchgCIAEoBRIdCgR0aWxlGAMgASgLMg8ud2Vld2FyLnYxLlRpbGUiEwoRU2V0VGlsZUF0UmVzcG9uc2UiRwoQU2V0VW5pdEF0UmVxdWVzdBIJCgFxGAEgASgFEgkKAXIYAiABKAUSHQoEdW5pdBgDIAEoCzIPLndlZXdhci52MS5Vbml0IhMKEVNldFVuaXRBdFJlc3BvbnNlIisKE1JlbW92ZVRpbGVBdFJlcXVlc3QSCQoBcRgBIAEoBRIJCgFyGAIgASgFIhYKFFJlbW92ZVRpbGVBdFJlc3BvbnNlIisKE1JlbW92ZVVuaXRBdFJlcXVlc3QSCQoBcRgBIAEoBRIJCgFyGAIgASgFIhYKFFJlbW92ZVVuaXRBdFJlc3BvbnNlIkUKFVNob3dIaWdobGlnaHRzUmVxdWVzdBIsCgpoaWdobGlnaHRzGAEgAygLMhgud2Vld2FyLnYxLkhpZ2hsaWdodFNwZWMiGAoWU2hvd0hpZ2hsaWdodHNSZXNwb25zZSIzCg1IaWdobGlnaHRTcGVjEgkKAXEYASABKAUSCQoBchgCIAEoBRIMCgR0eXBlGAMgASgJIicKFkNsZWFySGlnaGxpZ2h0c1JlcXVlc3QSDQoFdHlwZXMYASADKAkiGQoXQ2xlYXJIaWdobGlnaHRzUmVzcG9uc2UiQwoPU2hvd1BhdGhSZXF1ZXN0Eg4KBmNvb3JkcxgBIAMoBRINCgVjb2xvchgCIAEoDRIRCgl0aGlja25lc3MYAyABKAUiEgoQU2hvd1BhdGhSZXNwb25zZSITChFDbGVhclBhdGhzUmVxdWVzdCIUChJDbGVhclBhdGhzUmVzcG9uc2Uy4AkKDkdhbWVWaWV3ZXJQYWdlElQKFVNldFR1cm5PcHRpb25zQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USUgoTU2V0VW5pdFN0YXRzQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USWwocU2V0RGFtYWdlRGlzdHJpYnV0aW9uQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USVQoWU2V0VGVycmFpblN0YXRzQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USTwoMU2V0R2FtZVN0YXRlEh4ud2Vld2FyLnYxLlNldEdhbWVTdGF0ZVJlcXVlc3QaHy53ZWV3YXIudjEuU2V0R2FtZVN0YXRlUmVzcG9uc2USWwoQVXBkYXRlR2FtZVN0YXR1cxIiLndlZXdhci52MS5VcGRhdGVHYW1lU3RhdHVzUmVxdWVzdBojLndlZXdhci52MS5VcGRhdGVHYW1lU3RhdHVzUmVzcG9uc2USRgoJU2V0VGlsZUF0Ehsud2Vld2FyLnYxLlNldFRpbGVBdFJlcXVlc3QaHC53ZWV3YXIudjEuU2V0VGlsZUF0UmVzcG9uc2USRgoJU2V0VW5pdEF0Ehsud2Vld2FyLnYxLlNldFVuaXRBdFJlcXVlc3QaHC53ZWV3YXIudjEuU2V0VW5pdEF0UmVzcG9uc2USTwoMUmVtb3ZlVGlsZUF0Eh4ud2Vld2FyLnYxLlJlbW92ZVRpbGVBdFJlcXVlc3QaHy53ZWV3YXIudjEuUmVtb3ZlVGlsZUF0UmVzcG9uc2USTwoMUmVtb3ZlVW5pdEF0Eh4ud2Vld2FyLnYxLlJlbW92ZVVuaXRBdFJlcXVlc3QaHy53ZWV3YXIudjEuUmVtb3ZlVW5pdEF0UmVzcG9uc2USVQoOU2hvd0hpZ2hsaWdodHMSIC53ZWV3YXIudjEuU2hvd0hpZ2hsaWdodHNSZXF1ZXN0GiEud2Vld2FyLnYxLlNob3dIaWdobGlnaHRzUmVzcG9uc2USWAoPQ2xlYXJIaWdobGlnaHRzEiEud2Vld2FyLnYxLkNsZWFySGlnaGxpZ2h0c1JlcXVlc3QaIi53ZWV3YXIudjEuQ2xlYXJIaWdobGlnaHRzUmVzcG9uc2USQwoIU2hvd1BhdGgSGi53ZWV3YXIudjEuU2hvd1BhdGhSZXF1ZXN0Ghsud2Vld2FyLnYxLlNob3dQYXRoUmVzcG9uc2USSQoKQ2xlYXJQYXRocxIcLndlZXdhci52MS5DbGVhclBhdGhzUmVxdWVzdBodLndlZXdhci52MS5DbGVhclBhdGhzUmVzcG9uc2USSQoKTG9nTWVzc2FnZRIcLndlZXdhci52MS5Mb2dNZXNzYWdlUmVxdWVzdBodLndlZXdhci52MS5Mb2dNZXNzYWdlUmVzcG9uc2UaBMC1GAFCrgEKDWNvbS53ZWV3YXIudjFCE0dhbWV2aWV3ZXJwYWdlUHJvdG9QAVpDZ2l0aHViLmNvbS9wYW55YW0vdHVybmVuZ2luZS9nYW1lcy93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MTt3ZWV3YXJ2MaICA1dYWKoCCVdlZXdhci5WMcoCCVdlZXdhclxWMeICFVdlZXdhclxWMVxHUEJNZXRhZGF0YeoCCldlZXdhcjo6VjFiBnByb3RvMw", [file_wasmjs_v1_annotations, file_weewar_v1_models]);
+  fileDesc("Ch53ZWV3YXIvdjEvZ2FtZXZpZXdlcnBhZ2UucHJvdG8SCXdlZXdhci52MSIOCgxFbXB0eVJlcXVlc3QiDwoNRW1wdHlSZXNwb25zZSInChFTZXRDb250ZW50UmVxdWVzdBISCgppbm5lcl9odG1sGAEgASgJIhQKElNldENvbnRlbnRSZXNwb25zZSIkChFMb2dNZXNzYWdlUmVxdWVzdBIPCgdtZXNzYWdlGAEgASgJIhQKEkxvZ01lc3NhZ2VSZXNwb25zZSJZChNTZXRHYW1lU3RhdGVSZXF1ZXN0Eh0KBGdhbWUYASABKAsyDy53ZWV3YXIudjEuR2FtZRIjCgVzdGF0ZRgCIAEoCzIULndlZXdhci52MS5HYW1lU3RhdGUiFgoUU2V0R2FtZVN0YXRlUmVzcG9uc2UiRwoXVXBkYXRlR2FtZVN0YXR1c1JlcXVlc3QSFgoOY3VycmVudF9wbGF5ZXIYASABKAUSFAoMdHVybl9jb3VudGVyGAIgASgFIhoKGFVwZGF0ZUdhbWVTdGF0dXNSZXNwb25zZSJHChBTZXRUaWxlQXRSZXF1ZXN0EgkKAXEYASABKAUSCQoBchgCIAEoBRIdCgR0aWxlGAMgASgLMg8ud2Vld2FyLnYxLlRpbGUiEwoRU2V0VGlsZUF0UmVzcG9uc2UiRwoQU2V0VW5pdEF0UmVxdWVzdBIJCgFxGAEgASgFEgkKAXIYAiABKAUSHQoEdW5pdBgDIAEoCzIPLndlZXdhci52MS5Vbml0IhMKEVNldFVuaXRBdFJlc3BvbnNlIisKE1JlbW92ZVRpbGVBdFJlcXVlc3QSCQoBcRgBIAEoBRIJCgFyGAIgASgFIhYKFFJlbW92ZVRpbGVBdFJlc3BvbnNlIisKE1JlbW92ZVVuaXRBdFJlcXVlc3QSCQoBcRgBIAEoBRIJCgFyGAIgASgFIhYKFFJlbW92ZVVuaXRBdFJlc3BvbnNlIkUKFVNob3dIaWdobGlnaHRzUmVxdWVzdBIsCgpoaWdobGlnaHRzGAEgAygLMhgud2Vld2FyLnYxLkhpZ2hsaWdodFNwZWMiGAoWU2hvd0hpZ2hsaWdodHNSZXNwb25zZSIzCg1IaWdobGlnaHRTcGVjEgkKAXEYASABKAUSCQoBchgCIAEoBRIMCgR0eXBlGAMgASgJIicKFkNsZWFySGlnaGxpZ2h0c1JlcXVlc3QSDQoFdHlwZXMYASADKAkiGQoXQ2xlYXJIaWdobGlnaHRzUmVzcG9uc2UiQwoPU2hvd1BhdGhSZXF1ZXN0Eg4KBmNvb3JkcxgBIAMoBRINCgVjb2xvchgCIAEoDRIRCgl0aGlja25lc3MYAyABKAUiEgoQU2hvd1BhdGhSZXNwb25zZSITChFDbGVhclBhdGhzUmVxdWVzdCIUChJDbGVhclBhdGhzUmVzcG9uc2UiXAoYTW92ZVVuaXRBbmltYXRpb25SZXF1ZXN0Eh0KBHVuaXQYASABKAsyDy53ZWV3YXIudjEuVW5pdBIhCgRwYXRoGAIgAygLMhMud2Vld2FyLnYxLkhleENvb3JkIhsKGU1vdmVVbml0QW5pbWF0aW9uUmVzcG9uc2UiIAoISGV4Q29vcmQSCQoBcRgBIAEoBRIJCgFyGAIgASgFIpYBChdTaG93QXR0YWNrRWZmZWN0UmVxdWVzdBIOCgZmcm9tX3EYASABKAUSDgoGZnJvbV9yGAIgASgFEgwKBHRvX3EYAyABKAUSDAoEdG9fchgEIAEoBRIOCgZkYW1hZ2UYBSABKAUSLwoOc3BsYXNoX3RhcmdldHMYBiADKAsyFy53ZWV3YXIudjEuU3BsYXNoVGFyZ2V0IjQKDFNwbGFzaFRhcmdldBIJCgFxGAEgASgFEgkKAXIYAiABKAUSDgoGZGFtYWdlGAMgASgFIhoKGFNob3dBdHRhY2tFZmZlY3RSZXNwb25zZSI9ChVTaG93SGVhbEVmZmVjdFJlcXVlc3QSCQoBcRgBIAEoBRIJCgFyGAIgASgFEg4KBmFtb3VudBgDIAEoBSIYChZTaG93SGVhbEVmZmVjdFJlc3BvbnNlIjAKGFNob3dDYXB0dXJlRWZmZWN0UmVxdWVzdBIJCgFxGAEgASgFEgkKAXIYAiABKAUiGwoZU2hvd0NhcHR1cmVFZmZlY3RSZXNwb25zZSJvChlTZXRVbml0QXRBbmltYXRpb25SZXF1ZXN0EgkKAXEYASABKAUSCQoBchgCIAEoBRIdCgR1bml0GAMgASgLMg8ud2Vld2FyLnYxLlVuaXQSDQoFZmxhc2gYBCABKAgSDgoGYXBwZWFyGAUgASgIIhwKGlNldFVuaXRBdEFuaW1hdGlvblJlc3BvbnNlIkUKHFJlbW92ZVVuaXRBdEFuaW1hdGlvblJlcXVlc3QSCQoBcRgBIAEoBRIJCgFyGAIgASgFEg8KB2FuaW1hdGUYAyABKAgiHwodUmVtb3ZlVW5pdEF0QW5pbWF0aW9uUmVzcG9uc2Uyow4KDkdhbWVWaWV3ZXJQYWdlElQKFVNldFR1cm5PcHRpb25zQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USUgoTU2V0VW5pdFN0YXRzQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USWwocU2V0RGFtYWdlRGlzdHJpYnV0aW9uQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USVQoWU2V0VGVycmFpblN0YXRzQ29udGVudBIcLndlZXdhci52MS5TZXRDb250ZW50UmVxdWVzdBodLndlZXdhci52MS5TZXRDb250ZW50UmVzcG9uc2USTwoMU2V0R2FtZVN0YXRlEh4ud2Vld2FyLnYxLlNldEdhbWVTdGF0ZVJlcXVlc3QaHy53ZWV3YXIudjEuU2V0R2FtZVN0YXRlUmVzcG9uc2USWwoQVXBkYXRlR2FtZVN0YXR1cxIiLndlZXdhci52MS5VcGRhdGVHYW1lU3RhdHVzUmVxdWVzdBojLndlZXdhci52MS5VcGRhdGVHYW1lU3RhdHVzUmVzcG9uc2USRgoJU2V0VGlsZUF0Ehsud2Vld2FyLnYxLlNldFRpbGVBdFJlcXVlc3QaHC53ZWV3YXIudjEuU2V0VGlsZUF0UmVzcG9uc2USRgoJU2V0VW5pdEF0Ehsud2Vld2FyLnYxLlNldFVuaXRBdFJlcXVlc3QaHC53ZWV3YXIudjEuU2V0VW5pdEF0UmVzcG9uc2USTwoMUmVtb3ZlVGlsZUF0Eh4ud2Vld2FyLnYxLlJlbW92ZVRpbGVBdFJlcXVlc3QaHy53ZWV3YXIudjEuUmVtb3ZlVGlsZUF0UmVzcG9uc2USTwoMUmVtb3ZlVW5pdEF0Eh4ud2Vld2FyLnYxLlJlbW92ZVVuaXRBdFJlcXVlc3QaHy53ZWV3YXIudjEuUmVtb3ZlVW5pdEF0UmVzcG9uc2USVQoOU2hvd0hpZ2hsaWdodHMSIC53ZWV3YXIudjEuU2hvd0hpZ2hsaWdodHNSZXF1ZXN0GiEud2Vld2FyLnYxLlNob3dIaWdobGlnaHRzUmVzcG9uc2USWAoPQ2xlYXJIaWdobGlnaHRzEiEud2Vld2FyLnYxLkNsZWFySGlnaGxpZ2h0c1JlcXVlc3QaIi53ZWV3YXIudjEuQ2xlYXJIaWdobGlnaHRzUmVzcG9uc2USQwoIU2hvd1BhdGgSGi53ZWV3YXIudjEuU2hvd1BhdGhSZXF1ZXN0Ghsud2Vld2FyLnYxLlNob3dQYXRoUmVzcG9uc2USSQoKQ2xlYXJQYXRocxIcLndlZXdhci52MS5DbGVhclBhdGhzUmVxdWVzdBodLndlZXdhci52MS5DbGVhclBhdGhzUmVzcG9uc2USXgoRTW92ZVVuaXRBbmltYXRpb24SIy53ZWV3YXIudjEuTW92ZVVuaXRBbmltYXRpb25SZXF1ZXN0GiQud2Vld2FyLnYxLk1vdmVVbml0QW5pbWF0aW9uUmVzcG9uc2USWwoQU2hvd0F0dGFja0VmZmVjdBIiLndlZXdhci52MS5TaG93QXR0YWNrRWZmZWN0UmVxdWVzdBojLndlZXdhci52MS5TaG93QXR0YWNrRWZmZWN0UmVzcG9uc2USVQoOU2hvd0hlYWxFZmZlY3QSIC53ZWV3YXIudjEuU2hvd0hlYWxFZmZlY3RSZXF1ZXN0GiEud2Vld2FyLnYxLlNob3dIZWFsRWZmZWN0UmVzcG9uc2USXgoRU2hvd0NhcHR1cmVFZmZlY3QSIy53ZWV3YXIudjEuU2hvd0NhcHR1cmVFZmZlY3RSZXF1ZXN0GiQud2Vld2FyLnYxLlNob3dDYXB0dXJlRWZmZWN0UmVzcG9uc2USYQoSU2V0VW5pdEF0QW5pbWF0aW9uEiQud2Vld2FyLnYxLlNldFVuaXRBdEFuaW1hdGlvblJlcXVlc3QaJS53ZWV3YXIudjEuU2V0VW5pdEF0QW5pbWF0aW9uUmVzcG9uc2USagoVUmVtb3ZlVW5pdEF0QW5pbWF0aW9uEicud2Vld2FyLnYxLlJlbW92ZVVuaXRBdEFuaW1hdGlvblJlcXVlc3QaKC53ZWV3YXIudjEuUmVtb3ZlVW5pdEF0QW5pbWF0aW9uUmVzcG9uc2USSQoKTG9nTWVzc2FnZRIcLndlZXdhci52MS5Mb2dNZXNzYWdlUmVxdWVzdBodLndlZXdhci52MS5Mb2dNZXNzYWdlUmVzcG9uc2UaBMC1GAFCrgEKDWNvbS53ZWV3YXIudjFCE0dhbWV2aWV3ZXJwYWdlUHJvdG9QAVpDZ2l0aHViLmNvbS9wYW55YW0vdHVybmVuZ2luZS9nYW1lcy93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MTt3ZWV3YXJ2MaICA1dYWKoCCVdlZXdhci5WMcoCCVdlZXdhclxWMeICFVdlZXdhclxWMVxHUEJNZXRhZGF0YeoCCldlZXdhcjo6VjFiBnByb3RvMw", [file_wasmjs_v1_annotations, file_weewar_v1_models]);
 
 /**
  * @generated from message weewar.v1.EmptyRequest
@@ -519,6 +519,348 @@ export const ClearPathsResponseSchema: GenMessage<ClearPathsResponse> = /*@__PUR
   messageDesc(file_weewar_v1_gameviewerpage, 26);
 
 /**
+ * Request to animate unit movement along a path
+ *
+ * @generated from message weewar.v1.MoveUnitAnimationRequest
+ */
+export type MoveUnitAnimationRequest = Message<"weewar.v1.MoveUnitAnimationRequest"> & {
+  /**
+   * Unit to animate
+   *
+   * @generated from field: weewar.v1.Unit unit = 1;
+   */
+  unit?: Unit;
+
+  /**
+   * Path coordinates to animate along
+   *
+   * @generated from field: repeated weewar.v1.HexCoord path = 2;
+   */
+  path: HexCoord[];
+};
+
+/**
+ * Describes the message weewar.v1.MoveUnitAnimationRequest.
+ * Use `create(MoveUnitAnimationRequestSchema)` to create a new message.
+ */
+export const MoveUnitAnimationRequestSchema: GenMessage<MoveUnitAnimationRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 27);
+
+/**
+ * @generated from message weewar.v1.MoveUnitAnimationResponse
+ */
+export type MoveUnitAnimationResponse = Message<"weewar.v1.MoveUnitAnimationResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.MoveUnitAnimationResponse.
+ * Use `create(MoveUnitAnimationResponseSchema)` to create a new message.
+ */
+export const MoveUnitAnimationResponseSchema: GenMessage<MoveUnitAnimationResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 28);
+
+/**
+ * Hex coordinate for paths
+ *
+ * @generated from message weewar.v1.HexCoord
+ */
+export type HexCoord = Message<"weewar.v1.HexCoord"> & {
+  /**
+   * @generated from field: int32 q = 1;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 2;
+   */
+  r: number;
+};
+
+/**
+ * Describes the message weewar.v1.HexCoord.
+ * Use `create(HexCoordSchema)` to create a new message.
+ */
+export const HexCoordSchema: GenMessage<HexCoord> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 29);
+
+/**
+ * Request to show attack effect animation
+ *
+ * @generated from message weewar.v1.ShowAttackEffectRequest
+ */
+export type ShowAttackEffectRequest = Message<"weewar.v1.ShowAttackEffectRequest"> & {
+  /**
+   * Attacker Q coordinate
+   *
+   * @generated from field: int32 from_q = 1;
+   */
+  fromQ: number;
+
+  /**
+   * Attacker R coordinate
+   *
+   * @generated from field: int32 from_r = 2;
+   */
+  fromR: number;
+
+  /**
+   * Defender Q coordinate
+   *
+   * @generated from field: int32 to_q = 3;
+   */
+  toQ: number;
+
+  /**
+   * Defender R coordinate
+   *
+   * @generated from field: int32 to_r = 4;
+   */
+  toR: number;
+
+  /**
+   * Damage amount for intensity scaling
+   *
+   * @generated from field: int32 damage = 5;
+   */
+  damage: number;
+
+  /**
+   * Additional splash damage targets
+   *
+   * @generated from field: repeated weewar.v1.SplashTarget splash_targets = 6;
+   */
+  splashTargets: SplashTarget[];
+};
+
+/**
+ * Describes the message weewar.v1.ShowAttackEffectRequest.
+ * Use `create(ShowAttackEffectRequestSchema)` to create a new message.
+ */
+export const ShowAttackEffectRequestSchema: GenMessage<ShowAttackEffectRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 30);
+
+/**
+ * @generated from message weewar.v1.SplashTarget
+ */
+export type SplashTarget = Message<"weewar.v1.SplashTarget"> & {
+  /**
+   * @generated from field: int32 q = 1;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 2;
+   */
+  r: number;
+
+  /**
+   * @generated from field: int32 damage = 3;
+   */
+  damage: number;
+};
+
+/**
+ * Describes the message weewar.v1.SplashTarget.
+ * Use `create(SplashTargetSchema)` to create a new message.
+ */
+export const SplashTargetSchema: GenMessage<SplashTarget> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 31);
+
+/**
+ * @generated from message weewar.v1.ShowAttackEffectResponse
+ */
+export type ShowAttackEffectResponse = Message<"weewar.v1.ShowAttackEffectResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.ShowAttackEffectResponse.
+ * Use `create(ShowAttackEffectResponseSchema)` to create a new message.
+ */
+export const ShowAttackEffectResponseSchema: GenMessage<ShowAttackEffectResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 32);
+
+/**
+ * Request to show heal effect animation
+ *
+ * @generated from message weewar.v1.ShowHealEffectRequest
+ */
+export type ShowHealEffectRequest = Message<"weewar.v1.ShowHealEffectRequest"> & {
+  /**
+   * @generated from field: int32 q = 1;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 2;
+   */
+  r: number;
+
+  /**
+   * Heal amount
+   *
+   * @generated from field: int32 amount = 3;
+   */
+  amount: number;
+};
+
+/**
+ * Describes the message weewar.v1.ShowHealEffectRequest.
+ * Use `create(ShowHealEffectRequestSchema)` to create a new message.
+ */
+export const ShowHealEffectRequestSchema: GenMessage<ShowHealEffectRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 33);
+
+/**
+ * @generated from message weewar.v1.ShowHealEffectResponse
+ */
+export type ShowHealEffectResponse = Message<"weewar.v1.ShowHealEffectResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.ShowHealEffectResponse.
+ * Use `create(ShowHealEffectResponseSchema)` to create a new message.
+ */
+export const ShowHealEffectResponseSchema: GenMessage<ShowHealEffectResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 34);
+
+/**
+ * Request to show capture effect animation
+ *
+ * @generated from message weewar.v1.ShowCaptureEffectRequest
+ */
+export type ShowCaptureEffectRequest = Message<"weewar.v1.ShowCaptureEffectRequest"> & {
+  /**
+   * @generated from field: int32 q = 1;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 2;
+   */
+  r: number;
+};
+
+/**
+ * Describes the message weewar.v1.ShowCaptureEffectRequest.
+ * Use `create(ShowCaptureEffectRequestSchema)` to create a new message.
+ */
+export const ShowCaptureEffectRequestSchema: GenMessage<ShowCaptureEffectRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 35);
+
+/**
+ * @generated from message weewar.v1.ShowCaptureEffectResponse
+ */
+export type ShowCaptureEffectResponse = Message<"weewar.v1.ShowCaptureEffectResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.ShowCaptureEffectResponse.
+ * Use `create(ShowCaptureEffectResponseSchema)` to create a new message.
+ */
+export const ShowCaptureEffectResponseSchema: GenMessage<ShowCaptureEffectResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 36);
+
+/**
+ * Request to set unit with optional animation
+ *
+ * @generated from message weewar.v1.SetUnitAtAnimationRequest
+ */
+export type SetUnitAtAnimationRequest = Message<"weewar.v1.SetUnitAtAnimationRequest"> & {
+  /**
+   * @generated from field: int32 q = 1;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 2;
+   */
+  r: number;
+
+  /**
+   * @generated from field: weewar.v1.Unit unit = 3;
+   */
+  unit?: Unit;
+
+  /**
+   * Flash animation (for damage)
+   *
+   * @generated from field: bool flash = 4;
+   */
+  flash: boolean;
+
+  /**
+   * Appear/fade-in animation (for spawn)
+   *
+   * @generated from field: bool appear = 5;
+   */
+  appear: boolean;
+};
+
+/**
+ * Describes the message weewar.v1.SetUnitAtAnimationRequest.
+ * Use `create(SetUnitAtAnimationRequestSchema)` to create a new message.
+ */
+export const SetUnitAtAnimationRequestSchema: GenMessage<SetUnitAtAnimationRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 37);
+
+/**
+ * @generated from message weewar.v1.SetUnitAtAnimationResponse
+ */
+export type SetUnitAtAnimationResponse = Message<"weewar.v1.SetUnitAtAnimationResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.SetUnitAtAnimationResponse.
+ * Use `create(SetUnitAtAnimationResponseSchema)` to create a new message.
+ */
+export const SetUnitAtAnimationResponseSchema: GenMessage<SetUnitAtAnimationResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 38);
+
+/**
+ * Request to remove unit with optional animation
+ *
+ * @generated from message weewar.v1.RemoveUnitAtAnimationRequest
+ */
+export type RemoveUnitAtAnimationRequest = Message<"weewar.v1.RemoveUnitAtAnimationRequest"> & {
+  /**
+   * @generated from field: int32 q = 1;
+   */
+  q: number;
+
+  /**
+   * @generated from field: int32 r = 2;
+   */
+  r: number;
+
+  /**
+   * Fade-out animation (for death)
+   *
+   * @generated from field: bool animate = 3;
+   */
+  animate: boolean;
+};
+
+/**
+ * Describes the message weewar.v1.RemoveUnitAtAnimationRequest.
+ * Use `create(RemoveUnitAtAnimationRequestSchema)` to create a new message.
+ */
+export const RemoveUnitAtAnimationRequestSchema: GenMessage<RemoveUnitAtAnimationRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 39);
+
+/**
+ * @generated from message weewar.v1.RemoveUnitAtAnimationResponse
+ */
+export type RemoveUnitAtAnimationResponse = Message<"weewar.v1.RemoveUnitAtAnimationResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.RemoveUnitAtAnimationResponse.
+ * Use `create(RemoveUnitAtAnimationResponseSchema)` to create a new message.
+ */
+export const RemoveUnitAtAnimationResponseSchema: GenMessage<RemoveUnitAtAnimationResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_gameviewerpage, 40);
+
+/**
  * @generated from service weewar.v1.GameViewerPage
  */
 export const GameViewerPage: GenService<{
@@ -641,6 +983,56 @@ export const GameViewerPage: GenService<{
     methodKind: "unary";
     input: typeof ClearPathsRequestSchema;
     output: typeof ClearPathsResponseSchema;
+  },
+  /**
+   * Animation methods
+   *
+   * @generated from rpc weewar.v1.GameViewerPage.MoveUnitAnimation
+   */
+  moveUnitAnimation: {
+    methodKind: "unary";
+    input: typeof MoveUnitAnimationRequestSchema;
+    output: typeof MoveUnitAnimationResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GameViewerPage.ShowAttackEffect
+   */
+  showAttackEffect: {
+    methodKind: "unary";
+    input: typeof ShowAttackEffectRequestSchema;
+    output: typeof ShowAttackEffectResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GameViewerPage.ShowHealEffect
+   */
+  showHealEffect: {
+    methodKind: "unary";
+    input: typeof ShowHealEffectRequestSchema;
+    output: typeof ShowHealEffectResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GameViewerPage.ShowCaptureEffect
+   */
+  showCaptureEffect: {
+    methodKind: "unary";
+    input: typeof ShowCaptureEffectRequestSchema;
+    output: typeof ShowCaptureEffectResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GameViewerPage.SetUnitAtAnimation
+   */
+  setUnitAtAnimation: {
+    methodKind: "unary";
+    input: typeof SetUnitAtAnimationRequestSchema;
+    output: typeof SetUnitAtAnimationResponseSchema;
+  },
+  /**
+   * @generated from rpc weewar.v1.GameViewerPage.RemoveUnitAtAnimation
+   */
+  removeUnitAtAnimation: {
+    methodKind: "unary";
+    input: typeof RemoveUnitAtAnimationRequestSchema;
+    output: typeof RemoveUnitAtAnimationResponseSchema;
   },
   /**
    * Utility methods

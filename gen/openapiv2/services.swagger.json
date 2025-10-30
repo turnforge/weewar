@@ -1956,6 +1956,20 @@
       },
       "title": "*\nWorld batch-get response"
     },
+    "v1HexCoord": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "Hex coordinate for paths"
+    },
     "v1HighlightSpec": {
       "type": "object",
       "properties": {
@@ -2103,6 +2117,9 @@
         }
       },
       "title": "*\nMove unit from one position to another"
+    },
+    "v1MoveUnitAnimationResponse": {
+      "type": "object"
     },
     "v1Pagination": {
       "type": "object",
@@ -2285,6 +2302,9 @@
     "v1RemoveTileAtResponse": {
       "type": "object"
     },
+    "v1RemoveUnitAtAnimationResponse": {
+      "type": "object"
+    },
     "v1RemoveUnitAtResponse": {
       "type": "object"
     },
@@ -2308,7 +2328,19 @@
     "v1SetTileAtResponse": {
       "type": "object"
     },
+    "v1SetUnitAtAnimationResponse": {
+      "type": "object"
+    },
     "v1SetUnitAtResponse": {
+      "type": "object"
+    },
+    "v1ShowAttackEffectResponse": {
+      "type": "object"
+    },
+    "v1ShowCaptureEffectResponse": {
+      "type": "object"
+    },
+    "v1ShowHealEffectResponse": {
       "type": "object"
     },
     "v1ShowHighlightsResponse": {
@@ -2393,6 +2425,23 @@
         }
       },
       "title": "*\nResponse containing damage distribution statistics"
+    },
+    "v1SplashTarget": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "r": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "damage": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
     },
     "v1Tile": {
       "type": "object",

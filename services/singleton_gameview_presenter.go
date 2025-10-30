@@ -51,6 +51,13 @@ type GameScene interface {
 	ClearHighlights(context.Context)
 	ShowPath(context.Context, *v1.ShowPathRequest)
 	ShowHighlights(context.Context, *v1.ShowHighlightsRequest)
+	// Animation methods
+	MoveUnit(context.Context, *v1.MoveUnitAnimationRequest) (*v1.MoveUnitAnimationResponse, error)
+	ShowAttackEffect(context.Context, *v1.ShowAttackEffectRequest) (*v1.ShowAttackEffectResponse, error)
+	ShowHealEffect(context.Context, *v1.ShowHealEffectRequest) (*v1.ShowHealEffectResponse, error)
+	ShowCaptureEffect(context.Context, *v1.ShowCaptureEffectRequest) (*v1.ShowCaptureEffectResponse, error)
+	SetUnitAt(context.Context, *v1.SetUnitAtAnimationRequest) (*v1.SetUnitAtAnimationResponse, error)
+	RemoveUnitAt(context.Context, *v1.RemoveUnitAtAnimationRequest) (*v1.RemoveUnitAtAnimationResponse, error)
 }
 
 type SingletonGameViewPresenterImpl struct {
@@ -412,38 +419,42 @@ func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Con
 		for _, change := range result.Changes {
 			switch changeType := change.ChangeType.(type) {
 			case *v1.WorldChange_UnitMoved:
-				// Remove unit from previous position
-				if changeType.UnitMoved.PreviousUnit != nil {
-					s.GameState.RemoveUnitAt(ctx, &v1.RemoveUnitAtRequest{
-						Q: changeType.UnitMoved.PreviousUnit.Q,
-						R: changeType.UnitMoved.PreviousUnit.R,
-					})
-				}
-				// Add unit at new position
-				if changeType.UnitMoved.UpdatedUnit != nil {
-					s.GameState.SetUnitAt(ctx, &v1.SetUnitAtRequest{
-						Q:    changeType.UnitMoved.UpdatedUnit.Q,
-						R:    changeType.UnitMoved.UpdatedUnit.R,
-						Unit: changeType.UnitMoved.UpdatedUnit,
+				prevUnit := changeType.UnitMoved.PreviousUnit
+				updatedUnit := changeType.UnitMoved.UpdatedUnit
+				if prevUnit != nil && updatedUnit != nil {
+					// Build path for animation (simple: previous -> new)
+					path := []*v1.HexCoord{
+						{Q: prevUnit.Q, R: prevUnit.R},
+						{Q: updatedUnit.Q, R: updatedUnit.R},
+					}
+					// Animate unit movement
+					s.GameScene.MoveUnit(ctx, &v1.MoveUnitAnimationRequest{
+						Unit: updatedUnit,
+						Path: path,
 					})
 				}
 
 			case *v1.WorldChange_UnitDamaged:
-				// Update unit with new health
-				if changeType.UnitDamaged.UpdatedUnit != nil {
-					s.GameState.SetUnitAt(ctx, &v1.SetUnitAtRequest{
-						Q:    changeType.UnitDamaged.UpdatedUnit.Q,
-						R:    changeType.UnitDamaged.UpdatedUnit.R,
-						Unit: changeType.UnitDamaged.UpdatedUnit,
+				updatedUnit := changeType.UnitDamaged.UpdatedUnit
+				if updatedUnit != nil {
+					// Update unit with flash effect for now
+					// TODO: Enhance with attack animation when we have move context
+					s.GameScene.SetUnitAt(ctx, &v1.SetUnitAtAnimationRequest{
+						Q:     updatedUnit.Q,
+						R:     updatedUnit.R,
+						Unit:  updatedUnit,
+						Flash: true,
 					})
 				}
 
 			case *v1.WorldChange_UnitKilled:
-				// Remove killed unit
-				if changeType.UnitKilled.PreviousUnit != nil {
-					s.GameState.RemoveUnitAt(ctx, &v1.RemoveUnitAtRequest{
-						Q: changeType.UnitKilled.PreviousUnit.Q,
-						R: changeType.UnitKilled.PreviousUnit.R,
+				previousUnit := changeType.UnitKilled.PreviousUnit
+				if previousUnit != nil {
+					// Remove unit with death animation
+					s.GameScene.RemoveUnitAt(ctx, &v1.RemoveUnitAtAnimationRequest{
+						Q:       previousUnit.Q,
+						R:       previousUnit.R,
+						Animate: true,
 					})
 				}
 

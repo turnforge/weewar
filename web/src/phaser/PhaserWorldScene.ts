@@ -1420,4 +1420,127 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     public getLayerManager(): LayerManager | null {
         return this.layerManager;
     }
+
+    /**
+     * Calculate the tight bounding box of all tiles in the world
+     * @param padding - Padding in pixels to add around the bounds
+     * @returns Bounding box {x, y, width, height} or null if no tiles
+     */
+    private calculateMapBounds(padding: number = 20): { x: number; y: number; width: number; height: number } | null {
+        if (!this.world) {
+            return null;
+        }
+
+        const allTiles = this.world.getAllTiles();
+        if (allTiles.length === 0) {
+            return null;
+        }
+
+        // Calculate hex coordinate bounds
+        let minQ = allTiles[0].q;
+        let maxQ = allTiles[0].q;
+        let minR = allTiles[0].r;
+        let maxR = allTiles[0].r;
+
+        allTiles.forEach(tile => {
+            minQ = Math.min(minQ, tile.q);
+            maxQ = Math.max(maxQ, tile.q);
+            minR = Math.min(minR, tile.r);
+            maxR = Math.max(maxR, tile.r);
+        });
+
+        // Convert to pixel coordinates
+        const topLeft = hexToPixel(minQ, minR);
+        const bottomRight = hexToPixel(maxQ, maxR);
+
+        // Calculate bounds with tile dimensions
+        const halfWidth = this.tileWidth / 2;
+        const halfHeight = this.tileHeight / 2;
+
+        const x = topLeft.x - halfWidth - padding;
+        const y = topLeft.y - halfHeight - padding;
+        const width = (bottomRight.x - topLeft.x) + this.tileWidth + (padding * 2);
+        const height = (bottomRight.y - topLeft.y) + this.tileHeight + (padding * 2);
+
+        return { x, y, width, height };
+    }
+
+    /**
+     * Capture a screenshot of the current scene (clipped to map bounds)
+     * @param callback - Function to receive the screenshot as a Blob
+     * @param type - Image type (image/png or image/jpeg)
+     * @param quality - Quality for JPEG (0-1)
+     */
+    public captureScreenshot(callback: (blob: Blob | null) => void, type: string = 'image/png', quality: number = 0.92): void {
+        if (!this.phaserGame || !this.isInitialized) {
+            console.error('[PhaserWorldScene] Cannot capture screenshot: scene not initialized');
+            callback(null);
+            return;
+        }
+
+        // Calculate map bounds for clipping
+        const bounds = this.calculateMapBounds(20);
+
+        if (!bounds) {
+            console.error('[PhaserWorldScene] No tiles to capture');
+            callback(null);
+            return;
+        }
+
+        // Convert world coordinates to screen coordinates
+        const camera = this.cameras.main;
+        const screenX = (bounds.x - camera.scrollX) * camera.zoom;
+        const screenY = (bounds.y - camera.scrollY) * camera.zoom;
+        const screenWidth = bounds.width * camera.zoom;
+        const screenHeight = bounds.height * camera.zoom;
+
+        // Clamp to canvas bounds
+        const canvas = this.game.canvas;
+        const clampedX = Math.max(0, Math.min(screenX, canvas.width));
+        const clampedY = Math.max(0, Math.min(screenY, canvas.height));
+        const clampedWidth = Math.min(screenWidth, canvas.width - clampedX);
+        const clampedHeight = Math.min(screenHeight, canvas.height - clampedY);
+
+        // Use Phaser's snapshotArea for clipped capture
+        this.game.renderer.snapshotArea(
+            clampedX,
+            clampedY,
+            clampedWidth,
+            clampedHeight,
+            (image: HTMLImageElement | Phaser.Display.Color) => {
+                if (image instanceof HTMLImageElement) {
+                    // Convert image to blob
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    const ctx = canvas.getContext('2d');
+
+                    if (ctx) {
+                        ctx.drawImage(image, 0, 0);
+                        canvas.toBlob((blob) => {
+                            callback(blob);
+                        }, type, quality);
+                    } else {
+                        console.error('[PhaserWorldScene] Failed to get canvas context');
+                        callback(null);
+                    }
+                } else {
+                    console.error('[PhaserWorldScene] Unexpected snapshot result');
+                    callback(null);
+                }
+            }
+        );
+    }
+
+    /**
+     * Capture a screenshot and return it as a Promise
+     * @param type - Image type (image/png or image/jpeg)
+     * @param quality - Quality for JPEG (0-1)
+     * @returns Promise resolving to screenshot Blob
+     */
+    public async captureScreenshotAsync(type: string = 'image/png', quality: number = 0.92): Promise<Blob | null> {
+        return new Promise((resolve) => {
+            this.captureScreenshot(resolve, type, quality);
+        });
+    }
 }

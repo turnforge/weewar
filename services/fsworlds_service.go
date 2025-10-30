@@ -39,6 +39,14 @@ func (s *FSWorldsServiceImpl) ListWorlds(ctx context.Context, req *v1.ListWorlds
 	}
 	resp.Items, err = storage.ListFSEntities[*v1.World](s.storage, nil)
 	resp.Pagination.TotalResults = int32(len(resp.Items))
+
+	// Populate screenshot URLs for all worlds
+	for _, world := range resp.Items {
+		if world.ScreenshotUrl == "" {
+			world.ScreenshotUrl = fmt.Sprintf("/worlds/%s/screenshot", world.Id)
+		}
+	}
+
 	return resp, nil
 }
 
@@ -51,6 +59,11 @@ func (s *FSWorldsServiceImpl) GetWorld(ctx context.Context, req *v1.GetWorldRequ
 	world, err := storage.LoadFSArtifact[*v1.World](s.storage, req.Id, "metadata")
 	if err != nil {
 		return nil, fmt.Errorf("world metadata not found: %w", err)
+	}
+
+	// Populate screenshot URL if not set
+	if world.ScreenshotUrl == "" {
+		world.ScreenshotUrl = fmt.Sprintf("/worlds/%s/screenshot", world.Id)
 	}
 
 	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.Id, "data")

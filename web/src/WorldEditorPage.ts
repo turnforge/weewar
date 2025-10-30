@@ -389,7 +389,7 @@ class WorldEditorPage extends BasePage {
                 }
                 return;
             }
-            
+
             // Ctrl+S or Cmd+S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
@@ -402,6 +402,11 @@ class WorldEditorPage extends BasePage {
         const exportButton = document.getElementById('export-world-btn');
         if (exportButton) {
             exportButton.addEventListener('click', this.exportWorld.bind(this));
+        }
+
+        const screenshotButton = document.getElementById('capture-screenshot-btn');
+        if (screenshotButton) {
+            screenshotButton.addEventListener('click', this.handleScreenshotClick.bind(this));
         }
 
 
@@ -947,11 +952,53 @@ class WorldEditorPage extends BasePage {
 
         // World now handles its own export operations
         const result = await this.world.save();
-        
+
         if (result.success) {
             this.showToast('Success', 'World exported successfully', 'success');
         } else {
             this.showToast('Error', result.error || 'Failed to export world', 'error');
+        }
+    }
+
+    private async handleScreenshotClick(): Promise<void> {
+        const worldId = this.world?.getWorldId();
+        if (!worldId) {
+            console.error('No world ID available');
+            this.showToast('Error', 'No world ID available', 'error');
+            return;
+        }
+
+        if (!this.phaserEditorComponent || !this.phaserEditorComponent.editorScene) {
+            this.showToast('Error', 'Editor scene not initialized', 'error');
+            return;
+        }
+
+        try {
+            // Capture screenshot from Phaser scene
+            const blob = await this.phaserEditorComponent.editorScene.captureScreenshotAsync('image/png', 0.92);
+
+            if (!blob) {
+                this.showToast('Error', 'Failed to capture screenshot', 'error');
+                return;
+            }
+
+            // Upload to server
+            const formData = new FormData();
+            formData.append('screenshot', blob, 'screenshot.png');
+
+            const response = await fetch(`/worlds/${worldId}/screenshot`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                this.showToast('Success', 'Screenshot saved successfully', 'success');
+            } else {
+                this.showToast('Error', 'Failed to save screenshot', 'error');
+            }
+        } catch (error) {
+            console.error('Screenshot error:', error);
+            this.showToast('Error', 'Failed to capture or save screenshot', 'error');
         }
     }
 

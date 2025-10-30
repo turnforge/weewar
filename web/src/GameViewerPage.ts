@@ -626,6 +626,51 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
               gameId: this.currentGameId || ""
           });
         });
+
+        // Screenshot button
+        const screenshotBtn = document.getElementById('capture-screenshot-btn');
+        if (screenshotBtn) {
+            screenshotBtn.addEventListener('click', () => this.handleScreenshotClick());
+        }
+    }
+
+    /**
+     * Handle Screenshot button click
+     */
+    private async handleScreenshotClick(): Promise<void> {
+        if (!this.currentGameId) {
+            console.error('No game ID available');
+            this.showToast('Error', 'No game ID available', 'error');
+            return;
+        }
+
+        try {
+            // Capture screenshot from Phaser scene
+            const blob = await this.gameScene.captureScreenshotAsync('image/png', 0.92);
+
+            if (!blob) {
+                this.showToast('Error', 'Failed to capture screenshot', 'error');
+                return;
+            }
+
+            // Upload to server
+            const formData = new FormData();
+            formData.append('screenshot', blob, 'screenshot.png');
+
+            const response = await fetch(`/games/${this.currentGameId}/screenshot`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                this.showToast('Success', 'Screenshot saved successfully', 'success');
+            } else {
+                this.showToast('Error', 'Failed to save screenshot', 'error');
+            }
+        } catch (error) {
+            console.error('Screenshot error:', error);
+            this.showToast('Error', 'Failed to capture or save screenshot', 'error');
+        }
     }
 
     /**

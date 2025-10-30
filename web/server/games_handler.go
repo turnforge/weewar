@@ -18,6 +18,7 @@ func (r *RootViewsHandler) setupGamesMux() *http.ServeMux {
 		notationId := r.PathValue("notationId")
 		http.Redirect(w, r, fmt.Sprintf("/appitems/new?copyFrom=%s", notationId), http.StatusFound)
 	})
+	mux.HandleFunc("/{gameId}/screenshot", r.handleResourceScreenshot("game"))
 	mux.HandleFunc("/{gameId}", r.handleGameActions)
 	return mux
 }

@@ -60,6 +60,14 @@ func (s *FSGamesServiceImpl) ListGames(ctx context.Context, req *v1.ListGamesReq
 	}
 	resp.Items, err = storage.ListFSEntities[*v1.Game](s.storage, nil)
 	resp.Pagination.TotalResults = int32(len(resp.Items))
+
+	// Populate screenshot URLs for all games
+	for _, game := range resp.Items {
+		if game.ScreenshotUrl == "" {
+			game.ScreenshotUrl = fmt.Sprintf("/games/%s/screenshot", game.Id)
+		}
+	}
+
 	return resp, nil
 }
 
@@ -148,6 +156,11 @@ func (s *FSGamesServiceImpl) GetGame(ctx context.Context, req *v1.GetGameRequest
 	game, err := storage.LoadFSArtifact[*v1.Game](s.storage, req.Id, "metadata")
 	if err != nil {
 		return nil, fmt.Errorf("game metadata not found: %w", err)
+	}
+
+	// Populate screenshot URL if not set
+	if game.ScreenshotUrl == "" {
+		game.ScreenshotUrl = fmt.Sprintf("/games/%s/screenshot", game.Id)
 	}
 
 	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, req.Id, "state")

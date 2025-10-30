@@ -16,7 +16,9 @@ This folder contains all the Go HTML template files (`*.html`) used for server-s
 *   `Section.html`: Template for the outer frame of a single section, including its header (number, title, icon), universal controls (move, delete, add, settings, LLM, fullscreen), section-specific action bars (for System Description view/edit), and the main content container (`.section-content`) where the specific view/edit component renders.
 *   `HomePage.html`, `DesignEditorPage.html`, `LoginPage.html`: Top-level page templates that include `BasePage.html` and compose other smaller templates (like `DesignList.html`, `TableOfContents.html`, `DocumentTitle.html`).
 *   `WorldListingPage.html`, `WorldViewerPage.html`, `WorldEditorPage.html`: Complete worlds management templates for listing, viewing, and editing worlds.
-*   `WorldList.html`: Reusable component for displaying worlds in a grid layout with search, sort, and action controls.
+*   `WorldList.html`: Reusable component for displaying worlds in a table layout with search, sort, action controls, and screenshot thumbnails.
+*   `GameListingPage.html`, `GameViewerPage.html`: Complete games management templates for listing and viewing games.
+*   `GameList.html`: Reusable component for displaying games in a table layout with screenshot thumbnails and metadata.
 *   `WorldEditorPage.html`: **Interactive canvas-based world editor** with streamlined 2-panel layout:
     *   Left sidebar: World management, grid-based terrain palette (6 types), brush settings, painting tools, history controls
     *   Center: Real-time updating HTML5 canvas with hex grid visualization and world resize controls

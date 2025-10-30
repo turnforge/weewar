@@ -26,6 +26,24 @@
 
 ## UI Polish & User Experience
 
+### Screenshot and Preview System
+**Priority**: Medium
+**Status**: ✅ COMPLETE
+
+**Completed**:
+- [x] Screenshot capture functionality in PhaserWorldScene with tight bounds clipping
+- [x] Screenshot API endpoints for games and worlds
+- [x] Screenshot buttons in GameViewerPage and WorldEditorPage
+- [x] Screenshot thumbnails in GameList and WorldList pages
+- [x] screenshot_url field in Game and World protos for flexible URL management
+- [x] Default URL population with CDN-ready override capability
+
+**Design**:
+- Screenshots stored in `~/dev-app-data/weewar/storage/{games|worlds}/{id}/screenshots/`
+- Automatic tight bounds calculation to avoid empty space
+- Generic screenshot handler for reusability across resource types
+- Proto field allows easy migration to CDN or external hosting
+
 ### Visual Updates and Animations
 **Priority**: Medium
 **Status**: Not Started

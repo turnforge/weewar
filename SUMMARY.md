@@ -142,7 +142,22 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 
 ### Rules Data Extraction and Organization
 
-**Achievement**: Enhanced rules extraction system to extract action_order progression data and split rules into efficient separate files.
+**Achievement**: Enhanced rules extraction system with modern htmlquery-based parsing and terrain-unit relationship optimization.
+
+**Recent Improvements (Current Session)**:
+1. **Scraper Modernization**: Replaced manual tree traversal with htmlquery-based extraction
+   - `extractTerrainUnitInteractions`: Now uses `ExtractHtmlTable()` for clean table parsing with column index mapping
+   - `extractUnitIDFromCell`: Uses `htmlquery.FindOne()` instead of recursive traversal
+   - `containsCheckmark`: Single-line htmlquery lookup replacing 20-line traversal function
+   - `extractDefenderIDFromCard`: Direct XPath query replacing recursive node walking
+   - `extractUnitCombatProperties`: Parallel card extraction with `htmlquery.Find()`
+   - `extractDamageDistribution`: Direct tooltip div selection instead of manual recursion
+
+2. **Data Model Enhancement**: Added direct terrain-to-buildable-units mapping
+   - **TerrainDefinition.buildable_unit_ids**: New repeated int32 field for O(1) lookup
+   - Eliminates need to iterate through all TerrainUnitProperties to find buildable units
+   - Backward compatible: `can_build` flag remains in TerrainUnitProperties
+   - Example: Land Base (terrain 1) now has direct array: [1,2,3,4,5,6,7,8,9,20,25,26,27,29,30,40,44]
 
 **Key Improvements**:
 1. **Action Order Extraction**: Added XPath-based extraction of Progression sections from WeeWar HTML
@@ -151,7 +166,7 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
    - Ignores numeric hints (movement points, attack ranges) as they're extracted elsewhere
 
 2. **Data Split for Performance**: Separated rules data into two files
-   - **weewar-rules.json** (92KB): Core rules with units, terrains, terrain-unit properties, action_order
+   - **weewar-rules.json** (93KB): Core rules with units, terrains, terrain-unit properties, action_order, buildable_unit_ids
    - **weewar-damage.json** (1.2MB): Combat damage distributions (UnitUnitProperties)
    - Enables fast loading of core rules without heavy damage data
 
@@ -162,16 +177,18 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
    - All tests updated and passing
 
 **Implementation Details**:
-- cmd/extract-rules-data/main.go: extractActionOrder() function with badge parsing
+- cmd/extract-rules-data/main.go: All extraction functions now use htmlquery for clean, maintainable code
+- cmd/extract-rules-data/utils.go: ExtractHtmlTable utility for consistent table parsing
+- protos/weewar/v1/models.proto: TerrainDefinition.buildable_unit_ids field added
 - services/rules_loader.go: Updated to handle split file loading
 - assets/rule_data.go: Embeds both weewar-rules.json and weewar-damage.json
-- Extraction uses regex and HTML traversal to parse progression badges
 
 **Benefits**:
-- Faster initial load time (92KB vs 1.3MB)
-- Support for lazy damage data loading
-- Complete action progression data for all units
-- Cleaner separation of concerns in data files
+- Cleaner, more maintainable scraper code (no manual tree traversal)
+- Consistent extraction patterns across all data types
+- Faster terrain → buildable units lookup (direct array vs iteration)
+- Easier to extend with new HTML table structures
+- Better separation of data extraction concerns
 
 ### 🎉 Complete Unit Movement System Resolution
 

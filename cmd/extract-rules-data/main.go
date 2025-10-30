@@ -209,71 +209,93 @@ func extractTerrainName(doc *html.Node) string {
 }
 
 func extractTerrainUnitInteractions(doc *html.Node, terrainID int32, rulesData *RulesData) error {
-	// Use XPath to find column headers
-	var columnHeaders []string
-	headerCells := htmlquery.Find(doc, "//thead/tr/th")
-	for _, cell := range headerCells {
-		headerText := getTextContent(cell)
-		columnHeaders = append(columnHeaders, strings.ToLower(strings.TrimSpace(headerText)))
+	// Find the units interaction table (appears after h2 "Units" heading)
+	tableNode := htmlquery.FindOne(doc, "//h2[contains(., 'Units')]/following-sibling::div//table[1]")
+	if tableNode == nil {
+		fmt.Printf("  No units table found for terrain %d\n", terrainID)
+		return nil
 	}
 
-	// Use XPath to find all tbody rows
-	rows := htmlquery.Find(doc, "//tbody/tr")
-	for _, row := range rows {
-		extractUnitRowData(row, terrainID, columnHeaders, rulesData)
+	// Extract table structure to get headers
+	table := ExtractHtmlTable(tableNode)
+	if !table.HasHeader || len(table.Rows) < 2 {
+		fmt.Printf("  No valid units table found for terrain %d\n", terrainID)
+		return nil
 	}
 
-	return nil
-}
-
-func extractUnitRowData(row *html.Node, terrainID int32, columnHeaders []string, rulesData *RulesData) {
-	var unitID int32 = -1
-	properties := &weewarv1.TerrainUnitProperties{
-		TerrainId:    terrainID,
-		MovementCost: 1.0, // Default movement cost
+	// Get headers from first row and create column index map
+	columnIndex := make(map[string]int)
+	for i, header := range table.Rows[0] {
+		columnIndex[strings.ToLower(strings.TrimSpace(header))] = i
 	}
 
-	cellIndex := 0
-	for cell := row.FirstChild; cell != nil; cell = cell.NextSibling {
-		if cell.Type == html.ElementNode && cell.Data == "td" {
-			// Check if we have a valid column header for this index
-			if cellIndex < len(columnHeaders) {
-				columnName := columnHeaders[cellIndex]
-				cellText := getTextContent(cell)
+	// Track buildable units for this terrain
+	var buildableUnitIds []int32
 
-				switch columnName {
-				case "unit":
-					unitID = extractUnitIDFromCell(cell)
-				case "attack":
-					if attack := parseModifierValue(cellText); attack != 0 {
-						properties.AttackBonus = attack
-					}
-				case "defense":
-					if defense := parseModifierValue(cellText); defense != 0 {
-						properties.DefenseBonus = defense
-					}
-				case "movement":
-					properties.MovementCost = parseMovementCost(cellText)
-				case "heal":
-					if heal := parseModifierValue(cellText); heal > 0 {
-						properties.HealingBonus = heal
-					}
-				case "captures":
-					properties.CanCapture = containsCheckmark(cell)
-				case "builds":
-					properties.CanBuild = containsCheckmark(cell)
-				}
+	// Use htmlquery to get all data rows directly
+	rows := htmlquery.Find(tableNode, ".//tbody/tr")
+
+	for _, rowNode := range rows {
+		// Get all cell values for this row
+		cells := htmlquery.Find(rowNode, ".//td")
+		if len(cells) == 0 {
+			continue
+		}
+
+		// Extract unit ID from first cell (unit column)
+		unitID := extractUnitIDFromCell(cells[columnIndex["unit"]])
+		if unitID <= 0 {
+			continue
+		}
+
+		properties := &weewarv1.TerrainUnitProperties{
+			TerrainId:    terrainID,
+			UnitId:       unitID,
+			MovementCost: 1.0, // Default movement cost
+		}
+
+		// Process each column by looking up cell by index
+		if idx, ok := columnIndex["attack"]; ok && idx < len(cells) {
+			if attack := parseModifierValue(getTextContent(cells[idx])); attack != 0 {
+				properties.AttackBonus = attack
 			}
-			cellIndex++
+		}
+		if idx, ok := columnIndex["defense"]; ok && idx < len(cells) {
+			if defense := parseModifierValue(getTextContent(cells[idx])); defense != 0 {
+				properties.DefenseBonus = defense
+			}
+		}
+		if idx, ok := columnIndex["movement"]; ok && idx < len(cells) {
+			properties.MovementCost = parseMovementCost(getTextContent(cells[idx]))
+		}
+		if idx, ok := columnIndex["heal"]; ok && idx < len(cells) {
+			if heal := parseModifierValue(getTextContent(cells[idx])); heal > 0 {
+				properties.HealingBonus = heal
+			}
+		}
+		if idx, ok := columnIndex["captures"]; ok && idx < len(cells) {
+			properties.CanCapture = containsCheckmark(cells[idx])
+		}
+		if idx, ok := columnIndex["builds"]; ok && idx < len(cells) {
+			properties.CanBuild = containsCheckmark(cells[idx])
+		}
+
+		// Store the properties
+		key := fmt.Sprintf("%d:%d", terrainID, unitID)
+		rulesData.TerrainUnitProperties[key] = properties
+
+		// Track if this unit can be built on this terrain
+		if properties.CanBuild {
+			buildableUnitIds = append(buildableUnitIds, unitID)
 		}
 	}
 
-	// Create terrain-unit property key using our centralized format
-	if unitID > 0 {
-		properties.UnitId = unitID
-		key := fmt.Sprintf("%d:%d", terrainID, unitID)
-		rulesData.TerrainUnitProperties[key] = properties
+	// Store buildable unit IDs in terrain definition
+	if terrainDef, exists := rulesData.Terrains[fmt.Sprintf("%d", terrainID)]; exists {
+		terrainDef.BuildableUnitIds = buildableUnitIds
 	}
+
+	return nil
 }
 
 func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefinition, error) {
@@ -413,30 +435,21 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 
 func extractUnitCombatProperties(doc *html.Node, attackerID int32, damageData *DamageData) error {
 	// Extract combat damage distributions from the damage charts
-	var traverse func(*html.Node)
-	traverse = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "div" {
-			// Look for unit damage cards
-			for _, attr := range n.Attr {
-				if attr.Key == "class" && strings.Contains(attr.Val, "card") {
-					if defenderID := extractDefenderIDFromCard(n); defenderID > 0 {
-						if damage := extractDamageDistribution(n); damage != nil {
-							key := fmt.Sprintf("%d:%d", attackerID, defenderID)
-							damageData.UnitUnitProperties[key] = &weewarv1.UnitUnitProperties{
-								AttackerId: attackerID,
-								DefenderId: defenderID,
-								Damage:     damage,
-							}
-						}
-					}
+	// Use htmlquery to find all div elements with "card" class
+	cards := htmlquery.Find(doc, "//div[contains(@class, 'card')]")
+
+	for _, card := range cards {
+		if defenderID := extractDefenderIDFromCard(card); defenderID > 0 {
+			if damage := extractDamageDistribution(card); damage != nil {
+				key := fmt.Sprintf("%d:%d", attackerID, defenderID)
+				damageData.UnitUnitProperties[key] = &weewarv1.UnitUnitProperties{
+					AttackerId: attackerID,
+					DefenderId: defenderID,
+					Damage:     damage,
 				}
 			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			traverse(c)
-		}
 	}
-	traverse(doc)
 
 	return nil
 }
@@ -459,27 +472,23 @@ func getTextContent(n *html.Node) string {
 
 func extractUnitIDFromCell(cell *html.Node) int32 {
 	// Extract unit ID from href like "unit/view.html?unitId=1"
-	var traverse func(*html.Node) int32
-	traverse = func(n *html.Node) int32 {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, attr := range n.Attr {
-				if attr.Key == "href" && strings.Contains(attr.Val, "unitId=") {
-					if matches := regexp.MustCompile(`unitId=(\d+)`).FindStringSubmatch(attr.Val); len(matches) > 1 {
-						if id, err := strconv.Atoi(matches[1]); err == nil {
-							return int32(id)
-						}
-					}
+	// Use htmlquery to find the anchor tag with unitId parameter
+	link := htmlquery.FindOne(cell, ".//a[contains(@href, 'unitId=')]")
+	if link == nil {
+		return 0
+	}
+
+	// Get the href attribute
+	for _, attr := range link.Attr {
+		if attr.Key == "href" && strings.Contains(attr.Val, "unitId=") {
+			if matches := regexp.MustCompile(`unitId=(\d+)`).FindStringSubmatch(attr.Val); len(matches) > 1 {
+				if id, err := strconv.Atoi(matches[1]); err == nil {
+					return int32(id)
 				}
 			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			if result := traverse(c); result > 0 {
-				return result
-			}
-		}
-		return 0
 	}
-	return traverse(cell)
+	return 0
 }
 
 func parseModifierValue(text string) int32 {
@@ -516,48 +525,29 @@ func parseMovementCost(text string) float64 {
 
 func containsCheckmark(cell *html.Node) bool {
 	// Look for fa-check class indicating a checkmark
-	var traverse func(*html.Node) bool
-	traverse = func(n *html.Node) bool {
-		if n.Type == html.ElementNode && n.Data == "span" {
-			for _, attr := range n.Attr {
-				if attr.Key == "class" && strings.Contains(attr.Val, "fa-check") {
-					return true
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			if traverse(c) {
-				return true
-			}
-		}
-		return false
-	}
-	return traverse(cell)
+	checkmark := htmlquery.FindOne(cell, ".//span[contains(@class, 'fa-check')]")
+	return checkmark != nil
 }
 
 func extractDefenderIDFromCard(card *html.Node) int32 {
 	// Find the defender unit ID from the card header link
-	var traverse func(*html.Node) int32
-	traverse = func(n *html.Node) int32 {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, attr := range n.Attr {
-				if attr.Key == "href" && strings.Contains(attr.Val, "unitId=") {
-					if matches := regexp.MustCompile(`unitId=(\d+)`).FindStringSubmatch(attr.Val); len(matches) > 1 {
-						if id, err := strconv.Atoi(matches[1]); err == nil {
-							return int32(id)
-						}
-					}
+	// Use htmlquery to find the anchor tag with unitId parameter
+	link := htmlquery.FindOne(card, ".//a[contains(@href, 'unitId=')]")
+	if link == nil {
+		return 0
+	}
+
+	// Get the href attribute
+	for _, attr := range link.Attr {
+		if attr.Key == "href" && strings.Contains(attr.Val, "unitId=") {
+			if matches := regexp.MustCompile(`unitId=(\d+)`).FindStringSubmatch(attr.Val); len(matches) > 1 {
+				if id, err := strconv.Atoi(matches[1]); err == nil {
+					return int32(id)
 				}
 			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			if result := traverse(c); result > 0 {
-				return result
-			}
-		}
-		return 0
 	}
-	return traverse(card)
+	return 0
 }
 
 func extractDamageDistribution(card *html.Node) *weewarv1.DamageDistribution {
@@ -568,32 +558,32 @@ func extractDamageDistribution(card *html.Node) *weewarv1.DamageDistribution {
 	// Use a map to deduplicate damage values (HTML may have duplicate tooltips)
 	damageMap := make(map[int]*weewarv1.DamageRange)
 
-	// Extract damage probabilities from tooltip data
-	var traverse func(*html.Node)
-	traverse = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "div" {
-			for _, attr := range n.Attr {
-				if attr.Key == "data-bs-original-title" && strings.Contains(attr.Val, "% of the time") {
-					// Parse tooltip like "72.2% of the time Soldier deals 1 damage"
-					if matches := regexp.MustCompile(`(\d+(?:\.\d+)?)% of the time.*?deals (\d+) damage`).FindStringSubmatch(attr.Val); len(matches) > 2 {
-						if prob, err := strconv.ParseFloat(matches[1], 64); err == nil {
-							if dmg, err := strconv.Atoi(matches[2]); err == nil {
-								dmgFloat := float64(dmg)
+	// Use htmlquery to find all div elements with tooltip data
+	tooltipDivs := htmlquery.Find(card, ".//div[@data-bs-original-title]")
 
-								// Only add if we haven't seen this damage value before
-								if _, exists := damageMap[dmg]; !exists {
-									damageMap[dmg] = &weewarv1.DamageRange{
-										MinValue:    dmgFloat,
-										MaxValue:    dmgFloat,
-										Probability: prob / 100.0, // Convert percentage to decimal
-									}
+	for _, div := range tooltipDivs {
+		// Get the tooltip attribute
+		for _, attr := range div.Attr {
+			if attr.Key == "data-bs-original-title" && strings.Contains(attr.Val, "% of the time") {
+				// Parse tooltip like "72.2% of the time Soldier deals 1 damage"
+				if matches := regexp.MustCompile(`(\d+(?:\.\d+)?)% of the time.*?deals (\d+) damage`).FindStringSubmatch(attr.Val); len(matches) > 2 {
+					if prob, err := strconv.ParseFloat(matches[1], 64); err == nil {
+						if dmg, err := strconv.Atoi(matches[2]); err == nil {
+							dmgFloat := float64(dmg)
 
-									if damage.MinDamage == 0 || dmgFloat < damage.MinDamage {
-										damage.MinDamage = dmgFloat
-									}
-									if dmgFloat > damage.MaxDamage {
-										damage.MaxDamage = dmgFloat
-									}
+							// Only add if we haven't seen this damage value before
+							if _, exists := damageMap[dmg]; !exists {
+								damageMap[dmg] = &weewarv1.DamageRange{
+									MinValue:    dmgFloat,
+									MaxValue:    dmgFloat,
+									Probability: prob / 100.0, // Convert percentage to decimal
+								}
+
+								if damage.MinDamage == 0 || dmgFloat < damage.MinDamage {
+									damage.MinDamage = dmgFloat
+								}
+								if dmgFloat > damage.MaxDamage {
+									damage.MaxDamage = dmgFloat
 								}
 							}
 						}
@@ -601,11 +591,7 @@ func extractDamageDistribution(card *html.Node) *weewarv1.DamageDistribution {
 				}
 			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			traverse(c)
-		}
 	}
-	traverse(card)
 
 	if len(damageMap) == 0 {
 		return nil // No damage data found

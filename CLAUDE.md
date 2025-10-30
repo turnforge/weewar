@@ -26,6 +26,37 @@ Builds for frontend, wasm, backend are all running continuously and can be queri
 - `devloop logs <rulename>`  - Stream logs from running devloop server
 - `devloop status <rulename>` - Get status of rules from running devloop server
 
+## Rules Data Extraction
+
+The `cmd/extract-rules-data` tool scrapes game rules from saved WeeWar HTML pages:
+
+**Data Sources:**
+- `~/dev-app-data/weewar/data/Tiles/*.html` - Terrain pages with unit interaction tables
+- `~/dev-app-data/weewar/data/Units/*.html` - Unit pages with stats and combat damage charts
+
+**Extraction Architecture:**
+- Uses `ExtractHtmlTable()` utility for consistent table parsing across all scrapers
+- All functions use htmlquery/XPath instead of manual tree traversal
+- Generates two files: `weewar-rules.json` (93KB core rules) and `weewar-damage.json` (1.2MB combat data)
+
+**Key Extraction Functions:**
+- `extractTerrainUnitInteractions`: Parses terrain-unit interaction tables using htmlquery with column indexing
+- `extractUnitDefinition`: Extracts unit stats, classification, attack ranges, costs
+- `extractAttackTable`: Parses attack matrices using ExtractHtmlTable for base damage values
+- `extractUnitCombatProperties`: Extracts damage distributions from card tooltips
+- `extractActionOrder`: Parses Progression badges for action sequences
+
+**Running the Extractor:**
+```bash
+cd cmd/extract-rules-data
+go run .
+# Outputs: weewar-rules.json and weewar-damage.json
+cp *.json ../../assets/
+# Then run buf generate to update proto-generated code
+```
+
+**Proto Field Naming:** Proto uses snake_case in JSON but camelCase in Go (e.g., `buildable_unit_ids` → `BuildableUnitIds`)
+
 ## Summary instructions
 
 - When you are using compact, please focus on test output and code changes

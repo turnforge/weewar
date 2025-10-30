@@ -197,7 +197,7 @@ export interface TerrainDefinition {
   /** How this terrain impacts */
   unitProperties: Record<number, TerrainUnitProperties>;
   /** List of units that can be built on this terrain */
-  buildableUnits: number[];
+  buildableUnitIds: number[];
 }
 
 

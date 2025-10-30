@@ -852,9 +852,9 @@ type TerrainDefinition struct {
 	// How this terrain impacts
 	UnitProperties map[int32]*TerrainUnitProperties `protobuf:"bytes,7,rep,name=unit_properties,json=unitProperties,proto3" json:"unit_properties,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// List of units that can be built on this terrain
-	BuildableUnits []int32 `protobuf:"varint,8,rep,packed,name=buildable_units,json=buildableUnits,proto3" json:"buildable_units,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	BuildableUnitIds []int32 `protobuf:"varint,8,rep,packed,name=buildable_unit_ids,json=buildableUnitIds,proto3" json:"buildable_unit_ids,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *TerrainDefinition) Reset() {
@@ -922,9 +922,9 @@ func (x *TerrainDefinition) GetUnitProperties() map[int32]*TerrainUnitProperties
 	return nil
 }
 
-func (x *TerrainDefinition) GetBuildableUnits() []int32 {
+func (x *TerrainDefinition) GetBuildableUnitIds() []int32 {
 	if x != nil {
-		return x.BuildableUnits
+		return x.BuildableUnitIds
 	}
 	return nil
 }
@@ -3028,14 +3028,14 @@ const file_weewar_v1_models_proto_rawDesc = "" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
 	"\tis_ranged\x18\x03 \x01(\bR\bisRanged\x12\x1f\n" +
 	"\vturn_number\x18\x04 \x01(\x05R\n" +
-	"turnNumber\"\xd6\x02\n" +
+	"turnNumber\"\xdb\x02\n" +
 	"\x11TerrainDefinition\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x05 \x01(\x05R\x04type\x12 \n" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12Y\n" +
-	"\x0funit_properties\x18\a \x03(\v20.weewar.v1.TerrainDefinition.UnitPropertiesEntryR\x0eunitProperties\x12'\n" +
-	"\x0fbuildable_units\x18\b \x03(\x05R\x0ebuildableUnits\x1ac\n" +
+	"\x0funit_properties\x18\a \x03(\v20.weewar.v1.TerrainDefinition.UnitPropertiesEntryR\x0eunitProperties\x12,\n" +
+	"\x12buildable_unit_ids\x18\b \x03(\x05R\x10buildableUnitIds\x1ac\n" +
 	"\x13UnitPropertiesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x126\n" +
 	"\x05value\x18\x02 \x01(\v2 .weewar.v1.TerrainUnitPropertiesR\x05value:\x028\x01\"\xd9\a\n" +

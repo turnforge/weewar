@@ -192,7 +192,7 @@ message TerrainDefinition {
   map<int32, TerrainUnitProperties> unit_properties = 7;
 
   // List of units that can be built on this terrain
-  repeated int32 buildable_units = 8;
+  repeated int32 buildable_unit_ids = 8;
 }
 
 // Rules engine unit definition  

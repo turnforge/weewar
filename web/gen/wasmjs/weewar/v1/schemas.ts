@@ -390,7 +390,7 @@ export const TerrainDefinitionSchema: MessageSchema = {
       id: 7,
     },
     {
-      name: "buildableUnits",
+      name: "buildableUnitIds",
       type: FieldType.REPEATED,
       id: 8,
       repeated: true,

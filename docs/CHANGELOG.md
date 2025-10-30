@@ -2,6 +2,56 @@
 
 All notable changes to the WeeWar project are documented in this file.
 
+## [7.0.0] - 2025-01-29
+
+### 🎯 ACTION PROGRESSION SYSTEM REFACTOR ✅
+
+#### Index-Based State Machine
+- **REFACTORED**: Complete redesign from history-based to index-based progression tracking
+- **NEW**: `progression_step` (int32) field in Unit - index into UnitDefinition.action_order
+- **NEW**: `chosen_alternative` (string) field in Unit - tracks pipe-separated alternative choice
+- **REMOVED**: `actions_this_turn` field - eliminated complex history tracking
+- **SIMPLIFIED**: ~120 lines of complex logic reduced to ~30 lines of simple lookup
+
+#### Core Logic Improvements
+- **NEW**: `GetAllowedActions()` - replaces CalculateProgressionState() with simpler API
+- **NEW**: `canPerformAction()` - checks action viability based on resources
+- **IMPROVED**: Natural movement limiting via distance_left (no artificial counters)
+- **IMPROVED**: Pipe-separated alternatives properly handled as mutually exclusive
+- **DEFAULT**: action_order defaults to ["move", "attack|capture"]
+
+#### Integration Updates
+- **ProcessMoveUnit**: Advances progression_step when distance_left reaches 0
+- **ProcessAttackUnit**: Records chosen_alternative for pipe-separated options, advances step
+- **TopUpUnitIfNeeded**: Resets progression_step=0 and clears chosen_alternative on turn change
+- **GetOptionsAt**: Uses GetAllowedActions() for filtering available options
+- **copyUnit**: Includes new progression_step and chosen_alternative fields
+
+#### Test Coverage
+- **REWRITTEN**: All progression tests for simpler state machine model
+- **NEW**: TestGetAllowedActions - 7 scenarios covering core logic
+- **NEW**: TestProgressionStepAdvancement - tests step advancement on move
+- **NEW**: TestTopUpResetsProgression - tests turn change reset
+- **NEW**: TestParseActionAlternatives - tests pipe-separated parsing
+- **PASSING**: All tests including existing regression tests
+
+#### Benefits
+- **Simpler**: Single index lookup vs complex history analysis
+- **Flexible**: Declarative action_order configuration per unit type
+- **Extensible**: Supports advanced features (pipe alternatives, action_limits)
+- **Unified**: Same code validates moves and generates options
+- **Natural**: Movement limited by points, not artificial progression rules
+
+#### Files Modified
+- `protos/weewar/v1/models.proto` - Updated Unit message fields
+- `services/rules_engine.go` - Replaced CalculateProgressionState with GetAllowedActions
+- `services/moves.go` - Updated ProcessMoveUnit and ProcessAttackUnit
+- `services/game.go` - Updated TopUpUnitIfNeeded to reset progression
+- `services/base_games_service.go` - Updated GetOptionsAt integration
+- `services/action_progression_test.go` - Complete test rewrite
+
+---
+
 ## [6.0.0] - 2025-01-23
 
 ### 🎮 INCREMENTAL UI UPDATES & TURN MANAGEMENT ✅

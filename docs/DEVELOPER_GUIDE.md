@@ -554,6 +554,152 @@ if unitImg, err := assetManager.GetUnitImage(unitType, playerID); err == nil {
 }
 ```
 
+## Testing Phaser Animations
+
+### Browser Console Testing
+
+The GameViewerPage exposes `gameScene` to the browser console for interactive animation testing. This allows you to test animations without making actual game moves.
+
+#### Setup
+
+1. Open GameViewerPage in browser
+2. Open browser console (F12)
+3. Wait for message: `🎮 gameScene exposed to window for animation testing`
+
+#### Animation Testing Commands
+
+**Move Unit Animation**
+```javascript
+// Create a test unit object
+const testUnit = {
+  q: 0, r: 0,
+  unitType: 1,
+  player: 1,
+  availableHealth: 100,
+  distanceLeft: 3,
+  shortcut: "A1"
+};
+
+// Animate movement along a path
+await gameScene.moveUnit(testUnit, [
+  {q: 0, r: 0},   // Start
+  {q: 1, r: 0},   // Step 1
+  {q: 2, r: 0}    // End
+]);
+```
+
+**Attack Animation** (projectile + explosion)
+```javascript
+// Attack from (0,0) to (2,0) with 25 damage
+await gameScene.showAttackEffect(
+  {q: 0, r: 0},  // Attacker position
+  {q: 2, r: 0},  // Defender position
+  25             // Damage amount
+);
+
+// Attack with splash damage
+await gameScene.showAttackEffect(
+  {q: 0, r: 0},
+  {q: 2, r: 0},
+  30,
+  [  // Splash targets
+    {q: 2, r: 1, damage: 10},
+    {q: 3, r: 0, damage: 10}
+  ]
+);
+```
+
+**Heal Animation** (rising bubbles)
+```javascript
+await gameScene.showHealEffect(1, 0, 20);  // q, r, heal amount
+```
+
+**Capture Animation** (pulse effect)
+```javascript
+await gameScene.showCaptureEffect(1, 1);  // q, r
+```
+
+**Unit Flash** (damage indicator)
+```javascript
+const unit = {q: 0, r: 0, unitType: 1, player: 1, availableHealth: 75};
+await gameScene.setUnit(unit, {flash: true});
+```
+
+**Unit Appear** (spawn with fade-in)
+```javascript
+const newUnit = {q: 3, r: 3, unitType: 2, player: 2, availableHealth: 100};
+await gameScene.setUnit(newUnit, {appear: true});
+```
+
+**Unit Death** (fade-out)
+```javascript
+await gameScene.removeUnit(2, 2, {animate: true});
+```
+
+**Standalone Explosion**
+```javascript
+await gameScene.showExplosion(1, 1, 5);  // q, r, intensity
+```
+
+#### Quick Test Sequence
+
+Test all animations in sequence:
+
+```javascript
+(async () => {
+  const unit = {q: 0, r: 0, unitType: 1, player: 1, availableHealth: 100, distanceLeft: 3};
+
+  console.log("1. Move animation...");
+  await gameScene.moveUnit(unit, [{q:0,r:0}, {q:1,r:0}, {q:2,r:0}]);
+
+  console.log("2. Attack animation...");
+  await gameScene.showAttackEffect({q:2,r:0}, {q:4,r:0}, 25);
+
+  console.log("3. Heal animation...");
+  await gameScene.showHealEffect(2, 0, 20);
+
+  console.log("4. Capture animation...");
+  await gameScene.showCaptureEffect(3, 0);
+
+  console.log("✅ All animations complete!");
+})();
+```
+
+#### Animation Configuration
+
+Adjust animation speeds in `web/src/phaser/animations/AnimationConfig.ts`:
+
+```typescript
+export const AnimationConfig = {
+  MOVE_DURATION_PER_HEX: 200,    // ms per hex (0 = instant)
+  ATTACK_FLASH_DURATION: 150,
+  PROJECTILE_DURATION: 300,
+  EXPLOSION_DURATION: 300,
+  HEAL_DURATION: 400,
+  CAPTURE_DURATION: 500,
+  FADE_OUT_DURATION: 250,
+  FLASH_DURATION: 200,
+  APPEAR_DURATION: 200,
+};
+```
+
+Set any duration to `0` for instant mode (no animation).
+
+#### Troubleshooting
+
+**Animation not playing:**
+- Ensure unit exists at the specified coordinates
+- Check console for error messages
+- Verify path coordinates are valid hex positions
+
+**Sprite not found warnings:**
+- Scene only animates existing sprites
+- Use `gameScene.setUnit()` to create sprites first
+
+**Particle effects not visible:**
+- Check if `particle` texture is loaded (created in scene `create()`)
+- Verify Phaser scene is fully initialized
+
 ## Common Tasks
 
 ### Adding New Tests

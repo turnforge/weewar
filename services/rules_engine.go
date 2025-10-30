@@ -41,7 +41,7 @@ var (
 
 func init() {
 	var err error
-	defaultRulesEngine, err = LoadRulesEngineFromJSON(assets.RulesDataJSON)
+	defaultRulesEngine, err = LoadRulesEngineFromJSON(assets.RulesDataJSON, assets.RulesDamageDataJSON)
 	if err != nil {
 		panic(err)
 	}

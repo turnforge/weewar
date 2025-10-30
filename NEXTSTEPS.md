@@ -76,6 +76,8 @@
 - [x] Integration with ProcessMoveUnit, ProcessAttackUnit, GetOptionsAt
 - [x] Turn reset via TopUpUnitIfNeeded
 - [x] Comprehensive test coverage
+- [x] HTML extraction for action_order from WeeWar unit pages
+- [x] Rules data split into core rules (92KB) and damage distributions (1.2MB)
 
 **Design**:
 - Units track progression_step (0-based index into UnitDefinition.action_order)
@@ -84,6 +86,12 @@
 - Pipe-separated alternatives are mutually exclusive (choosing one locks out others)
 - action_limits supported for repeated actions (e.g., {"attack": 2} for double attacks)
 - State resets to step 0 on turn change
+
+**Data Extraction**:
+- cmd/extract-rules-data now extracts action_order from Progression HTML sections
+- Outputs two files: weewar-rules.json (core) and weewar-damage.json (damage distributions)
+- RulesEngine loader updated to load both files independently
+- Supports lazy loading - damage data only loaded when needed for combat
 
 ---
 

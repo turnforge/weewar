@@ -26,7 +26,7 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 	}
 
 	// Load rules engine
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}

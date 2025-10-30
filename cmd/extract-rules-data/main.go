@@ -15,12 +15,16 @@ import (
 	"golang.org/x/net/html"
 )
 
-// RulesData represents the complete rules data structure matching our proto schema
+// RulesData represents the core rules data structure (without damage distributions)
 type RulesData struct {
 	Units                 map[string]*weewarv1.UnitDefinition        `json:"units"`
 	Terrains              map[string]*weewarv1.TerrainDefinition     `json:"terrains"`
 	TerrainUnitProperties map[string]*weewarv1.TerrainUnitProperties `json:"terrainUnitProperties"`
-	UnitUnitProperties    map[string]*weewarv1.UnitUnitProperties    `json:"unitUnitProperties"`
+}
+
+// DamageData represents combat damage distributions (kept separate due to size)
+type DamageData struct {
+	UnitUnitProperties map[string]*weewarv1.UnitUnitProperties `json:"unitUnitProperties"`
 }
 
 func main() {
@@ -41,12 +45,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize rules data
+	// Initialize rules data (core rules and damage distributions separately)
 	rulesData := RulesData{
 		Units:                 make(map[string]*weewarv1.UnitDefinition),
 		Terrains:              make(map[string]*weewarv1.TerrainDefinition),
 		TerrainUnitProperties: make(map[string]*weewarv1.TerrainUnitProperties),
-		UnitUnitProperties:    make(map[string]*weewarv1.UnitUnitProperties),
+	}
+	damageData := DamageData{
+		UnitUnitProperties: make(map[string]*weewarv1.UnitUnitProperties),
 	}
 
 	// Extract terrain data
@@ -58,29 +64,44 @@ func main() {
 
 	// Extract unit data
 	fmt.Println("Extracting unit data...")
-	if err := extractUnitsData(unitsDir, &rulesData); err != nil {
+	if err := extractUnitsData(unitsDir, &rulesData, &damageData); err != nil {
 		fmt.Printf("Error extracting unit data: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Write output
-	outputPath := "weewar-rules-new.json"
-	jsonData, err := json.MarshalIndent(rulesData, "", "  ")
+	// Write core rules output
+	rulesPath := "weewar-rules.json"
+	rulesJSON, err := json.MarshalIndent(rulesData, "", "  ")
 	if err != nil {
-		fmt.Printf("Error marshaling JSON: %v\n", err)
+		fmt.Printf("Error marshaling rules JSON: %v\n", err)
 		os.Exit(1)
 	}
 
-	if err := os.WriteFile(outputPath, jsonData, 0644); err != nil {
-		fmt.Printf("Error writing output file: %v\n", err)
+	if err := os.WriteFile(rulesPath, rulesJSON, 0644); err != nil {
+		fmt.Printf("Error writing rules file: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("\nExtraction complete! Generated %s\n", outputPath)
-	fmt.Printf("- %d units\n", len(rulesData.Units))
-	fmt.Printf("- %d terrains\n", len(rulesData.Terrains))
-	fmt.Printf("- %d terrain-unit properties\n", len(rulesData.TerrainUnitProperties))
-	fmt.Printf("- %d unit-unit combat properties\n", len(rulesData.UnitUnitProperties))
+	// Write damage distributions output
+	damagePath := "weewar-damage.json"
+	damageJSON, err := json.MarshalIndent(damageData, "", "  ")
+	if err != nil {
+		fmt.Printf("Error marshaling damage JSON: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := os.WriteFile(damagePath, damageJSON, 0644); err != nil {
+		fmt.Printf("Error writing damage file: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nExtraction complete! Generated 2 files:\n")
+	fmt.Printf("- %s (core rules)\n", rulesPath)
+	fmt.Printf("  - %d units\n", len(rulesData.Units))
+	fmt.Printf("  - %d terrains\n", len(rulesData.Terrains))
+	fmt.Printf("  - %d terrain-unit properties\n", len(rulesData.TerrainUnitProperties))
+	fmt.Printf("- %s (damage distributions)\n", damagePath)
+	fmt.Printf("  - %d unit-unit combat properties\n", len(damageData.UnitUnitProperties))
 }
 
 func extractTerrainsData(tilesDir string, rulesData *RulesData) error {
@@ -128,7 +149,7 @@ func extractTerrainsData(tilesDir string, rulesData *RulesData) error {
 	return nil
 }
 
-func extractUnitsData(unitsDir string, rulesData *RulesData) error {
+func extractUnitsData(unitsDir string, rulesData *RulesData, damageData *DamageData) error {
 	files, err := filepath.Glob(filepath.Join(unitsDir, "*.html"))
 	if err != nil {
 		return fmt.Errorf("error reading units directory: %v", err)
@@ -164,8 +185,8 @@ func extractUnitsData(unitsDir string, rulesData *RulesData) error {
 		}
 		rulesData.Units[unitIDStr] = unitDef
 
-		// Extract unit-unit combat properties
-		if err := extractUnitCombatProperties(doc, int32(unitID), rulesData); err != nil {
+		// Extract unit-unit combat properties (damage distributions)
+		if err := extractUnitCombatProperties(doc, int32(unitID), damageData); err != nil {
 			return fmt.Errorf("error extracting combat properties for %s: %v", file, err)
 		}
 	}
@@ -384,10 +405,13 @@ func extractUnitDefinition(doc *html.Node, unitID int32) (*weewarv1.UnitDefiniti
 	// Extract attack table
 	extractAttackTable(doc, unitDef)
 
+	// Extract action order (Progression section)
+	extractActionOrder(doc, unitDef)
+
 	return unitDef, nil
 }
 
-func extractUnitCombatProperties(doc *html.Node, attackerID int32, rulesData *RulesData) error {
+func extractUnitCombatProperties(doc *html.Node, attackerID int32, damageData *DamageData) error {
 	// Extract combat damage distributions from the damage charts
 	var traverse func(*html.Node)
 	traverse = func(n *html.Node) {
@@ -398,7 +422,7 @@ func extractUnitCombatProperties(doc *html.Node, attackerID int32, rulesData *Ru
 					if defenderID := extractDefenderIDFromCard(n); defenderID > 0 {
 						if damage := extractDamageDistribution(n); damage != nil {
 							key := fmt.Sprintf("%d:%d", attackerID, defenderID)
-							rulesData.UnitUnitProperties[key] = &weewarv1.UnitUnitProperties{
+							damageData.UnitUnitProperties[key] = &weewarv1.UnitUnitProperties{
 								AttackerId: attackerID,
 								DefenderId: defenderID,
 								Damage:     damage,
@@ -686,4 +710,88 @@ func extractAttackTable(doc *html.Node, unitDef *weewarv1.UnitDefinition) {
 			}
 		}
 	}
+}
+
+// extractActionOrder extracts the action_order from the Progression section
+// The HTML structure is:
+//   <p><strong>Progression</strong>...
+//     <span class="badge bg-success fw-normal">
+//       <span class="tip">move 3</span>
+//     </span>
+//     <span class="badge bg-success fw-normal">
+//       <span class="tip">attack 1</span>
+//       OR
+//       <span class="tip">capture</span>
+//     </span>
+//   </p>
+// We extract action names and join alternatives with "|" (e.g., "attack|capture")
+// Numeric values like "move 3" or "attack 1-2" are ignored (extracted elsewhere)
+func extractActionOrder(doc *html.Node, unitDef *weewarv1.UnitDefinition) {
+	// Find the <p> element containing <strong>Progression</strong>
+	progNode := htmlquery.FindOne(doc, "//p[strong[text()='Progression']]")
+	if progNode == nil {
+		log.Printf("  No Progression section found\n")
+		return
+	}
+
+	// Find all badge spans within this paragraph
+	badges := htmlquery.Find(progNode, ".//span[contains(@class, 'badge bg-success')]")
+
+	actionOrder := []string{}
+
+	for _, badge := range badges {
+		// Get text content of the entire badge
+		text := getTextContent(badge)
+		text = strings.TrimSpace(text)
+
+		// Normalize whitespace
+		text = regexp.MustCompile(`\s+`).ReplaceAllString(text, " ")
+
+		// Check if this badge contains " OR "
+		if strings.Contains(text, " OR ") {
+			// Split by OR and extract action names
+			parts := strings.Split(text, " OR ")
+			actionNames := []string{}
+			for _, part := range parts {
+				actionName := extractActionName(strings.TrimSpace(part))
+				if actionName != "" {
+					actionNames = append(actionNames, actionName)
+				}
+			}
+			// Join with "|"
+			if len(actionNames) > 0 {
+				actionOrder = append(actionOrder, strings.Join(actionNames, "|"))
+			}
+		} else {
+			// Single action
+			actionName := extractActionName(text)
+			if actionName != "" {
+				actionOrder = append(actionOrder, actionName)
+			}
+		}
+	}
+
+	unitDef.ActionOrder = actionOrder
+	if len(actionOrder) > 0 {
+		log.Printf("  Action Order: %v\n", actionOrder)
+	}
+}
+
+// extractActionName extracts just the action name from text like "move 3" or "attack 1-2"
+// Ignores numeric values which are extracted elsewhere (movement points, attack range, etc.)
+// Returns the action name in lowercase
+func extractActionName(text string) string {
+	// Common action names - check in order of specificity
+	actions := []string{"capture", "attack", "move", "fix", "build", "repair"}
+
+	text = strings.ToLower(text)
+
+	// Find the first matching action name
+	for _, action := range actions {
+		if strings.Contains(text, action) {
+			return action
+		}
+	}
+
+	return ""
 }

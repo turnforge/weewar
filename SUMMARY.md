@@ -140,6 +140,39 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - **Pull-Based Sync**: Simple REST polling (websockets planned for Phase 3)
 - **Opaque Blob Storage**: Server stores game state without understanding content
 
+### Rules Data Extraction and Organization
+
+**Achievement**: Enhanced rules extraction system to extract action_order progression data and split rules into efficient separate files.
+
+**Key Improvements**:
+1. **Action Order Extraction**: Added XPath-based extraction of Progression sections from WeeWar HTML
+   - Extracts action sequences like ["move", "attack|capture"]
+   - Handles pipe-separated alternatives (e.g., "attack|capture", "attack|fix")
+   - Ignores numeric hints (movement points, attack ranges) as they're extracted elsewhere
+
+2. **Data Split for Performance**: Separated rules data into two files
+   - **weewar-rules.json** (92KB): Core rules with units, terrains, terrain-unit properties, action_order
+   - **weewar-damage.json** (1.2MB): Combat damage distributions (UnitUnitProperties)
+   - Enables fast loading of core rules without heavy damage data
+
+3. **Loader Updates**: Enhanced RulesEngine loading
+   - LoadRulesEngineFromJSON() now accepts both rulesJSON and damageJSON parameters
+   - LoadRulesEngineFromFile() updated to load both files
+   - Supports lazy loading - damage data optional for non-combat scenarios
+   - All tests updated and passing
+
+**Implementation Details**:
+- cmd/extract-rules-data/main.go: extractActionOrder() function with badge parsing
+- services/rules_loader.go: Updated to handle split file loading
+- assets/rule_data.go: Embeds both weewar-rules.json and weewar-damage.json
+- Extraction uses regex and HTML traversal to parse progression badges
+
+**Benefits**:
+- Faster initial load time (92KB vs 1.3MB)
+- Support for lazy damage data loading
+- Complete action progression data for all units
+- Cleaner separation of concerns in data files
+
 ### 🎉 Complete Unit Movement System Resolution
 
 **Problem**: Critical unit duplication bug where units appeared at both old and new positions after moves, plus incorrect coordinate data in move processor change generation.

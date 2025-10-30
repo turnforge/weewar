@@ -10,22 +10,34 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// LoadRulesEngineFromFile loads a RulesEngine from a canonical rules JSON file
-func LoadRulesEngineFromFile(filename string) (*RulesEngine, error) {
-	data, err := os.ReadFile(filename)
+// LoadRulesEngineFromFile loads a RulesEngine from separate rules and damage JSON files
+// damageFilename can be empty string if damage distributions are not needed
+func LoadRulesEngineFromFile(rulesFilename string, damageFilename string) (*RulesEngine, error) {
+	rulesData, err := os.ReadFile(rulesFilename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read rules file %s: %w", filename, err)
+		return nil, fmt.Errorf("failed to read rules file %s: %w", rulesFilename, err)
 	}
 
-	return LoadRulesEngineFromJSON(data)
+	var damageData []byte
+	if damageFilename != "" {
+		damageData, err = os.ReadFile(damageFilename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read damage file %s: %w", damageFilename, err)
+		}
+	}
+
+	return LoadRulesEngineFromJSON(rulesData, damageData)
 }
 
-// LoadRulesEngineFromJSON loads a RulesEngine from JSON bytes with proper proto field handling
-func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
-	// Parse the raw JSON structure first
+// LoadRulesEngineFromJSON loads a RulesEngine from separate rules and damage JSON bytes
+// rulesJSON contains units, terrains, and terrainUnitProperties
+// damageJSON contains unitUnitProperties (combat damage distributions)
+// If damageJSON is nil, damage distributions won't be loaded (useful for minimal setups)
+func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine, error) {
+	// Parse the rules JSON structure first
 	var rawData map[string]interface{}
-	if err := json.Unmarshal(jsonData, &rawData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal raw JSON: %w", err)
+	if err := json.Unmarshal(rulesJSON, &rawData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal rules JSON: %w", err)
 	}
 
 	rulesEngine := &RulesEngine{
@@ -107,24 +119,31 @@ func LoadRulesEngineFromJSON(jsonData []byte) (*RulesEngine, error) {
 		}
 	}
 
-	// Load UnitUnitProperties (centralized combat interactions)
-	if unitUnitPropsData, ok := rawData["unitUnitProperties"].(map[string]interface{}); ok {
-		for key, propRaw := range unitUnitPropsData {
-			propBytes, err := json.Marshal(propRaw)
-			if err != nil {
-				continue
-			}
+	// Load UnitUnitProperties (centralized combat interactions) from separate damage JSON
+	if damageJSON != nil && len(damageJSON) > 0 {
+		var damageData map[string]interface{}
+		if err := json.Unmarshal(damageJSON, &damageData); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal damage JSON: %w", err)
+		}
 
-			props := &v1.UnitUnitProperties{}
-			unmarshaler := protojson.UnmarshalOptions{
-				DiscardUnknown: true,
-			}
-			if err := unmarshaler.Unmarshal(propBytes, props); err == nil {
-				// Deduplicate damage ranges (source data may have duplicates)
-				deduplicateDamageRanges(props.Damage)
-				// Calculate expected damage from distribution
-				calculateExpectedDamage(props.Damage)
-				rulesEngine.UnitUnitProperties[key] = props
+		if unitUnitPropsData, ok := damageData["unitUnitProperties"].(map[string]interface{}); ok {
+			for key, propRaw := range unitUnitPropsData {
+				propBytes, err := json.Marshal(propRaw)
+				if err != nil {
+					continue
+				}
+
+				props := &v1.UnitUnitProperties{}
+				unmarshaler := protojson.UnmarshalOptions{
+					DiscardUnknown: true,
+				}
+				if err := unmarshaler.Unmarshal(propBytes, props); err == nil {
+					// Deduplicate damage ranges (source data may have duplicates)
+					deduplicateDamageRanges(props.Damage)
+					// Calculate expected damage from distribution
+					calculateExpectedDamage(props.Damage)
+					rulesEngine.UnitUnitProperties[key] = props
+				}
 			}
 		}
 	}

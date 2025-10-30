@@ -9,10 +9,11 @@ import (
 
 // var RULES_DATA_FILE = DevDataPath("assets/weewar-rules.json")
 var RULES_DATA_FILE = "../assets/weewar-rules.json"
+var DAMAGE_DATA_FILE = "../assets/weewar-damage.json"
 
 func TestRulesEngineLoading(t *testing.T) {
 	// Load rules from converted data
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -38,7 +39,7 @@ func TestRulesEngineLoading(t *testing.T) {
 }
 
 func TestRulesEngineUnitData(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -72,7 +73,7 @@ func TestRulesEngineUnitData(t *testing.T) {
 }
 
 func TestRulesEngineTerrainData(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -97,7 +98,7 @@ func TestRulesEngineTerrainData(t *testing.T) {
 }
 
 func TestRulesEngineMovementCosts(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -135,7 +136,7 @@ func TestRulesEngineMovementCosts(t *testing.T) {
 }
 
 func TestRulesEngineCombatDamage(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -183,7 +184,7 @@ func TestRulesEngineCombatDamage(t *testing.T) {
 }
 
 func TestRulesEngineAttackMatrix(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -211,7 +212,7 @@ func TestRulesEngineAttackMatrix(t *testing.T) {
 }
 
 func TestRulesEngineMovementMatrix(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -242,7 +243,7 @@ func TestRulesEngineMovementMatrix(t *testing.T) {
 }
 
 func TestRulesEngineDijkstraMovement(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}
@@ -315,7 +316,7 @@ func TestRulesEngineDijkstraMovement(t *testing.T) {
 }
 
 func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
-	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE)
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
 	if err != nil {
 		t.Fatalf("Failed to load rules engine: %v", err)
 	}

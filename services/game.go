@@ -135,6 +135,10 @@ func (g *Game) TopUpUnitIfNeeded(unit *v1.Unit) error {
 	unit.AttackHistory = nil
 	unit.AttacksReceivedThisTurn = 0
 
+	// Reset action progression for new turn
+	unit.ProgressionStep = 0
+	unit.ChosenAlternative = ""
+
 	// Mark unit as topped-up for this turn
 	unit.LastToppedupTurn = g.TurnCounter
 

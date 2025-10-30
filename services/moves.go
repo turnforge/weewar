@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
@@ -44,6 +45,8 @@ func copyUnit(unit *v1.Unit) *v1.Unit {
 		LastToppedupTurn:        unit.LastToppedupTurn,
 		AttacksReceivedThisTurn: unit.AttacksReceivedThisTurn,
 		AttackHistory:           attackHistory,
+		ProgressionStep:         unit.ProgressionStep,
+		ChosenAlternative:       unit.ChosenAlternative,
 	}
 }
 
@@ -239,6 +242,12 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	// Update unit stats on the moved unit
 	movedUnit.DistanceLeft -= cost
 
+	// Update progression: if distance_left reaches 0, advance to next step
+	if movedUnit.DistanceLeft <= 0 {
+		movedUnit.ProgressionStep++
+		movedUnit.ChosenAlternative = "" // Clear for next step
+	}
+
 	// Capture unit state after move (using the moved unit, not the original)
 	updatedUnit := copyUnit(movedUnit)
 	updatedUnit.LastActedTurn = unit.LastActedTurn
@@ -342,6 +351,30 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 			// If counter-attack calculation fails, no counter damage
 			attackerDamage = 0
 		}
+	}
+
+	// Update progression: record chosen alternative and check if step is complete
+	unitDef, err := g.rulesEngine.GetUnitData(attacker.UnitType)
+	if err == nil && unitDef != nil {
+		// Get action_order for this unit
+		actionOrder := unitDef.ActionOrder
+		if len(actionOrder) == 0 {
+			actionOrder = []string{"move", "attack|capture"}
+		}
+
+		// If current step has pipe-separated alternatives, record the choice
+		if int(attacker.ProgressionStep) < len(actionOrder) {
+			stepActions := actionOrder[attacker.ProgressionStep]
+			if strings.Contains(stepActions, "|") {
+				attacker.ChosenAlternative = "attack"
+			}
+		}
+
+		// Check if we've reached the action limit for attacks
+		// For now, assume 1 attack per step (can enhance later with action_limits)
+		// Since attack was performed, advance to next step
+		attacker.ProgressionStep++
+		attacker.ChosenAlternative = "" // Clear for next step
 	}
 
 	// Record attack in defender's history for future wound bonus calculations

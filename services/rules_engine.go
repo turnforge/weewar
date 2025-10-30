@@ -105,6 +105,102 @@ func (re *RulesEngine) GetTerrainData(terrainID int32) (*v1.TerrainDefinition, e
 	return terrain, nil
 }
 
+// =============================================================================
+// Action Progression System
+// =============================================================================
+
+// GetAllowedActions returns which actions are currently valid for a unit
+// based on its progression_step index into the UnitDefinition.action_order
+func (re *RulesEngine) GetAllowedActions(unit *v1.Unit, unitDef *v1.UnitDefinition) []string {
+	// Get action_order, default to ["move", "attack|capture"]
+	actionOrder := unitDef.ActionOrder
+	if len(actionOrder) == 0 {
+		actionOrder = []string{"move", "attack|capture"}
+	}
+
+	// Check if all steps complete
+	if unit.ProgressionStep >= int32(len(actionOrder)) {
+		return []string{} // Only end turn available
+	}
+
+	// Get current step's actions
+	stepActions := actionOrder[unit.ProgressionStep]
+	alternatives := parseActionAlternatives(stepActions)
+
+	// If user already chose an alternative from pipe-separated options,
+	// only that alternative is allowed (prevents switching mid-step)
+	if unit.ChosenAlternative != "" {
+		alternatives = []string{unit.ChosenAlternative}
+	}
+
+	// Filter by what can actually be performed
+	var allowed []string
+	for _, action := range alternatives {
+		if re.canPerformAction(unit, unitDef, action) {
+			allowed = append(allowed, action)
+		}
+	}
+
+	return allowed
+}
+
+// canPerformAction checks if a unit can currently perform a specific action
+// based on available resources (distance_left, etc.) and action_limits
+func (re *RulesEngine) canPerformAction(unit *v1.Unit, unitDef *v1.UnitDefinition, action string) bool {
+	switch action {
+	case "move":
+		// Can move if has movement points remaining
+		return unit.DistanceLeft > 0
+
+	case "attack":
+		// Can attack if hasn't reached attack limit
+		// TODO: Implement attack counting at current step and check against action_limits
+		return true
+
+	case "capture":
+		// Can capture if unit has capture ability
+		// TODO: Add canCapture flag to UnitDefinition or infer from unit type
+		return true
+
+	case "build":
+		// Can build if unit has build ability
+		// TODO: Add canBuild flag to UnitDefinition or infer from unit type
+		return true
+
+	default:
+		return false
+	}
+}
+
+// parseActionAlternatives parses pipe-separated action alternatives
+// e.g., "attack|capture" -> ["attack", "capture"]
+func parseActionAlternatives(stepActions string) []string {
+	// Simple split on pipe character
+	alternatives := []string{}
+	current := ""
+
+	for _, ch := range stepActions {
+		if ch == '|' {
+			if current != "" {
+				alternatives = append(alternatives, current)
+				current = ""
+			}
+		} else {
+			current += string(ch)
+		}
+	}
+
+	if current != "" {
+		alternatives = append(alternatives, current)
+	}
+
+	return alternatives
+}
+
+// =============================================================================
+// Movement Options
+// =============================================================================
+
 // GetMovementOptions returns all EMPTY tiles a unit can move to using Dijkstra's algorithm
 // Returns AllPaths structure containing all reachable tiles and path information
 func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remainingMovement int) (*v1.AllPaths, error) {

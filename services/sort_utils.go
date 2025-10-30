@@ -93,3 +93,13 @@ func AttackOptionLess(a, b *v1.AttackOption) bool {
 	// Same health, compare by unit type
 	return a.TargetUnitType < b.TargetUnitType
 }
+
+// containsAction checks if an action is in the allowed actions list
+func containsAction(actions []string, action string) bool {
+	for _, a := range actions {
+		if a == action {
+			return true
+		}
+	}
+	return false
+}

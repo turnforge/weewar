@@ -471,7 +471,7 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 // executeBuildAction processes a build unit action
 func (s *SingletonGameViewPresenterImpl) executeBuildAction(ctx context.Context, gameMove *v1.GameMove) {
 	// Call ProcessMoves to execute the build
-	_, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
 		Moves: []*v1.GameMove{gameMove},
 	})
 
@@ -490,6 +490,9 @@ func (s *SingletonGameViewPresenterImpl) executeBuildAction(ctx context.Context,
 
 	// Clear turn options panel
 	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
+
+	// Apply incremental updates from the move results
+	s.applyIncrementalChanges(ctx, resp.MoveResults)
 }
 
 func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Context) {
@@ -571,6 +574,19 @@ func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Con
 						Q:       previousUnit.Q,
 						R:       previousUnit.R,
 						Animate: true,
+					})
+				}
+
+			case *v1.WorldChange_UnitBuilt:
+				// Add newly built unit to the game state
+				builtUnit := changeType.UnitBuilt.Unit
+				if builtUnit != nil {
+					// Add unit with appear animation
+					s.GameScene.SetUnitAt(ctx, &v1.SetUnitAtAnimationRequest{
+						Q:      builtUnit.Q,
+						R:      builtUnit.R,
+						Unit:   builtUnit,
+						Appear: true,
 					})
 				}
 

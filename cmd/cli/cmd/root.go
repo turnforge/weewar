@@ -15,6 +15,7 @@ var (
 	jsonOut  bool
 	verbose  bool
 	dryrun   bool
+	confirm  bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -52,12 +53,14 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&jsonOut, "json", false, "output in JSON format")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "show detailed debug information")
 	rootCmd.PersistentFlags().BoolVar(&dryrun, "dryrun", false, "preview changes without saving to disk")
+	rootCmd.PersistentFlags().BoolVar(&confirm, "confirm", true, "prompt for confirmation on destructive actions")
 
 	// Bind flags to viper
 	viper.BindPFlag("game-id", rootCmd.PersistentFlags().Lookup("game-id"))
 	viper.BindPFlag("json", rootCmd.PersistentFlags().Lookup("json"))
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 	viper.BindPFlag("dryrun", rootCmd.PersistentFlags().Lookup("dryrun"))
+	viper.BindPFlag("confirm", rootCmd.PersistentFlags().Lookup("confirm"))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -122,4 +125,9 @@ func isVerbose() bool {
 // isDryrun returns whether dryrun mode is active
 func isDryrun() bool {
 	return viper.GetBool("dryrun")
+}
+
+// shouldConfirm returns whether confirmation prompts should be shown
+func shouldConfirm() bool {
+	return viper.GetBool("confirm")
 }

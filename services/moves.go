@@ -83,11 +83,136 @@ func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (results *v1.
 		return m.ProcessMoveUnit(game, move, a.MoveUnit)
 	case *v1.GameMove_AttackUnit:
 		return m.ProcessAttackUnit(game, move, a.AttackUnit)
+	case *v1.GameMove_BuildUnit:
+		return m.ProcessBuildUnit(game, move, a.BuildUnit)
 	case *v1.GameMove_EndTurn:
 		return m.ProcessEndTurn(game, move, a.EndTurn)
 	default:
 		return nil, fmt.Errorf("unknown move type: %T", move.MoveType)
 	}
+}
+
+// BuildUnit creates a new unit at the specified tile
+func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.BuildUnitAction) (result *v1.GameMoveResult, err error) {
+	// Initialize the result object
+	result = &v1.GameMoveResult{
+		IsPermanent: true, // Builds are permanent
+		SequenceNum: 0,    // TODO: Set proper sequence number
+		Changes:     []*v1.WorldChange{},
+	}
+
+	coord := CoordFromInt32(action.Q, action.R)
+	tile := g.World.TileAt(coord)
+	if tile == nil {
+		return nil, fmt.Errorf("no tile at position %v", coord)
+	}
+
+	// Check if tile belongs to the current player
+	if tile.Player != g.CurrentPlayer {
+		return nil, fmt.Errorf("tile at %v does not belong to player %d", coord, g.CurrentPlayer)
+	}
+
+	// Check if tile can build (must be a building that can produce units)
+	terrainData, err := g.rulesEngine.GetTerrainData(tile.TileType)
+	if err != nil || terrainData == nil {
+		return nil, fmt.Errorf("terrain data not found for tile type %d", tile.TileType)
+	}
+
+	if len(terrainData.BuildableUnitIds) == 0 {
+		return nil, fmt.Errorf("tile at %v cannot build units", coord)
+	}
+
+	// Check if the requested unit type can be built at this tile
+	canBuild := false
+	for _, buildableID := range terrainData.BuildableUnitIds {
+		if buildableID == action.UnitType {
+			canBuild = true
+			break
+		}
+	}
+	if !canBuild {
+		return nil, fmt.Errorf("tile at %v cannot build unit type %d", coord, action.UnitType)
+	}
+
+	// Check if tile has already built this turn (one build per turn per tile)
+	if tile.LastActedTurn == g.TurnCounter {
+		return nil, fmt.Errorf("tile at %v has already built a unit this turn", coord)
+	}
+
+	// Check if there's already a unit at this position
+	existingUnit := g.World.UnitAt(coord)
+	if existingUnit != nil {
+		return nil, fmt.Errorf("cannot build unit at %v: position already occupied by unit %s", coord, existingUnit.Shortcut)
+	}
+
+	// Get unit definition for cost validation
+	unitData, err := g.rulesEngine.GetUnitData(action.UnitType)
+	if err != nil || unitData == nil {
+		return nil, fmt.Errorf("unit data not found for unit type %d", action.UnitType)
+	}
+
+	// Check if player has enough coins
+	playerCoins := int32(0)
+	for _, player := range g.Config.Players {
+		if player.PlayerId == g.CurrentPlayer {
+			playerCoins = player.Coins
+			break
+		}
+	}
+
+	if playerCoins < unitData.Coins {
+		return nil, fmt.Errorf("insufficient coins: need %d, have %d", unitData.Coins, playerCoins)
+	}
+
+	// Deduct coins from player
+	for i, player := range g.Config.Players {
+		if player.PlayerId == g.CurrentPlayer {
+			g.Config.Players[i].Coins -= unitData.Coins
+			break
+		}
+	}
+
+	// Generate a shortcut for the new unit
+	newShortcut := g.World.GenerateUnitShortcut(g.CurrentPlayer)
+
+	// Create the new unit
+	newUnit := &v1.Unit{
+		Q:                int32(coord.Q),
+		R:                int32(coord.R),
+		Player:           g.CurrentPlayer,
+		UnitType:         action.UnitType,
+		Shortcut:         newShortcut,
+		AvailableHealth:  unitData.Health,
+		DistanceLeft:     0, // Newly built units cannot move this turn
+		LastActedTurn:    g.TurnCounter,
+		LastToppedupTurn: g.TurnCounter,
+		ProgressionStep:  1, // Start at step 1 (already used build action)
+	}
+
+	// Add unit to the world
+	g.World.AddUnit(newUnit)
+
+	// Mark tile as having acted this turn
+	tile.LastActedTurn = g.TurnCounter
+
+	// Update timestamp
+	g.GameState.UpdatedAt = tspb.New(time.Now())
+
+	// Record the build in world changes
+	change := &v1.WorldChange{
+		ChangeType: &v1.WorldChange_UnitBuilt{
+			UnitBuilt: &v1.UnitBuiltChange{
+				Unit:         copyUnit(newUnit),
+				TileQ:        tile.Q,
+				TileR:        tile.R,
+				CoinsCost:    unitData.Coins,
+				PlayerCoins:  playerCoins - unitData.Coins,
+			},
+		},
+	}
+
+	result.Changes = append(result.Changes, change)
+	return result, nil
 }
 
 // EndTurn advances to next player's turn

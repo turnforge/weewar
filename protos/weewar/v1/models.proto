@@ -560,6 +560,7 @@ message WorldChange {
     UnitDamagedChange unit_damaged = 2;
     UnitKilledChange unit_killed = 3;
     PlayerChangedChange player_changed = 4;
+    UnitBuiltChange unit_built = 5;
   }
 }
 
@@ -601,6 +602,21 @@ message PlayerChangedChange {
   int32 new_turn = 4;
   // Units that had their movement/health reset for the new turn
   repeated Unit reset_units = 5;
+}
+
+/**
+ * A new unit was built at a tile
+ */
+message UnitBuiltChange {
+  // The newly created unit
+  Unit unit = 1;
+  // Tile coordinates where unit was built
+  int32 tile_q = 2;
+  int32 tile_r = 3;
+  // Cost in coins
+  int32 coins_cost = 4;
+  // Player's remaining coins after build
+  int32 player_coins = 5;
 }
 
 // Compact representation of all reachable paths from a source

@@ -5,14 +5,16 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    EndTurnButtonClickedRequest,
-    EndTurnButtonClickedResponse,
     InitializeGameRequest,
-    InitializeGameResponse,
     SceneClickedRequest,
     SceneClickedResponse,
+    EndTurnButtonClickedResponse,
+    BuildOptionClickedRequest,
+    BuildOptionClickedResponse,
+    InitializeGameResponse,
     TurnOptionClickedRequest,
     TurnOptionClickedResponse,
+    EndTurnButtonClickedRequest,
 } from './interfaces';
 /**
  * GameViewPresenter service client interface
@@ -23,6 +25,7 @@ export interface GameViewPresenterMethods {
 	sceneClicked(request: SceneClickedRequest): Promise<SceneClickedResponse>;
 	turnOptionClicked(request: TurnOptionClickedRequest): Promise<TurnOptionClickedResponse>;
 	endTurnButtonClicked(request: EndTurnButtonClickedRequest): Promise<EndTurnButtonClickedResponse>;
+	buildOptionClicked(request: BuildOptionClickedRequest): Promise<BuildOptionClickedResponse>;
 }
 /**
  * GameViewPresenter service client implementation
@@ -40,5 +43,8 @@ export class GameViewPresenterServiceClient extends ServiceClient implements Gam
     }
     async endTurnButtonClicked(request: EndTurnButtonClickedRequest): Promise<EndTurnButtonClickedResponse> {
         return this.callMethod('gameViewPresenter.endTurnButtonClicked', request);
+    }
+    async buildOptionClicked(request: BuildOptionClickedRequest): Promise<BuildOptionClickedResponse> {
+        return this.callMethod('gameViewPresenter.buildOptionClicked', request);
     }
 }

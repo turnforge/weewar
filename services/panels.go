@@ -177,6 +177,25 @@ func (b *BaseTilePanel) SetCurrentTile(_ context.Context, u *v1.Tile) {
 	b.Tile = u
 }
 
+type BaseBuildOptionsModal struct {
+	PanelBase
+	BuildOptions []*v1.BuildUnitAction
+	Tile         *v1.Tile
+	PlayerCoins  int32
+}
+
+func (b *BaseBuildOptionsModal) Show(_ context.Context, tile *v1.Tile, buildOptions []*v1.BuildUnitAction, playerCoins int32) {
+	b.Tile = tile
+	b.BuildOptions = buildOptions
+	b.PlayerCoins = playerCoins
+}
+
+func (b *BaseBuildOptionsModal) Hide(_ context.Context) {
+	b.Tile = nil
+	b.BuildOptions = nil
+	b.PlayerCoins = 0
+}
+
 // Browser specific panel implementations
 
 func renderPanelTemplate(_ context.Context, templatefile string, data any) (content string) {
@@ -263,6 +282,37 @@ func (b *BrowserTerrainStatsPanel) SetCurrentTile(ctx context.Context, tile *v1.
 		InnerHtml: content,
 	})
 	fmt.Println("After TSP Set")
+}
+
+type BrowserBuildOptionsModal struct {
+	BaseBuildOptionsModal
+	GameViewerPage v1.GameViewerPageClient
+}
+
+func (b *BrowserBuildOptionsModal) Show(ctx context.Context, tile *v1.Tile, buildOptions []*v1.BuildUnitAction, playerCoins int32) {
+	b.BaseBuildOptionsModal.Show(ctx, tile, buildOptions, playerCoins)
+	fmt.Printf("[BrowserBuildOptionsModal] Show called with %d options, tile at (%d,%d), coins=%d\n",
+		len(buildOptions), tile.Q, tile.R, playerCoins)
+	content := renderPanelTemplate(ctx, "BuildOptionsModal.templar.html", map[string]any{
+		"BuildOptions": buildOptions,
+		"Tile":         tile,
+		"PlayerCoins":  playerCoins,
+		"Theme":        b.Theme,
+	})
+	fmt.Printf("[BrowserBuildOptionsModal] Calling GameViewerPage.ShowBuildOptions with content length=%d\n", len(content))
+	go b.GameViewerPage.ShowBuildOptions(ctx, &v1.ShowBuildOptionsRequest{
+		InnerHtml: content,
+		Hide:      false,
+		Q:         tile.Q,
+		R:         tile.R,
+	})
+}
+
+func (b *BrowserBuildOptionsModal) Hide(ctx context.Context) {
+	b.BaseBuildOptionsModal.Hide(ctx)
+	go b.GameViewerPage.ShowBuildOptions(ctx, &v1.ShowBuildOptionsRequest{
+		Hide: true,
+	})
 }
 
 type BrowserGameScene struct {

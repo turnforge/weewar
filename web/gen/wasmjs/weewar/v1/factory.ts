@@ -3,10 +3,10 @@ import { FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
 
 
 
-import { User as UserInterface, Pagination as PaginationInterface, PaginationResponse as PaginationResponseInterface, World as WorldInterface, WorldData as WorldDataInterface, Tile as TileInterface, Unit as UnitInterface, AttackRecord as AttackRecordInterface, TerrainDefinition as TerrainDefinitionInterface, UnitDefinition as UnitDefinitionInterface, TerrainUnitProperties as TerrainUnitPropertiesInterface, UnitUnitProperties as UnitUnitPropertiesInterface, DamageDistribution as DamageDistributionInterface, DamageRange as DamageRangeInterface, RulesEngine as RulesEngineInterface, Game as GameInterface, GameConfiguration as GameConfigurationInterface, GamePlayer as GamePlayerInterface, GameTeam as GameTeamInterface, GameSettings as GameSettingsInterface, GameState as GameStateInterface, GameMoveHistory as GameMoveHistoryInterface, GameMoveGroup as GameMoveGroupInterface, GameMove as GameMoveInterface, GameMoveResult as GameMoveResultInterface, MoveUnitAction as MoveUnitActionInterface, AttackUnitAction as AttackUnitActionInterface, EndTurnAction as EndTurnActionInterface, WorldChange as WorldChangeInterface, UnitMovedChange as UnitMovedChangeInterface, UnitDamagedChange as UnitDamagedChangeInterface, UnitKilledChange as UnitKilledChangeInterface, PlayerChangedChange as PlayerChangedChangeInterface, GameInfo as GameInfoInterface, ListGamesRequest as ListGamesRequestInterface, ListGamesResponse as ListGamesResponseInterface, GetGameRequest as GetGameRequestInterface, GetGameResponse as GetGameResponseInterface, GetGameContentRequest as GetGameContentRequestInterface, GetGameContentResponse as GetGameContentResponseInterface, UpdateGameRequest as UpdateGameRequestInterface, UpdateGameResponse as UpdateGameResponseInterface, DeleteGameRequest as DeleteGameRequestInterface, DeleteGameResponse as DeleteGameResponseInterface, GetGamesRequest as GetGamesRequestInterface, GetGamesResponse as GetGamesResponseInterface, CreateGameRequest as CreateGameRequestInterface, CreateGameResponse as CreateGameResponseInterface, ProcessMovesRequest as ProcessMovesRequestInterface, ProcessMovesResponse as ProcessMovesResponseInterface, GetGameStateRequest as GetGameStateRequestInterface, GetGameStateResponse as GetGameStateResponseInterface, ListMovesRequest as ListMovesRequestInterface, ListMovesResponse as ListMovesResponseInterface, GetOptionsAtRequest as GetOptionsAtRequestInterface, GetOptionsAtResponse as GetOptionsAtResponseInterface, AllPaths as AllPathsInterface, PathEdge as PathEdgeInterface, Path as PathInterface, GameOption as GameOptionInterface, EndTurnOption as EndTurnOptionInterface, MoveOption as MoveOptionInterface, AttackOption as AttackOptionInterface, BuildUnitOption as BuildUnitOptionInterface, CaptureBuildingOption as CaptureBuildingOptionInterface, SimulateAttackRequest as SimulateAttackRequestInterface, SimulateAttackResponse as SimulateAttackResponseInterface, EmptyRequest as EmptyRequestInterface, EmptyResponse as EmptyResponseInterface, SetContentRequest as SetContentRequestInterface, SetContentResponse as SetContentResponseInterface, ShowBuildOptionsRequest as ShowBuildOptionsRequestInterface, ShowBuildOptionsResponse as ShowBuildOptionsResponseInterface, LogMessageRequest as LogMessageRequestInterface, LogMessageResponse as LogMessageResponseInterface, SetGameStateRequest as SetGameStateRequestInterface, SetGameStateResponse as SetGameStateResponseInterface, UpdateGameStatusRequest as UpdateGameStatusRequestInterface, UpdateGameStatusResponse as UpdateGameStatusResponseInterface, SetTileAtRequest as SetTileAtRequestInterface, SetTileAtResponse as SetTileAtResponseInterface, SetUnitAtRequest as SetUnitAtRequestInterface, SetUnitAtResponse as SetUnitAtResponseInterface, RemoveTileAtRequest as RemoveTileAtRequestInterface, RemoveTileAtResponse as RemoveTileAtResponseInterface, RemoveUnitAtRequest as RemoveUnitAtRequestInterface, RemoveUnitAtResponse as RemoveUnitAtResponseInterface, ShowHighlightsRequest as ShowHighlightsRequestInterface, ShowHighlightsResponse as ShowHighlightsResponseInterface, HighlightSpec as HighlightSpecInterface, ClearHighlightsRequest as ClearHighlightsRequestInterface, ClearHighlightsResponse as ClearHighlightsResponseInterface, ShowPathRequest as ShowPathRequestInterface, ShowPathResponse as ShowPathResponseInterface, ClearPathsRequest as ClearPathsRequestInterface, ClearPathsResponse as ClearPathsResponseInterface, MoveUnitAnimationRequest as MoveUnitAnimationRequestInterface, MoveUnitAnimationResponse as MoveUnitAnimationResponseInterface, HexCoord as HexCoordInterface, ShowAttackEffectRequest as ShowAttackEffectRequestInterface, SplashTarget as SplashTargetInterface, ShowAttackEffectResponse as ShowAttackEffectResponseInterface, ShowHealEffectRequest as ShowHealEffectRequestInterface, ShowHealEffectResponse as ShowHealEffectResponseInterface, ShowCaptureEffectRequest as ShowCaptureEffectRequestInterface, ShowCaptureEffectResponse as ShowCaptureEffectResponseInterface, SetUnitAtAnimationRequest as SetUnitAtAnimationRequestInterface, SetUnitAtAnimationResponse as SetUnitAtAnimationResponseInterface, RemoveUnitAtAnimationRequest as RemoveUnitAtAnimationRequestInterface, RemoveUnitAtAnimationResponse as RemoveUnitAtAnimationResponseInterface, TurnOptionClickedRequest as TurnOptionClickedRequestInterface, TurnOptionClickedResponse as TurnOptionClickedResponseInterface, SceneClickedRequest as SceneClickedRequestInterface, SceneClickedResponse as SceneClickedResponseInterface, EndTurnButtonClickedRequest as EndTurnButtonClickedRequestInterface, EndTurnButtonClickedResponse as EndTurnButtonClickedResponseInterface, InitializeGameRequest as InitializeGameRequestInterface, InitializeGameResponse as InitializeGameResponseInterface, ThemeInfo as ThemeInfoInterface, UnitMapping as UnitMappingInterface, TerrainMapping as TerrainMappingInterface, ThemeManifest as ThemeManifestInterface, PlayerColor as PlayerColorInterface, AssetResult as AssetResultInterface, UserInfo as UserInfoInterface, ListUsersRequest as ListUsersRequestInterface, ListUsersResponse as ListUsersResponseInterface, GetUserRequest as GetUserRequestInterface, GetUserResponse as GetUserResponseInterface, GetUserContentRequest as GetUserContentRequestInterface, GetUserContentResponse as GetUserContentResponseInterface, UpdateUserRequest as UpdateUserRequestInterface, UpdateUserResponse as UpdateUserResponseInterface, DeleteUserRequest as DeleteUserRequestInterface, DeleteUserResponse as DeleteUserResponseInterface, GetUsersRequest as GetUsersRequestInterface, GetUsersResponse as GetUsersResponseInterface, CreateUserRequest as CreateUserRequestInterface, CreateUserResponse as CreateUserResponseInterface, WorldInfo as WorldInfoInterface, ListWorldsRequest as ListWorldsRequestInterface, ListWorldsResponse as ListWorldsResponseInterface, GetWorldRequest as GetWorldRequestInterface, GetWorldResponse as GetWorldResponseInterface, UpdateWorldRequest as UpdateWorldRequestInterface, UpdateWorldResponse as UpdateWorldResponseInterface, DeleteWorldRequest as DeleteWorldRequestInterface, DeleteWorldResponse as DeleteWorldResponseInterface, GetWorldsRequest as GetWorldsRequestInterface, GetWorldsResponse as GetWorldsResponseInterface, CreateWorldRequest as CreateWorldRequestInterface, CreateWorldResponse as CreateWorldResponseInterface, GameStatus, PathDirection, Type } from "./interfaces";
+import { User as UserInterface, Pagination as PaginationInterface, PaginationResponse as PaginationResponseInterface, World as WorldInterface, WorldData as WorldDataInterface, Tile as TileInterface, Unit as UnitInterface, AttackRecord as AttackRecordInterface, TerrainDefinition as TerrainDefinitionInterface, UnitDefinition as UnitDefinitionInterface, TerrainUnitProperties as TerrainUnitPropertiesInterface, UnitUnitProperties as UnitUnitPropertiesInterface, DamageDistribution as DamageDistributionInterface, DamageRange as DamageRangeInterface, RulesEngine as RulesEngineInterface, Game as GameInterface, GameConfiguration as GameConfigurationInterface, GamePlayer as GamePlayerInterface, GameTeam as GameTeamInterface, GameSettings as GameSettingsInterface, GameState as GameStateInterface, GameMoveHistory as GameMoveHistoryInterface, GameMoveGroup as GameMoveGroupInterface, GameMove as GameMoveInterface, GameMoveResult as GameMoveResultInterface, MoveUnitAction as MoveUnitActionInterface, AttackUnitAction as AttackUnitActionInterface, BuildUnitAction as BuildUnitActionInterface, CaptureBuildingAction as CaptureBuildingActionInterface, EndTurnAction as EndTurnActionInterface, WorldChange as WorldChangeInterface, UnitMovedChange as UnitMovedChangeInterface, UnitDamagedChange as UnitDamagedChangeInterface, UnitKilledChange as UnitKilledChangeInterface, PlayerChangedChange as PlayerChangedChangeInterface, AllPaths as AllPathsInterface, PathEdge as PathEdgeInterface, Path as PathInterface, GameInfo as GameInfoInterface, ListGamesRequest as ListGamesRequestInterface, ListGamesResponse as ListGamesResponseInterface, GetGameRequest as GetGameRequestInterface, GetGameResponse as GetGameResponseInterface, GetGameContentRequest as GetGameContentRequestInterface, GetGameContentResponse as GetGameContentResponseInterface, UpdateGameRequest as UpdateGameRequestInterface, UpdateGameResponse as UpdateGameResponseInterface, DeleteGameRequest as DeleteGameRequestInterface, DeleteGameResponse as DeleteGameResponseInterface, GetGamesRequest as GetGamesRequestInterface, GetGamesResponse as GetGamesResponseInterface, CreateGameRequest as CreateGameRequestInterface, CreateGameResponse as CreateGameResponseInterface, ProcessMovesRequest as ProcessMovesRequestInterface, ProcessMovesResponse as ProcessMovesResponseInterface, GetGameStateRequest as GetGameStateRequestInterface, GetGameStateResponse as GetGameStateResponseInterface, ListMovesRequest as ListMovesRequestInterface, ListMovesResponse as ListMovesResponseInterface, GetOptionsAtRequest as GetOptionsAtRequestInterface, GetOptionsAtResponse as GetOptionsAtResponseInterface, GameOption as GameOptionInterface, SimulateAttackRequest as SimulateAttackRequestInterface, SimulateAttackResponse as SimulateAttackResponseInterface, EmptyRequest as EmptyRequestInterface, EmptyResponse as EmptyResponseInterface, SetContentRequest as SetContentRequestInterface, SetContentResponse as SetContentResponseInterface, ShowBuildOptionsRequest as ShowBuildOptionsRequestInterface, ShowBuildOptionsResponse as ShowBuildOptionsResponseInterface, LogMessageRequest as LogMessageRequestInterface, LogMessageResponse as LogMessageResponseInterface, SetGameStateRequest as SetGameStateRequestInterface, SetGameStateResponse as SetGameStateResponseInterface, UpdateGameStatusRequest as UpdateGameStatusRequestInterface, UpdateGameStatusResponse as UpdateGameStatusResponseInterface, SetTileAtRequest as SetTileAtRequestInterface, SetTileAtResponse as SetTileAtResponseInterface, SetUnitAtRequest as SetUnitAtRequestInterface, SetUnitAtResponse as SetUnitAtResponseInterface, RemoveTileAtRequest as RemoveTileAtRequestInterface, RemoveTileAtResponse as RemoveTileAtResponseInterface, RemoveUnitAtRequest as RemoveUnitAtRequestInterface, RemoveUnitAtResponse as RemoveUnitAtResponseInterface, ShowHighlightsRequest as ShowHighlightsRequestInterface, ShowHighlightsResponse as ShowHighlightsResponseInterface, HighlightSpec as HighlightSpecInterface, ClearHighlightsRequest as ClearHighlightsRequestInterface, ClearHighlightsResponse as ClearHighlightsResponseInterface, ShowPathRequest as ShowPathRequestInterface, ShowPathResponse as ShowPathResponseInterface, ClearPathsRequest as ClearPathsRequestInterface, ClearPathsResponse as ClearPathsResponseInterface, MoveUnitAnimationRequest as MoveUnitAnimationRequestInterface, MoveUnitAnimationResponse as MoveUnitAnimationResponseInterface, HexCoord as HexCoordInterface, ShowAttackEffectRequest as ShowAttackEffectRequestInterface, SplashTarget as SplashTargetInterface, ShowAttackEffectResponse as ShowAttackEffectResponseInterface, ShowHealEffectRequest as ShowHealEffectRequestInterface, ShowHealEffectResponse as ShowHealEffectResponseInterface, ShowCaptureEffectRequest as ShowCaptureEffectRequestInterface, ShowCaptureEffectResponse as ShowCaptureEffectResponseInterface, SetUnitAtAnimationRequest as SetUnitAtAnimationRequestInterface, SetUnitAtAnimationResponse as SetUnitAtAnimationResponseInterface, RemoveUnitAtAnimationRequest as RemoveUnitAtAnimationRequestInterface, RemoveUnitAtAnimationResponse as RemoveUnitAtAnimationResponseInterface, TurnOptionClickedRequest as TurnOptionClickedRequestInterface, TurnOptionClickedResponse as TurnOptionClickedResponseInterface, SceneClickedRequest as SceneClickedRequestInterface, SceneClickedResponse as SceneClickedResponseInterface, EndTurnButtonClickedRequest as EndTurnButtonClickedRequestInterface, EndTurnButtonClickedResponse as EndTurnButtonClickedResponseInterface, BuildOptionClickedRequest as BuildOptionClickedRequestInterface, BuildOptionClickedResponse as BuildOptionClickedResponseInterface, InitializeGameRequest as InitializeGameRequestInterface, InitializeGameResponse as InitializeGameResponseInterface, ThemeInfo as ThemeInfoInterface, UnitMapping as UnitMappingInterface, TerrainMapping as TerrainMappingInterface, ThemeManifest as ThemeManifestInterface, PlayerColor as PlayerColorInterface, AssetResult as AssetResultInterface, UserInfo as UserInfoInterface, ListUsersRequest as ListUsersRequestInterface, ListUsersResponse as ListUsersResponseInterface, GetUserRequest as GetUserRequestInterface, GetUserResponse as GetUserResponseInterface, GetUserContentRequest as GetUserContentRequestInterface, GetUserContentResponse as GetUserContentResponseInterface, UpdateUserRequest as UpdateUserRequestInterface, UpdateUserResponse as UpdateUserResponseInterface, DeleteUserRequest as DeleteUserRequestInterface, DeleteUserResponse as DeleteUserResponseInterface, GetUsersRequest as GetUsersRequestInterface, GetUsersResponse as GetUsersResponseInterface, CreateUserRequest as CreateUserRequestInterface, CreateUserResponse as CreateUserResponseInterface, WorldInfo as WorldInfoInterface, ListWorldsRequest as ListWorldsRequestInterface, ListWorldsResponse as ListWorldsResponseInterface, GetWorldRequest as GetWorldRequestInterface, GetWorldResponse as GetWorldResponseInterface, UpdateWorldRequest as UpdateWorldRequestInterface, UpdateWorldResponse as UpdateWorldResponseInterface, DeleteWorldRequest as DeleteWorldRequestInterface, DeleteWorldResponse as DeleteWorldResponseInterface, GetWorldsRequest as GetWorldsRequestInterface, GetWorldsResponse as GetWorldsResponseInterface, CreateWorldRequest as CreateWorldRequestInterface, CreateWorldResponse as CreateWorldResponseInterface, GameStatus, PathDirection, Type } from "./interfaces";
 
 
-import { User as ConcreteUser, Pagination as ConcretePagination, PaginationResponse as ConcretePaginationResponse, World as ConcreteWorld, WorldData as ConcreteWorldData, Tile as ConcreteTile, Unit as ConcreteUnit, AttackRecord as ConcreteAttackRecord, TerrainDefinition as ConcreteTerrainDefinition, UnitDefinition as ConcreteUnitDefinition, TerrainUnitProperties as ConcreteTerrainUnitProperties, UnitUnitProperties as ConcreteUnitUnitProperties, DamageDistribution as ConcreteDamageDistribution, DamageRange as ConcreteDamageRange, RulesEngine as ConcreteRulesEngine, Game as ConcreteGame, GameConfiguration as ConcreteGameConfiguration, GamePlayer as ConcreteGamePlayer, GameTeam as ConcreteGameTeam, GameSettings as ConcreteGameSettings, GameState as ConcreteGameState, GameMoveHistory as ConcreteGameMoveHistory, GameMoveGroup as ConcreteGameMoveGroup, GameMove as ConcreteGameMove, GameMoveResult as ConcreteGameMoveResult, MoveUnitAction as ConcreteMoveUnitAction, AttackUnitAction as ConcreteAttackUnitAction, EndTurnAction as ConcreteEndTurnAction, WorldChange as ConcreteWorldChange, UnitMovedChange as ConcreteUnitMovedChange, UnitDamagedChange as ConcreteUnitDamagedChange, UnitKilledChange as ConcreteUnitKilledChange, PlayerChangedChange as ConcretePlayerChangedChange, GameInfo as ConcreteGameInfo, ListGamesRequest as ConcreteListGamesRequest, ListGamesResponse as ConcreteListGamesResponse, GetGameRequest as ConcreteGetGameRequest, GetGameResponse as ConcreteGetGameResponse, GetGameContentRequest as ConcreteGetGameContentRequest, GetGameContentResponse as ConcreteGetGameContentResponse, UpdateGameRequest as ConcreteUpdateGameRequest, UpdateGameResponse as ConcreteUpdateGameResponse, DeleteGameRequest as ConcreteDeleteGameRequest, DeleteGameResponse as ConcreteDeleteGameResponse, GetGamesRequest as ConcreteGetGamesRequest, GetGamesResponse as ConcreteGetGamesResponse, CreateGameRequest as ConcreteCreateGameRequest, CreateGameResponse as ConcreteCreateGameResponse, ProcessMovesRequest as ConcreteProcessMovesRequest, ProcessMovesResponse as ConcreteProcessMovesResponse, GetGameStateRequest as ConcreteGetGameStateRequest, GetGameStateResponse as ConcreteGetGameStateResponse, ListMovesRequest as ConcreteListMovesRequest, ListMovesResponse as ConcreteListMovesResponse, GetOptionsAtRequest as ConcreteGetOptionsAtRequest, GetOptionsAtResponse as ConcreteGetOptionsAtResponse, AllPaths as ConcreteAllPaths, PathEdge as ConcretePathEdge, Path as ConcretePath, GameOption as ConcreteGameOption, EndTurnOption as ConcreteEndTurnOption, MoveOption as ConcreteMoveOption, AttackOption as ConcreteAttackOption, BuildUnitOption as ConcreteBuildUnitOption, CaptureBuildingOption as ConcreteCaptureBuildingOption, SimulateAttackRequest as ConcreteSimulateAttackRequest, SimulateAttackResponse as ConcreteSimulateAttackResponse, EmptyRequest as ConcreteEmptyRequest, EmptyResponse as ConcreteEmptyResponse, SetContentRequest as ConcreteSetContentRequest, SetContentResponse as ConcreteSetContentResponse, ShowBuildOptionsRequest as ConcreteShowBuildOptionsRequest, ShowBuildOptionsResponse as ConcreteShowBuildOptionsResponse, LogMessageRequest as ConcreteLogMessageRequest, LogMessageResponse as ConcreteLogMessageResponse, SetGameStateRequest as ConcreteSetGameStateRequest, SetGameStateResponse as ConcreteSetGameStateResponse, UpdateGameStatusRequest as ConcreteUpdateGameStatusRequest, UpdateGameStatusResponse as ConcreteUpdateGameStatusResponse, SetTileAtRequest as ConcreteSetTileAtRequest, SetTileAtResponse as ConcreteSetTileAtResponse, SetUnitAtRequest as ConcreteSetUnitAtRequest, SetUnitAtResponse as ConcreteSetUnitAtResponse, RemoveTileAtRequest as ConcreteRemoveTileAtRequest, RemoveTileAtResponse as ConcreteRemoveTileAtResponse, RemoveUnitAtRequest as ConcreteRemoveUnitAtRequest, RemoveUnitAtResponse as ConcreteRemoveUnitAtResponse, ShowHighlightsRequest as ConcreteShowHighlightsRequest, ShowHighlightsResponse as ConcreteShowHighlightsResponse, HighlightSpec as ConcreteHighlightSpec, ClearHighlightsRequest as ConcreteClearHighlightsRequest, ClearHighlightsResponse as ConcreteClearHighlightsResponse, ShowPathRequest as ConcreteShowPathRequest, ShowPathResponse as ConcreteShowPathResponse, ClearPathsRequest as ConcreteClearPathsRequest, ClearPathsResponse as ConcreteClearPathsResponse, MoveUnitAnimationRequest as ConcreteMoveUnitAnimationRequest, MoveUnitAnimationResponse as ConcreteMoveUnitAnimationResponse, HexCoord as ConcreteHexCoord, ShowAttackEffectRequest as ConcreteShowAttackEffectRequest, SplashTarget as ConcreteSplashTarget, ShowAttackEffectResponse as ConcreteShowAttackEffectResponse, ShowHealEffectRequest as ConcreteShowHealEffectRequest, ShowHealEffectResponse as ConcreteShowHealEffectResponse, ShowCaptureEffectRequest as ConcreteShowCaptureEffectRequest, ShowCaptureEffectResponse as ConcreteShowCaptureEffectResponse, SetUnitAtAnimationRequest as ConcreteSetUnitAtAnimationRequest, SetUnitAtAnimationResponse as ConcreteSetUnitAtAnimationResponse, RemoveUnitAtAnimationRequest as ConcreteRemoveUnitAtAnimationRequest, RemoveUnitAtAnimationResponse as ConcreteRemoveUnitAtAnimationResponse, TurnOptionClickedRequest as ConcreteTurnOptionClickedRequest, TurnOptionClickedResponse as ConcreteTurnOptionClickedResponse, SceneClickedRequest as ConcreteSceneClickedRequest, SceneClickedResponse as ConcreteSceneClickedResponse, EndTurnButtonClickedRequest as ConcreteEndTurnButtonClickedRequest, EndTurnButtonClickedResponse as ConcreteEndTurnButtonClickedResponse, InitializeGameRequest as ConcreteInitializeGameRequest, InitializeGameResponse as ConcreteInitializeGameResponse, ThemeInfo as ConcreteThemeInfo, UnitMapping as ConcreteUnitMapping, TerrainMapping as ConcreteTerrainMapping, ThemeManifest as ConcreteThemeManifest, PlayerColor as ConcretePlayerColor, AssetResult as ConcreteAssetResult, UserInfo as ConcreteUserInfo, ListUsersRequest as ConcreteListUsersRequest, ListUsersResponse as ConcreteListUsersResponse, GetUserRequest as ConcreteGetUserRequest, GetUserResponse as ConcreteGetUserResponse, GetUserContentRequest as ConcreteGetUserContentRequest, GetUserContentResponse as ConcreteGetUserContentResponse, UpdateUserRequest as ConcreteUpdateUserRequest, UpdateUserResponse as ConcreteUpdateUserResponse, DeleteUserRequest as ConcreteDeleteUserRequest, DeleteUserResponse as ConcreteDeleteUserResponse, GetUsersRequest as ConcreteGetUsersRequest, GetUsersResponse as ConcreteGetUsersResponse, CreateUserRequest as ConcreteCreateUserRequest, CreateUserResponse as ConcreteCreateUserResponse, WorldInfo as ConcreteWorldInfo, ListWorldsRequest as ConcreteListWorldsRequest, ListWorldsResponse as ConcreteListWorldsResponse, GetWorldRequest as ConcreteGetWorldRequest, GetWorldResponse as ConcreteGetWorldResponse, UpdateWorldRequest as ConcreteUpdateWorldRequest, UpdateWorldResponse as ConcreteUpdateWorldResponse, DeleteWorldRequest as ConcreteDeleteWorldRequest, DeleteWorldResponse as ConcreteDeleteWorldResponse, GetWorldsRequest as ConcreteGetWorldsRequest, GetWorldsResponse as ConcreteGetWorldsResponse, CreateWorldRequest as ConcreteCreateWorldRequest, CreateWorldResponse as ConcreteCreateWorldResponse } from "./models";
+import { User as ConcreteUser, Pagination as ConcretePagination, PaginationResponse as ConcretePaginationResponse, World as ConcreteWorld, WorldData as ConcreteWorldData, Tile as ConcreteTile, Unit as ConcreteUnit, AttackRecord as ConcreteAttackRecord, TerrainDefinition as ConcreteTerrainDefinition, UnitDefinition as ConcreteUnitDefinition, TerrainUnitProperties as ConcreteTerrainUnitProperties, UnitUnitProperties as ConcreteUnitUnitProperties, DamageDistribution as ConcreteDamageDistribution, DamageRange as ConcreteDamageRange, RulesEngine as ConcreteRulesEngine, Game as ConcreteGame, GameConfiguration as ConcreteGameConfiguration, GamePlayer as ConcreteGamePlayer, GameTeam as ConcreteGameTeam, GameSettings as ConcreteGameSettings, GameState as ConcreteGameState, GameMoveHistory as ConcreteGameMoveHistory, GameMoveGroup as ConcreteGameMoveGroup, GameMove as ConcreteGameMove, GameMoveResult as ConcreteGameMoveResult, MoveUnitAction as ConcreteMoveUnitAction, AttackUnitAction as ConcreteAttackUnitAction, BuildUnitAction as ConcreteBuildUnitAction, CaptureBuildingAction as ConcreteCaptureBuildingAction, EndTurnAction as ConcreteEndTurnAction, WorldChange as ConcreteWorldChange, UnitMovedChange as ConcreteUnitMovedChange, UnitDamagedChange as ConcreteUnitDamagedChange, UnitKilledChange as ConcreteUnitKilledChange, PlayerChangedChange as ConcretePlayerChangedChange, AllPaths as ConcreteAllPaths, PathEdge as ConcretePathEdge, Path as ConcretePath, GameInfo as ConcreteGameInfo, ListGamesRequest as ConcreteListGamesRequest, ListGamesResponse as ConcreteListGamesResponse, GetGameRequest as ConcreteGetGameRequest, GetGameResponse as ConcreteGetGameResponse, GetGameContentRequest as ConcreteGetGameContentRequest, GetGameContentResponse as ConcreteGetGameContentResponse, UpdateGameRequest as ConcreteUpdateGameRequest, UpdateGameResponse as ConcreteUpdateGameResponse, DeleteGameRequest as ConcreteDeleteGameRequest, DeleteGameResponse as ConcreteDeleteGameResponse, GetGamesRequest as ConcreteGetGamesRequest, GetGamesResponse as ConcreteGetGamesResponse, CreateGameRequest as ConcreteCreateGameRequest, CreateGameResponse as ConcreteCreateGameResponse, ProcessMovesRequest as ConcreteProcessMovesRequest, ProcessMovesResponse as ConcreteProcessMovesResponse, GetGameStateRequest as ConcreteGetGameStateRequest, GetGameStateResponse as ConcreteGetGameStateResponse, ListMovesRequest as ConcreteListMovesRequest, ListMovesResponse as ConcreteListMovesResponse, GetOptionsAtRequest as ConcreteGetOptionsAtRequest, GetOptionsAtResponse as ConcreteGetOptionsAtResponse, GameOption as ConcreteGameOption, SimulateAttackRequest as ConcreteSimulateAttackRequest, SimulateAttackResponse as ConcreteSimulateAttackResponse, EmptyRequest as ConcreteEmptyRequest, EmptyResponse as ConcreteEmptyResponse, SetContentRequest as ConcreteSetContentRequest, SetContentResponse as ConcreteSetContentResponse, ShowBuildOptionsRequest as ConcreteShowBuildOptionsRequest, ShowBuildOptionsResponse as ConcreteShowBuildOptionsResponse, LogMessageRequest as ConcreteLogMessageRequest, LogMessageResponse as ConcreteLogMessageResponse, SetGameStateRequest as ConcreteSetGameStateRequest, SetGameStateResponse as ConcreteSetGameStateResponse, UpdateGameStatusRequest as ConcreteUpdateGameStatusRequest, UpdateGameStatusResponse as ConcreteUpdateGameStatusResponse, SetTileAtRequest as ConcreteSetTileAtRequest, SetTileAtResponse as ConcreteSetTileAtResponse, SetUnitAtRequest as ConcreteSetUnitAtRequest, SetUnitAtResponse as ConcreteSetUnitAtResponse, RemoveTileAtRequest as ConcreteRemoveTileAtRequest, RemoveTileAtResponse as ConcreteRemoveTileAtResponse, RemoveUnitAtRequest as ConcreteRemoveUnitAtRequest, RemoveUnitAtResponse as ConcreteRemoveUnitAtResponse, ShowHighlightsRequest as ConcreteShowHighlightsRequest, ShowHighlightsResponse as ConcreteShowHighlightsResponse, HighlightSpec as ConcreteHighlightSpec, ClearHighlightsRequest as ConcreteClearHighlightsRequest, ClearHighlightsResponse as ConcreteClearHighlightsResponse, ShowPathRequest as ConcreteShowPathRequest, ShowPathResponse as ConcreteShowPathResponse, ClearPathsRequest as ConcreteClearPathsRequest, ClearPathsResponse as ConcreteClearPathsResponse, MoveUnitAnimationRequest as ConcreteMoveUnitAnimationRequest, MoveUnitAnimationResponse as ConcreteMoveUnitAnimationResponse, HexCoord as ConcreteHexCoord, ShowAttackEffectRequest as ConcreteShowAttackEffectRequest, SplashTarget as ConcreteSplashTarget, ShowAttackEffectResponse as ConcreteShowAttackEffectResponse, ShowHealEffectRequest as ConcreteShowHealEffectRequest, ShowHealEffectResponse as ConcreteShowHealEffectResponse, ShowCaptureEffectRequest as ConcreteShowCaptureEffectRequest, ShowCaptureEffectResponse as ConcreteShowCaptureEffectResponse, SetUnitAtAnimationRequest as ConcreteSetUnitAtAnimationRequest, SetUnitAtAnimationResponse as ConcreteSetUnitAtAnimationResponse, RemoveUnitAtAnimationRequest as ConcreteRemoveUnitAtAnimationRequest, RemoveUnitAtAnimationResponse as ConcreteRemoveUnitAtAnimationResponse, TurnOptionClickedRequest as ConcreteTurnOptionClickedRequest, TurnOptionClickedResponse as ConcreteTurnOptionClickedResponse, SceneClickedRequest as ConcreteSceneClickedRequest, SceneClickedResponse as ConcreteSceneClickedResponse, EndTurnButtonClickedRequest as ConcreteEndTurnButtonClickedRequest, EndTurnButtonClickedResponse as ConcreteEndTurnButtonClickedResponse, BuildOptionClickedRequest as ConcreteBuildOptionClickedRequest, BuildOptionClickedResponse as ConcreteBuildOptionClickedResponse, InitializeGameRequest as ConcreteInitializeGameRequest, InitializeGameResponse as ConcreteInitializeGameResponse, ThemeInfo as ConcreteThemeInfo, UnitMapping as ConcreteUnitMapping, TerrainMapping as ConcreteTerrainMapping, ThemeManifest as ConcreteThemeManifest, PlayerColor as ConcretePlayerColor, AssetResult as ConcreteAssetResult, UserInfo as ConcreteUserInfo, ListUsersRequest as ConcreteListUsersRequest, ListUsersResponse as ConcreteListUsersResponse, GetUserRequest as ConcreteGetUserRequest, GetUserResponse as ConcreteGetUserResponse, GetUserContentRequest as ConcreteGetUserContentRequest, GetUserContentResponse as ConcreteGetUserContentResponse, UpdateUserRequest as ConcreteUpdateUserRequest, UpdateUserResponse as ConcreteUpdateUserResponse, DeleteUserRequest as ConcreteDeleteUserRequest, DeleteUserResponse as ConcreteDeleteUserResponse, GetUsersRequest as ConcreteGetUsersRequest, GetUsersResponse as ConcreteGetUsersResponse, CreateUserRequest as ConcreteCreateUserRequest, CreateUserResponse as ConcreteCreateUserResponse, WorldInfo as ConcreteWorldInfo, ListWorldsRequest as ConcreteListWorldsRequest, ListWorldsResponse as ConcreteListWorldsResponse, GetWorldRequest as ConcreteGetWorldRequest, GetWorldResponse as ConcreteGetWorldResponse, UpdateWorldRequest as ConcreteUpdateWorldRequest, UpdateWorldResponse as ConcreteUpdateWorldResponse, DeleteWorldRequest as ConcreteDeleteWorldRequest, DeleteWorldResponse as ConcreteDeleteWorldResponse, GetWorldsRequest as ConcreteGetWorldsRequest, GetWorldsResponse as ConcreteGetWorldsResponse, CreateWorldRequest as ConcreteCreateWorldRequest, CreateWorldResponse as ConcreteCreateWorldResponse } from "./models";
 
 
 
@@ -565,6 +565,46 @@ export class Weewar_v1Factory {
   }
 
   /**
+   * Enhanced factory method for BuildUnitAction
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newBuildUnitAction = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<BuildUnitActionInterface> => {
+    const out = new ConcreteBuildUnitAction();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
+   * Enhanced factory method for CaptureBuildingAction
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newCaptureBuildingAction = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<CaptureBuildingActionInterface> => {
+    const out = new ConcreteCaptureBuildingAction();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
    * Enhanced factory method for EndTurnAction
    * @param parent Parent object containing this field
    * @param attributeName Field name in parent object
@@ -679,6 +719,66 @@ export class Weewar_v1Factory {
     data?: any
   ): FactoryResult<PlayerChangedChangeInterface> => {
     const out = new ConcretePlayerChangedChange();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
+   * Enhanced factory method for AllPaths
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newAllPaths = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<AllPathsInterface> => {
+    const out = new ConcreteAllPaths();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
+   * Enhanced factory method for PathEdge
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newPathEdge = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<PathEdgeInterface> => {
+    const out = new ConcretePathEdge();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
+   * Enhanced factory method for Path
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newPath = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<PathInterface> => {
+    const out = new ConcretePath();
     
     // Factory does not populate by default - let deserializer handle it
     return { instance: out, fullyLoaded: false };
@@ -1145,66 +1245,6 @@ export class Weewar_v1Factory {
   }
 
   /**
-   * Enhanced factory method for AllPaths
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newAllPaths = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<AllPathsInterface> => {
-    const out = new ConcreteAllPaths();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for PathEdge
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newPathEdge = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<PathEdgeInterface> => {
-    const out = new ConcretePathEdge();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for Path
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newPath = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<PathInterface> => {
-    const out = new ConcretePath();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
    * Enhanced factory method for GameOption
    * @param parent Parent object containing this field
    * @param attributeName Field name in parent object
@@ -1219,106 +1259,6 @@ export class Weewar_v1Factory {
     data?: any
   ): FactoryResult<GameOptionInterface> => {
     const out = new ConcreteGameOption();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for EndTurnOption
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newEndTurnOption = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<EndTurnOptionInterface> => {
-    const out = new ConcreteEndTurnOption();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for MoveOption
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newMoveOption = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<MoveOptionInterface> => {
-    const out = new ConcreteMoveOption();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for AttackOption
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newAttackOption = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<AttackOptionInterface> => {
-    const out = new ConcreteAttackOption();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for BuildUnitOption
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newBuildUnitOption = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<BuildUnitOptionInterface> => {
-    const out = new ConcreteBuildUnitOption();
-    
-    // Factory does not populate by default - let deserializer handle it
-    return { instance: out, fullyLoaded: false };
-  }
-
-  /**
-   * Enhanced factory method for CaptureBuildingOption
-   * @param parent Parent object containing this field
-   * @param attributeName Field name in parent object
-   * @param attributeKey Array index, map key, or union tag (for containers)
-   * @param data Raw data to potentially populate from
-   * @returns Factory result with instance and population status
-   */
-  newCaptureBuildingOption = (
-    parent?: any,
-    attributeName?: string,
-    attributeKey?: string | number,
-    data?: any
-  ): FactoryResult<CaptureBuildingOptionInterface> => {
-    const out = new ConcreteCaptureBuildingOption();
     
     // Factory does not populate by default - let deserializer handle it
     return { instance: out, fullyLoaded: false };
@@ -2339,6 +2279,46 @@ export class Weewar_v1Factory {
     data?: any
   ): FactoryResult<EndTurnButtonClickedResponseInterface> => {
     const out = new ConcreteEndTurnButtonClickedResponse();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
+   * Enhanced factory method for BuildOptionClickedRequest
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newBuildOptionClickedRequest = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<BuildOptionClickedRequestInterface> => {
+    const out = new ConcreteBuildOptionClickedRequest();
+    
+    // Factory does not populate by default - let deserializer handle it
+    return { instance: out, fullyLoaded: false };
+  }
+
+  /**
+   * Enhanced factory method for BuildOptionClickedResponse
+   * @param parent Parent object containing this field
+   * @param attributeName Field name in parent object
+   * @param attributeKey Array index, map key, or union tag (for containers)
+   * @param data Raw data to potentially populate from
+   * @returns Factory result with instance and population status
+   */
+  newBuildOptionClickedResponse = (
+    parent?: any,
+    attributeName?: string,
+    attributeKey?: string | number,
+    data?: any
+  ): FactoryResult<BuildOptionClickedResponseInterface> => {
+    const out = new ConcreteBuildOptionClickedResponse();
     
     // Factory does not populate by default - let deserializer handle it
     return { instance: out, fullyLoaded: false };

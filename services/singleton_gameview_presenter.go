@@ -45,6 +45,12 @@ type TerrainStatsPanel interface {
 	SetCurrentTile(context.Context, *v1.Tile)
 }
 
+type BuildOptionsModal interface {
+	BasePanel
+	Show(context.Context, *v1.Tile, []*v1.BuildUnitAction, int32)
+	Hide(context.Context)
+}
+
 type GameScene interface {
 	BasePanel
 	ClearPaths(context.Context)
@@ -72,6 +78,7 @@ type SingletonGameViewPresenterImpl struct {
 	UnitStatsPanel          UnitStatsPanel
 	DamageDistributionPanel DamageDistributionPanel
 	TerrainStatsPanel       TerrainStatsPanel
+	BuildOptionsModal       BuildOptionsModal
 	GameScene               GameScene
 
 	// State tracking for current selection
@@ -161,17 +168,39 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 			R: r,
 		})
 		if err == nil && optionsResp != nil && len(optionsResp.Options) > 0 {
-			s.TurnOptionsPanel.SetCurrentUnit(ctx, unit, optionsResp)
+			// Check if there are ONLY build options (no movement/attack options)
+			buildOptions := extractBuildOptions(optionsResp)
+			hasOnlyBuildOptions := len(buildOptions) > 0 && len(buildOptions) == len(optionsResp.Options)
+			fmt.Printf("[SceneClicked] Options count: %d, Build options count: %d, hasOnlyBuildOptions: %v\n",
+				len(optionsResp.Options), len(buildOptions), hasOnlyBuildOptions)
 
-			// Send visualization commands to show highlights
-			highlights := buildHighlightSpecs(optionsResp, q, r)
-			if len(highlights) > 0 {
+			if hasOnlyBuildOptions {
+				// Show build modal instead of turn options panel
+				playerCoins := getPlayerCoins(game, gameState.CurrentPlayer)
+				fmt.Printf("[SceneClicked] Showing build modal with %d options, playerCoins=%d\n",
+					len(buildOptions), playerCoins)
+				s.BuildOptionsModal.Show(ctx, tile, buildOptions, playerCoins)
+				// Still show selection highlight
 				s.GameScene.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
-					Highlights: highlights,
+					Highlights: []*v1.HighlightSpec{{Q: q, R: r, Type: "selection"}},
 				})
 				s.hasHighlights = true
 				s.selectedQ = &q
 				s.selectedR = &r
+			} else {
+				// Show turn options panel as usual
+				s.TurnOptionsPanel.SetCurrentUnit(ctx, unit, optionsResp)
+
+				// Send visualization commands to show highlights
+				highlights := buildHighlightSpecs(optionsResp, q, r)
+				if len(highlights) > 0 {
+					s.GameScene.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
+						Highlights: highlights,
+					})
+					s.hasHighlights = true
+					s.selectedQ = &q
+					s.selectedR = &r
+				}
 			}
 		} else {
 			// No options available - clear options and highlights
@@ -195,6 +224,34 @@ func (s *SingletonGameViewPresenterImpl) clearHighlightsAndSelection(ctx context
 	}
 }
 
+// extractBuildOptions extracts all build options from the response
+func extractBuildOptions(optionsResp *v1.GetOptionsAtResponse) []*v1.BuildUnitAction {
+	if optionsResp == nil {
+		return nil
+	}
+
+	buildOptions := []*v1.BuildUnitAction{}
+	for _, option := range optionsResp.Options {
+		if buildOpt := option.GetBuild(); buildOpt != nil {
+			buildOptions = append(buildOptions, buildOpt)
+		}
+	}
+	return buildOptions
+}
+
+// getPlayerCoins returns the current player's coin count from game configuration
+func getPlayerCoins(game *v1.Game, playerID int32) int32 {
+	if game == nil || game.Config == nil || game.Config.Players == nil {
+		return 0
+	}
+	for _, player := range game.Config.Players {
+		if player.PlayerId == playerID {
+			return player.Coins
+		}
+	}
+	return 0
+}
+
 // buildHighlightSpecs creates HighlightSpec array from GetOptionsAt response
 // Extracts selection, movement, and attack highlights from the options
 func buildHighlightSpecs(optionsResp *v1.GetOptionsAtResponse, selectedQ, selectedR int32) []*v1.HighlightSpec {
@@ -216,16 +273,26 @@ func buildHighlightSpecs(optionsResp *v1.GetOptionsAtResponse, selectedQ, select
 		if moveOpt := option.GetMove(); moveOpt != nil {
 			// Add movement highlight
 			highlights = append(highlights, &v1.HighlightSpec{
-				Q:    moveOpt.Action.ToQ,
-				R:    moveOpt.Action.ToR,
-				Type: "movement",
+				Type:   "movement",
+				Q:      moveOpt.ToQ,
+				R:      moveOpt.ToR,
+				Action: &v1.HighlightSpec_Move{Move: moveOpt},
 			})
 		} else if attackOpt := option.GetAttack(); attackOpt != nil {
 			// Add attack highlight
 			highlights = append(highlights, &v1.HighlightSpec{
-				Q:    attackOpt.Action.DefenderQ,
-				R:    attackOpt.Action.DefenderR,
-				Type: "attack",
+				Q:      attackOpt.DefenderQ,
+				R:      attackOpt.DefenderR,
+				Type:   "attack",
+				Action: &v1.HighlightSpec_Attack{Attack: attackOpt},
+			})
+		} else if buildOpt := option.GetBuild(); buildOpt != nil {
+			// Add build highlight
+			highlights = append(highlights, &v1.HighlightSpec{
+				Q:      buildOpt.Q,
+				R:      buildOpt.R,
+				Type:   "build",
+				Action: &v1.HighlightSpec_Build{Build: buildOpt},
 			})
 		}
 	}
@@ -265,6 +332,38 @@ func (s *SingletonGameViewPresenterImpl) TurnOptionClicked(ctx context.Context, 
 			}
 		}
 	}
+
+	return
+}
+
+// BuildOptionClicked handles when user clicks a build option in the BuildOptionsModal
+func (s *SingletonGameViewPresenterImpl) BuildOptionClicked(ctx context.Context, req *v1.BuildOptionClickedRequest) (resp *v1.BuildOptionClickedResponse, err error) {
+	resp = &v1.BuildOptionClickedResponse{}
+
+	// Get current game state
+	gameState := s.GamesService.SingletonGameState
+	if gameState == nil {
+		fmt.Println("[Presenter] Game state is nil")
+		return
+	}
+
+	// Create the build move
+	gameMove := &v1.GameMove{
+		Player: gameState.CurrentPlayer,
+		MoveType: &v1.GameMove_BuildUnit{
+			BuildUnit: &v1.BuildUnitAction{
+				Q:        req.Q,
+				R:        req.R,
+				UnitType: req.UnitType,
+			},
+		},
+	}
+
+	fmt.Printf("[Presenter] Executing build of unit type %d at (%d,%d) for player %d\n",
+		req.UnitType, req.Q, req.R, gameState.CurrentPlayer)
+
+	// Execute the build move
+	s.executeBuildAction(ctx, gameMove)
 
 	return
 }
@@ -317,30 +416,26 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 	var gameMove *v1.GameMove
 	for _, option := range currentOptions.Options {
 		if opt := option.GetMove(); opt != nil {
-			if opt.Action.ToQ == targetQ && opt.Action.ToR == targetR {
+			if opt.ToQ == targetQ && opt.ToR == targetR {
 				gameMove = &v1.GameMove{
-					Player: gameState.CurrentPlayer,
-					MoveType: &v1.GameMove_MoveUnit{
-						MoveUnit: opt.Action,
-					},
+					Player:   gameState.CurrentPlayer,
+					MoveType: &v1.GameMove_MoveUnit{MoveUnit: opt},
 				}
 				fmt.Printf("[Presenter] Executing move from (%d,%d) to (%d,%d) for player %d\n",
-					opt.Action.FromQ, opt.Action.FromR,
-					opt.Action.ToQ, opt.Action.ToR,
+					opt.FromQ, opt.FromR,
+					opt.ToQ, opt.ToR,
 					gameState.CurrentPlayer)
 				break
 			}
 		} else if opt := option.GetAttack(); opt != nil {
-			if opt.Action.DefenderQ == targetQ && opt.Action.DefenderR == targetR {
+			if opt.DefenderQ == targetQ && opt.DefenderR == targetR {
 				gameMove = &v1.GameMove{
-					Player: gameState.CurrentPlayer,
-					MoveType: &v1.GameMove_AttackUnit{
-						AttackUnit: opt.Action,
-					},
+					Player:   gameState.CurrentPlayer,
+					MoveType: &v1.GameMove_AttackUnit{AttackUnit: opt},
 				}
 				fmt.Printf("[Presenter] Executing attack from (%d,%d) to (%d,%d) for player %d\n",
-					opt.Action.AttackerQ, opt.Action.AttackerR,
-					opt.Action.DefenderQ, opt.Action.DefenderR,
+					opt.AttackerQ, opt.AttackerR,
+					opt.DefenderQ, opt.DefenderR,
 					gameState.CurrentPlayer)
 				break
 			}
@@ -373,6 +468,30 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 }
 
 // executeEndTurnAction executes the end turn action
+// executeBuildAction processes a build unit action
+func (s *SingletonGameViewPresenterImpl) executeBuildAction(ctx context.Context, gameMove *v1.GameMove) {
+	// Call ProcessMoves to execute the build
+	_, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+		Moves: []*v1.GameMove{gameMove},
+	})
+
+	if err != nil {
+		fmt.Printf("[Presenter] Build action failed: %v\n", err)
+		return
+	}
+
+	fmt.Printf("[Presenter] Build action completed successfully\n")
+
+	// Hide the build modal
+	s.BuildOptionsModal.Hide(ctx)
+
+	// Clear selection and highlights
+	s.clearHighlightsAndSelection(ctx)
+
+	// Clear turn options panel
+	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
+}
+
 func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Context) {
 	gameState := s.GamesService.SingletonGameState
 	if gameState == nil {

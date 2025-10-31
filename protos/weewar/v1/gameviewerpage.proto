@@ -78,6 +78,8 @@ message SetContentResponse {
 message ShowBuildOptionsRequest {
     string inner_html = 1;
     bool hide = 2;
+    int32 q = 3;  // Q coordinate of the tile (for the modal to pass back to presenter)
+    int32 r = 4;  // R coordinate of the tile (for the modal to pass back to presenter)
 }
 
 message ShowBuildOptionsResponse {
@@ -166,6 +168,12 @@ message HighlightSpec {
     int32 q = 1;
     int32 r = 2;
     string type = 3; // "selection", "movement", "attack"
+    oneof action {
+      MoveUnitAction move = 4;
+      AttackUnitAction attack = 5;
+      BuildUnitAction build = 6;
+      CaptureBuildingAction capture = 7;
+    }
 }
 
 // Request to clear highlights

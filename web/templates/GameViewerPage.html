@@ -177,7 +177,36 @@
 
         <!-- Main Dockview Container -->
         <div id="dockview-container" class="flex-1 min-h-0"></div>
-        
+
+        <!-- Build Options Modal -->
+        <div id="build-options-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+            <div class="modal-content relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        🏗️ Build Unit
+                    </h2>
+                    <button class="cancel-button text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body (scrollable) -->
+                <div class="modal-body flex-1 overflow-y-auto px-6 py-4">
+                    <!-- Content will be injected here by BuildOptionsModal component -->
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <button class="cancel-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Hidden Panel Templates for Dockview -->
         <div style="display: none;">
             <div id="main-game-panel-template">
@@ -204,7 +233,7 @@
         <pre id="terrain-data-json" style="display: none;">{{ .GetTerrainDataJSON }}</pre>
         <pre id="unit-data-json" style="display: none;">{{ .GetUnitDataJSON }}</pre>
         <pre id="terrain-unit-properties-json" style="display: none;">{{ .GetTerrainUnitPropertiesJSON }}</pre>
-        <pre id="unit-unit-properties-json" style="display: none;">{{ .GetUnitUnitPropertiesJSON }}</pre>
+        <pre id="unit-unit-properties-json" style="display: none;">{{ if 0 }} {{ .GetUnitUnitPropertiesJSON }} {{ end }}</pre>
     </main>
 {{ end }}
 

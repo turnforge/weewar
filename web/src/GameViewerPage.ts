@@ -8,14 +8,6 @@ import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
 import {
     GameState as ProtoGameState,
-    Game as ProtoGame,
-    GameConfiguration as ProtoGameConfiguration,
-    MoveOption,
-    AttackOption,
-    GameMove,
-    GetOptionsAtResponse,
-    GameOption,
-    WorldData,
     SetGameStateRequest, SetGameStateResponse,
     SetContentRequest, SetContentResponse,
 	  LogMessageRequest, LogMessageResponse,
@@ -23,6 +15,7 @@ import {
     ClearHighlightsRequest, ClearHighlightsResponse,
     ShowPathRequest, ShowPathResponse,
     ClearPathsRequest, ClearPathsResponse,
+    ShowBuildOptionsRequest, ShowBuildOptionsResponse,
     HighlightSpec,
     MoveUnitAnimationRequest, MoveUnitAnimationResponse,
     ShowAttackEffectRequest, ShowAttackEffectResponse,
@@ -41,6 +34,7 @@ import { UnitStatsPanel } from './UnitStatsPanel';
 import { DamageDistributionPanel } from './DamageDistributionPanel';
 import { GameLogPanel } from './GameLogPanel';
 import { TurnOptionsPanel } from './TurnOptionsPanel';
+import { BuildOptionsModal } from './BuildOptionsModal';
 import { GameEventTypes, WorldEventTypes } from './events';
 import { RulesTable, TerrainStats } from './RulesTable';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
@@ -66,21 +60,13 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private damageDistributionPanel: DamageDistributionPanel
     private gameLogPanel: GameLogPanel
     private turnOptionsPanel: TurnOptionsPanel
+    private buildOptionsModal: BuildOptionsModal
     private rulesTable: RulesTable = new RulesTable();
     
     // Dockview interface
     private dockview: DockviewApi;
     private themeObserver: MutationObserver | null = null;
     
-    // Game configuration accessed directly from WASM-cached Game proto
-    
-    // UI state - gameLog is now handled by GameLogPanel
-    
-    // Move execution state
-    private selectedUnitCoord: { q: number, r: number } | null = null;
-    private availableMovementOptions: MoveOption[] = [];
-    private isProcessingMove: boolean = false;
-
     // =============================================================================
     // LCMComponent Interface Implementation
     // =============================================================================
@@ -100,7 +86,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         
         // Create child components
         this.createComponents();
-        
+
         this.updateGameStatusBanner('Game Loading...');
 
         await this.loadWASM() // kick off loading
@@ -113,6 +99,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             this.unitStatsPanel,
             this.damageDistributionPanel,
             this.gameLogPanel,
+            this.buildOptionsModal,
         ]
     }
 
@@ -136,11 +123,15 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
             if (this.turnOptionsPanel) {
                 this.turnOptionsPanel.setTheme(theme);
             }
+            if (this.buildOptionsModal) {
+                this.buildOptionsModal.setTheme(theme);
+            }
         }
 
         // Set presenter client on components so they can call presenter directly
         this.gameScene.gameViewPresenterClient = this.gameViewPresenterClient;
         this.turnOptionsPanel.gameViewPresenterClient = this.gameViewPresenterClient;
+        this.buildOptionsModal.gameViewPresenterClient = this.gameViewPresenterClient;
     }
 
     /**
@@ -249,6 +240,13 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private createComponents(): void {
         // ✅ Create shared World component first (subscribes first to server-changes)
         this.world = new World(this.eventBus, 'Game World');
+
+        // Create BuildOptionsModal (separate from DockView)
+        const modalElement = document.getElementById('build-options-modal');
+        if (!modalElement) {
+            throw new Error('GameViewerPage: build-options-modal element not found');
+        }
+        this.buildOptionsModal = new BuildOptionsModal(modalElement, this.eventBus, true);
 
         // Initialize DockView layout
         this.initializeDockView();
@@ -771,6 +769,20 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     this.turnOptionsPanel.innerHTML = request.innerHtml
     // Hydrate theme images and setup click handlers after Go template renders HTML
     await this.turnOptionsPanel.hydrateThemeImages()
+    return {}
+  }
+
+  async showBuildOptions(request: ShowBuildOptionsRequest): Promise<ShowBuildOptionsResponse> {
+    console.log("showBuildOptions called on the browser:", request);
+
+    if (request.hide) {
+      // Hide the modal
+      this.buildOptionsModal.hide();
+    } else {
+      // Show the modal with the rendered content and tile coordinates
+      await this.buildOptionsModal.show(request.innerHtml, request.q, request.r);
+    }
+
     return {}
   }
 

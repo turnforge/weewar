@@ -24,6 +24,7 @@ const (
 	GameViewPresenter_SceneClicked_FullMethodName         = "/weewar.v1.GameViewPresenter/SceneClicked"
 	GameViewPresenter_TurnOptionClicked_FullMethodName    = "/weewar.v1.GameViewPresenter/TurnOptionClicked"
 	GameViewPresenter_EndTurnButtonClicked_FullMethodName = "/weewar.v1.GameViewPresenter/EndTurnButtonClicked"
+	GameViewPresenter_BuildOptionClicked_FullMethodName   = "/weewar.v1.GameViewPresenter/BuildOptionClicked"
 )
 
 // GameViewPresenterClient is the client API for GameViewPresenter service.
@@ -60,6 +61,9 @@ type GameViewPresenterClient interface {
 	// *
 	// Called when user clicked the EndTurn button
 	EndTurnButtonClicked(ctx context.Context, in *EndTurnButtonClickedRequest, opts ...grpc.CallOption) (*EndTurnButtonClickedResponse, error)
+	// *
+	// Called when a build option is clicked in the BuildOptionsModal
+	BuildOptionClicked(ctx context.Context, in *BuildOptionClickedRequest, opts ...grpc.CallOption) (*BuildOptionClickedResponse, error)
 }
 
 type gameViewPresenterClient struct {
@@ -110,6 +114,16 @@ func (c *gameViewPresenterClient) EndTurnButtonClicked(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *gameViewPresenterClient) BuildOptionClicked(ctx context.Context, in *BuildOptionClickedRequest, opts ...grpc.CallOption) (*BuildOptionClickedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BuildOptionClickedResponse)
+	err := c.cc.Invoke(ctx, GameViewPresenter_BuildOptionClicked_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameViewPresenterServer is the server API for GameViewPresenter service.
 // All implementations should embed UnimplementedGameViewPresenterServer
 // for forward compatibility.
@@ -144,6 +158,9 @@ type GameViewPresenterServer interface {
 	// *
 	// Called when user clicked the EndTurn button
 	EndTurnButtonClicked(context.Context, *EndTurnButtonClickedRequest) (*EndTurnButtonClickedResponse, error)
+	// *
+	// Called when a build option is clicked in the BuildOptionsModal
+	BuildOptionClicked(context.Context, *BuildOptionClickedRequest) (*BuildOptionClickedResponse, error)
 }
 
 // UnimplementedGameViewPresenterServer should be embedded to have
@@ -164,6 +181,9 @@ func (UnimplementedGameViewPresenterServer) TurnOptionClicked(context.Context, *
 }
 func (UnimplementedGameViewPresenterServer) EndTurnButtonClicked(context.Context, *EndTurnButtonClickedRequest) (*EndTurnButtonClickedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndTurnButtonClicked not implemented")
+}
+func (UnimplementedGameViewPresenterServer) BuildOptionClicked(context.Context, *BuildOptionClickedRequest) (*BuildOptionClickedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuildOptionClicked not implemented")
 }
 func (UnimplementedGameViewPresenterServer) testEmbeddedByValue() {}
 
@@ -257,6 +277,24 @@ func _GameViewPresenter_EndTurnButtonClicked_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameViewPresenter_BuildOptionClicked_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BuildOptionClickedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewPresenterServer).BuildOptionClicked(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewPresenter_BuildOptionClicked_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewPresenterServer).BuildOptionClicked(ctx, req.(*BuildOptionClickedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameViewPresenter_ServiceDesc is the grpc.ServiceDesc for GameViewPresenter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -279,6 +317,10 @@ var GameViewPresenter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EndTurnButtonClicked",
 			Handler:    _GameViewPresenter_EndTurnButtonClicked_Handler,
+		},
+		{
+			MethodName: "BuildOptionClicked",
+			Handler:    _GameViewPresenter_BuildOptionClicked_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -191,7 +191,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 							if unitDef.Coins <= playerCoins {
 								options = append(options, &v1.GameOption{
 									OptionType: &v1.GameOption_Build{
-										Build: &v1.BuildUnitOption{
+										Build: &v1.BuildUnitAction{
 											Q:        req.Q,
 											R:        req.R,
 											UnitType: unitTypeID,
@@ -227,7 +227,7 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 		if len(allowedActions) == 0 {
 			options = append(options, &v1.GameOption{
 				OptionType: &v1.GameOption_EndTurn{
-					EndTurn: &v1.EndTurnOption{},
+					EndTurn: &v1.EndTurnAction{},
 				},
 			})
 		} else {
@@ -242,26 +242,23 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 					// Create move options from AllPaths
 					for key, edge := range allPaths.Edges {
-						// Create ready-to-use MoveUnitAction
-						moveAction := &v1.MoveUnitAction{
-							FromQ: req.Q,
-							FromR: req.R,
-							ToQ:   edge.ToQ,
-							ToR:   edge.ToR,
-						}
-
 						path, err := ReconstructPath(allPaths, edge.ToQ, edge.ToR)
 						if err != nil {
 							panic(err)
 						}
+
+						// Create ready-to-use MoveUnitAction
+						moveAction := &v1.MoveUnitAction{
+							FromQ:             req.Q,
+							FromR:             req.R,
+							ToQ:               edge.ToQ,
+							ToR:               edge.ToR,
+							MovementCost:      edge.TotalCost,
+							ReconstructedPath: path,
+						}
+
 						options = append(options, &v1.GameOption{
-							OptionType: &v1.GameOption_Move{
-								Move: &v1.MoveOption{
-									MovementCost:      edge.TotalCost,
-									Action:            moveAction,
-									ReconstructedPath: path,
-								},
-							},
+							OptionType: &v1.GameOption_Move{Move: moveAction},
 						})
 						_ = key // Using key just to avoid unused variable warning
 					}
@@ -284,22 +281,18 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 							// Create ready-to-use AttackUnitAction
 							attackAction := &v1.AttackUnitAction{
-								AttackerQ: req.Q,
-								AttackerR: req.R,
-								DefenderQ: int32(coord.Q),
-								DefenderR: int32(coord.R),
+								AttackerQ:        req.Q,
+								AttackerR:        req.R,
+								DefenderQ:        int32(coord.Q),
+								DefenderR:        int32(coord.R),
+								TargetUnitType:   targetUnit.UnitType,
+								TargetUnitHealth: targetUnit.AvailableHealth,
+								CanAttack:        true,
+								DamageEstimate:   damageEstimate,
 							}
 
 							options = append(options, &v1.GameOption{
-								OptionType: &v1.GameOption_Attack{
-									Attack: &v1.AttackOption{
-										TargetUnitType:   targetUnit.UnitType,
-										TargetUnitHealth: targetUnit.AvailableHealth,
-										CanAttack:        true,
-										DamageEstimate:   damageEstimate,
-										Action:           attackAction,
-									},
-								},
+								OptionType: &v1.GameOption_Attack{Attack: attackAction},
 							})
 						}
 					}
@@ -308,26 +301,6 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 			// TODO: Add capture building options if "capture" is allowed
 			// TODO: Add build unit options if "build" is allowed
-		}
-
-		// Only add the endturn option if unit belongs to current player
-		if unit.Player == rtGame.CurrentPlayer {
-			options = append(options, &v1.GameOption{
-				OptionType: &v1.GameOption_EndTurn{
-					EndTurn: &v1.EndTurnOption{},
-				},
-			})
-		}
-	} else if tile != nil {
-		// No unit present - show end turn only if:
-		// - tile is not owned (player == 0), OR
-		// - tile is owned by current player
-		if tile.Player == 0 || tile.Player == rtGame.CurrentPlayer {
-			options = append(options, &v1.GameOption{
-				OptionType: &v1.GameOption_EndTurn{
-					EndTurn: &v1.EndTurnOption{},
-				},
-			})
 		}
 	}
 

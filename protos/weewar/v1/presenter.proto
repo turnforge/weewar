@@ -63,6 +63,16 @@ service GameViewPresenter {
       body: "*",
     };
   }
+
+  /**
+   * Called when a build option is clicked in the BuildOptionsModal
+   */
+  rpc BuildOptionClicked(BuildOptionClickedRequest) returns (BuildOptionClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:clicked:buildOption/{game_id}",
+      body: "*",
+    };
+  }
 }
 
 // Called when a turn option is clicked in TurnOptionsPanel
@@ -102,6 +112,17 @@ message EndTurnButtonClickedResponse {
   string game_id = 1;
 }
 
+// Called when a build option is clicked in BuildOptionsModal
+message BuildOptionClickedRequest {
+  string game_id = 1;
+  int32 q = 2;              // Q coordinate of the tile where unit is being built
+  int32 r = 3;              // R coordinate of the tile where unit is being built
+  int32 unit_type = 4;     // Type of unit being built (e.g., "soldier_basic")
+}
+
+// Response of a build option click
+message BuildOptionClickedResponse {
+}
 
 // Called when the end turn button was clicked
 message InitializeGameRequest {

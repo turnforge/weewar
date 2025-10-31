@@ -85,6 +85,9 @@ func (exports *Weewar_v1ServicesExports) RegisterAPI() {
 			"endTurnButtonClicked": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gameViewPresenterEndTurnButtonClicked(this, args)
 			}),
+			"buildOptionClicked": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gameViewPresenterBuildOptionClicked(this, args)
+			}),
 		},
 		"usersService": map[string]interface{}{
 			"createUser": js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -853,6 +856,55 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterEndTurnButtonClicked(t
 
 	// Call service method
 	resp, err := exports.GameViewPresenter.EndTurnButtonClicked(ctx, req)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: true,  // Emit zero values to avoid undefined in JavaScript
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// gameViewPresenterBuildOptionClicked handles the BuildOptionClicked method for GameViewPresenter
+func (exports *Weewar_v1ServicesExports) gameViewPresenterBuildOptionClicked(this js.Value, args []js.Value) any {
+	if exports.GameViewPresenter == nil {
+		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return createJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return createJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &weewarv1.BuildOptionClickedRequest{}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.GameViewPresenter.BuildOptionClicked(ctx, req)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

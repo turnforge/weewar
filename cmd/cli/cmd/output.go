@@ -103,7 +103,7 @@ func FormatOptions(pc *PresenterContext, position string) string {
 		switch opt := option.OptionType.(type) {
 		case *v1.GameOption_Move:
 			moveOpt := opt.Move
-			targetCoord := services.CoordFromInt32(moveOpt.Action.ToQ, moveOpt.Action.ToR)
+			targetCoord := services.CoordFromInt32(moveOpt.ToQ, moveOpt.ToR)
 			sb.WriteString(fmt.Sprintf("%d. move to %s (cost: %f)\n",
 				i+1, targetCoord.String(), moveOpt.MovementCost))
 
@@ -115,7 +115,7 @@ func FormatOptions(pc *PresenterContext, position string) string {
 
 		case *v1.GameOption_Attack:
 			attackOpt := opt.Attack
-			targetCoord := services.CoordFromInt32(attackOpt.Action.DefenderQ, attackOpt.Action.DefenderR)
+			targetCoord := services.CoordFromInt32(attackOpt.DefenderQ, attackOpt.DefenderR)
 			sb.WriteString(fmt.Sprintf("%d. attack %s (damage est: %d)\n",
 				i+1, targetCoord.String(), attackOpt.DamageEstimate))
 

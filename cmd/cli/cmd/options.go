@@ -85,15 +85,15 @@ func runOptions(cmd *cobra.Command, args []string) error {
 				case *v1.GameOption_Move:
 					options = append(options, map[string]any{
 						"type":          "move",
-						"q":             opt.Move.Action.ToQ,
-						"r":             opt.Move.Action.ToR,
+						"q":             opt.Move.ToQ,
+						"r":             opt.Move.ToR,
 						"movement_cost": opt.Move.MovementCost,
 					})
 				case *v1.GameOption_Attack:
 					options = append(options, map[string]any{
 						"type":            "attack",
-						"q":               opt.Attack.Action.DefenderQ,
-						"r":               opt.Attack.Action.DefenderR,
+						"q":               opt.Attack.DefenderQ,
+						"r":               opt.Attack.DefenderR,
 						"damage_estimate": opt.Attack.DamageEstimate,
 					})
 				case *v1.GameOption_Build:

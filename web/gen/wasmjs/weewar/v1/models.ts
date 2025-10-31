@@ -1,7 +1,7 @@
 import { FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
 
 
-import { User as UserInterface, Pagination as PaginationInterface, PaginationResponse as PaginationResponseInterface, World as WorldInterface, WorldData as WorldDataInterface, Tile as TileInterface, Unit as UnitInterface, AttackRecord as AttackRecordInterface, TerrainDefinition as TerrainDefinitionInterface, UnitDefinition as UnitDefinitionInterface, TerrainUnitProperties as TerrainUnitPropertiesInterface, UnitUnitProperties as UnitUnitPropertiesInterface, DamageDistribution as DamageDistributionInterface, DamageRange as DamageRangeInterface, RulesEngine as RulesEngineInterface, Game as GameInterface, GameConfiguration as GameConfigurationInterface, GamePlayer as GamePlayerInterface, GameTeam as GameTeamInterface, GameSettings as GameSettingsInterface, GameState as GameStateInterface, GameMoveHistory as GameMoveHistoryInterface, GameMoveGroup as GameMoveGroupInterface, GameMove as GameMoveInterface, GameMoveResult as GameMoveResultInterface, MoveUnitAction as MoveUnitActionInterface, AttackUnitAction as AttackUnitActionInterface, EndTurnAction as EndTurnActionInterface, WorldChange as WorldChangeInterface, UnitMovedChange as UnitMovedChangeInterface, UnitDamagedChange as UnitDamagedChangeInterface, UnitKilledChange as UnitKilledChangeInterface, PlayerChangedChange as PlayerChangedChangeInterface, GameInfo as GameInfoInterface, ListGamesRequest as ListGamesRequestInterface, ListGamesResponse as ListGamesResponseInterface, GetGameRequest as GetGameRequestInterface, GetGameResponse as GetGameResponseInterface, GetGameContentRequest as GetGameContentRequestInterface, GetGameContentResponse as GetGameContentResponseInterface, UpdateGameRequest as UpdateGameRequestInterface, UpdateGameResponse as UpdateGameResponseInterface, DeleteGameRequest as DeleteGameRequestInterface, DeleteGameResponse as DeleteGameResponseInterface, GetGamesRequest as GetGamesRequestInterface, GetGamesResponse as GetGamesResponseInterface, CreateGameRequest as CreateGameRequestInterface, CreateGameResponse as CreateGameResponseInterface, ProcessMovesRequest as ProcessMovesRequestInterface, ProcessMovesResponse as ProcessMovesResponseInterface, GetGameStateRequest as GetGameStateRequestInterface, GetGameStateResponse as GetGameStateResponseInterface, ListMovesRequest as ListMovesRequestInterface, ListMovesResponse as ListMovesResponseInterface, GetOptionsAtRequest as GetOptionsAtRequestInterface, GetOptionsAtResponse as GetOptionsAtResponseInterface, AllPaths as AllPathsInterface, PathEdge as PathEdgeInterface, Path as PathInterface, GameOption as GameOptionInterface, EndTurnOption as EndTurnOptionInterface, MoveOption as MoveOptionInterface, AttackOption as AttackOptionInterface, BuildUnitOption as BuildUnitOptionInterface, CaptureBuildingOption as CaptureBuildingOptionInterface, SimulateAttackRequest as SimulateAttackRequestInterface, SimulateAttackResponse as SimulateAttackResponseInterface, EmptyRequest as EmptyRequestInterface, EmptyResponse as EmptyResponseInterface, SetContentRequest as SetContentRequestInterface, SetContentResponse as SetContentResponseInterface, ShowBuildOptionsRequest as ShowBuildOptionsRequestInterface, ShowBuildOptionsResponse as ShowBuildOptionsResponseInterface, LogMessageRequest as LogMessageRequestInterface, LogMessageResponse as LogMessageResponseInterface, SetGameStateRequest as SetGameStateRequestInterface, SetGameStateResponse as SetGameStateResponseInterface, UpdateGameStatusRequest as UpdateGameStatusRequestInterface, UpdateGameStatusResponse as UpdateGameStatusResponseInterface, SetTileAtRequest as SetTileAtRequestInterface, SetTileAtResponse as SetTileAtResponseInterface, SetUnitAtRequest as SetUnitAtRequestInterface, SetUnitAtResponse as SetUnitAtResponseInterface, RemoveTileAtRequest as RemoveTileAtRequestInterface, RemoveTileAtResponse as RemoveTileAtResponseInterface, RemoveUnitAtRequest as RemoveUnitAtRequestInterface, RemoveUnitAtResponse as RemoveUnitAtResponseInterface, ShowHighlightsRequest as ShowHighlightsRequestInterface, ShowHighlightsResponse as ShowHighlightsResponseInterface, HighlightSpec as HighlightSpecInterface, ClearHighlightsRequest as ClearHighlightsRequestInterface, ClearHighlightsResponse as ClearHighlightsResponseInterface, ShowPathRequest as ShowPathRequestInterface, ShowPathResponse as ShowPathResponseInterface, ClearPathsRequest as ClearPathsRequestInterface, ClearPathsResponse as ClearPathsResponseInterface, MoveUnitAnimationRequest as MoveUnitAnimationRequestInterface, MoveUnitAnimationResponse as MoveUnitAnimationResponseInterface, HexCoord as HexCoordInterface, ShowAttackEffectRequest as ShowAttackEffectRequestInterface, SplashTarget as SplashTargetInterface, ShowAttackEffectResponse as ShowAttackEffectResponseInterface, ShowHealEffectRequest as ShowHealEffectRequestInterface, ShowHealEffectResponse as ShowHealEffectResponseInterface, ShowCaptureEffectRequest as ShowCaptureEffectRequestInterface, ShowCaptureEffectResponse as ShowCaptureEffectResponseInterface, SetUnitAtAnimationRequest as SetUnitAtAnimationRequestInterface, SetUnitAtAnimationResponse as SetUnitAtAnimationResponseInterface, RemoveUnitAtAnimationRequest as RemoveUnitAtAnimationRequestInterface, RemoveUnitAtAnimationResponse as RemoveUnitAtAnimationResponseInterface, TurnOptionClickedRequest as TurnOptionClickedRequestInterface, TurnOptionClickedResponse as TurnOptionClickedResponseInterface, SceneClickedRequest as SceneClickedRequestInterface, SceneClickedResponse as SceneClickedResponseInterface, EndTurnButtonClickedRequest as EndTurnButtonClickedRequestInterface, EndTurnButtonClickedResponse as EndTurnButtonClickedResponseInterface, InitializeGameRequest as InitializeGameRequestInterface, InitializeGameResponse as InitializeGameResponseInterface, ThemeInfo as ThemeInfoInterface, UnitMapping as UnitMappingInterface, TerrainMapping as TerrainMappingInterface, ThemeManifest as ThemeManifestInterface, PlayerColor as PlayerColorInterface, AssetResult as AssetResultInterface, UserInfo as UserInfoInterface, ListUsersRequest as ListUsersRequestInterface, ListUsersResponse as ListUsersResponseInterface, GetUserRequest as GetUserRequestInterface, GetUserResponse as GetUserResponseInterface, GetUserContentRequest as GetUserContentRequestInterface, GetUserContentResponse as GetUserContentResponseInterface, UpdateUserRequest as UpdateUserRequestInterface, UpdateUserResponse as UpdateUserResponseInterface, DeleteUserRequest as DeleteUserRequestInterface, DeleteUserResponse as DeleteUserResponseInterface, GetUsersRequest as GetUsersRequestInterface, GetUsersResponse as GetUsersResponseInterface, CreateUserRequest as CreateUserRequestInterface, CreateUserResponse as CreateUserResponseInterface, WorldInfo as WorldInfoInterface, ListWorldsRequest as ListWorldsRequestInterface, ListWorldsResponse as ListWorldsResponseInterface, GetWorldRequest as GetWorldRequestInterface, GetWorldResponse as GetWorldResponseInterface, UpdateWorldRequest as UpdateWorldRequestInterface, UpdateWorldResponse as UpdateWorldResponseInterface, DeleteWorldRequest as DeleteWorldRequestInterface, DeleteWorldResponse as DeleteWorldResponseInterface, GetWorldsRequest as GetWorldsRequestInterface, GetWorldsResponse as GetWorldsResponseInterface, CreateWorldRequest as CreateWorldRequestInterface, CreateWorldResponse as CreateWorldResponseInterface, GameStatus, PathDirection, Type } from "./interfaces";
+import { User as UserInterface, Pagination as PaginationInterface, PaginationResponse as PaginationResponseInterface, World as WorldInterface, WorldData as WorldDataInterface, Tile as TileInterface, Unit as UnitInterface, AttackRecord as AttackRecordInterface, TerrainDefinition as TerrainDefinitionInterface, UnitDefinition as UnitDefinitionInterface, TerrainUnitProperties as TerrainUnitPropertiesInterface, UnitUnitProperties as UnitUnitPropertiesInterface, DamageDistribution as DamageDistributionInterface, DamageRange as DamageRangeInterface, RulesEngine as RulesEngineInterface, Game as GameInterface, GameConfiguration as GameConfigurationInterface, GamePlayer as GamePlayerInterface, GameTeam as GameTeamInterface, GameSettings as GameSettingsInterface, GameState as GameStateInterface, GameMoveHistory as GameMoveHistoryInterface, GameMoveGroup as GameMoveGroupInterface, GameMove as GameMoveInterface, GameMoveResult as GameMoveResultInterface, MoveUnitAction as MoveUnitActionInterface, AttackUnitAction as AttackUnitActionInterface, BuildUnitAction as BuildUnitActionInterface, CaptureBuildingAction as CaptureBuildingActionInterface, EndTurnAction as EndTurnActionInterface, WorldChange as WorldChangeInterface, UnitMovedChange as UnitMovedChangeInterface, UnitDamagedChange as UnitDamagedChangeInterface, UnitKilledChange as UnitKilledChangeInterface, PlayerChangedChange as PlayerChangedChangeInterface, AllPaths as AllPathsInterface, PathEdge as PathEdgeInterface, Path as PathInterface, GameInfo as GameInfoInterface, ListGamesRequest as ListGamesRequestInterface, ListGamesResponse as ListGamesResponseInterface, GetGameRequest as GetGameRequestInterface, GetGameResponse as GetGameResponseInterface, GetGameContentRequest as GetGameContentRequestInterface, GetGameContentResponse as GetGameContentResponseInterface, UpdateGameRequest as UpdateGameRequestInterface, UpdateGameResponse as UpdateGameResponseInterface, DeleteGameRequest as DeleteGameRequestInterface, DeleteGameResponse as DeleteGameResponseInterface, GetGamesRequest as GetGamesRequestInterface, GetGamesResponse as GetGamesResponseInterface, CreateGameRequest as CreateGameRequestInterface, CreateGameResponse as CreateGameResponseInterface, ProcessMovesRequest as ProcessMovesRequestInterface, ProcessMovesResponse as ProcessMovesResponseInterface, GetGameStateRequest as GetGameStateRequestInterface, GetGameStateResponse as GetGameStateResponseInterface, ListMovesRequest as ListMovesRequestInterface, ListMovesResponse as ListMovesResponseInterface, GetOptionsAtRequest as GetOptionsAtRequestInterface, GetOptionsAtResponse as GetOptionsAtResponseInterface, GameOption as GameOptionInterface, SimulateAttackRequest as SimulateAttackRequestInterface, SimulateAttackResponse as SimulateAttackResponseInterface, EmptyRequest as EmptyRequestInterface, EmptyResponse as EmptyResponseInterface, SetContentRequest as SetContentRequestInterface, SetContentResponse as SetContentResponseInterface, ShowBuildOptionsRequest as ShowBuildOptionsRequestInterface, ShowBuildOptionsResponse as ShowBuildOptionsResponseInterface, LogMessageRequest as LogMessageRequestInterface, LogMessageResponse as LogMessageResponseInterface, SetGameStateRequest as SetGameStateRequestInterface, SetGameStateResponse as SetGameStateResponseInterface, UpdateGameStatusRequest as UpdateGameStatusRequestInterface, UpdateGameStatusResponse as UpdateGameStatusResponseInterface, SetTileAtRequest as SetTileAtRequestInterface, SetTileAtResponse as SetTileAtResponseInterface, SetUnitAtRequest as SetUnitAtRequestInterface, SetUnitAtResponse as SetUnitAtResponseInterface, RemoveTileAtRequest as RemoveTileAtRequestInterface, RemoveTileAtResponse as RemoveTileAtResponseInterface, RemoveUnitAtRequest as RemoveUnitAtRequestInterface, RemoveUnitAtResponse as RemoveUnitAtResponseInterface, ShowHighlightsRequest as ShowHighlightsRequestInterface, ShowHighlightsResponse as ShowHighlightsResponseInterface, HighlightSpec as HighlightSpecInterface, ClearHighlightsRequest as ClearHighlightsRequestInterface, ClearHighlightsResponse as ClearHighlightsResponseInterface, ShowPathRequest as ShowPathRequestInterface, ShowPathResponse as ShowPathResponseInterface, ClearPathsRequest as ClearPathsRequestInterface, ClearPathsResponse as ClearPathsResponseInterface, MoveUnitAnimationRequest as MoveUnitAnimationRequestInterface, MoveUnitAnimationResponse as MoveUnitAnimationResponseInterface, HexCoord as HexCoordInterface, ShowAttackEffectRequest as ShowAttackEffectRequestInterface, SplashTarget as SplashTargetInterface, ShowAttackEffectResponse as ShowAttackEffectResponseInterface, ShowHealEffectRequest as ShowHealEffectRequestInterface, ShowHealEffectResponse as ShowHealEffectResponseInterface, ShowCaptureEffectRequest as ShowCaptureEffectRequestInterface, ShowCaptureEffectResponse as ShowCaptureEffectResponseInterface, SetUnitAtAnimationRequest as SetUnitAtAnimationRequestInterface, SetUnitAtAnimationResponse as SetUnitAtAnimationResponseInterface, RemoveUnitAtAnimationRequest as RemoveUnitAtAnimationRequestInterface, RemoveUnitAtAnimationResponse as RemoveUnitAtAnimationResponseInterface, TurnOptionClickedRequest as TurnOptionClickedRequestInterface, TurnOptionClickedResponse as TurnOptionClickedResponseInterface, SceneClickedRequest as SceneClickedRequestInterface, SceneClickedResponse as SceneClickedResponseInterface, EndTurnButtonClickedRequest as EndTurnButtonClickedRequestInterface, EndTurnButtonClickedResponse as EndTurnButtonClickedResponseInterface, BuildOptionClickedRequest as BuildOptionClickedRequestInterface, BuildOptionClickedResponse as BuildOptionClickedResponseInterface, InitializeGameRequest as InitializeGameRequestInterface, InitializeGameResponse as InitializeGameResponseInterface, ThemeInfo as ThemeInfoInterface, UnitMapping as UnitMappingInterface, TerrainMapping as TerrainMappingInterface, ThemeManifest as ThemeManifestInterface, PlayerColor as PlayerColorInterface, AssetResult as AssetResultInterface, UserInfo as UserInfoInterface, ListUsersRequest as ListUsersRequestInterface, ListUsersResponse as ListUsersResponseInterface, GetUserRequest as GetUserRequestInterface, GetUserResponse as GetUserResponseInterface, GetUserContentRequest as GetUserContentRequestInterface, GetUserContentResponse as GetUserContentResponseInterface, UpdateUserRequest as UpdateUserRequestInterface, UpdateUserResponse as UpdateUserResponseInterface, DeleteUserRequest as DeleteUserRequestInterface, DeleteUserResponse as DeleteUserResponseInterface, GetUsersRequest as GetUsersRequestInterface, GetUsersResponse as GetUsersResponseInterface, CreateUserRequest as CreateUserRequestInterface, CreateUserResponse as CreateUserResponseInterface, WorldInfo as WorldInfoInterface, ListWorldsRequest as ListWorldsRequestInterface, ListWorldsResponse as ListWorldsResponseInterface, GetWorldRequest as GetWorldRequestInterface, GetWorldResponse as GetWorldResponseInterface, UpdateWorldRequest as UpdateWorldRequestInterface, UpdateWorldResponse as UpdateWorldResponseInterface, DeleteWorldRequest as DeleteWorldRequestInterface, DeleteWorldResponse as DeleteWorldResponseInterface, GetWorldsRequest as GetWorldsRequestInterface, GetWorldsResponse as GetWorldsResponseInterface, CreateWorldRequest as CreateWorldRequestInterface, CreateWorldResponse as CreateWorldResponseInterface, GameStatus, PathDirection, Type } from "./interfaces";
 import { Weewar_v1Deserializer } from "./deserializer";
 
 
@@ -572,6 +572,8 @@ export class GamePlayer implements GamePlayerInterface {
   name: string = "";
   /** Whether play is still in the game - can this just be inferred? */
   isActive: boolean = false;
+  /** How many coins the player started off with */
+  startingCoins: number = 0;
   /** Player's current money/coins balance for building units */
   coins: number = 0;
 
@@ -750,6 +752,7 @@ export class GameMove implements GameMoveInterface {
   moveUnit?: MoveUnitAction;
   attackUnit?: AttackUnitAction;
   endTurn?: EndTurnAction;
+  buildUnit?: BuildUnitAction;
 
   /**
    * Create and deserialize an instance from raw data
@@ -806,6 +809,10 @@ export class MoveUnitAction implements MoveUnitActionInterface {
   fromR: number = 0;
   toQ: number = 0;
   toR: number = 0;
+  /** Optional fields that can be used for showing move options as well as debugging */
+  movementCost: number = 0;
+  /** Debug fields */
+  reconstructedPath?: Path;
 
   /**
    * Create and deserialize an instance from raw data
@@ -832,6 +839,11 @@ export class AttackUnitAction implements AttackUnitActionInterface {
   attackerR: number = 0;
   defenderQ: number = 0;
   defenderR: number = 0;
+  /** Optional fields for presenting during "options" and debugging */
+  targetUnitType: number = 0;
+  targetUnitHealth: number = 0;
+  canAttack: boolean = false;
+  damageEstimate: number = 0;
 
   /**
    * Create and deserialize an instance from raw data
@@ -840,6 +852,57 @@ export class AttackUnitAction implements AttackUnitActionInterface {
    */
   static from(data: any) {
     return Weewar_v1Deserializer.from<AttackUnitAction>(AttackUnitAction.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * *
+ An action to build a unit (at a city tile)
+ */
+export class BuildUnitAction implements BuildUnitActionInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.BuildUnitAction";
+
+  q: number = 0;
+  r: number = 0;
+  unitType: number = 0;
+  cost: number = 0;
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized BuildUnitAction instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<BuildUnitAction>(BuildUnitAction.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * *
+ A move where a unit can capture a building
+ */
+export class CaptureBuildingAction implements CaptureBuildingActionInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.CaptureBuildingAction";
+
+  q: number = 0;
+  r: number = 0;
+  tileType: number = 0;
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized CaptureBuildingAction instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<CaptureBuildingAction>(CaptureBuildingAction.MESSAGE_TYPE, data);
   }
 }
 
@@ -992,6 +1055,90 @@ export class PlayerChangedChange implements PlayerChangedChangeInterface {
    */
   static from(data: any) {
     return Weewar_v1Deserializer.from<PlayerChangedChange>(PlayerChangedChange.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * Compact representation of all reachable paths from a source
+ */
+export class AllPaths implements AllPathsInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.AllPaths";
+
+  /** Starting coordinate for all paths */
+  sourceQ: number = 0;
+  sourceR: number = 0;
+  /** Map of edges: key is "toQ,toR" for quick parent lookup
+ Each edge represents the optimal way to reach 'to' from its parent */
+  edges: Record<string, PathEdge> = {};
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized AllPaths instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<AllPaths>(AllPaths.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * A single edge in a path with movement details
+ */
+export class PathEdge implements PathEdgeInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.PathEdge";
+
+  fromQ: number = 0;
+  fromR: number = 0;
+  toQ: number = 0;
+  toR: number = 0;
+  movementCost: number = 0;
+  totalCost: number = 0;
+  terrainType: string = "";
+  explanation: string = "";
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized PathEdge instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<PathEdge>(PathEdge.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * Full path from source to destination (constructed on-demand from AllPaths)
+ */
+export class Path implements PathInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.Path";
+
+  /** Edges in order from source to destination */
+  edges: PathEdge[] = [];
+  /** len(directions) = len(edges) - 1
+ and directions[i] = direction from edge[i - 1] -> edge[i] */
+  directions: PathDirection[] = [];
+  /** Sum of all edge costs */
+  totalCost: number = 0;
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized Path instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<Path>(Path.MESSAGE_TYPE, data);
   }
 }
 
@@ -1595,90 +1742,6 @@ export class GetOptionsAtResponse implements GetOptionsAtResponseInterface {
 
 
 /**
- * Compact representation of all reachable paths from a source
- */
-export class AllPaths implements AllPathsInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.AllPaths";
-
-  /** Starting coordinate for all paths */
-  sourceQ: number = 0;
-  sourceR: number = 0;
-  /** Map of edges: key is "toQ,toR" for quick parent lookup
- Each edge represents the optimal way to reach 'to' from its parent */
-  edges: Record<string, PathEdge> = {};
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized AllPaths instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<AllPaths>(AllPaths.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * A single edge in a path with movement details
- */
-export class PathEdge implements PathEdgeInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.PathEdge";
-
-  fromQ: number = 0;
-  fromR: number = 0;
-  toQ: number = 0;
-  toR: number = 0;
-  movementCost: number = 0;
-  totalCost: number = 0;
-  terrainType: string = "";
-  explanation: string = "";
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized PathEdge instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<PathEdge>(PathEdge.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * Full path from source to destination (constructed on-demand from AllPaths)
- */
-export class Path implements PathInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.Path";
-
-  /** Edges in order from source to destination */
-  edges: PathEdge[] = [];
-  /** len(directions) = len(edges) - 1
- and directions[i] = direction from edge[i - 1] -> edge[i] */
-  directions: PathDirection[] = [];
-  /** Sum of all edge costs */
-  totalCost: number = 0;
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized Path instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<Path>(Path.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
  * *
  A single game option available at a position
  */
@@ -1688,11 +1751,11 @@ export class GameOption implements GameOptionInterface {
    */
   static readonly MESSAGE_TYPE = "weewar.v1.GameOption";
 
-  move?: MoveOption;
-  attack?: AttackOption;
-  endTurn?: EndTurnOption;
-  build?: BuildUnitOption;
-  capture?: CaptureBuildingOption;
+  move?: MoveUnitAction;
+  attack?: AttackUnitAction;
+  build?: BuildUnitAction;
+  capture?: CaptureBuildingAction;
+  endTurn?: EndTurnAction;
 
   /**
    * Create and deserialize an instance from raw data
@@ -1701,135 +1764,6 @@ export class GameOption implements GameOptionInterface {
    */
   static from(data: any) {
     return Weewar_v1Deserializer.from<GameOption>(GameOption.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * *
- Option to end the current turn
- */
-export class EndTurnOption implements EndTurnOptionInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.EndTurnOption";
-
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized EndTurnOption instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<EndTurnOption>(EndTurnOption.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * *
- Option to move to a specific coordinate
- */
-export class MoveOption implements MoveOptionInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.MoveOption";
-
-  movementCost: number = 0;
-  /** Ready-to-use action object for ProcessMoves */
-  action?: MoveUnitAction;
-  /** Debug fields */
-  reconstructedPath?: Path;
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized MoveOption instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<MoveOption>(MoveOption.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * *
- A possible attack target
- */
-export class AttackOption implements AttackOptionInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.AttackOption";
-
-  /** Target unit type and health */
-  targetUnitType: number = 0;
-  targetUnitHealth: number = 0;
-  canAttack: boolean = false;
-  damageEstimate: number = 0;
-  /** Ready-to-use action object for ProcessMoves */
-  action?: AttackUnitAction;
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized AttackOption instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<AttackOption>(AttackOption.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * *
- An option to build a unit (at a city tile)
- */
-export class BuildUnitOption implements BuildUnitOptionInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.BuildUnitOption";
-
-  q: number = 0;
-  r: number = 0;
-  unitType: number = 0;
-  cost: number = 0;
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized BuildUnitOption instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<BuildUnitOption>(BuildUnitOption.MESSAGE_TYPE, data);
-  }
-}
-
-
-/**
- * *
- A move where a unit can capture a building
- */
-export class CaptureBuildingOption implements CaptureBuildingOptionInterface {
-  /**
-   * Fully qualified message type for schema resolution
-   */
-  static readonly MESSAGE_TYPE = "weewar.v1.CaptureBuildingOption";
-
-  q: number = 0;
-  r: number = 0;
-  tileType: number = 0;
-
-  /**
-   * Create and deserialize an instance from raw data
-   * @param data Raw data to deserialize
-   * @returns Deserialized CaptureBuildingOption instance or null if creation failed
-   */
-  static from(data: any) {
-    return Weewar_v1Deserializer.from<CaptureBuildingOption>(CaptureBuildingOption.MESSAGE_TYPE, data);
   }
 }
 
@@ -1984,6 +1918,8 @@ export class ShowBuildOptionsRequest implements ShowBuildOptionsRequestInterface
 
   innerHtml: string = "";
   hide: boolean = false;
+  q: number = 0;
+  r: number = 0;
 
   /**
    * Create and deserialize an instance from raw data
@@ -2367,6 +2303,10 @@ export class HighlightSpec implements HighlightSpecInterface {
   q: number = 0;
   r: number = 0;
   type: string = "";
+  move?: MoveUnitAction;
+  attack?: AttackUnitAction;
+  build?: BuildUnitAction;
+  capture?: CaptureBuildingAction;
 
   /**
    * Create and deserialize an instance from raw data
@@ -2944,6 +2884,52 @@ export class EndTurnButtonClickedResponse implements EndTurnButtonClickedRespons
    */
   static from(data: any) {
     return Weewar_v1Deserializer.from<EndTurnButtonClickedResponse>(EndTurnButtonClickedResponse.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * Called when a build option is clicked in BuildOptionsModal
+ */
+export class BuildOptionClickedRequest implements BuildOptionClickedRequestInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.BuildOptionClickedRequest";
+
+  gameId: string = "";
+  q: number = 0;
+  r: number = 0;
+  unitType: number = 0;
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized BuildOptionClickedRequest instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<BuildOptionClickedRequest>(BuildOptionClickedRequest.MESSAGE_TYPE, data);
+  }
+}
+
+
+/**
+ * Response of a build option click
+ */
+export class BuildOptionClickedResponse implements BuildOptionClickedResponseInterface {
+  /**
+   * Fully qualified message type for schema resolution
+   */
+  static readonly MESSAGE_TYPE = "weewar.v1.BuildOptionClickedResponse";
+
+
+  /**
+   * Create and deserialize an instance from raw data
+   * @param data Raw data to deserialize
+   * @returns Deserialized BuildOptionClickedResponse instance or null if creation failed
+   */
+  static from(data: any) {
+    return Weewar_v1Deserializer.from<BuildOptionClickedResponse>(BuildOptionClickedResponse.MESSAGE_TYPE, data);
   }
 }
 

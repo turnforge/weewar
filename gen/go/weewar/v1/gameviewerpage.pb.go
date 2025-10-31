@@ -181,6 +181,8 @@ type ShowBuildOptionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	InnerHtml     string                 `protobuf:"bytes,1,opt,name=inner_html,json=innerHtml,proto3" json:"inner_html,omitempty"`
 	Hide          bool                   `protobuf:"varint,2,opt,name=hide,proto3" json:"hide,omitempty"`
+	Q             int32                  `protobuf:"varint,3,opt,name=q,proto3" json:"q,omitempty"` // Q coordinate of the tile (for the modal to pass back to presenter)
+	R             int32                  `protobuf:"varint,4,opt,name=r,proto3" json:"r,omitempty"` // R coordinate of the tile (for the modal to pass back to presenter)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -227,6 +229,20 @@ func (x *ShowBuildOptionsRequest) GetHide() bool {
 		return x.Hide
 	}
 	return false
+}
+
+func (x *ShowBuildOptionsRequest) GetQ() int32 {
+	if x != nil {
+		return x.Q
+	}
+	return 0
+}
+
+func (x *ShowBuildOptionsRequest) GetR() int32 {
+	if x != nil {
+		return x.R
+	}
+	return 0
 }
 
 type ShowBuildOptionsResponse struct {
@@ -981,10 +997,17 @@ func (*ShowHighlightsResponse) Descriptor() ([]byte, []int) {
 
 // Specification for a single highlight
 type HighlightSpec struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Q             int32                  `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
-	R             int32                  `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // "selection", "movement", "attack"
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Q     int32                  `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
+	R     int32                  `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
+	Type  string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // "selection", "movement", "attack"
+	// Types that are valid to be assigned to Action:
+	//
+	//	*HighlightSpec_Move
+	//	*HighlightSpec_Attack
+	//	*HighlightSpec_Build
+	//	*HighlightSpec_Capture
+	Action        isHighlightSpec_Action `protobuf_oneof:"action"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1039,6 +1062,77 @@ func (x *HighlightSpec) GetType() string {
 	}
 	return ""
 }
+
+func (x *HighlightSpec) GetAction() isHighlightSpec_Action {
+	if x != nil {
+		return x.Action
+	}
+	return nil
+}
+
+func (x *HighlightSpec) GetMove() *MoveUnitAction {
+	if x != nil {
+		if x, ok := x.Action.(*HighlightSpec_Move); ok {
+			return x.Move
+		}
+	}
+	return nil
+}
+
+func (x *HighlightSpec) GetAttack() *AttackUnitAction {
+	if x != nil {
+		if x, ok := x.Action.(*HighlightSpec_Attack); ok {
+			return x.Attack
+		}
+	}
+	return nil
+}
+
+func (x *HighlightSpec) GetBuild() *BuildUnitAction {
+	if x != nil {
+		if x, ok := x.Action.(*HighlightSpec_Build); ok {
+			return x.Build
+		}
+	}
+	return nil
+}
+
+func (x *HighlightSpec) GetCapture() *CaptureBuildingAction {
+	if x != nil {
+		if x, ok := x.Action.(*HighlightSpec_Capture); ok {
+			return x.Capture
+		}
+	}
+	return nil
+}
+
+type isHighlightSpec_Action interface {
+	isHighlightSpec_Action()
+}
+
+type HighlightSpec_Move struct {
+	Move *MoveUnitAction `protobuf:"bytes,4,opt,name=move,proto3,oneof"`
+}
+
+type HighlightSpec_Attack struct {
+	Attack *AttackUnitAction `protobuf:"bytes,5,opt,name=attack,proto3,oneof"`
+}
+
+type HighlightSpec_Build struct {
+	Build *BuildUnitAction `protobuf:"bytes,6,opt,name=build,proto3,oneof"`
+}
+
+type HighlightSpec_Capture struct {
+	Capture *CaptureBuildingAction `protobuf:"bytes,7,opt,name=capture,proto3,oneof"`
+}
+
+func (*HighlightSpec_Move) isHighlightSpec_Action() {}
+
+func (*HighlightSpec_Attack) isHighlightSpec_Action() {}
+
+func (*HighlightSpec_Build) isHighlightSpec_Action() {}
+
+func (*HighlightSpec_Capture) isHighlightSpec_Action() {}
 
 // Request to clear highlights
 type ClearHighlightsRequest struct {
@@ -2020,11 +2114,13 @@ const file_weewar_v1_gameviewerpage_proto_rawDesc = "" +
 	"\x11SetContentRequest\x12\x1d\n" +
 	"\n" +
 	"inner_html\x18\x01 \x01(\tR\tinnerHtml\"\x14\n" +
-	"\x12SetContentResponse\"L\n" +
+	"\x12SetContentResponse\"h\n" +
 	"\x17ShowBuildOptionsRequest\x12\x1d\n" +
 	"\n" +
 	"inner_html\x18\x01 \x01(\tR\tinnerHtml\x12\x12\n" +
-	"\x04hide\x18\x02 \x01(\bR\x04hide\"\x1a\n" +
+	"\x04hide\x18\x02 \x01(\bR\x04hide\x12\f\n" +
+	"\x01q\x18\x03 \x01(\x05R\x01q\x12\f\n" +
+	"\x01r\x18\x04 \x01(\x05R\x01r\"\x1a\n" +
 	"\x18ShowBuildOptionsResponse\"-\n" +
 	"\x11LogMessageRequest\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"\x14\n" +
@@ -2059,11 +2155,16 @@ const file_weewar_v1_gameviewerpage_proto_rawDesc = "" +
 	"\n" +
 	"highlights\x18\x01 \x03(\v2\x18.weewar.v1.HighlightSpecR\n" +
 	"highlights\"\x18\n" +
-	"\x16ShowHighlightsResponse\"?\n" +
+	"\x16ShowHighlightsResponse\"\xa3\x02\n" +
 	"\rHighlightSpec\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\".\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12/\n" +
+	"\x04move\x18\x04 \x01(\v2\x19.weewar.v1.MoveUnitActionH\x00R\x04move\x125\n" +
+	"\x06attack\x18\x05 \x01(\v2\x1b.weewar.v1.AttackUnitActionH\x00R\x06attack\x122\n" +
+	"\x05build\x18\x06 \x01(\v2\x1a.weewar.v1.BuildUnitActionH\x00R\x05build\x12<\n" +
+	"\acapture\x18\a \x01(\v2 .weewar.v1.CaptureBuildingActionH\x00R\acaptureB\b\n" +
+	"\x06action\".\n" +
 	"\x16ClearHighlightsRequest\x12\x14\n" +
 	"\x05types\x18\x01 \x03(\tR\x05types\"\x19\n" +
 	"\x17ClearHighlightsResponse\"]\n" +
@@ -2203,6 +2304,10 @@ var file_weewar_v1_gameviewerpage_proto_goTypes = []any{
 	(*GameState)(nil),                     // 44: weewar.v1.GameState
 	(*Tile)(nil),                          // 45: weewar.v1.Tile
 	(*Unit)(nil),                          // 46: weewar.v1.Unit
+	(*MoveUnitAction)(nil),                // 47: weewar.v1.MoveUnitAction
+	(*AttackUnitAction)(nil),              // 48: weewar.v1.AttackUnitAction
+	(*BuildUnitAction)(nil),               // 49: weewar.v1.BuildUnitAction
+	(*CaptureBuildingAction)(nil),         // 50: weewar.v1.CaptureBuildingAction
 }
 var file_weewar_v1_gameviewerpage_proto_depIdxs = []int32{
 	43, // 0: weewar.v1.SetGameStateRequest.game:type_name -> weewar.v1.Game
@@ -2210,59 +2315,63 @@ var file_weewar_v1_gameviewerpage_proto_depIdxs = []int32{
 	45, // 2: weewar.v1.SetTileAtRequest.tile:type_name -> weewar.v1.Tile
 	46, // 3: weewar.v1.SetUnitAtRequest.unit:type_name -> weewar.v1.Unit
 	22, // 4: weewar.v1.ShowHighlightsRequest.highlights:type_name -> weewar.v1.HighlightSpec
-	46, // 5: weewar.v1.MoveUnitAnimationRequest.unit:type_name -> weewar.v1.Unit
-	31, // 6: weewar.v1.MoveUnitAnimationRequest.path:type_name -> weewar.v1.HexCoord
-	33, // 7: weewar.v1.ShowAttackEffectRequest.splash_targets:type_name -> weewar.v1.SplashTarget
-	46, // 8: weewar.v1.SetUnitAtAnimationRequest.unit:type_name -> weewar.v1.Unit
-	2,  // 9: weewar.v1.GameViewerPage.SetTurnOptionsContent:input_type -> weewar.v1.SetContentRequest
-	4,  // 10: weewar.v1.GameViewerPage.ShowBuildOptions:input_type -> weewar.v1.ShowBuildOptionsRequest
-	2,  // 11: weewar.v1.GameViewerPage.SetUnitStatsContent:input_type -> weewar.v1.SetContentRequest
-	2,  // 12: weewar.v1.GameViewerPage.SetDamageDistributionContent:input_type -> weewar.v1.SetContentRequest
-	2,  // 13: weewar.v1.GameViewerPage.SetTerrainStatsContent:input_type -> weewar.v1.SetContentRequest
-	8,  // 14: weewar.v1.GameViewerPage.SetGameState:input_type -> weewar.v1.SetGameStateRequest
-	10, // 15: weewar.v1.GameViewerPage.UpdateGameStatus:input_type -> weewar.v1.UpdateGameStatusRequest
-	12, // 16: weewar.v1.GameViewerPage.SetTileAt:input_type -> weewar.v1.SetTileAtRequest
-	14, // 17: weewar.v1.GameViewerPage.SetUnitAt:input_type -> weewar.v1.SetUnitAtRequest
-	16, // 18: weewar.v1.GameViewerPage.RemoveTileAt:input_type -> weewar.v1.RemoveTileAtRequest
-	18, // 19: weewar.v1.GameViewerPage.RemoveUnitAt:input_type -> weewar.v1.RemoveUnitAtRequest
-	20, // 20: weewar.v1.GameViewerPage.ShowHighlights:input_type -> weewar.v1.ShowHighlightsRequest
-	23, // 21: weewar.v1.GameViewerPage.ClearHighlights:input_type -> weewar.v1.ClearHighlightsRequest
-	25, // 22: weewar.v1.GameViewerPage.ShowPath:input_type -> weewar.v1.ShowPathRequest
-	27, // 23: weewar.v1.GameViewerPage.ClearPaths:input_type -> weewar.v1.ClearPathsRequest
-	29, // 24: weewar.v1.GameViewerPage.MoveUnitAnimation:input_type -> weewar.v1.MoveUnitAnimationRequest
-	32, // 25: weewar.v1.GameViewerPage.ShowAttackEffect:input_type -> weewar.v1.ShowAttackEffectRequest
-	35, // 26: weewar.v1.GameViewerPage.ShowHealEffect:input_type -> weewar.v1.ShowHealEffectRequest
-	37, // 27: weewar.v1.GameViewerPage.ShowCaptureEffect:input_type -> weewar.v1.ShowCaptureEffectRequest
-	39, // 28: weewar.v1.GameViewerPage.SetUnitAtAnimation:input_type -> weewar.v1.SetUnitAtAnimationRequest
-	41, // 29: weewar.v1.GameViewerPage.RemoveUnitAtAnimation:input_type -> weewar.v1.RemoveUnitAtAnimationRequest
-	6,  // 30: weewar.v1.GameViewerPage.LogMessage:input_type -> weewar.v1.LogMessageRequest
-	3,  // 31: weewar.v1.GameViewerPage.SetTurnOptionsContent:output_type -> weewar.v1.SetContentResponse
-	5,  // 32: weewar.v1.GameViewerPage.ShowBuildOptions:output_type -> weewar.v1.ShowBuildOptionsResponse
-	3,  // 33: weewar.v1.GameViewerPage.SetUnitStatsContent:output_type -> weewar.v1.SetContentResponse
-	3,  // 34: weewar.v1.GameViewerPage.SetDamageDistributionContent:output_type -> weewar.v1.SetContentResponse
-	3,  // 35: weewar.v1.GameViewerPage.SetTerrainStatsContent:output_type -> weewar.v1.SetContentResponse
-	9,  // 36: weewar.v1.GameViewerPage.SetGameState:output_type -> weewar.v1.SetGameStateResponse
-	11, // 37: weewar.v1.GameViewerPage.UpdateGameStatus:output_type -> weewar.v1.UpdateGameStatusResponse
-	13, // 38: weewar.v1.GameViewerPage.SetTileAt:output_type -> weewar.v1.SetTileAtResponse
-	15, // 39: weewar.v1.GameViewerPage.SetUnitAt:output_type -> weewar.v1.SetUnitAtResponse
-	17, // 40: weewar.v1.GameViewerPage.RemoveTileAt:output_type -> weewar.v1.RemoveTileAtResponse
-	19, // 41: weewar.v1.GameViewerPage.RemoveUnitAt:output_type -> weewar.v1.RemoveUnitAtResponse
-	21, // 42: weewar.v1.GameViewerPage.ShowHighlights:output_type -> weewar.v1.ShowHighlightsResponse
-	24, // 43: weewar.v1.GameViewerPage.ClearHighlights:output_type -> weewar.v1.ClearHighlightsResponse
-	26, // 44: weewar.v1.GameViewerPage.ShowPath:output_type -> weewar.v1.ShowPathResponse
-	28, // 45: weewar.v1.GameViewerPage.ClearPaths:output_type -> weewar.v1.ClearPathsResponse
-	30, // 46: weewar.v1.GameViewerPage.MoveUnitAnimation:output_type -> weewar.v1.MoveUnitAnimationResponse
-	34, // 47: weewar.v1.GameViewerPage.ShowAttackEffect:output_type -> weewar.v1.ShowAttackEffectResponse
-	36, // 48: weewar.v1.GameViewerPage.ShowHealEffect:output_type -> weewar.v1.ShowHealEffectResponse
-	38, // 49: weewar.v1.GameViewerPage.ShowCaptureEffect:output_type -> weewar.v1.ShowCaptureEffectResponse
-	40, // 50: weewar.v1.GameViewerPage.SetUnitAtAnimation:output_type -> weewar.v1.SetUnitAtAnimationResponse
-	42, // 51: weewar.v1.GameViewerPage.RemoveUnitAtAnimation:output_type -> weewar.v1.RemoveUnitAtAnimationResponse
-	7,  // 52: weewar.v1.GameViewerPage.LogMessage:output_type -> weewar.v1.LogMessageResponse
-	31, // [31:53] is the sub-list for method output_type
-	9,  // [9:31] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	47, // 5: weewar.v1.HighlightSpec.move:type_name -> weewar.v1.MoveUnitAction
+	48, // 6: weewar.v1.HighlightSpec.attack:type_name -> weewar.v1.AttackUnitAction
+	49, // 7: weewar.v1.HighlightSpec.build:type_name -> weewar.v1.BuildUnitAction
+	50, // 8: weewar.v1.HighlightSpec.capture:type_name -> weewar.v1.CaptureBuildingAction
+	46, // 9: weewar.v1.MoveUnitAnimationRequest.unit:type_name -> weewar.v1.Unit
+	31, // 10: weewar.v1.MoveUnitAnimationRequest.path:type_name -> weewar.v1.HexCoord
+	33, // 11: weewar.v1.ShowAttackEffectRequest.splash_targets:type_name -> weewar.v1.SplashTarget
+	46, // 12: weewar.v1.SetUnitAtAnimationRequest.unit:type_name -> weewar.v1.Unit
+	2,  // 13: weewar.v1.GameViewerPage.SetTurnOptionsContent:input_type -> weewar.v1.SetContentRequest
+	4,  // 14: weewar.v1.GameViewerPage.ShowBuildOptions:input_type -> weewar.v1.ShowBuildOptionsRequest
+	2,  // 15: weewar.v1.GameViewerPage.SetUnitStatsContent:input_type -> weewar.v1.SetContentRequest
+	2,  // 16: weewar.v1.GameViewerPage.SetDamageDistributionContent:input_type -> weewar.v1.SetContentRequest
+	2,  // 17: weewar.v1.GameViewerPage.SetTerrainStatsContent:input_type -> weewar.v1.SetContentRequest
+	8,  // 18: weewar.v1.GameViewerPage.SetGameState:input_type -> weewar.v1.SetGameStateRequest
+	10, // 19: weewar.v1.GameViewerPage.UpdateGameStatus:input_type -> weewar.v1.UpdateGameStatusRequest
+	12, // 20: weewar.v1.GameViewerPage.SetTileAt:input_type -> weewar.v1.SetTileAtRequest
+	14, // 21: weewar.v1.GameViewerPage.SetUnitAt:input_type -> weewar.v1.SetUnitAtRequest
+	16, // 22: weewar.v1.GameViewerPage.RemoveTileAt:input_type -> weewar.v1.RemoveTileAtRequest
+	18, // 23: weewar.v1.GameViewerPage.RemoveUnitAt:input_type -> weewar.v1.RemoveUnitAtRequest
+	20, // 24: weewar.v1.GameViewerPage.ShowHighlights:input_type -> weewar.v1.ShowHighlightsRequest
+	23, // 25: weewar.v1.GameViewerPage.ClearHighlights:input_type -> weewar.v1.ClearHighlightsRequest
+	25, // 26: weewar.v1.GameViewerPage.ShowPath:input_type -> weewar.v1.ShowPathRequest
+	27, // 27: weewar.v1.GameViewerPage.ClearPaths:input_type -> weewar.v1.ClearPathsRequest
+	29, // 28: weewar.v1.GameViewerPage.MoveUnitAnimation:input_type -> weewar.v1.MoveUnitAnimationRequest
+	32, // 29: weewar.v1.GameViewerPage.ShowAttackEffect:input_type -> weewar.v1.ShowAttackEffectRequest
+	35, // 30: weewar.v1.GameViewerPage.ShowHealEffect:input_type -> weewar.v1.ShowHealEffectRequest
+	37, // 31: weewar.v1.GameViewerPage.ShowCaptureEffect:input_type -> weewar.v1.ShowCaptureEffectRequest
+	39, // 32: weewar.v1.GameViewerPage.SetUnitAtAnimation:input_type -> weewar.v1.SetUnitAtAnimationRequest
+	41, // 33: weewar.v1.GameViewerPage.RemoveUnitAtAnimation:input_type -> weewar.v1.RemoveUnitAtAnimationRequest
+	6,  // 34: weewar.v1.GameViewerPage.LogMessage:input_type -> weewar.v1.LogMessageRequest
+	3,  // 35: weewar.v1.GameViewerPage.SetTurnOptionsContent:output_type -> weewar.v1.SetContentResponse
+	5,  // 36: weewar.v1.GameViewerPage.ShowBuildOptions:output_type -> weewar.v1.ShowBuildOptionsResponse
+	3,  // 37: weewar.v1.GameViewerPage.SetUnitStatsContent:output_type -> weewar.v1.SetContentResponse
+	3,  // 38: weewar.v1.GameViewerPage.SetDamageDistributionContent:output_type -> weewar.v1.SetContentResponse
+	3,  // 39: weewar.v1.GameViewerPage.SetTerrainStatsContent:output_type -> weewar.v1.SetContentResponse
+	9,  // 40: weewar.v1.GameViewerPage.SetGameState:output_type -> weewar.v1.SetGameStateResponse
+	11, // 41: weewar.v1.GameViewerPage.UpdateGameStatus:output_type -> weewar.v1.UpdateGameStatusResponse
+	13, // 42: weewar.v1.GameViewerPage.SetTileAt:output_type -> weewar.v1.SetTileAtResponse
+	15, // 43: weewar.v1.GameViewerPage.SetUnitAt:output_type -> weewar.v1.SetUnitAtResponse
+	17, // 44: weewar.v1.GameViewerPage.RemoveTileAt:output_type -> weewar.v1.RemoveTileAtResponse
+	19, // 45: weewar.v1.GameViewerPage.RemoveUnitAt:output_type -> weewar.v1.RemoveUnitAtResponse
+	21, // 46: weewar.v1.GameViewerPage.ShowHighlights:output_type -> weewar.v1.ShowHighlightsResponse
+	24, // 47: weewar.v1.GameViewerPage.ClearHighlights:output_type -> weewar.v1.ClearHighlightsResponse
+	26, // 48: weewar.v1.GameViewerPage.ShowPath:output_type -> weewar.v1.ShowPathResponse
+	28, // 49: weewar.v1.GameViewerPage.ClearPaths:output_type -> weewar.v1.ClearPathsResponse
+	30, // 50: weewar.v1.GameViewerPage.MoveUnitAnimation:output_type -> weewar.v1.MoveUnitAnimationResponse
+	34, // 51: weewar.v1.GameViewerPage.ShowAttackEffect:output_type -> weewar.v1.ShowAttackEffectResponse
+	36, // 52: weewar.v1.GameViewerPage.ShowHealEffect:output_type -> weewar.v1.ShowHealEffectResponse
+	38, // 53: weewar.v1.GameViewerPage.ShowCaptureEffect:output_type -> weewar.v1.ShowCaptureEffectResponse
+	40, // 54: weewar.v1.GameViewerPage.SetUnitAtAnimation:output_type -> weewar.v1.SetUnitAtAnimationResponse
+	42, // 55: weewar.v1.GameViewerPage.RemoveUnitAtAnimation:output_type -> weewar.v1.RemoveUnitAtAnimationResponse
+	7,  // 56: weewar.v1.GameViewerPage.LogMessage:output_type -> weewar.v1.LogMessageResponse
+	35, // [35:57] is the sub-list for method output_type
+	13, // [13:35] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_gameviewerpage_proto_init() }
@@ -2271,6 +2380,12 @@ func file_weewar_v1_gameviewerpage_proto_init() {
 		return
 	}
 	file_weewar_v1_models_proto_init()
+	file_weewar_v1_gameviewerpage_proto_msgTypes[22].OneofWrappers = []any{
+		(*HighlightSpec_Move)(nil),
+		(*HighlightSpec_Attack)(nil),
+		(*HighlightSpec_Build)(nil),
+		(*HighlightSpec_Capture)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

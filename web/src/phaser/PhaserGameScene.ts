@@ -5,7 +5,7 @@ import { World } from '../World';
 import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer } from './layers/HexHighlightLayer';
 import { EventBus } from '../../lib/EventBus';
 import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/gameViewPresenterClient';
-import { MoveOption, AttackOption } from '../../gen/wasmjs/weewar/v1/interfaces';
+import { MoveUnitAction, AttackUnitAction, HighlightSpec } from '../../gen/wasmjs/weewar/v1/interfaces';
 
 /**
  * PhaserGameScene extends PhaserWorldScene with game-specific interactive features.
@@ -31,8 +31,6 @@ export class PhaserGameScene extends PhaserWorldScene {
     public gameViewPresenterClient: GameViewPresenterClient;
     private selectedUnit: { q: number; r: number; unitData: any } | null = null;
     private gameMode: 'select' | 'move' | 'attack' = 'select';
-    private currentPlayer: number = 1;
-    private isPlayerTurn: boolean = true;
     
     // Layer-based highlight system
     private _selectionHighlightLayer: SelectionHighlightLayer | null = null;
@@ -89,121 +87,6 @@ export class PhaserGameScene extends PhaserWorldScene {
         this._attackHighlightLayer = new AttackHighlightLayer(this, this.tileWidth);
         layerManager.addLayer(this._attackHighlightLayer);
     }
-    
-    /**
-     * Get tile data at specific coordinates (for callback functions)
-     */
-    public getTileAt(q: number, r: number): any {
-        if (!this.world) {
-            return null;
-        }
-        return this.world.getTileAt(q, r);
-    }
-
-    /**
-     * Get unit data at specific coordinates (for callback functions) 
-     */
-    public getUnitAt(q: number, r: number): any {
-        if (!this.world) {
-            return null;
-        }
-        return this.world.getUnitAt(q, r);
-    }
-
-    /**
-     * Check if there's a unit at the specified coordinates
-     */
-    public hasUnitAt(q: number, r: number): boolean {
-        if (!this.world) {
-            return false;
-        }
-        return this.world.getUnitAt(q, r) !== null;
-    }
-
-    /**
-     * Check if there's a tile at the specified coordinates
-     */
-    public hasTileAt(q: number, r: number): boolean {
-        if (!this.world) {
-            return false;
-        }
-        return this.world.getTileAt(q, r) !== null;
-    }
-
-    /**
-     * Handle selection mode clicks
-     */
-    private handleSelectClick(q: number, r: number): void {
-        // Check if there's a unit at this position
-        const unitAtPosition = this.getUnitAt(q, r);
-        
-        if (unitAtPosition) {
-            // Clear previous selection
-            this.clearSelection();
-            
-            // Set new selection (visual will be updated by external callback)
-            this.selectedUnit = {
-                q: q,
-                r: r,
-                unitData: unitAtPosition
-            };
-            
-            // Highlight selected unit
-            this.highlightSelectedUnit(q, r);
-        } else {
-            // Empty tile click in select mode - clear selection
-            this.clearSelection();
-        }
-    }
-
-    /**
-     * Handle movement mode clicks
-     */
-    private handleMoveClick(q: number, r: number): void {
-        if (!this.selectedUnit) {
-            console.warn('[PhaserGameScene] Move click but no unit selected');
-            return;
-        }
-
-        // Check if this is a valid movement target
-        const isValidMove = this.movableCoords.some(coord => coord.q === q && coord.r === r);
-        
-        if (isValidMove) {
-            // External callback will handle the actual move through game engine
-            // We just provide visual feedback here
-            this.showMovePreview(this.selectedUnit.q, this.selectedUnit.r, q, r);
-            
-            // Return to select mode after move attempt
-            this.setGameMode('select');
-        } else {
-            console.warn(`[PhaserGameScene] Invalid move target: Q=${q}, R=${r}`);
-            // Could show visual feedback for invalid move
-        }
-    }
-
-    /**
-     * Handle attack mode clicks
-     */
-    private handleAttackClick(q: number, r: number): void {
-        if (!this.selectedUnit) {
-            console.warn('[PhaserGameScene] Attack click but no unit selected');
-            return;
-        }
-
-        // Check if this is a valid attack target
-        const isValidAttack = this.attackableCoords.some(coord => coord.q === q && coord.r === r);
-        
-        if (isValidAttack) {
-            // External callback will handle the actual attack through game engine
-            // We just provide visual feedback here
-            this.showAttackPreview(this.selectedUnit.q, this.selectedUnit.r, q, r);
-            
-            // Return to select mode after attack attempt
-            this.setGameMode('select');
-        } else {
-            console.warn(`[PhaserGameScene] Invalid attack target: Q=${q}, R=${r}`);
-        }
-    }
 
     /**
      * Set the current game mode
@@ -213,32 +96,6 @@ export class PhaserGameScene extends PhaserWorldScene {
         
         // Update visual indicators based on mode
         this.updateModeVisuals();
-    }
-
-    /**
-     * Set the selected unit and show movement/attack options
-     */
-    public selectUnit(q: number, r: number, movableCoords: Array<{ q: number; r: number }>, attackableCoords: Array<{ q: number; r: number }>): void {
-        const unitData = this.getUnitAt(q, r);
-        if (!unitData) {
-            console.warn(`[PhaserGameScene] No unit found at Q=${q}, R=${r} for selection`);
-            return;
-        }
-
-        // Store selection state
-        this.selectedUnit = { q, r, unitData };
-        this.movableCoords = movableCoords;
-        this.attackableCoords = attackableCoords;
-
-        // Update visuals
-        this.highlightSelectedUnit(q, r);
-        // Convert coordinate objects to MoveOption-like objects for compatibility
-        const moveOptions = movableCoords.map(coord => ({ q: coord.q, r: coord.r, movementCost: 1 }));
-        this.showMovementOptions(moveOptions);
-        this.showAttackOptions(attackableCoords);
-        
-        // Enable distance labels for the selected unit
-        this.setShowUnitDistance(true, { q, r });
     }
 
     /**
@@ -302,68 +159,6 @@ export class PhaserGameScene extends PhaserWorldScene {
     }
 
     /**
-     * Show movement options as green highlights using MoveOption objects
-     */
-    private showMovementOptions(moveOptions: any[]): void {
-        if (this._movementHighlightLayer) {
-            this._movementHighlightLayer.showMovementOptions(moveOptions);
-        } else {
-            console.warn('[PhaserGameScene] Movement highlight layer not available');
-        }
-    }
-
-    /**
-     * Show attack options as red highlights
-     */
-    private showAttackOptions(attackableCoords: Array<{ q: number; r: number }>): void {
-        if (this._attackHighlightLayer) {
-            this._attackHighlightLayer.showAttackOptions(attackableCoords);
-        } else {
-            console.warn('[PhaserGameScene] Attack highlight layer not available');
-        }
-    }
-
-    /**
-     * Show move preview line
-     */
-    private showMovePreview(fromQ: number, fromR: number, toQ: number, toR: number): void {
-        this.clearPathPreview();
-
-        this.pathPreview = this.add.graphics();
-        this.pathPreview.lineStyle(3, 0x00FF00, 0.8); // Green line
-
-        const fromPos = hexToPixel(fromQ, fromR);
-        const toPos = hexToPixel(toQ, toR);
-
-        this.pathPreview.beginPath();
-        this.pathPreview.moveTo(fromPos.x, fromPos.y);
-        this.pathPreview.lineTo(toPos.x, toPos.y);
-        this.pathPreview.strokePath();
-        
-        this.pathPreview.setDepth(15); // Above everything
-    }
-
-    /**
-     * Show attack preview line
-     */
-    private showAttackPreview(fromQ: number, fromR: number, toQ: number, toR: number): void {
-        this.clearPathPreview();
-
-        this.pathPreview = this.add.graphics();
-        this.pathPreview.lineStyle(3, 0xFF0000, 0.8); // Red line
-
-        const fromPos = hexToPixel(fromQ, fromR);
-        const toPos = hexToPixel(toQ, toR);
-
-        this.pathPreview.beginPath();
-        this.pathPreview.moveTo(fromPos.x, fromPos.y);
-        this.pathPreview.lineTo(toPos.x, toPos.y);
-        this.pathPreview.strokePath();
-        
-        this.pathPreview.setDepth(15); // Above everything
-    }
-
-    /**
      * Emphasize movement highlights for move mode
      */
     private emphasizeMovementHighlights(): void {
@@ -410,41 +205,11 @@ export class PhaserGameScene extends PhaserWorldScene {
     }
 
     /**
-     * Set current player (affects interaction permissions)
-     */
-    public setCurrentPlayer(playerId: number): void {
-        this.currentPlayer = playerId;
-    }
-
-    /**
-     * Set whether it's the player's turn (affects interaction availability)
-     */
-    public setPlayerTurn(isPlayerTurn: boolean): void {
-        this.isPlayerTurn = isPlayerTurn;
-        
-        if (!isPlayerTurn) {
-            // Clear selection when it's not player's turn
-            this.clearSelection();
-        }
-    }
-
-    /**
-     * Get current selection state for external queries
-     */
-    public getSelectedUnit(): { q: number; r: number; unitData: any } | null {
-        return this.selectedUnit;
-    }
-
-    /**
      * Get current game mode
      */
     public getGameMode(): 'select' | 'move' | 'attack' {
         return this.gameMode;
     }
-
-    /**
-     * Get layer instances for direct manipulation
-     */
 
     // =========================================================================
     // Visualization Command Methods (called by presenter via GameViewerPage)
@@ -454,15 +219,15 @@ export class PhaserGameScene extends PhaserWorldScene {
      * Show highlights on the game board
      * @param highlights Array of HighlightSpec from presenter
      */
-    public showHighlights(highlights: any[]): void {
+    public showHighlights(highlights: HighlightSpec[]): void {
         if (!highlights || highlights.length === 0) {
             return;
         }
 
         // Group highlights by type
         const selections = highlights.filter(h => h.type === 'selection');
-        const movements = highlights.filter(h => h.type === 'movement');
-        const attacks = highlights.filter(h => h.type === 'attack');
+        const movements: MoveUnitAction[] = highlights.filter(h => h.type === 'movement').map(h => h.move!);
+        const attacks = highlights.filter(h => h.type === 'attack').map(h => h.attack!);
 
         // Apply selection highlights (typically just one)
         if (this._selectionHighlightLayer && selections.length > 0) {
@@ -474,36 +239,12 @@ export class PhaserGameScene extends PhaserWorldScene {
         // Apply movement highlights
         if (this._movementHighlightLayer && movements.length > 0) {
             // Convert to MoveOption-like objects for the layer
-            const moveOptions: MoveOption[] = movements.map(h => ({
-                action: {
-                    fromQ: h.q,
-                    fromR: h.r,
-                    toQ: h.q,
-                    toR: h.r,
-                },
-                movementCost: 0, // Cost not available in HighlightSpec
-            }));
-            this._movementHighlightLayer.showMovementOptions(moveOptions);
+            this._movementHighlightLayer.showMovementOptions(movements);
         }
 
         // Apply attack highlights
         if (this._attackHighlightLayer && attacks.length > 0) {
-            const attackCoords = attacks.map(h => ({ q: h.q, r: h.r }));
-            /*
-            const attackCoords: AttackOption[] = attacks.map(h => ({
-              targetUnitType: 0,
-              targetUnitHealth: 0,
-              canAttack: true,
-              damageEstimate: 0,
-              action: {
-                  attackerQ: h.q,
-                  attackerR: h.r,
-                  defenderQ: h.q,
-                  defenderR: h.r,
-              }
-            }));
-            */
-            this._attackHighlightLayer.showAttackOptions(attackCoords);
+            this._attackHighlightLayer.showAttackOptions(attacks);
         }
     }
 

@@ -377,114 +377,17 @@ message GetOptionsAtResponse {
   AllPaths all_paths = 5;
 }
 
-// Compact representation of all reachable paths from a source
-message AllPaths {
-  // Starting coordinate for all paths
-  int32 source_q = 1;
-  int32 source_r = 2;
-  
-  // Map of edges: key is "toQ,toR" for quick parent lookup
-  // Each edge represents the optimal way to reach 'to' from its parent
-  map<string, PathEdge> edges = 3;
-}
-
-// A single edge in a path with movement details
-message PathEdge {
-  int32 from_q = 1;            // Parent coordinate Q
-  int32 from_r = 2;            // Parent coordinate R
-  int32 to_q = 3;              // Destination coordinate Q
-  int32 to_r = 4;              // Destination coordinate R
-  double movement_cost = 5;     // Cost to move from 'from' to 'to' (edge cost)
-  double total_cost = 6;        // Total cumulative cost from source to 'to'
-  string terrain_type = 7;     // e.g., "mountain", "plains", "forest"
-  string explanation = 8;      // e.g., "Mountain costs Soldier 4 movement points"
-}
-
-// Full path from source to destination (constructed on-demand from AllPaths)
-message Path {
-  // Edges in order from source to destination
-  repeated PathEdge edges = 1;
-
-  // len(directions) = len(edges) - 1
-  // and directions[i] = direction from edge[i - 1] -> edge[i]
-  repeated PathDirection directions = 2;
-
-  // Sum of all edge costs
-  double total_cost = 3;
-}
-
-enum PathDirection {
-  PATH_DIRECTION_UNSPECIFIED = 0;
-	PATH_DIRECTION_LEFT = 1;
-	PATH_DIRECTION_TOP_LEFT = 2;
-	PATH_DIRECTION_TOP_RIGHT = 3;
-	PATH_DIRECTION_RIGHT = 4;
-	PATH_DIRECTION_BOTTOM_RIGHT = 5;
-	PATH_DIRECTION_BOTTOM_LEFT = 6;
-}
-
 /**
  * A single game option available at a position
  */
 message GameOption {
   oneof option_type {
-    MoveOption move = 1;
-    AttackOption attack = 2;
-    EndTurnOption end_turn = 3;
-    BuildUnitOption build = 4;
-    CaptureBuildingOption  capture = 5;
+    MoveUnitAction move = 1;
+    AttackUnitAction attack = 2;
+    BuildUnitAction build = 3;
+    CaptureBuildingAction capture = 4;
+    EndTurnAction end_turn = 5;
   }
-}
-
-/**
- * Option to end the current turn
- */
-message EndTurnOption {
-  // Empty - just indicates end turn is available
-}
-
-/**
- * Option to move to a specific coordinate
- */
-message MoveOption {
-  double movement_cost = 3;
-  // Ready-to-use action object for ProcessMoves
-  MoveUnitAction action = 4;
-
-  // Debug fields
-  Path reconstructed_path = 5;
-}
-
-/**
- * A possible attack target
- */
-message AttackOption {
-  // Target unit type and health
-  int32 target_unit_type = 3;
-  int32 target_unit_health = 4;
-  bool can_attack = 5;
-  int32 damage_estimate = 6; // Estimated damage this attack would deal
-  // Ready-to-use action object for ProcessMoves
-  AttackUnitAction action = 7;
-}
-
-/**
- * An option to build a unit (at a city tile)
- */
-message BuildUnitOption {
-  int32 q = 1;
-  int32 r = 2;
-  int32 unit_type = 3;
-  int32 cost = 4;
-}
-
-/**
- * A move where a unit can capture a building
- */
-message CaptureBuildingOption {
-  int32 q = 1;
-  int32 r = 2;
-  int32 tile_type = 3;
 }
 
 /**

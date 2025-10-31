@@ -47,6 +47,11 @@ class GameViewPresenterStub(object):
                 request_serializer=weewar_dot_v1_dot_presenter__pb2.EndTurnButtonClickedRequest.SerializeToString,
                 response_deserializer=weewar_dot_v1_dot_presenter__pb2.EndTurnButtonClickedResponse.FromString,
                 _registered_method=True)
+        self.BuildOptionClicked = channel.unary_unary(
+                '/weewar.v1.GameViewPresenter/BuildOptionClicked',
+                request_serializer=weewar_dot_v1_dot_presenter__pb2.BuildOptionClickedRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_presenter__pb2.BuildOptionClickedResponse.FromString,
+                _registered_method=True)
 
 
 class GameViewPresenterServicer(object):
@@ -101,6 +106,14 @@ class GameViewPresenterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def BuildOptionClicked(self, request, context):
+        """*
+        Called when a build option is clicked in the BuildOptionsModal
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GameViewPresenterServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -123,6 +136,11 @@ def add_GameViewPresenterServicer_to_server(servicer, server):
                     servicer.EndTurnButtonClicked,
                     request_deserializer=weewar_dot_v1_dot_presenter__pb2.EndTurnButtonClickedRequest.FromString,
                     response_serializer=weewar_dot_v1_dot_presenter__pb2.EndTurnButtonClickedResponse.SerializeToString,
+            ),
+            'BuildOptionClicked': grpc.unary_unary_rpc_method_handler(
+                    servicer.BuildOptionClicked,
+                    request_deserializer=weewar_dot_v1_dot_presenter__pb2.BuildOptionClickedRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_presenter__pb2.BuildOptionClickedResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -246,6 +264,33 @@ class GameViewPresenter(object):
             '/weewar.v1.GameViewPresenter/EndTurnButtonClicked',
             weewar_dot_v1_dot_presenter__pb2.EndTurnButtonClickedRequest.SerializeToString,
             weewar_dot_v1_dot_presenter__pb2.EndTurnButtonClickedResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def BuildOptionClicked(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GameViewPresenter/BuildOptionClicked',
+            weewar_dot_v1_dot_presenter__pb2.BuildOptionClickedRequest.SerializeToString,
+            weewar_dot_v1_dot_presenter__pb2.BuildOptionClickedResponse.FromString,
             options,
             channel_credentials,
             insecure,

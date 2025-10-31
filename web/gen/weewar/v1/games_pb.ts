@@ -2,13 +2,13 @@
 // @generated from file weewar/v1/games.proto (package weewar.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_google_api_annotations } from "../../google/api/annotations_pb";
 import { file_protoc_gen_openapiv2_options_annotations } from "../../protoc-gen-openapiv2/options/annotations_pb";
 import type { FieldMask } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_field_mask } from "@bufbuild/protobuf/wkt";
-import type { AttackUnitAction, Game, GameMove, GameMoveGroup, GameMoveHistory, GameMoveResult, GameState, MoveUnitAction, Pagination, PaginationResponse, WorldChange } from "./models_pb";
+import type { AllPaths, AttackUnitAction, BuildUnitAction, CaptureBuildingAction, EndTurnAction, Game, GameMove, GameMoveGroup, GameMoveHistory, GameMoveResult, GameState, MoveUnitAction, Pagination, PaginationResponse, WorldChange } from "./models_pb";
 import { file_weewar_v1_models } from "./models_pb";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -16,7 +16,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/games.proto.
  */
 export const file_weewar_v1_games: GenFile = /*@__PURE__*/
-  fileDesc("ChV3ZWV3YXIvdjEvZ2FtZXMucHJvdG8SCXdlZXdhci52MSKRAQoIR2FtZUluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghjYXRlZ29yeRgEIAEoCRISCgpkaWZmaWN1bHR5GAUgASgJEgwKBHRhZ3MYBiADKAkSDAoEaWNvbhgHIAEoCRIUCgxsYXN0X3VwZGF0ZWQYCCABKAkiTwoQTGlzdEdhbWVzUmVxdWVzdBIpCgpwYWdpbmF0aW9uGAEgASgLMhUud2Vld2FyLnYxLlBhZ2luYXRpb24SEAoIb3duZXJfaWQYAiABKAkiZgoRTGlzdEdhbWVzUmVzcG9uc2USHgoFaXRlbXMYASADKAsyDy53ZWV3YXIudjEuR2FtZRIxCgpwYWdpbmF0aW9uGAIgASgLMh0ud2Vld2FyLnYxLlBhZ2luYXRpb25SZXNwb25zZSItCg5HZXRHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJIoIBCg9HZXRHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEiMKBXN0YXRlGAIgASgLMhQud2Vld2FyLnYxLkdhbWVTdGF0ZRIrCgdoaXN0b3J5GAMgASgLMhoud2Vld2FyLnYxLkdhbWVNb3ZlSGlzdG9yeSI0ChVHZXRHYW1lQ29udGVudFJlcXVlc3QSCgoCaWQYASABKAkSDwoHdmVyc2lvbhgCIAEoCSJgChZHZXRHYW1lQ29udGVudFJlc3BvbnNlEhYKDndlZXdhcl9jb250ZW50GAEgASgJEhYKDnJlY2lwZV9jb250ZW50GAIgASgJEhYKDnJlYWRtZV9jb250ZW50GAMgASgJIuwBChFVcGRhdGVHYW1lUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEiEKCG5ld19nYW1lGAIgASgLMg8ud2Vld2FyLnYxLkdhbWUSJwoJbmV3X3N0YXRlGAMgASgLMhQud2Vld2FyLnYxLkdhbWVTdGF0ZRIvCgtuZXdfaGlzdG9yeRgEIAEoCzIaLndlZXdhci52MS5HYW1lTW92ZUhpc3RvcnkSLwoLdXBkYXRlX21hc2sYBSABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrOhiSQRUKEyoRVXBkYXRlR2FtZVJlcXVlc3QiTgoSVXBkYXRlR2FtZVJlc3BvbnNlEh0KBGdhbWUYASABKAsyDy53ZWV3YXIudjEuR2FtZToZkkEWChQqElVwZGF0ZUdhbWVSZXNwb25zZSIfChFEZWxldGVHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCSIUChJEZWxldGVHYW1lUmVzcG9uc2UiHgoPR2V0R2FtZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSKIAQoQR2V0R2FtZXNSZXNwb25zZRI1CgVnYW1lcxgBIAMoCzImLndlZXdhci52MS5HZXRHYW1lc1Jlc3BvbnNlLkdhbWVzRW50cnkaPQoKR2FtZXNFbnRyeRILCgNrZXkYASABKAkSHgoFdmFsdWUYAiABKAsyDy53ZWV3YXIudjEuR2FtZToCOAEiMgoRQ3JlYXRlR2FtZVJlcXVlc3QSHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lItcBChJDcmVhdGVHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEigKCmdhbWVfc3RhdGUYAiABKAsyFC53ZWV3YXIudjEuR2FtZVN0YXRlEkQKDGZpZWxkX2Vycm9ycxgDIAMoCzIuLndlZXdhci52MS5DcmVhdGVHYW1lUmVzcG9uc2UuRmllbGRFcnJvcnNFbnRyeRoyChBGaWVsZEVycm9yc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEihgEKE1Byb2Nlc3NNb3Zlc1JlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCRIiCgVtb3ZlcxgDIAMoCzITLndlZXdhci52MS5HYW1lTW92ZRI6ChFleHBlY3RlZF9yZXNwb25zZRgCIAEoCzIfLndlZXdhci52MS5Qcm9jZXNzTW92ZXNSZXNwb25zZSJwChRQcm9jZXNzTW92ZXNSZXNwb25zZRIvCgxtb3ZlX3Jlc3VsdHMYASADKAsyGS53ZWV3YXIudjEuR2FtZU1vdmVSZXN1bHQSJwoHY2hhbmdlcxgCIAMoCzIWLndlZXdhci52MS5Xb3JsZENoYW5nZSImChNHZXRHYW1lU3RhdGVSZXF1ZXN0Eg8KB2dhbWVfaWQYASABKAkiOwoUR2V0R2FtZVN0YXRlUmVzcG9uc2USIwoFc3RhdGUYASABKAsyFC53ZWV3YXIudjEuR2FtZVN0YXRlIkMKEExpc3RNb3Zlc1JlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCRIOCgZvZmZzZXQYAiABKAUSDgoGbGFzdF9uGAMgASgFIlQKEUxpc3RNb3Zlc1Jlc3BvbnNlEhAKCGhhc19tb3JlGAEgASgIEi0KC21vdmVfZ3JvdXBzGAIgAygLMhgud2Vld2FyLnYxLkdhbWVNb3ZlR3JvdXAiPAoTR2V0T3B0aW9uc0F0UmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEgkKAXEYAiABKAUSCQoBchgDIAEoBSKYAQoUR2V0T3B0aW9uc0F0UmVzcG9uc2USJgoHb3B0aW9ucxgBIAMoCzIVLndlZXdhci52MS5HYW1lT3B0aW9uEhYKDmN1cnJlbnRfcGxheWVyGAIgASgFEhgKEGdhbWVfaW5pdGlhbGl6ZWQYAyABKAgSJgoJYWxsX3BhdGhzGAUgASgLMhMud2Vld2FyLnYxLkFsbFBhdGhzIqABCghBbGxQYXRocxIQCghzb3VyY2VfcRgBIAEoBRIQCghzb3VyY2VfchgCIAEoBRItCgVlZGdlcxgDIAMoCzIeLndlZXdhci52MS5BbGxQYXRocy5FZGdlc0VudHJ5GkEKCkVkZ2VzRW50cnkSCwoDa2V5GAEgASgJEiIKBXZhbHVlGAIgASgLMhMud2Vld2FyLnYxLlBhdGhFZGdlOgI4ASKcAQoIUGF0aEVkZ2USDgoGZnJvbV9xGAEgASgFEg4KBmZyb21fchgCIAEoBRIMCgR0b19xGAMgASgFEgwKBHRvX3IYBCABKAUSFQoNbW92ZW1lbnRfY29zdBgFIAEoARISCgp0b3RhbF9jb3N0GAYgASgBEhQKDHRlcnJhaW5fdHlwZRgHIAEoCRITCgtleHBsYW5hdGlvbhgIIAEoCSJsCgRQYXRoEiIKBWVkZ2VzGAEgAygLMhMud2Vld2FyLnYxLlBhdGhFZGdlEiwKCmRpcmVjdGlvbnMYAiADKA4yGC53ZWV3YXIudjEuUGF0aERpcmVjdGlvbhISCgp0b3RhbF9jb3N0GAMgASgBIv0BCgpHYW1lT3B0aW9uEiUKBG1vdmUYASABKAsyFS53ZWV3YXIudjEuTW92ZU9wdGlvbkgAEikKBmF0dGFjaxgCIAEoCzIXLndlZXdhci52MS5BdHRhY2tPcHRpb25IABIsCghlbmRfdHVybhgDIAEoCzIYLndlZXdhci52MS5FbmRUdXJuT3B0aW9uSAASKwoFYnVpbGQYBCABKAsyGi53ZWV3YXIudjEuQnVpbGRVbml0T3B0aW9uSAASMwoHY2FwdHVyZRgFIAEoCzIgLndlZXdhci52MS5DYXB0dXJlQnVpbGRpbmdPcHRpb25IAEINCgtvcHRpb25fdHlwZSIPCg1FbmRUdXJuT3B0aW9uInsKCk1vdmVPcHRpb24SFQoNbW92ZW1lbnRfY29zdBgDIAEoARIpCgZhY3Rpb24YBCABKAsyGS53ZWV3YXIudjEuTW92ZVVuaXRBY3Rpb24SKwoScmVjb25zdHJ1Y3RlZF9wYXRoGAUgASgLMg8ud2Vld2FyLnYxLlBhdGgingEKDEF0dGFja09wdGlvbhIYChB0YXJnZXRfdW5pdF90eXBlGAMgASgFEhoKEnRhcmdldF91bml0X2hlYWx0aBgEIAEoBRISCgpjYW5fYXR0YWNrGAUgASgIEhcKD2RhbWFnZV9lc3RpbWF0ZRgGIAEoBRIrCgZhY3Rpb24YByABKAsyGy53ZWV3YXIudjEuQXR0YWNrVW5pdEFjdGlvbiJICg9CdWlsZFVuaXRPcHRpb24SCQoBcRgBIAEoBRIJCgFyGAIgASgFEhEKCXVuaXRfdHlwZRgDIAEoBRIMCgRjb3N0GAQgASgFIkAKFUNhcHR1cmVCdWlsZGluZ09wdGlvbhIJCgFxGAEgASgFEgkKAXIYAiABKAUSEQoJdGlsZV90eXBlGAMgASgFIuMBChVTaW11bGF0ZUF0dGFja1JlcXVlc3QSGgoSYXR0YWNrZXJfdW5pdF90eXBlGAEgASgFEhgKEGF0dGFja2VyX3RlcnJhaW4YAiABKAUSFwoPYXR0YWNrZXJfaGVhbHRoGAMgASgFEhoKEmRlZmVuZGVyX3VuaXRfdHlwZRgEIAEoBRIYChBkZWZlbmRlcl90ZXJyYWluGAUgASgFEhcKD2RlZmVuZGVyX2hlYWx0aBgGIAEoBRITCgt3b3VuZF9ib251cxgHIAEoBRIXCg9udW1fc2ltdWxhdGlvbnMYCCABKAUi8gMKFlNpbXVsYXRlQXR0YWNrUmVzcG9uc2USZwocYXR0YWNrZXJfZGFtYWdlX2Rpc3RyaWJ1dGlvbhgBIAMoCzJBLndlZXdhci52MS5TaW11bGF0ZUF0dGFja1Jlc3BvbnNlLkF0dGFja2VyRGFtYWdlRGlzdHJpYnV0aW9uRW50cnkSZwocZGVmZW5kZXJfZGFtYWdlX2Rpc3RyaWJ1dGlvbhgCIAMoCzJBLndlZXdhci52MS5TaW11bGF0ZUF0dGFja1Jlc3BvbnNlLkRlZmVuZGVyRGFtYWdlRGlzdHJpYnV0aW9uRW50cnkSHAoUYXR0YWNrZXJfbWVhbl9kYW1hZ2UYAyABKAESHAoUZGVmZW5kZXJfbWVhbl9kYW1hZ2UYBCABKAESIQoZYXR0YWNrZXJfa2lsbF9wcm9iYWJpbGl0eRgFIAEoARIhChlkZWZlbmRlcl9raWxsX3Byb2JhYmlsaXR5GAYgASgBGkEKH0F0dGFja2VyRGFtYWdlRGlzdHJpYnV0aW9uRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ARpBCh9EZWZlbmRlckRhbWFnZURpc3RyaWJ1dGlvbkVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEq3gEKDVBhdGhEaXJlY3Rpb24SHgoaUEFUSF9ESVJFQ1RJT05fVU5TUEVDSUZJRUQQABIXChNQQVRIX0RJUkVDVElPTl9MRUZUEAESGwoXUEFUSF9ESVJFQ1RJT05fVE9QX0xFRlQQAhIcChhQQVRIX0RJUkVDVElPTl9UT1BfUklHSFQQAxIYChRQQVRIX0RJUkVDVElPTl9SSUdIVBAEEh8KG1BBVEhfRElSRUNUSU9OX0JPVFRPTV9SSUdIVBAFEh4KGlBBVEhfRElSRUNUSU9OX0JPVFRPTV9MRUZUEAYyqAkKDEdhbWVzU2VydmljZRJfCgpDcmVhdGVHYW1lEhwud2Vld2FyLnYxLkNyZWF0ZUdhbWVSZXF1ZXN0Gh0ud2Vld2FyLnYxLkNyZWF0ZUdhbWVSZXNwb25zZSIUgtPkkwIOOgEqIgkvdjEvZ2FtZXMSXwoIR2V0R2FtZXMSGi53ZWV3YXIudjEuR2V0R2FtZXNSZXF1ZXN0Ghsud2Vld2FyLnYxLkdldEdhbWVzUmVzcG9uc2UiGoLT5JMCFBISL3YxL2dhbWVzOmJhdGNoR2V0ElkKCUxpc3RHYW1lcxIbLndlZXdhci52MS5MaXN0R2FtZXNSZXF1ZXN0Ghwud2Vld2FyLnYxLkxpc3RHYW1lc1Jlc3BvbnNlIhGC0+STAgsSCS92MS9nYW1lcxJYCgdHZXRHYW1lEhkud2Vld2FyLnYxLkdldEdhbWVSZXF1ZXN0Ghoud2Vld2FyLnYxLkdldEdhbWVSZXNwb25zZSIWgtPkkwIQEg4vdjEvZ2FtZXMve2lkfRJjCgpEZWxldGVHYW1lEhwud2Vld2FyLnYxLkRlbGV0ZUdhbWVSZXF1ZXN0Gh0ud2Vld2FyLnYxLkRlbGV0ZUdhbWVSZXNwb25zZSIYgtPkkwISKhAvdjEvZ2FtZXMve2lkPSp9EmsKClVwZGF0ZUdhbWUSHC53ZWV3YXIudjEuVXBkYXRlR2FtZVJlcXVlc3QaHS53ZWV3YXIudjEuVXBkYXRlR2FtZVJlc3BvbnNlIiCC0+STAho6ASoyFS92MS9nYW1lcy97Z2FtZV9pZD0qfRJyCgxHZXRHYW1lU3RhdGUSHi53ZWV3YXIudjEuR2V0R2FtZVN0YXRlUmVxdWVzdBofLndlZXdhci52MS5HZXRHYW1lU3RhdGVSZXNwb25zZSIhgtPkkwIbEhkvdjEvZ2FtZXMve2dhbWVfaWR9L3N0YXRlEmkKCUxpc3RNb3ZlcxIbLndlZXdhci52MS5MaXN0TW92ZXNSZXF1ZXN0Ghwud2Vld2FyLnYxLkxpc3RNb3Zlc1Jlc3BvbnNlIiGC0+STAhsSGS92MS9nYW1lcy97Z2FtZV9pZH0vbW92ZXMSdQoMUHJvY2Vzc01vdmVzEh4ud2Vld2FyLnYxLlByb2Nlc3NNb3Zlc1JlcXVlc3QaHy53ZWV3YXIudjEuUHJvY2Vzc01vdmVzUmVzcG9uc2UiJILT5JMCHjoBKiIZL3YxL2dhbWVzL3tnYW1lX2lkfS9tb3ZlcxJ8CgxHZXRPcHRpb25zQXQSHi53ZWV3YXIudjEuR2V0T3B0aW9uc0F0UmVxdWVzdBofLndlZXdhci52MS5HZXRPcHRpb25zQXRSZXNwb25zZSIrgtPkkwIlEiMvdjEvZ2FtZXMve2dhbWVfaWR9L29wdGlvbnMve3F9L3tyfRJ7Cg5TaW11bGF0ZUF0dGFjaxIgLndlZXdhci52MS5TaW11bGF0ZUF0dGFja1JlcXVlc3QaIS53ZWV3YXIudjEuU2ltdWxhdGVBdHRhY2tSZXNwb25zZSIkgtPkkwIeOgEqIhkvdjEvZ2FtZXMvc2ltdWxhdGVfYXR0YWNrQqUBCg1jb20ud2Vld2FyLnYxQgpHYW1lc1Byb3RvUAFaQ2dpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjE7d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations, file_google_protobuf_field_mask, file_weewar_v1_models]);
+  fileDesc("ChV3ZWV3YXIvdjEvZ2FtZXMucHJvdG8SCXdlZXdhci52MSKRAQoIR2FtZUluZm8SCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghjYXRlZ29yeRgEIAEoCRISCgpkaWZmaWN1bHR5GAUgASgJEgwKBHRhZ3MYBiADKAkSDAoEaWNvbhgHIAEoCRIUCgxsYXN0X3VwZGF0ZWQYCCABKAkiTwoQTGlzdEdhbWVzUmVxdWVzdBIpCgpwYWdpbmF0aW9uGAEgASgLMhUud2Vld2FyLnYxLlBhZ2luYXRpb24SEAoIb3duZXJfaWQYAiABKAkiZgoRTGlzdEdhbWVzUmVzcG9uc2USHgoFaXRlbXMYASADKAsyDy53ZWV3YXIudjEuR2FtZRIxCgpwYWdpbmF0aW9uGAIgASgLMh0ud2Vld2FyLnYxLlBhZ2luYXRpb25SZXNwb25zZSItCg5HZXRHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCRIPCgd2ZXJzaW9uGAIgASgJIoIBCg9HZXRHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEiMKBXN0YXRlGAIgASgLMhQud2Vld2FyLnYxLkdhbWVTdGF0ZRIrCgdoaXN0b3J5GAMgASgLMhoud2Vld2FyLnYxLkdhbWVNb3ZlSGlzdG9yeSI0ChVHZXRHYW1lQ29udGVudFJlcXVlc3QSCgoCaWQYASABKAkSDwoHdmVyc2lvbhgCIAEoCSJgChZHZXRHYW1lQ29udGVudFJlc3BvbnNlEhYKDndlZXdhcl9jb250ZW50GAEgASgJEhYKDnJlY2lwZV9jb250ZW50GAIgASgJEhYKDnJlYWRtZV9jb250ZW50GAMgASgJIuwBChFVcGRhdGVHYW1lUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEiEKCG5ld19nYW1lGAIgASgLMg8ud2Vld2FyLnYxLkdhbWUSJwoJbmV3X3N0YXRlGAMgASgLMhQud2Vld2FyLnYxLkdhbWVTdGF0ZRIvCgtuZXdfaGlzdG9yeRgEIAEoCzIaLndlZXdhci52MS5HYW1lTW92ZUhpc3RvcnkSLwoLdXBkYXRlX21hc2sYBSABKAsyGi5nb29nbGUucHJvdG9idWYuRmllbGRNYXNrOhiSQRUKEyoRVXBkYXRlR2FtZVJlcXVlc3QiTgoSVXBkYXRlR2FtZVJlc3BvbnNlEh0KBGdhbWUYASABKAsyDy53ZWV3YXIudjEuR2FtZToZkkEWChQqElVwZGF0ZUdhbWVSZXNwb25zZSIfChFEZWxldGVHYW1lUmVxdWVzdBIKCgJpZBgBIAEoCSIUChJEZWxldGVHYW1lUmVzcG9uc2UiHgoPR2V0R2FtZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSKIAQoQR2V0R2FtZXNSZXNwb25zZRI1CgVnYW1lcxgBIAMoCzImLndlZXdhci52MS5HZXRHYW1lc1Jlc3BvbnNlLkdhbWVzRW50cnkaPQoKR2FtZXNFbnRyeRILCgNrZXkYASABKAkSHgoFdmFsdWUYAiABKAsyDy53ZWV3YXIudjEuR2FtZToCOAEiMgoRQ3JlYXRlR2FtZVJlcXVlc3QSHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lItcBChJDcmVhdGVHYW1lUmVzcG9uc2USHQoEZ2FtZRgBIAEoCzIPLndlZXdhci52MS5HYW1lEigKCmdhbWVfc3RhdGUYAiABKAsyFC53ZWV3YXIudjEuR2FtZVN0YXRlEkQKDGZpZWxkX2Vycm9ycxgDIAMoCzIuLndlZXdhci52MS5DcmVhdGVHYW1lUmVzcG9uc2UuRmllbGRFcnJvcnNFbnRyeRoyChBGaWVsZEVycm9yc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEihgEKE1Byb2Nlc3NNb3Zlc1JlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCRIiCgVtb3ZlcxgDIAMoCzITLndlZXdhci52MS5HYW1lTW92ZRI6ChFleHBlY3RlZF9yZXNwb25zZRgCIAEoCzIfLndlZXdhci52MS5Qcm9jZXNzTW92ZXNSZXNwb25zZSJwChRQcm9jZXNzTW92ZXNSZXNwb25zZRIvCgxtb3ZlX3Jlc3VsdHMYASADKAsyGS53ZWV3YXIudjEuR2FtZU1vdmVSZXN1bHQSJwoHY2hhbmdlcxgCIAMoCzIWLndlZXdhci52MS5Xb3JsZENoYW5nZSImChNHZXRHYW1lU3RhdGVSZXF1ZXN0Eg8KB2dhbWVfaWQYASABKAkiOwoUR2V0R2FtZVN0YXRlUmVzcG9uc2USIwoFc3RhdGUYASABKAsyFC53ZWV3YXIudjEuR2FtZVN0YXRlIkMKEExpc3RNb3Zlc1JlcXVlc3QSDwoHZ2FtZV9pZBgBIAEoCRIOCgZvZmZzZXQYAiABKAUSDgoGbGFzdF9uGAMgASgFIlQKEUxpc3RNb3Zlc1Jlc3BvbnNlEhAKCGhhc19tb3JlGAEgASgIEi0KC21vdmVfZ3JvdXBzGAIgAygLMhgud2Vld2FyLnYxLkdhbWVNb3ZlR3JvdXAiPAoTR2V0T3B0aW9uc0F0UmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEgkKAXEYAiABKAUSCQoBchgDIAEoBSKYAQoUR2V0T3B0aW9uc0F0UmVzcG9uc2USJgoHb3B0aW9ucxgBIAMoCzIVLndlZXdhci52MS5HYW1lT3B0aW9uEhYKDmN1cnJlbnRfcGxheWVyGAIgASgFEhgKEGdhbWVfaW5pdGlhbGl6ZWQYAyABKAgSJgoJYWxsX3BhdGhzGAUgASgLMhMud2Vld2FyLnYxLkFsbFBhdGhzIoUCCgpHYW1lT3B0aW9uEikKBG1vdmUYASABKAsyGS53ZWV3YXIudjEuTW92ZVVuaXRBY3Rpb25IABItCgZhdHRhY2sYAiABKAsyGy53ZWV3YXIudjEuQXR0YWNrVW5pdEFjdGlvbkgAEisKBWJ1aWxkGAMgASgLMhoud2Vld2FyLnYxLkJ1aWxkVW5pdEFjdGlvbkgAEjMKB2NhcHR1cmUYBCABKAsyIC53ZWV3YXIudjEuQ2FwdHVyZUJ1aWxkaW5nQWN0aW9uSAASLAoIZW5kX3R1cm4YBSABKAsyGC53ZWV3YXIudjEuRW5kVHVybkFjdGlvbkgAQg0KC29wdGlvbl90eXBlIuMBChVTaW11bGF0ZUF0dGFja1JlcXVlc3QSGgoSYXR0YWNrZXJfdW5pdF90eXBlGAEgASgFEhgKEGF0dGFja2VyX3RlcnJhaW4YAiABKAUSFwoPYXR0YWNrZXJfaGVhbHRoGAMgASgFEhoKEmRlZmVuZGVyX3VuaXRfdHlwZRgEIAEoBRIYChBkZWZlbmRlcl90ZXJyYWluGAUgASgFEhcKD2RlZmVuZGVyX2hlYWx0aBgGIAEoBRITCgt3b3VuZF9ib251cxgHIAEoBRIXCg9udW1fc2ltdWxhdGlvbnMYCCABKAUi8gMKFlNpbXVsYXRlQXR0YWNrUmVzcG9uc2USZwocYXR0YWNrZXJfZGFtYWdlX2Rpc3RyaWJ1dGlvbhgBIAMoCzJBLndlZXdhci52MS5TaW11bGF0ZUF0dGFja1Jlc3BvbnNlLkF0dGFja2VyRGFtYWdlRGlzdHJpYnV0aW9uRW50cnkSZwocZGVmZW5kZXJfZGFtYWdlX2Rpc3RyaWJ1dGlvbhgCIAMoCzJBLndlZXdhci52MS5TaW11bGF0ZUF0dGFja1Jlc3BvbnNlLkRlZmVuZGVyRGFtYWdlRGlzdHJpYnV0aW9uRW50cnkSHAoUYXR0YWNrZXJfbWVhbl9kYW1hZ2UYAyABKAESHAoUZGVmZW5kZXJfbWVhbl9kYW1hZ2UYBCABKAESIQoZYXR0YWNrZXJfa2lsbF9wcm9iYWJpbGl0eRgFIAEoARIhChlkZWZlbmRlcl9raWxsX3Byb2JhYmlsaXR5GAYgASgBGkEKH0F0dGFja2VyRGFtYWdlRGlzdHJpYnV0aW9uRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ARpBCh9EZWZlbmRlckRhbWFnZURpc3RyaWJ1dGlvbkVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEyqAkKDEdhbWVzU2VydmljZRJfCgpDcmVhdGVHYW1lEhwud2Vld2FyLnYxLkNyZWF0ZUdhbWVSZXF1ZXN0Gh0ud2Vld2FyLnYxLkNyZWF0ZUdhbWVSZXNwb25zZSIUgtPkkwIOOgEqIgkvdjEvZ2FtZXMSXwoIR2V0R2FtZXMSGi53ZWV3YXIudjEuR2V0R2FtZXNSZXF1ZXN0Ghsud2Vld2FyLnYxLkdldEdhbWVzUmVzcG9uc2UiGoLT5JMCFBISL3YxL2dhbWVzOmJhdGNoR2V0ElkKCUxpc3RHYW1lcxIbLndlZXdhci52MS5MaXN0R2FtZXNSZXF1ZXN0Ghwud2Vld2FyLnYxLkxpc3RHYW1lc1Jlc3BvbnNlIhGC0+STAgsSCS92MS9nYW1lcxJYCgdHZXRHYW1lEhkud2Vld2FyLnYxLkdldEdhbWVSZXF1ZXN0Ghoud2Vld2FyLnYxLkdldEdhbWVSZXNwb25zZSIWgtPkkwIQEg4vdjEvZ2FtZXMve2lkfRJjCgpEZWxldGVHYW1lEhwud2Vld2FyLnYxLkRlbGV0ZUdhbWVSZXF1ZXN0Gh0ud2Vld2FyLnYxLkRlbGV0ZUdhbWVSZXNwb25zZSIYgtPkkwISKhAvdjEvZ2FtZXMve2lkPSp9EmsKClVwZGF0ZUdhbWUSHC53ZWV3YXIudjEuVXBkYXRlR2FtZVJlcXVlc3QaHS53ZWV3YXIudjEuVXBkYXRlR2FtZVJlc3BvbnNlIiCC0+STAho6ASoyFS92MS9nYW1lcy97Z2FtZV9pZD0qfRJyCgxHZXRHYW1lU3RhdGUSHi53ZWV3YXIudjEuR2V0R2FtZVN0YXRlUmVxdWVzdBofLndlZXdhci52MS5HZXRHYW1lU3RhdGVSZXNwb25zZSIhgtPkkwIbEhkvdjEvZ2FtZXMve2dhbWVfaWR9L3N0YXRlEmkKCUxpc3RNb3ZlcxIbLndlZXdhci52MS5MaXN0TW92ZXNSZXF1ZXN0Ghwud2Vld2FyLnYxLkxpc3RNb3Zlc1Jlc3BvbnNlIiGC0+STAhsSGS92MS9nYW1lcy97Z2FtZV9pZH0vbW92ZXMSdQoMUHJvY2Vzc01vdmVzEh4ud2Vld2FyLnYxLlByb2Nlc3NNb3Zlc1JlcXVlc3QaHy53ZWV3YXIudjEuUHJvY2Vzc01vdmVzUmVzcG9uc2UiJILT5JMCHjoBKiIZL3YxL2dhbWVzL3tnYW1lX2lkfS9tb3ZlcxJ8CgxHZXRPcHRpb25zQXQSHi53ZWV3YXIudjEuR2V0T3B0aW9uc0F0UmVxdWVzdBofLndlZXdhci52MS5HZXRPcHRpb25zQXRSZXNwb25zZSIrgtPkkwIlEiMvdjEvZ2FtZXMve2dhbWVfaWR9L29wdGlvbnMve3F9L3tyfRJ7Cg5TaW11bGF0ZUF0dGFjaxIgLndlZXdhci52MS5TaW11bGF0ZUF0dGFja1JlcXVlc3QaIS53ZWV3YXIudjEuU2ltdWxhdGVBdHRhY2tSZXNwb25zZSIkgtPkkwIeOgEqIhkvdjEvZ2FtZXMvc2ltdWxhdGVfYXR0YWNrQqUBCg1jb20ud2Vld2FyLnYxQgpHYW1lc1Byb3RvUAFaQ2dpdGh1Yi5jb20vcGFueWFtL3R1cm5lbmdpbmUvZ2FtZXMvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjE7d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations, file_google_protobuf_field_mask, file_weewar_v1_models]);
 
 /**
  * GameInfo represents a game in the catalog
@@ -708,146 +708,6 @@ export const GetOptionsAtResponseSchema: GenMessage<GetOptionsAtResponse> = /*@_
   messageDesc(file_weewar_v1_games, 22);
 
 /**
- * Compact representation of all reachable paths from a source
- *
- * @generated from message weewar.v1.AllPaths
- */
-export type AllPaths = Message<"weewar.v1.AllPaths"> & {
-  /**
-   * Starting coordinate for all paths
-   *
-   * @generated from field: int32 source_q = 1;
-   */
-  sourceQ: number;
-
-  /**
-   * @generated from field: int32 source_r = 2;
-   */
-  sourceR: number;
-
-  /**
-   * Map of edges: key is "toQ,toR" for quick parent lookup
-   * Each edge represents the optimal way to reach 'to' from its parent
-   *
-   * @generated from field: map<string, weewar.v1.PathEdge> edges = 3;
-   */
-  edges: { [key: string]: PathEdge };
-};
-
-/**
- * Describes the message weewar.v1.AllPaths.
- * Use `create(AllPathsSchema)` to create a new message.
- */
-export const AllPathsSchema: GenMessage<AllPaths> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 23);
-
-/**
- * A single edge in a path with movement details
- *
- * @generated from message weewar.v1.PathEdge
- */
-export type PathEdge = Message<"weewar.v1.PathEdge"> & {
-  /**
-   * Parent coordinate Q
-   *
-   * @generated from field: int32 from_q = 1;
-   */
-  fromQ: number;
-
-  /**
-   * Parent coordinate R
-   *
-   * @generated from field: int32 from_r = 2;
-   */
-  fromR: number;
-
-  /**
-   * Destination coordinate Q
-   *
-   * @generated from field: int32 to_q = 3;
-   */
-  toQ: number;
-
-  /**
-   * Destination coordinate R
-   *
-   * @generated from field: int32 to_r = 4;
-   */
-  toR: number;
-
-  /**
-   * Cost to move from 'from' to 'to' (edge cost)
-   *
-   * @generated from field: double movement_cost = 5;
-   */
-  movementCost: number;
-
-  /**
-   * Total cumulative cost from source to 'to'
-   *
-   * @generated from field: double total_cost = 6;
-   */
-  totalCost: number;
-
-  /**
-   * e.g., "mountain", "plains", "forest"
-   *
-   * @generated from field: string terrain_type = 7;
-   */
-  terrainType: string;
-
-  /**
-   * e.g., "Mountain costs Soldier 4 movement points"
-   *
-   * @generated from field: string explanation = 8;
-   */
-  explanation: string;
-};
-
-/**
- * Describes the message weewar.v1.PathEdge.
- * Use `create(PathEdgeSchema)` to create a new message.
- */
-export const PathEdgeSchema: GenMessage<PathEdge> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 24);
-
-/**
- * Full path from source to destination (constructed on-demand from AllPaths)
- *
- * @generated from message weewar.v1.Path
- */
-export type Path = Message<"weewar.v1.Path"> & {
-  /**
-   * Edges in order from source to destination
-   *
-   * @generated from field: repeated weewar.v1.PathEdge edges = 1;
-   */
-  edges: PathEdge[];
-
-  /**
-   * len(directions) = len(edges) - 1
-   * and directions[i] = direction from edge[i - 1] -> edge[i]
-   *
-   * @generated from field: repeated weewar.v1.PathDirection directions = 2;
-   */
-  directions: PathDirection[];
-
-  /**
-   * Sum of all edge costs
-   *
-   * @generated from field: double total_cost = 3;
-   */
-  totalCost: number;
-};
-
-/**
- * Describes the message weewar.v1.Path.
- * Use `create(PathSchema)` to create a new message.
- */
-export const PathSchema: GenMessage<Path> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 25);
-
-/**
  * *
  * A single game option available at a position
  *
@@ -859,34 +719,34 @@ export type GameOption = Message<"weewar.v1.GameOption"> & {
    */
   optionType: {
     /**
-     * @generated from field: weewar.v1.MoveOption move = 1;
+     * @generated from field: weewar.v1.MoveUnitAction move = 1;
      */
-    value: MoveOption;
+    value: MoveUnitAction;
     case: "move";
   } | {
     /**
-     * @generated from field: weewar.v1.AttackOption attack = 2;
+     * @generated from field: weewar.v1.AttackUnitAction attack = 2;
      */
-    value: AttackOption;
+    value: AttackUnitAction;
     case: "attack";
   } | {
     /**
-     * @generated from field: weewar.v1.EndTurnOption end_turn = 3;
+     * @generated from field: weewar.v1.BuildUnitAction build = 3;
      */
-    value: EndTurnOption;
-    case: "endTurn";
-  } | {
-    /**
-     * @generated from field: weewar.v1.BuildUnitOption build = 4;
-     */
-    value: BuildUnitOption;
+    value: BuildUnitAction;
     case: "build";
   } | {
     /**
-     * @generated from field: weewar.v1.CaptureBuildingOption capture = 5;
+     * @generated from field: weewar.v1.CaptureBuildingAction capture = 4;
      */
-    value: CaptureBuildingOption;
+    value: CaptureBuildingAction;
     case: "capture";
+  } | {
+    /**
+     * @generated from field: weewar.v1.EndTurnAction end_turn = 5;
+     */
+    value: EndTurnAction;
+    case: "endTurn";
   } | { case: undefined; value?: undefined };
 };
 
@@ -895,170 +755,7 @@ export type GameOption = Message<"weewar.v1.GameOption"> & {
  * Use `create(GameOptionSchema)` to create a new message.
  */
 export const GameOptionSchema: GenMessage<GameOption> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 26);
-
-/**
- * *
- * Option to end the current turn
- *
- * Empty - just indicates end turn is available
- *
- * @generated from message weewar.v1.EndTurnOption
- */
-export type EndTurnOption = Message<"weewar.v1.EndTurnOption"> & {
-};
-
-/**
- * Describes the message weewar.v1.EndTurnOption.
- * Use `create(EndTurnOptionSchema)` to create a new message.
- */
-export const EndTurnOptionSchema: GenMessage<EndTurnOption> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 27);
-
-/**
- * *
- * Option to move to a specific coordinate
- *
- * @generated from message weewar.v1.MoveOption
- */
-export type MoveOption = Message<"weewar.v1.MoveOption"> & {
-  /**
-   * @generated from field: double movement_cost = 3;
-   */
-  movementCost: number;
-
-  /**
-   * Ready-to-use action object for ProcessMoves
-   *
-   * @generated from field: weewar.v1.MoveUnitAction action = 4;
-   */
-  action?: MoveUnitAction;
-
-  /**
-   * Debug fields
-   *
-   * @generated from field: weewar.v1.Path reconstructed_path = 5;
-   */
-  reconstructedPath?: Path;
-};
-
-/**
- * Describes the message weewar.v1.MoveOption.
- * Use `create(MoveOptionSchema)` to create a new message.
- */
-export const MoveOptionSchema: GenMessage<MoveOption> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 28);
-
-/**
- * *
- * A possible attack target
- *
- * @generated from message weewar.v1.AttackOption
- */
-export type AttackOption = Message<"weewar.v1.AttackOption"> & {
-  /**
-   * Target unit type and health
-   *
-   * @generated from field: int32 target_unit_type = 3;
-   */
-  targetUnitType: number;
-
-  /**
-   * @generated from field: int32 target_unit_health = 4;
-   */
-  targetUnitHealth: number;
-
-  /**
-   * @generated from field: bool can_attack = 5;
-   */
-  canAttack: boolean;
-
-  /**
-   * Estimated damage this attack would deal
-   *
-   * @generated from field: int32 damage_estimate = 6;
-   */
-  damageEstimate: number;
-
-  /**
-   * Ready-to-use action object for ProcessMoves
-   *
-   * @generated from field: weewar.v1.AttackUnitAction action = 7;
-   */
-  action?: AttackUnitAction;
-};
-
-/**
- * Describes the message weewar.v1.AttackOption.
- * Use `create(AttackOptionSchema)` to create a new message.
- */
-export const AttackOptionSchema: GenMessage<AttackOption> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 29);
-
-/**
- * *
- * An option to build a unit (at a city tile)
- *
- * @generated from message weewar.v1.BuildUnitOption
- */
-export type BuildUnitOption = Message<"weewar.v1.BuildUnitOption"> & {
-  /**
-   * @generated from field: int32 q = 1;
-   */
-  q: number;
-
-  /**
-   * @generated from field: int32 r = 2;
-   */
-  r: number;
-
-  /**
-   * @generated from field: int32 unit_type = 3;
-   */
-  unitType: number;
-
-  /**
-   * @generated from field: int32 cost = 4;
-   */
-  cost: number;
-};
-
-/**
- * Describes the message weewar.v1.BuildUnitOption.
- * Use `create(BuildUnitOptionSchema)` to create a new message.
- */
-export const BuildUnitOptionSchema: GenMessage<BuildUnitOption> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 30);
-
-/**
- * *
- * A move where a unit can capture a building
- *
- * @generated from message weewar.v1.CaptureBuildingOption
- */
-export type CaptureBuildingOption = Message<"weewar.v1.CaptureBuildingOption"> & {
-  /**
-   * @generated from field: int32 q = 1;
-   */
-  q: number;
-
-  /**
-   * @generated from field: int32 r = 2;
-   */
-  r: number;
-
-  /**
-   * @generated from field: int32 tile_type = 3;
-   */
-  tileType: number;
-};
-
-/**
- * Describes the message weewar.v1.CaptureBuildingOption.
- * Use `create(CaptureBuildingOptionSchema)` to create a new message.
- */
-export const CaptureBuildingOptionSchema: GenMessage<CaptureBuildingOption> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 31);
+  messageDesc(file_weewar_v1_games, 23);
 
 /**
  * *
@@ -1115,7 +812,7 @@ export type SimulateAttackRequest = Message<"weewar.v1.SimulateAttackRequest"> &
  * Use `create(SimulateAttackRequestSchema)` to create a new message.
  */
 export const SimulateAttackRequestSchema: GenMessage<SimulateAttackRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 32);
+  messageDesc(file_weewar_v1_games, 24);
 
 /**
  * *
@@ -1164,53 +861,7 @@ export type SimulateAttackResponse = Message<"weewar.v1.SimulateAttackResponse">
  * Use `create(SimulateAttackResponseSchema)` to create a new message.
  */
 export const SimulateAttackResponseSchema: GenMessage<SimulateAttackResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_games, 33);
-
-/**
- * @generated from enum weewar.v1.PathDirection
- */
-export enum PathDirection {
-  /**
-   * @generated from enum value: PATH_DIRECTION_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: PATH_DIRECTION_LEFT = 1;
-   */
-  LEFT = 1,
-
-  /**
-   * @generated from enum value: PATH_DIRECTION_TOP_LEFT = 2;
-   */
-  TOP_LEFT = 2,
-
-  /**
-   * @generated from enum value: PATH_DIRECTION_TOP_RIGHT = 3;
-   */
-  TOP_RIGHT = 3,
-
-  /**
-   * @generated from enum value: PATH_DIRECTION_RIGHT = 4;
-   */
-  RIGHT = 4,
-
-  /**
-   * @generated from enum value: PATH_DIRECTION_BOTTOM_RIGHT = 5;
-   */
-  BOTTOM_RIGHT = 5,
-
-  /**
-   * @generated from enum value: PATH_DIRECTION_BOTTOM_LEFT = 6;
-   */
-  BOTTOM_LEFT = 6,
-}
-
-/**
- * Describes the enum weewar.v1.PathDirection.
- */
-export const PathDirectionSchema: GenEnum<PathDirection> = /*@__PURE__*/
-  enumDesc(file_weewar_v1_games, 0);
+  messageDesc(file_weewar_v1_games, 25);
 
 /**
  * GamesService manages the game examples catalog

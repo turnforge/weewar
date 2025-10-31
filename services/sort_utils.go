@@ -20,11 +20,11 @@ func GameOptionLess(a, b *v1.GameOption) bool {
 	switch aOpt := a.OptionType.(type) {
 	case *v1.GameOption_Move:
 		if bOpt, ok := b.OptionType.(*v1.GameOption_Move); ok {
-			return MoveOptionLess(aOpt.Move, bOpt.Move)
+			return MoveUnitActionLess(aOpt.Move, bOpt.Move)
 		}
 	case *v1.GameOption_Attack:
 		if bOpt, ok := b.OptionType.(*v1.GameOption_Attack); ok {
-			return AttackOptionLess(aOpt.Attack, bOpt.Attack)
+			return AttackUnitActionLess(aOpt.Attack, bOpt.Attack)
 		}
 	}
 
@@ -38,47 +38,47 @@ func getOptionTypePriority(opt *v1.GameOption) int {
 		return 0
 	case *v1.GameOption_Attack:
 		return 1
-	case *v1.GameOption_EndTurn:
-		return 2
 	case *v1.GameOption_Build:
-		return 3
+		return 2
 	case *v1.GameOption_Capture:
+		return 3
+	case *v1.GameOption_EndTurn:
 		return 4
 	default:
 		return 99
 	}
 }
 
-// MoveOptionLess compares two MoveOptions
+// MoveUnitActionLess compares two MoveUnitActions
 // First by movement cost, then by direction
-func MoveOptionLess(a, b *v1.MoveOption) bool {
+func MoveUnitActionLess(a, b *v1.MoveUnitAction) bool {
 	// Compare by cost first
 	if a.MovementCost != b.MovementCost {
 		return a.MovementCost < b.MovementCost
 	}
 
 	// Same cost, compare by direction
-	fromA := CoordFromInt32(a.Action.FromQ, a.Action.FromR)
-	toA := CoordFromInt32(a.Action.ToQ, a.Action.ToR)
+	fromA := CoordFromInt32(a.FromQ, a.FromR)
+	toA := CoordFromInt32(a.ToQ, a.ToR)
 	dirA := GetDirection(fromA, toA)
 
-	fromB := CoordFromInt32(b.Action.FromQ, b.Action.FromR)
-	toB := CoordFromInt32(b.Action.ToQ, b.Action.ToR)
+	fromB := CoordFromInt32(b.FromQ, b.FromR)
+	toB := CoordFromInt32(b.ToQ, b.ToR)
 	dirB := GetDirection(fromB, toB)
 
 	return dirA < dirB
 }
 
-// AttackOptionLess compares two AttackOptions
+// AttackUnitActionLess compares two AttackUnitActions
 // First by distance, then by target health (lowest first), then by unit type
-func AttackOptionLess(a, b *v1.AttackOption) bool {
+func AttackUnitActionLess(a, b *v1.AttackUnitAction) bool {
 	// Calculate distances
-	attackerA := CoordFromInt32(a.Action.AttackerQ, a.Action.AttackerR)
-	targetA := CoordFromInt32(a.Action.DefenderQ, a.Action.DefenderR)
+	attackerA := CoordFromInt32(a.AttackerQ, a.AttackerR)
+	targetA := CoordFromInt32(a.DefenderQ, a.DefenderR)
 	distA := attackerA.Distance(targetA)
 
-	attackerB := CoordFromInt32(b.Action.AttackerQ, b.Action.AttackerR)
-	targetB := CoordFromInt32(b.Action.DefenderQ, b.Action.DefenderR)
+	attackerB := CoordFromInt32(b.AttackerQ, b.AttackerR)
+	targetB := CoordFromInt32(b.DefenderQ, b.DefenderR)
 	distB := attackerB.Distance(targetB)
 
 	if distA != distB {

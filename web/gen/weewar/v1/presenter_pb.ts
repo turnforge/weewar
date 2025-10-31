@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/presenter.proto.
  */
 export const file_weewar_v1_presenter: GenFile = /*@__PURE__*/
-  fileDesc("Chl3ZWV3YXIvdjEvcHJlc2VudGVyLnByb3RvEgl3ZWV3YXIudjEibAoYVHVybk9wdGlvbkNsaWNrZWRSZXF1ZXN0Eg8KB2dhbWVfaWQYASABKAkSFAoMb3B0aW9uX2luZGV4GAIgASgFEhMKC29wdGlvbl90eXBlGAMgASgJEgkKAXEYBCABKAUSCQoBchgFIAEoBSIsChlUdXJuT3B0aW9uQ2xpY2tlZFJlc3BvbnNlEg8KB2dhbWVfaWQYASABKAkiSwoTU2NlbmVDbGlja2VkUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEgkKAXEYAiABKAUSCQoBchgDIAEoBRINCgVsYXllchgEIAEoCSInChRTY2VuZUNsaWNrZWRSZXNwb25zZRIPCgdnYW1lX2lkGAEgASgJIi4KG0VuZFR1cm5CdXR0b25DbGlja2VkUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJIi8KHEVuZFR1cm5CdXR0b25DbGlja2VkUmVzcG9uc2USDwoHZ2FtZV9pZBgBIAEoCSJUChVJbml0aWFsaXplR2FtZVJlcXVlc3QSEQoJZ2FtZV9kYXRhGAEgASgJEhIKCmdhbWVfc3RhdGUYAiABKAkSFAoMbW92ZV9oaXN0b3J5GAMgASgJInkKFkluaXRpYWxpemVHYW1lUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBINCgVlcnJvchgCIAEoCRIWCg5jdXJyZW50X3BsYXllchgDIAEoBRIUCgx0dXJuX2NvdW50ZXIYBCABKAUSEQoJZ2FtZV9uYW1lGAUgASgJMt8EChFHYW1lVmlld1ByZXNlbnRlchJXCg5Jbml0aWFsaXplR2FtZRIgLndlZXdhci52MS5Jbml0aWFsaXplR2FtZVJlcXVlc3QaIS53ZWV3YXIudjEuSW5pdGlhbGl6ZUdhbWVSZXNwb25zZSIAEpIBCgxTY2VuZUNsaWNrZWQSHi53ZWV3YXIudjEuU2NlbmVDbGlja2VkUmVxdWVzdBofLndlZXdhci52MS5TY2VuZUNsaWNrZWRSZXNwb25zZSJBgtPkkwI7OgEqIjYvdjEvcHJlc2VudGVycy9nYW1ldmlldy9hY3Rpb246Y2xpY2tlZDpzY2VuZS97Z2FtZV9pZH0SpgEKEVR1cm5PcHRpb25DbGlja2VkEiMud2Vld2FyLnYxLlR1cm5PcHRpb25DbGlja2VkUmVxdWVzdBokLndlZXdhci52MS5UdXJuT3B0aW9uQ2xpY2tlZFJlc3BvbnNlIkaC0+STAkA6ASoiOy92MS9wcmVzZW50ZXJzL2dhbWV2aWV3L2FjdGlvbjpjbGlja2VkOnR1cm5PcHRpb24ve2dhbWVfaWR9ErIBChRFbmRUdXJuQnV0dG9uQ2xpY2tlZBImLndlZXdhci52MS5FbmRUdXJuQnV0dG9uQ2xpY2tlZFJlcXVlc3QaJy53ZWV3YXIudjEuRW5kVHVybkJ1dHRvbkNsaWNrZWRSZXNwb25zZSJJgtPkkwJDOgEqIj4vdjEvcHJlc2VudGVycy9nYW1ldmlldy9hY3Rpb246Y2xpY2tlZDplbmRUdXJuQnV0dG9uL3tnYW1lX2lkfUKpAQoNY29tLndlZXdhci52MUIOUHJlc2VudGVyUHJvdG9QAVpDZ2l0aHViLmNvbS9wYW55YW0vdHVybmVuZ2luZS9nYW1lcy93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MTt3ZWV3YXJ2MaICA1dYWKoCCVdlZXdhci5WMcoCCVdlZXdhclxWMeICFVdlZXdhclxWMVxHUEJNZXRhZGF0YeoCCldlZXdhcjo6VjFiBnByb3RvMw", [file_google_protobuf_field_mask, file_weewar_v1_models, file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations]);
+  fileDesc("Chl3ZWV3YXIvdjEvcHJlc2VudGVyLnByb3RvEgl3ZWV3YXIudjEibAoYVHVybk9wdGlvbkNsaWNrZWRSZXF1ZXN0Eg8KB2dhbWVfaWQYASABKAkSFAoMb3B0aW9uX2luZGV4GAIgASgFEhMKC29wdGlvbl90eXBlGAMgASgJEgkKAXEYBCABKAUSCQoBchgFIAEoBSIsChlUdXJuT3B0aW9uQ2xpY2tlZFJlc3BvbnNlEg8KB2dhbWVfaWQYASABKAkiSwoTU2NlbmVDbGlja2VkUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJEgkKAXEYAiABKAUSCQoBchgDIAEoBRINCgVsYXllchgEIAEoCSInChRTY2VuZUNsaWNrZWRSZXNwb25zZRIPCgdnYW1lX2lkGAEgASgJIi4KG0VuZFR1cm5CdXR0b25DbGlja2VkUmVxdWVzdBIPCgdnYW1lX2lkGAEgASgJIi8KHEVuZFR1cm5CdXR0b25DbGlja2VkUmVzcG9uc2USDwoHZ2FtZV9pZBgBIAEoCSJVChlCdWlsZE9wdGlvbkNsaWNrZWRSZXF1ZXN0Eg8KB2dhbWVfaWQYASABKAkSCQoBcRgCIAEoBRIJCgFyGAMgASgFEhEKCXVuaXRfdHlwZRgEIAEoBSIcChpCdWlsZE9wdGlvbkNsaWNrZWRSZXNwb25zZSJUChVJbml0aWFsaXplR2FtZVJlcXVlc3QSEQoJZ2FtZV9kYXRhGAEgASgJEhIKCmdhbWVfc3RhdGUYAiABKAkSFAoMbW92ZV9oaXN0b3J5GAMgASgJInkKFkluaXRpYWxpemVHYW1lUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBINCgVlcnJvchgCIAEoCRIWCg5jdXJyZW50X3BsYXllchgDIAEoBRIUCgx0dXJuX2NvdW50ZXIYBCABKAUSEQoJZ2FtZV9uYW1lGAUgASgJMowGChFHYW1lVmlld1ByZXNlbnRlchJXCg5Jbml0aWFsaXplR2FtZRIgLndlZXdhci52MS5Jbml0aWFsaXplR2FtZVJlcXVlc3QaIS53ZWV3YXIudjEuSW5pdGlhbGl6ZUdhbWVSZXNwb25zZSIAEpIBCgxTY2VuZUNsaWNrZWQSHi53ZWV3YXIudjEuU2NlbmVDbGlja2VkUmVxdWVzdBofLndlZXdhci52MS5TY2VuZUNsaWNrZWRSZXNwb25zZSJBgtPkkwI7OgEqIjYvdjEvcHJlc2VudGVycy9nYW1ldmlldy9hY3Rpb246Y2xpY2tlZDpzY2VuZS97Z2FtZV9pZH0SpgEKEVR1cm5PcHRpb25DbGlja2VkEiMud2Vld2FyLnYxLlR1cm5PcHRpb25DbGlja2VkUmVxdWVzdBokLndlZXdhci52MS5UdXJuT3B0aW9uQ2xpY2tlZFJlc3BvbnNlIkaC0+STAkA6ASoiOy92MS9wcmVzZW50ZXJzL2dhbWV2aWV3L2FjdGlvbjpjbGlja2VkOnR1cm5PcHRpb24ve2dhbWVfaWR9ErIBChRFbmRUdXJuQnV0dG9uQ2xpY2tlZBImLndlZXdhci52MS5FbmRUdXJuQnV0dG9uQ2xpY2tlZFJlcXVlc3QaJy53ZWV3YXIudjEuRW5kVHVybkJ1dHRvbkNsaWNrZWRSZXNwb25zZSJJgtPkkwJDOgEqIj4vdjEvcHJlc2VudGVycy9nYW1ldmlldy9hY3Rpb246Y2xpY2tlZDplbmRUdXJuQnV0dG9uL3tnYW1lX2lkfRKqAQoSQnVpbGRPcHRpb25DbGlja2VkEiQud2Vld2FyLnYxLkJ1aWxkT3B0aW9uQ2xpY2tlZFJlcXVlc3QaJS53ZWV3YXIudjEuQnVpbGRPcHRpb25DbGlja2VkUmVzcG9uc2UiR4LT5JMCQToBKiI8L3YxL3ByZXNlbnRlcnMvZ2FtZXZpZXcvYWN0aW9uOmNsaWNrZWQ6YnVpbGRPcHRpb24ve2dhbWVfaWR9QqkBCg1jb20ud2Vld2FyLnYxQg5QcmVzZW50ZXJQcm90b1ABWkNnaXRodWIuY29tL3BhbnlhbS90dXJuZW5naW5lL2dhbWVzL3dlZXdhci9nZW4vZ28vd2Vld2FyL3YxO3dlZXdhcnYxogIDV1hYqgIJV2Vld2FyLlYxygIJV2Vld2FyXFYx4gIVV2Vld2FyXFYxXEdQQk1ldGFkYXRh6gIKV2Vld2FyOjpWMWIGcHJvdG8z", [file_google_protobuf_field_mask, file_weewar_v1_models, file_google_api_annotations, file_protoc_gen_openapiv2_options_annotations]);
 
 /**
  * Called when a turn option is clicked in TurnOptionsPanel
@@ -174,6 +174,61 @@ export const EndTurnButtonClickedResponseSchema: GenMessage<EndTurnButtonClicked
   messageDesc(file_weewar_v1_presenter, 5);
 
 /**
+ * Called when a build option is clicked in BuildOptionsModal
+ *
+ * @generated from message weewar.v1.BuildOptionClickedRequest
+ */
+export type BuildOptionClickedRequest = Message<"weewar.v1.BuildOptionClickedRequest"> & {
+  /**
+   * @generated from field: string game_id = 1;
+   */
+  gameId: string;
+
+  /**
+   * Q coordinate of the tile where unit is being built
+   *
+   * @generated from field: int32 q = 2;
+   */
+  q: number;
+
+  /**
+   * R coordinate of the tile where unit is being built
+   *
+   * @generated from field: int32 r = 3;
+   */
+  r: number;
+
+  /**
+   * Type of unit being built (e.g., "soldier_basic")
+   *
+   * @generated from field: int32 unit_type = 4;
+   */
+  unitType: number;
+};
+
+/**
+ * Describes the message weewar.v1.BuildOptionClickedRequest.
+ * Use `create(BuildOptionClickedRequestSchema)` to create a new message.
+ */
+export const BuildOptionClickedRequestSchema: GenMessage<BuildOptionClickedRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_presenter, 6);
+
+/**
+ * Response of a build option click
+ *
+ * @generated from message weewar.v1.BuildOptionClickedResponse
+ */
+export type BuildOptionClickedResponse = Message<"weewar.v1.BuildOptionClickedResponse"> & {
+};
+
+/**
+ * Describes the message weewar.v1.BuildOptionClickedResponse.
+ * Use `create(BuildOptionClickedResponseSchema)` to create a new message.
+ */
+export const BuildOptionClickedResponseSchema: GenMessage<BuildOptionClickedResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_presenter, 7);
+
+/**
  * Called when the end turn button was clicked
  *
  * @generated from message weewar.v1.InitializeGameRequest
@@ -200,7 +255,7 @@ export type InitializeGameRequest = Message<"weewar.v1.InitializeGameRequest"> &
  * Use `create(InitializeGameRequestSchema)` to create a new message.
  */
 export const InitializeGameRequestSchema: GenMessage<InitializeGameRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_presenter, 6);
+  messageDesc(file_weewar_v1_presenter, 8);
 
 /**
  * Response of a turn option click
@@ -241,7 +296,7 @@ export type InitializeGameResponse = Message<"weewar.v1.InitializeGameResponse">
  * Use `create(InitializeGameResponseSchema)` to create a new message.
  */
 export const InitializeGameResponseSchema: GenMessage<InitializeGameResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_presenter, 7);
+  messageDesc(file_weewar_v1_presenter, 9);
 
 /**
  * Presenter service is the P in Model View Presenter
@@ -308,6 +363,17 @@ export const GameViewPresenter: GenService<{
     methodKind: "unary";
     input: typeof EndTurnButtonClickedRequestSchema;
     output: typeof EndTurnButtonClickedResponseSchema;
+  },
+  /**
+   * *
+   * Called when a build option is clicked in the BuildOptionsModal
+   *
+   * @generated from rpc weewar.v1.GameViewPresenter.BuildOptionClicked
+   */
+  buildOptionClicked: {
+    methodKind: "unary";
+    input: typeof BuildOptionClickedRequestSchema;
+    output: typeof BuildOptionClickedResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_weewar_v1_presenter, 0);

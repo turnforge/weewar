@@ -17,21 +17,21 @@ type OptionFormatter struct {
 func (f *OptionFormatter) FormatOption(option *v1.GameOption, allPaths *v1.AllPaths) string {
 	switch opt := option.OptionType.(type) {
 	case *v1.GameOption_Move:
-		return f.FormatMoveOption(opt.Move, allPaths)
+		return f.FormatMoveUnitAction(opt.Move, allPaths)
 	case *v1.GameOption_Attack:
-		return f.FormatAttackOption(opt.Attack)
+		return f.FormatAttackUnitAction(opt.Attack)
 	case *v1.GameOption_EndTurn:
 		return "End turn"
 	case *v1.GameOption_Build:
-		return f.FormatBuildOption(opt.Build)
+		return f.FormatBuildUnitAction(opt.Build)
 	default:
 		return "Unknown option"
 	}
 }
 
-// FormatMoveOption formats a movement option with optional path visualization
-func (f *OptionFormatter) FormatMoveOption(moveOpt *v1.MoveOption, allPaths *v1.AllPaths) string {
-	targetCoord := CoordFromInt32(moveOpt.Action.ToQ, moveOpt.Action.ToR)
+// FormatMoveUnitAction formats a movement option with optional path visualization
+func (f *OptionFormatter) FormatMoveUnitAction(moveOpt *v1.MoveUnitAction, allPaths *v1.AllPaths) string {
+	targetCoord := CoordFromInt32(moveOpt.ToQ, moveOpt.ToR)
 
 	// Basic format: "move to (q,r) (cost: X)"
 	result := fmt.Sprintf("move to %s (cost: %f)",
@@ -39,7 +39,7 @@ func (f *OptionFormatter) FormatMoveOption(moveOpt *v1.MoveOption, allPaths *v1.
 
 	// Add path visualization if available and requested
 	if f.ShowPaths && allPaths != nil {
-		path, err := ReconstructPath(allPaths, moveOpt.Action.ToQ, moveOpt.Action.ToR)
+		path, err := ReconstructPath(allPaths, moveOpt.ToQ, moveOpt.ToR)
 		if err == nil && path != nil {
 			if f.DetailedPaths {
 				pathStr := FormatPathDetailed(path, "   ")
@@ -54,9 +54,9 @@ func (f *OptionFormatter) FormatMoveOption(moveOpt *v1.MoveOption, allPaths *v1.
 	return result
 }
 
-// FormatAttackOption formats an attack option with damage estimate
-func (f *OptionFormatter) FormatAttackOption(attackOpt *v1.AttackOption) string {
-	targetCoord := CoordFromInt32(attackOpt.Action.DefenderQ, attackOpt.Action.DefenderR)
+// FormatAttackUnitAction formats an attack option with damage estimate
+func (f *OptionFormatter) FormatAttackUnitAction(attackOpt *v1.AttackUnitAction) string {
+	targetCoord := CoordFromInt32(attackOpt.DefenderQ, attackOpt.DefenderR)
 
 	// Include target unit type and damage estimate
 	result := fmt.Sprintf("attack %s", targetCoord.String())
@@ -72,8 +72,8 @@ func (f *OptionFormatter) FormatAttackOption(attackOpt *v1.AttackOption) string 
 	return result
 }
 
-// FormatBuildOption formats a build option
-func (f *OptionFormatter) FormatBuildOption(buildOpt *v1.BuildUnitOption) string {
+// FormatBuildUnitAction formats a build option
+func (f *OptionFormatter) FormatBuildUnitAction(buildOpt *v1.BuildUnitAction) string {
 	if buildOpt == nil {
 		return "build"
 	}

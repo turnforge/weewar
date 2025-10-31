@@ -1,0 +1,110 @@
+{{ $theme := .Theme }}
+{{ $tile := .Tile }}
+{{ $playerCoins := .PlayerCoins }}
+<!-- Build Options Modal Content -->
+<div class="space-y-3">
+  <!-- Header showing current coins -->
+  <div class="flex items-center justify-between mb-4 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Available Coins</span>
+    <div class="flex items-center gap-1">
+      <span class="text-lg font-bold text-yellow-600 dark:text-yellow-400">🪙 {{ $playerCoins }}</span>
+      <span class="text-sm text-gray-500 dark:text-gray-400">coins</span>
+    </div>
+  </div>
+
+  <!-- Build Options List -->
+  {{ range $index, $buildOption := .BuildOptions }}
+  {{ $unitDef := $theme.GetUnitDefinition $buildOption.UnitType }}
+  {{ $canAfford := ge $playerCoins $buildOption.Cost }}
+  <button
+    class="build-option-button w-full text-left p-4 rounded-lg border-2 transition-all {{ if $canAfford }}bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer{{ else }}bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed{{ end }}"
+    data-option-index="{{ $index }}"
+    data-unit-type="{{ $buildOption.UnitType }}"
+    data-cost="{{ $buildOption.Cost }}"
+    {{ if not $canAfford }}disabled{{ end }}
+  >
+    <div class="flex items-start gap-3">
+      <!-- Unit Icon -->
+      <div class="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
+        <img
+          class="theme-unit-image w-12 h-12 object-contain"
+          data-unit-id="{{ $buildOption.UnitType }}"
+          data-player-id="{{ $tile.Player }}"
+          style="image-rendering: pixelated"
+        />
+      </div>
+
+      <!-- Unit Info -->
+      <div class="flex-1 min-w-0">
+        <!-- Unit Name and Type -->
+        <div class="flex items-baseline gap-2 mb-1">
+          <h3 class="font-semibold text-base text-gray-900 dark:text-white">
+            {{ $theme.GetUnitName $buildOption.UnitType }}
+          </h3>
+          {{ if $unitDef }}
+          <span class="text-xs px-2 py-0.5 rounded {{ if eq $unitDef.Classification "Heavy Land" }}bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300{{ else if eq $unitDef.Classification "Light Land" }}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{{ else if eq $unitDef.Classification "Light Water" }}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300{{ else if eq $unitDef.Classification "Heavy Water" }}bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300{{ else if eq $unitDef.Classification "Air" }}bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300{{ else }}bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300{{ end }}">
+            {{ $unitDef.Classification }}
+          </span>
+          {{ end }}
+        </div>
+
+        <!-- Unit Stats -->
+        {{ if $unitDef }}
+        <div class="flex items-center gap-3 mb-2 text-xs text-gray-600 dark:text-gray-400">
+          <span class="flex items-center gap-1" title="Movement">
+            <span class="font-medium">move {{ $unitDef.MoveCount }}</span>
+            {{ if $unitDef.AttackRange }}
+            <span class="text-gray-400 dark:text-gray-500">OR</span>
+            {{ end }}
+          </span>
+          {{ if $unitDef.AttackRange }}
+          <span class="flex items-center gap-1" title="Attack Range">
+            <span class="font-medium">attack {{ $unitDef.AttackRange }}</span>
+          </span>
+          {{ end }}
+          {{ if $unitDef.CanCapture }}
+          <span class="flex items-center gap-1" title="Can Capture">
+            <span class="font-medium">OR capture</span>
+          </span>
+          {{ end }}
+        </div>
+
+        <!-- Unit Abilities -->
+        {{ if or $unitDef.BestAgainst $unitDef.CannotAttack $unitDef.SpecialAbilities }}
+        <ul class="space-y-1 text-xs text-gray-700 dark:text-gray-300">
+          {{ if $unitDef.BestAgainst }}
+          <li class="flex items-start gap-1">
+            <span class="text-green-600 dark:text-green-400">•</span>
+            <span>{{ $unitDef.BestAgainst }}</span>
+          </li>
+          {{ end }}
+          {{ if $unitDef.CannotAttack }}
+          <li class="flex items-start gap-1">
+            <span class="text-red-600 dark:text-red-400">•</span>
+            <span>{{ $unitDef.CannotAttack }}</span>
+          </li>
+          {{ end }}
+          {{ range $unitDef.SpecialAbilities }}
+          <li class="flex items-start gap-1">
+            <span class="text-blue-600 dark:text-blue-400">•</span>
+            <span>{{ . }}</span>
+          </li>
+          {{ end }}
+        </ul>
+        {{ end }}
+        {{ end }}
+      </div>
+
+      <!-- Cost Badge -->
+      <div class="flex-shrink-0 flex flex-col items-end">
+        <div class="flex items-center gap-1 px-2 py-1 rounded {{ if $canAfford }}bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200{{ else }}bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400{{ end }}">
+          <span class="text-base font-bold">🪙 {{ $buildOption.Cost }}</span>
+        </div>
+        {{ if not $canAfford }}
+        <span class="text-xs text-red-600 dark:text-red-400 mt-1">Insufficient coins</span>
+        {{ end }}
+      </div>
+    </div>
+  </button>
+  {{ end }}
+</div>

@@ -8,7 +8,7 @@
 import * as Phaser from 'phaser';
 import { BaseLayer, LayerConfig, ClickContext, LayerHitResult } from '../LayerSystem';
 import { hexToPixel } from '../hexUtils';
-import { MoveOption, AttackOption } from '../../../gen/wasmjs/weewar/v1/interfaces';
+import { MoveUnitAction, AttackUnitAction } from '../../../gen/wasmjs/weewar/v1/interfaces';
 
 // =============================================================================
 // Hex Highlight Base Class
@@ -248,7 +248,7 @@ export class SelectionHighlightLayer extends HexHighlightLayer {
  * Shows green highlights for valid movement positions
  */
 export class MovementHighlightLayer extends HexHighlightLayer {
-    private movementOptions: Map<string, MoveOption> = new Map();
+    private movementOptions: Map<string, MoveUnitAction> = new Map();
     private coordinateTexts: Map<string, Phaser.GameObjects.Text> = new Map();
     private showDebugCoordinates: boolean = true;
     
@@ -275,26 +275,26 @@ export class MovementHighlightLayer extends HexHighlightLayer {
     
     
     /**
-     * Show movement options using protobuf MoveOption objects
+     * Show movement options using protobuf MoveUnitAction objects
      */
-    public showMovementOptions(moveOptions: MoveOption[]): void {
+    public showMovementOptions(moveOptions: MoveUnitAction[]): void {
         // Clear existing highlights and stored options
         this.clearHighlights();
         this.clearCoordinateTexts();
         this.movementOptions.clear();
         
-        // Add highlights for each valid movement position and store the MoveOption data
+        // Add highlights for each valid movement position and store the MoveUnitAction data
         moveOptions.forEach(moveOption => {
             // Green highlight with subtle border
-            this.addHighlight(moveOption.action!.fromQ, moveOption.action!.fromR, 0x00FF00, 0.2, 0x00FF00, 2);
+            this.addHighlight(moveOption.toQ, moveOption.toR, 0x00FF00, 0.2, 0x00FF00, 2);
             
             // Store the move option for click handling
-            const coordKey = `${moveOption.action!.fromQ},${moveOption.action!.fromR}`;
+            const coordKey = `${moveOption.toQ},${moveOption.toR}`;
             this.movementOptions.set(coordKey, moveOption);
             
             // Add debug coordinate text if enabled
             if (this.showDebugCoordinates) {
-                this.addCoordinateText(moveOption.action!.fromQ, moveOption.action!.fromR, moveOption);
+                this.addCoordinateText(moveOption.toQ, moveOption.toR, moveOption);
             }
         });
     }
@@ -324,7 +324,7 @@ export class MovementHighlightLayer extends HexHighlightLayer {
     /**
      * Add coordinate text overlay at hex position
      */
-    private addCoordinateText(q: number, r: number, moveOption: MoveOption): void {
+    private addCoordinateText(q: number, r: number, moveOption: MoveUnitAction): void {
         const key = `${q},${r}`;
         const position = hexToPixel(q, r);
         
@@ -363,7 +363,7 @@ export class MovementHighlightLayer extends HexHighlightLayer {
     /**
      * Get the move option for a specific coordinate (if any)
      */
-    public getMoveOptionAt(q: number, r: number): MoveOption | undefined {
+    public getMoveUnitActionAt(q: number, r: number): MoveUnitAction | undefined {
         const coordKey = `${q},${r}`;
         return this.movementOptions.get(coordKey);
     }
@@ -411,14 +411,14 @@ export class AttackHighlightLayer extends HexHighlightLayer {
     /**
      * Show attack options
      */
-    public showAttackOptions(coords: Array<{ q: number; r: number }>): void {
+    public showAttackOptions(coords: AttackUnitAction[]): void {
         // Clear existing highlights
         this.clearHighlights();
         
         // Add highlights for each valid attack target
         coords.forEach(coord => {
             // Red highlight with border
-            this.addHighlight(coord.q, coord.r, 0xFF0000, 0.2, 0xFF0000, 2);
+            this.addHighlight(coord.defenderQ, coord.defenderR, 0xFF0000, 0.2, 0xFF0000, 2);
         });
     }
     

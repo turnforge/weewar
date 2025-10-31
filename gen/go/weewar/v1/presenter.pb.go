@@ -351,6 +351,112 @@ func (x *EndTurnButtonClickedResponse) GetGameId() string {
 	return ""
 }
 
+// Called when a build option is clicked in BuildOptionsModal
+type BuildOptionClickedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GameId        string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	Q             int32                  `protobuf:"varint,2,opt,name=q,proto3" json:"q,omitempty"`                               // Q coordinate of the tile where unit is being built
+	R             int32                  `protobuf:"varint,3,opt,name=r,proto3" json:"r,omitempty"`                               // R coordinate of the tile where unit is being built
+	UnitType      int32                  `protobuf:"varint,4,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"` // Type of unit being built (e.g., "soldier_basic")
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BuildOptionClickedRequest) Reset() {
+	*x = BuildOptionClickedRequest{}
+	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BuildOptionClickedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BuildOptionClickedRequest) ProtoMessage() {}
+
+func (x *BuildOptionClickedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BuildOptionClickedRequest.ProtoReflect.Descriptor instead.
+func (*BuildOptionClickedRequest) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *BuildOptionClickedRequest) GetGameId() string {
+	if x != nil {
+		return x.GameId
+	}
+	return ""
+}
+
+func (x *BuildOptionClickedRequest) GetQ() int32 {
+	if x != nil {
+		return x.Q
+	}
+	return 0
+}
+
+func (x *BuildOptionClickedRequest) GetR() int32 {
+	if x != nil {
+		return x.R
+	}
+	return 0
+}
+
+func (x *BuildOptionClickedRequest) GetUnitType() int32 {
+	if x != nil {
+		return x.UnitType
+	}
+	return 0
+}
+
+// Response of a build option click
+type BuildOptionClickedResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BuildOptionClickedResponse) Reset() {
+	*x = BuildOptionClickedResponse{}
+	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BuildOptionClickedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BuildOptionClickedResponse) ProtoMessage() {}
+
+func (x *BuildOptionClickedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BuildOptionClickedResponse.ProtoReflect.Descriptor instead.
+func (*BuildOptionClickedResponse) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{7}
+}
+
 // Called when the end turn button was clicked
 type InitializeGameRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -363,7 +469,7 @@ type InitializeGameRequest struct {
 
 func (x *InitializeGameRequest) Reset() {
 	*x = InitializeGameRequest{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -375,7 +481,7 @@ func (x *InitializeGameRequest) String() string {
 func (*InitializeGameRequest) ProtoMessage() {}
 
 func (x *InitializeGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -388,7 +494,7 @@ func (x *InitializeGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeGameRequest.ProtoReflect.Descriptor instead.
 func (*InitializeGameRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{6}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *InitializeGameRequest) GetGameData() string {
@@ -427,7 +533,7 @@ type InitializeGameResponse struct {
 
 func (x *InitializeGameResponse) Reset() {
 	*x = InitializeGameResponse{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -439,7 +545,7 @@ func (x *InitializeGameResponse) String() string {
 func (*InitializeGameResponse) ProtoMessage() {}
 
 func (x *InitializeGameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -452,7 +558,7 @@ func (x *InitializeGameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeGameResponse.ProtoReflect.Descriptor instead.
 func (*InitializeGameResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{7}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *InitializeGameResponse) GetSuccess() bool {
@@ -514,7 +620,13 @@ const file_weewar_v1_presenter_proto_rawDesc = "" +
 	"\x1bEndTurnButtonClickedRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\"7\n" +
 	"\x1cEndTurnButtonClickedResponse\x12\x17\n" +
-	"\agame_id\x18\x01 \x01(\tR\x06gameId\"v\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\"m\n" +
+	"\x19BuildOptionClickedRequest\x12\x17\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\f\n" +
+	"\x01q\x18\x02 \x01(\x05R\x01q\x12\f\n" +
+	"\x01r\x18\x03 \x01(\x05R\x01r\x12\x1b\n" +
+	"\tunit_type\x18\x04 \x01(\x05R\bunitType\"\x1c\n" +
+	"\x1aBuildOptionClickedResponse\"v\n" +
 	"\x15InitializeGameRequest\x12\x1b\n" +
 	"\tgame_data\x18\x01 \x01(\tR\bgameData\x12\x1d\n" +
 	"\n" +
@@ -525,12 +637,13 @@ const file_weewar_v1_presenter_proto_rawDesc = "" +
 	"\x05error\x18\x02 \x01(\tR\x05error\x12%\n" +
 	"\x0ecurrent_player\x18\x03 \x01(\x05R\rcurrentPlayer\x12!\n" +
 	"\fturn_counter\x18\x04 \x01(\x05R\vturnCounter\x12\x1b\n" +
-	"\tgame_name\x18\x05 \x01(\tR\bgameName2\xdf\x04\n" +
+	"\tgame_name\x18\x05 \x01(\tR\bgameName2\x8c\x06\n" +
 	"\x11GameViewPresenter\x12W\n" +
 	"\x0eInitializeGame\x12 .weewar.v1.InitializeGameRequest\x1a!.weewar.v1.InitializeGameResponse\"\x00\x12\x92\x01\n" +
 	"\fSceneClicked\x12\x1e.weewar.v1.SceneClickedRequest\x1a\x1f.weewar.v1.SceneClickedResponse\"A\x82\xd3\xe4\x93\x02;:\x01*\"6/v1/presenters/gameview/action:clicked:scene/{game_id}\x12\xa6\x01\n" +
 	"\x11TurnOptionClicked\x12#.weewar.v1.TurnOptionClickedRequest\x1a$.weewar.v1.TurnOptionClickedResponse\"F\x82\xd3\xe4\x93\x02@:\x01*\";/v1/presenters/gameview/action:clicked:turnOption/{game_id}\x12\xb2\x01\n" +
-	"\x14EndTurnButtonClicked\x12&.weewar.v1.EndTurnButtonClickedRequest\x1a'.weewar.v1.EndTurnButtonClickedResponse\"I\x82\xd3\xe4\x93\x02C:\x01*\">/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}B\xa9\x01\n" +
+	"\x14EndTurnButtonClicked\x12&.weewar.v1.EndTurnButtonClickedRequest\x1a'.weewar.v1.EndTurnButtonClickedResponse\"I\x82\xd3\xe4\x93\x02C:\x01*\">/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}\x12\xaa\x01\n" +
+	"\x12BuildOptionClicked\x12$.weewar.v1.BuildOptionClickedRequest\x1a%.weewar.v1.BuildOptionClickedResponse\"G\x82\xd3\xe4\x93\x02A:\x01*\"</v1/presenters/gameview/action:clicked:buildOption/{game_id}B\xa9\x01\n" +
 	"\rcom.weewar.v1B\x0ePresenterProtoP\x01ZCgithub.com/panyam/turnengine/games/weewar/gen/go/weewar/v1;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"
 
@@ -546,7 +659,7 @@ func file_weewar_v1_presenter_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_presenter_proto_rawDescData
 }
 
-var file_weewar_v1_presenter_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_weewar_v1_presenter_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_weewar_v1_presenter_proto_goTypes = []any{
 	(*TurnOptionClickedRequest)(nil),     // 0: weewar.v1.TurnOptionClickedRequest
 	(*TurnOptionClickedResponse)(nil),    // 1: weewar.v1.TurnOptionClickedResponse
@@ -554,20 +667,24 @@ var file_weewar_v1_presenter_proto_goTypes = []any{
 	(*SceneClickedResponse)(nil),         // 3: weewar.v1.SceneClickedResponse
 	(*EndTurnButtonClickedRequest)(nil),  // 4: weewar.v1.EndTurnButtonClickedRequest
 	(*EndTurnButtonClickedResponse)(nil), // 5: weewar.v1.EndTurnButtonClickedResponse
-	(*InitializeGameRequest)(nil),        // 6: weewar.v1.InitializeGameRequest
-	(*InitializeGameResponse)(nil),       // 7: weewar.v1.InitializeGameResponse
+	(*BuildOptionClickedRequest)(nil),    // 6: weewar.v1.BuildOptionClickedRequest
+	(*BuildOptionClickedResponse)(nil),   // 7: weewar.v1.BuildOptionClickedResponse
+	(*InitializeGameRequest)(nil),        // 8: weewar.v1.InitializeGameRequest
+	(*InitializeGameResponse)(nil),       // 9: weewar.v1.InitializeGameResponse
 }
 var file_weewar_v1_presenter_proto_depIdxs = []int32{
-	6, // 0: weewar.v1.GameViewPresenter.InitializeGame:input_type -> weewar.v1.InitializeGameRequest
+	8, // 0: weewar.v1.GameViewPresenter.InitializeGame:input_type -> weewar.v1.InitializeGameRequest
 	2, // 1: weewar.v1.GameViewPresenter.SceneClicked:input_type -> weewar.v1.SceneClickedRequest
 	0, // 2: weewar.v1.GameViewPresenter.TurnOptionClicked:input_type -> weewar.v1.TurnOptionClickedRequest
 	4, // 3: weewar.v1.GameViewPresenter.EndTurnButtonClicked:input_type -> weewar.v1.EndTurnButtonClickedRequest
-	7, // 4: weewar.v1.GameViewPresenter.InitializeGame:output_type -> weewar.v1.InitializeGameResponse
-	3, // 5: weewar.v1.GameViewPresenter.SceneClicked:output_type -> weewar.v1.SceneClickedResponse
-	1, // 6: weewar.v1.GameViewPresenter.TurnOptionClicked:output_type -> weewar.v1.TurnOptionClickedResponse
-	5, // 7: weewar.v1.GameViewPresenter.EndTurnButtonClicked:output_type -> weewar.v1.EndTurnButtonClickedResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	6, // 4: weewar.v1.GameViewPresenter.BuildOptionClicked:input_type -> weewar.v1.BuildOptionClickedRequest
+	9, // 5: weewar.v1.GameViewPresenter.InitializeGame:output_type -> weewar.v1.InitializeGameResponse
+	3, // 6: weewar.v1.GameViewPresenter.SceneClicked:output_type -> weewar.v1.SceneClickedResponse
+	1, // 7: weewar.v1.GameViewPresenter.TurnOptionClicked:output_type -> weewar.v1.TurnOptionClickedResponse
+	5, // 8: weewar.v1.GameViewPresenter.EndTurnButtonClicked:output_type -> weewar.v1.EndTurnButtonClickedResponse
+	7, // 9: weewar.v1.GameViewPresenter.BuildOptionClicked:output_type -> weewar.v1.BuildOptionClickedResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -585,7 +702,7 @@ func file_weewar_v1_presenter_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_presenter_proto_rawDesc), len(file_weewar_v1_presenter_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

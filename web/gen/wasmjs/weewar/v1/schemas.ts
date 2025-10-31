@@ -830,9 +830,14 @@ export const GamePlayerSchema: MessageSchema = {
       id: 6,
     },
     {
-      name: "coins",
+      name: "startingCoins",
       type: FieldType.NUMBER,
       id: 7,
+    },
+    {
+      name: "coins",
+      type: FieldType.NUMBER,
+      id: 8,
     },
   ],
 };
@@ -1067,6 +1072,13 @@ export const GameMoveSchema: MessageSchema = {
       messageType: "weewar.v1.EndTurnAction",
       oneofGroup: "move_type",
     },
+    {
+      name: "buildUnit",
+      type: FieldType.MESSAGE,
+      id: 7,
+      messageType: "weewar.v1.BuildUnitAction",
+      oneofGroup: "move_type",
+    },
   ],
   oneofGroups: ["move_type"],
 };
@@ -1125,6 +1137,17 @@ export const MoveUnitActionSchema: MessageSchema = {
       type: FieldType.NUMBER,
       id: 4,
     },
+    {
+      name: "movementCost",
+      type: FieldType.NUMBER,
+      id: 5,
+    },
+    {
+      name: "reconstructedPath",
+      type: FieldType.MESSAGE,
+      id: 6,
+      messageType: "weewar.v1.Path",
+    },
   ],
 };
 
@@ -1154,6 +1177,81 @@ export const AttackUnitActionSchema: MessageSchema = {
       name: "defenderR",
       type: FieldType.NUMBER,
       id: 4,
+    },
+    {
+      name: "targetUnitType",
+      type: FieldType.NUMBER,
+      id: 5,
+    },
+    {
+      name: "targetUnitHealth",
+      type: FieldType.NUMBER,
+      id: 6,
+    },
+    {
+      name: "canAttack",
+      type: FieldType.BOOLEAN,
+      id: 7,
+    },
+    {
+      name: "damageEstimate",
+      type: FieldType.NUMBER,
+      id: 8,
+    },
+  ],
+};
+
+
+/**
+ * Schema for BuildUnitAction message
+ */
+export const BuildUnitActionSchema: MessageSchema = {
+  name: "BuildUnitAction",
+  fields: [
+    {
+      name: "q",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "r",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "unitType",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "cost",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
+  ],
+};
+
+
+/**
+ * Schema for CaptureBuildingAction message
+ */
+export const CaptureBuildingActionSchema: MessageSchema = {
+  name: "CaptureBuildingAction",
+  fields: [
+    {
+      name: "q",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "r",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "tileType",
+      type: FieldType.NUMBER,
+      id: 3,
     },
   ],
 };
@@ -1300,6 +1398,109 @@ export const PlayerChangedChangeSchema: MessageSchema = {
       id: 5,
       messageType: "weewar.v1.Unit",
       repeated: true,
+    },
+  ],
+};
+
+
+/**
+ * Schema for AllPaths message
+ */
+export const AllPathsSchema: MessageSchema = {
+  name: "AllPaths",
+  fields: [
+    {
+      name: "sourceQ",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "sourceR",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "edges",
+      type: FieldType.STRING,
+      id: 3,
+    },
+  ],
+};
+
+
+/**
+ * Schema for PathEdge message
+ */
+export const PathEdgeSchema: MessageSchema = {
+  name: "PathEdge",
+  fields: [
+    {
+      name: "fromQ",
+      type: FieldType.NUMBER,
+      id: 1,
+    },
+    {
+      name: "fromR",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "toQ",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "toR",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
+    {
+      name: "movementCost",
+      type: FieldType.NUMBER,
+      id: 5,
+    },
+    {
+      name: "totalCost",
+      type: FieldType.NUMBER,
+      id: 6,
+    },
+    {
+      name: "terrainType",
+      type: FieldType.STRING,
+      id: 7,
+    },
+    {
+      name: "explanation",
+      type: FieldType.STRING,
+      id: 8,
+    },
+  ],
+};
+
+
+/**
+ * Schema for Path message
+ */
+export const PathSchema: MessageSchema = {
+  name: "Path",
+  fields: [
+    {
+      name: "edges",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.PathEdge",
+      repeated: true,
+    },
+    {
+      name: "directions",
+      type: FieldType.REPEATED,
+      id: 2,
+      repeated: true,
+    },
+    {
+      name: "totalCost",
+      type: FieldType.NUMBER,
+      id: 3,
     },
   ],
 };
@@ -1836,109 +2037,6 @@ export const GetOptionsAtResponseSchema: MessageSchema = {
 
 
 /**
- * Schema for AllPaths message
- */
-export const AllPathsSchema: MessageSchema = {
-  name: "AllPaths",
-  fields: [
-    {
-      name: "sourceQ",
-      type: FieldType.NUMBER,
-      id: 1,
-    },
-    {
-      name: "sourceR",
-      type: FieldType.NUMBER,
-      id: 2,
-    },
-    {
-      name: "edges",
-      type: FieldType.STRING,
-      id: 3,
-    },
-  ],
-};
-
-
-/**
- * Schema for PathEdge message
- */
-export const PathEdgeSchema: MessageSchema = {
-  name: "PathEdge",
-  fields: [
-    {
-      name: "fromQ",
-      type: FieldType.NUMBER,
-      id: 1,
-    },
-    {
-      name: "fromR",
-      type: FieldType.NUMBER,
-      id: 2,
-    },
-    {
-      name: "toQ",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-    {
-      name: "toR",
-      type: FieldType.NUMBER,
-      id: 4,
-    },
-    {
-      name: "movementCost",
-      type: FieldType.NUMBER,
-      id: 5,
-    },
-    {
-      name: "totalCost",
-      type: FieldType.NUMBER,
-      id: 6,
-    },
-    {
-      name: "terrainType",
-      type: FieldType.STRING,
-      id: 7,
-    },
-    {
-      name: "explanation",
-      type: FieldType.STRING,
-      id: 8,
-    },
-  ],
-};
-
-
-/**
- * Schema for Path message
- */
-export const PathSchema: MessageSchema = {
-  name: "Path",
-  fields: [
-    {
-      name: "edges",
-      type: FieldType.MESSAGE,
-      id: 1,
-      messageType: "weewar.v1.PathEdge",
-      repeated: true,
-    },
-    {
-      name: "directions",
-      type: FieldType.REPEATED,
-      id: 2,
-      repeated: true,
-    },
-    {
-      name: "totalCost",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-  ],
-};
-
-
-/**
  * Schema for GameOption message
  */
 export const GameOptionSchema: MessageSchema = {
@@ -1948,167 +2046,39 @@ export const GameOptionSchema: MessageSchema = {
       name: "move",
       type: FieldType.MESSAGE,
       id: 1,
-      messageType: "weewar.v1.MoveOption",
+      messageType: "weewar.v1.MoveUnitAction",
       oneofGroup: "option_type",
     },
     {
       name: "attack",
       type: FieldType.MESSAGE,
       id: 2,
-      messageType: "weewar.v1.AttackOption",
-      oneofGroup: "option_type",
-    },
-    {
-      name: "endTurn",
-      type: FieldType.MESSAGE,
-      id: 3,
-      messageType: "weewar.v1.EndTurnOption",
+      messageType: "weewar.v1.AttackUnitAction",
       oneofGroup: "option_type",
     },
     {
       name: "build",
       type: FieldType.MESSAGE,
-      id: 4,
-      messageType: "weewar.v1.BuildUnitOption",
+      id: 3,
+      messageType: "weewar.v1.BuildUnitAction",
       oneofGroup: "option_type",
     },
     {
       name: "capture",
       type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "weewar.v1.CaptureBuildingAction",
+      oneofGroup: "option_type",
+    },
+    {
+      name: "endTurn",
+      type: FieldType.MESSAGE,
       id: 5,
-      messageType: "weewar.v1.CaptureBuildingOption",
+      messageType: "weewar.v1.EndTurnAction",
       oneofGroup: "option_type",
     },
   ],
   oneofGroups: ["option_type"],
-};
-
-
-/**
- * Schema for EndTurnOption message
- */
-export const EndTurnOptionSchema: MessageSchema = {
-  name: "EndTurnOption",
-  fields: [
-  ],
-};
-
-
-/**
- * Schema for MoveOption message
- */
-export const MoveOptionSchema: MessageSchema = {
-  name: "MoveOption",
-  fields: [
-    {
-      name: "movementCost",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-    {
-      name: "action",
-      type: FieldType.MESSAGE,
-      id: 4,
-      messageType: "weewar.v1.MoveUnitAction",
-    },
-    {
-      name: "reconstructedPath",
-      type: FieldType.MESSAGE,
-      id: 5,
-      messageType: "weewar.v1.Path",
-    },
-  ],
-};
-
-
-/**
- * Schema for AttackOption message
- */
-export const AttackOptionSchema: MessageSchema = {
-  name: "AttackOption",
-  fields: [
-    {
-      name: "targetUnitType",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-    {
-      name: "targetUnitHealth",
-      type: FieldType.NUMBER,
-      id: 4,
-    },
-    {
-      name: "canAttack",
-      type: FieldType.BOOLEAN,
-      id: 5,
-    },
-    {
-      name: "damageEstimate",
-      type: FieldType.NUMBER,
-      id: 6,
-    },
-    {
-      name: "action",
-      type: FieldType.MESSAGE,
-      id: 7,
-      messageType: "weewar.v1.AttackUnitAction",
-    },
-  ],
-};
-
-
-/**
- * Schema for BuildUnitOption message
- */
-export const BuildUnitOptionSchema: MessageSchema = {
-  name: "BuildUnitOption",
-  fields: [
-    {
-      name: "q",
-      type: FieldType.NUMBER,
-      id: 1,
-    },
-    {
-      name: "r",
-      type: FieldType.NUMBER,
-      id: 2,
-    },
-    {
-      name: "unitType",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-    {
-      name: "cost",
-      type: FieldType.NUMBER,
-      id: 4,
-    },
-  ],
-};
-
-
-/**
- * Schema for CaptureBuildingOption message
- */
-export const CaptureBuildingOptionSchema: MessageSchema = {
-  name: "CaptureBuildingOption",
-  fields: [
-    {
-      name: "q",
-      type: FieldType.NUMBER,
-      id: 1,
-    },
-    {
-      name: "r",
-      type: FieldType.NUMBER,
-      id: 2,
-    },
-    {
-      name: "tileType",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-  ],
 };
 
 
@@ -2262,6 +2232,16 @@ export const ShowBuildOptionsRequestSchema: MessageSchema = {
       name: "hide",
       type: FieldType.BOOLEAN,
       id: 2,
+    },
+    {
+      name: "q",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "r",
+      type: FieldType.NUMBER,
+      id: 4,
     },
   ],
 };
@@ -2544,7 +2524,36 @@ export const HighlightSpecSchema: MessageSchema = {
       type: FieldType.STRING,
       id: 3,
     },
+    {
+      name: "move",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "weewar.v1.MoveUnitAction",
+      oneofGroup: "action",
+    },
+    {
+      name: "attack",
+      type: FieldType.MESSAGE,
+      id: 5,
+      messageType: "weewar.v1.AttackUnitAction",
+      oneofGroup: "action",
+    },
+    {
+      name: "build",
+      type: FieldType.MESSAGE,
+      id: 6,
+      messageType: "weewar.v1.BuildUnitAction",
+      oneofGroup: "action",
+    },
+    {
+      name: "capture",
+      type: FieldType.MESSAGE,
+      id: 7,
+      messageType: "weewar.v1.CaptureBuildingAction",
+      oneofGroup: "action",
+    },
   ],
+  oneofGroups: ["action"],
 };
 
 
@@ -3027,6 +3036,46 @@ export const EndTurnButtonClickedResponseSchema: MessageSchema = {
       type: FieldType.STRING,
       id: 1,
     },
+  ],
+};
+
+
+/**
+ * Schema for BuildOptionClickedRequest message
+ */
+export const BuildOptionClickedRequestSchema: MessageSchema = {
+  name: "BuildOptionClickedRequest",
+  fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "q",
+      type: FieldType.NUMBER,
+      id: 2,
+    },
+    {
+      name: "r",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
+      name: "unitType",
+      type: FieldType.NUMBER,
+      id: 4,
+    },
+  ],
+};
+
+
+/**
+ * Schema for BuildOptionClickedResponse message
+ */
+export const BuildOptionClickedResponseSchema: MessageSchema = {
+  name: "BuildOptionClickedResponse",
+  fields: [
   ],
 };
 
@@ -3888,12 +3937,17 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.GameMoveResult": GameMoveResultSchema,
   "weewar.v1.MoveUnitAction": MoveUnitActionSchema,
   "weewar.v1.AttackUnitAction": AttackUnitActionSchema,
+  "weewar.v1.BuildUnitAction": BuildUnitActionSchema,
+  "weewar.v1.CaptureBuildingAction": CaptureBuildingActionSchema,
   "weewar.v1.EndTurnAction": EndTurnActionSchema,
   "weewar.v1.WorldChange": WorldChangeSchema,
   "weewar.v1.UnitMovedChange": UnitMovedChangeSchema,
   "weewar.v1.UnitDamagedChange": UnitDamagedChangeSchema,
   "weewar.v1.UnitKilledChange": UnitKilledChangeSchema,
   "weewar.v1.PlayerChangedChange": PlayerChangedChangeSchema,
+  "weewar.v1.AllPaths": AllPathsSchema,
+  "weewar.v1.PathEdge": PathEdgeSchema,
+  "weewar.v1.Path": PathSchema,
   "weewar.v1.GameInfo": GameInfoSchema,
   "weewar.v1.ListGamesRequest": ListGamesRequestSchema,
   "weewar.v1.ListGamesResponse": ListGamesResponseSchema,
@@ -3917,15 +3971,7 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.ListMovesResponse": ListMovesResponseSchema,
   "weewar.v1.GetOptionsAtRequest": GetOptionsAtRequestSchema,
   "weewar.v1.GetOptionsAtResponse": GetOptionsAtResponseSchema,
-  "weewar.v1.AllPaths": AllPathsSchema,
-  "weewar.v1.PathEdge": PathEdgeSchema,
-  "weewar.v1.Path": PathSchema,
   "weewar.v1.GameOption": GameOptionSchema,
-  "weewar.v1.EndTurnOption": EndTurnOptionSchema,
-  "weewar.v1.MoveOption": MoveOptionSchema,
-  "weewar.v1.AttackOption": AttackOptionSchema,
-  "weewar.v1.BuildUnitOption": BuildUnitOptionSchema,
-  "weewar.v1.CaptureBuildingOption": CaptureBuildingOptionSchema,
   "weewar.v1.SimulateAttackRequest": SimulateAttackRequestSchema,
   "weewar.v1.SimulateAttackResponse": SimulateAttackResponseSchema,
   "weewar.v1.EmptyRequest": EmptyRequestSchema,
@@ -3977,6 +4023,8 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.SceneClickedResponse": SceneClickedResponseSchema,
   "weewar.v1.EndTurnButtonClickedRequest": EndTurnButtonClickedRequestSchema,
   "weewar.v1.EndTurnButtonClickedResponse": EndTurnButtonClickedResponseSchema,
+  "weewar.v1.BuildOptionClickedRequest": BuildOptionClickedRequestSchema,
+  "weewar.v1.BuildOptionClickedResponse": BuildOptionClickedResponseSchema,
   "weewar.v1.InitializeGameRequest": InitializeGameRequestSchema,
   "weewar.v1.InitializeGameResponse": InitializeGameResponseSchema,
   "weewar.v1.ThemeInfo": ThemeInfoSchema,

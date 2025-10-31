@@ -488,6 +488,63 @@
         ]
       }
     },
+    "/v1/presenters/gameview/action:clicked:buildOption/{game_id}": {
+      "post": {
+        "summary": "*\nCalled when a build option is clicked in the BuildOptionsModal",
+        "operationId": "GameViewPresenter_BuildOptionClicked",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1BuildOptionClickedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "q": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Q coordinate of the tile where unit is being built"
+                },
+                "r": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "R coordinate of the tile where unit is being built"
+                },
+                "unitType": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "Type of unit being built (e.g., \"soldier_basic\")"
+                }
+              },
+              "title": "Called when a build option is clicked in BuildOptionsModal"
+            }
+          }
+        ],
+        "tags": [
+          "GameViewPresenter"
+        ]
+      }
+    },
     "/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}": {
       "post": {
         "summary": "*\nCalled when user clicked the EndTurn button",
@@ -1264,33 +1321,6 @@
       },
       "title": "Compact representation of all reachable paths from a source"
     },
-    "v1AttackOption": {
-      "type": "object",
-      "properties": {
-        "targetUnitType": {
-          "type": "integer",
-          "format": "int32",
-          "title": "Target unit type and health"
-        },
-        "targetUnitHealth": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "canAttack": {
-          "type": "boolean"
-        },
-        "damageEstimate": {
-          "type": "integer",
-          "format": "int32",
-          "title": "Estimated damage this attack would deal"
-        },
-        "action": {
-          "$ref": "#/definitions/v1AttackUnitAction",
-          "title": "Ready-to-use action object for ProcessMoves"
-        }
-      },
-      "title": "*\nA possible attack target"
-    },
     "v1AttackRecord": {
       "type": "object",
       "properties": {
@@ -1333,11 +1363,32 @@
         "defenderR": {
           "type": "integer",
           "format": "int32"
+        },
+        "targetUnitType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Optional fields for presenting during \"options\" and debugging"
+        },
+        "targetUnitHealth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "canAttack": {
+          "type": "boolean"
+        },
+        "damageEstimate": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Estimated damage this attack would deal"
         }
       },
       "title": "*\nAttack with one unit against another"
     },
-    "v1BuildUnitOption": {
+    "v1BuildOptionClickedResponse": {
+      "type": "object",
+      "title": "Response of a build option click"
+    },
+    "v1BuildUnitAction": {
       "type": "object",
       "properties": {
         "q": {
@@ -1357,9 +1408,9 @@
           "format": "int32"
         }
       },
-      "title": "*\nAn option to build a unit (at a city tile)"
+      "title": "*\nAn action to build a unit (at a city tile)"
     },
-    "v1CaptureBuildingOption": {
+    "v1CaptureBuildingAction": {
       "type": "object",
       "properties": {
         "q": {
@@ -1500,11 +1551,6 @@
       },
       "title": "Response of a turn option click"
     },
-    "v1EndTurnOption": {
-      "type": "object",
-      "description": "Empty - just indicates end turn is available",
-      "title": "*\nOption to end the current turn"
-    },
     "v1Game": {
       "type": "object",
       "properties": {
@@ -1612,6 +1658,9 @@
         },
         "endTurn": {
           "$ref": "#/definitions/v1EndTurnAction"
+        },
+        "buildUnit": {
+          "$ref": "#/definitions/v1BuildUnitAction"
         }
       },
       "title": "*\nRepresents a single move which can be one of many actions in the game"
@@ -1692,19 +1741,19 @@
       "type": "object",
       "properties": {
         "move": {
-          "$ref": "#/definitions/v1MoveOption"
+          "$ref": "#/definitions/v1MoveUnitAction"
         },
         "attack": {
-          "$ref": "#/definitions/v1AttackOption"
-        },
-        "endTurn": {
-          "$ref": "#/definitions/v1EndTurnOption"
+          "$ref": "#/definitions/v1AttackUnitAction"
         },
         "build": {
-          "$ref": "#/definitions/v1BuildUnitOption"
+          "$ref": "#/definitions/v1BuildUnitAction"
         },
         "capture": {
-          "$ref": "#/definitions/v1CaptureBuildingOption"
+          "$ref": "#/definitions/v1CaptureBuildingAction"
+        },
+        "endTurn": {
+          "$ref": "#/definitions/v1EndTurnAction"
         }
       },
       "title": "*\nA single game option available at a position"
@@ -1738,6 +1787,11 @@
         "isActive": {
           "type": "boolean",
           "title": "Whether play is still in the game - can this just be inferred?"
+        },
+        "startingCoins": {
+          "type": "integer",
+          "format": "int32",
+          "title": "How many coins the player started off with"
         },
         "coins": {
           "type": "integer",
@@ -1989,6 +2043,18 @@
         "type": {
           "type": "string",
           "title": "\"selection\", \"movement\", \"attack\""
+        },
+        "move": {
+          "$ref": "#/definitions/v1MoveUnitAction"
+        },
+        "attack": {
+          "$ref": "#/definitions/v1AttackUnitAction"
+        },
+        "build": {
+          "$ref": "#/definitions/v1BuildUnitAction"
+        },
+        "capture": {
+          "$ref": "#/definitions/v1CaptureBuildingAction"
         }
       },
       "title": "Specification for a single highlight"
@@ -2083,24 +2149,6 @@
       "type": "object",
       "title": "Response from fetch"
     },
-    "v1MoveOption": {
-      "type": "object",
-      "properties": {
-        "movementCost": {
-          "type": "number",
-          "format": "double"
-        },
-        "action": {
-          "$ref": "#/definitions/v1MoveUnitAction",
-          "title": "Ready-to-use action object for ProcessMoves"
-        },
-        "reconstructedPath": {
-          "$ref": "#/definitions/v1Path",
-          "title": "Debug fields"
-        }
-      },
-      "title": "*\nOption to move to a specific coordinate"
-    },
     "v1MoveUnitAction": {
       "type": "object",
       "properties": {
@@ -2119,6 +2167,15 @@
         "toR": {
           "type": "integer",
           "format": "int32"
+        },
+        "movementCost": {
+          "type": "number",
+          "format": "double",
+          "title": "Optional fields that can be used for showing move options as well as debugging"
+        },
+        "reconstructedPath": {
+          "$ref": "#/definitions/v1Path",
+          "title": "Debug fields"
         }
       },
       "title": "*\nMove unit from one position to another"

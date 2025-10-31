@@ -363,8 +363,11 @@ message GamePlayer {
   // Whether play is still in the game - can this just be inferred?
   bool is_active = 6;
 
+  // How many coins the player started off with
+  int32 starting_coins = 7;
+
   // Player's current money/coins balance for building units
-  int32 coins = 7;
+  int32 coins = 8;
 }
 
 message GameTeam {
@@ -468,6 +471,7 @@ message GameMove {
     MoveUnitAction move_unit = 4;
     AttackUnitAction attack_unit = 5;
     EndTurnAction end_turn = 6;
+    BuildUnitAction build_unit = 7;
   }
 }
 
@@ -495,6 +499,12 @@ message MoveUnitAction {
   int32 from_r = 2;
   int32 to_q = 3;
   int32 to_r = 4;
+
+  // Optional fields that can be used for showing move options as well as debugging
+  double movement_cost = 5;
+
+  // Debug fields
+  Path reconstructed_path = 6;
 }
 
 /**
@@ -505,6 +515,32 @@ message AttackUnitAction {
   int32 attacker_r = 2;
   int32 defender_q = 3;
   int32 defender_r = 4;
+
+
+  // Optional fields for presenting during "options" and debugging
+  int32 target_unit_type = 5;
+  int32 target_unit_health = 6;
+  bool can_attack = 7;
+  int32 damage_estimate = 8; // Estimated damage this attack would deal
+}
+
+/**
+ * An action to build a unit (at a city tile)
+ */
+message BuildUnitAction {
+  int32 q = 1;
+  int32 r = 2;
+  int32 unit_type = 3;
+  int32 cost = 4;
+}
+
+/**
+ * A move where a unit can capture a building
+ */
+message CaptureBuildingAction {
+  int32 q = 1;
+  int32 r = 2;
+  int32 tile_type = 3;
 }
 
 /**
@@ -565,4 +601,50 @@ message PlayerChangedChange {
   int32 new_turn = 4;
   // Units that had their movement/health reset for the new turn
   repeated Unit reset_units = 5;
+}
+
+// Compact representation of all reachable paths from a source
+message AllPaths {
+  // Starting coordinate for all paths
+  int32 source_q = 1;
+  int32 source_r = 2;
+  
+  // Map of edges: key is "toQ,toR" for quick parent lookup
+  // Each edge represents the optimal way to reach 'to' from its parent
+  map<string, PathEdge> edges = 3;
+}
+
+// A single edge in a path with movement details
+message PathEdge {
+  int32 from_q = 1;            // Parent coordinate Q
+  int32 from_r = 2;            // Parent coordinate R
+  int32 to_q = 3;              // Destination coordinate Q
+  int32 to_r = 4;              // Destination coordinate R
+  double movement_cost = 5;     // Cost to move from 'from' to 'to' (edge cost)
+  double total_cost = 6;        // Total cumulative cost from source to 'to'
+  string terrain_type = 7;     // e.g., "mountain", "plains", "forest"
+  string explanation = 8;      // e.g., "Mountain costs Soldier 4 movement points"
+}
+
+// Full path from source to destination (constructed on-demand from AllPaths)
+message Path {
+  // Edges in order from source to destination
+  repeated PathEdge edges = 1;
+
+  // len(directions) = len(edges) - 1
+  // and directions[i] = direction from edge[i - 1] -> edge[i]
+  repeated PathDirection directions = 2;
+
+  // Sum of all edge costs
+  double total_cost = 3;
+}
+
+enum PathDirection {
+  PATH_DIRECTION_UNSPECIFIED = 0;
+	PATH_DIRECTION_LEFT = 1;
+	PATH_DIRECTION_TOP_LEFT = 2;
+	PATH_DIRECTION_TOP_RIGHT = 3;
+	PATH_DIRECTION_RIGHT = 4;
+	PATH_DIRECTION_BOTTOM_RIGHT = 5;
+	PATH_DIRECTION_BOTTOM_LEFT = 6;
 }

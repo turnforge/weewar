@@ -358,6 +358,8 @@ export interface GamePlayer {
   name: string;
   /** Whether play is still in the game - can this just be inferred? */
   isActive: boolean;
+  /** How many coins the player started off with */
+  startingCoins: number;
   /** Player's current money/coins balance for building units */
   coins: number;
 }
@@ -452,6 +454,7 @@ export interface GameMove {
   moveUnit?: MoveUnitAction;
   attackUnit?: AttackUnitAction;
   endTurn?: EndTurnAction;
+  buildUnit?: BuildUnitAction;
 }
 
 
@@ -480,6 +483,10 @@ export interface MoveUnitAction {
   fromR: number;
   toQ: number;
   toR: number;
+  /** Optional fields that can be used for showing move options as well as debugging */
+  movementCost: number;
+  /** Debug fields */
+  reconstructedPath?: Path;
 }
 
 
@@ -492,6 +499,34 @@ export interface AttackUnitAction {
   attackerR: number;
   defenderQ: number;
   defenderR: number;
+  /** Optional fields for presenting during "options" and debugging */
+  targetUnitType: number;
+  targetUnitHealth: number;
+  canAttack: boolean;
+  damageEstimate: number;
+}
+
+
+/**
+ * *
+ An action to build a unit (at a city tile)
+ */
+export interface BuildUnitAction {
+  q: number;
+  r: number;
+  unitType: number;
+  cost: number;
+}
+
+
+/**
+ * *
+ A move where a unit can capture a building
+ */
+export interface CaptureBuildingAction {
+  q: number;
+  r: number;
+  tileType: number;
 }
 
 
@@ -560,6 +595,48 @@ export interface PlayerChangedChange {
   newTurn: number;
   /** Units that had their movement/health reset for the new turn */
   resetUnits?: Unit[];
+}
+
+
+/**
+ * Compact representation of all reachable paths from a source
+ */
+export interface AllPaths {
+  /** Starting coordinate for all paths */
+  sourceQ: number;
+  sourceR: number;
+  /** Map of edges: key is "toQ,toR" for quick parent lookup
+ Each edge represents the optimal way to reach 'to' from its parent */
+  edges: Record<string, PathEdge>;
+}
+
+
+/**
+ * A single edge in a path with movement details
+ */
+export interface PathEdge {
+  fromQ: number;
+  fromR: number;
+  toQ: number;
+  toR: number;
+  movementCost: number;
+  totalCost: number;
+  terrainType: string;
+  explanation: string;
+}
+
+
+/**
+ * Full path from source to destination (constructed on-demand from AllPaths)
+ */
+export interface Path {
+  /** Edges in order from source to destination */
+  edges?: PathEdge[];
+  /** len(directions) = len(edges) - 1
+ and directions[i] = direction from edge[i - 1] -> edge[i] */
+  directions: PathDirection[];
+  /** Sum of all edge costs */
+  totalCost: number;
 }
 
 
@@ -840,116 +917,15 @@ export interface GetOptionsAtResponse {
 
 
 /**
- * Compact representation of all reachable paths from a source
- */
-export interface AllPaths {
-  /** Starting coordinate for all paths */
-  sourceQ: number;
-  sourceR: number;
-  /** Map of edges: key is "toQ,toR" for quick parent lookup
- Each edge represents the optimal way to reach 'to' from its parent */
-  edges: Record<string, PathEdge>;
-}
-
-
-/**
- * A single edge in a path with movement details
- */
-export interface PathEdge {
-  fromQ: number;
-  fromR: number;
-  toQ: number;
-  toR: number;
-  movementCost: number;
-  totalCost: number;
-  terrainType: string;
-  explanation: string;
-}
-
-
-/**
- * Full path from source to destination (constructed on-demand from AllPaths)
- */
-export interface Path {
-  /** Edges in order from source to destination */
-  edges?: PathEdge[];
-  /** len(directions) = len(edges) - 1
- and directions[i] = direction from edge[i - 1] -> edge[i] */
-  directions: PathDirection[];
-  /** Sum of all edge costs */
-  totalCost: number;
-}
-
-
-/**
  * *
  A single game option available at a position
  */
 export interface GameOption {
-  move?: MoveOption;
-  attack?: AttackOption;
-  endTurn?: EndTurnOption;
-  build?: BuildUnitOption;
-  capture?: CaptureBuildingOption;
-}
-
-
-/**
- * *
- Option to end the current turn
- */
-export interface EndTurnOption {
-}
-
-
-/**
- * *
- Option to move to a specific coordinate
- */
-export interface MoveOption {
-  movementCost: number;
-  /** Ready-to-use action object for ProcessMoves */
-  action?: MoveUnitAction;
-  /** Debug fields */
-  reconstructedPath?: Path;
-}
-
-
-/**
- * *
- A possible attack target
- */
-export interface AttackOption {
-  /** Target unit type and health */
-  targetUnitType: number;
-  targetUnitHealth: number;
-  canAttack: boolean;
-  damageEstimate: number;
-  /** Ready-to-use action object for ProcessMoves */
-  action?: AttackUnitAction;
-}
-
-
-/**
- * *
- An option to build a unit (at a city tile)
- */
-export interface BuildUnitOption {
-  q: number;
-  r: number;
-  unitType: number;
-  cost: number;
-}
-
-
-/**
- * *
- A move where a unit can capture a building
- */
-export interface CaptureBuildingOption {
-  q: number;
-  r: number;
-  tileType: number;
+  move?: MoveUnitAction;
+  attack?: AttackUnitAction;
+  build?: BuildUnitAction;
+  capture?: CaptureBuildingAction;
+  endTurn?: EndTurnAction;
 }
 
 
@@ -1014,6 +990,8 @@ export interface SetContentResponse {
 export interface ShowBuildOptionsRequest {
   innerHtml: string;
   hide: boolean;
+  q: number;
+  r: number;
 }
 
 
@@ -1145,6 +1123,10 @@ export interface HighlightSpec {
   q: number;
   r: number;
   type: string;
+  move?: MoveUnitAction;
+  attack?: AttackUnitAction;
+  build?: BuildUnitAction;
+  capture?: CaptureBuildingAction;
 }
 
 
@@ -1350,6 +1332,24 @@ export interface EndTurnButtonClickedRequest {
  */
 export interface EndTurnButtonClickedResponse {
   gameId: string;
+}
+
+
+/**
+ * Called when a build option is clicked in BuildOptionsModal
+ */
+export interface BuildOptionClickedRequest {
+  gameId: string;
+  q: number;
+  r: number;
+  unitType: number;
+}
+
+
+/**
+ * Response of a build option click
+ */
+export interface BuildOptionClickedResponse {
 }
 
 

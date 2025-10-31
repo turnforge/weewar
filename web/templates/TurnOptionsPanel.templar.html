@@ -30,15 +30,15 @@
     class="turn-option-button w-full text-left p-3 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-800 transition-colors"
     data-option-index="{{ $index }}"
     data-option-type="move"
-    data-q="{{ $move.Action.ToQ }}"
-    data-r="{{ $move.Action.ToR }}"
+    data-q="{{ $move.ToQ }}"
+    data-r="{{ $move.ToR }}"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="text-green-600 dark:text-green-400 text-lg">➜</span>
         <div>
           <div class="font-medium text-gray-900 dark:text-white">
-            Move to ({{ $move.Action.ToQ }}, {{ $move.Action.ToR }})
+            Move to ({{ $move.ToQ }}, {{ $move.ToR }})
           </div>
           <div class="text-xs text-gray-500 dark:text-gray-400">
             Cost: {{ $move.MovementCost }} MP
@@ -53,16 +53,16 @@
     class="turn-option-button w-full text-left p-3 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
     data-option-index="{{ $index }}"
     data-option-type="attack"
-    data-q="{{ $attack.Action.DefenderQ }}"
-    data-r="{{ $attack.Action.DefenderR }}"
+    data-q="{{ $attack.DefenderQ }}"
+    data-r="{{ $attack.DefenderR }}"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="text-red-600 dark:text-red-400 text-lg">⚔️</span>
         <div>
           <div class="font-medium text-gray-900 dark:text-white">
-            Attack at ({{ $attack.Action.DefenderQ }}, {{
-            $attack.Action.DefenderR }})
+            Attack at ({{ $attack.DefenderQ }}, {{
+            $attack.DefenderR }})
           </div>
           <div class="text-xs text-gray-500 dark:text-gray-400">
             Target: {{ $theme.GetUnitName $attack.TargetUnitType }} (HP: {{

@@ -46,6 +46,9 @@ const (
 	// GameViewPresenterEndTurnButtonClickedProcedure is the fully-qualified name of the
 	// GameViewPresenter's EndTurnButtonClicked RPC.
 	GameViewPresenterEndTurnButtonClickedProcedure = "/weewar.v1.GameViewPresenter/EndTurnButtonClicked"
+	// GameViewPresenterBuildOptionClickedProcedure is the fully-qualified name of the
+	// GameViewPresenter's BuildOptionClicked RPC.
+	GameViewPresenterBuildOptionClickedProcedure = "/weewar.v1.GameViewPresenter/BuildOptionClicked"
 )
 
 // GameViewPresenterClient is a client for the weewar.v1.GameViewPresenter service.
@@ -66,6 +69,9 @@ type GameViewPresenterClient interface {
 	// *
 	// Called when user clicked the EndTurn button
 	EndTurnButtonClicked(context.Context, *connect.Request[v1.EndTurnButtonClickedRequest]) (*connect.Response[v1.EndTurnButtonClickedResponse], error)
+	// *
+	// Called when a build option is clicked in the BuildOptionsModal
+	BuildOptionClicked(context.Context, *connect.Request[v1.BuildOptionClickedRequest]) (*connect.Response[v1.BuildOptionClickedResponse], error)
 }
 
 // NewGameViewPresenterClient constructs a client for the weewar.v1.GameViewPresenter service. By
@@ -103,6 +109,12 @@ func NewGameViewPresenterClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(gameViewPresenterMethods.ByName("EndTurnButtonClicked")),
 			connect.WithClientOptions(opts...),
 		),
+		buildOptionClicked: connect.NewClient[v1.BuildOptionClickedRequest, v1.BuildOptionClickedResponse](
+			httpClient,
+			baseURL+GameViewPresenterBuildOptionClickedProcedure,
+			connect.WithSchema(gameViewPresenterMethods.ByName("BuildOptionClicked")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -112,6 +124,7 @@ type gameViewPresenterClient struct {
 	sceneClicked         *connect.Client[v1.SceneClickedRequest, v1.SceneClickedResponse]
 	turnOptionClicked    *connect.Client[v1.TurnOptionClickedRequest, v1.TurnOptionClickedResponse]
 	endTurnButtonClicked *connect.Client[v1.EndTurnButtonClickedRequest, v1.EndTurnButtonClickedResponse]
+	buildOptionClicked   *connect.Client[v1.BuildOptionClickedRequest, v1.BuildOptionClickedResponse]
 }
 
 // InitializeGame calls weewar.v1.GameViewPresenter.InitializeGame.
@@ -134,6 +147,11 @@ func (c *gameViewPresenterClient) EndTurnButtonClicked(ctx context.Context, req 
 	return c.endTurnButtonClicked.CallUnary(ctx, req)
 }
 
+// BuildOptionClicked calls weewar.v1.GameViewPresenter.BuildOptionClicked.
+func (c *gameViewPresenterClient) BuildOptionClicked(ctx context.Context, req *connect.Request[v1.BuildOptionClickedRequest]) (*connect.Response[v1.BuildOptionClickedResponse], error) {
+	return c.buildOptionClicked.CallUnary(ctx, req)
+}
+
 // GameViewPresenterHandler is an implementation of the weewar.v1.GameViewPresenter service.
 type GameViewPresenterHandler interface {
 	// *
@@ -152,6 +170,9 @@ type GameViewPresenterHandler interface {
 	// *
 	// Called when user clicked the EndTurn button
 	EndTurnButtonClicked(context.Context, *connect.Request[v1.EndTurnButtonClickedRequest]) (*connect.Response[v1.EndTurnButtonClickedResponse], error)
+	// *
+	// Called when a build option is clicked in the BuildOptionsModal
+	BuildOptionClicked(context.Context, *connect.Request[v1.BuildOptionClickedRequest]) (*connect.Response[v1.BuildOptionClickedResponse], error)
 }
 
 // NewGameViewPresenterHandler builds an HTTP handler from the service implementation. It returns
@@ -185,6 +206,12 @@ func NewGameViewPresenterHandler(svc GameViewPresenterHandler, opts ...connect.H
 		connect.WithSchema(gameViewPresenterMethods.ByName("EndTurnButtonClicked")),
 		connect.WithHandlerOptions(opts...),
 	)
+	gameViewPresenterBuildOptionClickedHandler := connect.NewUnaryHandler(
+		GameViewPresenterBuildOptionClickedProcedure,
+		svc.BuildOptionClicked,
+		connect.WithSchema(gameViewPresenterMethods.ByName("BuildOptionClicked")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/weewar.v1.GameViewPresenter/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case GameViewPresenterInitializeGameProcedure:
@@ -195,6 +222,8 @@ func NewGameViewPresenterHandler(svc GameViewPresenterHandler, opts ...connect.H
 			gameViewPresenterTurnOptionClickedHandler.ServeHTTP(w, r)
 		case GameViewPresenterEndTurnButtonClickedProcedure:
 			gameViewPresenterEndTurnButtonClickedHandler.ServeHTTP(w, r)
+		case GameViewPresenterBuildOptionClickedProcedure:
+			gameViewPresenterBuildOptionClickedHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -218,4 +247,8 @@ func (UnimplementedGameViewPresenterHandler) TurnOptionClicked(context.Context, 
 
 func (UnimplementedGameViewPresenterHandler) EndTurnButtonClicked(context.Context, *connect.Request[v1.EndTurnButtonClickedRequest]) (*connect.Response[v1.EndTurnButtonClickedResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewPresenter.EndTurnButtonClicked is not implemented"))
+}
+
+func (UnimplementedGameViewPresenterHandler) BuildOptionClicked(context.Context, *connect.Request[v1.BuildOptionClickedRequest]) (*connect.Response[v1.BuildOptionClickedResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewPresenter.BuildOptionClicked is not implemented"))
 }

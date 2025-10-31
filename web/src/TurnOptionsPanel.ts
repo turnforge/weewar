@@ -6,16 +6,6 @@ import { World } from './World';
 import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
 import { ITheme } from '../assets/themes/BaseTheme';
 import { ThemeUtils } from './ThemeUtils';
-import {
-    Unit,
-    GameOption,
-    MoveOption,
-    AttackOption,
-    EndTurnOption,
-    BuildUnitOption,
-    CaptureBuildingOption,
-    GetOptionsAtResponse
-} from '../gen/wasmjs/weewar/v1/interfaces'
 
 /**
  * TurnOptionsPanel displays available turn options at a selected position

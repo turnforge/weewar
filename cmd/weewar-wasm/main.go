@@ -68,6 +68,12 @@ func main() {
 	wasmGameViewPresenter.TurnOptionsPanel.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.TurnOptionsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
+	wasmGameViewPresenter.BuildOptionsModal = &services.BrowserBuildOptionsModal{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.BuildOptionsModal.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.BuildOptionsModal.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
+
 	// Register the JavaScript API using generated exports
 	exports.RegisterAPI()
 

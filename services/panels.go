@@ -293,13 +293,21 @@ func (b *BrowserBuildOptionsModal) Show(ctx context.Context, tile *v1.Tile, buil
 	b.BaseBuildOptionsModal.Show(ctx, tile, buildOptions, playerCoins)
 	fmt.Printf("[BrowserBuildOptionsModal] Show called with %d options, tile at (%d,%d), coins=%d\n",
 		len(buildOptions), tile.Q, tile.R, playerCoins)
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("[BrowserBuildOptionsModal] PANIC during template rendering: %v\n", r)
+		}
+	}()
+
 	content := renderPanelTemplate(ctx, "BuildOptionsModal.templar.html", map[string]any{
 		"BuildOptions": buildOptions,
 		"Tile":         tile,
 		"PlayerCoins":  playerCoins,
 		"Theme":        b.Theme,
+		"RulesTable":   b.RulesEngine,
 	})
-	fmt.Printf("[BrowserBuildOptionsModal] Calling GameViewerPage.ShowBuildOptions with content length=%d\n", len(content))
+	fmt.Printf("[BrowserBuildOptionsModal] Template rendered successfully, content length=%d\n", len(content))
 	go b.GameViewerPage.ShowBuildOptions(ctx, &v1.ShowBuildOptionsRequest{
 		InnerHtml: content,
 		Hide:      false,

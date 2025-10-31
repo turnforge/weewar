@@ -263,6 +263,44 @@ Available options:
 - Other player's bases show no options (correct ownership check)
 - Neutral tiles show end turn only
 
+### Build System Implementation
+
+**Achievement**: Complete unit production system with validation, coin management, and dual CLI/web UI support.
+
+**Key Features**:
+- **ProcessBuildUnit**: Full move processor with comprehensive validations
+  * Tile ownership check (must belong to current player)
+  * Terrain compatibility (checks buildable_unit_ids)
+  * One-build-per-turn-per-tile enforcement (via tile.LastActedTurn)
+  * Position occupancy check (cannot build on occupied tiles)
+  * Coin balance validation and deduction
+- **CLI Command**: `ww build <tile> <unit_type>` with unit name or ID support
+- **Confirmation Prompts**: "You will build a Tank costing 400 coins. Are you sure? (y/n)"
+- **Web UI**: BuildOptionsModal shows unit stats, costs, and player coins
+- **History Tracking**: UnitBuiltChange records builds in world history
+
+**Implementation Details**:
+- cmd/cli/cmd/build.go: CLI command with parseUnitType() for name/ID resolution
+- services/moves.go: ProcessBuildUnit() with all validation logic
+- services/panels.go: Base/Browser BuildOptionsModal separation
+- web/templates/BuildOptionsModal.templar.html: Rich unit info display
+- protos/weewar/v1/models.proto: UnitBuiltChange message
+
+**CLI Examples**:
+```bash
+ww build t:A1 trooper              # Build by name
+ww build t:A1 5                    # Build by unit type ID
+ww build t:A1 tank --confirm=false # Skip confirmation
+ww build t:A1 tank --dryrun        # Preview without executing
+```
+
+**Validations**:
+- Only tile owner can build
+- Terrain must support unit type (buildable_unit_ids check)
+- Player must have sufficient coins
+- One build per turn per tile (via tile.LastActedTurn)
+- Position must be unoccupied
+
 ### Path Tracking and Movement Explainability
 
 **Achievement**: Implemented comprehensive path tracking system that provides full movement paths and terrain cost explanations in GetOptionsAt RPC.

@@ -161,12 +161,19 @@
 
 ### Advanced Game Mechanics
 **Priority**: Medium
-**Status**: Not Started
+**Status**: Building System Complete
 
-**Tasks**:
+**Completed**:
+- [x] Unit production from buildings (build system)
+- [x] Resource management system (coin deduction and validation)
+- [x] Build validation (ownership, terrain compatibility, one-build-per-turn)
+- [x] CLI build command with confirmation prompts
+- [x] Web UI build options modal with unit stats and costs
+- [x] ProcessBuildUnit with comprehensive validations
+- [x] UnitBuiltChange tracking in world history
+
+**Remaining Tasks**:
 - [ ] Building capture mechanics
-- [ ] Unit production from buildings
-- [ ] Resource management system
 - [ ] Fog of war implementation
 - [ ] Turn time limits and timers
 - [ ] Team play mechanics (already in proto, needs implementation)

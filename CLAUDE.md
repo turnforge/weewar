@@ -131,14 +131,18 @@ export WEEWAR_GAME_ID=c5380903  # Or use --game-id flag
 ww status                    # Show game state (players, coins, units, tiles)
 ww units                     # List all units
 ww options B1                # Show available moves for unit B1
+ww options t:A1              # Show build options for tile A1
 ww move B1 0,-3             # Move unit by coordinates
 ww move B1 R                # Move unit by direction (L/R/TL/TR/BL/BR)
 ww attack A1 B2             # Attack unit
+ww build t:A1 trooper       # Build a unit at tile A1
+ww build t:A1 5             # Build unit type 5 at tile A1
 ww endturn                  # End current player's turn
 
 # Flags
 ww --verbose units          # Show debug output
 ww --dryrun move B1 R      # Preview move without saving
+ww --confirm=false build t:A1 tank  # Build without confirmation prompt
 ww --json status            # Output as JSON
 ```
 

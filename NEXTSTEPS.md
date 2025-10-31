@@ -161,7 +161,7 @@
 
 ### Advanced Game Mechanics
 **Priority**: Medium
-**Status**: Building System Complete
+**Status**: Economy System Complete
 
 **Completed**:
 - [x] Unit production from buildings (build system)
@@ -171,8 +171,16 @@
 - [x] Web UI build options modal with unit stats and costs
 - [x] ProcessBuildUnit with comprehensive validations
 - [x] UnitBuiltChange tracking in world history
+- [x] Economy system with coin deduction on build
+- [x] Income generation on end turn (bases * income_per_base)
+- [x] CoinsChangedChange WorldChange event tracking
+- [x] FSGamesService fix to persist GameConfig changes
+- [x] Move command error propagation (no false success messages)
 
 **Remaining Tasks**:
+- [ ] Move income rates from hardcoded constant to GameConfiguration.IncomeConfig
+- [ ] Add income configuration UI in StartGamePage
+- [ ] Add starting coins configuration per player in StartGamePage
 - [ ] Building capture mechanics
 - [ ] Fog of war implementation
 - [ ] Turn time limits and timers

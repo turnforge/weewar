@@ -13,6 +13,7 @@ type PresenterContext struct {
 	Presenter          *services.SingletonGameViewPresenterImpl
 	GameState          *services.BaseGameState
 	TurnOptions        *services.BaseTurnOptionsPanel
+	BuildOptions       *services.BaseBuildOptionsModal
 	UnitStats          *services.BaseUnitPanel
 	TerrainStats       *services.BaseTilePanel
 	DamageDistribution *services.BaseUnitPanel
@@ -48,6 +49,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 		State: gameResp.State,
 	}
 	turnOptions := &services.BaseTurnOptionsPanel{}
+	buildOptions := &services.BaseBuildOptionsModal{}
 	unitStats := &services.BaseUnitPanel{}
 	terrainStats := &services.BaseTilePanel{}
 	damageDistribution := &services.BaseUnitPanel{}
@@ -56,6 +58,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 	// Wire up presenter with base panels
 	presenter.GameState = gameState
 	presenter.TurnOptionsPanel = turnOptions
+	presenter.BuildOptionsModal = buildOptions
 	presenter.UnitStatsPanel = unitStats
 	presenter.TerrainStatsPanel = terrainStats
 	presenter.DamageDistributionPanel = damageDistribution
@@ -65,6 +68,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 		Presenter:          presenter,
 		GameState:          gameState,
 		TurnOptions:        turnOptions,
+		BuildOptions:       buildOptions,
 		UnitStats:          unitStats,
 		TerrainStats:       terrainStats,
 		DamageDistribution: damageDistribution,

@@ -96,6 +96,26 @@ func runOptions(cmd *cobra.Command, args []string) error {
 						"r":               opt.Attack.Action.DefenderR,
 						"damage_estimate": opt.Attack.DamageEstimate,
 					})
+				case *v1.GameOption_Build:
+					buildOpt := opt.Build
+					unitName := fmt.Sprintf("type %d", buildOpt.UnitType)
+
+					// Try to get actual unit name
+					rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
+						pc.Presenter.GamesService.SingletonGame,
+						pc.Presenter.GamesService.SingletonGameState)
+					if err == nil && rtGame.GetRulesEngine() != nil {
+						if unitDef, err := rtGame.GetRulesEngine().GetUnitData(buildOpt.UnitType); err == nil {
+							unitName = unitDef.Name
+						}
+					}
+
+					options = append(options, map[string]any{
+						"type":      "build",
+						"unit_type": buildOpt.UnitType,
+						"unit_name": unitName,
+						"cost":      buildOpt.Cost,
+					})
 				case *v1.GameOption_EndTurn:
 					options = append(options, map[string]any{
 						"type": "endturn",

@@ -153,7 +153,6 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 	// Check if there's a tile at this position and get its actions
 	tile := rtGame.World.TileAt(AxialCoord{Q: int(req.Q), R: int(req.R)})
-	fmt.Printf("DEBUG: TileAt(%d,%d) returned: %v\n", req.Q, req.R, tile)
 	if tile != nil {
 		// Lazy top-up: Ensure tile is refreshed for the current turn
 		if err := rtGame.TopUpTileIfNeeded(tile); err != nil {
@@ -175,8 +174,6 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 
 				// Get allowed actions for this tile
 				tileActions := rtGame.rulesEngine.GetAllowedActionsForTile(tile, terrainDef, playerCoins)
-				fmt.Printf("DEBUG: Tile at (%d,%d) player=%d, currentPlayer=%d, terrainType=%d, playerCoins=%d, actions=%v\n",
-					tile.Q, tile.R, tile.Player, rtGame.CurrentPlayer, tile.TileType, playerCoins, tileActions)
 
 				// Generate options based on allowed tile actions
 				for _, action := range tileActions {
@@ -313,22 +310,25 @@ func (s *BaseGamesServiceImpl) GetOptionsAt(ctx context.Context, req *v1.GetOpti
 			// TODO: Add build unit options if "build" is allowed
 		}
 
-		// Only add the endturn option if it is curerent player
+		// Only add the endturn option if unit belongs to current player
 		if unit.Player == rtGame.CurrentPlayer {
-			// Enemy unit - only end turn available (can't interact with enemy units directly)
 			options = append(options, &v1.GameOption{
 				OptionType: &v1.GameOption_EndTurn{
 					EndTurn: &v1.EndTurnOption{},
 				},
 			})
 		}
-	} else {
-		// No unit present - always show end turn option for empty tiles
-		options = append(options, &v1.GameOption{
-			OptionType: &v1.GameOption_EndTurn{
-				EndTurn: &v1.EndTurnOption{},
-			},
-		})
+	} else if tile != nil {
+		// No unit present - show end turn only if:
+		// - tile is not owned (player == 0), OR
+		// - tile is owned by current player
+		if tile.Player == 0 || tile.Player == rtGame.CurrentPlayer {
+			options = append(options, &v1.GameOption{
+				OptionType: &v1.GameOption_EndTurn{
+					EndTurn: &v1.EndTurnOption{},
+				},
+			})
+		}
 	}
 
 	// Sort it for convinience too

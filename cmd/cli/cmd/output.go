@@ -121,8 +121,18 @@ func FormatOptions(pc *PresenterContext, position string) string {
 
 		case *v1.GameOption_Build:
 			buildOpt := opt.Build
-			sb.WriteString(fmt.Sprintf("%d. build unit type %d (cost: %d)\n",
-				i+1, buildOpt.UnitType, buildOpt.Cost))
+			unitName := fmt.Sprintf("type %d", buildOpt.UnitType) // fallback
+
+			// Try to get the actual unit name from RulesEngine
+			if pc.Presenter != nil && pc.Presenter.RulesEngine != nil {
+				rulesEngine := &services.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+				if unitDef, err := rulesEngine.GetUnitData(buildOpt.UnitType); err == nil {
+					unitName = unitDef.Name
+				}
+			}
+
+			sb.WriteString(fmt.Sprintf("%d. build %s (cost: %d)\n",
+				i+1, unitName, buildOpt.Cost))
 
 		case *v1.GameOption_EndTurn:
 			sb.WriteString(fmt.Sprintf("%d. end turn\n", i+1))

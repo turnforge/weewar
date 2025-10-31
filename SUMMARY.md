@@ -210,21 +210,58 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - All tests passing with correct unit movement and no duplication
 - Transaction flow simulation tests validating copy-on-write semantics
 
-### Unit Shortcut System Implementation
+### Unit and Tile Shortcut System Implementation
 
-**Achievement**: Implemented automatic unit shortcuts (A1, B12, C3) for easy identification and reference throughout the game lifecycle.
+**Achievement**: Implemented automatic shortcuts (A1, B12, C3) for both units and tiles for easy identification and reference throughout the game lifecycle.
 
 **Key Features**:
-- **Automatic Generation**: Units automatically receive shortcuts when created (Player letter A-Z + sequential number)
+- **Automatic Generation**: Units and tiles automatically receive shortcuts when created (Player letter A-Z + sequential number)
+- **Non-Unique Between Types**: Shortcuts can be reused between units and tiles (e.g., A1 can be both a unit and a tile)
 - **Persistent IDs**: Shortcuts are saved with game state and preserved across save/load cycles
-- **Fast Lookup**: O(1) access via unitsByShortcut map instead of O(n) iteration
-- **No ID Reuse**: Counters only increment, ensuring unique IDs even after units die
+- **Fast Lookup**: O(1) access via unitsByShortcut and tilesByShortcut maps instead of O(n) iteration
+- **No ID Reuse**: Counters only increment, ensuring unique IDs even after units/tiles are removed
 - **Transaction Safe**: Child worlds inherit parent counters properly
+- **CLI Support**: "t:" prefix for tile lookups (e.g., `ww options t:A1`)
 
 **Implementation Details**:
-- Players tracked using index-based letters (Player 1 = A, Player 2 = B, etc.)
-- World maintains nextShortcutNumber tracking per player
+- Players tracked using 1-based indexing (Player 1 = A, Player 2 = B, Player 0 = neutral/untaken)
+- World maintains unitCountersByPlayer and tileCountersByPlayer tracking
+- Shortcuts only assigned to player-owned tiles (player > 0)
+- CLI position parser supports both unit shortcuts and tile shortcuts with "t:" prefix
 - Debug rendering shows shortcuts over units on game board
+
+### Tile Action State Machine with Money-Based Filtering
+
+**Achievement**: Implemented tile-specific action system with build options filtered by player coin balance, enabling base building functionality.
+
+**Key Features**:
+- **GetAllowedActionsForTile**: State machine for tile actions (parallel to GetAllowedActionsForUnit)
+- **Money-Based Filtering**: Only shows buildable units the player can afford
+- **Player-Agnostic Design**: State machine checks affordability, caller handles ownership
+- **CLI Integration**: Build options display in `ww options t:A1` with unit names and costs
+- **End Turn Logic**: Shows only for current player's units/tiles or neutral tiles
+
+**Implementation Details**:
+- services/rules_engine.go: GetAllowedActionsForTile(tile, terrainDef, playerCoins)
+- services/base_games_service.go: GetOptionsAt evaluates both unit and tile actions
+- services/singleton_gameview_presenter.go: SceneClicked calls GetOptionsAt regardless of unit presence
+- services/tile_actions_test.go: Comprehensive unit tests for all money scenarios
+- End turn logic: Shows for (1) current player's units, (2) current player's city tiles, (3) neutral tiles
+
+**Example**:
+```
+ww options t:A1
+Available options:
+1. end turn
+2. build Soldier (Basic) (cost: 75)
+3. build Goliath RC (cost: 50)
+```
+
+**Test Coverage**:
+- All unit tests pass for money-based filtering scenarios
+- CLI tests verify current player's bases show build options
+- Other player's bases show no options (correct ownership check)
+- Neutral tiles show end turn only
 
 ### Path Tracking and Movement Explainability
 

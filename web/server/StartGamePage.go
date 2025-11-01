@@ -91,7 +91,7 @@ func (p *StartGamePage) initializeGameConfiguration() {
 
 	// Initialize players with defaults
 	players := []*protos.GamePlayer{}
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		playerType := "ai"
 		if i == 0 {
 			playerType = "human"
@@ -103,18 +103,18 @@ func (p *StartGamePage) initializeGameConfiguration() {
 			TeamId:        int32(i + 1),
 			Name:          fmt.Sprintf("Player %d", i+1),
 			IsActive:      true,
-			StartingCoins: 300,
-			Coins:         300,
+			StartingCoins: weewar.DefaultStartingCoins,
+			Coins:         weewar.DefaultStartingCoins,
 		})
 	}
 
 	// Initialize default income configuration
 	incomeConfig := &protos.IncomeConfig{
-		LandbaseIncome:     100,
-		NavalbaseIncome:    100,
-		AirportbaseIncome:  100,
-		MissilesiloIncome:  100,
-		MinesIncome:        100,
+		LandbaseIncome:    weewar.DefaultLandbaseIncome,
+		NavalbaseIncome:   weewar.DefaultNavalbaseIncome,
+		AirportbaseIncome: weewar.DefaultAirportbaseIncome,
+		MissilesiloIncome: weewar.DefaultMissilesiloIncome,
+		MinesIncome:       weewar.DefaultMinesIncome,
 	}
 
 	// Initialize default settings

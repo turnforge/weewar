@@ -10,14 +10,21 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+const DefaultStartingCoins = 300
+const DefaultLandbaseIncome = 100
+const DefaultNavalbaseIncome = 150
+const DefaultAirportbaseIncome = 200
+const DefaultMissilesiloIncome = 300
+const DefaultMinesIncome = 500
+
 // Default Income available from various tile types if this is not already in our rules data json
 // All other tiles do not generate income
 var DefaultIncomeMap = map[int32]int32{
-	1:  100, // Land Base
-	2:  150, // Naval base
-	3:  200, // Airport base
-	16: 300, // Missile silo
-	20: 500, // Mines
+	1:  DefaultLandbaseIncome,
+	2:  DefaultNavalbaseIncome,
+	3:  DefaultAirportbaseIncome,
+	16: DefaultMissilesiloIncome,
+	20: DefaultMinesIncome,
 }
 
 // LoadRulesEngineFromFile loads a RulesEngine from separate rules and damage JSON files
@@ -45,7 +52,7 @@ func LoadRulesEngineFromFile(rulesFilename string, damageFilename string) (*Rule
 // If damageJSON is nil, damage distributions won't be loaded (useful for minimal setups)
 func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine, error) {
 	// Parse the rules JSON structure first
-	var rawData map[string]interface{}
+	var rawData map[string]any
 	if err := json.Unmarshal(rulesJSON, &rawData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal rules JSON: %w", err)
 	}
@@ -60,7 +67,7 @@ func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine,
 	}
 
 	// Load terrains using protojson for proper field handling
-	if terrainData, ok := rawData["terrains"].(map[string]interface{}); ok {
+	if terrainData, ok := rawData["terrains"].(map[string]any); ok {
 		for idStr, terrainJson := range terrainData {
 			id, err := strconv.ParseInt(idStr, 10, 32)
 			if err != nil {
@@ -86,7 +93,7 @@ func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine,
 	}
 
 	// Load units using protojson for proper field handling
-	if unitData, ok := rawData["units"].(map[string]interface{}); ok {
+	if unitData, ok := rawData["units"].(map[string]any); ok {
 		for idStr, unitJson := range unitData {
 			id, err := strconv.ParseInt(idStr, 10, 32)
 			if err != nil {
@@ -112,7 +119,7 @@ func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine,
 	}
 
 	// Load TerrainUnitProperties (centralized movement costs and terrain interactions)
-	if terrainUnitPropsData, ok := rawData["terrainUnitProperties"].(map[string]interface{}); ok {
+	if terrainUnitPropsData, ok := rawData["terrainUnitProperties"].(map[string]any); ok {
 		for key, propRaw := range terrainUnitPropsData {
 			propBytes, err := json.Marshal(propRaw)
 			if err != nil {
@@ -130,13 +137,13 @@ func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine,
 	}
 
 	// Load UnitUnitProperties (centralized combat interactions) from separate damage JSON
-	if damageJSON != nil && len(damageJSON) > 0 {
-		var damageData map[string]interface{}
+	if len(damageJSON) > 0 {
+		var damageData map[string]any
 		if err := json.Unmarshal(damageJSON, &damageData); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal damage JSON: %w", err)
 		}
 
-		if unitUnitPropsData, ok := damageData["unitUnitProperties"].(map[string]interface{}); ok {
+		if unitUnitPropsData, ok := damageData["unitUnitProperties"].(map[string]any); ok {
 			for key, propRaw := range unitUnitPropsData {
 				propBytes, err := json.Marshal(propRaw)
 				if err != nil {

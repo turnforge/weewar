@@ -28,7 +28,7 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from protoc_gen_openapiv2.options import annotations_pb2 as protoc__gen__openapiv2_dot_options_dot_annotations__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19weewar/v1/presenter.proto\x12\tweewar.v1\x1a google/protobuf/field_mask.proto\x1a\x16weewar/v1/models.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\x93\x01\n\x18TurnOptionClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12!\n\x0coption_index\x18\x02 \x01(\x05R\x0boptionIndex\x12\x1f\n\x0boption_type\x18\x03 \x01(\tR\noptionType\x12\x0c\n\x01q\x18\x04 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x05 \x01(\x05R\x01r\"4\n\x19TurnOptionClickedResponse\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"`\n\x13SceneClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x0c\n\x01q\x18\x02 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x03 \x01(\x05R\x01r\x12\x14\n\x05layer\x18\x04 \x01(\tR\x05layer\"/\n\x14SceneClickedResponse\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"6\n\x1b\x45ndTurnButtonClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"7\n\x1c\x45ndTurnButtonClickedResponse\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"m\n\x19\x42uildOptionClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x0c\n\x01q\x18\x02 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x03 \x01(\x05R\x01r\x12\x1b\n\tunit_type\x18\x04 \x01(\x05R\x08unitType\"\x1c\n\x1a\x42uildOptionClickedResponse\"v\n\x15InitializeGameRequest\x12\x1b\n\tgame_data\x18\x01 \x01(\tR\x08gameData\x12\x1d\n\ngame_state\x18\x02 \x01(\tR\tgameState\x12!\n\x0cmove_history\x18\x03 \x01(\tR\x0bmoveHistory\"\xaf\x01\n\x16InitializeGameResponse\x12\x18\n\x07success\x18\x01 \x01(\x08R\x07success\x12\x14\n\x05\x65rror\x18\x02 \x01(\tR\x05\x65rror\x12%\n\x0e\x63urrent_player\x18\x03 \x01(\x05R\rcurrentPlayer\x12!\n\x0cturn_counter\x18\x04 \x01(\x05R\x0bturnCounter\x12\x1b\n\tgame_name\x18\x05 \x01(\tR\x08gameName2\x8c\x06\n\x11GameViewPresenter\x12W\n\x0eInitializeGame\x12 .weewar.v1.InitializeGameRequest\x1a!.weewar.v1.InitializeGameResponse\"\x00\x12\x92\x01\n\x0cSceneClicked\x12\x1e.weewar.v1.SceneClickedRequest\x1a\x1f.weewar.v1.SceneClickedResponse\"A\x82\xd3\xe4\x93\x02;\"6/v1/presenters/gameview/action:clicked:scene/{game_id}:\x01*\x12\xa6\x01\n\x11TurnOptionClicked\x12#.weewar.v1.TurnOptionClickedRequest\x1a$.weewar.v1.TurnOptionClickedResponse\"F\x82\xd3\xe4\x93\x02@\";/v1/presenters/gameview/action:clicked:turnOption/{game_id}:\x01*\x12\xb2\x01\n\x14\x45ndTurnButtonClicked\x12&.weewar.v1.EndTurnButtonClickedRequest\x1a\'.weewar.v1.EndTurnButtonClickedResponse\"I\x82\xd3\xe4\x93\x02\x43\">/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}:\x01*\x12\xaa\x01\n\x12\x42uildOptionClicked\x12$.weewar.v1.BuildOptionClickedRequest\x1a%.weewar.v1.BuildOptionClickedResponse\"G\x82\xd3\xe4\x93\x02\x41\"</v1/presenters/gameview/action:clicked:buildOption/{game_id}:\x01*B\xa9\x01\n\rcom.weewar.v1B\x0ePresenterProtoP\x01ZCgithub.com/panyam/turnengine/games/weewar/gen/go/weewar/v1;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19weewar/v1/presenter.proto\x12\tweewar.v1\x1a google/protobuf/field_mask.proto\x1a\x16weewar/v1/models.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\x94\x01\n\x1aInitializeSingletonRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x1b\n\tgame_data\x18\x02 \x01(\tR\x08gameData\x12\x1d\n\ngame_state\x18\x03 \x01(\tR\tgameState\x12!\n\x0cmove_history\x18\x04 \x01(\tR\x0bmoveHistory\"\\\n\x1bInitializeSingletonResponse\x12=\n\x08response\x18\x01 \x01(\x0b\x32!.weewar.v1.InitializeGameResponseR\x08response\"\x93\x01\n\x18TurnOptionClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12!\n\x0coption_index\x18\x02 \x01(\x05R\x0boptionIndex\x12\x1f\n\x0boption_type\x18\x03 \x01(\tR\noptionType\x12\x0c\n\x01q\x18\x04 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x05 \x01(\x05R\x01r\"4\n\x19TurnOptionClickedResponse\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"`\n\x13SceneClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x0c\n\x01q\x18\x02 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x03 \x01(\x05R\x01r\x12\x14\n\x05layer\x18\x04 \x01(\tR\x05layer\"/\n\x14SceneClickedResponse\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"6\n\x1b\x45ndTurnButtonClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"7\n\x1c\x45ndTurnButtonClickedResponse\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"m\n\x19\x42uildOptionClickedRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12\x0c\n\x01q\x18\x02 \x01(\x05R\x01q\x12\x0c\n\x01r\x18\x03 \x01(\x05R\x01r\x12\x1b\n\tunit_type\x18\x04 \x01(\x05R\x08unitType\"\x1c\n\x1a\x42uildOptionClickedResponse\"0\n\x15InitializeGameRequest\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\"\xaf\x01\n\x16InitializeGameResponse\x12\x18\n\x07success\x18\x01 \x01(\x08R\x07success\x12\x14\n\x05\x65rror\x18\x02 \x01(\tR\x05\x65rror\x12%\n\x0e\x63urrent_player\x18\x03 \x01(\x05R\rcurrentPlayer\x12!\n\x0cturn_counter\x18\x04 \x01(\x05R\x0bturnCounter\x12\x1b\n\tgame_name\x18\x05 \x01(\tR\x08gameName2\x85\x01\n\x1bSingletonInitializerService\x12\x66\n\x13InitializeSingleton\x12%.weewar.v1.InitializeSingletonRequest\x1a&.weewar.v1.InitializeSingletonResponse\"\x00\x32\x8c\x06\n\x11GameViewPresenter\x12W\n\x0eInitializeGame\x12 .weewar.v1.InitializeGameRequest\x1a!.weewar.v1.InitializeGameResponse\"\x00\x12\x92\x01\n\x0cSceneClicked\x12\x1e.weewar.v1.SceneClickedRequest\x1a\x1f.weewar.v1.SceneClickedResponse\"A\x82\xd3\xe4\x93\x02;\"6/v1/presenters/gameview/action:clicked:scene/{game_id}:\x01*\x12\xa6\x01\n\x11TurnOptionClicked\x12#.weewar.v1.TurnOptionClickedRequest\x1a$.weewar.v1.TurnOptionClickedResponse\"F\x82\xd3\xe4\x93\x02@\";/v1/presenters/gameview/action:clicked:turnOption/{game_id}:\x01*\x12\xb2\x01\n\x14\x45ndTurnButtonClicked\x12&.weewar.v1.EndTurnButtonClickedRequest\x1a\'.weewar.v1.EndTurnButtonClickedResponse\"I\x82\xd3\xe4\x93\x02\x43\">/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}:\x01*\x12\xaa\x01\n\x12\x42uildOptionClicked\x12$.weewar.v1.BuildOptionClickedRequest\x1a%.weewar.v1.BuildOptionClickedResponse\"G\x82\xd3\xe4\x93\x02\x41\"</v1/presenters/gameview/action:clicked:buildOption/{game_id}:\x01*B\xa9\x01\n\rcom.weewar.v1B\x0ePresenterProtoP\x01ZCgithub.com/panyam/turnengine/games/weewar/gen/go/weewar/v1;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -44,26 +44,32 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GAMEVIEWPRESENTER'].methods_by_name['EndTurnButtonClicked']._serialized_options = b'\202\323\344\223\002C\">/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}:\001*'
   _globals['_GAMEVIEWPRESENTER'].methods_by_name['BuildOptionClicked']._loaded_options = None
   _globals['_GAMEVIEWPRESENTER'].methods_by_name['BuildOptionClicked']._serialized_options = b'\202\323\344\223\002A\"</v1/presenters/gameview/action:clicked:buildOption/{game_id}:\001*'
-  _globals['_TURNOPTIONCLICKEDREQUEST']._serialized_start=177
-  _globals['_TURNOPTIONCLICKEDREQUEST']._serialized_end=324
-  _globals['_TURNOPTIONCLICKEDRESPONSE']._serialized_start=326
-  _globals['_TURNOPTIONCLICKEDRESPONSE']._serialized_end=378
-  _globals['_SCENECLICKEDREQUEST']._serialized_start=380
-  _globals['_SCENECLICKEDREQUEST']._serialized_end=476
-  _globals['_SCENECLICKEDRESPONSE']._serialized_start=478
-  _globals['_SCENECLICKEDRESPONSE']._serialized_end=525
-  _globals['_ENDTURNBUTTONCLICKEDREQUEST']._serialized_start=527
-  _globals['_ENDTURNBUTTONCLICKEDREQUEST']._serialized_end=581
-  _globals['_ENDTURNBUTTONCLICKEDRESPONSE']._serialized_start=583
-  _globals['_ENDTURNBUTTONCLICKEDRESPONSE']._serialized_end=638
-  _globals['_BUILDOPTIONCLICKEDREQUEST']._serialized_start=640
-  _globals['_BUILDOPTIONCLICKEDREQUEST']._serialized_end=749
-  _globals['_BUILDOPTIONCLICKEDRESPONSE']._serialized_start=751
-  _globals['_BUILDOPTIONCLICKEDRESPONSE']._serialized_end=779
-  _globals['_INITIALIZEGAMEREQUEST']._serialized_start=781
-  _globals['_INITIALIZEGAMEREQUEST']._serialized_end=899
-  _globals['_INITIALIZEGAMERESPONSE']._serialized_start=902
-  _globals['_INITIALIZEGAMERESPONSE']._serialized_end=1077
-  _globals['_GAMEVIEWPRESENTER']._serialized_start=1080
-  _globals['_GAMEVIEWPRESENTER']._serialized_end=1860
+  _globals['_INITIALIZESINGLETONREQUEST']._serialized_start=177
+  _globals['_INITIALIZESINGLETONREQUEST']._serialized_end=325
+  _globals['_INITIALIZESINGLETONRESPONSE']._serialized_start=327
+  _globals['_INITIALIZESINGLETONRESPONSE']._serialized_end=419
+  _globals['_TURNOPTIONCLICKEDREQUEST']._serialized_start=422
+  _globals['_TURNOPTIONCLICKEDREQUEST']._serialized_end=569
+  _globals['_TURNOPTIONCLICKEDRESPONSE']._serialized_start=571
+  _globals['_TURNOPTIONCLICKEDRESPONSE']._serialized_end=623
+  _globals['_SCENECLICKEDREQUEST']._serialized_start=625
+  _globals['_SCENECLICKEDREQUEST']._serialized_end=721
+  _globals['_SCENECLICKEDRESPONSE']._serialized_start=723
+  _globals['_SCENECLICKEDRESPONSE']._serialized_end=770
+  _globals['_ENDTURNBUTTONCLICKEDREQUEST']._serialized_start=772
+  _globals['_ENDTURNBUTTONCLICKEDREQUEST']._serialized_end=826
+  _globals['_ENDTURNBUTTONCLICKEDRESPONSE']._serialized_start=828
+  _globals['_ENDTURNBUTTONCLICKEDRESPONSE']._serialized_end=883
+  _globals['_BUILDOPTIONCLICKEDREQUEST']._serialized_start=885
+  _globals['_BUILDOPTIONCLICKEDREQUEST']._serialized_end=994
+  _globals['_BUILDOPTIONCLICKEDRESPONSE']._serialized_start=996
+  _globals['_BUILDOPTIONCLICKEDRESPONSE']._serialized_end=1024
+  _globals['_INITIALIZEGAMEREQUEST']._serialized_start=1026
+  _globals['_INITIALIZEGAMEREQUEST']._serialized_end=1074
+  _globals['_INITIALIZEGAMERESPONSE']._serialized_start=1077
+  _globals['_INITIALIZEGAMERESPONSE']._serialized_end=1252
+  _globals['_SINGLETONINITIALIZERSERVICE']._serialized_start=1255
+  _globals['_SINGLETONINITIALIZERSERVICE']._serialized_end=1388
+  _globals['_GAMEVIEWPRESENTER']._serialized_start=1391
+  _globals['_GAMEVIEWPRESENTER']._serialized_end=2171
 # @@protoc_insertion_point(module_scope)

@@ -1301,6 +1301,25 @@ export interface ShowCaptureEffectResponse {
 
 
 /**
+ * Called when the end turn button was clicked
+ */
+export interface InitializeSingletonRequest {
+  gameId: string;
+  gameData: string;
+  gameState: string;
+  moveHistory: string;
+}
+
+
+/**
+ * Response of a turn option click
+ */
+export interface InitializeSingletonResponse {
+  response?: InitializeGameResponse;
+}
+
+
+/**
  * Called when a turn option is clicked in TurnOptionsPanel
  */
 export interface TurnOptionClickedRequest {
@@ -1377,9 +1396,7 @@ export interface BuildOptionClickedResponse {
  * Called when the end turn button was clicked
  */
 export interface InitializeGameRequest {
-  gameData: string;
-  gameState: string;
-  moveHistory: string;
+  gameId: string;
 }
 
 

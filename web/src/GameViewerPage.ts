@@ -3,6 +3,7 @@ import WeewarBundle from '../gen/wasmjs';
 import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
 import { GameViewerPageMethods, GameViewerPageServiceClient as GameViewerPageClient } from '../gen/wasmjs/weewar/v1/gameViewerPageClient';
 import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
+import { SingletonInitializerServiceServiceClient as SingletonInitializerServiceClient } from '../gen/wasmjs/weewar/v1/singletonInitializerServiceClient';
 import { EventBus } from '../lib/EventBus';
 import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
@@ -52,6 +53,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private wasmBundle: WeewarBundle;
     private gamesServiceClient: GamesServiceServiceClient;
     private gameViewPresenterClient: GameViewPresenterClient;
+    private singletonInitializerClient : SingletonInitializerServiceClient;
     private currentGameId: string | null;
     private gameScene: PhaserGameScene
     private world: World  // ✅ Shared World component
@@ -595,6 +597,7 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         this.wasmBundle  = new WeewarBundle();
         this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
         this.gameViewPresenterClient = new GameViewPresenterClient(this.wasmBundle);
+        this.singletonInitializerClient = new SingletonInitializerServiceClient(this.wasmBundle);
         await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
         await this.wasmBundle.waitUntilReady()
     }
@@ -605,22 +608,58 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
      */
     private async initializePresenter(): Promise<void> {
         // Get raw JSON data from page elements
-        const gameElement = document.getElementById('game.data-json');
-        const gameStateElement = document.getElementById('game-state-data-json');
-        const historyElement = document.getElementById('game-history-data-json');
+        const gameElement = document.getElementById('game.data-json')!;
+        const gameStateElement = document.getElementById('game-state-data-json')!;
+        const historyElement = document.getElementById('game-history-data-json')!;
         
         if (!gameElement?.textContent || gameElement.textContent.trim() === 'null') {
             throw new Error('No game data found in page elements');
         }
-        // 3. Call presenter to initialize (ONE proto RPC call does everything!)
-        const response = await this.gameViewPresenterClient.initializeGame({
-          gameData: gameElement.textContent,
-          gameState: gameStateElement?.textContent || '{}',
-          moveHistory: historyElement?.textContent || '{"gameId":"","groups":[]}'
-        });
-        
-        if (!response.success) {
-            throw new Error(`WASM load failed: ${response.error}`);
+
+        if (false) {
+            // Convert JSON strings to Uint8Array for WASM
+            const gameBytes = new TextEncoder().encode(gameElement.textContent);
+            const gameStateBytes = new TextEncoder().encode(
+                gameStateElement?.textContent && gameStateElement.textContent.trim() !== 'null'
+                    ? gameStateElement.textContent
+                    : '{}'
+            );
+            const historyBytes = new TextEncoder().encode(
+                historyElement?.textContent && historyElement.textContent.trim() !== 'null'
+                    ? historyElement.textContent
+                    : '{"gameId":"","groups":[]}'
+            );
+
+            // Call WASM loadGameData function - check if it exists first
+            const weewar = (window as any).weewar;
+            if (!weewar || !weewar.loadGameData) {
+                throw new Error('WASM loadGameData function not available. WASM module may not be fully loaded.');
+            }
+
+            const wasmResult = weewar.loadGameData(gameBytes, gameStateBytes, historyBytes);
+
+            if (!wasmResult.success) {
+                throw new Error(`WASM load failed: ${wasmResult.error}`);
+            }
+
+            // 3. Call presenter to initialize (ONE proto RPC call does everything!)
+            const response = await this.gameViewPresenterClient.initializeGame({ gameId: this.currentGameId || "", });
+            
+            if (!response.success) {
+                throw new Error(`WASM load failed: ${response.error}`);
+            }
+        } else {
+            // 3. Call presenter to initialize (ONE proto RPC call does everything!)
+            const response = await this.singletonInitializerClient.initializeSingleton({
+                gameId: this.currentGameId || "",
+                gameData: gameElement!.textContent,
+                gameState: gameStateElement?.textContent || '{}',
+                moveHistory: historyElement?.textContent || '{"gameId":"","groups":[]}',
+            });
+            
+            if (!response.response!.success) {
+                throw new Error(`WASM load failed: ${response.response!.error}`);
+            }
         }
     }
 

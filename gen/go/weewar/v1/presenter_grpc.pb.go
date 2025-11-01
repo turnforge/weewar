@@ -20,6 +20,106 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	SingletonInitializerService_InitializeSingleton_FullMethodName = "/weewar.v1.SingletonInitializerService/InitializeSingleton"
+)
+
+// SingletonInitializerServiceClient is the client API for SingletonInitializerService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SingletonInitializerServiceClient interface {
+	InitializeSingleton(ctx context.Context, in *InitializeSingletonRequest, opts ...grpc.CallOption) (*InitializeSingletonResponse, error)
+}
+
+type singletonInitializerServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSingletonInitializerServiceClient(cc grpc.ClientConnInterface) SingletonInitializerServiceClient {
+	return &singletonInitializerServiceClient{cc}
+}
+
+func (c *singletonInitializerServiceClient) InitializeSingleton(ctx context.Context, in *InitializeSingletonRequest, opts ...grpc.CallOption) (*InitializeSingletonResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InitializeSingletonResponse)
+	err := c.cc.Invoke(ctx, SingletonInitializerService_InitializeSingleton_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SingletonInitializerServiceServer is the server API for SingletonInitializerService service.
+// All implementations should embed UnimplementedSingletonInitializerServiceServer
+// for forward compatibility.
+type SingletonInitializerServiceServer interface {
+	InitializeSingleton(context.Context, *InitializeSingletonRequest) (*InitializeSingletonResponse, error)
+}
+
+// UnimplementedSingletonInitializerServiceServer should be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedSingletonInitializerServiceServer struct{}
+
+func (UnimplementedSingletonInitializerServiceServer) InitializeSingleton(context.Context, *InitializeSingletonRequest) (*InitializeSingletonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitializeSingleton not implemented")
+}
+func (UnimplementedSingletonInitializerServiceServer) testEmbeddedByValue() {}
+
+// UnsafeSingletonInitializerServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SingletonInitializerServiceServer will
+// result in compilation errors.
+type UnsafeSingletonInitializerServiceServer interface {
+	mustEmbedUnimplementedSingletonInitializerServiceServer()
+}
+
+func RegisterSingletonInitializerServiceServer(s grpc.ServiceRegistrar, srv SingletonInitializerServiceServer) {
+	// If the following call pancis, it indicates UnimplementedSingletonInitializerServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&SingletonInitializerService_ServiceDesc, srv)
+}
+
+func _SingletonInitializerService_InitializeSingleton_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitializeSingletonRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SingletonInitializerServiceServer).InitializeSingleton(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SingletonInitializerService_InitializeSingleton_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SingletonInitializerServiceServer).InitializeSingleton(ctx, req.(*InitializeSingletonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// SingletonInitializerService_ServiceDesc is the grpc.ServiceDesc for SingletonInitializerService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SingletonInitializerService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "weewar.v1.SingletonInitializerService",
+	HandlerType: (*SingletonInitializerServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "InitializeSingleton",
+			Handler:    _SingletonInitializerService_InitializeSingleton_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "weewar/v1/presenter.proto",
+}
+
+const (
 	GameViewPresenter_InitializeGame_FullMethodName       = "/weewar.v1.GameViewPresenter/InitializeGame"
 	GameViewPresenter_SceneClicked_FullMethodName         = "/weewar.v1.GameViewPresenter/SceneClicked"
 	GameViewPresenter_TurnOptionClicked_FullMethodName    = "/weewar.v1.GameViewPresenter/TurnOptionClicked"

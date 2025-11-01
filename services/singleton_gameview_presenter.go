@@ -8,69 +8,12 @@ import (
 	"github.com/panyam/turnengine/games/weewar/web/assets/themes"
 )
 
-type BasePanel interface {
-	SetTheme(t themes.Theme)
-	SetRulesEngine(t *v1.RulesEngine)
-}
-
-type GameState interface {
-	SetGameState(context.Context, *v1.SetGameStateRequest) (*v1.SetGameStateResponse, error)
-	RemoveUnitAt(context.Context, *v1.RemoveUnitAtRequest) (*v1.RemoveUnitAtResponse, error)
-	SetUnitAt(context.Context, *v1.SetUnitAtRequest) (*v1.SetUnitAtResponse, error)
-	UpdateGameStatus(context.Context, *v1.UpdateGameStatusRequest) (*v1.UpdateGameStatusResponse, error)
-}
-
-type TurnOptionsPanel interface {
-	BasePanel
-	CurrentOptions() *v1.GetOptionsAtResponse
-	CurrentUnit() *v1.Unit
-	SetCurrentUnit(context.Context, *v1.Unit, *v1.GetOptionsAtResponse)
-}
-
-type UnitStatsPanel interface {
-	BasePanel
-	CurrentUnit() *v1.Unit
-	SetCurrentUnit(context.Context, *v1.Unit)
-}
-
-type DamageDistributionPanel interface {
-	BasePanel
-	CurrentUnit() *v1.Unit
-	SetCurrentUnit(context.Context, *v1.Unit)
-}
-
-type TerrainStatsPanel interface {
-	BasePanel
-	CurrentTile() *v1.Tile
-	SetCurrentTile(context.Context, *v1.Tile)
-}
-
-type BuildOptionsModal interface {
-	BasePanel
-	Show(context.Context, *v1.Tile, []*v1.BuildUnitAction, int32)
-	Hide(context.Context)
-}
-
-type GameScene interface {
-	BasePanel
-	ClearPaths(context.Context)
-	ClearHighlights(context.Context, *v1.ClearHighlightsRequest)
-	ShowPath(context.Context, *v1.ShowPathRequest)
-	ShowHighlights(context.Context, *v1.ShowHighlightsRequest)
-	// Animation methods
-	MoveUnit(context.Context, *v1.MoveUnitRequest) (*v1.MoveUnitResponse, error)
-	ShowAttackEffect(context.Context, *v1.ShowAttackEffectRequest) (*v1.ShowAttackEffectResponse, error)
-	ShowHealEffect(context.Context, *v1.ShowHealEffectRequest) (*v1.ShowHealEffectResponse, error)
-	ShowCaptureEffect(context.Context, *v1.ShowCaptureEffectRequest) (*v1.ShowCaptureEffectResponse, error)
-	SetUnitAt(context.Context, *v1.SetUnitAtRequest) (*v1.SetUnitAtResponse, error)
-	RemoveUnitAt(context.Context, *v1.RemoveUnitAtRequest) (*v1.RemoveUnitAtResponse, error)
-}
-
 type SingletonGameViewPresenterImpl struct {
 	BaseGameViewPresenterImpl
-	GamesService *SingletonGamesServiceImpl
-	RulesEngine  *v1.RulesEngine
-	Theme        themes.Theme
+	GamesService GamesServiceImpl
+	// GamesService *SingletonGamesServiceImpl
+	RulesEngine *v1.RulesEngine
+	Theme       themes.Theme
 
 	// All the "UI Elements" we will change state of
 	GameState               GameState
@@ -102,9 +45,13 @@ func NewSingletonGameViewPresenterImpl() *SingletonGameViewPresenterImpl {
 
 // Our initial game loader
 func (s *SingletonGameViewPresenterImpl) InitializeGame(ctx context.Context, req *v1.InitializeGameRequest) (resp *v1.InitializeGameResponse, err error) {
-	s.GamesService.Load([]byte(req.GameData), []byte(req.GameState), []byte(req.MoveHistory))
-	game := s.GamesService.SingletonGame
-	gameState := s.GamesService.SingletonGameState
+	getGameResp, err := s.GamesService.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	if err != nil {
+		// TODO - handle gracefully
+		panic(err)
+	}
+	game := getGameResp.Game
+	gameState := getGameResp.State
 	// moveHistory := s.GamesService.SingletonGameMoveHistory
 
 	// Now update the game state based on this
@@ -131,10 +78,23 @@ func (s *SingletonGameViewPresenterImpl) InitializeGame(ctx context.Context, req
 	return
 }
 
+func (s *SingletonGameViewPresenterImpl) GetGame(ctx context.Context, gameId string) (resp *v1.GetGameResponse, err error) {
+	getGameResp, err := s.GamesService.GetGame(ctx, &v1.GetGameRequest{Id: gameId})
+	if err != nil {
+		// TODO - handle gracefully
+		panic(err)
+	}
+	return getGameResp, err
+}
+
 func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *v1.SceneClickedRequest) (resp *v1.SceneClickedResponse, err error) {
 	resp = &v1.SceneClickedResponse{}
-	game := s.GamesService.SingletonGame
-	gameState := s.GamesService.SingletonGameState
+	getGameResp, err := s.GetGame(ctx, req.GameId)
+	if err != nil {
+		return
+	}
+	game := getGameResp.Game
+	gameState := getGameResp.State
 	rg, err := s.GamesService.GetRuntimeGame(game, gameState)
 	q, r := req.Q, req.R
 	coord := CoordFromInt32(q, r)
@@ -143,7 +103,7 @@ func (s *SingletonGameViewPresenterImpl) SceneClicked(ctx context.Context, req *
 	switch req.Layer {
 	case "movement-highlight":
 		// User clicked on a movement highlight - execute the move
-		if err := s.executeMovementAction(ctx, q, r); err != nil {
+		if err := s.executeMovementAction(ctx, game, gameState, q, r); err != nil {
 			return nil, err
 		}
 	case "base-map":
@@ -317,8 +277,9 @@ func (s *SingletonGameViewPresenterImpl) TurnOptionClicked(ctx context.Context, 
 	if req.OptionType == "move" && s.selectedQ != nil && s.selectedR != nil {
 		// Get the options again to extract the path for this specific move
 		optionsResp, err := s.GamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
-			Q: *s.selectedQ,
-			R: *s.selectedR,
+			GameId: req.GameId,
+			Q:      *s.selectedQ,
+			R:      *s.selectedR,
 		})
 
 		if err == nil && optionsResp != nil && int(req.OptionIndex) < len(optionsResp.Options) {
@@ -346,15 +307,14 @@ func (s *SingletonGameViewPresenterImpl) BuildOptionClicked(ctx context.Context,
 	resp = &v1.BuildOptionClickedResponse{}
 
 	// Get current game state
-	gameState := s.GamesService.SingletonGameState
-	if gameState == nil {
-		fmt.Println("[Presenter] Game state is nil")
+	getGameResp, err := s.GetGame(ctx, req.GameId)
+	if err != nil {
 		return
 	}
 
 	// Create the build move
 	gameMove := &v1.GameMove{
-		Player: gameState.CurrentPlayer,
+		Player: getGameResp.State.CurrentPlayer,
 		MoveType: &v1.GameMove_BuildUnit{
 			BuildUnit: &v1.BuildUnitAction{
 				Q:        req.Q,
@@ -365,10 +325,10 @@ func (s *SingletonGameViewPresenterImpl) BuildOptionClicked(ctx context.Context,
 	}
 
 	fmt.Printf("[Presenter] Executing build of unit type %d at (%d,%d) for player %d\n",
-		req.UnitType, req.Q, req.R, gameState.CurrentPlayer)
+		req.UnitType, req.Q, req.R, getGameResp.State.CurrentPlayer)
 
 	// Execute the build move
-	s.executeBuildAction(ctx, gameMove)
+	s.executeBuildAction(ctx, getGameResp.Game, getGameResp.State, gameMove)
 
 	return
 }
@@ -376,22 +336,23 @@ func (s *SingletonGameViewPresenterImpl) BuildOptionClicked(ctx context.Context,
 // EndTurnButtonClicked handles when user clicks the end turn button
 func (s *SingletonGameViewPresenterImpl) EndTurnButtonClicked(ctx context.Context, req *v1.EndTurnButtonClickedRequest) (resp *v1.EndTurnButtonClickedResponse, err error) {
 	resp = &v1.EndTurnButtonClickedResponse{}
-	s.executeEndTurnAction(ctx)
+
+	// Get current game state
+	getGameResp, err := s.GetGame(ctx, req.GameId)
+	if err != nil {
+		return
+	}
+
+	s.executeEndTurnAction(ctx, getGameResp.Game, getGameResp.State)
 	return
 }
 
 // executeMovementAction executes a movement when user clicks on a movement highlight
-func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Context, targetQ, targetR int32) error {
+func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Context, game *v1.Game, gameState *v1.GameState, targetQ, targetR int32) error {
 	// Get current options from TurnOptionsPanel
 	currentOptions := s.TurnOptionsPanel.CurrentOptions()
 	if currentOptions == nil || len(currentOptions.Options) == 0 {
 		return fmt.Errorf("no options available for movement")
-	}
-
-	// Get current game state
-	gameState := s.GamesService.SingletonGameState
-	if gameState == nil {
-		return fmt.Errorf("game state is nil")
 	}
 
 	// Find the move option that matches the clicked coordinates
@@ -437,14 +398,14 @@ func (s *SingletonGameViewPresenterImpl) executeMovementAction(ctx context.Conte
 	fmt.Println("[Presenter] Move executed successfully")
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, resp.MoveResults)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults)
 
 	return nil
 }
 
 // executeEndTurnAction executes the end turn action
 // executeBuildAction processes a build unit action
-func (s *SingletonGameViewPresenterImpl) executeBuildAction(ctx context.Context, gameMove *v1.GameMove) {
+func (s *SingletonGameViewPresenterImpl) executeBuildAction(ctx context.Context, game *v1.Game, gameState *v1.GameState, gameMove *v1.GameMove) {
 	// Call ProcessMoves to execute the build
 	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{Moves: []*v1.GameMove{gameMove}})
 	if err != nil {
@@ -458,16 +419,10 @@ func (s *SingletonGameViewPresenterImpl) executeBuildAction(ctx context.Context,
 	s.BuildOptionsModal.Hide(ctx)
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, resp.MoveResults)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults)
 }
 
-func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Context) {
-	gameState := s.GamesService.SingletonGameState
-	if gameState == nil {
-		fmt.Println("[Presenter] Game state is nil")
-		return
-	}
-
+func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Context, game *v1.Game, gameState *v1.GameState) {
 	fmt.Printf("[Presenter] Ending turn for player %d\n", gameState.CurrentPlayer)
 
 	// Create end turn move
@@ -488,14 +443,14 @@ func (s *SingletonGameViewPresenterImpl) executeEndTurnAction(ctx context.Contex
 		return
 	}
 
-	fmt.Printf("[Presenter] Turn ended, new current player: %d\n", s.GamesService.SingletonGameState.CurrentPlayer)
+	fmt.Printf("[Presenter] Turn ended, new current player: %d\n", gameState.CurrentPlayer)
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, resp.MoveResults)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults)
 }
 
 // applyIncrementalChanges processes WorldChange objects and calls incremental browser update methods
-func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Context, moveResults []*v1.GameMoveResult) {
+func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Context, game *v1.Game, gameState *v1.GameState, moveResults []*v1.GameMoveResult) {
 	// Clear selection and highlights
 	s.clearHighlightsAndSelection(ctx)
 	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
@@ -572,7 +527,6 @@ func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Con
 					}
 				}
 				// Update game UI status with new current player and turn counter
-				gameState := s.GamesService.SingletonGameState
 				s.GameState.UpdateGameStatus(ctx, &v1.UpdateGameStatusRequest{
 					CurrentPlayer: gameState.CurrentPlayer,
 					TurnCounter:   gameState.TurnCounter,
@@ -581,7 +535,6 @@ func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Con
 			case *v1.WorldChange_CoinsChanged:
 				// Refresh game state panel to show updated coin balances
 				// The GameState panel automatically displays player coins from the game state
-				gameState := s.GamesService.SingletonGameState
 				s.GameState.UpdateGameStatus(ctx, &v1.UpdateGameStatusRequest{
 					CurrentPlayer: gameState.CurrentPlayer,
 					TurnCounter:   gameState.TurnCounter,
@@ -594,16 +547,11 @@ func (s *SingletonGameViewPresenterImpl) applyIncrementalChanges(ctx context.Con
 	}
 
 	// After applying all changes, refresh exhausted highlights
-	s.refreshExhaustedHighlights(ctx)
+	s.refreshExhaustedHighlights(ctx, game, gameState)
 }
 
 // refreshExhaustedHighlights updates the exhausted highlights for all units with no movement points
-func (s *SingletonGameViewPresenterImpl) refreshExhaustedHighlights(ctx context.Context) {
-	gameState := s.GamesService.SingletonGameState
-	if gameState == nil || gameState.WorldData == nil {
-		return
-	}
-
+func (s *SingletonGameViewPresenterImpl) refreshExhaustedHighlights(ctx context.Context, game *v1.Game, gameState *v1.GameState) {
 	// Build list of exhausted units/tiles
 	var exhaustedHighlights []*v1.HighlightSpec
 

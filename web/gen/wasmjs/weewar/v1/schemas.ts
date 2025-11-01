@@ -603,7 +603,7 @@ export const UnitUnitPropertiesSchema: MessageSchema = {
       messageType: "weewar.v1.DamageDistribution",
     },
   ],
-  oneofGroups: ["_defense_override", "_attack_override"],
+  oneofGroups: ["_attack_override", "_defense_override"],
 };
 
 
@@ -2981,6 +2981,52 @@ export const ShowCaptureEffectResponseSchema: MessageSchema = {
 
 
 /**
+ * Schema for InitializeSingletonRequest message
+ */
+export const InitializeSingletonRequestSchema: MessageSchema = {
+  name: "InitializeSingletonRequest",
+  fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "gameData",
+      type: FieldType.STRING,
+      id: 2,
+    },
+    {
+      name: "gameState",
+      type: FieldType.STRING,
+      id: 3,
+    },
+    {
+      name: "moveHistory",
+      type: FieldType.STRING,
+      id: 4,
+    },
+  ],
+};
+
+
+/**
+ * Schema for InitializeSingletonResponse message
+ */
+export const InitializeSingletonResponseSchema: MessageSchema = {
+  name: "InitializeSingletonResponse",
+  fields: [
+    {
+      name: "response",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.InitializeGameResponse",
+    },
+  ],
+};
+
+
+/**
  * Schema for TurnOptionClickedRequest message
  */
 export const TurnOptionClickedRequestSchema: MessageSchema = {
@@ -3152,19 +3198,9 @@ export const InitializeGameRequestSchema: MessageSchema = {
   name: "InitializeGameRequest",
   fields: [
     {
-      name: "gameData",
+      name: "gameId",
       type: FieldType.STRING,
       id: 1,
-    },
-    {
-      name: "gameState",
-      type: FieldType.STRING,
-      id: 2,
-    },
-    {
-      name: "moveHistory",
-      type: FieldType.STRING,
-      id: 3,
     },
   ],
 };
@@ -4081,6 +4117,8 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.ShowHealEffectResponse": ShowHealEffectResponseSchema,
   "weewar.v1.ShowCaptureEffectRequest": ShowCaptureEffectRequestSchema,
   "weewar.v1.ShowCaptureEffectResponse": ShowCaptureEffectResponseSchema,
+  "weewar.v1.InitializeSingletonRequest": InitializeSingletonRequestSchema,
+  "weewar.v1.InitializeSingletonResponse": InitializeSingletonResponseSchema,
   "weewar.v1.TurnOptionClickedRequest": TurnOptionClickedRequestSchema,
   "weewar.v1.TurnOptionClickedResponse": TurnOptionClickedResponseSchema,
   "weewar.v1.SceneClickedRequest": SceneClickedRequestSchema,

@@ -88,13 +88,17 @@ func savePresenterState(pc *PresenterContext, dryrun bool) error {
 	}
 
 	ctx := context.Background()
+	pc, game, gameState, gameHistory, _, err := GetGame()
+	if err != nil {
+		panic(err)
+	}
 
 	// Save game state back to disk using FSGamesService
-	_, err := pc.FSService.UpdateGame(ctx, &v1.UpdateGameRequest{
+	_, err = pc.FSService.UpdateGame(ctx, &v1.UpdateGameRequest{
 		GameId:     pc.GameID,
-		NewGame:    pc.Presenter.GamesService.SingletonGame,
-		NewState:   pc.Presenter.GamesService.SingletonGameState,
-		NewHistory: pc.Presenter.GamesService.SingletonGameMoveHistory,
+		NewGame:    game,
+		NewState:   gameState,
+		NewHistory: gameHistory,
 	})
 
 	if err != nil {

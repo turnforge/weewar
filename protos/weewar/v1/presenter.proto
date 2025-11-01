@@ -10,6 +10,24 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1";
 
+service SingletonInitializerService {
+  rpc InitializeSingleton(InitializeSingletonRequest) returns (InitializeSingletonResponse) {
+  }
+}
+
+// Called when the end turn button was clicked
+message InitializeSingletonRequest {
+  string game_id = 1;
+  string game_data = 2;
+  string game_state = 3;
+  string move_history = 4;
+}
+
+// Response of a turn option click
+message InitializeSingletonResponse {
+  InitializeGameResponse response = 1;
+}
+
 // Presenter service is the P in Model View Presenter
 // We noticed that the front end was getting very bloated with not just views but also the 
 // cycles of interactions across various components.   So a MVP is being adopted where
@@ -126,9 +144,7 @@ message BuildOptionClickedResponse {
 
 // Called when the end turn button was clicked
 message InitializeGameRequest {
-  string game_data = 1;
-  string game_state = 2;
-  string move_history = 3;
+  string game_id = 1;
 }
 
 // Response of a turn option click

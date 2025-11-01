@@ -25,6 +25,120 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Called when the end turn button was clicked
+type InitializeSingletonRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GameId        string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	GameData      string                 `protobuf:"bytes,2,opt,name=game_data,json=gameData,proto3" json:"game_data,omitempty"`
+	GameState     string                 `protobuf:"bytes,3,opt,name=game_state,json=gameState,proto3" json:"game_state,omitempty"`
+	MoveHistory   string                 `protobuf:"bytes,4,opt,name=move_history,json=moveHistory,proto3" json:"move_history,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InitializeSingletonRequest) Reset() {
+	*x = InitializeSingletonRequest{}
+	mi := &file_weewar_v1_presenter_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InitializeSingletonRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitializeSingletonRequest) ProtoMessage() {}
+
+func (x *InitializeSingletonRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_presenter_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitializeSingletonRequest.ProtoReflect.Descriptor instead.
+func (*InitializeSingletonRequest) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *InitializeSingletonRequest) GetGameId() string {
+	if x != nil {
+		return x.GameId
+	}
+	return ""
+}
+
+func (x *InitializeSingletonRequest) GetGameData() string {
+	if x != nil {
+		return x.GameData
+	}
+	return ""
+}
+
+func (x *InitializeSingletonRequest) GetGameState() string {
+	if x != nil {
+		return x.GameState
+	}
+	return ""
+}
+
+func (x *InitializeSingletonRequest) GetMoveHistory() string {
+	if x != nil {
+		return x.MoveHistory
+	}
+	return ""
+}
+
+// Response of a turn option click
+type InitializeSingletonResponse struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Response      *InitializeGameResponse `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InitializeSingletonResponse) Reset() {
+	*x = InitializeSingletonResponse{}
+	mi := &file_weewar_v1_presenter_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InitializeSingletonResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitializeSingletonResponse) ProtoMessage() {}
+
+func (x *InitializeSingletonResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_presenter_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitializeSingletonResponse.ProtoReflect.Descriptor instead.
+func (*InitializeSingletonResponse) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *InitializeSingletonResponse) GetResponse() *InitializeGameResponse {
+	if x != nil {
+		return x.Response
+	}
+	return nil
+}
+
 // Called when a turn option is clicked in TurnOptionsPanel
 type TurnOptionClickedRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -39,7 +153,7 @@ type TurnOptionClickedRequest struct {
 
 func (x *TurnOptionClickedRequest) Reset() {
 	*x = TurnOptionClickedRequest{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[0]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -51,7 +165,7 @@ func (x *TurnOptionClickedRequest) String() string {
 func (*TurnOptionClickedRequest) ProtoMessage() {}
 
 func (x *TurnOptionClickedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[0]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,7 +178,7 @@ func (x *TurnOptionClickedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurnOptionClickedRequest.ProtoReflect.Descriptor instead.
 func (*TurnOptionClickedRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{0}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TurnOptionClickedRequest) GetGameId() string {
@@ -112,7 +226,7 @@ type TurnOptionClickedResponse struct {
 
 func (x *TurnOptionClickedResponse) Reset() {
 	*x = TurnOptionClickedResponse{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[1]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -124,7 +238,7 @@ func (x *TurnOptionClickedResponse) String() string {
 func (*TurnOptionClickedResponse) ProtoMessage() {}
 
 func (x *TurnOptionClickedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[1]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -137,7 +251,7 @@ func (x *TurnOptionClickedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurnOptionClickedResponse.ProtoReflect.Descriptor instead.
 func (*TurnOptionClickedResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{1}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *TurnOptionClickedResponse) GetGameId() string {
@@ -160,7 +274,7 @@ type SceneClickedRequest struct {
 
 func (x *SceneClickedRequest) Reset() {
 	*x = SceneClickedRequest{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[2]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -172,7 +286,7 @@ func (x *SceneClickedRequest) String() string {
 func (*SceneClickedRequest) ProtoMessage() {}
 
 func (x *SceneClickedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[2]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -185,7 +299,7 @@ func (x *SceneClickedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SceneClickedRequest.ProtoReflect.Descriptor instead.
 func (*SceneClickedRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{2}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SceneClickedRequest) GetGameId() string {
@@ -226,7 +340,7 @@ type SceneClickedResponse struct {
 
 func (x *SceneClickedResponse) Reset() {
 	*x = SceneClickedResponse{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[3]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -238,7 +352,7 @@ func (x *SceneClickedResponse) String() string {
 func (*SceneClickedResponse) ProtoMessage() {}
 
 func (x *SceneClickedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[3]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -251,7 +365,7 @@ func (x *SceneClickedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SceneClickedResponse.ProtoReflect.Descriptor instead.
 func (*SceneClickedResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{3}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *SceneClickedResponse) GetGameId() string {
@@ -271,7 +385,7 @@ type EndTurnButtonClickedRequest struct {
 
 func (x *EndTurnButtonClickedRequest) Reset() {
 	*x = EndTurnButtonClickedRequest{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[4]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -283,7 +397,7 @@ func (x *EndTurnButtonClickedRequest) String() string {
 func (*EndTurnButtonClickedRequest) ProtoMessage() {}
 
 func (x *EndTurnButtonClickedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[4]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -296,7 +410,7 @@ func (x *EndTurnButtonClickedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndTurnButtonClickedRequest.ProtoReflect.Descriptor instead.
 func (*EndTurnButtonClickedRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{4}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *EndTurnButtonClickedRequest) GetGameId() string {
@@ -316,7 +430,7 @@ type EndTurnButtonClickedResponse struct {
 
 func (x *EndTurnButtonClickedResponse) Reset() {
 	*x = EndTurnButtonClickedResponse{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[5]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -328,7 +442,7 @@ func (x *EndTurnButtonClickedResponse) String() string {
 func (*EndTurnButtonClickedResponse) ProtoMessage() {}
 
 func (x *EndTurnButtonClickedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[5]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -341,7 +455,7 @@ func (x *EndTurnButtonClickedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndTurnButtonClickedResponse.ProtoReflect.Descriptor instead.
 func (*EndTurnButtonClickedResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{5}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *EndTurnButtonClickedResponse) GetGameId() string {
@@ -364,7 +478,7 @@ type BuildOptionClickedRequest struct {
 
 func (x *BuildOptionClickedRequest) Reset() {
 	*x = BuildOptionClickedRequest{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -376,7 +490,7 @@ func (x *BuildOptionClickedRequest) String() string {
 func (*BuildOptionClickedRequest) ProtoMessage() {}
 
 func (x *BuildOptionClickedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[6]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -389,7 +503,7 @@ func (x *BuildOptionClickedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuildOptionClickedRequest.ProtoReflect.Descriptor instead.
 func (*BuildOptionClickedRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{6}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *BuildOptionClickedRequest) GetGameId() string {
@@ -429,7 +543,7 @@ type BuildOptionClickedResponse struct {
 
 func (x *BuildOptionClickedResponse) Reset() {
 	*x = BuildOptionClickedResponse{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -441,7 +555,7 @@ func (x *BuildOptionClickedResponse) String() string {
 func (*BuildOptionClickedResponse) ProtoMessage() {}
 
 func (x *BuildOptionClickedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[7]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -454,22 +568,20 @@ func (x *BuildOptionClickedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuildOptionClickedResponse.ProtoReflect.Descriptor instead.
 func (*BuildOptionClickedResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{7}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{9}
 }
 
 // Called when the end turn button was clicked
 type InitializeGameRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	GameData      string                 `protobuf:"bytes,1,opt,name=game_data,json=gameData,proto3" json:"game_data,omitempty"`
-	GameState     string                 `protobuf:"bytes,2,opt,name=game_state,json=gameState,proto3" json:"game_state,omitempty"`
-	MoveHistory   string                 `protobuf:"bytes,3,opt,name=move_history,json=moveHistory,proto3" json:"move_history,omitempty"`
+	GameId        string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InitializeGameRequest) Reset() {
 	*x = InitializeGameRequest{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[8]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -481,7 +593,7 @@ func (x *InitializeGameRequest) String() string {
 func (*InitializeGameRequest) ProtoMessage() {}
 
 func (x *InitializeGameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[8]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -494,26 +606,12 @@ func (x *InitializeGameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeGameRequest.ProtoReflect.Descriptor instead.
 func (*InitializeGameRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{8}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *InitializeGameRequest) GetGameData() string {
+func (x *InitializeGameRequest) GetGameId() string {
 	if x != nil {
-		return x.GameData
-	}
-	return ""
-}
-
-func (x *InitializeGameRequest) GetGameState() string {
-	if x != nil {
-		return x.GameState
-	}
-	return ""
-}
-
-func (x *InitializeGameRequest) GetMoveHistory() string {
-	if x != nil {
-		return x.MoveHistory
+		return x.GameId
 	}
 	return ""
 }
@@ -533,7 +631,7 @@ type InitializeGameResponse struct {
 
 func (x *InitializeGameResponse) Reset() {
 	*x = InitializeGameResponse{}
-	mi := &file_weewar_v1_presenter_proto_msgTypes[9]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -545,7 +643,7 @@ func (x *InitializeGameResponse) String() string {
 func (*InitializeGameResponse) ProtoMessage() {}
 
 func (x *InitializeGameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_presenter_proto_msgTypes[9]
+	mi := &file_weewar_v1_presenter_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -558,7 +656,7 @@ func (x *InitializeGameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeGameResponse.ProtoReflect.Descriptor instead.
 func (*InitializeGameResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{9}
+	return file_weewar_v1_presenter_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *InitializeGameResponse) GetSuccess() bool {
@@ -600,7 +698,15 @@ var File_weewar_v1_presenter_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_presenter_proto_rawDesc = "" +
 	"\n" +
-	"\x19weewar/v1/presenter.proto\x12\tweewar.v1\x1a google/protobuf/field_mask.proto\x1a\x16weewar/v1/models.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\x93\x01\n" +
+	"\x19weewar/v1/presenter.proto\x12\tweewar.v1\x1a google/protobuf/field_mask.proto\x1a\x16weewar/v1/models.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\x94\x01\n" +
+	"\x1aInitializeSingletonRequest\x12\x17\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\x1b\n" +
+	"\tgame_data\x18\x02 \x01(\tR\bgameData\x12\x1d\n" +
+	"\n" +
+	"game_state\x18\x03 \x01(\tR\tgameState\x12!\n" +
+	"\fmove_history\x18\x04 \x01(\tR\vmoveHistory\"\\\n" +
+	"\x1bInitializeSingletonResponse\x12=\n" +
+	"\bresponse\x18\x01 \x01(\v2!.weewar.v1.InitializeGameResponseR\bresponse\"\x93\x01\n" +
 	"\x18TurnOptionClickedRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12!\n" +
 	"\foption_index\x18\x02 \x01(\x05R\voptionIndex\x12\x1f\n" +
@@ -626,18 +732,17 @@ const file_weewar_v1_presenter_proto_rawDesc = "" +
 	"\x01q\x18\x02 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x03 \x01(\x05R\x01r\x12\x1b\n" +
 	"\tunit_type\x18\x04 \x01(\x05R\bunitType\"\x1c\n" +
-	"\x1aBuildOptionClickedResponse\"v\n" +
-	"\x15InitializeGameRequest\x12\x1b\n" +
-	"\tgame_data\x18\x01 \x01(\tR\bgameData\x12\x1d\n" +
-	"\n" +
-	"game_state\x18\x02 \x01(\tR\tgameState\x12!\n" +
-	"\fmove_history\x18\x03 \x01(\tR\vmoveHistory\"\xaf\x01\n" +
+	"\x1aBuildOptionClickedResponse\"0\n" +
+	"\x15InitializeGameRequest\x12\x17\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\"\xaf\x01\n" +
 	"\x16InitializeGameResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
 	"\x05error\x18\x02 \x01(\tR\x05error\x12%\n" +
 	"\x0ecurrent_player\x18\x03 \x01(\x05R\rcurrentPlayer\x12!\n" +
 	"\fturn_counter\x18\x04 \x01(\x05R\vturnCounter\x12\x1b\n" +
-	"\tgame_name\x18\x05 \x01(\tR\bgameName2\x8c\x06\n" +
+	"\tgame_name\x18\x05 \x01(\tR\bgameName2\x85\x01\n" +
+	"\x1bSingletonInitializerService\x12f\n" +
+	"\x13InitializeSingleton\x12%.weewar.v1.InitializeSingletonRequest\x1a&.weewar.v1.InitializeSingletonResponse\"\x002\x8c\x06\n" +
 	"\x11GameViewPresenter\x12W\n" +
 	"\x0eInitializeGame\x12 .weewar.v1.InitializeGameRequest\x1a!.weewar.v1.InitializeGameResponse\"\x00\x12\x92\x01\n" +
 	"\fSceneClicked\x12\x1e.weewar.v1.SceneClickedRequest\x1a\x1f.weewar.v1.SceneClickedResponse\"A\x82\xd3\xe4\x93\x02;:\x01*\"6/v1/presenters/gameview/action:clicked:scene/{game_id}\x12\xa6\x01\n" +
@@ -659,35 +764,40 @@ func file_weewar_v1_presenter_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_presenter_proto_rawDescData
 }
 
-var file_weewar_v1_presenter_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_weewar_v1_presenter_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_weewar_v1_presenter_proto_goTypes = []any{
-	(*TurnOptionClickedRequest)(nil),     // 0: weewar.v1.TurnOptionClickedRequest
-	(*TurnOptionClickedResponse)(nil),    // 1: weewar.v1.TurnOptionClickedResponse
-	(*SceneClickedRequest)(nil),          // 2: weewar.v1.SceneClickedRequest
-	(*SceneClickedResponse)(nil),         // 3: weewar.v1.SceneClickedResponse
-	(*EndTurnButtonClickedRequest)(nil),  // 4: weewar.v1.EndTurnButtonClickedRequest
-	(*EndTurnButtonClickedResponse)(nil), // 5: weewar.v1.EndTurnButtonClickedResponse
-	(*BuildOptionClickedRequest)(nil),    // 6: weewar.v1.BuildOptionClickedRequest
-	(*BuildOptionClickedResponse)(nil),   // 7: weewar.v1.BuildOptionClickedResponse
-	(*InitializeGameRequest)(nil),        // 8: weewar.v1.InitializeGameRequest
-	(*InitializeGameResponse)(nil),       // 9: weewar.v1.InitializeGameResponse
+	(*InitializeSingletonRequest)(nil),   // 0: weewar.v1.InitializeSingletonRequest
+	(*InitializeSingletonResponse)(nil),  // 1: weewar.v1.InitializeSingletonResponse
+	(*TurnOptionClickedRequest)(nil),     // 2: weewar.v1.TurnOptionClickedRequest
+	(*TurnOptionClickedResponse)(nil),    // 3: weewar.v1.TurnOptionClickedResponse
+	(*SceneClickedRequest)(nil),          // 4: weewar.v1.SceneClickedRequest
+	(*SceneClickedResponse)(nil),         // 5: weewar.v1.SceneClickedResponse
+	(*EndTurnButtonClickedRequest)(nil),  // 6: weewar.v1.EndTurnButtonClickedRequest
+	(*EndTurnButtonClickedResponse)(nil), // 7: weewar.v1.EndTurnButtonClickedResponse
+	(*BuildOptionClickedRequest)(nil),    // 8: weewar.v1.BuildOptionClickedRequest
+	(*BuildOptionClickedResponse)(nil),   // 9: weewar.v1.BuildOptionClickedResponse
+	(*InitializeGameRequest)(nil),        // 10: weewar.v1.InitializeGameRequest
+	(*InitializeGameResponse)(nil),       // 11: weewar.v1.InitializeGameResponse
 }
 var file_weewar_v1_presenter_proto_depIdxs = []int32{
-	8, // 0: weewar.v1.GameViewPresenter.InitializeGame:input_type -> weewar.v1.InitializeGameRequest
-	2, // 1: weewar.v1.GameViewPresenter.SceneClicked:input_type -> weewar.v1.SceneClickedRequest
-	0, // 2: weewar.v1.GameViewPresenter.TurnOptionClicked:input_type -> weewar.v1.TurnOptionClickedRequest
-	4, // 3: weewar.v1.GameViewPresenter.EndTurnButtonClicked:input_type -> weewar.v1.EndTurnButtonClickedRequest
-	6, // 4: weewar.v1.GameViewPresenter.BuildOptionClicked:input_type -> weewar.v1.BuildOptionClickedRequest
-	9, // 5: weewar.v1.GameViewPresenter.InitializeGame:output_type -> weewar.v1.InitializeGameResponse
-	3, // 6: weewar.v1.GameViewPresenter.SceneClicked:output_type -> weewar.v1.SceneClickedResponse
-	1, // 7: weewar.v1.GameViewPresenter.TurnOptionClicked:output_type -> weewar.v1.TurnOptionClickedResponse
-	5, // 8: weewar.v1.GameViewPresenter.EndTurnButtonClicked:output_type -> weewar.v1.EndTurnButtonClickedResponse
-	7, // 9: weewar.v1.GameViewPresenter.BuildOptionClicked:output_type -> weewar.v1.BuildOptionClickedResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	11, // 0: weewar.v1.InitializeSingletonResponse.response:type_name -> weewar.v1.InitializeGameResponse
+	0,  // 1: weewar.v1.SingletonInitializerService.InitializeSingleton:input_type -> weewar.v1.InitializeSingletonRequest
+	10, // 2: weewar.v1.GameViewPresenter.InitializeGame:input_type -> weewar.v1.InitializeGameRequest
+	4,  // 3: weewar.v1.GameViewPresenter.SceneClicked:input_type -> weewar.v1.SceneClickedRequest
+	2,  // 4: weewar.v1.GameViewPresenter.TurnOptionClicked:input_type -> weewar.v1.TurnOptionClickedRequest
+	6,  // 5: weewar.v1.GameViewPresenter.EndTurnButtonClicked:input_type -> weewar.v1.EndTurnButtonClickedRequest
+	8,  // 6: weewar.v1.GameViewPresenter.BuildOptionClicked:input_type -> weewar.v1.BuildOptionClickedRequest
+	1,  // 7: weewar.v1.SingletonInitializerService.InitializeSingleton:output_type -> weewar.v1.InitializeSingletonResponse
+	11, // 8: weewar.v1.GameViewPresenter.InitializeGame:output_type -> weewar.v1.InitializeGameResponse
+	5,  // 9: weewar.v1.GameViewPresenter.SceneClicked:output_type -> weewar.v1.SceneClickedResponse
+	3,  // 10: weewar.v1.GameViewPresenter.TurnOptionClicked:output_type -> weewar.v1.TurnOptionClickedResponse
+	7,  // 11: weewar.v1.GameViewPresenter.EndTurnButtonClicked:output_type -> weewar.v1.EndTurnButtonClickedResponse
+	9,  // 12: weewar.v1.GameViewPresenter.BuildOptionClicked:output_type -> weewar.v1.BuildOptionClickedResponse
+	7,  // [7:13] is the sub-list for method output_type
+	1,  // [1:7] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_presenter_proto_init() }
@@ -702,9 +812,9 @@ func file_weewar_v1_presenter_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_presenter_proto_rawDesc), len(file_weewar_v1_presenter_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_weewar_v1_presenter_proto_goTypes,
 		DependencyIndexes: file_weewar_v1_presenter_proto_depIdxs,

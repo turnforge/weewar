@@ -20,10 +20,11 @@ import (
 
 // Weewar_v1ServicesExports provides WASM exports for dependency injection
 type Weewar_v1ServicesExports struct {
-	GamesService      weewarv1.GamesServiceServer
-	GameViewPresenter weewarv1.GameViewPresenterServer
-	UsersService      weewarv1.UsersServiceServer
-	WorldsService     weewarv1.WorldsServiceServer
+	GamesService                weewarv1.GamesServiceServer
+	SingletonInitializerService weewarv1.SingletonInitializerServiceServer
+	GameViewPresenter           weewarv1.GameViewPresenterServer
+	UsersService                weewarv1.UsersServiceServer
+	WorldsService               weewarv1.WorldsServiceServer
 
 	// Browser-provided services (clients)
 	GameViewerPage *GameViewerPageClient
@@ -70,6 +71,11 @@ func (exports *Weewar_v1ServicesExports) RegisterAPI() {
 			}),
 			"simulateAttack": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gamesServiceSimulateAttack(this, args)
+			}),
+		},
+		"singletonInitializerService": map[string]interface{}{
+			"initializeSingleton": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.singletonInitializerServiceInitializeSingleton(this, args)
 			}),
 		},
 		"gameViewPresenter": map[string]interface{}{
@@ -660,6 +666,55 @@ func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Valu
 
 	// Call service method
 	resp, err := exports.GamesService.SimulateAttack(ctx, req)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	marshalOpts := protojson.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: true,  // Emit zero values to avoid undefined in JavaScript
+		UseEnumNumbers:  false, // Use enum string values
+	}
+	responseJSON, err := marshalOpts.Marshal(resp)
+	if err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// singletonInitializerServiceInitializeSingleton handles the InitializeSingleton method for SingletonInitializerService
+func (exports *Weewar_v1ServicesExports) singletonInitializerServiceInitializeSingleton(this js.Value, args []js.Value) any {
+	if exports.SingletonInitializerService == nil {
+		return createJSResponse(false, "SingletonInitializerService not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return createJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return createJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &weewarv1.InitializeSingletonRequest{}
+	opts := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}
+	if err := opts.Unmarshal([]byte(requestJSON), req); err != nil {
+		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.SingletonInitializerService.InitializeSingleton(ctx, req)
 	if err != nil {
 		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

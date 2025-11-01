@@ -12,6 +12,9 @@
       "name": "GameViewerPage"
     },
     {
+      "name": "SingletonInitializerService"
+    },
+    {
       "name": "GameViewPresenter"
     },
     {
@@ -2133,6 +2136,15 @@
         },
         "gameName": {
           "type": "string"
+        }
+      },
+      "title": "Response of a turn option click"
+    },
+    "v1InitializeSingletonResponse": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/v1InitializeGameResponse"
         }
       },
       "title": "Response of a turn option click"

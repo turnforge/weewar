@@ -251,9 +251,7 @@ func FormatUnits(pc *PresenterContext, state *v1.GameState) string {
 		return "No units found\n"
 	}
 
-	rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
-		pc.Presenter.GamesService.SingletonGame,
-		pc.Presenter.GamesService.SingletonGameState)
+	pc, _, _, _, rtGame, err := GetGame()
 	if err != nil {
 		panic(err)
 	}
@@ -315,9 +313,7 @@ func FormatTiles(pc *PresenterContext, state *v1.GameState) string {
 		return "No tiles found\n"
 	}
 
-	rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
-		pc.Presenter.GamesService.SingletonGame,
-		pc.Presenter.GamesService.SingletonGameState)
+	pc, _, _, _, rtGame, err := GetGame()
 	if err != nil {
 		panic(err)
 	}

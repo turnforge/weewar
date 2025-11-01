@@ -22,6 +22,9 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
+	// SingletonInitializerServiceName is the fully-qualified name of the SingletonInitializerService
+	// service.
+	SingletonInitializerServiceName = "weewar.v1.SingletonInitializerService"
 	// GameViewPresenterName is the fully-qualified name of the GameViewPresenter service.
 	GameViewPresenterName = "weewar.v1.GameViewPresenter"
 )
@@ -34,6 +37,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// SingletonInitializerServiceInitializeSingletonProcedure is the fully-qualified name of the
+	// SingletonInitializerService's InitializeSingleton RPC.
+	SingletonInitializerServiceInitializeSingletonProcedure = "/weewar.v1.SingletonInitializerService/InitializeSingleton"
 	// GameViewPresenterInitializeGameProcedure is the fully-qualified name of the GameViewPresenter's
 	// InitializeGame RPC.
 	GameViewPresenterInitializeGameProcedure = "/weewar.v1.GameViewPresenter/InitializeGame"
@@ -50,6 +56,78 @@ const (
 	// GameViewPresenter's BuildOptionClicked RPC.
 	GameViewPresenterBuildOptionClickedProcedure = "/weewar.v1.GameViewPresenter/BuildOptionClicked"
 )
+
+// SingletonInitializerServiceClient is a client for the weewar.v1.SingletonInitializerService
+// service.
+type SingletonInitializerServiceClient interface {
+	InitializeSingleton(context.Context, *connect.Request[v1.InitializeSingletonRequest]) (*connect.Response[v1.InitializeSingletonResponse], error)
+}
+
+// NewSingletonInitializerServiceClient constructs a client for the
+// weewar.v1.SingletonInitializerService service. By default, it uses the Connect protocol with the
+// binary Protobuf Codec, asks for gzipped responses, and sends uncompressed requests. To use the
+// gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewSingletonInitializerServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) SingletonInitializerServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	singletonInitializerServiceMethods := v1.File_weewar_v1_presenter_proto.Services().ByName("SingletonInitializerService").Methods()
+	return &singletonInitializerServiceClient{
+		initializeSingleton: connect.NewClient[v1.InitializeSingletonRequest, v1.InitializeSingletonResponse](
+			httpClient,
+			baseURL+SingletonInitializerServiceInitializeSingletonProcedure,
+			connect.WithSchema(singletonInitializerServiceMethods.ByName("InitializeSingleton")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// singletonInitializerServiceClient implements SingletonInitializerServiceClient.
+type singletonInitializerServiceClient struct {
+	initializeSingleton *connect.Client[v1.InitializeSingletonRequest, v1.InitializeSingletonResponse]
+}
+
+// InitializeSingleton calls weewar.v1.SingletonInitializerService.InitializeSingleton.
+func (c *singletonInitializerServiceClient) InitializeSingleton(ctx context.Context, req *connect.Request[v1.InitializeSingletonRequest]) (*connect.Response[v1.InitializeSingletonResponse], error) {
+	return c.initializeSingleton.CallUnary(ctx, req)
+}
+
+// SingletonInitializerServiceHandler is an implementation of the
+// weewar.v1.SingletonInitializerService service.
+type SingletonInitializerServiceHandler interface {
+	InitializeSingleton(context.Context, *connect.Request[v1.InitializeSingletonRequest]) (*connect.Response[v1.InitializeSingletonResponse], error)
+}
+
+// NewSingletonInitializerServiceHandler builds an HTTP handler from the service implementation. It
+// returns the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewSingletonInitializerServiceHandler(svc SingletonInitializerServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	singletonInitializerServiceMethods := v1.File_weewar_v1_presenter_proto.Services().ByName("SingletonInitializerService").Methods()
+	singletonInitializerServiceInitializeSingletonHandler := connect.NewUnaryHandler(
+		SingletonInitializerServiceInitializeSingletonProcedure,
+		svc.InitializeSingleton,
+		connect.WithSchema(singletonInitializerServiceMethods.ByName("InitializeSingleton")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/weewar.v1.SingletonInitializerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case SingletonInitializerServiceInitializeSingletonProcedure:
+			singletonInitializerServiceInitializeSingletonHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedSingletonInitializerServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedSingletonInitializerServiceHandler struct{}
+
+func (UnimplementedSingletonInitializerServiceHandler) InitializeSingleton(context.Context, *connect.Request[v1.InitializeSingletonRequest]) (*connect.Response[v1.InitializeSingletonResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.SingletonInitializerService.InitializeSingleton is not implemented"))
+}
 
 // GameViewPresenterClient is a client for the weewar.v1.GameViewPresenter service.
 type GameViewPresenterClient interface {

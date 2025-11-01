@@ -5,6 +5,78 @@ import grpc
 from weewar.v1 import presenter_pb2 as weewar_dot_v1_dot_presenter__pb2
 
 
+class SingletonInitializerServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.InitializeSingleton = channel.unary_unary(
+                '/weewar.v1.SingletonInitializerService/InitializeSingleton',
+                request_serializer=weewar_dot_v1_dot_presenter__pb2.InitializeSingletonRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_presenter__pb2.InitializeSingletonResponse.FromString,
+                _registered_method=True)
+
+
+class SingletonInitializerServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def InitializeSingleton(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_SingletonInitializerServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'InitializeSingleton': grpc.unary_unary_rpc_method_handler(
+                    servicer.InitializeSingleton,
+                    request_deserializer=weewar_dot_v1_dot_presenter__pb2.InitializeSingletonRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_presenter__pb2.InitializeSingletonResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'weewar.v1.SingletonInitializerService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('weewar.v1.SingletonInitializerService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class SingletonInitializerService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def InitializeSingleton(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.SingletonInitializerService/InitializeSingleton',
+            weewar_dot_v1_dot_presenter__pb2.InitializeSingletonRequest.SerializeToString,
+            weewar_dot_v1_dot_presenter__pb2.InitializeSingletonResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
 class GameViewPresenterStub(object):
     """Presenter service is the P in Model View Presenter
     We noticed that the front end was getting very bloated with not just views but also the 

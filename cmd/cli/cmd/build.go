@@ -38,25 +38,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	unitTypeArg := args[1]
 
 	// Get game ID
-	gameID, err := getGameID()
-	if err != nil {
-		return err
-	}
-
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
 	ctx := context.Background()
-
-	// Get runtime game for parsing positions
-	rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
-		pc.Presenter.GamesService.SingletonGame,
-		pc.Presenter.GamesService.SingletonGameState)
+	pc, _, _, _, rtGame, err := GetGame()
 	if err != nil {
-		return fmt.Errorf("failed to get runtime game: %w", err)
+		return err
 	}
 
 	// Parse tile position

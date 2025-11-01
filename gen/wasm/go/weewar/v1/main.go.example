@@ -23,6 +23,13 @@ func main() {
 		//     auth: authService,
 		//     config: appConfig,
 		// },
+		// TODO: Replace with your actual SingletonInitializerService implementation
+		// SingletonInitializerService: &yourSingletonInitializerServiceImplementation{
+		//     // Initialize with database, config, etc.
+		//     db: database,
+		//     auth: authService,
+		//     config: appConfig,
+		// },
 		// TODO: Replace with your actual GameViewPresenter implementation
 		// GameViewPresenter: &yourGameViewPresenterImplementation{
 		//     // Initialize with database, config, etc.

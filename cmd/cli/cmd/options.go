@@ -32,26 +32,10 @@ func init() {
 func runOptions(cmd *cobra.Command, args []string) error {
 	position := args[0]
 
-	// Get game ID
-	gameID, err := getGameID()
-	if err != nil {
-		return err
-	}
-
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
 	ctx := context.Background()
-
-	// Get runtime game for parsing position
-	rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
-		pc.Presenter.GamesService.SingletonGame,
-		pc.Presenter.GamesService.SingletonGameState)
+	pc, _, _, _, rtGame, err := GetGame()
 	if err != nil {
-		return fmt.Errorf("failed to get runtime game: %w", err)
+		return err
 	}
 
 	// Parse position (could be coordinate or unit ID)
@@ -101,13 +85,8 @@ func runOptions(cmd *cobra.Command, args []string) error {
 					unitName := fmt.Sprintf("type %d", buildOpt.UnitType)
 
 					// Try to get actual unit name
-					rtGame, err := pc.Presenter.GamesService.GetRuntimeGame(
-						pc.Presenter.GamesService.SingletonGame,
-						pc.Presenter.GamesService.SingletonGameState)
-					if err == nil && rtGame.GetRulesEngine() != nil {
-						if unitDef, err := rtGame.GetRulesEngine().GetUnitData(buildOpt.UnitType); err == nil {
-							unitName = unitDef.Name
-						}
+					if unitDef, err := rtGame.GetRulesEngine().GetUnitData(buildOpt.UnitType); err == nil {
+						unitName = unitDef.Name
 					}
 
 					options = append(options, map[string]any{

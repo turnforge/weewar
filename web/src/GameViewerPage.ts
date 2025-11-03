@@ -746,6 +746,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
         if (gameLoadingOverlay) {
             gameLoadingOverlay.style.display = 'none';
         }
+
+        // Dismiss splash screen once game is fully loaded
+        super.dismissSplashScreen();
     }
 
     /**

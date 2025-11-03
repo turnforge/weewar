@@ -8,10 +8,13 @@ import (
 )
 
 type BasePage struct {
-	Title              string
-	BodyClass          string
-	CustomHeader       bool
-	BodyDataAttributes string
+	Title               string
+	BodyClass           string
+	CustomHeader        bool
+	BodyDataAttributes  string
+	DisableSplashScreen bool
+	SplashTitle         string
+	SplashMessage       string
 }
 
 type HomePage struct {
@@ -27,6 +30,7 @@ type HomePage struct {
 
 func (p *HomePage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
 	p.Title = "Home"
+	p.DisableSplashScreen = true
 	p.Header.Load(r, w, vc)
 
 	// Fetch recent games (limit to 6)

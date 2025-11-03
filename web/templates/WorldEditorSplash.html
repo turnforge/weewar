@@ -1,0 +1,43 @@
+<!-- templates/WorldEditorSplash.html -->
+{{ define "WorldEditorSplash" }}
+<div class="flex flex-col items-center space-y-8">
+  <!-- Custom Editor Loading Animation -->
+  <div class="relative w-24 h-24">
+    <!-- Outer ring -->
+    <div class="absolute inset-0 border-4 border-blue-200 dark:border-blue-900 rounded-full"></div>
+    <!-- Spinning ring -->
+    <div class="absolute inset-0 border-4 border-blue-600 dark:border-blue-400 rounded-full border-t-transparent animate-spin"></div>
+    <!-- Inner icon -->
+    <div class="absolute inset-0 flex items-center justify-center">
+      <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- Loading Message -->
+  <div class="text-center space-y-3 max-w-md">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white" data-splash-title>Loading World Editor</h2>
+    <p class="text-base text-gray-600 dark:text-gray-400" data-splash-message>Initializing Phaser engine, loading tools, and preparing workspace...</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="w-96 max-w-full">
+    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+      <div
+        data-splash-progress-bar
+        class="h-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 transition-all duration-300 ease-out rounded-full"
+        style="width: 0%"
+      ></div>
+    </div>
+    <p class="text-sm text-gray-600 dark:text-gray-400 text-center mt-2" data-splash-progress-text>0%</p>
+  </div>
+
+  <!-- Loading Steps (optional progress indicator) -->
+  <div class="flex space-x-2">
+    <div class="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse"></div>
+    <div class="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+    <div class="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+  </div>
+</div>
+{{ end }}

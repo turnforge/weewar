@@ -2,6 +2,7 @@
 import { ThemeManager } from '../lib/ThemeManager'; // For theme consistency if needed later
 import { Modal } from '../lib/Modal';
 import { ToastManager } from '../lib/ToastManager';
+import { SplashScreen } from '../lib/SplashScreen';
 
 /**
  * Manages the listing page logic
@@ -31,6 +32,7 @@ class HomePage {
         // Use event delegation for clicks within the modal
         // Listen on the modal container or a higher-level element
         document.body.addEventListener('click', this.handleModalClick.bind(this));
+        SplashScreen.dismiss()
     }
 
     /**

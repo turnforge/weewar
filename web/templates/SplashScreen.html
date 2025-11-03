@@ -1,0 +1,28 @@
+<!-- templates/SplashScreen.html -->
+{{ define "DefaultSplashScreen" }}
+<div class="flex flex-col items-center space-y-6">
+  <!-- Loading Spinner -->
+  <div class="relative w-16 h-16">
+    <div class="absolute inset-0 border-4 border-gray-300 dark:border-gray-700 rounded-full"></div>
+    <div class="absolute inset-0 border-4 border-blue-600 dark:border-blue-400 rounded-full border-t-transparent animate-spin"></div>
+  </div>
+
+  <!-- Loading Message -->
+  <div class="text-center space-y-2">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white" data-splash-title>{{ or .SplashTitle "Loading" }}</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-400" data-splash-message>{{ or .SplashMessage "Initializing application..." }}</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="w-80 max-w-full">
+    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div
+        data-splash-progress-bar
+        class="h-full bg-blue-600 dark:bg-blue-400 transition-all duration-300 ease-out rounded-full"
+        style="width: 0%"
+      ></div>
+    </div>
+    <p class="text-xs text-gray-500 dark:text-gray-500 text-center mt-2" data-splash-progress-text>0%</p>
+  </div>
+</div>
+{{ end }}

@@ -4,6 +4,7 @@ import { ToastManager } from './ToastManager';
 import { EventBus } from './EventBus';
 import { BaseComponent } from './Component';
 import { LCMComponent } from './LCMComponent';
+import { SplashScreen } from '../lib/SplashScreen';
 
 /**
  * Base class for all pages that provides common UI components and functionality
@@ -183,5 +184,9 @@ export abstract class BasePage extends BaseComponent {
         }
         
         return element;
+    }
+
+    protected dismissSplashScreen() {
+        SplashScreen.dismiss();
     }
 }

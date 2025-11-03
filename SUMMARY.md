@@ -29,8 +29,41 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - **GameState**: Lightweight controller managing WASM interactions
 - **GameViewer**: Phaser-based view rendering hex maps and units
 - **Event System**: Clean separation between game logic and UI updates
+- **Splash Screen System**: Pre-load overlays with progress tracking for page initialization
 
 ## Recent Major Achievements
+
+### Splash Screen System (Current Session)
+
+**Achievement**: Implemented instant-loading splash screen system with progress tracking for all major pages.
+
+**Key Features**:
+- **Pure HTML/CSS Loading**: Splash screen renders immediately before JavaScript loads
+- **Translucent Backdrop**: 95% opacity with backdrop blur effect for modern appearance
+- **Progress Bar**: Updateable 0-100% progress indicator with smooth transitions
+- **Customizable Templates**: Support for default and custom splash screens per page
+- **Fade-out Animation**: 300ms smooth transition when dismissed
+- **Theme-Aware**: Automatic light/dark mode support
+
+**Implementation**:
+- web/templates/BasePage.html: Splash screen container with block override support
+- web/templates/SplashScreen.html: Default splash template with spinner and progress bar
+- web/templates/WorldEditorSplash.html: Example custom splash with map icon
+- web/src/lib/SplashScreen.ts: TypeScript utility for progress updates and dismissal
+- web/src/lib/BasePage.ts: dismissSplashScreen() helper method
+
+**Integration**:
+- WorldEditorPage: Dismisses after Phaser initialization and world loading
+- GameViewerPage: Dismisses after game state loads and canvas renders
+- WorldViewerPage: Dismisses after world data loads into scene
+- StartGamePage: Dismisses after world preview loads
+
+**Benefits**:
+- Immediate visual feedback before JavaScript loads
+- Better perceived performance with progress indication
+- Consistent loading experience across all pages
+- Easy to customize per-page with template overrides
+- No JavaScript required for initial display
 
 ### Formula-Based Combat System Implementation
 

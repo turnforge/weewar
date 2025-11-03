@@ -2054,7 +2054,7 @@ class WorldEditorPage extends BasePage {
     
     private async handlePhaserReady() {
         this.logToConsole('EventBus: Phaser editor is ready');
-        
+
         // Load world data if available
         if (this.world && this.phaserEditorComponent) {
             // Give Phaser time to fully initialize webgl context and scene
@@ -2062,6 +2062,9 @@ class WorldEditorPage extends BasePage {
             this.hasPendingWorldDataLoad = false;
             this.refreshTileStats();
         }
+
+        // Dismiss splash screen once everything is loaded and ready
+        super.dismissSplashScreen();
     }
 }
 

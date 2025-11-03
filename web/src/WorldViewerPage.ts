@@ -72,6 +72,9 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         this.bindPageSpecificEvents();
         this.worldScene.loadWorld(this.world);
         this.showToast('Success', 'World loaded successfully', 'success');
+
+        // Dismiss splash screen once world is loaded
+        super.dismissSplashScreen();
     }
 
     /**

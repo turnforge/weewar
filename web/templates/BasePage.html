@@ -2,6 +2,7 @@
 {{# include "Header.html" #}}
 {{# include "ModalContainer.html" #}}
 {{# include "ToastContainer.html" #}}
+{{# include "SplashScreen.html" #}}
 
 {{ define "BasePage" }}
 <!DOCTYPE html>
@@ -27,6 +28,17 @@
 
 {{/* Add data attributes passed from child templates */}}
 <body class='{{ or .BodyClass "h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200" }}' {{ .BodyDataAttributes | safeHTMLAttr }}>
+  <!-- Pre-load Splash Screen (loads instantly, before JS) -->
+  {{ if not .DisableSplashScreen }}
+  <div id="splash-screen" class="fixed inset-0 z-[9999] bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300">
+
+    {{ block "SplashScreenContent" . }}
+      {{ template "DefaultSplashScreen" . }}
+    {{ end }}
+
+  </div>
+  {{ end }}
+
   {{ block "HeaderSection" . }}
     {{ if not .CustomHeader }}
     <!-- Header Block -->

@@ -443,7 +443,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         // Set up progress tracking
         this.assetProvider.onProgress = (progress: number) => {
             if (this.debugMode) {
-                console.log(`[PhaserWorldScene] Loading assets: ${Math.round(progress * 100)}%`);
+                // console.log(`[PhaserWorldScene] Loading assets: ${Math.round(progress * 100)}%`);
             }
         };
         

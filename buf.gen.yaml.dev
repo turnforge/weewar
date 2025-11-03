@@ -17,6 +17,13 @@ plugins:
     out: ./gen/go
     opt: paths=source_relative
 
+  # vtprotobuf for TinyGo WASM compatibility (generates reflection-free code)
+  # - local: protoc-gen-go-vtproto
+    # out: gen/go
+    # opt:
+      # - paths=source_relative
+      # - features=marshal+unmarshal+size
+
   - local: protoc-gen-connect-go
     out: gen/go
     opt: paths=source_relative

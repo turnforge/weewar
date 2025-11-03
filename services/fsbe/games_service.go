@@ -11,7 +11,7 @@ import (
 	"log"
 	"time"
 
-	turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1/models"
+	// turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1/models"
 	"github.com/panyam/turnengine/engine/storage"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1/models"
 	v1services "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1/services"
@@ -343,34 +343,36 @@ func (s *FSGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMovesR
 
 	// Apply expected changes to current state to get new state
 	// This is what validators will do independently
-	newState := proto.Clone(gameresp.State).(*v1.GameState)
-	// TODO: Apply req.ExpectedChanges to newState
+	/*
+		newState := proto.Clone(gameresp.State).(*v1.GameState)
+		// TODO: Apply req.ExpectedChanges to newState
 
-	// Compute hashes (validators will compute same hashes)
-	fromStateHash := computeHash(gameresp.State)
-	toStateHash := computeHash(newState)
+		// Compute hashes (validators will compute same hashes)
+			fromStateHash := computeHash(gameresp.State)
+			toStateHash := computeHash(newState)
 
-	// Serialize for coordinator (game-agnostic blobs)
-	movesBlob := serialize(&v1.ProcessMovesRequest{
-		GameId: req.GameId,
-		Moves:  req.Moves,
-	})
-	changesBlob := serialize(req.ExpectedResponse)
-	newStateBlob := serialize(newState)
+			// Serialize for coordinator (game-agnostic blobs)
+			movesBlob := serialize(&v1.ProcessMovesRequest{
+				GameId: req.GameId,
+				Moves:  req.Moves,
+			})
+			changesBlob := serialize(req.ExpectedResponse)
+			newStateBlob := serialize(newState)
 
-	// Create proposal for coordinator
-	proposal := &turnengine.SubmitProposalRequest{
-		SessionId:     req.GameId,
-		ProposerId:    "player1", // TODO: Get from context/session
-		FromStateHash: fromStateHash,
-		ToStateHash:   toStateHash,
-		MovesBlob:     movesBlob,
-		ChangesBlob:   changesBlob,
-		NewStateBlob:  newStateBlob,
-	}
+			// Create proposal for coordinator
+				proposal := &turnengine.SubmitProposalRequest{
+					SessionId:     req.GameId,
+					ProposerId:    "player1", // TODO: Get from context/session
+					FromStateHash: fromStateHash,
+					ToStateHash:   toStateHash,
+					MovesBlob:     movesBlob,
+					ChangesBlob:   changesBlob,
+					NewStateBlob:  newStateBlob,
+				}
 
-	// TODO: Submit to coordinator when wired up
-	_ = proposal
+				// TODO: Submit to coordinator when wired up
+				_ = proposal
+	*/
 
 	// For now, just apply the changes directly (simulating accepted proposal)
 	return req.ExpectedResponse, nil
@@ -379,6 +381,7 @@ func (s *FSGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMovesR
 // ement coordination.Callbacks interface
 
 // OnProposalStarted is called when a proposal is accepted for validation
+/*
 func (s *FSGamesService) OnProposalStarted(gameID string, proposal *turnengine.ProposalInfo) error {
 	// Load the game state
 	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, gameID, "state")
@@ -387,7 +390,6 @@ func (s *FSGamesService) OnProposalStarted(gameID string, proposal *turnengine.P
 	}
 
 	// Set the proposal tracking info
-	/*
 		gameState.ProposalInfo = &turnengine.ProposalTrackingInfo{
 			ProposalId:     proposal.ProposalId,
 			ProposerId:     proposal.ProposerId,
@@ -396,13 +398,14 @@ func (s *FSGamesService) OnProposalStarted(gameID string, proposal *turnengine.P
 			ValidatorCount: int32(len(proposal.AssignedValidators)),
 			VotesReceived:  0,
 		}
-	*/
 
 	// Save the updated state
 	return s.storage.SaveArtifact(gameID, "state", gameState)
 }
+*/
 
 // OnProposalAccepted is called when consensus approves the proposal
+/*
 func (s *FSGamesService) OnProposalAccepted(gameID string, proposal *turnengine.ProposalInfo) error {
 	// The new state is in the proposal's new_state_blob
 	// We need to save it as the new game state
@@ -422,8 +425,10 @@ func (s *FSGamesService) OnProposalAccepted(gameID string, proposal *turnengine.
 	// Save the state
 	return s.storage.SaveArtifact(gameID, "state", gameState)
 }
+*/
 
 // OnProposalFailed is called when proposal is rejected or times out
+/*
 func (s *FSGamesService) OnProposalFailed(gameID string, proposal *turnengine.ProposalInfo, reason string) error {
 	// Clear the proposal info from game state
 	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, gameID, "state")
@@ -437,3 +442,4 @@ func (s *FSGamesService) OnProposalFailed(gameID string, proposal *turnengine.Pr
 	// Save the state
 	return s.storage.SaveArtifact(gameID, "state", gameState)
 }
+*/

@@ -13,10 +13,7 @@ import (
 	"log"
 	"log/slog"
 	"net"
-	"time"
 
-	"github.com/panyam/turnengine/engine/coordination"
-	turnengine "github.com/panyam/turnengine/engine/gen/go/turnengine/v1"
 	v1s "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1/services"
 	"github.com/panyam/turnengine/games/weewar/services/fsbe"
 	"google.golang.org/grpc"
@@ -38,23 +35,26 @@ func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool
 	gamesService := fsbe.NewFSGamesService("")
 
 	// Create coordination storage
-	coordStorageDir := fsbe.DevDataPath("storage/coordination")
-	coordStorage, err := coordination.NewFileCoordinationStorage(coordStorageDir)
-	if err != nil {
-		return fmt.Errorf("failed to create coordination storage: %w", err)
-	}
+	/*
+		coordStorageDir := fsbe.DevDataPath("storage/coordination")
+		coordStorage, err := coordination.NewFileCoordinationStorage(coordStorageDir)
+		if err != nil {
+			return fmt.Errorf("failed to create coordination storage: %w", err)
+		}
 
-	// Create coordinator service with games service as callback
-	coordConfig := coordination.Config{
-		RequiredValidators: 1, // Start with 1 for testing
-		ValidationTimeout:  5 * time.Minute,
-	}
-	coordService := coordination.NewService(coordStorage, coordConfig, gamesService)
+		// Create coordinator service with games service as callback
+			coordConfig := coordination.Config{
+				RequiredValidators: 1, // Start with 1 for testing
+				ValidationTimeout:  5 * time.Minute,
+			}
+			coordService := coordination.NewService(coordStorage, coordConfig, gamesService)
+	*/
 
 	// Register services
 	v1s.RegisterGamesServiceServer(server, gamesService)
 	v1s.RegisterWorldsServiceServer(server, fsbe.NewFSWorldsService(""))
-	turnengine.RegisterCoordinatorServiceServer(server, coordService)
+
+	// turnengine.RegisterCoordinatorServiceServer(server, coordService)
 
 	l, err := net.Listen("tcp", s.Address)
 	if err != nil {

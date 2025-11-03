@@ -10,8 +10,8 @@ import (
 	oa "github.com/panyam/oneauth"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	v1connect "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1/weewarv1connect"
-	"github.com/panyam/turnengine/games/weewar/services"
-	svc "github.com/panyam/turnengine/games/weewar/services"
+	"github.com/panyam/turnengine/games/weewar/services/fsbe"
+	"github.com/panyam/turnengine/games/weewar/services/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -23,7 +23,7 @@ import (
 type ApiHandler struct {
 	mux            *http.ServeMux
 	AuthMiddleware *oa.Middleware
-	ClientMgr      *svc.ClientMgr
+	ClientMgr      *server.ClientMgr
 
 	// Here we can have to ways of accessing the services - either via clients or by actual service instead if you are not
 	// running the services on a dedicated port
@@ -33,7 +33,7 @@ func (n *ApiHandler) Handler() http.Handler {
 	return n.mux
 }
 
-func NewApiHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *ApiHandler {
+func NewApiHandler(middleware *oa.Middleware, clients *server.ClientMgr) *ApiHandler {
 	out := ApiHandler{
 		mux:            http.NewServeMux(),
 		AuthMiddleware: middleware,
@@ -63,12 +63,12 @@ func NewApiHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *ApiHandle
 	// Add AppItems Connect handler
 	// We will do this for each service we have registered
 	log.Println("Adding Games Connect handler...")
-	gamesAdapter := NewConnectGamesServiceAdapter(services.NewFSGamesService())
+	gamesAdapter := NewConnectGamesServiceAdapter(fsbe.NewFSGamesService(""))
 	gamesConnectPath, gamesConnectHandler := v1connect.NewGamesServiceHandler(gamesAdapter)
 	out.mux.Handle(gamesConnectPath, gamesConnectHandler)
 	log.Printf("Registered Games Connect handler at: %s", gamesConnectPath)
 
-	worldsAdapter := NewConnectWorldsServiceAdapter(services.NewFSWorldsService())
+	worldsAdapter := NewConnectWorldsServiceAdapter(fsbe.NewFSWorldsService(""))
 	worldsConnectPath, worldsConnectHandler := v1connect.NewWorldsServiceHandler(worldsAdapter)
 	out.mux.Handle(worldsConnectPath, worldsConnectHandler)
 	log.Printf("Registered Worlds Connect handler at: %s", worldsConnectPath)

@@ -5,40 +5,40 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    LogMessageRequest,
-    RemoveTileAtResponse,
-    UpdateGameStatusResponse,
-    SetTileAtResponse,
-    UpdateGameStatusRequest,
-    RemoveUnitAtRequest,
-    ShowHighlightsRequest,
-    MoveUnitResponse,
-    LogMessageResponse,
-    ShowPathRequest,
-    ShowAttackEffectRequest,
-    ShowBuildOptionsRequest,
-    SetGameStateResponse,
-    SetUnitAtRequest,
-    RemoveTileAtRequest,
-    ClearHighlightsRequest,
+    ShowPathResponse,
+    ShowCaptureEffectResponse,
     ShowBuildOptionsResponse,
+    RemoveUnitAtRequest,
+    MoveUnitResponse,
+    SetTileAtResponse,
+    ClearHighlightsResponse,
+    SetContentResponse,
     SetTileAtRequest,
     ClearPathsRequest,
-    ShowAttackEffectResponse,
-    ShowHealEffectResponse,
-    ShowHighlightsResponse,
-    ClearHighlightsResponse,
     MoveUnitRequest,
+    ShowAttackEffectRequest,
+    ShowHealEffectResponse,
+    ShowBuildOptionsRequest,
+    ShowHighlightsResponse,
     ShowHealEffectRequest,
-    ShowCaptureEffectResponse,
-    SetContentRequest,
-    SetContentResponse,
-    ShowPathResponse,
-    ClearPathsResponse,
     SetGameStateRequest,
+    UpdateGameStatusRequest,
     SetUnitAtResponse,
+    ShowHighlightsRequest,
+    ShowPathRequest,
+    SetContentRequest,
+    SetGameStateResponse,
+    UpdateGameStatusResponse,
+    RemoveTileAtRequest,
     RemoveUnitAtResponse,
+    ClearHighlightsRequest,
+    ClearPathsResponse,
+    SetUnitAtRequest,
+    RemoveTileAtResponse,
+    ShowAttackEffectResponse,
     ShowCaptureEffectRequest,
+    LogMessageRequest,
+    LogMessageResponse,
 } from './interfaces';
 /**
  * GameViewerPage service client interface
@@ -70,7 +70,7 @@ export interface GameViewerPageMethods {
  * GameViewerPage service client implementation
  * Lightweight facade that uses shared WASM bundle
  */
-export class GameViewerPageServiceClient extends ServiceClient implements GameViewerPageMethods {
+export class GameViewerPageClient extends ServiceClient implements GameViewerPageMethods {
     async setTurnOptionsContent(request: SetContentRequest): Promise<SetContentResponse> {
         return this.callMethod('gameViewerPage.setTurnOptionsContent', request);
     }

@@ -6,11 +6,13 @@ import (
 
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	"github.com/panyam/turnengine/games/weewar/services"
+	"github.com/panyam/turnengine/games/weewar/services/fsbe"
+	"github.com/panyam/turnengine/games/weewar/services/singleton"
 )
 
 // PresenterContext holds the presenter and associated panels for CLI operations
 type PresenterContext struct {
-	Presenter          *services.SingletonGameViewPresenterImpl
+	Presenter          *services.GameViewPresenter
 	GameState          *services.BaseGameState
 	TurnOptions        *services.BaseTurnOptionsPanel
 	BuildOptions       *services.BaseBuildOptionsModal
@@ -19,7 +21,7 @@ type PresenterContext struct {
 	DamageDistribution *services.BaseUnitPanel
 	GameScene          *services.BaseGameScene
 	GameID             string
-	FSService          *services.FSGamesServiceImpl
+	FSService          *fsbe.FSGamesService
 }
 
 // createPresenter loads a game from disk into an in-memory presenter
@@ -27,20 +29,20 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 	ctx := context.Background()
 
 	// Load game from disk using FSGamesService
-	fsService := services.NewFSGamesService()
+	fsService := fsbe.NewFSGamesService("")
 	gameResp, err := fsService.GetGame(ctx, &v1.GetGameRequest{Id: gameID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to load game %s: %w", gameID, err)
 	}
 
 	// Always use SingletonGamesService for in-memory operations
-	singletonService := services.NewSingletonGamesServiceImpl()
+	singletonService := singleton.NewSingletonGamesService()
 	singletonService.SingletonGame = gameResp.Game
 	singletonService.SingletonGameState = gameResp.State
 	singletonService.SingletonGameMoveHistory = gameResp.History
 
 	// Create presenter (already initializes RulesEngine and Theme)
-	presenter := services.NewSingletonGameViewPresenterImpl()
+	presenter := services.NewGameViewPresenter()
 	presenter.GamesService = singletonService
 
 	// Create base panels (data-only, no HTML rendering)

@@ -11,7 +11,6 @@ import (
 
 	wasm "github.com/panyam/protoc-gen-go-wasmjs/pkg/wasm"
 	weewarv1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	grpc "google.golang.org/grpc"
 )
 
 // =============================================================================
@@ -31,7 +30,7 @@ func NewGameViewerPageClient() *GameViewerPageClient {
 }
 
 // SetTurnOptionsContent calls the browser-provided SetTurnOptionsContent method
-func (c *GameViewerPageClient) SetTurnOptionsContent(ctx context.Context, req *weewarv1.SetContentRequest, opts ...grpc.CallOption) (*weewarv1.SetContentResponse, error) {
+func (c *GameViewerPageClient) SetTurnOptionsContent(ctx context.Context, req *weewarv1.SetContentRequest) (*weewarv1.SetContentResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetContentRequest, *weewarv1.SetContentResponse](
 		c.channel, ctx, "GameViewerPage", "setTurnOptionsContent", req,
@@ -39,7 +38,7 @@ func (c *GameViewerPageClient) SetTurnOptionsContent(ctx context.Context, req *w
 }
 
 // ShowBuildOptions calls the browser-provided ShowBuildOptions method
-func (c *GameViewerPageClient) ShowBuildOptions(ctx context.Context, req *weewarv1.ShowBuildOptionsRequest, opts ...grpc.CallOption) (*weewarv1.ShowBuildOptionsResponse, error) {
+func (c *GameViewerPageClient) ShowBuildOptions(ctx context.Context, req *weewarv1.ShowBuildOptionsRequest) (*weewarv1.ShowBuildOptionsResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ShowBuildOptionsRequest, *weewarv1.ShowBuildOptionsResponse](
 		c.channel, ctx, "GameViewerPage", "showBuildOptions", req,
@@ -47,7 +46,7 @@ func (c *GameViewerPageClient) ShowBuildOptions(ctx context.Context, req *weewar
 }
 
 // SetUnitStatsContent calls the browser-provided SetUnitStatsContent method
-func (c *GameViewerPageClient) SetUnitStatsContent(ctx context.Context, req *weewarv1.SetContentRequest, opts ...grpc.CallOption) (*weewarv1.SetContentResponse, error) {
+func (c *GameViewerPageClient) SetUnitStatsContent(ctx context.Context, req *weewarv1.SetContentRequest) (*weewarv1.SetContentResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetContentRequest, *weewarv1.SetContentResponse](
 		c.channel, ctx, "GameViewerPage", "setUnitStatsContent", req,
@@ -55,7 +54,7 @@ func (c *GameViewerPageClient) SetUnitStatsContent(ctx context.Context, req *wee
 }
 
 // SetDamageDistributionContent calls the browser-provided SetDamageDistributionContent method
-func (c *GameViewerPageClient) SetDamageDistributionContent(ctx context.Context, req *weewarv1.SetContentRequest, opts ...grpc.CallOption) (*weewarv1.SetContentResponse, error) {
+func (c *GameViewerPageClient) SetDamageDistributionContent(ctx context.Context, req *weewarv1.SetContentRequest) (*weewarv1.SetContentResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetContentRequest, *weewarv1.SetContentResponse](
 		c.channel, ctx, "GameViewerPage", "setDamageDistributionContent", req,
@@ -63,7 +62,7 @@ func (c *GameViewerPageClient) SetDamageDistributionContent(ctx context.Context,
 }
 
 // SetTerrainStatsContent calls the browser-provided SetTerrainStatsContent method
-func (c *GameViewerPageClient) SetTerrainStatsContent(ctx context.Context, req *weewarv1.SetContentRequest, opts ...grpc.CallOption) (*weewarv1.SetContentResponse, error) {
+func (c *GameViewerPageClient) SetTerrainStatsContent(ctx context.Context, req *weewarv1.SetContentRequest) (*weewarv1.SetContentResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetContentRequest, *weewarv1.SetContentResponse](
 		c.channel, ctx, "GameViewerPage", "setTerrainStatsContent", req,
@@ -71,7 +70,7 @@ func (c *GameViewerPageClient) SetTerrainStatsContent(ctx context.Context, req *
 }
 
 // SetGameState calls the browser-provided SetGameState method
-func (c *GameViewerPageClient) SetGameState(ctx context.Context, req *weewarv1.SetGameStateRequest, opts ...grpc.CallOption) (*weewarv1.SetGameStateResponse, error) {
+func (c *GameViewerPageClient) SetGameState(ctx context.Context, req *weewarv1.SetGameStateRequest) (*weewarv1.SetGameStateResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetGameStateRequest, *weewarv1.SetGameStateResponse](
 		c.channel, ctx, "GameViewerPage", "setGameState", req,
@@ -79,7 +78,7 @@ func (c *GameViewerPageClient) SetGameState(ctx context.Context, req *weewarv1.S
 }
 
 // UpdateGameStatus calls the browser-provided UpdateGameStatus method
-func (c *GameViewerPageClient) UpdateGameStatus(ctx context.Context, req *weewarv1.UpdateGameStatusRequest, opts ...grpc.CallOption) (*weewarv1.UpdateGameStatusResponse, error) {
+func (c *GameViewerPageClient) UpdateGameStatus(ctx context.Context, req *weewarv1.UpdateGameStatusRequest) (*weewarv1.UpdateGameStatusResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.UpdateGameStatusRequest, *weewarv1.UpdateGameStatusResponse](
 		c.channel, ctx, "GameViewerPage", "updateGameStatus", req,
@@ -87,7 +86,7 @@ func (c *GameViewerPageClient) UpdateGameStatus(ctx context.Context, req *weewar
 }
 
 // SetTileAt calls the browser-provided SetTileAt method
-func (c *GameViewerPageClient) SetTileAt(ctx context.Context, req *weewarv1.SetTileAtRequest, opts ...grpc.CallOption) (*weewarv1.SetTileAtResponse, error) {
+func (c *GameViewerPageClient) SetTileAt(ctx context.Context, req *weewarv1.SetTileAtRequest) (*weewarv1.SetTileAtResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetTileAtRequest, *weewarv1.SetTileAtResponse](
 		c.channel, ctx, "GameViewerPage", "setTileAt", req,
@@ -95,7 +94,7 @@ func (c *GameViewerPageClient) SetTileAt(ctx context.Context, req *weewarv1.SetT
 }
 
 // SetUnitAt calls the browser-provided SetUnitAt method
-func (c *GameViewerPageClient) SetUnitAt(ctx context.Context, req *weewarv1.SetUnitAtRequest, opts ...grpc.CallOption) (*weewarv1.SetUnitAtResponse, error) {
+func (c *GameViewerPageClient) SetUnitAt(ctx context.Context, req *weewarv1.SetUnitAtRequest) (*weewarv1.SetUnitAtResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.SetUnitAtRequest, *weewarv1.SetUnitAtResponse](
 		c.channel, ctx, "GameViewerPage", "setUnitAt", req,
@@ -103,7 +102,7 @@ func (c *GameViewerPageClient) SetUnitAt(ctx context.Context, req *weewarv1.SetU
 }
 
 // RemoveTileAt calls the browser-provided RemoveTileAt method
-func (c *GameViewerPageClient) RemoveTileAt(ctx context.Context, req *weewarv1.RemoveTileAtRequest, opts ...grpc.CallOption) (*weewarv1.RemoveTileAtResponse, error) {
+func (c *GameViewerPageClient) RemoveTileAt(ctx context.Context, req *weewarv1.RemoveTileAtRequest) (*weewarv1.RemoveTileAtResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.RemoveTileAtRequest, *weewarv1.RemoveTileAtResponse](
 		c.channel, ctx, "GameViewerPage", "removeTileAt", req,
@@ -111,7 +110,7 @@ func (c *GameViewerPageClient) RemoveTileAt(ctx context.Context, req *weewarv1.R
 }
 
 // RemoveUnitAt calls the browser-provided RemoveUnitAt method
-func (c *GameViewerPageClient) RemoveUnitAt(ctx context.Context, req *weewarv1.RemoveUnitAtRequest, opts ...grpc.CallOption) (*weewarv1.RemoveUnitAtResponse, error) {
+func (c *GameViewerPageClient) RemoveUnitAt(ctx context.Context, req *weewarv1.RemoveUnitAtRequest) (*weewarv1.RemoveUnitAtResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.RemoveUnitAtRequest, *weewarv1.RemoveUnitAtResponse](
 		c.channel, ctx, "GameViewerPage", "removeUnitAt", req,
@@ -119,7 +118,7 @@ func (c *GameViewerPageClient) RemoveUnitAt(ctx context.Context, req *weewarv1.R
 }
 
 // ShowHighlights calls the browser-provided ShowHighlights method
-func (c *GameViewerPageClient) ShowHighlights(ctx context.Context, req *weewarv1.ShowHighlightsRequest, opts ...grpc.CallOption) (*weewarv1.ShowHighlightsResponse, error) {
+func (c *GameViewerPageClient) ShowHighlights(ctx context.Context, req *weewarv1.ShowHighlightsRequest) (*weewarv1.ShowHighlightsResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ShowHighlightsRequest, *weewarv1.ShowHighlightsResponse](
 		c.channel, ctx, "GameViewerPage", "showHighlights", req,
@@ -127,7 +126,7 @@ func (c *GameViewerPageClient) ShowHighlights(ctx context.Context, req *weewarv1
 }
 
 // ClearHighlights calls the browser-provided ClearHighlights method
-func (c *GameViewerPageClient) ClearHighlights(ctx context.Context, req *weewarv1.ClearHighlightsRequest, opts ...grpc.CallOption) (*weewarv1.ClearHighlightsResponse, error) {
+func (c *GameViewerPageClient) ClearHighlights(ctx context.Context, req *weewarv1.ClearHighlightsRequest) (*weewarv1.ClearHighlightsResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ClearHighlightsRequest, *weewarv1.ClearHighlightsResponse](
 		c.channel, ctx, "GameViewerPage", "clearHighlights", req,
@@ -135,7 +134,7 @@ func (c *GameViewerPageClient) ClearHighlights(ctx context.Context, req *weewarv
 }
 
 // ShowPath calls the browser-provided ShowPath method
-func (c *GameViewerPageClient) ShowPath(ctx context.Context, req *weewarv1.ShowPathRequest, opts ...grpc.CallOption) (*weewarv1.ShowPathResponse, error) {
+func (c *GameViewerPageClient) ShowPath(ctx context.Context, req *weewarv1.ShowPathRequest) (*weewarv1.ShowPathResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ShowPathRequest, *weewarv1.ShowPathResponse](
 		c.channel, ctx, "GameViewerPage", "showPath", req,
@@ -143,7 +142,7 @@ func (c *GameViewerPageClient) ShowPath(ctx context.Context, req *weewarv1.ShowP
 }
 
 // ClearPaths calls the browser-provided ClearPaths method
-func (c *GameViewerPageClient) ClearPaths(ctx context.Context, req *weewarv1.ClearPathsRequest, opts ...grpc.CallOption) (*weewarv1.ClearPathsResponse, error) {
+func (c *GameViewerPageClient) ClearPaths(ctx context.Context, req *weewarv1.ClearPathsRequest) (*weewarv1.ClearPathsResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ClearPathsRequest, *weewarv1.ClearPathsResponse](
 		c.channel, ctx, "GameViewerPage", "clearPaths", req,
@@ -151,7 +150,7 @@ func (c *GameViewerPageClient) ClearPaths(ctx context.Context, req *weewarv1.Cle
 }
 
 // MoveUnit calls the browser-provided MoveUnit method
-func (c *GameViewerPageClient) MoveUnit(ctx context.Context, req *weewarv1.MoveUnitRequest, opts ...grpc.CallOption) (*weewarv1.MoveUnitResponse, error) {
+func (c *GameViewerPageClient) MoveUnit(ctx context.Context, req *weewarv1.MoveUnitRequest) (*weewarv1.MoveUnitResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.MoveUnitRequest, *weewarv1.MoveUnitResponse](
 		c.channel, ctx, "GameViewerPage", "moveUnit", req,
@@ -159,7 +158,7 @@ func (c *GameViewerPageClient) MoveUnit(ctx context.Context, req *weewarv1.MoveU
 }
 
 // ShowAttackEffect calls the browser-provided ShowAttackEffect method
-func (c *GameViewerPageClient) ShowAttackEffect(ctx context.Context, req *weewarv1.ShowAttackEffectRequest, opts ...grpc.CallOption) (*weewarv1.ShowAttackEffectResponse, error) {
+func (c *GameViewerPageClient) ShowAttackEffect(ctx context.Context, req *weewarv1.ShowAttackEffectRequest) (*weewarv1.ShowAttackEffectResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ShowAttackEffectRequest, *weewarv1.ShowAttackEffectResponse](
 		c.channel, ctx, "GameViewerPage", "showAttackEffect", req,
@@ -167,7 +166,7 @@ func (c *GameViewerPageClient) ShowAttackEffect(ctx context.Context, req *weewar
 }
 
 // ShowHealEffect calls the browser-provided ShowHealEffect method
-func (c *GameViewerPageClient) ShowHealEffect(ctx context.Context, req *weewarv1.ShowHealEffectRequest, opts ...grpc.CallOption) (*weewarv1.ShowHealEffectResponse, error) {
+func (c *GameViewerPageClient) ShowHealEffect(ctx context.Context, req *weewarv1.ShowHealEffectRequest) (*weewarv1.ShowHealEffectResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ShowHealEffectRequest, *weewarv1.ShowHealEffectResponse](
 		c.channel, ctx, "GameViewerPage", "showHealEffect", req,
@@ -175,7 +174,7 @@ func (c *GameViewerPageClient) ShowHealEffect(ctx context.Context, req *weewarv1
 }
 
 // ShowCaptureEffect calls the browser-provided ShowCaptureEffect method
-func (c *GameViewerPageClient) ShowCaptureEffect(ctx context.Context, req *weewarv1.ShowCaptureEffectRequest, opts ...grpc.CallOption) (*weewarv1.ShowCaptureEffectResponse, error) {
+func (c *GameViewerPageClient) ShowCaptureEffect(ctx context.Context, req *weewarv1.ShowCaptureEffectRequest) (*weewarv1.ShowCaptureEffectResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.ShowCaptureEffectRequest, *weewarv1.ShowCaptureEffectResponse](
 		c.channel, ctx, "GameViewerPage", "showCaptureEffect", req,
@@ -183,7 +182,7 @@ func (c *GameViewerPageClient) ShowCaptureEffect(ctx context.Context, req *weewa
 }
 
 // LogMessage calls the browser-provided LogMessage method
-func (c *GameViewerPageClient) LogMessage(ctx context.Context, req *weewarv1.LogMessageRequest, opts ...grpc.CallOption) (*weewarv1.LogMessageResponse, error) {
+func (c *GameViewerPageClient) LogMessage(ctx context.Context, req *weewarv1.LogMessageRequest) (*weewarv1.LogMessageResponse, error) {
 	// This is a synchronous browser method
 	return wasm.CallBrowserService[*weewarv1.LogMessageRequest, *weewarv1.LogMessageResponse](
 		c.channel, ctx, "GameViewerPage", "logMessage", req,

@@ -65,7 +65,7 @@ func (p *AttackSimulatorPage) loadTerrainAndUnitData() {
 			terrainName := tm.GetTerrainName(i, terrainData.Name, useTheme, themeName)
 
 			terrain := TerrainType{
-				TerrainData: weewar.TerrainData{
+				TerrainData: TerrainData{
 					ID:           terrainData.Id,
 					Name:         terrainName,
 					BaseMoveCost: 1.0,

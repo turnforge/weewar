@@ -2,7 +2,7 @@ import { BasePage } from '../lib/BasePage';
 import { EventBus } from '../lib/EventBus';
 import { LCMComponent } from '../lib/LCMComponent';
 import WeewarBundle from '../gen/wasmjs';
-import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
+import { GamesServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
 import { SimulateAttackRequest, SimulateAttackResponse } from '../gen/wasmjs/weewar/v1/interfaces';
 import { LifecycleController } from '../lib/LifecycleController';
 import { ITheme } from '../assets/themes/BaseTheme';
@@ -14,7 +14,7 @@ import DefaultTheme from '../assets/themes/default';
  */
 class AttackSimulatorPage extends BasePage {
     private wasmBundle: WeewarBundle | null = null;
-    private gamesServiceClient: GamesServiceServiceClient | null = null;
+    private gamesClient: GamesServiceClient | null = null;
     private theme: ITheme;
 
     // Canvas/container elements
@@ -105,7 +105,7 @@ class AttackSimulatorPage extends BasePage {
         try {
             console.log('[AttackSimulator] Loading WASM bundle...');
             this.wasmBundle = new WeewarBundle();
-            this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
+            this.gamesClient = new GamesServiceClient(this.wasmBundle);
             await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
             await this.wasmBundle.waitUntilReady();
             console.log('[AttackSimulator] WASM loaded successfully');
@@ -116,7 +116,7 @@ class AttackSimulatorPage extends BasePage {
     }
 
     private async runSimulation(): Promise<void> {
-        if (!this.gamesServiceClient) {
+        if (!this.gamesClient) {
             console.error('[AttackSimulator] WASM not loaded yet');
             return;
         }
@@ -137,7 +137,7 @@ class AttackSimulatorPage extends BasePage {
 
         try {
             // Call WASM RPC
-            const response: SimulateAttackResponse = await this.gamesServiceClient.simulateAttack(request);
+            const response: SimulateAttackResponse = await this.gamesClient.simulateAttack(request);
             console.log('[AttackSimulator] Simulation result:', response);
 
             // Update visualizations

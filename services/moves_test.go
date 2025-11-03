@@ -58,20 +58,20 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 		t.Logf("Destination tile (2,3) exists: type=%d", destTile.TileType)
 	}
 	// Create SingletonGamesService and set up singleton data
-	wasmService := NewSingletonGamesServiceImpl()
+	singletonService := NewSingletonGamesServiceImpl()
 
 	// Set up the singleton objects (reuse the ones we created)
-	wasmService.SingletonGame = game
+	singletonService.SingletonGame = game
 
-	wasmService.SingletonGameState = gameState
-	wasmService.SingletonGameState.WorldData = convertRuntimeWorldToProto(world)
-	wasmService.SingletonGameState.UpdatedAt = timestamppb.Now()
+	singletonService.SingletonGameState = gameState
+	singletonService.SingletonGameState.WorldData = convertRuntimeWorldToProto(world)
+	singletonService.SingletonGameState.UpdatedAt = timestamppb.Now()
 
-	wasmService.SingletonGameMoveHistory = &v1.GameMoveHistory{
+	singletonService.SingletonGameMoveHistory = &v1.GameMoveHistory{
 		Groups: []*v1.GameMoveGroup{},
 	}
 
-	wasmService.RuntimeGame = rtGame
+	singletonService.RuntimeGame = rtGame
 
 	// Verify initial state: N units
 	if rtGame.World.NumUnits() != int32(len(units)) {
@@ -83,7 +83,7 @@ func setupTest(t *testing.T, nq, nr int, units []*v1.Unit) *SingletonGamesServic
 		t.Logf("  Unit at (%d,%d) player=%d type=%d", coord.Q, coord.R, unit.Player, unit.UnitType)
 	}
 
-	return wasmService
+	return singletonService
 }
 
 // Test that reproduces the unit duplication bug using real ProcessMoves with SingletonGamesService

@@ -1,3 +1,6 @@
+//go:build !wasm
+// +build !wasm
+
 package server
 
 import (
@@ -5,15 +8,15 @@ import (
 
 	"connectrpc.com/connect"
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
-	"github.com/panyam/turnengine/games/weewar/services"
+	"github.com/panyam/turnengine/games/weewar/services/fsbe"
 )
 
 // ConnectGamesServiceAdapter adapts the gRPC GamesService to Connect's interface
 type ConnectGamesServiceAdapter struct {
-	svc *services.FSGamesServiceImpl
+	svc *fsbe.FSGamesService
 }
 
-func NewConnectGamesServiceAdapter(svc *services.FSGamesServiceImpl) *ConnectGamesServiceAdapter {
+func NewConnectGamesServiceAdapter(svc *fsbe.FSGamesService) *ConnectGamesServiceAdapter {
 	return &ConnectGamesServiceAdapter{svc: svc}
 }
 
@@ -120,10 +123,10 @@ func (a *ConnectGameServiceAdapter) StreamSomeThing(ctx context.Context, req *co
 
 // ConnectWorldsServiceAdapter adapts the gRPC WorldsService to Connect's interface
 type ConnectWorldsServiceAdapter struct {
-	svc *services.FSWorldsServiceImpl
+	svc *fsbe.FSWorldsService
 }
 
-func NewConnectWorldsServiceAdapter(svc *services.FSWorldsServiceImpl) *ConnectWorldsServiceAdapter {
+func NewConnectWorldsServiceAdapter(svc *fsbe.FSWorldsService) *ConnectWorldsServiceAdapter {
 	return &ConnectWorldsServiceAdapter{svc: svc}
 }
 

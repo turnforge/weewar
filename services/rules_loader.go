@@ -179,13 +179,6 @@ func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine,
 	return rulesEngine, nil
 }
 
-// LoadRulesEngineFromLegacy loads a RulesEngine by converting from legacy weewar-data.json format
-func LoadRulesEngineFromLegacy(filename string) (*RulesEngine, error) {
-	// This would use the conversion logic from the CLI tool
-	// For now, return an error suggesting to use the converter first
-	return nil, fmt.Errorf("legacy format loading not implemented - use weewar-convert CLI tool first to convert %s to canonical format", filename)
-}
-
 // SaveRulesEngineToFile saves a RulesEngine to a JSON file
 func SaveRulesEngineToFile(rulesEngine *RulesEngine, filename string) error {
 	data, err := json.MarshalIndent(rulesEngine, "", "  ")

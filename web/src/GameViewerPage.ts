@@ -1,9 +1,9 @@
 import { BasePage } from '../lib/BasePage';
 import WeewarBundle from '../gen/wasmjs';
-import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
-import { GameViewerPageMethods, GameViewerPageServiceClient as GameViewerPageClient } from '../gen/wasmjs/weewar/v1/gameViewerPageClient';
-import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
-import { SingletonInitializerServiceServiceClient as SingletonInitializerServiceClient } from '../gen/wasmjs/weewar/v1/singletonInitializerServiceClient';
+import { GamesServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
+import { GameViewerPageMethods, GameViewerPageClient as GameViewerPageClient } from '../gen/wasmjs/weewar/v1/gameViewerPageClient';
+import { GameViewPresenterClient as  GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
+import { SingletonInitializerServiceClient as SingletonInitializerClient } from '../gen/wasmjs/weewar/v1/singletonInitializerServiceClient';
 import { EventBus } from '../lib/EventBus';
 import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
@@ -51,9 +51,9 @@ import { DockviewApi, DockviewComponent } from 'dockview-core';
  */
 export class GameViewerPage extends BasePage implements LCMComponent, GameViewerPageMethods {
     private wasmBundle: WeewarBundle;
-    private gamesServiceClient: GamesServiceServiceClient;
+    private gamesClient: GamesServiceClient;
     private gameViewPresenterClient: GameViewPresenterClient;
-    private singletonInitializerClient : SingletonInitializerServiceClient;
+    private singletonInitializerClient : SingletonInitializerClient;
     private currentGameId: string | null;
     private gameScene: PhaserGameScene
     private world: World  // ✅ Shared World component
@@ -595,9 +595,9 @@ export class GameViewerPage extends BasePage implements LCMComponent, GameViewer
     private async loadWASM(): Promise<void> {
         // Create base bundle with module configuration
         this.wasmBundle  = new WeewarBundle();
-        this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
+        this.gamesClient = new GamesServiceClient(this.wasmBundle);
         this.gameViewPresenterClient = new GameViewPresenterClient(this.wasmBundle);
-        this.singletonInitializerClient = new SingletonInitializerServiceClient(this.wasmBundle);
+        this.singletonInitializerClient = new SingletonInitializerClient(this.wasmBundle);
         await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
         await this.wasmBundle.waitUntilReady()
     }

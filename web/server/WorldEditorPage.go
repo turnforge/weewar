@@ -24,8 +24,27 @@ type TBButton struct {
 	Command   string
 }
 
+// TerrainType represents whether terrain is nature or player-controllable
+type TerrainType2 int32
+
+const (
+	TerrainNature TerrainType2 = iota // Natural terrain (grass, mountains, water, etc.)
+	TerrainPlayer                     // Player-controllable structures (bases, cities, etc.)
+)
+
+// TerrainData represents terrain type information
+type TerrainData struct {
+	ID           int32        // `json:"id"`
+	Name         string       // `json:"name"`
+	BaseMoveCost float64      // `json:"baseMoveCost"` // Base movement cost for this terrain
+	DefenseBonus float64      // `json:"defenseBonus"`
+	Type         TerrainType2 // `json:"type"` // Nature or Player terrain
+	Properties   []string     // `json:"properties,omitempty"`
+	// Note: Unit-specific movement costs in RulesEngine can override base cost
+}
+
 type TerrainType struct {
-	weewar.TerrainData
+	TerrainData
 	IconDataURL     string `json:"iconDataURL"`
 	HasPlayerColors bool   `json:"hasPlayerColors"`
 }
@@ -80,8 +99,8 @@ func (v *WorldEditorPage) SetupDefaults() {
 
 	// Determine whether to use theme-based assets or PNG assets
 	// Set useTheme = true to use theme assets, false for PNG assets
-	useTheme := true       // Set to true to use theme-based assets
-	themeName := v.Theme   // Use theme from query parameter (set in Load method)
+	useTheme := true     // Set to true to use theme-based assets
+	themeName := v.Theme // Use theme from query parameter (set in Load method)
 
 	// Get the theme manager
 	tm := GetThemeManager()
@@ -101,7 +120,7 @@ func (v *WorldEditorPage) SetupDefaults() {
 			// TODO: Could calculate average movement cost across all units for this terrain
 
 			terrain := TerrainType{
-				TerrainData: weewar.TerrainData{
+				TerrainData: TerrainData{
 					ID:           terrainData.Id,
 					Name:         terrainName,
 					BaseMoveCost: baseMoveCost,

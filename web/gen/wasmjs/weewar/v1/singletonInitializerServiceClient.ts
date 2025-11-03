@@ -5,8 +5,8 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    InitializeSingletonResponse,
     InitializeSingletonRequest,
+    InitializeSingletonResponse,
 } from './interfaces';
 /**
  * SingletonInitializerService service client interface
@@ -19,7 +19,7 @@ export interface SingletonInitializerServiceMethods {
  * SingletonInitializerService service client implementation
  * Lightweight facade that uses shared WASM bundle
  */
-export class SingletonInitializerServiceServiceClient extends ServiceClient implements SingletonInitializerServiceMethods {
+export class SingletonInitializerServiceClient extends ServiceClient implements SingletonInitializerServiceMethods {
     async initializeSingleton(request: InitializeSingletonRequest): Promise<InitializeSingletonResponse> {
         return this.callMethod('singletonInitializerService.initializeSingleton', request);
     }

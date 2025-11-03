@@ -1,6 +1,6 @@
 import { EventBus } from '../lib/EventBus';
 import WeewarBundle from '../gen/wasmjs';
-import { GamesServiceServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
+import { GamesServiceClient } from '../gen/wasmjs/weewar/v1/gamesServiceClient';
 import { 
     ProcessMovesRequest, 
     ProcessMovesResponse, 
@@ -31,7 +31,7 @@ import * as models from '../gen/wasmjs/weewar/v1/models'
  */
 export class GameState {
     private wasmBundle: WeewarBundle;
-    private gamesServiceClient: GamesServiceServiceClient;
+    private gamesClient: GamesServiceClient;
     private eventBus: EventBus;
     
     // Lightweight game metadata only
@@ -47,9 +47,9 @@ export class GameState {
         this.wasmBundle  = new WeewarBundle();
 
         // Create service clients using composition
-        this.gamesServiceClient = new GamesServiceServiceClient(this.wasmBundle);
+        this.gamesClient = new GamesServiceClient(this.wasmBundle);
         // Register browser API implementation when ready
-        // const browserAPI = new BrowserAPIServiceClient(wasmBundle);
+        // const browserAPI = new BrowserAPIClient(wasmBundle);
         // this.wasmBundle.registerBrowserService('BrowserAPI', new BrowserAPIImpl());
 
         this.loadWASMModule();
@@ -141,7 +141,7 @@ export class GameState {
         };
 
         // Call the ProcessMoves service  
-        const response: ProcessMovesResponse = await this.gamesServiceClient.processMoves(request);
+        const response: ProcessMovesResponse = await this.gamesClient.processMoves(request);
 
         // Extract world changes from move results (each move result contains its own changes)
         const worldChanges: WorldChange[] = [];
@@ -260,7 +260,7 @@ export class GameState {
     public async getCurrentGameState(): Promise<ProtoGameState> {
         await this.wasmBundle.ensureReady();
         const request = models.GetGameStateRequest.from({ gameId: this.gameId });
-        const response = await this.gamesServiceClient.getGameState(request);
+        const response = await this.gamesClient.getGameState(request);
         return response.state || models.GameState.from({});
     }
 
@@ -270,7 +270,7 @@ export class GameState {
     public async getCurrentGame(): Promise<ProtoGame> {
         const client = await this.wasmBundle.ensureReady();
         const request = models.GetGameRequest.from({ id: this.gameId });
-        const response = await this.gamesServiceClient.getGame(request);
+        const response = await this.gamesClient.getGame(request);
         return response.game || models.Game.from({});
     }
 
@@ -309,7 +309,7 @@ export class GameState {
             r: r
         });
 
-        const response = await this.gamesServiceClient.getOptionsAt(request);
+        const response = await this.gamesClient.getOptionsAt(request);
         return response;
     }
 }

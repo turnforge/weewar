@@ -8,8 +8,7 @@ import (
 	oa "github.com/panyam/oneauth"
 	oa2 "github.com/panyam/oneauth/oauth2"
 	"github.com/panyam/templar"
-	"github.com/panyam/turnengine/games/weewar/services"
-	svc "github.com/panyam/turnengine/games/weewar/services"
+	"github.com/panyam/turnengine/games/weewar/services/server"
 )
 
 // You can all this anything - but App is just a convention for all "top level" routes and handlers
@@ -17,7 +16,7 @@ type App struct {
 	Api       *ApiHandler
 	Auth      *oa.OneAuth         // One auth gives us alots of things out of the box
 	Session   *scs.SessionManager // Session and auth go together
-	ClientMgr *svc.ClientMgr
+	ClientMgr *server.ClientMgr
 
 	// Instead of giving each resource its own dedicated handler we are having a top level "Views"
 	// handler.  This is responsible for handling all views/pages/static resources.  In the Views
@@ -29,7 +28,7 @@ type App struct {
 	BaseUrl string
 }
 
-func NewApp(ClientMgr *services.ClientMgr) (app *App, err error) {
+func NewApp(ClientMgr *server.ClientMgr) (app *App, err error) {
 	session := scs.New() //scs.NewCookieManager("u46IpCV9y5Vlur8YvODJEhgOY8m9JVE4"),
 	// session.Store = NewMemoryStore(0)
 

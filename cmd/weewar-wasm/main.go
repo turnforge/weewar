@@ -15,6 +15,7 @@ import (
 	// Generated WASM exports
 	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
 	weewar_v1_services "github.com/panyam/turnengine/games/weewar/gen/wasm/go/weewar/v1"
+	"github.com/panyam/turnengine/games/weewar/services/singleton"
 
 	// Service implementations
 	"github.com/panyam/turnengine/games/weewar/services"
@@ -22,8 +23,8 @@ import (
 
 type SingletonInitializerService struct {
 	v1.UnimplementedSingletonInitializerServiceServer
-	GamesService      *services.SingletonGamesServiceImpl
-	GameViewPresenter *services.SingletonGameViewPresenterImpl
+	GamesService      *singleton.SingletonGamesService
+	GameViewPresenter *services.GameViewPresenter
 }
 
 func (s *SingletonInitializerService) InitializeSingleton(ctx context.Context, req *v1.InitializeSingletonRequest) (resp *v1.InitializeSingletonResponse, err error) {
@@ -36,9 +37,9 @@ func main() {
 	fmt.Println("WeeWar WASM module loading...")
 
 	// Create WASM singleton services (data will be loaded via Load() calls from JS)
-	wasmWorldsService := services.NewSingletonWorldsServiceImpl()
-	wasmGamesService := services.NewSingletonGamesServiceImpl()
-	wasmGameViewPresenter := services.NewSingletonGameViewPresenterImpl()
+	wasmWorldsService := singleton.NewSingletonWorldsService()
+	wasmGamesService := singleton.NewSingletonGamesService()
+	wasmGameViewPresenter := services.NewGameViewPresenter()
 	wasmGameViewPresenter.GamesService = wasmGamesService
 	wasmInitializer := &SingletonInitializerService{
 		GamesService:      wasmGamesService,
@@ -54,41 +55,41 @@ func main() {
 		GameViewerPage:              weewar_v1_services.NewGameViewerPageClient(),
 		SingletonInitializerService: wasmInitializer,
 	}
-	wasmGameViewPresenter.GameState = &services.BrowserGameState{
+	wasmGameViewPresenter.GameState = &BrowserGameState{
 		GameViewerPage: exports.GameViewerPage,
 	}
 
-	wasmGameViewPresenter.DamageDistributionPanel = &services.BrowserDamageDistributionPanel{
+	wasmGameViewPresenter.DamageDistributionPanel = &BrowserDamageDistributionPanel{
 		GameViewerPage: exports.GameViewerPage,
 	}
 	wasmGameViewPresenter.DamageDistributionPanel.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.DamageDistributionPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
-	wasmGameViewPresenter.UnitStatsPanel = &services.BrowserUnitStatsPanel{
+	wasmGameViewPresenter.UnitStatsPanel = &BrowserUnitStatsPanel{
 		GameViewerPage: exports.GameViewerPage,
 	}
 	wasmGameViewPresenter.UnitStatsPanel.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.UnitStatsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
-	wasmGameViewPresenter.TerrainStatsPanel = &services.BrowserTerrainStatsPanel{
+	wasmGameViewPresenter.TerrainStatsPanel = &BrowserTerrainStatsPanel{
 		GameViewerPage: exports.GameViewerPage,
 	}
 	wasmGameViewPresenter.TerrainStatsPanel.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.TerrainStatsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
-	wasmGameViewPresenter.GameScene = &services.BrowserGameScene{
+	wasmGameViewPresenter.GameScene = &BrowserGameScene{
 		GameViewerPage: exports.GameViewerPage,
 	}
 	wasmGameViewPresenter.GameScene.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.GameScene.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
-	wasmGameViewPresenter.TurnOptionsPanel = &services.BrowserTurnOptionsPanel{
+	wasmGameViewPresenter.TurnOptionsPanel = &BrowserTurnOptionsPanel{
 		GameViewerPage: exports.GameViewerPage,
 	}
 	wasmGameViewPresenter.TurnOptionsPanel.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.TurnOptionsPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
-	wasmGameViewPresenter.BuildOptionsModal = &services.BrowserBuildOptionsModal{
+	wasmGameViewPresenter.BuildOptionsModal = &BrowserBuildOptionsModal{
 		GameViewerPage: exports.GameViewerPage,
 	}
 	wasmGameViewPresenter.BuildOptionsModal.SetTheme(wasmGameViewPresenter.Theme)
@@ -123,7 +124,7 @@ func main() {
 		gameMoveHistoryBytes := make([]byte, args[2].Get("length").Int())
 		js.CopyBytesToGo(gameMoveHistoryBytes, args[2])
 
-		// Call the Load method on SingletonGamesServiceImpl
+		// Call the Load method on SingletonGamesService
 		wasmGamesService.Load(gameBytes, gameStateBytes, gameMoveHistoryBytes)
 
 		fmt.Printf("WASM singleton data loaded: game=%d bytes, state=%d bytes, history=%d bytes\n",

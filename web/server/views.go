@@ -14,12 +14,13 @@ import (
 	gotl "github.com/panyam/goutils/template"
 	oa "github.com/panyam/oneauth"
 	tmplr "github.com/panyam/templar"
-	svc "github.com/panyam/turnengine/games/weewar/services"
+	"github.com/panyam/turnengine/games/weewar/services/server"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
 const TEMPLATES_FOLDER = "./web/templates"
+const ServeGzippedResources = true
 
 // You may have a builder/bundler creating an output folder.  Set that path here.  It can be absolute or relative to
 // where the executable will be running from
@@ -28,7 +29,7 @@ const STATIC_FOLDER = "./web/static"
 
 type ViewContext struct {
 	AuthMiddleware *oa.Middleware
-	ClientMgr      *svc.ClientMgr
+	ClientMgr      *server.ClientMgr
 	Ctx            context.Context
 	Templates      *tmplr.TemplateGroup
 }
@@ -52,7 +53,7 @@ type RootViewsHandler struct {
 	Context *ViewContext
 }
 
-func NewRootViewsHandler(middleware *oa.Middleware, clients *svc.ClientMgr) *RootViewsHandler {
+func NewRootViewsHandler(middleware *oa.Middleware, clients *server.ClientMgr) *RootViewsHandler {
 	out := RootViewsHandler{
 		mux: http.NewServeMux(),
 	}
@@ -191,7 +192,11 @@ func (n *RootViewsHandler) setupRoutes() {
 	// Typically "/views" is dedicated for returning view fragments - eg via htmx
 	n.mux.Handle("/views/", http.StripPrefix("/views", n.setupViewsMux()))
 
-	n.mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir(STATIC_FOLDER))))
+	if ServeGzippedResources {
+		n.mux.Handle("/static/", http.StripPrefix("/static", GzipFileServer(http.Dir(STATIC_FOLDER))))
+	} else {
+		n.mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir(STATIC_FOLDER))))
+	}
 
 	// Then setup your "resource" specific endpoints
 	n.mux.Handle("/games/", http.StripPrefix("/games", n.setupGamesMux()))

@@ -5,28 +5,28 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    CreateGameRequest,
-    DeleteGameRequest,
-    UpdateGameRequest,
-    GetGameStateResponse,
-    SimulateAttackRequest,
-    CreateGameResponse,
-    GetGamesRequest,
-    GetGamesResponse,
-    GetGameRequest,
-    GetGameResponse,
-    GetGameStateRequest,
-    ListMovesResponse,
-    SimulateAttackResponse,
-    ListGamesRequest,
-    ListGamesResponse,
-    ProcessMovesRequest,
-    DeleteGameResponse,
     UpdateGameResponse,
     ListMovesRequest,
+    ListMovesResponse,
+    ProcessMovesRequest,
     ProcessMovesResponse,
-    GetOptionsAtRequest,
+    CreateGameRequest,
+    CreateGameResponse,
+    GetGamesResponse,
+    GetGameStateResponse,
     GetOptionsAtResponse,
+    SimulateAttackResponse,
+    GetGamesRequest,
+    GetGameResponse,
+    GetOptionsAtRequest,
+    SimulateAttackRequest,
+    GetGameRequest,
+    DeleteGameRequest,
+    UpdateGameRequest,
+    GetGameStateRequest,
+    ListGamesRequest,
+    ListGamesResponse,
+    DeleteGameResponse,
 } from './interfaces';
 /**
  * GamesService service client interface
@@ -49,7 +49,7 @@ export interface GamesServiceMethods {
  * GamesService service client implementation
  * Lightweight facade that uses shared WASM bundle
  */
-export class GamesServiceServiceClient extends ServiceClient implements GamesServiceMethods {
+export class GamesServiceClient extends ServiceClient implements GamesServiceMethods {
     async createGame(request: CreateGameRequest): Promise<CreateGameResponse> {
         return this.callMethod('gamesService.createGame', request);
     }

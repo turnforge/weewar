@@ -5,16 +5,16 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    InitializeGameRequest,
-    InitializeGameResponse,
-    TurnOptionClickedRequest,
-    EndTurnButtonClickedRequest,
-    SceneClickedRequest,
-    SceneClickedResponse,
-    TurnOptionClickedResponse,
     EndTurnButtonClickedResponse,
     BuildOptionClickedRequest,
     BuildOptionClickedResponse,
+    InitializeGameRequest,
+    InitializeGameResponse,
+    SceneClickedRequest,
+    SceneClickedResponse,
+    TurnOptionClickedRequest,
+    EndTurnButtonClickedRequest,
+    TurnOptionClickedResponse,
 } from './interfaces';
 /**
  * GameViewPresenter service client interface
@@ -31,7 +31,7 @@ export interface GameViewPresenterMethods {
  * GameViewPresenter service client implementation
  * Lightweight facade that uses shared WASM bundle
  */
-export class GameViewPresenterServiceClient extends ServiceClient implements GameViewPresenterMethods {
+export class GameViewPresenterClient extends ServiceClient implements GameViewPresenterMethods {
     async initializeGame(request: InitializeGameRequest): Promise<InitializeGameResponse> {
         return this.callMethod('gameViewPresenter.initializeGame', request);
     }

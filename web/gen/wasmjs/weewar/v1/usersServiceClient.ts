@@ -5,18 +5,18 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    UpdateUserResponse,
-    CreateUserResponse,
-    GetUsersResponse,
-    ListUsersRequest,
-    GetUserRequest,
-    CreateUserRequest,
-    GetUsersRequest,
-    ListUsersResponse,
     GetUserResponse,
+    UpdateUserResponse,
+    GetUsersRequest,
+    GetUsersResponse,
+    GetUserRequest,
     DeleteUserRequest,
     DeleteUserResponse,
     UpdateUserRequest,
+    CreateUserRequest,
+    CreateUserResponse,
+    ListUsersRequest,
+    ListUsersResponse,
 } from './interfaces';
 /**
  * UsersService service client interface
@@ -34,7 +34,7 @@ export interface UsersServiceMethods {
  * UsersService service client implementation
  * Lightweight facade that uses shared WASM bundle
  */
-export class UsersServiceServiceClient extends ServiceClient implements UsersServiceMethods {
+export class UsersServiceClient extends ServiceClient implements UsersServiceMethods {
     async createUser(request: CreateUserRequest): Promise<CreateUserResponse> {
         return this.callMethod('usersService.createUser', request);
     }

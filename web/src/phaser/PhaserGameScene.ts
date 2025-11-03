@@ -4,7 +4,7 @@ import { hexToPixel } from './hexUtils';
 import { World } from '../World';
 import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer } from './layers/HexHighlightLayer';
 import { EventBus } from '../../lib/EventBus';
-import { GameViewPresenterServiceClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/gameViewPresenterClient';
+import { GameViewPresenterClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/gameViewPresenterClient';
 import { MoveUnitAction, AttackUnitAction, HighlightSpec } from '../../gen/wasmjs/weewar/v1/interfaces';
 
 /**

@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/panyam/turnengine/games/weewar/services"
+	"github.com/panyam/turnengine/games/weewar/services/server"
 	"github.com/panyam/turnengine/games/weewar/utils"
 	web "github.com/panyam/turnengine/games/weewar/web/server"
 )
@@ -80,7 +80,7 @@ func (b *Backend) SetupApp() *utils.App {
 	app := &utils.App{Ctx: context.Background()}
 	log.Println("Grpc, Address: ", grpcAddress)
 	log.Println("gateway, Address: ", gatewayAddress)
-	app.AddServer(&services.Server{Address: b.GrpcAddress})
+	app.AddServer(&server.Server{Address: b.GrpcAddress})
 	app.AddServer(&web.WebAppServer{GrpcAddress: b.GrpcAddress, Address: b.GatewayAddress})
 	b.App = app
 	return app

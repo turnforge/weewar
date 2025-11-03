@@ -33,7 +33,10 @@ wasm: # test
 	echo "Building WeeWar WASM modules..."
 	mkdir -p web/static/wasm
 	echo "Building weewar-cli WASM..."
-	GOOS=js GOARCH=wasm go build -o web/static/wasm/weewar-cli.wasm cmd/weewar-wasm/*.go
+	# GOOS=js GOARCH=wasm go build -o web/static/wasm/weewar-cli.wasm cmd/weewar-wasm/*.go
+	GOOS=js GOARCH=wasm go build -ldflags="-s -w" -trimpath -o web/static/wasm/weewar-cli.wasm ./cmd/weewar-wasm
+	echo "Compressing WASM with gzip..."
+	gzip -9 -k -f web/static/wasm/weewar-cli.wasm
 	echo "Copying wasm_exec.js..."
 
 wasmexecjs:

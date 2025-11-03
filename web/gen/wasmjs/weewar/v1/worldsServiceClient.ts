@@ -5,18 +5,18 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    DeleteWorldRequest,
-    UpdateWorldResponse,
     CreateWorldRequest,
     CreateWorldResponse,
-    GetWorldsRequest,
     GetWorldsResponse,
-    GetWorldRequest,
+    ListWorldsResponse,
     GetWorldResponse,
     DeleteWorldResponse,
     UpdateWorldRequest,
+    GetWorldsRequest,
     ListWorldsRequest,
-    ListWorldsResponse,
+    GetWorldRequest,
+    DeleteWorldRequest,
+    UpdateWorldResponse,
 } from './interfaces';
 /**
  * WorldsService service client interface
@@ -34,7 +34,7 @@ export interface WorldsServiceMethods {
  * WorldsService service client implementation
  * Lightweight facade that uses shared WASM bundle
  */
-export class WorldsServiceServiceClient extends ServiceClient implements WorldsServiceMethods {
+export class WorldsServiceClient extends ServiceClient implements WorldsServiceMethods {
     async createWorld(request: CreateWorldRequest): Promise<CreateWorldResponse> {
         return this.callMethod('worldsService.createWorld', request);
     }

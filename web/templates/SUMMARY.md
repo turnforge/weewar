@@ -414,3 +414,45 @@ Dedicated page for world selection during game creation.
   → click Play on world
   → /games/new?worldId=X
 ```
+
+### Mobile GameViewer Templates (Session 2025-01-04)
+
+#### CompactSummaryCard.templar.html
+Template for mobile compact card showing terrain and unit selection info.
+
+**Features:**
+- Renders server-side by Go presenter via template engine
+- Displays terrain type with icon and name
+- Shows unit type with icon, name, and health (HP: X/10)
+- Conditional rendering (tile-only, unit-only, or both)
+- Theme-hydrated images via data attributes
+- Responsive spacing and typography
+
+**Template Architecture:**
+- Uses Go template syntax (`{{ if }}`, `{{ $theme.GetTerrainName }}`)
+- Receives data: `{ Tile, Unit, Theme }`
+- HTML rendered in Go, sent to browser via RPC
+- Browser hydrates theme images asynchronously
+
+**Integration Pattern:**
+```go
+// services/gameview_presenter.go
+s.CompactSummaryCardPanel.SetCurrentData(ctx, tile, unit)
+
+// cmd/weewar-wasm/browser.go
+content := renderPanelTemplate(ctx, "CompactSummaryCard.templar.html", map[string]any{
+    "Tile":  tile,
+    "Unit":  unit,
+    "Theme": theme,
+})
+go b.GameViewerPage.SetCompactSummaryCard(ctx, &v1.SetContentRequest{
+    InnerHtml: content,
+})
+```
+
+**Design:**
+- 56px fixed height, absolute positioned below header
+- Larger icons (32x32) for touch targets
+- Font-semibold labels for visibility
+- HP badge with background for emphasis
+- Horizontal layout with divider between terrain/unit

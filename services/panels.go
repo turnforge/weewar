@@ -196,3 +196,14 @@ func (b *BaseBuildOptionsModal) Hide(_ context.Context) {
 	b.BuildOptions = nil
 	b.PlayerCoins = 0
 }
+
+type BaseCompactSummaryCardPanel struct {
+	PanelBase
+	Tile *v1.Tile
+	Unit *v1.Unit
+}
+
+func (b *BaseCompactSummaryCardPanel) SetCurrentData(_ context.Context, tile *v1.Tile, unit *v1.Unit) {
+	b.Tile = tile
+	b.Unit = unit
+}

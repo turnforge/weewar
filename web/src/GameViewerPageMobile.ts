@@ -221,10 +221,7 @@ export class GameViewerPageMobile extends GameViewerPageBase {
      * Called after game scene is created
      */
     protected onGameSceneCreated(): void {
-        // Subscribe to selection events to update context
-        this.eventBus.addSubscription('tile-selected', null, this);
-        this.eventBus.addSubscription('unit-selected', null, this);
-        this.eventBus.addSubscription('selection-cleared', null, this);
+        // No event subscriptions needed - presenter drives all updates via RPC calls
     }
 
     /**
@@ -314,9 +311,19 @@ export class GameViewerPageMobile extends GameViewerPageBase {
             panelId => this.allowedPanels.includes(panelId)
         );
 
+        console.log('[GameViewerPageMobile] renderBottomBar:', {
+            currentContext: this.currentContext,
+            allowedPanels: this.allowedPanels,
+            orderedPanelIds: orderedPanelIds
+        });
+
         // Build HTML for buttons
         const buttonsHtml = orderedPanelIds.map(panelId => {
             const metadata = BUTTON_METADATA[panelId];
+            if (!metadata) {
+                console.error(`[GameViewerPageMobile] No metadata for panel: ${panelId}`);
+                return '';
+            }
             return `
                 <button
                     data-panel-id="${metadata.id}"
@@ -338,40 +345,6 @@ export class GameViewerPageMobile extends GameViewerPageBase {
         });
     }
 
-    /**
-     * Update button ordering based on selection context
-     */
-    private updateButtonOrdering(context: 'unitSelected' | 'tileSelected' | 'nothingSelected'): void {
-        if (this.currentContext === context) return;
-
-        this.currentContext = context;
-        this.renderBottomBar();
-        this.updateButtonHighlights(); // Re-apply highlights after re-rendering buttons
-    }
-
-    /**
-     * Handle event bus events
-     */
-    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
-        switch(eventType) {
-            case 'unit-selected':
-                this.updateButtonOrdering('unitSelected');
-                break;
-
-            case 'tile-selected':
-                // Check if tile has unit
-                const hasUnit = data && data.unit;
-                this.updateButtonOrdering(hasUnit ? 'unitSelected' : 'tileSelected');
-                break;
-
-            case 'selection-cleared':
-                this.updateButtonOrdering('nothingSelected');
-                break;
-
-            default:
-                super.handleBusEvent(eventType, data, target, emitter);
-        }
-    }
 
     /**
      * Override setCompactSummaryCard to show content in compact card
@@ -395,7 +368,16 @@ export class GameViewerPageMobile extends GameViewerPageBase {
         // Update allowed panels list
         this.allowedPanels = request.panelIds as PanelId[];
 
-        // Re-render bottom bar with new panel set
+        // Infer context from allowed panels (since events aren't emitted by GameScene)
+        if (this.allowedPanels.includes('unit-stats') || this.allowedPanels.includes('damage-distribution')) {
+            this.currentContext = 'unitSelected';
+        } else if (this.allowedPanels.includes('terrain-stats')) {
+            this.currentContext = 'tileSelected';
+        } else {
+            this.currentContext = 'nothingSelected';
+        }
+
+        // Re-render bottom bar with new panel set and context
         this.renderBottomBar();
         this.updateButtonHighlights();
 

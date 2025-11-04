@@ -85,6 +85,22 @@ func (b *BrowserTerrainStatsPanel) SetCurrentTile(ctx context.Context, tile *v1.
 	fmt.Println("After TSP Set")
 }
 
+type BrowserCompactSummaryCardPanel struct {
+	services.PanelBase
+	GameViewerPage *wasmv1.GameViewerPageClient
+}
+
+func (b *BrowserCompactSummaryCardPanel) SetCurrentData(ctx context.Context, tile *v1.Tile, unit *v1.Unit) {
+	content := renderPanelTemplate(ctx, "CompactSummaryCard.templar.html", map[string]any{
+		"Tile":  tile,
+		"Unit":  unit,
+		"Theme": b.Theme,
+	})
+	go b.GameViewerPage.SetCompactSummaryCard(ctx, &v1.SetContentRequest{
+		InnerHtml: content,
+	})
+}
+
 type BrowserBuildOptionsModal struct {
 	services.BaseBuildOptionsModal
 	GameViewerPage *wasmv1.GameViewerPageClient

@@ -46,10 +46,19 @@
 
     /* Compact Summary Card - fixed height */
     #mobile-compact-summary-card {
-        @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-2;
+        @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3;
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        height: 56px;
+        top: 66px;
+        /*
         flex-shrink: 0;
-        min-height: 60px;
-        max-height: 60px;
+        display: flex;
+        align-items: center;
+        min-height: 56px;
+        max-height: 56px;
+        */
     }
 
     /* Game Scene fills remaining space (header is 70px, bottom bar is 64px, card initially hidden) */
@@ -61,7 +70,7 @@
 
     /* When compact card is visible, adjust game scene height */
     #mobile-compact-summary-card:not(.hidden) ~ #mobile-game-scene-container {
-        height: calc(100vh - 70px - 60px - 64px); /* viewport - header - card - bottom bar */
+        height: calc(100vh - 70px - 64px); /* viewport - header - card - bottom bar */
     }
 
     #phaser-viewer-container {
@@ -72,6 +81,7 @@
     #mobile-bottom-bar {
         @apply bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700;
         @apply flex items-center justify-around;
+        display: flex;
         position: fixed;
         bottom: 0;
         left: 0;

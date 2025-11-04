@@ -89,10 +89,11 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 - **GameViewerPageMobile.ts**: Mobile page with context-aware bottom action bar
 - **MobileBottomDrawer.ts**: Reusable drawer component (60-70% height, auto-close on backdrop tap)
 - **CompactSummaryCard.ts**: Top banner showing terrain+unit selection info
-- **Context-Aware Button Ordering**: Dynamic reordering based on selection state (unit/tile/nothing)
-- **setCompactSummaryCard RPC**: New browser method for mobile-specific UI updates (no-op for desktop/grid)
+- **Context-Aware Button Ordering**: Dynamic reordering inferred from allowed panels (unit/tile/nothing context)
+- **setCompactSummaryCard RPC**: Presenter-rendered HTML sent via RPC (CompactSummaryCard.templar.html)
 - **Bottom Drawers**: 5 drawers (unit stats, terrain stats, damage, actions, log), one open at a time
-- **Layout Structure**: Header → Compact Card → Game Scene (flex: 1) → Bottom Bar (64px)
+- **Layout Structure**: Header (70px) → Compact Card (56px absolute) → Game Scene → Bottom Bar (64px fixed)
+- **Presenter-Driven**: All UI updates via RPC calls, no event bus subscriptions needed
 
 **Architecture Benefits:**
 - Clean separation of game logic from layout concerns
@@ -100,6 +101,56 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 - Can serve different variants based on user agent/screen size
 - Each variant optimized for its use case (performance, flexibility, touch)
 - Reusable components in web/lib for cross-page usage
+
+**Template-Based Panel Rendering Pattern (Session 2025-01-04):**
+
+Refactored inline HTML generation to use server-side Go templates for cleaner architecture:
+
+**Before (Inline HTML in Go):**
+```go
+// services/gameview_presenter.go
+func (s *GameViewPresenter) renderCompactSummaryCard(tile, unit) string {
+    html := `<div class="flex items-center">`
+    html += fmt.Sprintf(`<img data-tile-id="%d" />`, tile.TileType)
+    // ... 50+ lines of HTML string concatenation
+    return html
+}
+```
+
+**After (Template-Based):**
+```go
+// services/gameview_presenter.go - Clean interface call
+s.CompactSummaryCardPanel.SetCurrentData(ctx, tile, unit)
+
+// cmd/weewar-wasm/browser.go - Template rendering
+content := renderPanelTemplate(ctx, "CompactSummaryCard.templar.html", map[string]any{
+    "Tile":  tile,
+    "Unit":  unit,
+    "Theme": theme,
+})
+```
+
+**Panel Interface Architecture:**
+1. **Interface Definition** (services/gameview_presenter.go):
+   - `CompactSummaryCardPanel` interface with `SetCurrentData(tile, unit)`
+   - Added to `BaseGameViewPresenter` struct
+
+2. **Base Implementation** (services/panels.go):
+   - `BaseCompactSummaryCardPanel` for CLI/non-browser (stores data only)
+
+3. **Browser Implementation** (cmd/weewar-wasm/browser.go):
+   - `BrowserCompactSummaryCardPanel` renders template and calls RPC
+
+4. **Template File** (web/templates/CompactSummaryCard.templar.html):
+   - Go template with conditionals and theme integration
+   - Clean separation of structure from logic
+
+**Benefits:**
+- No HTML strings in Go code
+- Template syntax highlighting and validation
+- Consistent with other panels (TurnOptions, UnitStats, etc.)
+- Easier to maintain and modify UI
+- Clear separation: Go handles data, templates handle presentation
 
 ### Recent Session Work (2025-11-03)
 

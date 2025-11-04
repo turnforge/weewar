@@ -355,20 +355,28 @@
 - [x] Context-aware button ordering (unit/tile/nothing selected) (2025-11-04)
 - [x] MobileBottomDrawer reusable component (2025-11-04)
 - [x] CompactSummaryCard for terrain+unit info (2025-11-04)
-- [ ] Fix mobile layout CSS (bottom bar visibility issue)
-- [ ] Server-side setCompactSummaryCard implementation
+- [x] CompactSummaryCard template refactoring (inline HTML → templar.html) (2025-01-04)
+- [x] Presenter-driven mobile UI updates via RPC (2025-01-04)
+- [x] Panel interface architecture for CompactCard (2025-01-04)
 - [ ] Touch controls for unit selection and movement
 - [ ] Touch gesture support (pinch to zoom, pan)
 - [ ] Mobile performance optimization
 - [ ] Touch-friendly hex selection and highlighting
+- [ ] Fix TurnOptionsPanel background (transparent issue)
 
-**Architecture Implementation (2025-11-04)**:
-- GameViewerPageMobile.ts: Mobile page variant with context-aware bottom bar
-- MobileBottomDrawer.ts: Reusable drawer component (60-70% height, auto-close)
-- CompactSummaryCard.ts: Top banner showing terrain+unit selection info
-- GameViewerPageMobile.html: Mobile template with 5 drawers and bottom action bar
-- Button Ordering: Dynamic reordering based on selection context (unit/tile/nothing)
-- setCompactSummaryCard: New RPC method for mobile-specific UI updates
+**Architecture Implementation (2025-11-04 / 2025-01-04)**:
+- **TypeScript Components**:
+  - GameViewerPageMobile.ts: Mobile page variant with context-aware bottom bar
+  - MobileBottomDrawer.ts: Reusable drawer component (60-70% height, auto-close)
+  - CompactSummaryCard.ts: Top banner showing terrain+unit selection info
+  - GameViewerPageMobile.html: Mobile template with 5 drawers and bottom action bar
+- **Button Ordering**: Dynamic reordering inferred from allowed panels (no event bus)
+- **Presenter-Driven**: All UI updates via RPC calls (SetAllowedPanels, SetCompactSummaryCard)
+- **Template Refactoring (2025-01-04)**:
+  - CompactSummaryCard.templar.html: Server-side Go template with theme integration
+  - Panel interface: CompactSummaryCardPanel with Base/Browser implementations
+  - Clean separation: Go handles data, templates handle presentation
+  - Consistent with TurnOptions, UnitStats, TerrainStats panel patterns
 
 ---
 

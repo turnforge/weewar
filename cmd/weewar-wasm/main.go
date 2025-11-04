@@ -95,6 +95,12 @@ func main() {
 	wasmGameViewPresenter.BuildOptionsModal.SetTheme(wasmGameViewPresenter.Theme)
 	wasmGameViewPresenter.BuildOptionsModal.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
 
+	wasmGameViewPresenter.CompactSummaryCardPanel = &BrowserCompactSummaryCardPanel{
+		GameViewerPage: exports.GameViewerPage,
+	}
+	wasmGameViewPresenter.CompactSummaryCardPanel.SetTheme(wasmGameViewPresenter.Theme)
+	wasmGameViewPresenter.CompactSummaryCardPanel.SetRulesEngine(wasmGameViewPresenter.RulesEngine)
+
 	// Wire GameViewerPage client for mobile-specific RPC calls
 	wasmGameViewPresenter.GameViewerPage = exports.GameViewerPage
 

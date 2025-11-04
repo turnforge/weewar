@@ -51,6 +51,11 @@ type BuildOptionsModal interface {
 	Hide(context.Context)
 }
 
+type CompactSummaryCardPanel interface {
+	BasePanel
+	SetCurrentData(context.Context, *v1.Tile, *v1.Unit)
+}
+
 type GameScene interface {
 	BasePanel
 	ClearPaths(context.Context)
@@ -85,6 +90,7 @@ type BaseGameViewPresenter struct {
 	DamageDistributionPanel DamageDistributionPanel
 	TerrainStatsPanel       TerrainStatsPanel
 	BuildOptionsModal       BuildOptionsModal
+	CompactSummaryCardPanel CompactSummaryCardPanel
 	GameScene               GameScene
 	GameViewerPage          GameViewerPageClient // For mobile-specific RPC calls
 
@@ -204,17 +210,16 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 			if unit != nil {
 				allowedPanels = append(allowedPanels, "unit-stats", "damage-distribution")
 			}
+			fmt.Printf("[Presenter] SceneClicked: Setting allowed panels: %v (tile=%v, unit=%v)\n",
+				allowedPanels, tile != nil, unit != nil)
 			go s.GameViewerPage.SetAllowedPanels(ctx, &v1.SetAllowedPanelsRequest{
 				PanelIds: allowedPanels,
 			})
+		}
 
-			// Set compact summary card with combined terrain+unit info
-			compactContent := s.renderCompactSummaryCard(tile, unit)
-			if compactContent != "" {
-				go s.GameViewerPage.SetCompactSummaryCard(ctx, &v1.SetContentRequest{
-					InnerHtml: compactContent,
-				})
-			}
+		// Update compact summary card with combined terrain+unit info
+		if s.CompactSummaryCardPanel != nil {
+			s.CompactSummaryCardPanel.SetCurrentData(ctx, tile, unit)
 		}
 
 		// Top up unit if present
@@ -675,66 +680,3 @@ func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, game
 	}
 }
 
-// renderCompactSummaryCard renders a compact summary card showing terrain and unit info for mobile
-func (s *GameViewPresenter) renderCompactSummaryCard(tile *v1.Tile, unit *v1.Unit) string {
-	if tile == nil && unit == nil {
-		return ""
-	}
-
-	var html string
-
-	// Get terrain info
-	var terrainName string
-	if tile != nil {
-		terrainName = s.Theme.GetTerrainName(tile.TileType)
-	}
-
-	// Get unit info
-	var unitName string
-	var unitHealth int32
-	if unit != nil {
-		unitName = s.Theme.GetUnitName(unit.UnitType)
-		unitHealth = unit.AvailableHealth
-	}
-
-	// Build compact HTML with theme-hydrated images
-	html = `<div class="flex items-center gap-3">`
-
-	// Terrain icon and name (using theme-tile-image class for hydration)
-	if tile != nil && terrainName != "" {
-		html += fmt.Sprintf(`
-			<div class="flex items-center gap-2">
-				<img class="theme-tile-image w-6 h-6 object-contain"
-				     data-tile-id="%d"
-				     data-player-id="0"
-				     alt="%s"
-				     style="image-rendering: pixelated" />
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">%s</span>
-			</div>
-		`, tile.TileType, terrainName, terrainName)
-	}
-
-	// Divider if both terrain and unit
-	if terrainName != "" && unitName != "" {
-		html += `<div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>`
-	}
-
-	// Unit icon, name, and health (using theme-unit-image class for hydration)
-	if unit != nil && unitName != "" {
-		html += fmt.Sprintf(`
-			<div class="flex items-center gap-2">
-				<img class="theme-unit-image w-6 h-6 object-contain"
-				     data-unit-id="%d"
-				     data-player-id="%d"
-				     alt="%s"
-				     style="image-rendering: pixelated" />
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">%s</span>
-				<span class="text-xs text-gray-500 dark:text-gray-400">HP: %d/10</span>
-			</div>
-		`, unit.UnitType, unit.Player, unitName, unitName, unitHealth)
-	}
-
-	html += `</div>`
-
-	return html
-}

@@ -12,16 +12,17 @@ import (
 
 // PresenterContext holds the presenter and associated panels for CLI operations
 type PresenterContext struct {
-	Presenter          *services.GameViewPresenter
-	GameState          *services.BaseGameState
-	TurnOptions        *services.BaseTurnOptionsPanel
-	BuildOptions       *services.BaseBuildOptionsModal
-	UnitStats          *services.BaseUnitPanel
-	TerrainStats       *services.BaseTilePanel
-	DamageDistribution *services.BaseUnitPanel
-	GameScene          *services.BaseGameScene
-	GameID             string
-	FSService          *fsbe.FSGamesService
+	Presenter             *services.GameViewPresenter
+	GameState             *services.BaseGameState
+	TurnOptions           *services.BaseTurnOptionsPanel
+	BuildOptions          *services.BaseBuildOptionsModal
+	UnitStats             *services.BaseUnitPanel
+	TerrainStats          *services.BaseTilePanel
+	DamageDistribution    *services.BaseUnitPanel
+	CompactSummaryCard    *services.BaseCompactSummaryCardPanel
+	GameScene             *services.BaseGameScene
+	GameID                string
+	FSService             *fsbe.FSGamesService
 }
 
 // createPresenter loads a game from disk into an in-memory presenter
@@ -55,6 +56,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 	unitStats := &services.BaseUnitPanel{}
 	terrainStats := &services.BaseTilePanel{}
 	damageDistribution := &services.BaseUnitPanel{}
+	compactSummaryCard := &services.BaseCompactSummaryCardPanel{}
 	gameScene := &services.BaseGameScene{}
 
 	// Wire up presenter with base panels
@@ -64,6 +66,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 	presenter.UnitStatsPanel = unitStats
 	presenter.TerrainStatsPanel = terrainStats
 	presenter.DamageDistributionPanel = damageDistribution
+	presenter.CompactSummaryCardPanel = compactSummaryCard
 	presenter.GameScene = gameScene
 
 	return &PresenterContext{
@@ -74,6 +77,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 		UnitStats:          unitStats,
 		TerrainStats:       terrainStats,
 		DamageDistribution: damageDistribution,
+		CompactSummaryCard: compactSummaryCard,
 		GameScene:          gameScene,
 		GameID:             gameID,
 		FSService:          fsService,

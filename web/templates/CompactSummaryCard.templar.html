@@ -1,0 +1,56 @@
+{{ if or .Tile .Unit }}
+{{ $theme := .Theme }}
+<div class="flex items-center justify-start gap-4 h-full">
+  {{ if .Tile }}
+  {{ $terrainName := $theme.GetTerrainName .Tile.TileType }}
+  {{ if $terrainName }}
+  <!-- Terrain icon and name -->
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+      <img
+        class="theme-tile-image w-full h-full object-contain"
+        data-tile-id="{{ .Tile.TileType }}"
+        data-player-id="0"
+        alt="{{ $terrainName }}"
+        style="image-rendering: pixelated"
+      />
+    </div>
+    <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{
+      $terrainName
+    }}</span>
+  </div>
+  {{ end }}
+  {{ end }}
+
+  {{ if and .Tile .Unit }}
+  <!-- Divider if both terrain and unit -->
+  <div class="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
+  {{ end }}
+
+  {{ if .Unit }}
+  {{ $unitName := $theme.GetUnitName .Unit.UnitType }}
+  {{ if $unitName }}
+  <!-- Unit icon, name, and health -->
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+      <img
+        class="theme-unit-image w-full h-full object-contain"
+        data-unit-id="{{ .Unit.UnitType }}"
+        data-player-id="{{ .Unit.Player }}"
+        alt="{{ $unitName }}"
+        style="image-rendering: pixelated"
+      />
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{
+        $unitName
+      }}</span>
+      <span class="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded"
+        >HP: {{ .Unit.AvailableHealth }}/10</span
+      >
+    </div>
+  </div>
+  {{ end }}
+  {{ end }}
+</div>
+{{ end }}

@@ -45,9 +45,9 @@ wasm: # test
 	echo "Compressing standard WASM Binary..."
 	gzip -9 -k -f web/static/wasm/weewar-cli-tinygo.wasm
 	echo "Building TinyGO NoDebug WASM Binary..."
-	tinygo build -target wasm -no-debug -o web/static/wasm/weewar-cli-tinygo-nodebug.wasm ./cmd/weewar-wasm
-	echo "Compressing TinyGo NoDebug WASM Binary..."
-	gzip -9 -k -f web/static/wasm/weewar-cli-tinygo-nodebug.wasm
+	# tinygo build -target wasm -no-debug -o web/static/wasm/weewar-cli-tinygo-nodebug.wasm ./cmd/weewar-wasm
+	# echo "Compressing TinyGo NoDebug WASM Binary..."
+	# gzip -9 -k -f web/static/wasm/weewar-cli-tinygo-nodebug.wasm
 
 wasmexecjs:
 	@echo "Copying wasm_exec.js files..."

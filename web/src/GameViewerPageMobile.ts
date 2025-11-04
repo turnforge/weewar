@@ -131,10 +131,11 @@ export class GameViewerPageMobile extends GameViewerPageBase {
             if (drawerElement) {
                 const drawer = new MobileBottomDrawer(drawerElement, this.eventBus, true);
 
-                // Set close callback to track open drawer
+                // Set close callback to track open drawer and update button highlights
                 drawer.setOnClose(() => {
                     if (this.currentOpenDrawer === panelId) {
                         this.currentOpenDrawer = null;
+                        this.updateButtonHighlights();
                     }
                 });
 
@@ -229,6 +230,17 @@ export class GameViewerPageMobile extends GameViewerPageBase {
      * Show/focus a specific panel (opens its drawer)
      */
     protected showPanel(panelId: PanelId): void {
+        // If same drawer is already open, close it (toggle behavior)
+        if (this.currentOpenDrawer === panelId) {
+            const drawer = this.drawers.get(panelId);
+            if (drawer) {
+                drawer.close();
+                this.currentOpenDrawer = null;
+                this.updateButtonHighlights();
+            }
+            return;
+        }
+
         // Close current drawer if different
         if (this.currentOpenDrawer && this.currentOpenDrawer !== panelId) {
             const currentDrawer = this.drawers.get(this.currentOpenDrawer);
@@ -242,6 +254,29 @@ export class GameViewerPageMobile extends GameViewerPageBase {
         if (drawer) {
             drawer.open();
             this.currentOpenDrawer = panelId;
+            this.updateButtonHighlights();
+        }
+    }
+
+    /**
+     * Update button highlights based on which drawer is open
+     */
+    private updateButtonHighlights(): void {
+        if (!this.bottomBarElement) return;
+
+        // Remove active class from all buttons
+        this.bottomBarElement.querySelectorAll('.bottom-bar-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Add active class to button for currently open drawer
+        if (this.currentOpenDrawer) {
+            const activeButton = this.bottomBarElement.querySelector(
+                `[data-panel-id="${this.currentOpenDrawer}"]`
+            );
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
         }
     }
 
@@ -294,6 +329,7 @@ export class GameViewerPageMobile extends GameViewerPageBase {
 
         this.currentContext = context;
         this.renderBottomBar();
+        this.updateButtonHighlights(); // Re-apply highlights after re-rendering buttons
     }
 
     /**

@@ -23,6 +23,8 @@ service GameViewerPage {
 
     rpc SetTerrainStatsContent(SetContentRequest) returns (SetContentResponse);
 
+    rpc SetCompactSummaryCard(SetContentRequest) returns (SetContentResponse);
+
     rpc SetGameState(SetGameStateRequest) returns (SetGameStateResponse);
 
     // Update game UI metadata (current player, turn counter)

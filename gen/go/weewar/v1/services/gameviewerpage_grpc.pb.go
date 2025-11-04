@@ -26,6 +26,7 @@ const (
 	GameViewerPage_SetUnitStatsContent_FullMethodName          = "/weewar.v1.GameViewerPage/SetUnitStatsContent"
 	GameViewerPage_SetDamageDistributionContent_FullMethodName = "/weewar.v1.GameViewerPage/SetDamageDistributionContent"
 	GameViewerPage_SetTerrainStatsContent_FullMethodName       = "/weewar.v1.GameViewerPage/SetTerrainStatsContent"
+	GameViewerPage_SetCompactSummaryCard_FullMethodName        = "/weewar.v1.GameViewerPage/SetCompactSummaryCard"
 	GameViewerPage_SetGameState_FullMethodName                 = "/weewar.v1.GameViewerPage/SetGameState"
 	GameViewerPage_UpdateGameStatus_FullMethodName             = "/weewar.v1.GameViewerPage/UpdateGameStatus"
 	GameViewerPage_SetTileAt_FullMethodName                    = "/weewar.v1.GameViewerPage/SetTileAt"
@@ -53,6 +54,7 @@ type GameViewerPageClient interface {
 	SetUnitStatsContent(ctx context.Context, in *models.SetContentRequest, opts ...grpc.CallOption) (*models.SetContentResponse, error)
 	SetDamageDistributionContent(ctx context.Context, in *models.SetContentRequest, opts ...grpc.CallOption) (*models.SetContentResponse, error)
 	SetTerrainStatsContent(ctx context.Context, in *models.SetContentRequest, opts ...grpc.CallOption) (*models.SetContentResponse, error)
+	SetCompactSummaryCard(ctx context.Context, in *models.SetContentRequest, opts ...grpc.CallOption) (*models.SetContentResponse, error)
 	SetGameState(ctx context.Context, in *models.SetGameStateRequest, opts ...grpc.CallOption) (*models.SetGameStateResponse, error)
 	// Update game UI metadata (current player, turn counter)
 	UpdateGameStatus(ctx context.Context, in *models.UpdateGameStatusRequest, opts ...grpc.CallOption) (*models.UpdateGameStatusResponse, error)
@@ -127,6 +129,16 @@ func (c *gameViewerPageClient) SetTerrainStatsContent(ctx context.Context, in *m
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(models.SetContentResponse)
 	err := c.cc.Invoke(ctx, GameViewerPage_SetTerrainStatsContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameViewerPageClient) SetCompactSummaryCard(ctx context.Context, in *models.SetContentRequest, opts ...grpc.CallOption) (*models.SetContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(models.SetContentResponse)
+	err := c.cc.Invoke(ctx, GameViewerPage_SetCompactSummaryCard_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -293,6 +305,7 @@ type GameViewerPageServer interface {
 	SetUnitStatsContent(context.Context, *models.SetContentRequest) (*models.SetContentResponse, error)
 	SetDamageDistributionContent(context.Context, *models.SetContentRequest) (*models.SetContentResponse, error)
 	SetTerrainStatsContent(context.Context, *models.SetContentRequest) (*models.SetContentResponse, error)
+	SetCompactSummaryCard(context.Context, *models.SetContentRequest) (*models.SetContentResponse, error)
 	SetGameState(context.Context, *models.SetGameStateRequest) (*models.SetGameStateResponse, error)
 	// Update game UI metadata (current player, turn counter)
 	UpdateGameStatus(context.Context, *models.UpdateGameStatusRequest) (*models.UpdateGameStatusResponse, error)
@@ -336,6 +349,9 @@ func (UnimplementedGameViewerPageServer) SetDamageDistributionContent(context.Co
 }
 func (UnimplementedGameViewerPageServer) SetTerrainStatsContent(context.Context, *models.SetContentRequest) (*models.SetContentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetTerrainStatsContent not implemented")
+}
+func (UnimplementedGameViewerPageServer) SetCompactSummaryCard(context.Context, *models.SetContentRequest) (*models.SetContentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetCompactSummaryCard not implemented")
 }
 func (UnimplementedGameViewerPageServer) SetGameState(context.Context, *models.SetGameStateRequest) (*models.SetGameStateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetGameState not implemented")
@@ -488,6 +504,24 @@ func _GameViewerPage_SetTerrainStatsContent_Handler(srv interface{}, ctx context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GameViewerPageServer).SetTerrainStatsContent(ctx, req.(*models.SetContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameViewerPage_SetCompactSummaryCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(models.SetContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewerPageServer).SetCompactSummaryCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewerPage_SetCompactSummaryCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewerPageServer).SetCompactSummaryCard(ctx, req.(*models.SetContentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -788,6 +822,10 @@ var GameViewerPage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetTerrainStatsContent",
 			Handler:    _GameViewerPage_SetTerrainStatsContent_Handler,
+		},
+		{
+			MethodName: "SetCompactSummaryCard",
+			Handler:    _GameViewerPage_SetCompactSummaryCard_Handler,
 		},
 		{
 			MethodName: "SetGameState",

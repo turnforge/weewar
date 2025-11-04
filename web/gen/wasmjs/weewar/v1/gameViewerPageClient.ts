@@ -5,40 +5,40 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    ShowCaptureEffectRequest,
-    LogMessageResponse,
-    LogMessageRequest,
-    ShowPathRequest,
-    ShowPathResponse,
-    ShowBuildOptionsRequest,
-    UpdateGameStatusRequest,
-    SetTileAtRequest,
-    SetUnitAtRequest,
-    ShowHealEffectRequest,
-    SetContentResponse,
-    ShowHighlightsRequest,
-    ClearHighlightsResponse,
-    MoveUnitResponse,
-    ShowAttackEffectRequest,
-    ShowHealEffectResponse,
     SetUnitAtResponse,
-    RemoveTileAtResponse,
-    ShowHighlightsResponse,
-    MoveUnitRequest,
+    UpdateGameStatusRequest,
     SetTileAtResponse,
-    ClearHighlightsRequest,
-    ClearPathsRequest,
-    ClearPathsResponse,
-    ShowCaptureEffectResponse,
-    SetContentRequest,
+    RemoveTileAtResponse,
+    ClearHighlightsResponse,
+    ShowPathRequest,
+    ShowHealEffectRequest,
+    LogMessageRequest,
     ShowBuildOptionsResponse,
-    RemoveTileAtRequest,
-    RemoveUnitAtResponse,
-    SetGameStateRequest,
     SetGameStateResponse,
+    ClearHighlightsRequest,
+    SetTileAtRequest,
+    RemoveUnitAtResponse,
+    ShowPathResponse,
+    ClearPathsRequest,
+    MoveUnitRequest,
+    ShowCaptureEffectResponse,
+    LogMessageResponse,
+    SetGameStateRequest,
+    ShowHighlightsRequest,
+    MoveUnitResponse,
+    SetContentRequest,
+    ShowHighlightsResponse,
+    ClearPathsResponse,
+    ShowBuildOptionsRequest,
     UpdateGameStatusResponse,
     RemoveUnitAtRequest,
     ShowAttackEffectResponse,
+    ShowCaptureEffectRequest,
+    SetContentResponse,
+    SetUnitAtRequest,
+    RemoveTileAtRequest,
+    ShowAttackEffectRequest,
+    ShowHealEffectResponse,
 } from './interfaces';
 /**
  * GameViewerPage service client interface
@@ -50,6 +50,7 @@ export interface GameViewerPageMethods {
 	setUnitStatsContent(request: SetContentRequest): Promise<SetContentResponse>;
 	setDamageDistributionContent(request: SetContentRequest): Promise<SetContentResponse>;
 	setTerrainStatsContent(request: SetContentRequest): Promise<SetContentResponse>;
+	setCompactSummaryCard(request: SetContentRequest): Promise<SetContentResponse>;
 	setGameState(request: SetGameStateRequest): Promise<SetGameStateResponse>;
 	updateGameStatus(request: UpdateGameStatusRequest): Promise<UpdateGameStatusResponse>;
 	setTileAt(request: SetTileAtRequest): Promise<SetTileAtResponse>;
@@ -85,6 +86,9 @@ export class GameViewerPageClient extends ServiceClient implements GameViewerPag
     }
     async setTerrainStatsContent(request: SetContentRequest): Promise<SetContentResponse> {
         return this.callMethod('gameViewerPage.setTerrainStatsContent', request);
+    }
+    async setCompactSummaryCard(request: SetContentRequest): Promise<SetContentResponse> {
+        return this.callMethod('gameViewerPage.setCompactSummaryCard', request);
     }
     async setGameState(request: SetGameStateRequest): Promise<SetGameStateResponse> {
         return this.callMethod('gameViewerPage.setGameState', request);

@@ -50,6 +50,9 @@ const (
 	// GameViewerPageSetTerrainStatsContentProcedure is the fully-qualified name of the GameViewerPage's
 	// SetTerrainStatsContent RPC.
 	GameViewerPageSetTerrainStatsContentProcedure = "/weewar.v1.GameViewerPage/SetTerrainStatsContent"
+	// GameViewerPageSetCompactSummaryCardProcedure is the fully-qualified name of the GameViewerPage's
+	// SetCompactSummaryCard RPC.
+	GameViewerPageSetCompactSummaryCardProcedure = "/weewar.v1.GameViewerPage/SetCompactSummaryCard"
 	// GameViewerPageSetGameStateProcedure is the fully-qualified name of the GameViewerPage's
 	// SetGameState RPC.
 	GameViewerPageSetGameStateProcedure = "/weewar.v1.GameViewerPage/SetGameState"
@@ -103,6 +106,7 @@ type GameViewerPageClient interface {
 	SetUnitStatsContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
 	SetDamageDistributionContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
 	SetTerrainStatsContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
+	SetCompactSummaryCard(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
 	SetGameState(context.Context, *connect.Request[models.SetGameStateRequest]) (*connect.Response[models.SetGameStateResponse], error)
 	// Update game UI metadata (current player, turn counter)
 	UpdateGameStatus(context.Context, *connect.Request[models.UpdateGameStatusRequest]) (*connect.Response[models.UpdateGameStatusResponse], error)
@@ -164,6 +168,12 @@ func NewGameViewerPageClient(httpClient connect.HTTPClient, baseURL string, opts
 			httpClient,
 			baseURL+GameViewerPageSetTerrainStatsContentProcedure,
 			connect.WithSchema(gameViewerPageMethods.ByName("SetTerrainStatsContent")),
+			connect.WithClientOptions(opts...),
+		),
+		setCompactSummaryCard: connect.NewClient[models.SetContentRequest, models.SetContentResponse](
+			httpClient,
+			baseURL+GameViewerPageSetCompactSummaryCardProcedure,
+			connect.WithSchema(gameViewerPageMethods.ByName("SetCompactSummaryCard")),
 			connect.WithClientOptions(opts...),
 		),
 		setGameState: connect.NewClient[models.SetGameStateRequest, models.SetGameStateResponse](
@@ -266,6 +276,7 @@ type gameViewerPageClient struct {
 	setUnitStatsContent          *connect.Client[models.SetContentRequest, models.SetContentResponse]
 	setDamageDistributionContent *connect.Client[models.SetContentRequest, models.SetContentResponse]
 	setTerrainStatsContent       *connect.Client[models.SetContentRequest, models.SetContentResponse]
+	setCompactSummaryCard        *connect.Client[models.SetContentRequest, models.SetContentResponse]
 	setGameState                 *connect.Client[models.SetGameStateRequest, models.SetGameStateResponse]
 	updateGameStatus             *connect.Client[models.UpdateGameStatusRequest, models.UpdateGameStatusResponse]
 	setTileAt                    *connect.Client[models.SetTileAtRequest, models.SetTileAtResponse]
@@ -306,6 +317,11 @@ func (c *gameViewerPageClient) SetDamageDistributionContent(ctx context.Context,
 // SetTerrainStatsContent calls weewar.v1.GameViewerPage.SetTerrainStatsContent.
 func (c *gameViewerPageClient) SetTerrainStatsContent(ctx context.Context, req *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error) {
 	return c.setTerrainStatsContent.CallUnary(ctx, req)
+}
+
+// SetCompactSummaryCard calls weewar.v1.GameViewerPage.SetCompactSummaryCard.
+func (c *gameViewerPageClient) SetCompactSummaryCard(ctx context.Context, req *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error) {
+	return c.setCompactSummaryCard.CallUnary(ctx, req)
 }
 
 // SetGameState calls weewar.v1.GameViewerPage.SetGameState.
@@ -391,6 +407,7 @@ type GameViewerPageHandler interface {
 	SetUnitStatsContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
 	SetDamageDistributionContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
 	SetTerrainStatsContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
+	SetCompactSummaryCard(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error)
 	SetGameState(context.Context, *connect.Request[models.SetGameStateRequest]) (*connect.Response[models.SetGameStateResponse], error)
 	// Update game UI metadata (current player, turn counter)
 	UpdateGameStatus(context.Context, *connect.Request[models.UpdateGameStatusRequest]) (*connect.Response[models.UpdateGameStatusResponse], error)
@@ -448,6 +465,12 @@ func NewGameViewerPageHandler(svc GameViewerPageHandler, opts ...connect.Handler
 		GameViewerPageSetTerrainStatsContentProcedure,
 		svc.SetTerrainStatsContent,
 		connect.WithSchema(gameViewerPageMethods.ByName("SetTerrainStatsContent")),
+		connect.WithHandlerOptions(opts...),
+	)
+	gameViewerPageSetCompactSummaryCardHandler := connect.NewUnaryHandler(
+		GameViewerPageSetCompactSummaryCardProcedure,
+		svc.SetCompactSummaryCard,
+		connect.WithSchema(gameViewerPageMethods.ByName("SetCompactSummaryCard")),
 		connect.WithHandlerOptions(opts...),
 	)
 	gameViewerPageSetGameStateHandler := connect.NewUnaryHandler(
@@ -552,6 +575,8 @@ func NewGameViewerPageHandler(svc GameViewerPageHandler, opts ...connect.Handler
 			gameViewerPageSetDamageDistributionContentHandler.ServeHTTP(w, r)
 		case GameViewerPageSetTerrainStatsContentProcedure:
 			gameViewerPageSetTerrainStatsContentHandler.ServeHTTP(w, r)
+		case GameViewerPageSetCompactSummaryCardProcedure:
+			gameViewerPageSetCompactSummaryCardHandler.ServeHTTP(w, r)
 		case GameViewerPageSetGameStateProcedure:
 			gameViewerPageSetGameStateHandler.ServeHTTP(w, r)
 		case GameViewerPageUpdateGameStatusProcedure:
@@ -609,6 +634,10 @@ func (UnimplementedGameViewerPageHandler) SetDamageDistributionContent(context.C
 
 func (UnimplementedGameViewerPageHandler) SetTerrainStatsContent(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.SetTerrainStatsContent is not implemented"))
+}
+
+func (UnimplementedGameViewerPageHandler) SetCompactSummaryCard(context.Context, *connect.Request[models.SetContentRequest]) (*connect.Response[models.SetContentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewerPage.SetCompactSummaryCard is not implemented"))
 }
 
 func (UnimplementedGameViewerPageHandler) SetGameState(context.Context, *connect.Request[models.SetGameStateRequest]) (*connect.Response[models.SetGameStateResponse], error) {

@@ -179,7 +179,7 @@
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
                 <p class="text-sm text-gray-700 dark:text-gray-300">
-                    Showing page <span class="font-medium">{{ .Paginator.CurrentPage | Add1 }}</span>
+                    Showing page <span class="font-medium">{{ .Plus .Paginator.CurrentPage 1 }}</span>
                 </p>
             </div>
             <div>

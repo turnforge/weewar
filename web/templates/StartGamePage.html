@@ -61,16 +61,16 @@
                         <!-- Phaser canvas will be inserted here and sized to 100% width/height -->
                     </div>
                     {{ else }}
-                    <!-- World Selection Grid -->
-                    <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                        <!-- Filter Panel -->
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Choose a World</h3>
-                            {{ template "WorldFilterPanel" (dict "SearchInputId" "world-search" "SortSelectId" "world-sort" "HideCreateButton" true "SelectionMode" true "HtmxEnabled" false) }}
+                    <!-- No World Selected - This should not happen as backend redirects to /worlds/select -->
+                    <div class="flex items-center justify-center flex-1">
+                        <div class="text-center p-8">
+                            <div class="text-6xl text-gray-400 dark:text-gray-500 mb-4">🗺️</div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No World Selected</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Redirecting to world selection...</p>
+                            <a href="/worlds/select" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                Select a World
+                            </a>
                         </div>
-
-                        <!-- World Grid -->
-                        {{ template "WorldGrid" (dict "Worlds" .WorldListView.Worlds "SelectionMode" true "EmptyTitle" "No worlds available" "EmptyMessage" "Create a world first to start a game.") }}
                     </div>
                     {{ end }}
                 </div>

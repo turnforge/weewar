@@ -59,6 +59,28 @@
 - Leverages screenshot system for visual preview cards
 - Immediate activity overview on landing
 
+### World Selection & Listing System
+**Priority**: Medium
+**Status**: ✅ COMPLETE
+
+**Completed**:
+- [x] WorldFilterPanel reusable component (search, sort, filter)
+- [x] WorldGrid component with responsive card layout
+- [x] WorldList unified component (table and grid views)
+- [x] SelectWorldPage for streamlined game creation workflow
+- [x] View mode toggle (table/grid) with query param persistence
+- [x] Action modes (manage vs select) for different contexts
+- [x] Pagination support in both table and grid views
+- [x] Auto-redirect from /games/new to /worlds/select
+- [x] Responsive design with mobile bottom sheets
+
+**Design**:
+- Configurable listing component reused across WorldListingPage and SelectWorldPage
+- "Manage" mode: Edit/Delete/Start Game actions via dropdown menu
+- "Select" mode: Large Play buttons for quick game creation
+- Smart defaults: Grid for selection, table for management
+- Seamless user flow: /games/new → /worlds/select → click Play → game config
+
 ### Screenshot and Preview System
 **Priority**: Medium
 **Status**: ✅ COMPLETE
@@ -314,14 +336,21 @@
 
 ### Mobile Support
 **Priority**: Low
-**Status**: Not Started
+**Status**: 🔄 IN PROGRESS - Responsive Layouts Complete
 
-**Tasks**:
+**Completed**:
+- [x] Responsive layouts for mobile screens (WorldViewerPage, StartGamePage)
+- [x] Mobile-optimized UI components (bottom sheets, FABs, responsive headers)
+- [x] Responsive world listing with grid/table views
+- [x] Mobile navigation improvements (dropdown menus for actions)
+- [x] Responsive game configuration panel with bottom sheet
+- [x] Splash screen system across all pages
+
+**Remaining Tasks**:
 - [ ] Touch controls for unit selection and movement
-- [ ] Responsive layouts for mobile screens
-- [ ] Mobile-optimized UI components
 - [ ] Touch gesture support (pinch to zoom, pan)
 - [ ] Mobile performance optimization
+- [ ] Touch-friendly hex selection and highlighting
 
 ---
 

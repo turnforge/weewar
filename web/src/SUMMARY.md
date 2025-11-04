@@ -120,3 +120,46 @@ private initializeBottomSheet(): void {
 **Key Fixes:**
 - StartGamePage: Fixed mobile "Start Game" button by using `querySelectorAll` to bind all buttons (desktop + mobile)
 - Validation: Updated `validateGameConfiguration()` to disable/enable all button instances across layouts
+
+#### Listing Page TypeScript Classes ✅
+Created TypeScript pages for listing pages that previously had no JavaScript:
+
+**WorldListingPage.ts** - Worlds listing page
+```typescript
+class WorldListingPage {
+    constructor() {
+        ThemeManager.init();
+        this.init();
+    }
+
+    private init(): void {
+        SplashScreen.dismiss();
+    }
+}
+```
+
+**GameListingPage.ts** - Games listing page
+```typescript
+class GameListingPage {
+    constructor() {
+        ThemeManager.init();
+        this.init();
+    }
+
+    private init(): void {
+        SplashScreen.dismiss();
+    }
+}
+```
+
+**Purpose:**
+- Initialize ThemeManager for dark/light mode support
+- Dismiss splash screen on page load
+- Consistent pattern with HomePage.ts
+
+**Integration:**
+- Added to webpack.config.js components array
+- Generated bundles included in respective page templates
+- Both pages now properly initialize JavaScript functionality
+
+**Result:** Splash screens now properly dismissed on /worlds/ and /games/ listing pages

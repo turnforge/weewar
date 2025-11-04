@@ -326,3 +326,91 @@ updateScene(state); // TypeScript updates Phaser or DOM
    - Add explicit media queries with `!important` for critical show/hide behavior
    - Test both mobile (< 768px) and desktop (> 1024px) layouts
    - Ensure FAB buttons are properly positioned and accessible on mobile
+
+### Reusable Components (Session 2025-11-03)
+
+#### WorldFilterPanel.html
+Reusable search and filter controls for world listings.
+
+**Parameters:**
+- `SearchInputId`: ID for search input element
+- `SortSelectId`: ID for sort select element
+- `HideCreateButton`: Boolean to hide "Create New" button
+- `HtmxEnabled`: Boolean to enable HTMX attributes for live filtering
+- `Query`: Current search query
+- `Sort`: Current sort order
+
+**Features:**
+- Search input with icon
+- Sort dropdown (modified desc/asc, title A-Z/Z-A)
+- Optional "Create New World" button
+- HTMX support for live search/filter
+
+**Usage:**
+```go
+{{ template "WorldFilterPanel" (dict "SearchInputId" "world-search" "SortSelectId" "world-sort" "HideCreateButton" true "HtmxEnabled" true "Query" .Query "Sort" .Sort) }}
+```
+
+#### WorldGrid.html
+Grid view for displaying worlds as cards.
+
+**Parameters:**
+- `Worlds`: Array of World objects
+- `ActionMode`: "manage" or "select" - controls action buttons
+
+**Features:**
+- Responsive grid (1-4 columns based on screen size)
+- World preview images with aspect-video ratio
+- Action mode support:
+  - **manage**: Three-dot menu with Edit/Delete/Start Game
+  - **select**: Large green "Play" button
+- Empty states customized per mode
+- Pagination-ready
+
+**Usage:**
+```go
+{{ template "WorldGrid" (dict "Worlds" .Worlds "ActionMode" .ActionMode) }}
+```
+
+#### WorldList.html
+Unified world listing component supporting both table and grid views.
+
+**Parameters (from WorldListView):**
+- `Worlds`: Array of World objects
+- `ViewMode`: "table" or "grid"
+- `ActionMode`: "manage" or "select"
+- `Paginator`: Pagination state
+- `Query`: Search query
+- `Sort`: Sort order
+
+**Features:**
+- View mode toggle (table/grid) in manage mode
+- Table view: Traditional list with dropdown actions
+- Grid view: Card-based gallery using WorldGrid component
+- Shared pagination controls for both views
+- Integrates WorldFilterPanel
+- Empty states
+
+**Pages Using:**
+- WorldListingPage (manage mode, default table view)
+- SelectWorldPage (select mode, default grid view)
+
+#### SelectWorldPage.html
+Dedicated page for world selection during game creation.
+
+**Features:**
+- Preset to ActionMode="select"
+- Grid view by default
+- Large "Play" buttons on world cards
+- Header buttons: "Manage Worlds", "Create World"
+- Simplified workflow for game creation
+
+**Route:** `/worlds/select`
+
+**User Flow:**
+```
+/games/new (no worldId)
+  → redirect to /worlds/select
+  → click Play on world
+  → /games/new?worldId=X
+```

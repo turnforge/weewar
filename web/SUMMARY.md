@@ -259,6 +259,29 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Consistent Implementation**: Reusable patterns for openSheet/closeSheet handlers with ESC key support
 - **Layout Preservation**: Desktop two-column layouts unchanged, mobile gets optimized single-column with overlays
 
+#### Configurable World Listing System (Complete)
+- **WorldFilterPanel Component**: Reusable search, filter, and sort controls with optional HTMX support
+- **WorldGrid Component**: Responsive grid view (1-4 columns) with card-based world display
+- **WorldList Component**: Unified component supporting both table and grid view modes
+- **View Modes**: Toggle between table (traditional list) and grid (card gallery) views with query params
+- **Action Modes**: "manage" mode (edit/delete/start game) vs "select" mode (large Play buttons)
+- **SelectWorldPage**: Dedicated world selection page for game creation workflow (/worlds/select)
+- **Pagination**: Full pagination support in both table and grid views
+- **Smart Defaults**: Grid view for selection, table view for management
+- **User Flow Optimization**: /games/new without worldId auto-redirects to /worlds/select
+
+#### Splash Screen System Completion (Complete)
+- **WorldListingPage.ts**: Created TypeScript page class for worlds listing with splash screen dismissal
+- **GameListingPage.ts**: Created TypeScript page class for games listing with splash screen dismissal
+- **Webpack Integration**: Added both pages to build configuration for bundling
+- **Consistent Pattern**: All pages now properly dismiss splash screens on load
+
+#### StartGamePage Robustness (Complete)
+- **Graceful Missing WorldId**: No error toast when accessing without worldId parameter
+- **Auto-Redirect**: Automatically redirects to /worlds/select for world selection
+- **Conditional Loading**: Only loads world data and Phaser components when worldId present
+- **Safe Activation**: Component initialization checks prevent crashes
+
 ## Status
 **Current Version**: 8.8 (Animation Framework)
 **Status**: Production-ready with animation system ready for presenter integration

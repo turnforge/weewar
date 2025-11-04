@@ -1,0 +1,253 @@
+<!-- templates/GameViewerPageGrid.html -->
+{{# include "BasePage.html" #}}
+
+{{ define "ExtraHeaderButtons" }}
+<!-- Turn/Game Control Buttons -->
+<div class="flex items-center space-x-2">
+    <!-- Current Player Display -->
+    <div class="flex items-center px-3 py-2 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100">
+        <span class="text-sm font-medium">Player 1's Turn</span>
+    </div>
+
+    <!-- End Turn Button -->
+    <button id="end-turn-btn" type="button"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-800">
+        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        End Turn
+    </button>
+
+    <!-- Undo Button -->
+    <button id="undo-move-btn" type="button" disabled
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-400 bg-gray-200 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed">
+        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+        Undo
+    </button>
+
+    <!-- Screenshot Button -->
+    <button id="capture-screenshot-btn" type="button"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800">
+        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Screenshot
+    </button>
+</div>
+{{ end }}
+
+{{ define "__ExtraHeadSection" }}
+<style>
+    /* Grid Layout Styles */
+    #grid-container {
+        display: grid;
+        grid-template-columns: 280px 1fr 320px;
+        grid-template-rows: auto 1fr;
+        gap: 0;
+        height: 100%;
+        width: 100%;
+    }
+
+    /* Game scene takes center column, full height */
+    #grid-game-scene-container {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        @apply bg-gray-900 relative;
+        min-height: 0; /* Allow flex children to shrink */
+    }
+
+    /* Left column - Game Log */
+    #grid-game-log-container {
+        grid-column: 1;
+        grid-row: 1 / 3;
+        @apply bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto;
+    }
+
+    /* Right column - stacked panels */
+    #grid-terrain-stats-container {
+        grid-column: 3;
+        grid-row: 1;
+        @apply bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto;
+        max-height: 25vh;
+    }
+
+    #grid-unit-stats-container {
+        grid-column: 3;
+        grid-row: 1;
+        @apply bg-white dark:bg-gray-800 border-l border-t border-gray-200 dark:border-gray-700 overflow-y-auto;
+        margin-top: 25vh;
+        max-height: 25vh;
+    }
+
+    #grid-damage-distribution-container {
+        grid-column: 3;
+        grid-row: 1;
+        @apply bg-white dark:bg-gray-800 border-l border-t border-gray-200 dark:border-gray-700 overflow-y-auto;
+        margin-top: 50vh;
+        max-height: 25vh;
+    }
+
+    #grid-turn-options-container {
+        grid-column: 3;
+        grid-row: 2;
+        @apply bg-white dark:bg-gray-800 border-l border-t border-gray-200 dark:border-gray-700 overflow-y-auto;
+    }
+
+    /* Phaser container fills the game scene area */
+    #phaser-viewer-container {
+        @apply w-full h-full;
+    }
+
+    /* Loading overlay */
+    #game-loading {
+        @apply absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50;
+    }
+
+    /* Action panel styles */
+    .action-panel {
+        @apply bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700;
+    }
+
+    /* Unit selection highlight */
+    .selected-unit {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+    }
+
+    /* Move/attack indicators */
+    .valid-move {
+        background-color: rgba(34, 197, 94, 0.3) !important;
+    }
+
+    .valid-attack {
+        background-color: rgba(239, 68, 68, 0.3) !important;
+    }
+</style>
+{{ end }}
+
+{{ define "BodySection" }}
+    <input id="gameIdInput" value="{{ .GameId }}" type="hidden" />
+    <input id="playerCount" value="{{ .PlayerCount }}" type="hidden" />
+    <input id="maxTurns" value="{{ .MaxTurns }}" type="hidden" />
+
+    <!-- Game Viewer Container -->
+    <main class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-h-0">
+        <!-- Game Status Bar -->
+        <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <span id="game-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Game Loading...
+                    </span>
+                    <div class="text-sm text-gray-600 dark:text-gray-300">
+                        <span>{{ .Game.Name }}</span>
+                        <span class="mx-2">•</span>
+                        <span>{{ .PlayerCount }} Players</span>
+                        {{ if ne .MaxTurns 0 }}
+                        <span class="mx-2">•</span>
+                        <span>{{ .MaxTurns }} Turn Limit</span>
+                        {{ end }}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div id="turn-counter" class="text-sm text-gray-600 dark:text-gray-300">
+                        Turn 1
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="grid-container" class="flex-1 min-h-0">
+            <!-- Game Log Panel (Left) -->
+            <div id="grid-game-log-container">
+                {{# include "panels/GameLogPanel.html" #}}
+            </div>
+
+            <!-- Game Scene (Center) -->
+            <div id="grid-game-scene-container">
+                <!-- Loading Overlay -->
+                <div id="game-loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
+                    <div class="text-center">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+                        <p class="text-white text-lg">Loading Game...</p>
+                    </div>
+                </div>
+
+                <!-- Phaser Game Container -->
+                <div id="phaser-viewer-container"></div>
+            </div>
+
+            <!-- Right Column Panels -->
+            <div id="grid-terrain-stats-container">
+                {{# include "TerrainStatsPanel.html" #}}
+            </div>
+
+            <div id="grid-unit-stats-container">
+                {{# include "UnitStatsPanel.html" #}}
+            </div>
+
+            <div id="grid-damage-distribution-container">
+                {{# include "DamageDistributionPanel.html" #}}
+            </div>
+
+            <div id="grid-turn-options-container">
+                {{# include "TurnOptionsPanel.html" #}}
+            </div>
+        </div>
+
+        <!-- Build Options Modal -->
+        <div id="build-options-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+            <div class="modal-content relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        🏗️ Build Unit
+                    </h2>
+                    <button class="cancel-button text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body (scrollable) -->
+                <div class="modal-body flex-1 overflow-y-auto px-6 py-4">
+                    <!-- Content will be injected here by BuildOptionsModal component -->
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <button class="cancel-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden World Data for Frontend -->
+        <pre id="game.data-json" style="display: none;">{{ if .Game }}{{ .Game | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="game-state-data-json" style="display: none;">{{ if .GameState }}{{ .GameState | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="game-history-data-json" style="display: none;">{{ if .GameHistory }}{{ .GameHistory | ToJson }}{{ else }}null{{ end }}</pre>
+
+        <!-- Hidden Rules Engine Data for Frontend -->
+        <pre id="terrain-data-json" style="display: none;">{{ .GetTerrainDataJSON }}</pre>
+        <pre id="unit-data-json" style="display: none;">{{ .GetUnitDataJSON }}</pre>
+        <pre id="terrain-unit-properties-json" style="display: none;">{{ .GetTerrainUnitPropertiesJSON }}</pre>
+        <pre id="unit-unit-properties-json" style="display: none;">{{ if 0 }} {{ .GetUnitUnitPropertiesJSON }} {{ end }}</pre>
+    </main>
+{{ end }}
+
+{{ define "PostBodySection" }}
+<!-- WASM and Game Scripts -->
+<script src="{{.WasmExecJsPath}}"></script>
+<input id = "wasmBundlePathField" type=hidden value="{{.WasmBundlePath}}" />
+<!-- Include generated JS for GameViewerPageGrid -->
+{{# include "gen/GameViewerPageGrid.html" #}}
+{{ end }}
+
+{{ define "GameViewerPageGrid" }}
+{{ template "BasePage" . }}
+{{ end }}

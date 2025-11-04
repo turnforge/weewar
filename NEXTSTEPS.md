@@ -336,7 +336,7 @@
 
 ### Mobile Support
 **Priority**: Low
-**Status**: 🔄 IN PROGRESS - Responsive Layouts Complete
+**Status**: 🔄 IN PROGRESS - Page Variant Architecture Ready for Mobile
 
 **Completed**:
 - [x] Responsive layouts for mobile screens (WorldViewerPage, StartGamePage)
@@ -345,12 +345,21 @@
 - [x] Mobile navigation improvements (dropdown menus for actions)
 - [x] Responsive game configuration panel with bottom sheet
 - [x] Splash screen system across all pages
+- [x] GameViewerPageBase abstract class architecture (2025-11-04)
+- [x] GameViewerPageDockView implementation (flexible layout)
+- [x] GameViewerPageGrid implementation (static grid layout)
+- [x] Page variant pattern ready for mobile implementation
 
 **Remaining Tasks**:
+- [ ] GameViewerPageMobile with bottom sheet/drawer system
+- [ ] Context-aware panel switching (unit selected, base selected, nothing selected)
 - [ ] Touch controls for unit selection and movement
 - [ ] Touch gesture support (pinch to zoom, pan)
 - [ ] Mobile performance optimization
 - [ ] Touch-friendly hex selection and highlighting
+
+**Architecture Notes**:
+The Page Variant Architecture pattern (GameViewerPageBase + layout-specific children) provides a clean foundation for mobile implementation. All game logic lives in the base class, allowing GameViewerPageMobile to focus solely on mobile-optimized layout and interactions.
 
 ---
 

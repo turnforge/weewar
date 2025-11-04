@@ -75,6 +75,23 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 *   **Reference Management**: Cleaner component initialization and lifecycle patterns
 *   **State Management Consolidation**: Reduced complexity in page-level state handling
 
+### Recent Session Work (2025-11-04)
+
+#### Page Variant Architecture Pattern ✅
+*   **GameViewerPageBase Abstract Class**: Core game logic extracted to base class (WASM, presenter, panels, events, RPC methods)
+*   **Layout-Specific Child Classes**: GameViewerPageDockView (flexible dockable layout) and GameViewerPageGrid (static CSS grid)
+*   **Abstract Method Pattern**: Child classes implement layout-specific concerns (initializeLayout, createPanels, getGameSceneContainer)
+*   **Zero Logic Duplication**: All game logic lives in base class, children only handle structural differences
+*   **Flexible Timing Control**: Child classes control when game scene is created (early for Grid, late for DockView)
+*   **Server-Side Template Rendering**: Each variant has its own HTML template with appropriate layout structure
+*   **Planned Mobile Variant**: Foundation ready for GameViewerPageMobile with bottom sheet and context-aware panels
+
+**Architecture Benefits:**
+- Clean separation of game logic from layout concerns
+- Easy to add new layout variants without code duplication
+- Can serve different variants based on user agent/screen size
+- Each variant optimized for its use case (performance, flexibility, touch)
+
 ### Recent Session Work (2025-11-03)
 
 #### Responsive Bottom Sheet Implementation ✅

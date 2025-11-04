@@ -11,6 +11,61 @@
 - **Legacy System Removal**: Completely eliminated old canvas system and related complexity
 - **UI Reorganization**: Moved view controls to logical locations with Phaser editor tools
 
+### Page Variant Architecture (2025-11-04) ✅
+**Purpose**: Multiple layout implementations sharing core game logic for responsive, adaptive UI
+- **Abstract Base Class Pattern**: GameViewerPageBase contains all game logic (WASM, presenter, panels, events)
+- **Layout-Specific Children**: GameViewerPageDockView (flexible dockable), GameViewerPageGrid (static CSS grid), GameViewerPageMobile (planned)
+- **Zero Logic Duplication**: Core game functionality lives in base class, children only handle layout structure
+- **Flexible Timing Control**: Child classes control when game scene is created (early for Grid, late for DockView)
+- **Abstract Method Interface**: initializeLayout(), createPanels(), getGameSceneContainer(), shouldCreateGameSceneEarly()
+- **Server-Side Template Rendering**: Each variant has dedicated HTML template optimized for its layout engine
+- **Variant Selection Strategy**: Server can route to appropriate variant based on user agent, screen size, or user preference
+
+**Implementation Structure**:
+```typescript
+abstract class GameViewerPageBase extends BasePage implements LCMComponent, GameViewerPageMethods {
+    // Core game logic (all variants share this)
+    protected wasmBundle: WeewarBundle;
+    protected gameViewPresenterClient: GameViewPresenterClient;
+    protected gameScene: PhaserGameScene;
+    protected world: World;
+    protected panels: /* all panel types */;
+
+    // Abstract methods for layout-specific behavior
+    protected abstract initializeLayout(): Promise<void>;
+    protected abstract createPanels(): LCMComponent[];
+    protected abstract getGameSceneContainer(): HTMLElement;
+    protected abstract shouldCreateGameSceneEarly(): boolean;
+
+    // Browser RPC methods (implemented in base)
+    async setGameState(req: SetGameStateRequest): Promise<SetGameStateResponse>;
+    async showHighlights(req: ShowHighlightsRequest): Promise<ShowHighlightsResponse>;
+    // ... all other RPC methods
+}
+
+class GameViewerPageDockView extends GameViewerPageBase {
+    // DockView-specific layout initialization
+    // Lazy panel creation, late game scene initialization
+}
+
+class GameViewerPageGrid extends GameViewerPageBase {
+    // CSS Grid layout with pre-existing containers
+    // Immediate panel creation, early game scene initialization
+}
+
+class GameViewerPageMobile extends GameViewerPageBase {
+    // Mobile layout with bottom sheets and FABs
+    // Context-aware panel switching based on selection state
+}
+```
+
+**Architecture Benefits**:
+- **Maintainability**: Single source of truth for game logic, changes propagate to all variants
+- **Flexibility**: Easy to add new layout variants without touching core game code
+- **Performance**: Each variant optimized for its specific use case (DockView flexibility vs Grid simplicity)
+- **Responsive Design**: Server can choose optimal variant based on device capabilities
+- **Testing**: Test core logic once in base class, layout-specific tests for each variant
+
 ### Frontend ProcessMoves Integration (January 2025) ✅
 - **Unified Game Data Architecture**: Complete integration of Game, GameState, and GameHistory loading from page elements
 - **ProcessMoves WASM Integration**: All game actions flow through unified ProcessMoves pattern with WASM client

@@ -9,6 +9,7 @@ import { EventBus } from '../../lib/EventBus';
 import { WorldEventType, WorldEventTypes } from '../events';
 import { TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from '../World';
 import { AssetProvider } from '../../assets/providers/AssetProvider';
+import { AssetThemePreference } from '../AssetThemePreference';
 import { AnimationConfig } from './animations/AnimationConfig';
 import { ProjectileEffect } from './animations/effects/ProjectileEffect';
 import { ExplosionEffect } from './animations/effects/ExplosionEffect';
@@ -100,6 +101,9 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
      * Create the default asset provider based on configuration
      */
     private createDefaultAssetProvider(): AssetProvider {
+        // Sync localStorage to cookie to ensure backend has latest preference
+        AssetThemePreference.sync();
+
         // Check URL parameters for asset configuration
         const urlParams = new URLSearchParams(window.location.search);
 

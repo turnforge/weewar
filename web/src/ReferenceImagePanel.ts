@@ -470,30 +470,46 @@ export class ReferenceImagePanel extends BaseComponent {
           this.log('Loading reference image directly from clipboard');
           this.showToast('Loading', 'Loading reference image from clipboard...', 'info');
           this.updateReferenceStatus('Loading from clipboard...');
-          
-          // Check if clipboard API is available
-          if (!navigator.clipboard || !navigator.clipboard.read) {
-              throw new Error('Clipboard API not supported in this browser');
-          }
-          
-          // Read from clipboard
-          const clipboardItems = await navigator.clipboard.read();
-          let imageFound = false;
-          
-          for (const clipboardItem of clipboardItems) {
-              for (const type of clipboardItem.types) {
-                  if (type.startsWith('image/')) {
-                      const blob = await clipboardItem.getType(type);
-                      await this.loadReferenceFromBlob(blob, 'clipboard');
-                      imageFound = true;
-                      break;
-                  }
+
+          try {
+              // Check if clipboard API is available
+              if (!navigator.clipboard || !navigator.clipboard.read) {
+                  throw new Error('Clipboard API not supported in this browser. Try using the file upload option instead.');
               }
-              if (imageFound) break;
-          }
-          
-          if (!imageFound) {
-              throw new Error('No image found in clipboard');
+
+              // Request clipboard-read permission
+              // Note: This may trigger a browser permission prompt
+              const permission = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+
+              if (permission.state === 'denied') {
+                  throw new Error('Clipboard access denied. Please grant clipboard permissions in your browser settings.');
+              }
+
+              // Read from clipboard (this may also trigger permission prompt if not already granted)
+              const clipboardItems = await navigator.clipboard.read();
+              let imageFound = false;
+
+              for (const clipboardItem of clipboardItems) {
+                  for (const type of clipboardItem.types) {
+                      if (type.startsWith('image/')) {
+                          const blob = await clipboardItem.getType(type);
+                          await this.loadReferenceFromBlob(blob, 'clipboard');
+                          imageFound = true;
+                          break;
+                      }
+                  }
+                  if (imageFound) break;
+              }
+
+              if (!imageFound) {
+                  throw new Error('No image found in clipboard. Copy an image and try again.');
+              }
+          } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+              this.log(`Failed to load from clipboard: ${errorMessage}`);
+              this.showToast('Error', errorMessage, 'error');
+              this.updateReferenceStatus('Failed to load from clipboard');
+              throw error;
           }
     }
     

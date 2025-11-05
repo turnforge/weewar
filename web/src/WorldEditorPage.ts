@@ -331,8 +331,7 @@ class WorldEditorPage extends BasePage {
                         return this.createPhaserComponent();
                     case 'tilestats':
                         return this.createTileStatsComponent();
-                    case 'console':
-                        return this.createConsoleComponent();
+                    // case 'console': return this.createConsoleComponent();
                     case 'advancedTools':
                         return this.createAdvancedToolsComponent();
                     case 'referenceImage':
@@ -1335,12 +1334,14 @@ class WorldEditorPage extends BasePage {
         });
 
         // Add console panel below Phaser (250px height)
+        /*
         this.dockview.addPanel({
             id: 'console',
             component: 'console',
             title: '💻 Console',
             position: { direction: 'below', referencePanel: 'phaser' }
         });
+       */
 
         // Set panel sizes after layout is created
         setTimeout(() => {

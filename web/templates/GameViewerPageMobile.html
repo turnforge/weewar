@@ -1,9 +1,15 @@
 <!-- templates/GameViewerPageMobile.html -->
 {{# include "BasePage.html" #}}
+{{# include "GameViewerHeaderButtons.html" #}}
+{{# include "UnitStatsPanel.html" #}}
+{{# include "TerrainStatsPanel.html" #}}
+{{# include "DamageDistributionPanel.html" #}}
+{{# include "TurnOptionsPanel.html" #}}
+{{# include "panels/GameLogPanel.html" #}}
 
 {{ define "ExtraHeaderButtons" }}
 <div class="flex items-center space-x-2">
-    {{# include "GameViewerHeaderButtons.html" #}}
+    {{ template "GameViewerHeaderButtons" }}
 </div>
 {{ end }}
 
@@ -208,9 +214,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div class="drawer-content">
-                {{# include "UnitStatsPanel.html" #}}
-            </div>
+            <div class="drawer-content"> {{ template "UnitStatsPanel" }} </div>
         </div>
     </div>
 
@@ -223,9 +227,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div class="drawer-content">
-                {{# include "TerrainStatsPanel.html" #}}
-            </div>
+            <div class="drawer-content"> {{ template "TerrainStatsPanel" }} </div>
         </div>
     </div>
 
@@ -238,9 +240,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div class="drawer-content">
-                {{# include "DamageDistributionPanel.html" #}}
-            </div>
+            <div class="drawer-content">{{ template "DamageDistributionPanel" }}</div>
         </div>
     </div>
 
@@ -253,9 +253,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div class="drawer-content">
-                {{# include "TurnOptionsPanel.html" #}}
-            </div>
+            <div class="drawer-content"> {{ template "TurnOptionsPanel" }} </div>
         </div>
     </div>
 
@@ -268,9 +266,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <div class="drawer-content">
-                {{# include "panels/GameLogPanel.html" #}}
-            </div>
+            <div class="drawer-content"> {{ template "GameLogPanel" }} </div>
         </div>
     </div>
 
@@ -326,3 +322,4 @@
 {{ define "GameViewerPageMobile" }}
 {{ template "BasePage" . }}
 {{ end }}
+

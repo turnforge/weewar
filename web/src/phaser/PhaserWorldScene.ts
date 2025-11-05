@@ -592,7 +592,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     /**
      * Set up the layer system for managing overlays and interactions
      */
-    private setupLayerSystem(): void {
+    protected setupLayerSystem(): void {
         // Create layer manager with coordinate conversion functions
         this.layerManager = new LayerManager(
             this,

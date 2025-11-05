@@ -3,6 +3,7 @@ import { Unit, Tile, World } from '../World';
 import * as models from '../../gen/wasmjs/weewar/v1/models'
 import { EventBus } from '../../lib/EventBus';
 import { hexToPixel, pixelToHex } from './hexUtils';
+import { ReferenceImageLayer } from './layers/ReferenceImageLayer';
 
 /**
  * PhaserEditorScene extends PhaserWorldScene with editor-specific functionality.
@@ -22,11 +23,8 @@ import { hexToPixel, pixelToHex } from './hexUtils';
  * - Self-contained Phaser.Game instance
  */
 export class PhaserEditorScene extends PhaserWorldScene {
-    // Reference image functionality
-    private referenceImage: Phaser.GameObjects.Image | null = null;
-    private referenceMode: boolean = false;
-    private referenceAlpha: number = 0.5;
-    private referencePosition: { x: number; y: number } = { x: 0, y: 0 };
+    // Reference image layer for proper overlay/background handling
+    private referenceImageLayer: ReferenceImageLayer | null = null;
 
     // Editor-specific state
     private currentTerrain: number = 1; // Default grass (terrain type 1)
@@ -39,6 +37,20 @@ export class PhaserEditorScene extends PhaserWorldScene {
         super(containerElement, eventBus, debugMode);
         // Override the scene key for this specific scene type
         // this.scene.settings.key = 'PhaserEditorScene';
+    }
+
+    /**
+     * Override setupLayerSystem to add ReferenceImageLayer for editor
+     */
+    protected setupLayerSystem(): void {
+        // Call parent to set up base layers (baseMapLayer, exhaustedUnitsLayer)
+        super.setupLayerSystem();
+
+        // Create and add reference image layer for overlay/background support
+        this.referenceImageLayer = new ReferenceImageLayer(this);
+        if (this.layerManager) {
+            this.layerManager.addLayer(this.referenceImageLayer);
+        }
     }
 
     /**
@@ -84,40 +96,20 @@ export class PhaserEditorScene extends PhaserWorldScene {
     }
 
     /**
-     * Reference image functionality
+     * Reference image functionality - delegated to ReferenceImageLayer
      */
     public setReferenceImage(imageUrl: string): void {
-        if (this.referenceImage) {
-            this.referenceImage.destroy();
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.setReferenceImage(imageUrl);
         }
-
-        // Load and display reference image
-        this.load.image('reference', imageUrl);
-        this.load.start();
-        
-        this.load.once('complete', () => {
-            this.referenceImage = this.add.image(
-                this.referencePosition.x, 
-                this.referencePosition.y, 
-                'reference'
-            );
-            this.referenceImage.setAlpha(this.referenceAlpha);
-            this.referenceImage.setDepth(-1); // Behind tiles
-        });
     }
 
     /**
      * Set reference image mode (0 = hidden, 1 = background, 2 = overlay)
      */
     public setReferenceMode(mode: number): void {
-        this.referenceMode = mode > 0;
-        if (this.referenceImage) {
-            this.referenceImage.setVisible(this.referenceMode);
-            if (mode === 1) {
-                this.referenceImage.setDepth(-1); // Background
-            } else if (mode === 2) {
-                this.referenceImage.setDepth(1000); // Overlay
-            }
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.setReferenceMode(mode);
         }
     }
 
@@ -125,9 +117,10 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Toggle reference image visibility
      */
     public toggleReferenceMode(): void {
-        this.referenceMode = !this.referenceMode;
-        if (this.referenceImage) {
-            this.referenceImage.setVisible(this.referenceMode);
+        if (this.referenceImageLayer) {
+            const currentState = this.referenceImageLayer.getReferenceState();
+            const newMode = currentState.mode === 0 ? 1 : 0;
+            this.referenceImageLayer.setReferenceMode(newMode);
         }
     }
 
@@ -135,9 +128,8 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Set reference image alpha
      */
     public setReferenceAlpha(alpha: number): void {
-        this.referenceAlpha = alpha;
-        if (this.referenceImage) {
-            this.referenceImage.setAlpha(alpha);
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.setReferenceAlpha(alpha);
         }
     }
 
@@ -145,9 +137,8 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Set reference image position
      */
     public setReferencePosition(x: number, y: number): void {
-        this.referencePosition = { x, y };
-        if (this.referenceImage) {
-            this.referenceImage.setPosition(x, y);
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.setReferencePosition(x, y);
         }
     }
 
@@ -155,8 +146,8 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Set reference image scale
      */
     public setReferenceScale(x: number, y: number): void {
-        if (this.referenceImage) {
-            this.referenceImage.setScale(x, y);
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.setReferenceScale(x, y);
             // Emit scale change event for WorldEditor
             this.events.emit('referenceScaleChanged', { x, y });
         }
@@ -166,12 +157,11 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Set reference image scale with top-left corner as pivot
      */
     public setReferenceScaleFromTopLeft(x: number, y: number): void {
-        if (this.referenceImage) {
-            // Set origin to top-left for scaling
-            this.referenceImage.setOrigin(0, 0);
-            this.referenceImage.setScale(x, y);
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.setReferenceScaleFromTopLeft(x, y);
             // Emit scale change event for WorldEditor
-            this.events.emit('referenceScaleChanged', { x, y });
+            const state = this.referenceImageLayer.getReferenceState();
+            this.events.emit('referenceScaleChanged', { x: state.scale.x, y: state.scale.y });
         }
     }
 
@@ -185,40 +175,19 @@ export class PhaserEditorScene extends PhaserWorldScene {
         scale: { x: number; y: number };
         hasImage: boolean;
     } | null {
-        if (!this.referenceImage) {
-            return {
-                mode: 0,
-                alpha: this.referenceAlpha,
-                position: { x: this.referencePosition.x, y: this.referencePosition.y },
-                scale: { x: 1, y: 1 },
-                hasImage: false
-            };
+        if (this.referenceImageLayer) {
+            return this.referenceImageLayer.getReferenceState();
         }
-
-        return {
-            mode: this.referenceMode ? 1 : 0,
-            alpha: this.referenceAlpha,
-            position: { 
-                x: this.referenceImage.x, 
-                y: this.referenceImage.y 
-            },
-            scale: { 
-                x: this.referenceImage.scaleX, 
-                y: this.referenceImage.scaleY 
-            },
-            hasImage: true
-        };
+        return null;
     }
 
     /**
      * Clear reference image
      */
     public clearReferenceImage(): void {
-        if (this.referenceImage) {
-            this.referenceImage.destroy();
-            this.referenceImage = null;
+        if (this.referenceImageLayer) {
+            this.referenceImageLayer.clearReferenceImage();
         }
-        this.referenceMode = false;
     }
 
     /**
@@ -233,14 +202,15 @@ export class PhaserEditorScene extends PhaserWorldScene {
         referenceMode: boolean;
         referenceAlpha: number;
     } {
+        const refState = this.referenceImageLayer?.getReferenceState();
         return {
             terrain: this.currentTerrain,
             unit: this.currentUnit,
             player: this.currentPlayer,
             brushSize: this.brushSize,
             mode: this.editorMode,
-            referenceMode: this.referenceMode,
-            referenceAlpha: this.referenceAlpha
+            referenceMode: refState ? refState.mode > 0 : false,
+            referenceAlpha: refState ? refState.alpha : 0.5
         };
     }
 
@@ -423,33 +393,19 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Load reference image from file
      */
     public async loadReferenceFromFile(file: File): Promise<boolean> {
-        if (!file.type.startsWith('image/')) {
-            console.error('[PhaserEditorScene] File is not an image:', file.type);
-            return false;
+        if (this.referenceImageLayer) {
+            return await this.referenceImageLayer.loadReferenceFromFile(file);
         }
-        const imageUrl = URL.createObjectURL(file);
-        this.setReferenceImage(imageUrl);
-        return true;
+        return false;
     }
 
     /**
      * Load reference image from clipboard
      */
     public async loadReferenceFromClipboard(): Promise<boolean> {
-        // Read from clipboard
-        const items = await navigator.clipboard.read();
-        
-        for (const item of items) {
-            if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
-                const imageBlob = await item.getType(item.types.find(type => type.startsWith('image/')) || '');
-                const imageUrl = URL.createObjectURL(imageBlob);
-                
-                this.setReferenceImage(imageUrl);
-                return true;
-            }
+        if (this.referenceImageLayer) {
+            return await this.referenceImageLayer.loadReferenceFromClipboard();
         }
-        
-        console.warn('[PhaserEditorScene] No image found in clipboard');
         return false;
     }
 

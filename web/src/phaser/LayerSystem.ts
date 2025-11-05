@@ -331,6 +331,48 @@ export class LayerManager {
     }
 
     /**
+     * Process scroll events through the layer system
+     * Returns true if a layer handled the scroll (camera should not zoom)
+     */
+    public processScroll(pointer: Phaser.Input.Pointer, deltaY: number): boolean {
+        // Create click context for hit testing
+        const hexCoords = this.pixelToHexFn(pointer.worldX, pointer.worldY);
+        const context: ClickContext = {
+            screenX: pointer.x,
+            screenY: pointer.y,
+            worldX: pointer.worldX,
+            worldY: pointer.worldY,
+            hexQ: hexCoords.q,
+            hexR: hexCoords.r,
+            tile: this.getTileFn(hexCoords.q, hexCoords.r),
+            unit: this.getUnitFn(hexCoords.q, hexCoords.r),
+            timestamp: Date.now(),
+            button: pointer.button
+        };
+
+        // Process interactive layers by depth (highest first)
+        const interactiveLayers = this.getInteractiveLayers();
+
+        for (const layer of interactiveLayers) {
+            const hitResult = layer.hitTest(context);
+
+            // If layer blocks or consumes, try to handle scroll
+            if (hitResult === LayerHitResult.CONSUME || hitResult === LayerHitResult.BLOCK) {
+                if (layer.handleScroll) {
+                    const handled = layer.handleScroll(context, deltaY);
+                    if (handled) {
+                        return true; // Layer handled the scroll
+                    }
+                }
+                // Layer wanted to block but doesn't have scroll handler - still block camera
+                return hitResult === LayerHitResult.BLOCK;
+            }
+        }
+
+        return false; // No layer handled the scroll, camera can zoom
+    }
+
+    /**
      * Notify all layers to stop drag operations
      */
     public stopDrag(): void {

@@ -72,13 +72,45 @@ export class ReferenceImageLayer extends BaseLayer {
         if (!this.isDragging || !this.referenceImage) {
             return false;
         }
-        
+
         // Update image position based on drag
         const newX = this.dragStartImageX + (context.worldX - this.dragStartX);
         const newY = this.dragStartImageY + (context.worldY - this.dragStartY);
-        
+
         this.setReferencePosition(newX, newY);
         return true;
+    }
+
+    public handleScroll(context: ClickContext, deltaY: number): boolean {
+        if (!this.referenceImage || this.referenceMode !== 2) {
+            return false;
+        }
+
+        // Scale the reference image around the mouse cursor position
+        const scaleFactor = deltaY > 0 ? 0.99 : 1.01; // Zoom in/out by 1%
+        const newScaleX = this.referenceScale.x * scaleFactor;
+        const newScaleY = this.referenceScale.y * scaleFactor;
+
+        // Get mouse position in world coordinates
+        const mouseWorldX = context.worldX;
+        const mouseWorldY = context.worldY;
+
+        // Calculate the offset from the image position to the mouse
+        const offsetX = mouseWorldX - this.referencePosition.x;
+        const offsetY = mouseWorldY - this.referencePosition.y;
+
+        // When scaling, adjust position so the point under cursor stays in place
+        const newOffsetX = offsetX * scaleFactor;
+        const newOffsetY = offsetY * scaleFactor;
+
+        const newPosX = mouseWorldX - newOffsetX;
+        const newPosY = mouseWorldY - newOffsetY;
+
+        // Apply new scale and position
+        this.setReferenceScale(newScaleX, newScaleY);
+        this.setReferencePosition(newPosX, newPosY);
+
+        return true; // We handled the scroll
     }
     
     /**

@@ -61,15 +61,18 @@ export interface Layer {
     readonly name: string;
     readonly coordinateSpace: CoordinateSpace;
     readonly interactive: boolean;
-    
+
     // Visibility and positioning
     visible: boolean;
     depth: number;
-    
+
     // Core lifecycle methods
     hitTest(context: ClickContext): LayerHitResult | null;
+    handleClick?(context: ClickContext): boolean;
     handleDrag?(context: ClickContext, deltaX: number, deltaY: number): boolean;
-    
+    handleScroll?(context: ClickContext, deltaY: number): boolean;
+    stopDrag?(): void;
+
     // Display control
     show(): void;
     hide(): void;
@@ -77,7 +80,7 @@ export interface Layer {
     setScale(x: number, y: number): void;
     setAlpha(alpha: number): void;
     setDepth(depth: number): void;
-    
+
     // Lifecycle
     destroy(): void;
 }
@@ -243,6 +246,101 @@ export class LayerManager {
         return null; // No layer wants to handle the click
     }
     
+    /**
+     * Process drag events through the layer system
+     * Returns true if a layer handled the drag (camera should not pan)
+     */
+    public processDrag(pointer: Phaser.Input.Pointer, deltaX: number, deltaY: number): boolean {
+        // Create click context for hit testing
+        const hexCoords = this.pixelToHexFn(pointer.worldX, pointer.worldY);
+        const context: ClickContext = {
+            screenX: pointer.x,
+            screenY: pointer.y,
+            worldX: pointer.worldX,
+            worldY: pointer.worldY,
+            hexQ: hexCoords.q,
+            hexR: hexCoords.r,
+            tile: this.getTileFn(hexCoords.q, hexCoords.r),
+            unit: this.getUnitFn(hexCoords.q, hexCoords.r),
+            timestamp: Date.now(),
+            button: pointer.button
+        };
+
+        // Process interactive layers by depth (highest first)
+        const interactiveLayers = this.getInteractiveLayers();
+
+        for (const layer of interactiveLayers) {
+            const hitResult = layer.hitTest(context);
+
+            // If layer blocks or consumes, try to handle drag
+            if (hitResult === LayerHitResult.CONSUME || hitResult === LayerHitResult.BLOCK) {
+                if (layer.handleDrag) {
+                    const handled = layer.handleDrag(context, deltaX, deltaY);
+                    if (handled) {
+                        return true; // Layer handled the drag
+                    }
+                }
+                // Layer wanted to block but doesn't have drag handler - still block camera
+                return hitResult === LayerHitResult.BLOCK;
+            }
+        }
+
+        return false; // No layer handled the drag, camera can pan
+    }
+
+    /**
+     * Process click events through the layer system
+     * Returns true if a layer handled the click
+     */
+    public processClick(pointer: Phaser.Input.Pointer): boolean {
+        // Create click context for hit testing
+        const hexCoords = this.pixelToHexFn(pointer.worldX, pointer.worldY);
+        const context: ClickContext = {
+            screenX: pointer.x,
+            screenY: pointer.y,
+            worldX: pointer.worldX,
+            worldY: pointer.worldY,
+            hexQ: hexCoords.q,
+            hexR: hexCoords.r,
+            tile: this.getTileFn(hexCoords.q, hexCoords.r),
+            unit: this.getUnitFn(hexCoords.q, hexCoords.r),
+            timestamp: Date.now(),
+            button: pointer.button
+        };
+
+        // Process interactive layers by depth (highest first)
+        const interactiveLayers = this.getInteractiveLayers();
+
+        for (const layer of interactiveLayers) {
+            const hitResult = layer.hitTest(context);
+
+            // If layer blocks or consumes, try to handle click
+            if (hitResult === LayerHitResult.CONSUME || hitResult === LayerHitResult.BLOCK) {
+                if (layer.handleClick) {
+                    const handled = layer.handleClick(context);
+                    if (handled) {
+                        return true; // Layer handled the click
+                    }
+                }
+                // Layer wanted to block but doesn't have click handler
+                return hitResult === LayerHitResult.BLOCK;
+            }
+        }
+
+        return false; // No layer handled the click
+    }
+
+    /**
+     * Notify all layers to stop drag operations
+     */
+    public stopDrag(): void {
+        for (const layer of this.layers.values()) {
+            if (layer.stopDrag) {
+                layer.stopDrag();
+            }
+        }
+    }
+
     /**
      * Clean up all layers
      */

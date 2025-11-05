@@ -626,6 +626,11 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             if (pointer.button === 0) { // Left click only
                 pointerDownPosition = { x: pointer.x, y: pointer.y };
                 pointerDownTime = Date.now();
+
+                // Let layers handle the click (e.g., start drag for reference image in overlay mode)
+                if (this.layerManager) {
+                    this.layerManager.processClick(pointer);
+                }
             }
         });
         
@@ -634,15 +639,20 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             if (pointer.button === 0 && pointerDownPosition) { // Left click only
                 const timeDelta = Date.now() - pointerDownTime;
                 const distance = Math.sqrt(
-                    Math.pow(pointer.x - pointerDownPosition.x, 2) + 
+                    Math.pow(pointer.x - pointerDownPosition.x, 2) +
                     Math.pow(pointer.y - pointerDownPosition.y, 2)
                 );
-                
+
                 // This is a tap if it's quick and doesn't move much
                 if (timeDelta < TAP_TIME_THRESHOLD && distance < TAP_DISTANCE_THRESHOLD) {
                     this.handleTap(pointer);
                 }
-                
+
+                // Notify layers to stop any drag operations
+                if (this.layerManager) {
+                    this.layerManager.stopDrag();
+                }
+
                 // Reset tracking
                 pointerDownPosition = null;
                 pointerDownTime = 0;
@@ -658,25 +668,34 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             // Calculate drag delta
             const deltaX = pointer.x - pointer.prevPosition.x;
             const deltaY = pointer.y - pointer.prevPosition.y;
-            
+
+            // Check if any layer wants to handle the drag (e.g., reference image in overlay mode)
+            if (this.layerManager) {
+                const layerHandledDrag = this.layerManager.processDrag(pointer, deltaX, deltaY);
+                if (layerHandledDrag) {
+                    // Layer handled the drag, don't pan camera
+                    return;
+                }
+            }
+
             // Pan camera opposite to drag direction
             const camera = this.cameras.main;
             const oldScrollX = camera.scrollX;
             const oldScrollY = camera.scrollY;
-            
+
             camera.scrollX -= deltaX / camera.zoom;
             camera.scrollY -= deltaY / camera.zoom;
-            
+
             // Emit camera moved event if position changed
             if (oldScrollX !== camera.scrollX || oldScrollY !== camera.scrollY) {
-                this.events.emit('camera-moved', { 
-                    scrollX: camera.scrollX, 
+                this.events.emit('camera-moved', {
+                    scrollX: camera.scrollX,
                     scrollY: camera.scrollY,
                     deltaX: camera.scrollX - oldScrollX,
                     deltaY: camera.scrollY - oldScrollY
                 });
             }
-            
+
             // Keep drag zone centered on camera
             if (this.dragZone) {
                 this.dragZone.setPosition(camera.centerX, camera.centerY);

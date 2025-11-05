@@ -3,10 +3,14 @@
   id="turn-options-panel-template"
   class="turn-options-panel h-full bg-white dark:bg-gray-800 p-4 overflow-y-auto"
 >
+  <h4 class="font-medium text-gray-900 dark:text-white mb-3">🎯 Turn Options</h4>
+
   {{ if .Options }}
-  <!-- Options Header with Unit Info -->
-  {{ $theme := .Theme }}
-  <div class="mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+  <!-- Turn Options Content -->
+  <div id="turn-options-content" class="nothidden">
+    <!-- Options Header with Unit Info -->
+    {{ $theme := .Theme }}
+    <div class="mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded">
     {{ if .Unit }}
     <div class="flex items-center gap-2 mb-2" style="height: 96px">
       <img
@@ -152,6 +156,7 @@
         </p>
       </div>
     </div>
+  </div>
   </div>
   {{ else }}
   <!-- No options / empty state -->

@@ -349,6 +349,9 @@
 - [x] GameViewerPageDockView implementation (flexible layout)
 - [x] GameViewerPageGrid implementation (static grid layout)
 - [x] Page variant pattern ready for mobile implementation
+- [x] Responsive header menu system with drawer/dropdown switching (2025-01-05)
+- [x] Animated mobile drawer below header with backdrop fade (2025-01-05)
+- [x] Toast positioning adjusted for mobile bottom bars (2025-01-05)
 
 **Remaining Tasks**:
 - [x] GameViewerPageMobile with bottom drawer system (2025-11-04)
@@ -358,11 +361,11 @@
 - [x] CompactSummaryCard template refactoring (inline HTML → templar.html) (2025-01-04)
 - [x] Presenter-driven mobile UI updates via RPC (2025-01-04)
 - [x] Panel interface architecture for CompactCard (2025-01-04)
+- [x] TurnOptionsPanel template structure fix (2025-01-05)
 - [ ] Touch controls for unit selection and movement
 - [ ] Touch gesture support (pinch to zoom, pan)
 - [ ] Mobile performance optimization
 - [ ] Touch-friendly hex selection and highlighting
-- [ ] Fix TurnOptionsPanel background (transparent issue)
 
 **Architecture Implementation (2025-11-04 / 2025-01-04)**:
 - **TypeScript Components**:

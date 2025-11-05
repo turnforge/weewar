@@ -273,22 +273,77 @@ updateScene(state); // TypeScript updates Phaser or DOM
 - `WorldViewerPage.html` - Stats panel with FAB button
 - `StartGamePage.html` - Config panel with FAB button
 
-#### Responsive Header Buttons
+#### Responsive Header Menu System
 
-**Purpose:** Desktop buttons collapse into dropdown menu on mobile.
+**Purpose:** Desktop buttons collapse into responsive menu on mobile - drawer for narrow screens with overflow constraints, dropdown for wide screens.
 
 **Implementation in Header.html:**
-- Desktop: Buttons shown inline via `md:flex` visibility
-- Mobile: Three-dot menu button triggers dropdown
-- TypeScript: `initializeHeaderActionsDropdown()` in BasePage.ts clones buttons into dropdown
+- Desktop (≥768px): Buttons shown inline via `md:flex` visibility
+- Mobile (<768px): Three-dot menu button triggers drawer or dropdown based on constraints
+- **Header Actions Drawer**: Full-overlay drawer that slides down from header (z-index 60)
+- **Header Actions Dropdown**: Positioned dropdown for unconstrained layouts (z-index 50)
+- TypeScript: `initializeHeaderActionsDropdown()` in BasePage.ts handles responsive switching
+
+**Architecture:**
+```
+┌─ All Pages ─────────────────────────────────┐
+│ Header.html (shared across all pages)       │
+│ ├─ Desktop: Buttons inline (#header-buttons-desktop) │
+│ ├─ Mobile: "..." menu button                │
+│ ├─ Dropdown: Fixed positioning (#header-actions-dropdown) │
+│ └─ Drawer: Full overlay (#header-actions-drawer) │
+└──────────────────────────────────────────────┘
+
+┌─ BasePage.ts ───────────────────────────────┐
+│ initializeHeaderActionsDropdown()           │
+│ ├─ Clones buttons from source container     │
+│ ├─ Detects screen width (768px breakpoint)  │
+│ ├─ Mobile: Opens drawer with slide animation│
+│ └─ Desktop: Opens dropdown below button     │
+└──────────────────────────────────────────────┘
+```
+
+**Drawer Features (Mobile):**
+- Full-screen overlay with semi-transparent backdrop
+- Positioned directly below header (top: 70px)
+- Slide-down/up animation (300ms duration, ease-out)
+- Backdrop fade animation (opacity 0 → 0.5)
+- Auto-close on backdrop click or Escape key
+- Buttons maintain full styling with full-width layout
+
+**Dropdown Features (Desktop):**
+- Compact menu positioned below button
+- List-style items with hover effects
+- Traditional dropdown styling
 
 **Usage Pattern:**
 ```html
 {{ block "ExtraHeaderButtons" . }}
+  <!-- Add 'header-action-btn' class to include in mobile menu -->
   <button class="header-action-btn px-4 py-2 ...">Edit</button>
   <button class="header-action-btn px-4 py-2 ...">Create Game</button>
 {{ end }}
 ```
+
+**Technical Details:**
+- Breakpoint: 768px (matches Tailwind `md:` breakpoint)
+- Drawer z-index: 60 (above all content)
+- Drawer animation: `transform -translate-y-full` → `translate-y-0`
+- Backdrop animation: `opacity-0 bg-black` → `bg-opacity-50`
+- Event handling: `requestAnimationFrame` for smooth transitions
+- Cleanup: 300ms delay before hiding to complete animation
+
+**Why Drawer for Mobile:**
+- Avoids overflow:hidden clipping issues on mobile layouts
+- Consistent with mobile drawer patterns (drawers > dropdowns on small screens)
+- Works across all pages regardless of page-specific overflow constraints
+- Full-screen backdrop prevents interaction with underlying content
+
+**Pages Using Pattern:**
+- All pages with Header.html (universal implementation)
+- GameViewerPageMobile (End Turn button in menu)
+- WorldViewerPage (Edit/Create Game buttons in menu)
+- StartGamePage (action buttons in menu)
 
 ### Best Practices
 

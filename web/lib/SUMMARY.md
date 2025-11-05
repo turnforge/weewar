@@ -39,7 +39,47 @@ components help with lifecycled loading, eventbuses, structured pages and DOM ma
 
 ## Integration Capabilities
 
-*   **HTMX**: Component hydration support for server-driven UI updates  
+*   **HTMX**: Component hydration support for server-driven UI updates
 *   **Toast/Modal Systems**: User feedback and interaction patterns
 *   **Theme Management**: Coordinated theming across component boundaries
+
+## Responsive UI Patterns (BasePage.ts)
+
+### Responsive Header Menu System
+
+**Purpose**: Provides adaptive menu behavior for header action buttons across all pages
+
+**Implementation** (`initializeHeaderActionsDropdown()`):
+- Detects screen width using 768px breakpoint (matches Tailwind `md:`)
+- Clones buttons with `header-action-btn` class from source container
+- Mobile (<768px): Opens animated drawer below header
+- Desktop (≥768px): Opens traditional dropdown menu
+
+**Mobile Drawer Features**:
+- Full-screen overlay with backdrop (z-index 60)
+- Slide-down animation (300ms, ease-out)
+- Positioned at `top: 70px` (below header)
+- Backdrop fade: opacity 0 → 0.5
+- Maintains button styling (full-width layout)
+- Closes on backdrop click or Escape key
+
+**Desktop Dropdown Features**:
+- Compact list-style menu
+- Positioned below trigger button
+- Hover effects on items
+- Outside-click dismissal
+
+**Animation Technique**:
+- Uses `requestAnimationFrame` for smooth transitions
+- Transform: `-translate-y-full` → `translate-y-0`
+- Delayed cleanup (300ms) after close animation completes
+- Prevents jarring visibility changes
+
+**Why This Approach**:
+- **Overflow Safety**: Drawer escapes `overflow:hidden` constraints common on mobile
+- **Platform Consistency**: Drawer pattern standard on mobile, dropdown on desktop
+- **Universal**: Works across all pages without page-specific modifications
+- **Accessible**: Keyboard navigation (Escape), backdrop dismissal
+
+**Usage**: Any page using Header.html automatically gets responsive menu behavior
 

@@ -2,6 +2,29 @@
 
 All notable changes to the WeeWar project are documented in this file.
 
+## [Unreleased] - 2025-01-05
+
+### 🎨 MOBILE UI IMPROVEMENTS
+
+#### Responsive Header Menu System
+- **NEW**: Adaptive menu behavior - drawer for mobile (<768px), dropdown for desktop (≥768px)
+- **NEW**: Animated mobile drawer below header with slide-down/up transitions (300ms, ease-out)
+- **NEW**: Full-screen backdrop with fade animation (opacity 0 → 0.5)
+- **FIX**: Overflow clipping issues on mobile - drawer positioned at z-index 60, escapes constraints
+- **IMPROVED**: Universal implementation in Header.html - works across all pages automatically
+- **IMPROVED**: Keyboard accessibility - Escape key dismisses drawer/dropdown
+
+#### Template Fixes
+- **FIX**: TurnOptionsPanel transparent background - added missing h4 title and inner content div wrapper
+- **FIX**: Toast positioning on mobile - moved from bottom: 1rem to bottom: 5rem to avoid bottom navigation bar
+
+#### Files Modified
+- `web/templates/Header.html` - Added drawer overlay structure with animations
+- `web/lib/BasePage.ts` - Implemented responsive menu detection and animation handling
+- `web/templates/GameViewerPageMobile.html` - Added header-action-btn class to End Turn button
+- `web/templates/TurnOptionsPanel.templar.html` - Fixed template structure to match other panels
+- `web/templates/ToastContainer.html` - Added media query for mobile positioning
+
 ## [7.0.0] - 2025-01-29
 
 ### 🎯 ACTION PROGRESSION SYSTEM REFACTOR ✅

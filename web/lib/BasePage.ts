@@ -143,61 +143,135 @@ export abstract class BasePage extends BaseComponent {
     }
 
     /**
-     * Initialize responsive header actions dropdown for mobile
+     * Initialize responsive header actions menu (drawer for mobile, dropdown for desktop)
      */
     protected initializeHeaderActionsDropdown(): void {
         const menuBtn = document.getElementById('header-actions-menu-btn');
         const dropdown = document.getElementById('header-actions-dropdown');
-        const dropdownContent = document.getElementById('header-actions-dropdown-content');
+        const drawer = document.getElementById('header-actions-drawer');
         const sourceContainer = document.getElementById('header-buttons-source');
 
-        if (!menuBtn || !dropdown || !dropdownContent || !sourceContainer) {
+        if (!menuBtn || !sourceContainer) {
             return; // Elements don't exist on this page
         }
 
-        // Clone buttons from source into dropdown with dropdown styling
-        const buttons = sourceContainer.querySelectorAll('.header-action-btn');
-        buttons.forEach((button) => {
-            const clone = button.cloneNode(true) as HTMLElement;
+        // Tailwind md: breakpoint is 768px
+        const MOBILE_BREAKPOINT = 768;
+        const isMobile = () => window.innerWidth < MOBILE_BREAKPOINT;
 
-            // Convert to dropdown item styling
-            clone.classList.remove('px-4', 'py-2', 'rounded-md', 'shadow-sm', 'border', 'border-transparent', 'border-gray-300', 'dark:border-gray-600');
-            clone.classList.add('w-full', 'text-left', 'px-4', 'py-2', 'text-sm', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'flex', 'items-center');
+        // Setup dropdown (desktop)
+        if (dropdown) {
+            const dropdownContent = dropdown.querySelector('#header-actions-dropdown-content') as HTMLElement;
+            if (dropdownContent) {
+                // Clone buttons from source into dropdown with dropdown styling
+                const buttons = sourceContainer.querySelectorAll('.header-action-btn');
+                buttons.forEach((button) => {
+                    const clone = button.cloneNode(true) as HTMLElement;
 
-            // Remove bg colors and use hover instead
-            clone.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700', 'bg-white', 'dark:bg-gray-700', 'hover:bg-gray-50', 'dark:hover:bg-gray-600');
-            clone.classList.add('text-gray-700', 'dark:text-gray-200');
+                    // Convert to dropdown item styling
+                    clone.classList.remove('px-4', 'py-2', 'rounded-md', 'shadow-sm', 'border', 'border-transparent', 'border-gray-300', 'dark:border-gray-600');
+                    clone.classList.add('w-full', 'text-left', 'px-4', 'py-2', 'text-sm', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'flex', 'items-center');
 
-            dropdownContent.appendChild(clone);
-        });
+                    // Remove bg colors and use hover instead
+                    clone.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700', 'bg-white', 'dark:bg-gray-700', 'hover:bg-gray-50', 'dark:hover:bg-gray-600');
+                    clone.classList.add('text-gray-700', 'dark:text-gray-200');
 
-        // Toggle dropdown
-        const toggleDropdown = () => {
-            dropdown.classList.toggle('hidden');
-        };
+                    dropdownContent.appendChild(clone);
+                });
+            }
+        }
 
-        // Close dropdown
-        const closeDropdown = () => {
-            dropdown.classList.add('hidden');
-        };
+        // Setup drawer (mobile)
+        if (drawer) {
+            const drawerContent = drawer.querySelector('#header-actions-drawer-content') as HTMLElement;
+            const drawerContainer = drawer.querySelector('.header-drawer-container') as HTMLElement;
+            const drawerBackdrop = drawer.querySelector('.header-drawer-backdrop') as HTMLElement;
 
-        // Event listeners
+            if (drawerContent) {
+                // Clone buttons from source into drawer with drawer styling
+                const buttons = sourceContainer.querySelectorAll('.header-action-btn');
+                buttons.forEach((button) => {
+                    const clone = button.cloneNode(true) as HTMLElement;
+
+                    // Keep button styling but make full width
+                    clone.classList.add('w-full', 'justify-center');
+
+                    drawerContent.appendChild(clone);
+                });
+            }
+
+            // Drawer open/close with animation
+            const openDrawer = () => {
+                drawer.classList.remove('hidden');
+                // Trigger reflow to ensure animation plays
+                void drawer.offsetHeight;
+                requestAnimationFrame(() => {
+                    drawerBackdrop.classList.remove('opacity-0');
+                    drawerBackdrop.classList.add('bg-opacity-50');
+                    drawerContainer.classList.remove('-translate-y-full');
+                    drawerContainer.classList.add('translate-y-0');
+                });
+            };
+
+            const closeDrawer = () => {
+                drawerBackdrop.classList.remove('bg-opacity-50');
+                drawerBackdrop.classList.add('opacity-0');
+                drawerContainer.classList.remove('translate-y-0');
+                drawerContainer.classList.add('-translate-y-full');
+
+                // Wait for animation to complete before hiding
+                setTimeout(() => {
+                    drawer.classList.add('hidden');
+                }, 300); // Match duration-300 in CSS
+            };
+
+            if (drawerBackdrop) {
+                drawerBackdrop.addEventListener('click', closeDrawer);
+            }
+
+            // Store functions for use in toggle handler
+            (drawer as any)._openDrawer = openDrawer;
+            (drawer as any)._closeDrawer = closeDrawer;
+        }
+
+        // Toggle menu button handler
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleDropdown();
-        });
 
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (!dropdown.classList.contains('hidden') && !dropdown.contains(e.target as Node)) {
-                closeDropdown();
+            if (isMobile()) {
+                // Use drawer on mobile
+                if (drawer) {
+                    const isOpen = !drawer.classList.contains('hidden');
+                    if (isOpen) {
+                        (drawer as any)._closeDrawer();
+                    } else {
+                        (drawer as any)._openDrawer();
+                    }
+                }
+            } else {
+                // Use dropdown on desktop
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                }
             }
         });
 
-        // Close on escape key
+        // Close handlers
+        document.addEventListener('click', (e) => {
+            // Close dropdown if open and clicked outside
+            if (dropdown && !dropdown.classList.contains('hidden') && !dropdown.contains(e.target as Node)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !dropdown.classList.contains('hidden')) {
-                closeDropdown();
+            if (e.key === 'Escape') {
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                }
+                if (drawer && !drawer.classList.contains('hidden')) {
+                    (drawer as any)._closeDrawer();
+                }
             }
         });
     }

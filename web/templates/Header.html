@@ -46,7 +46,7 @@
     </div>
 
     <!-- Mobile: Dropdown Menu Button -->
-    <div class="relative md:hidden">
+    <div class="md:hidden">
       <button
         id="header-actions-menu-btn"
         type="button"
@@ -57,16 +57,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
       </button>
-
-      <!-- Dropdown Menu -->
-      <div
-        id="header-actions-dropdown"
-        class="hidden absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-50"
-      >
-        <div class="py-1" id="header-actions-dropdown-content">
-          <!-- Buttons will be cloned here by JS -->
-        </div>
-      </div>
     </div>
 
     <!-- Theme Toggle Button -->
@@ -87,4 +77,29 @@
     {{ block "ExtraHeaderButtons" . }} {{ end }}
   </div>
 </header>
+
+<!-- Mobile Header Dropdown Menu (outside header to avoid clipping) -->
+<div
+  id="header-actions-dropdown"
+  class="hidden fixed w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-50"
+>
+  <div class="py-1" id="header-actions-dropdown-content">
+    <!-- Buttons will be cloned here by JS -->
+  </div>
+</div>
+
+<!-- Mobile Header Actions Drawer (for narrow screens with overflow constraints) -->
+<div id="header-actions-drawer" class="hidden fixed inset-0 z-[60]">
+  <!-- Backdrop -->
+  <div class="header-drawer-backdrop absolute inset-0 bg-black transition-opacity duration-300 opacity-0"></div>
+
+  <!-- Drawer Container - positioned below header -->
+  <div class="header-drawer-container absolute left-0 right-0 bg-white dark:bg-gray-800 shadow-2xl border-b border-gray-200 dark:border-gray-700 transform -translate-y-full transition-transform duration-300 ease-out" style="top: 70px;">
+    <!-- Drawer Content -->
+    <div class="p-4 space-y-2 max-h-[calc(100vh-70px)] overflow-y-auto" id="header-actions-drawer-content">
+      <!-- Buttons will be cloned here by JS -->
+    </div>
+  </div>
+</div>
+
 {{ end }}

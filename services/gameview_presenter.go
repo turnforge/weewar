@@ -500,8 +500,8 @@ func (s *GameViewPresenter) executeMovementAction(ctx context.Context, game *v1.
 
 	fmt.Println("[Presenter] Move executed successfully")
 
-	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults)
+	// Apply other incremental updates (skip UnitMoved animations since we handled above)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults, gameMove)
 
 	return nil
 }
@@ -522,7 +522,7 @@ func (s *GameViewPresenter) executeBuildAction(ctx context.Context, game *v1.Gam
 	s.BuildOptionsModal.Hide(ctx)
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults, gameMove)
 }
 
 func (s *GameViewPresenter) executeEndTurnAction(ctx context.Context, game *v1.Game, gameState *v1.GameState) {
@@ -549,11 +549,11 @@ func (s *GameViewPresenter) executeEndTurnAction(ctx context.Context, game *v1.G
 	fmt.Printf("[Presenter] Turn ended, new current player: %d\n", gameState.CurrentPlayer)
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults, gameMove)
 }
 
 // applyIncrementalChanges processes WorldChange objects and calls incremental browser update methods
-func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v1.Game, gameState *v1.GameState, moveResults []*v1.GameMoveResult) {
+func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v1.Game, gameState *v1.GameState, moveResults []*v1.GameMoveResult, gameMove *v1.GameMove) {
 	// Clear selection and highlights
 	s.clearHighlightsAndSelection(ctx)
 	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
@@ -569,11 +569,55 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 						{Q: prevUnit.Q, R: prevUnit.R},
 						{Q: updatedUnit.Q, R: updatedUnit.R},
 					}
-					// Animate unit movement
+					unitMoved := changeType.UnitMoved
+					if gameMove != nil {
+						moveAction := gameMove.GetMoveUnit()
+						coords := ExtractPathCoords(moveAction.ReconstructedPath)
+						path = []*v1.HexCoord{}
+						for i := 0; i < len(coords); i += 2 {
+							path = append(path, &v1.HexCoord{Q: coords[i], R: coords[i+1]})
+						}
+						/*
+							// If this was a move action with a reconstructed path, animate it with the full path
+							// Build full path from reconstructed_path if available
+							if moveAction.ReconstructedPath != nil && len(moveAction.ReconstructedPath.Edges) > 0 {
+								// Extract coordinates from path edges
+								path = make([]*v1.HexCoord, 0, len(moveAction.ReconstructedPath.Edges)+1)
+								// Add starting point
+								path = append(path, &v1.HexCoord{
+									Q: moveAction.ReconstructedPath.Edges[0].FromQ,
+									R: moveAction.ReconstructedPath.Edges[0].FromR,
+								})
+								// Add each destination along the path
+								for _, edge := range moveAction.ReconstructedPath.Edges {
+									path = append(path, &v1.HexCoord{
+										Q: edge.ToQ,
+										R: edge.ToR,
+									})
+								}
+							} else {
+								// Fallback to simple 2-point path
+								path = []*v1.HexCoord{
+									{Q: moveAction.FromQ, R: moveAction.FromR},
+									{Q: moveAction.ToQ, R: moveAction.ToR},
+								}
+							}
+						*/
+					}
+
+					// Animate the movement with full path
 					s.GameScene.MoveUnit(ctx, &v1.MoveUnitRequest{
-						Unit: updatedUnit,
+						Unit: unitMoved.UpdatedUnit,
 						Path: path,
 					})
+
+					/*
+						// Animate unit movement
+						s.GameScene.MoveUnit(ctx, &v1.MoveUnitRequest{
+							Unit: updatedUnit,
+							Path: path,
+						})
+					*/
 				}
 
 			case *v1.WorldChange_UnitDamaged:
@@ -654,7 +698,7 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 }
 
 // refreshExhaustedHighlights updates the exhausted highlights for all units with no movement points
-func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, game *v1.Game, gameState *v1.GameState) {
+func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, _ *v1.Game, gameState *v1.GameState) {
 	// Build list of exhausted units/tiles
 	var exhaustedHighlights []*v1.HighlightSpec
 
@@ -679,4 +723,3 @@ func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, game
 		})
 	}
 }
-

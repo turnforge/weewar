@@ -355,6 +355,9 @@
 - [x] Responsive header menu system with drawer/dropdown switching (2025-01-05)
 - [x] Animated mobile drawer below header with backdrop fade (2025-01-05)
 - [x] Toast positioning adjusted for mobile bottom bars (2025-01-05)
+- [x] Single global drawer with CSS positioning (no DOM manipulation) (2025-01-05)
+- [x] Event listeners preserved on all header buttons (End Turn, Undo, Screenshot) (2025-01-05)
+- [x] Consistent button content across all GameViewer page variants (2025-01-05)
 
 **Remaining Tasks**:
 - [x] GameViewerPageMobile with bottom drawer system (2025-11-04)

@@ -40,24 +40,17 @@
 
   <!-- Action Buttons -->
   <div class="flex items-center space-x-2">
-    <!-- Desktop: Show buttons directly -->
-    <div id="header-buttons-desktop" class="hidden md:flex items-center space-x-2">
-      {{ block "ExtraHeaderButtons" . }} {{ end }}
-    </div>
-
-    <!-- Mobile: Dropdown Menu Button -->
-    <div class="md:hidden">
-      <button
-        id="header-actions-menu-btn"
-        type="button"
-        class="p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-        aria-label="Page actions"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-        </svg>
-      </button>
-    </div>
+    <!-- Menu Button (shows drawer on mobile, hides on desktop) -->
+    <button
+      id="header-actions-menu-btn"
+      type="button"
+      class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+      aria-label="Page actions"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+      </svg>
+    </button>
 
     <!-- Theme Toggle Button -->
     <button
@@ -71,35 +64,140 @@
       </span>
     </button>
   </div>
-
-  <!-- Hidden container for header buttons (used by JS to clone into dropdown) -->
-  <div id="header-buttons-source" class="hidden">
-    {{ block "ExtraHeaderButtons" . }} {{ end }}
-  </div>
 </header>
 
-<!-- Mobile Header Dropdown Menu (outside header to avoid clipping) -->
-<div
-  id="header-actions-dropdown"
-  class="hidden fixed w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-50"
->
-  <div class="py-1" id="header-actions-dropdown-content">
-    <!-- Buttons will be cloned here by JS -->
-  </div>
-</div>
+<!-- Header Actions Drawer - Global container positioned via CSS -->
+<div id="header-actions-drawer" class="fixed z-[60] hidden">
+  <!-- Backdrop (mobile only) -->
+  <div class="header-drawer-backdrop absolute inset-0 transition-opacity duration-300 md:hidden"></div>
 
-<!-- Mobile Header Actions Drawer (for narrow screens with overflow constraints) -->
-<div id="header-actions-drawer" class="hidden fixed inset-0 z-[60]">
-  <!-- Backdrop -->
-  <div class="header-drawer-backdrop absolute inset-0 bg-black transition-opacity duration-300 opacity-0"></div>
-
-  <!-- Drawer Container - positioned below header -->
-  <div class="header-drawer-container absolute left-0 right-0 bg-white dark:bg-gray-800 shadow-2xl border-b border-gray-200 dark:border-gray-700 transform -translate-y-full transition-transform duration-300 ease-out" style="top: 70px;">
+  <!-- Drawer Container -->
+  <div class="header-drawer-container bg-white dark:bg-gray-800 transition-transform duration-300 ease-out">
     <!-- Drawer Content -->
-    <div class="p-4 space-y-2 max-h-[calc(100vh-70px)] overflow-y-auto" id="header-actions-drawer-content">
-      <!-- Buttons will be cloned here by JS -->
+    <div class="header-actions-drawer-content p-4 space-y-2">
+      {{ block "ExtraHeaderButtons" . }} {{ end }}
     </div>
   </div>
 </div>
+
+<style>
+/* Desktop: Drawer appears inline with header */
+@media (min-width: 768px) {
+  #header-actions-drawer {
+    position: absolute;
+    top: 0;
+    right: 60px; /* Space for theme toggle */
+    height: 70px;
+    width: auto;
+    z-index: 10;
+  }
+
+  #header-actions-drawer .header-drawer-container {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    transform: none;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  #header-actions-drawer .header-actions-drawer-content {
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    height: 100%;
+  }
+
+  /* Hide backdrop on desktop */
+  #header-actions-drawer .header-drawer-backdrop {
+    display: none;
+  }
+
+  /* Show drawer always on desktop */
+  #header-actions-drawer {
+    display: block !important;
+  }
+}
+
+/* Mobile: Drawer slides from top */
+@media (max-width: 767px) {
+  #header-actions-drawer {
+    inset: 0;
+  }
+
+  #header-actions-drawer.hidden {
+    pointer-events: none;
+  }
+
+  #header-actions-drawer.open {
+    pointer-events: auto;
+  }
+
+  #header-actions-drawer .header-drawer-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 70px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid;
+    @apply border-gray-200 dark:border-gray-700;
+    transform: translateY(-100%);
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+
+  #header-actions-drawer.open .header-drawer-container {
+    transform: translateY(0);
+  }
+
+  #header-actions-drawer .header-drawer-backdrop {
+    opacity: 0;
+  }
+
+  #header-actions-drawer.open .header-drawer-backdrop {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Stack buttons vertically in drawer, full width */
+  #header-actions-drawer .header-actions-drawer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Override the wrapper div to stack vertically on mobile */
+  #header-actions-drawer .header-actions-drawer-content > div {
+    display: flex;
+    flex-direction: column !important;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  /* Remove horizontal spacing from wrapper */
+  #header-actions-drawer .header-actions-drawer-content > div.space-x-2 {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  #header-actions-drawer .header-actions-drawer-content > div.space-x-2 > * {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  #header-actions-drawer .header-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Hide non-button elements in mobile drawer (like player display, turn counter) */
+  #header-actions-drawer .header-actions-drawer-content > div > div:not(.header-action-btn):not(button) {
+    display: none;
+  }
+}
+</style>
 
 {{ end }}

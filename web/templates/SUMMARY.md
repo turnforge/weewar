@@ -325,13 +325,22 @@ updateScene(state); // TypeScript updates Phaser or DOM
 {{ end }}
 ```
 
+**Architecture (Updated 2025-01-05):**
+- Single global drawer (Header.html) positioned via CSS - no DOM manipulation
+- Desktop (≥768px): Drawer positioned absolutely inline with header, always visible
+- Mobile (<768px): Drawer slides down from top when "..." button clicked
+- Buttons remain in drawer permanently - event listeners never lost
+- CSS handles all responsive positioning - JavaScript only toggles visibility
+
 **Technical Details:**
 - Breakpoint: 768px (matches Tailwind `md:` breakpoint)
 - Drawer z-index: 60 (above all content)
-- Drawer animation: `transform -translate-y-full` → `translate-y-0`
-- Backdrop animation: `opacity-0 bg-black` → `bg-opacity-50`
-- Event handling: `requestAnimationFrame` for smooth transitions
-- Cleanup: 300ms delay before hiding to complete animation
+- Desktop: `position: absolute; right: 60px; top: 0;` (inline with header)
+- Mobile: `position: fixed; inset: 0;` with `top: 70px` container
+- Drawer animation: `transform: translateY(-100%)` → `translateY(0)` (300ms)
+- Backdrop animation: `opacity: 0` → `opacity: 1; background: rgba(0,0,0,0.5)` (300ms)
+- Event handling: `requestAnimationFrame` for smooth open, 300ms delay for close
+- Button stacking: Horizontal on desktop, vertical on mobile (CSS flex-direction)
 
 **Why Drawer for Mobile:**
 - Avoids overflow:hidden clipping issues on mobile layouts

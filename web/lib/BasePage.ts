@@ -143,135 +143,58 @@ export abstract class BasePage extends BaseComponent {
     }
 
     /**
-     * Initialize responsive header actions menu (drawer for mobile, dropdown for desktop)
+     * Initialize responsive header actions drawer
+     * On desktop: drawer is always visible, positioned inline with header
+     * On mobile: drawer slides down from top when menu button is clicked
      */
     protected initializeHeaderActionsDropdown(): void {
         const menuBtn = document.getElementById('header-actions-menu-btn');
-        const dropdown = document.getElementById('header-actions-dropdown');
         const drawer = document.getElementById('header-actions-drawer');
-        const sourceContainer = document.getElementById('header-buttons-source');
 
-        if (!menuBtn || !sourceContainer) {
+        if (!menuBtn || !drawer) {
             return; // Elements don't exist on this page
         }
 
-        // Tailwind md: breakpoint is 768px
-        const MOBILE_BREAKPOINT = 768;
-        const isMobile = () => window.innerWidth < MOBILE_BREAKPOINT;
+        const drawerBackdrop = drawer.querySelector('.header-drawer-backdrop') as HTMLElement;
 
-        // Setup dropdown (desktop)
-        if (dropdown) {
-            const dropdownContent = dropdown.querySelector('#header-actions-dropdown-content') as HTMLElement;
-            if (dropdownContent) {
-                // Clone buttons from source into dropdown with dropdown styling
-                const buttons = sourceContainer.querySelectorAll('.header-action-btn');
-                buttons.forEach((button) => {
-                    const clone = button.cloneNode(true) as HTMLElement;
+        // Open drawer with animation
+        const openDrawer = () => {
+            drawer.classList.remove('hidden');
+            // Trigger reflow to ensure animation plays
+            void drawer.offsetHeight;
+            requestAnimationFrame(() => {
+                drawer.classList.add('open');
+            });
+        };
 
-                    // Convert to dropdown item styling
-                    clone.classList.remove('px-4', 'py-2', 'rounded-md', 'shadow-sm', 'border', 'border-transparent', 'border-gray-300', 'dark:border-gray-600');
-                    clone.classList.add('w-full', 'text-left', 'px-4', 'py-2', 'text-sm', 'hover:bg-gray-100', 'dark:hover:bg-gray-700', 'flex', 'items-center');
+        // Close drawer with animation
+        const closeDrawer = () => {
+            drawer.classList.remove('open');
+            // Wait for animation to complete before hiding
+            setTimeout(() => {
+                drawer.classList.add('hidden');
+            }, 300); // Match duration-300 in CSS
+        };
 
-                    // Remove bg colors and use hover instead
-                    clone.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700', 'bg-white', 'dark:bg-gray-700', 'hover:bg-gray-50', 'dark:hover:bg-gray-600');
-                    clone.classList.add('text-gray-700', 'dark:text-gray-200');
-
-                    dropdownContent.appendChild(clone);
-                });
-            }
-        }
-
-        // Setup drawer (mobile)
-        if (drawer) {
-            const drawerContent = drawer.querySelector('#header-actions-drawer-content') as HTMLElement;
-            const drawerContainer = drawer.querySelector('.header-drawer-container') as HTMLElement;
-            const drawerBackdrop = drawer.querySelector('.header-drawer-backdrop') as HTMLElement;
-
-            if (drawerContent) {
-                // Clone buttons from source into drawer with drawer styling
-                const buttons = sourceContainer.querySelectorAll('.header-action-btn');
-                buttons.forEach((button) => {
-                    const clone = button.cloneNode(true) as HTMLElement;
-
-                    // Keep button styling but make full width
-                    clone.classList.add('w-full', 'justify-center');
-
-                    drawerContent.appendChild(clone);
-                });
-            }
-
-            // Drawer open/close with animation
-            const openDrawer = () => {
-                drawer.classList.remove('hidden');
-                // Trigger reflow to ensure animation plays
-                void drawer.offsetHeight;
-                requestAnimationFrame(() => {
-                    drawerBackdrop.classList.remove('opacity-0');
-                    drawerBackdrop.classList.add('bg-opacity-50');
-                    drawerContainer.classList.remove('-translate-y-full');
-                    drawerContainer.classList.add('translate-y-0');
-                });
-            };
-
-            const closeDrawer = () => {
-                drawerBackdrop.classList.remove('bg-opacity-50');
-                drawerBackdrop.classList.add('opacity-0');
-                drawerContainer.classList.remove('translate-y-0');
-                drawerContainer.classList.add('-translate-y-full');
-
-                // Wait for animation to complete before hiding
-                setTimeout(() => {
-                    drawer.classList.add('hidden');
-                }, 300); // Match duration-300 in CSS
-            };
-
-            if (drawerBackdrop) {
-                drawerBackdrop.addEventListener('click', closeDrawer);
-            }
-
-            // Store functions for use in toggle handler
-            (drawer as any)._openDrawer = openDrawer;
-            (drawer as any)._closeDrawer = closeDrawer;
-        }
-
-        // Toggle menu button handler
+        // Toggle drawer (mobile only - desktop drawer is always visible via CSS)
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-
-            if (isMobile()) {
-                // Use drawer on mobile
-                if (drawer) {
-                    const isOpen = !drawer.classList.contains('hidden');
-                    if (isOpen) {
-                        (drawer as any)._closeDrawer();
-                    } else {
-                        (drawer as any)._openDrawer();
-                    }
-                }
+            if (drawer.classList.contains('open')) {
+                closeDrawer();
             } else {
-                // Use dropdown on desktop
-                if (dropdown) {
-                    dropdown.classList.toggle('hidden');
-                }
+                openDrawer();
             }
         });
 
-        // Close handlers
-        document.addEventListener('click', (e) => {
-            // Close dropdown if open and clicked outside
-            if (dropdown && !dropdown.classList.contains('hidden') && !dropdown.contains(e.target as Node)) {
-                dropdown.classList.add('hidden');
-            }
-        });
+        // Close drawer when backdrop is clicked (mobile only)
+        if (drawerBackdrop) {
+            drawerBackdrop.addEventListener('click', closeDrawer);
+        }
 
+        // Close drawer on Escape key (mobile only)
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (dropdown && !dropdown.classList.contains('hidden')) {
-                    dropdown.classList.add('hidden');
-                }
-                if (drawer && !drawer.classList.contains('hidden')) {
-                    (drawer as any)._closeDrawer();
-                }
+            if (e.key === 'Escape' && drawer.classList.contains('open')) {
+                closeDrawer();
             }
         });
     }

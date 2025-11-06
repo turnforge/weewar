@@ -302,11 +302,16 @@ export class ReferenceImageLayer extends BaseLayer {
             return false;
         }
 
-        const imageBlob = await this.imageDB.getImage(this.worldId);
-        if (imageBlob) {
-            const imageUrl = URL.createObjectURL(imageBlob);
+        const record = await this.imageDB.getImageRecord(this.worldId);
+        if (record) {
+            const imageUrl = URL.createObjectURL(record.imageBlob);
             this.setReferenceImage(imageUrl);
-            console.log('[ReferenceImageLayer] Loaded reference image from storage');
+
+            // Always set to background mode when restoring
+            // (Hidden is inconvenient, Overlay risks accidental scale/position changes)
+            this.setReferenceMode(1); // 1 = background
+            console.log('[ReferenceImageLayer] Restored reference image in background mode');
+
             return true;
         }
 

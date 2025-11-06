@@ -96,11 +96,11 @@ export class ReferenceImageDB {
     }
 
     /**
-     * Get the reference image for a world
+     * Get the reference image record for a world
      * @param worldId The world ID
-     * @returns The image blob, or null if not found
+     * @returns The full record with blob and metadata, or null if not found
      */
-    async getImage(worldId: string): Promise<Blob | null> {
+    async getImageRecord(worldId: string): Promise<ReferenceImageRecord | null> {
         if (!this.isAvailable || !this.db) {
             console.warn('[ReferenceImageDB] IndexedDB not available, cannot get image');
             return null;
@@ -110,7 +110,7 @@ export class ReferenceImageDB {
             const record = await this.getRecord(worldId);
             if (record) {
                 console.log(`[ReferenceImageDB] Retrieved reference image for world ${worldId}`);
-                return record.imageBlob;
+                return record;
             }
             return null;
         } catch (error) {

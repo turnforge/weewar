@@ -301,9 +301,28 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - Scene events bridge layer changes to EventBus for UI synchronization
 - Guard conditions in ReferenceImagePanel prevent circular updates from programmatic input.value changes
 
+### Recent Achievements (Session 2025-01-06)
+
+#### UI Fixes and Panel Scrolling (Complete)
+- **WorldListingPage Navigation Fix**: Disabled HTMX in-place updates for search filters to fix splash screen issue
+  - Changed WorldFilterPanel HtmxEnabled parameter from true to false
+  - Search and sort controls now perform full page redirects instead of partial updates
+  - Added JavaScript handlers (handleSearchChange, handleSortChange) for non-HTMX navigation
+  - Splash screen now properly dismisses after view switching
+- **Panel Scrolling Fix**: Fixed vertical scrolling in WorldEditorPage dockview panels
+  - Added `style="height: 100%"` to all panel wrapper divs in WorldEditorPage.html
+  - Fixed: ToolsPanel, GameConfigPanel, ReferenceImagePanel, WorldStatsPanel, TileStatsPanel, TerrainStatsPanel
+  - Added `overflow-y-auto` to WorldStatsPanel and TileStatsPanel content
+  - Panels now properly constrain to parent height and scroll when content exceeds available space
+
+**Architecture**:
+- Panel wrappers must have `height: 100%` to properly constrain children in dockview
+- Panel content divs need `h-full max-h-full overflow-y-auto` for proper scrolling
+- Following same pattern as GameViewerPage panels (TurnOptionsPanel, etc.)
+
 ## Status
-**Current Version**: 8.9 (Reference Image Layer System)
-**Status**: Production-ready with complete world editor reference image overlay system
+**Current Version**: 8.10 (UI Polish and Panel Scrolling Fixes)
+**Status**: Production-ready with improved navigation and fixed panel scrolling
 **Build Status**: Clean compilation with all TypeScript errors resolved
 **Testing**: Jest (unit) + Playwright (e2e) with command interface and persistent test worlds
 **Architecture**: Flexible AssetProvider system with presenter-driven animation framework and layer-based interaction system

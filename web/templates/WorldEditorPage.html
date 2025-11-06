@@ -2,9 +2,10 @@
 {{# include "BasePage.html" #}}
 {{# include "TerrainStatsPanel.html" #}}
 {{# include "WorldStatsPanel.html" #}}
+{{# include "panels/ToolsPanel.html" #}}
 {{# include "panels/WorldEditorPageScenePanel.html" #}}
 {{# include "panels/ConsolePanel.html" #}}
-{{# include "panels/AdvancedToolsPanel.html" #}}
+{{# include "panels/GameConfigPanel.html" #}}
 {{# include "panels/ReferenceImagePanel.html" #}}
 
 {{ define "ExtraHeaderButtons" }}
@@ -134,19 +135,19 @@
         
         <!-- Hidden Panel Templates for Dockview -->
         <div style="display: none;">
-            <div id="tools-panel-template"> {{ template "ToolsPanel" . }} </div>
+            <div id="tools-panel-template" style="height: 100%;"> {{ template "ToolsPanel" . }} </div>
             <div id="canvas-panel-template" style="height: 100%;"> {{ template "WorldEditorPageScenePanel" . }} </div>
             {{/* <div id="console-panel-template"> {{ template "ConsolePanel" . }} </div> */}}
-            <div id="advanced-tools-panel-template"> {{ template "AdvancedToolsPanel" . }} </div>
-            <div id="reference-image-panel-template"> {{ template "ReferenceImagePanel" . }} </div>
-            <div id="tilestats-panel-template">
-                <div class="tilestats-panel w-full h-full p-4">
+            <div id="game-config-panel-template" style="height: 100%;"> {{ template "GameConfigPanel" . }} </div>
+            <div id="reference-image-panel-template" style="height: 100%;"> {{ template "ReferenceImagePanel" . }} </div>
+            <div id="tilestats-panel-template" style="height: 100%;">
+                <div class="tilestats-panel w-full h-full p-4 overflow-y-auto">
                     <!-- TileStatsPanel content will be rendered here -->
                 </div>
             </div>
-            <div id="terrain-stats-panel-template" style="display: none;"> {{ template "TerrainStatsPanel" . }} </div>
-            {{ template "WorldStatsPanel" . }}
-            <div id="worldstats-panel-template">
+            <div id="terrain-stats-panel-template" style="height: 100%;"> {{ template "TerrainStatsPanel" . }} </div>
+            <div id="worldstats-panel-template" style="height: 100%;">
+                {{ template "WorldStatsPanel" . }}
             </div>
         </div>
         

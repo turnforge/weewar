@@ -14,10 +14,12 @@ class WorldListingPage {
      * Initialize page
      */
     private init(): void {
-        // Dismiss splash screen once page is ready
-        SplashScreen.dismiss();
+        // Page-specific initialization
     }
 }
+
+// Dismiss splash screen immediately when script loads (defer ensures DOM is ready)
+SplashScreen.dismiss();
 
 // Initialize the WorldListingPage when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {

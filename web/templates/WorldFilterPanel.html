@@ -62,4 +62,25 @@
     </a>
     {{ end }}
 </div>
+
+{{ if not .HtmxEnabled }}
+<script>
+function handleSearchChange(input) {
+    const url = new URL(window.location.href);
+    const value = input.value.trim();
+    if (value) {
+        url.searchParams.set('q', value);
+    } else {
+        url.searchParams.delete('q');
+    }
+    window.location.href = url.toString();
+}
+
+function handleSortChange(select) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', select.value);
+    window.location.href = url.toString();
+}
+</script>
+{{ end }}
 {{ end }}

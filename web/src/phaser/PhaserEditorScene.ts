@@ -122,8 +122,8 @@ export class PhaserEditorScene extends PhaserWorldScene {
             if (!this.isInShapeDrawingMode || !this.currentShapeTool) return;
 
             if (event.key === 'Escape') {
-                // Cancel shape drawing
-                this.exitShapeMode();
+                // Cancel current shape but stay in shape mode
+                this.cancelCurrentShape();
             } else if (event.key === 'Enter' && this.currentShapeTool.requiresKeyboardConfirm()) {
                 // Complete shape if it requires keyboard confirmation (polygon, path, etc.)
                 if (this.currentShapeTool.canComplete()) {
@@ -578,6 +578,18 @@ export class PhaserEditorScene extends PhaserWorldScene {
 
     /**
      * Exit shape drawing mode (cancel current shape)
+     * Escape behavior: Cancel the current shape being drawn but stay in rectangle mode
+     */
+    private cancelCurrentShape(): void {
+        // Reset the current shape but keep the tool active
+        if (this.currentShapeTool) {
+            this.currentShapeTool.reset();
+        }
+        this.clearShapePreview();
+    }
+
+    /**
+     * Exit shape drawing mode completely (disables tool)
      */
     private exitShapeMode(): void {
         this.isInShapeDrawingMode = false;
@@ -616,5 +628,18 @@ export class PhaserEditorScene extends PhaserWorldScene {
                 this.world.removeUnitAt(q, r);
             }
         }
+    }
+
+    /**
+     * Override handleTap to prevent tile painting during shape mode
+     */
+    protected override handleTap(pointer: Phaser.Input.Pointer): void {
+        // Block tile painting when in shape mode
+        if (this.isInShapeDrawingMode) {
+            return; // Don't call parent handleTap
+        }
+
+        // Otherwise, call parent to handle normal tile painting
+        super.handleTap(pointer);
     }
 }

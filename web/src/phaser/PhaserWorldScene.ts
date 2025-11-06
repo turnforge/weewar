@@ -61,7 +61,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     protected panSpeed: number = 100;
 
     // Layer system for managing overlays and interactions
-    protected layerManager: LayerManager | null = null;
+    protected layerManager: LayerManager;
     protected baseMapLayer: BaseMapLayer | null = null;
     protected exhaustedUnitsLayer: ExhaustedUnitsHighlightLayer | null = null;
 
@@ -78,7 +78,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private assetsReadyResolver: (() => void) | null = null;
     
     // Camera drag zone
-    private dragZone: Phaser.GameObjects.Zone | null = null;
+    protected dragZone: Phaser.GameObjects.Zone | null = null;
     
     // Asset provider for loading and managing textures
     private assetProvider: AssetProvider;
@@ -440,7 +440,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         // Clean up layer system
         if (this.layerManager) {
             this.layerManager.destroy();
-            this.layerManager = null;
         }
         this.baseMapLayer = null;
         

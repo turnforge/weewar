@@ -397,7 +397,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
             return;
         }
         
-        this.editorScene.setShowHealth(data.show);
+        this.editorScene.setShowUnitHealth(data.show);
         this.log(`Health visibility set to: ${data.show}`);
     }
     

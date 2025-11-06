@@ -37,6 +37,10 @@
 - [x] Unified Brush/Fill tool dropdown with optgroup sections
 - [x] Dynamic brush size reading from dropdown (single source of truth)
 - [x] Fill tool foundation (5, 10, 20, 50, 100 tile radius options)
+- [x] Rectangle shape tool with drag-to-paint interface
+- [x] ShapeHighlightLayer for extensible shape tool preview system
+- [x] World.rectFrom() method using row/col coordinate space
+- [x] Blue outline preview showing perimeter during rectangle drag
 
 **Remaining Tasks**:
 - [ ] Implement flood fill algorithm with radial limit
@@ -44,6 +48,8 @@
 - [ ] Remove dead code: GameViewerPage.ts (replaced by PageBase + variants)
 - [ ] Keyboard shortcuts for Fill tool
 - [ ] Fill tool visual feedback and preview
+- [ ] Circle shape tool using World.circleFrom()
+- [ ] Ellipse shape tool using World.ellipseFrom()
 
 **Design**:
 - Brush/Fill unified selector uses optgroups for clear separation

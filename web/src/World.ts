@@ -2,7 +2,7 @@ import { EventBus } from '../lib/EventBus';
 import { WorldEventTypes, WorldEventType } from './events';
 import { BaseComponent } from '../lib/Component';
 import { HexCoord } from './phaser/hexUtils';
-import { axialNeighbors } from "./phaser/hexUtils";
+import { rowColToHex, hexToRowCol, axialNeighbors } from "./phaser/hexUtils";
 import { 
     World as ProtoWorld, 
     WorldData as ProtoWorldData, 
@@ -887,6 +887,45 @@ export class World {
             }
         }
         return out
+    }
+
+    /**
+     * Get tiles in a rectangular region based on row/col coordinates
+     * @param startQ Starting Q coordinate
+     * @param startR Starting R coordinate
+     * @param endQ Ending Q coordinate
+     * @param endR Ending R coordinate
+     * @param filled If true, returns all tiles in the rectangle. If false, returns only outline tiles.
+     * @returns Array of [q, r] coordinate tuples
+     */
+    public rectFrom(startQ: number, startR: number, endQ: number, endR: number, filled: boolean = true): [number, number][] {
+        // Convert to row/col coordinates for proper rectangular selection
+        const startRowCol = hexToRowCol(startQ, startR);
+        const endRowCol = hexToRowCol(endQ, endR);
+
+        const minRow = Math.min(startRowCol.row, endRowCol.row);
+        const maxRow = Math.max(startRowCol.row, endRowCol.row);
+        const minCol = Math.min(startRowCol.col, endRowCol.col);
+        const maxCol = Math.max(startRowCol.col, endRowCol.col);
+
+        const out: [number, number][] = [];
+
+        for (let row = minRow; row <= maxRow; row++) {
+            for (let col = minCol; col <= maxCol; col++) {
+                // If not filled, only include outline tiles
+                if (!filled) {
+                    if (row !== minRow && row !== maxRow && col !== minCol && col !== maxCol) {
+                        continue; // Skip interior tiles
+                    }
+                }
+
+                // Convert back to hex coordinates
+                const hex = rowColToHex(row, col);
+                out.push([hex.q, hex.r]);
+            }
+        }
+
+        return out;
     }
 
     public floodNeighbors(q: number, r: number, radius: number): [number, number][] {

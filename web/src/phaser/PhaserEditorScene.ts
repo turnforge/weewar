@@ -2,8 +2,9 @@ import { PhaserWorldScene } from './PhaserWorldScene';
 import { Unit, Tile, World } from '../World';
 import * as models from '../../gen/wasmjs/weewar/v1/models'
 import { EventBus } from '../../lib/EventBus';
-import { hexToPixel, pixelToHex } from './hexUtils';
+import { TILE_WIDTH, hexToPixel, pixelToHex } from './hexUtils';
 import { ReferenceImageLayer } from './layers/ReferenceImageLayer';
+import { ShapeHighlightLayer } from './layers/HexHighlightLayer';
 
 /**
  * PhaserEditorScene extends PhaserWorldScene with editor-specific functionality.
@@ -26,12 +27,19 @@ export class PhaserEditorScene extends PhaserWorldScene {
     // Reference image layer for proper overlay/background handling
     private referenceImageLayer: ReferenceImageLayer | null = null;
 
+    // Shape preview layer for showing drag outline (rectangle, circle, ellipse, etc.)
+    private shapePreviewLayer: ShapeHighlightLayer | null = null;
+
     // Editor-specific state
     private currentTerrain: number = 1; // Default grass (terrain type 1)
     private currentUnit: number = 1; // Default unit
     private currentPlayer: number = 0; // Default player
     private brushSize: number = 0; // Single tile
-    private editorMode: 'terrain' | 'unit' | 'erase' = 'terrain';
+    private editorMode: 'terrain' | 'unit' | 'clear' = 'terrain';
+
+    // Rectangle tool state
+    private rectangleStartCoord: { q: number; r: number } | null = null;
+    private isRectangleMode: boolean = false;
 
     constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super(containerElement, eventBus, debugMode);
@@ -40,7 +48,16 @@ export class PhaserEditorScene extends PhaserWorldScene {
     }
 
     /**
-     * Override setupLayerSystem to add ReferenceImageLayer for editor
+     * Override create to add rectangle mode input handling after input system is ready
+     */
+    create() {
+        super.create();
+        // Setup rectangle mode input handling after parent's input setup
+        this.setupRectangleInputHandling();
+    }
+
+    /**
+     * Override setupLayerSystem to add ReferenceImageLayer and RectanglePreviewLayer for editor
      */
     protected setupLayerSystem(): void {
         // Call parent to set up base layers (baseMapLayer, exhaustedUnitsLayer)
@@ -48,9 +65,82 @@ export class PhaserEditorScene extends PhaserWorldScene {
 
         // Create and add reference image layer for overlay/background support
         this.referenceImageLayer = new ReferenceImageLayer(this);
-        if (this.layerManager) {
-            this.layerManager.addLayer(this.referenceImageLayer);
+        this.layerManager.addLayer(this.referenceImageLayer);
+
+        // Create and add shape preview layer for shape tools (rectangle, circle, ellipse, etc.)
+        this.shapePreviewLayer = new ShapeHighlightLayer(this, TILE_WIDTH);
+        this.layerManager.addLayer(this.shapePreviewLayer);
+    }
+
+    /**
+     * Setup rectangle mode input handling
+     */
+    private setupRectangleInputHandling(): void {
+        // Override the drag zone behavior to handle rectangle mode
+        if (this.dragZone) {
+            // Store the original drag handler
+            const originalDragHandler = this.dragZone.listeners('drag')[0];
+
+            // Remove the original handler
+            this.dragZone.off('drag');
+
+            // Add new handler that checks rectangle mode first
+            this.dragZone.on('drag', (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+                // If in rectangle mode and we have a start coord, handle rectangle preview instead of camera drag
+                if (this.isRectangleMode && this.rectangleStartCoord) {
+                    // Convert pointer to hex coordinates
+                    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+                    const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
+
+                    // Show preview
+                    this.showRectanglePreview(
+                        this.rectangleStartCoord.q,
+                        this.rectangleStartCoord.r,
+                        hexCoord.q,
+                        hexCoord.r
+                    );
+                    return; // Don't pan camera
+                }
+
+                // Otherwise, call original drag handler
+                if (originalDragHandler) {
+                    originalDragHandler.call(this, pointer, dragX, dragY);
+                }
+            });
         }
+
+        // Handle pointer down for rectangle mode
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            if (!this.isRectangleMode || pointer.button !== 0) return;
+
+            // Convert pointer to hex coordinates
+            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
+
+            // Store start coordinate
+            this.rectangleStartCoord = { q: hexCoord.q, r: hexCoord.r };
+        });
+
+        // Handle pointer up to apply rectangle
+        this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+            if (!this.isRectangleMode || !this.rectangleStartCoord || pointer.button !== 0) return;
+
+            // Convert pointer to hex coordinates
+            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
+
+            // Apply rectangle
+            this.applyRectangle(
+                this.rectangleStartCoord.q,
+                this.rectangleStartCoord.r,
+                hexCoord.q,
+                hexCoord.r
+            );
+
+            // Clear preview and reset
+            this.clearRectanglePreview();
+            this.rectangleStartCoord = null;
+        });
     }
 
     /**
@@ -82,17 +172,10 @@ export class PhaserEditorScene extends PhaserWorldScene {
     }
 
     /**
-     * Set editor mode (terrain, unit, erase)
+     * Set editor mode (terrain, unit, clear)
      */
-    public setEditorMode(mode: 'terrain' | 'unit' | 'erase'): void {
+    public setEditorMode(mode: 'terrain' | 'unit' | 'clear'): void {
         this.editorMode = mode;
-    }
-    
-    /**
-     * Set health label visibility
-     */
-    public setShowHealth(show: boolean): void {
-        this.setShowUnitHealth(show);
     }
 
     /**
@@ -448,5 +531,66 @@ export class PhaserEditorScene extends PhaserWorldScene {
     public setTile(tile: Tile, brushSize: number = 0): void {
         // Call parent setTile method which expects just the tile
         super.setTile(tile);
+    }
+
+    /**
+     * Enable rectangle mode
+     */
+    public setRectangleMode(enabled: boolean): void {
+        this.isRectangleMode = enabled;
+        if (!enabled) {
+            this.clearRectanglePreview();
+            this.rectangleStartCoord = null;
+        }
+    }
+
+    /**
+     * Check if rectangle mode is enabled
+     */
+    public isInRectangleMode(): boolean {
+        return this.isRectangleMode;
+    }
+
+    /**
+     * Show rectangle preview outline
+     */
+    public showRectanglePreview(startQ: number, startR: number, endQ: number, endR: number): void {
+        if (!this.shapePreviewLayer || !this.world) return;
+
+        // Use World's rectFrom method to get outline tiles (filled=false)
+        const outlineTiles = this.world.rectFrom(startQ, startR, endQ, endR, false)
+            .map(([q, r]) => ({ q, r }));
+
+        this.shapePreviewLayer.showShapeOutline(outlineTiles);
+    }
+
+    /**
+     * Clear rectangle preview
+     */
+    public clearRectanglePreview(): void {
+        if (this.shapePreviewLayer) {
+            this.shapePreviewLayer.clearPreview();
+        }
+    }
+
+    /**
+     * Apply terrain to all tiles in rectangle
+     */
+    public applyRectangle(startQ: number, startR: number, endQ: number, endR: number): void {
+        if (!this.world) return;
+
+        // Use World's rectFrom method to get all tiles (filled=true)
+        const tiles = this.world.rectFrom(startQ, startR, endQ, endR, true);
+
+        // Apply terrain to all tiles in the rectangle
+        for (const [q, r] of tiles) {
+            if (this.editorMode === 'terrain') {
+                this.world.setTileAt(q, r, this.currentTerrain, 0);
+            } else if (this.editorMode === 'unit') {
+                this.world.setUnitAt(q, r, this.currentUnit, this.currentPlayer);
+            } else if (this.editorMode === 'clear') {
+                this.world.removeUnitAt(q, r);
+            }
+        }
     }
 }

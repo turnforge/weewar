@@ -482,3 +482,49 @@ export class ExhaustedUnitsHighlightLayer extends HexHighlightLayer {
         return this.hasHighlight(q, r);
     }
 }
+
+// =============================================================================
+// Shape Highlight Layer
+// =============================================================================
+
+/**
+ * Shows blue outline preview for shape tools (rectangle, circle, ellipse, etc.) during drag operation
+ */
+export class ShapeHighlightLayer extends HexHighlightLayer {
+    constructor(scene: Phaser.Scene, tileWidth: number) {
+        super(scene, {
+            name: 'shape-preview',
+            coordinateSpace: 'hex',
+            interactive: false, // Preview is visual only, doesn't consume clicks
+            depth: 14, // Above exhausted layer (13) for clear visibility
+            tileWidth
+        });
+    }
+
+    public hitTest(context: ClickContext): LayerHitResult | null {
+        // Shape preview is visual only, never intercept clicks
+        return LayerHitResult.TRANSPARENT;
+    }
+
+    /**
+     * Show shape outline preview for tiles that will be affected
+     * @param outlineTiles Array of {q, r} coordinates representing the outline
+     */
+    public showShapeOutline(outlineTiles: Array<{q: number, r: number}>): void {
+        // Clear existing highlights
+        this.clearHighlights();
+
+        // Add blue outline highlights for each tile
+        outlineTiles.forEach(coord => {
+            // Blue highlight with bright blue stroke for visibility
+            this.addHighlight(coord.q, coord.r, 0x0080FF, 0.2, 0x00BFFF, 3);
+        });
+    }
+
+    /**
+     * Clear the shape preview
+     */
+    public clearPreview(): void {
+        this.clearHighlights();
+    }
+}

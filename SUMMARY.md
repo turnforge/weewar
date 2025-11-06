@@ -33,6 +33,40 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 
 ## Recent Major Achievements
 
+### World Editor Shape Tools (Current Session)
+
+**Achievement**: Implemented extensible shape tool system for WorldEditorPage with rectangle tool as first implementation.
+
+**Key Features**:
+- **ShapeHighlightLayer**: Reusable preview layer for drag-to-paint shape tools (rectangle, circle, ellipse, etc.)
+- **Rectangle Tool**: Click and drag to create rectangular regions in row/col coordinate space
+- **Row/Col Coordinate System**: Proper rectangular regions that align with visual hex grid layout
+- **World.rectFrom()**: Extensible pattern for shape generation with outline-only or filled modes
+- **Blue Outline Preview**: Shows perimeter tiles during drag operation before applying
+
+**Implementation**:
+- web/src/phaser/layers/HexHighlightLayer.ts: ShapeHighlightLayer with showShapeOutline()
+- web/src/World.ts: rectFrom(startQ, startR, endQ, endR, filled) method with row/col conversion
+- web/src/phaser/PhaserEditorScene.ts: Rectangle mode handling with drag zone interception
+- web/templates/panels/WorldEditorPageToolbar.html: Rectangle option in dropdown
+
+**Architecture**:
+- Shape preview layer (depth 14) above all other highlights
+- Non-interactive layer returns LayerHitResult.TRANSPARENT
+- Drag handler checks rectangle mode before camera panning
+- Converts to row/col space for proper rectangular selection in hex grids
+
+**Future Extensibility**:
+- Ready for circleFrom(), ellipseFrom(), and other shape methods
+- Same ShapeHighlightLayer works for all shape tools
+- Consistent input handling pattern across all shapes
+
+**Benefits**:
+- Faster terrain placement for large rectangular regions
+- Visual preview shows exactly which tiles will be affected
+- Foundation for multiple shape-based editing tools
+- Proper alignment with hex grid visual layout
+
 ### Responsive Layout System (Current Session)
 
 **Achievement**: Implemented mobile-first responsive design for WorldViewerPage with reusable header button system.

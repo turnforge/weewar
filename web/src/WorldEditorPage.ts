@@ -615,27 +615,40 @@ class WorldEditorPage extends BasePage {
             console.log('Health checkbox not found in Phaser panel');
         }
 
-        // Brush/Fill tool selector
+        // Brush/Fill/Rectangle tool selector
         const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
         if (brushSizeSelect) {
             brushSizeSelect.addEventListener('change', (e) => {
                 const value = (e.target as HTMLSelectElement).value;
 
-                if (value.startsWith('fill:')) {
+                if (value === 'rect') {
+                    // Rectangle mode
+                    this.setBrushSize("rect", 0);
+                    if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
+                        this.phaserEditorComponent.editorScene.setRectangleMode(true);
+                    }
+                    console.log(`Rectangle mode activated`);
+                } else if (value.startsWith('fill:')) {
                     // Fill mode - extract radius
                     const radius = parseInt(value.substring(5));
                     this.setBrushSize("fill", radius);
+                    if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
+                        this.phaserEditorComponent.editorScene.setRectangleMode(false);
+                    }
                     console.log(`Fill mode activated with radius: ${radius}`);
                 } else {
                     // Brush mode - extract size
                     const size = parseInt(value);
                     this.setBrushSize("brush", size);
+                    if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
+                        this.phaserEditorComponent.editorScene.setRectangleMode(false);
+                    }
                     console.log(`Brush size changed to: ${size}`);
                 }
             });
-            console.log('Brush/Fill tool selector event handler bound');
+            console.log('Brush/Fill/Rectangle tool selector event handler bound');
         } else {
-            console.log('Brush/Fill tool selector not found');
+            console.log('Brush/Fill/Rectangle tool selector not found');
         }
     }
 

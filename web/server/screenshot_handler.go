@@ -17,6 +17,11 @@ func (r *RootViewsHandler) handleResourceScreenshot(resourceType string) http.Ha
 			return
 		}
 
+		screenshotName := req.PathValue("screenshotName")
+
+		// themeName := ThemeFromRequest(req)
+		// filename := fmt.Sprintf("screenshot_%s.png", themeName)
+
 		// Construct path to screenshot
 		screenshotPath := filepath.Join(
 			os.Getenv("HOME"),
@@ -26,7 +31,7 @@ func (r *RootViewsHandler) handleResourceScreenshot(resourceType string) http.Ha
 			resourceType+"s", // games or worlds
 			resourceId,
 			"screenshots",
-			"screenshot.png",
+			screenshotName+".png",
 		)
 
 		switch req.Method {
@@ -53,9 +58,9 @@ func (r *RootViewsHandler) getScreenshot(w http.ResponseWriter, req *http.Reques
 }
 
 // saveScreenshot saves the uploaded screenshot
-func (r *RootViewsHandler) saveScreenshot(w http.ResponseWriter, req *http.Request, screenshotPath, resourceType, resourceId string) {
+func (r *RootViewsHandler) saveScreenshot(w http.ResponseWriter, req *http.Request, screenshotPath, resourceType, resourceId string) (err error) {
 	// Parse multipart form (10MB max)
-	if err := req.ParseMultipartForm(10 << 20); err != nil {
+	if err = req.ParseMultipartForm(10 << 20); err != nil {
 		log.Printf("Failed to parse multipart form: %v", err)
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
@@ -72,7 +77,7 @@ func (r *RootViewsHandler) saveScreenshot(w http.ResponseWriter, req *http.Reque
 
 	// Create screenshots directory if it doesn't exist
 	screenshotDir := filepath.Dir(screenshotPath)
-	if err := os.MkdirAll(screenshotDir, 0755); err != nil {
+	if err = os.MkdirAll(screenshotDir, 0755); err != nil {
 		log.Printf("Failed to create screenshots directory: %v", err)
 		http.Error(w, "Failed to create directory", http.StatusInternalServerError)
 		return
@@ -88,7 +93,7 @@ func (r *RootViewsHandler) saveScreenshot(w http.ResponseWriter, req *http.Reque
 	defer dst.Close()
 
 	// Copy uploaded file to destination
-	if _, err := io.Copy(dst, file); err != nil {
+	if _, err = io.Copy(dst, file); err != nil {
 		log.Printf("Failed to write screenshot: %v", err)
 		http.Error(w, "Failed to save screenshot", http.StatusInternalServerError)
 		return
@@ -100,4 +105,5 @@ func (r *RootViewsHandler) saveScreenshot(w http.ResponseWriter, req *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"success": true}`))
+	return
 }

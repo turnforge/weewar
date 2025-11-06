@@ -174,9 +174,10 @@ export const WorldSchema: MessageSchema = {
       messageType: "weewar.v1.WorldData",
     },
     {
-      name: "screenshotUrl",
-      type: FieldType.STRING,
+      name: "previewUrls",
+      type: FieldType.REPEATED,
       id: 11,
+      repeated: true,
     },
   ],
 };
@@ -756,13 +757,14 @@ export const GameSchema: MessageSchema = {
     {
       name: "config",
       type: FieldType.MESSAGE,
-      id: 12,
+      id: 11,
       messageType: "weewar.v1.GameConfiguration",
     },
     {
-      name: "screenshotUrl",
-      type: FieldType.STRING,
-      id: 13,
+      name: "previewUrls",
+      type: FieldType.REPEATED,
+      id: 12,
+      repeated: true,
     },
   ],
 };

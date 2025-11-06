@@ -5,6 +5,7 @@ import { GameViewerPageMethods, GameViewerPageClient as GameViewerPageClient } f
 import { GameViewPresenterClient as GameViewPresenterClient } from '../gen/wasmjs/weewar/v1/gameViewPresenterClient';
 import { SingletonInitializerServiceClient as SingletonInitializerClient } from '../gen/wasmjs/weewar/v1/singletonInitializerServiceClient';
 import { EventBus } from '../lib/EventBus';
+import { AssetThemePreference } from './AssetThemePreference';
 import { PhaserGameScene } from './phaser/PhaserGameScene';
 import { Unit, Tile, World } from './World';
 import {
@@ -355,7 +356,9 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
             const formData = new FormData();
             formData.append('screenshot', blob, 'screenshot.png');
 
-            const response = await fetch(`/games/${this.currentGameId}/screenshot`, {
+            const themeName = AssetThemePreference.get()
+            const previewUrl = `/games/${this.currentGameId}/screenshots/${themeName}`;
+            const response = await fetch(previewUrl, {
                 method: 'POST',
                 body: formData
             });
@@ -369,6 +372,9 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
             console.error('Screenshot error:', error);
             this.showToast('Error', 'Failed to capture or save screenshot', 'error');
         }
+    }
+
+    private async addGamePreviewUrl(previewUrl: string): Promise<void> {
     }
 
     /**

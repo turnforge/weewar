@@ -125,9 +125,9 @@ export class World implements WorldInterface {
   difficulty: string = "";
   /** The actual world contents/data */
   worldData?: WorldData;
-  /** URL to screenshot/preview image (defaults to /worlds/{id}/screenshot)
+  /** URL to screenshot/preview image (defaults to /worlds/{id}/screenshots/{screenshotName})
  Can be overridden to point to CDN or external hosting */
-  screenshotUrl: string = "";
+  previewUrls: string[] = [];
 
   /**
    * Create and deserialize an instance from raw data
@@ -514,9 +514,9 @@ export class Game implements GameInterface {
   difficulty: string = "";
   /** Game configuration */
   config?: GameConfiguration;
-  /** URL to screenshot/preview image (defaults to /games/{id}/screenshot)
+  /** URL to screenshot/preview image (defaults to /games/{id}/screenshots/{screenshotName})
  Can be overridden to point to CDN or external hosting */
-  screenshotUrl: string = "";
+  previewUrls: string[] = [];
 
   /**
    * Create and deserialize an instance from raw data

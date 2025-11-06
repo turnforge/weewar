@@ -103,9 +103,9 @@ message World {
   // The actual world contents/data
   WorldData world_data = 10;
 
-  // URL to screenshot/preview image (defaults to /worlds/{id}/screenshot)
+  // URL to screenshot/preview image (defaults to /worlds/{id}/screenshots/{screenshotName})
   // Can be overridden to point to CDN or external hosting
-  string screenshot_url = 11;
+  repeated string preview_urls = 11;
 }
 
 message WorldData {
@@ -330,11 +330,11 @@ message Game {
   string difficulty = 10;
 
   // Game configuration
-  GameConfiguration config = 12;
+  GameConfiguration config = 11;
 
-  // URL to screenshot/preview image (defaults to /games/{id}/screenshot)
+  // URL to screenshot/preview image (defaults to /games/{id}/screenshots/{screenshotName})
   // Can be overridden to point to CDN or external hosting
-  string screenshot_url = 13;
+  repeated string preview_urls = 12;
 }
 
 message GameConfiguration {

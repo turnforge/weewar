@@ -107,9 +107,9 @@ export interface World {
   difficulty: string;
   /** The actual world contents/data */
   worldData?: WorldData;
-  /** URL to screenshot/preview image (defaults to /worlds/{id}/screenshot)
+  /** URL to screenshot/preview image (defaults to /worlds/{id}/screenshots/{screenshotName})
  Can be overridden to point to CDN or external hosting */
-  screenshotUrl: string;
+  previewUrls: string[];
 }
 
 
@@ -328,9 +328,9 @@ export interface Game {
   difficulty: string;
   /** Game configuration */
   config?: GameConfiguration;
-  /** URL to screenshot/preview image (defaults to /games/{id}/screenshot)
+  /** URL to screenshot/preview image (defaults to /games/{id}/screenshots/{screenshotName})
  Can be overridden to point to CDN or external hosting */
-  screenshotUrl: string;
+  previewUrls: string[];
 }
 
 

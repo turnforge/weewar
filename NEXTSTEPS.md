@@ -115,7 +115,7 @@
 - [x] Fixed infinite canvas height growth by removing automatic ResizeObserver
 
 **Design**:
-- Screenshots stored in `~/dev-app-data/weewar/storage/{games|worlds}/{id}/screenshots/`
+- Screenshots stored in `~/dev-app-data/weewar/storage/{games|worlds}/{id}/screenshots/{screenshotName}`
 - Automatic tight bounds calculation to avoid empty space
 - Generic screenshot handler for reusability across resource types
 - Proto field allows easy migration to CDN or external hosting

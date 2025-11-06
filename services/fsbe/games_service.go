@@ -71,8 +71,8 @@ func (s *FSGamesService) ListGames(ctx context.Context, req *v1.ListGamesRequest
 
 	// Populate screenshot URLs for all games
 	for _, game := range resp.Items {
-		if game.ScreenshotUrl == "" {
-			game.ScreenshotUrl = fmt.Sprintf("/games/%s/screenshot", game.Id)
+		if len(game.PreviewUrls) == 0 {
+			game.PreviewUrls = []string{fmt.Sprintf("/games/%s/screenshots/default", game.Id)}
 		}
 	}
 
@@ -167,8 +167,8 @@ func (s *FSGamesService) GetGame(ctx context.Context, req *v1.GetGameRequest) (r
 	}
 
 	// Populate screenshot URL if not set
-	if game.ScreenshotUrl == "" {
-		game.ScreenshotUrl = fmt.Sprintf("/games/%s/screenshot", game.Id)
+	if len(game.PreviewUrls) == 0 {
+		game.PreviewUrls = []string{fmt.Sprintf("/games/%s/screenshots/default", game.Id)}
 	}
 
 	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, req.Id, "state")

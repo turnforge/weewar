@@ -12,10 +12,30 @@ export class AssetThemePreference {
 
     /**
      * Get the current asset theme preference
-     * Priority: localStorage > default
+     * Priority: URL query param > localStorage > cookie > default
      */
     public static get(): string {
-        return localStorage.getItem(AssetThemePreference.STORAGE_KEY) || AssetThemePreference.DEFAULT_THEME;
+        // Check URL query parameter first
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlTheme = urlParams.get('theme');
+        if (urlTheme) {
+            return urlTheme;
+        }
+
+        // Check localStorage
+        const localStorageTheme = localStorage.getItem(AssetThemePreference.STORAGE_KEY);
+        if (localStorageTheme) {
+            return localStorageTheme;
+        }
+
+        // Check cookie
+        const cookieTheme = AssetThemePreference.getCookie(AssetThemePreference.COOKIE_NAME);
+        if (cookieTheme) {
+            return cookieTheme;
+        }
+
+        // Fall back to default
+        return AssetThemePreference.DEFAULT_THEME;
     }
 
     /**

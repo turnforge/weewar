@@ -15,10 +15,11 @@ func (r *RootViewsHandler) setupGamesMux() *http.ServeMux {
 	mux.HandleFunc("/new", r.ViewRenderer(Copier(&StartGamePage{}), ""))
 	mux.HandleFunc("/{gameId}/view", r.gameViewerHandler) // Use custom handler for layout detection
 	mux.HandleFunc("/{gameId}/copy", func(w http.ResponseWriter, r *http.Request) {
-		notationId := r.PathValue("notationId")
-		http.Redirect(w, r, fmt.Sprintf("/appitems/new?copyFrom=%s", notationId), http.StatusFound)
+		gameId := r.PathValue("gameId")
+		http.Redirect(w, r, fmt.Sprintf("/games/new?copyFrom=%s", gameId), http.StatusFound)
 	})
-	mux.HandleFunc("/{gameId}/screenshot", r.handleResourceScreenshot("game"))
+	mux.HandleFunc("/{gameId}/screenshots/{screenshotName}/", r.handleResourceScreenshot("game"))
+	mux.HandleFunc("/{gameId}/screenshots/{screenshotName}", r.handleResourceScreenshot("game"))
 	mux.HandleFunc("/{gameId}", r.handleGameActions)
 	return mux
 }

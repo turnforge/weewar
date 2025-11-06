@@ -2,6 +2,7 @@ import { BasePage } from '../lib/BasePage';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { TileStatsPanel } from './TileStatsPanel';
+import { AssetThemePreference } from './AssetThemePreference';
 import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from '../lib/KeyboardShortcutManager';
 import { shouldIgnoreShortcut } from '../lib/DOMUtils';
 import { Unit, Tile, World, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from './World';
@@ -985,13 +986,16 @@ class WorldEditorPage extends BasePage {
             const formData = new FormData();
             formData.append('screenshot', blob, 'screenshot.png');
 
-            const response = await fetch(`/worlds/${worldId}/screenshot`, {
+            const themeName = AssetThemePreference.get()
+            const previewUrl = `/worlds/${worldId}/screenshots/${themeName}`;
+            const response = await fetch(previewUrl, {
                 method: 'POST',
                 body: formData
             });
 
             if (response.ok) {
                 this.showToast('Success', 'Screenshot saved successfully', 'success');
+                this.addWorldPreviewUrl(previewUrl)
             } else {
                 this.showToast('Error', 'Failed to save screenshot', 'error');
             }
@@ -999,6 +1003,9 @@ class WorldEditorPage extends BasePage {
             console.error('Screenshot error:', error);
             this.showToast('Error', 'Failed to capture or save screenshot', 'error');
         }
+    }
+
+    private async addWorldPreviewUrl(previewUrl: string): Promise<void> {
     }
 
     private async saveWorldTitle(newTitle: string): Promise<void> {

@@ -75,7 +75,7 @@
                 <a href="/games/{{ .Id }}/view" class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
                     <div class="flex">
                         <div class="flex-shrink-0 w-32 h-24">
-                            <img src="{{ .ScreenshotUrl }}"
+                            <img src="{{ index .PreviewUrls 0 }}"
                                  alt="{{ .Name }} preview"
                                  class="w-full h-full object-cover"
                                  onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 96%22%3E%3Crect fill=%22%23e5e7eb%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2214%22 fill=%22%239ca3af%22%3ENo Preview%3C/text%3E%3C/svg%3E';" />
@@ -120,7 +120,7 @@
                 <a href="/worlds/{{ .Id }}/view" class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
                     <div class="flex">
                         <div class="flex-shrink-0 w-32 h-24">
-                            <img src="{{ .ScreenshotUrl }}"
+                            <img src="{{ index .PreviewUrls 0 }}"
                                  alt="{{ .Name }} preview"
                                  class="w-full h-full object-cover"
                                  onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 96%22%3E%3Crect fill=%22%23e5e7eb%22 width=%22100%25%22 height=%22100%25%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22sans-serif%22 font-size=%2214%22 fill=%22%239ca3af%22%3ENo Preview%3C/text%3E%3C/svg%3E';" />

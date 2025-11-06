@@ -353,10 +353,10 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
             });
             this.log(`Updated Phaser player to: ${toolState.selectedPlayer}`);
         }
-        
+
         if (toolState.brushSize !== undefined) {
             this.editorScene.setBrushSize(toolState.brushSize);
-            this.log(`Updated Phaser brush size to: ${toolState.brushSize}`);
+            this.log(`Updated Phaser brush to: ${toolState.brushMode} mode, size ${toolState.brushSize}`);
         }
     }
     
@@ -492,20 +492,6 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     }
     
     /**
-     * Get brush radius from brush size
-     */
-    private getBrushRadius(brushSize: number): number {
-        switch (brushSize) {
-            case 1: return 1;   // Small (3 hexes)
-            case 3: return 2;   // Medium (5 hexes) 
-            case 5: return 3;   // Large (9 hexes)
-            case 10: return 4;  // X-Large (15 hexes)
-            case 15: return 5;  // XX-Large (21 hexes)
-            default: return 0;  // Single hex
-        }
-    }
-    
-    /**
      * Handle tile clicks for painting
      */
     private handleTileClick(q: number, r: number): void {
@@ -532,15 +518,23 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
                         this.world.setTileAt(q, r, toolState.selectedTerrain, playerId);
                     } else {
                         // Multiple tiles in radius
-                        const radius = this.getBrushRadius(toolState.brushSize);
-                        for (let bq = q - radius; bq <= q + radius; bq++) {
-                            for (let br = r - radius; br <= r + radius; br++) {
-                                // Use cube distance to determine if tile is within brush radius
-                                const distance = Math.abs(bq - q) + Math.abs(br - r) + Math.abs(-bq - br - (-q - r));
-                                if (distance <= radius * 2) { // Hex distance formula
-                                    this.world.setTileAt(bq, br, toolState.selectedTerrain, playerId);
-                                }
-                            }
+                        const radius = toolState.brushSize;
+                        const minq = q - radius;
+                        const maxq = q + radius;
+                        const minr = r - radius;
+                        const maxr = r + radius;
+                        const startingTile = this.world.getTileAt(q, r)
+                        let touchingNeighbours = [] as [number, number][]
+                        if (toolState.brushMode == "brush") {
+                            touchingNeighbours = this.world.radialNeighbours(q, r, toolState.brushSize)
+                        } else if (toolState.brushMode == "fill") { // flood fill
+                            touchingNeighbours = this.world.floodNeighbors(q, r, toolState.brushSize)
+                        } else {
+                          throw new Error("Invalid brush mode: ")
+                        }
+                        for (var i = 0;i < touchingNeighbours.length;i++) {
+                            const [nq, nr] = touchingNeighbours[i]
+                            this.world.setTileAt(nq, nr, toolState.selectedTerrain, playerId);
                         }
                     }
                 }
@@ -566,7 +560,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
                         this.world.removeUnitAt(q, r);
                     } else {
                         // Multiple tiles in radius
-                        const radius = this.getBrushRadius(toolState.brushSize);
+                        const radius = toolState.brushSize;
                         for (let bq = q - radius; bq <= q + radius; bq++) {
                             for (let br = r - radius; br <= r + radius; br++) {
                                 // Use cube distance to determine if tile is within brush radius

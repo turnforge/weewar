@@ -624,12 +624,12 @@ class WorldEditorPage extends BasePage {
                 if (value.startsWith('fill:')) {
                     // Fill mode - extract radius
                     const radius = parseInt(value.substring(5));
-                    this.setFillRadius(radius);
+                    this.setBrushSize("fill", radius);
                     console.log(`Fill mode activated with radius: ${radius}`);
                 } else {
                     // Brush mode - extract size
                     const size = parseInt(value);
-                    this.setBrushSize(size);
+                    this.setBrushSize("brush", size);
                     console.log(`Brush size changed to: ${size}`);
                 }
             });
@@ -699,16 +699,13 @@ class WorldEditorPage extends BasePage {
                 contextFilter: noModifiersFilter
             },
             
-            // Brush size shortcuts (b + number)
+            // Brush/Fill tool selector (b to open dropdown)
             {
                 key: 'b',
-                handler: (args?: string) => this.selectBrushSize(args),
-                previewHandler: (args?: string) => this.previewBrushSize(args),
-                cancelHandler: () => this.cancelSelection(),
-                description: 'Set brush size (1-6)',
+                handler: () => this.openBrushDropdown(),
+                description: 'Open brush/fill tool selector',
                 category: 'Tools',
-                requiresArgs: true,
-                argType: 'number',
+                requiresArgs: false,
                 contextFilter: noModifiersFilter
             },
             
@@ -761,32 +758,45 @@ class WorldEditorPage extends BasePage {
         // Button selection now handled by EditorToolsPanel component
     }
 
-    public setBrushSize(size: number): void {
+    public setBrushSize(mode: string, size: number): void {
         if (this.pageState) {
-            this.pageState.setBrushSize(size);
+            this.pageState.setBrushSize(mode, size);
         }
 
         this.updateBrushInfo();
-    }
-
-    public setFillRadius(radius: number): void {
-        // TODO: Implement flood fill functionality
-        // Store fill radius in pageState for future use
-        console.log(`Fill radius set to: ${radius} (flood fill not yet implemented)`);
-        this.showToast('Fill Mode', `Fill tool activated with ${radius} tile radius`, 'info');
     }
 
     /**
      * Setup event handlers for game config panel inputs
      */
     private setupGameConfigHandlers(): void {
-        // Save button handler
+        // Save button handler - saves world to disk
         const saveButton = document.getElementById('save-game-config');
         if (saveButton) {
-            saveButton.addEventListener('click', () => this.saveGameConfig());
+            saveButton.addEventListener('click', () => {
+                this.saveGameConfig();
+                this.saveWorld();
+            });
         }
 
-        // TODO: Add auto-save on input change if desired
+        // Add input event listeners to detect changes and update game config
+        const inputIds = [
+            'config-num-players',
+            'config-starting-coins',
+            'config-game-income',
+            'config-landbase-income',
+            'config-navalbase-income',
+            'config-airportbase-income',
+            'config-missilesilo-income',
+            'config-mines-income'
+        ];
+
+        inputIds.forEach(id => {
+            const input = document.getElementById(id) as HTMLInputElement;
+            if (input) {
+                input.addEventListener('input', () => this.saveGameConfig());
+            }
+        });
     }
 
     /**
@@ -866,8 +876,7 @@ class WorldEditorPage extends BasePage {
             this.world.setDefaultGameConfig(gameConfig);
         }
 
-        this.showToast('Configuration Saved', 'Default game configuration updated', 'success');
-        console.log('Game configuration saved:', gameConfig);
+        console.log('Game configuration updated:', gameConfig);
     }
     
     public setShowGrid(showGrid: boolean): void {
@@ -1653,7 +1662,7 @@ class WorldEditorPage extends BasePage {
             this.pageState.setSelectedTerrain(this.savedToolState.selectedTerrain);
             this.pageState.setSelectedUnit(this.savedToolState.selectedUnit);
             this.pageState.setSelectedPlayer(this.savedToolState.selectedPlayer);
-            this.pageState.setBrushSize(this.savedToolState.brushSize);
+            this.pageState.setBrushSize(this.savedToolState.brushMode, this.savedToolState.brushSize);
             // placementMode is automatically set by setSelectedTerrain/setSelectedUnit
             
             // UI element updates are handled by EditorToolsPanel via pageState observers
@@ -1830,21 +1839,25 @@ class WorldEditorPage extends BasePage {
     private previewBrushSize(args?: string): void {
         const index = parseInt(args || '1'); // 1-based index
 
-        // Get brush size values from the select dropdown
-        const brushSizeValues = this.getBrushSizeValues();
+        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+        if (!brushSizeSelect || index < 1 || index > brushSizeSelect.options.length) {
+            return;
+        }
 
-        if (index >= 1 && index <= brushSizeValues.length) {
-            this.saveUIState();
-            const actualSize = brushSizeValues[index - 1];
-            this.setBrushSize(actualSize);
+        this.saveUIState();
+        const option = brushSizeSelect.options[index - 1];
+        const value = option.value;
 
-            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-            if (brushSizeSelect) {
-                brushSizeSelect.value = actualSize.toString();
-            }
-
-            const brushSizeName = this.getBrushSizeName(actualSize);
-            this.showPreviewIndicator(`Preview: ${brushSizeName} brush`);
+        if (value.startsWith('fill:')) {
+            const radius = parseInt(value.substring(5));
+            this.setBrushSize("fill", radius);
+            brushSizeSelect.value = value;
+            this.showPreviewIndicator(`Preview: ${option.text}`);
+        } else {
+            const size = parseInt(value);
+            this.setBrushSize("brush", size);
+            brushSizeSelect.value = value;
+            this.showPreviewIndicator(`Preview: ${option.text}`);
         }
     }
     
@@ -2133,31 +2146,43 @@ class WorldEditorPage extends BasePage {
         }
     }
     
+    private openBrushDropdown(): void {
+        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+        if (brushSizeSelect) {
+            // Focus the dropdown and show options
+            brushSizeSelect.focus();
+            brushSizeSelect.click();
+            console.log('Opened brush/fill tool selector');
+        }
+    }
+
     private selectBrushSize(args?: string): void {
         const index = parseInt(args || '1'); // 1-based index
 
         this.hidePreviewIndicator(); // Hide preview indicator when committing
 
-        // Get brush size values from the select dropdown
-        const brushSizeValues = this.getBrushSizeValues();
-
-        if (index >= 1 && index <= brushSizeValues.length) {
-            const actualSize = brushSizeValues[index - 1];
-            this.setBrushSize(actualSize);
-
-            // Update brush size selector in UI and trigger onchange
-            const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
-            if (brushSizeSelect) {
-                brushSizeSelect.value = actualSize.toString();
-                // Trigger the onchange event
-                brushSizeSelect.dispatchEvent(new Event('change'));
-            }
-
-            const brushSizeName = this.getBrushSizeName(actualSize);
-            this.showToast('Brush Size Selected', `${brushSizeName} brush selected`, 'success');
-        } else {
+        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+        if (!brushSizeSelect || index < 1 || index > brushSizeSelect.options.length) {
             this.showToast('Invalid Selection', `Brush size ${index} not available`, 'error');
+            return;
         }
+
+        const option = brushSizeSelect.options[index - 1];
+        const value = option.value;
+
+        if (value.startsWith('fill:')) {
+            const radius = parseInt(value.substring(5));
+            this.setBrushSize("fill", radius);
+        } else {
+            const size = parseInt(value);
+            this.setBrushSize("brush", size);
+        }
+
+        // Update brush size selector in UI and trigger onchange
+        brushSizeSelect.value = value;
+        brushSizeSelect.dispatchEvent(new Event('change'));
+
+        this.showToast('Brush Tool Selected', `${option.text} selected`, 'success');
     }
     
     private activateClearMode(): void {
@@ -2178,7 +2203,7 @@ class WorldEditorPage extends BasePage {
         // Reset to default terrain (grass) via pageState
         if (this.pageState) {
             this.pageState.setSelectedTerrain(1);
-            this.pageState.setBrushSize(0);
+            this.pageState.setBrushSize("brush", 0);
             this.pageState.setSelectedPlayer(1);
         }
         

@@ -22,6 +22,7 @@ export interface ToolState {
     selectedUnit: number;
     selectedPlayer: number;
     placementMode: 'terrain' | 'unit' | 'clear';
+    brushMode: string;
     brushSize: number;
 }
 
@@ -62,6 +63,7 @@ export interface SavedUIState {
     terrain: number;
     unit: number;
     playerId: number;
+    brushMode: string;
     brushSize: number;
     placementMode: 'terrain' | 'unit' | 'clear';
 }
@@ -96,6 +98,7 @@ export class WorldEditorPageState {
             selectedUnit: 0,    // Default to no unit
             selectedPlayer: 1,  // Default to player 1
             placementMode: 'terrain',
+            brushMode: "brush",        // Default to single hex
             brushSize: 0        // Default to single hex
         };
         
@@ -169,8 +172,8 @@ export class WorldEditorPageState {
         this.updateToolState({ placementMode: mode });
     }
     
-    public setBrushSize(size: number): void {
-        this.updateToolState({ brushSize: size });
+    public setBrushSize(mode: string, size: number): void {
+        this.updateToolState({ brushMode: mode, brushSize: size });
     }
     
     // Visual state management
@@ -279,6 +282,7 @@ export class WorldEditorPageState {
             terrain: this.toolState.selectedTerrain,
             unit: this.toolState.selectedUnit,
             playerId: this.toolState.selectedPlayer,
+            brushMode: this.toolState.brushMode,
             brushSize: this.toolState.brushSize,
             placementMode: this.toolState.placementMode
         };
@@ -294,6 +298,7 @@ export class WorldEditorPageState {
             selectedTerrain: this.savedUIState.terrain,
             selectedUnit: this.savedUIState.unit,
             selectedPlayer: this.savedUIState.playerId,
+            brushMode: this.savedUIState.brushMode,
             brushSize: this.savedUIState.brushSize,
             placementMode: this.savedUIState.placementMode
         });
@@ -313,6 +318,7 @@ export class WorldEditorPageState {
             selectedUnit: 0,
             selectedPlayer: 1,
             placementMode: 'terrain',
+            brushMode: "brush",
             brushSize: 0
         });
         this.updateWorkflowState({ lastAction: 'reset-to-defaults' });
@@ -333,6 +339,10 @@ export class WorldEditorPageState {
     
     public getCurrentPlacementMode(): 'terrain' | 'unit' | 'clear' {
         return this.toolState.placementMode;
+    }
+    
+    public getCurrentBrushMode(): string {
+        return this.toolState.brushMode;
     }
     
     public getCurrentBrushSize(): number {

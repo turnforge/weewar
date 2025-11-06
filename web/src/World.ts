@@ -2,6 +2,7 @@ import { EventBus } from '../lib/EventBus';
 import { WorldEventTypes, WorldEventType } from './events';
 import { BaseComponent } from '../lib/Component';
 import { HexCoord } from './phaser/hexUtils';
+import { axialNeighbors } from "./phaser/hexUtils";
 import { 
     World as ProtoWorld, 
     WorldData as ProtoWorldData, 
@@ -311,6 +312,9 @@ export class World {
     public setDefaultGameConfig(config: any): void {
         this.metadata.defaultGameConfig = config;
         this.hasUnsavedChanges = true;
+        this.emitStateChange(WorldEventTypes.WORLD_METADATA_CHANGED, {
+            name: this.metadata.name, width: this.metadata.width, height: this.metadata.height
+        });
     }
 
     public getMetadata(): WorldMetadata {
@@ -865,5 +869,59 @@ export class World {
         // Player IDs are 1-based, so player count is maxPlayer
         // Ensure minimum of 2 players
         return Math.max(2, maxPlayer);
+    }
+
+    public radialNeighbours(q: number, r: number, radius: number): [number, number][] {
+        const minq = q - radius;
+        const maxq = q + radius;
+        const minr = r - radius;
+        const maxr = r + radius;
+        const out = [] as [number, number][]
+        for (let bq = minq; bq <= maxq; bq++) {
+            for (let br = minr; br <= maxr; br++) {
+                // Use cube distance to determine if tile is within brush radius
+                const distance = Math.abs(bq - q) + Math.abs(br - r) + Math.abs(-bq - br - (-q - r));
+                if (distance <= radius * 2) { // Hex distance formula
+                  out.push([bq, br])
+                }
+            }
+        }
+        return out
+    }
+
+    public floodNeighbors(q: number, r: number, radius: number): [number, number][] {
+        let queue = [[q,r]] as [number, number][]
+        const minq = q - radius;
+        const maxq = q + radius;
+        const minr = r - radius;
+        const maxr = r + radius;
+        const startingTile = this.getTileAt(q, r)
+        const visited = {} as any
+        visited[q + ":" + r] = true
+        for (var i = 0;i < queue.length;i++) {
+            const [nextq, nextr] = queue[i];
+            const key = nextq + ":" + nextr
+            console.log("Visiting: ", key)
+
+            // go through all children
+            const neighbors = axialNeighbors(nextq, nextr)
+            for (var j = 0;j < 6;j++) {
+               const [cq, cr] = neighbors[j]
+               if (cq >= minq && cq <= maxq && cr >= minr && cr <= maxr) {
+                  const ckey = cq + ":" + cr
+                  if (!visited[ckey]) {
+                      const childTile = this.getTileAt(cq, cr)
+                      if (childTile == startingTile || (
+                              childTile != null && startingTile != null &&
+                              childTile.tileType == startingTile.tileType &&
+                              childTile.player == startingTile.player)) {
+                          queue.push([cq, cr])
+                          visited[cq + ":" + cr] = true
+                      }
+                  }
+               }
+            }
+        }
+        return queue
     }
 }

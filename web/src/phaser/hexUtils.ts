@@ -76,3 +76,21 @@ export function hexToRowCol(q: number, r: number): { row: number; col: number } 
     const col = q + Math.floor((r - (r & 1)) / 2);
     return { row, col };
 }
+
+
+export const AxialNeighborDeltas = [
+	{q: -1, r: 0}, // LEFT
+	{q: 0, r: -1}, // TOP_LEFT
+	{q: 1, r: -1}, // TOP_RIGHT
+	{q: 1, r: 0},  // RIGHT
+	{q: 0, r: 1},  // BOTTOM_RIGHT
+	{q: -1, r: 1}, // BOTTOM_LEFT
+]
+
+export function axialNeighbors(q: number, r: number): [number, number][] {
+  let out = [] as any;
+	for (var i = 0;i < 6;i++) {
+    out.push([q + AxialNeighborDeltas[i].q, r + AxialNeighborDeltas[i].r])
+	}
+  return out
+}

@@ -80,7 +80,7 @@ func (c AxialCoord) Neighbor(direction NeighborDirection) AxialCoord {
 
 // Neighbors returns all 6 neighboring cube coordinates
 func (c AxialCoord) Neighbors(out *[6]AxialCoord) {
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		out[i] = c.Neighbor(NeighborDirection(i))
 	}
 }

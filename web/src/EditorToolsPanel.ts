@@ -430,34 +430,40 @@ export class EditorToolsPanel extends BaseComponent {
      */
     private bindBrushSizeControl(): void {
         const brushSizeSelect = this.findElement('#brush-size') as HTMLSelectElement;
-        
+
         if (brushSizeSelect) {
             brushSizeSelect.addEventListener('change', (e) => {
                 const target = e.target as HTMLSelectElement;
                 this.executeWhenReady(() => {
-                    const brushSize = parseInt(target.value);
-                    
-                    // Map brush size value to index for name lookup
-                    const brushSizeToIndex: { [key: number]: number } = {
-                        0: 0,  // Single
-                        1: 1,  // Small
-                        3: 2,  // Medium
-                        5: 3,  // Large
-                        10: 4, // X-Large
-                        15: 5  // XX-Large
-                    };
-                    const nameIndex = brushSizeToIndex[brushSize] ?? 0;
-                    const sizeName = BRUSH_SIZE_NAMES[nameIndex] || `Size ${brushSize}`;
-                    
+                    const value = target.value;
+
+                    let mode: string;
+                    let size: number;
+                    let displayName: string;
+
+                    if (value.startsWith('fill:')) {
+                        // Fill mode - extract radius
+                        mode = "fill";
+                        size = parseInt(value.substring(5));
+                        const option = target.selectedOptions[0];
+                        displayName = option?.text || `Fill ${size}`;
+                    } else {
+                        // Brush mode - extract size
+                        mode = "brush";
+                        size = parseInt(value);
+                        const option = target.selectedOptions[0];
+                        displayName = option?.text || `Brush ${size}`;
+                    }
+
                     // Update page state directly
                     if (this.pageState) {
-                        this.pageState.setBrushSize(brushSize);
+                        this.pageState.setBrushSize(mode, size);
                     }
-                    
-                    this.log(`Brush size changed to: ${brushSize} (${sizeName})`);
+
+                    this.log(`Brush/Fill tool changed to: ${mode} with size ${size} (${displayName})`);
                 });
             });
-            
+
             this.log('Bound brush size control');
         } else {
             this.log('Brush size control not found');
@@ -523,21 +529,21 @@ export class EditorToolsPanel extends BaseComponent {
      */
     private syncUIWithPageState(): void {
         if (!this.pageState) return;
-        
+
         const toolState = this.pageState.getToolState();
-        
+
         // Update terrain button selection
         this.updateTerrainButtonHighlight(toolState.selectedTerrain);
-        
-        // Update unit button selection 
+
+        // Update unit button selection
         this.updateUnitButtonHighlight(toolState.selectedUnit);
-        
+
         // Update brush size dropdown
-        this.updateBrushSizeDropdown(toolState.brushSize);
-        
+        this.updateBrushSizeDropdown(toolState.brushMode, toolState.brushSize);
+
         // Update player dropdowns
         this.updatePlayerDropdowns(toolState.selectedPlayer);
-        
+
         this.log('UI synced with page state');
     }
     
@@ -578,10 +584,12 @@ export class EditorToolsPanel extends BaseComponent {
     /**
      * Update brush size dropdown (internal method for UI sync)
      */
-    private updateBrushSizeDropdown(brushSize: number): void {
+    private updateBrushSizeDropdown(brushMode: string, brushSize: number): void {
         const brushSizeSelect = this.findElement('#brush-size') as HTMLSelectElement;
         if (brushSizeSelect) {
-            brushSizeSelect.value = brushSize.toString();
+            // Reconstruct the value based on mode
+            const value = brushMode === "fill" ? `fill:${brushSize}` : brushSize.toString();
+            brushSizeSelect.value = value;
         }
     }
     
@@ -611,6 +619,7 @@ export class EditorToolsPanel extends BaseComponent {
             return {
                 terrain: toolState.selectedTerrain,
                 unit: toolState.selectedUnit,
+                brushMode: toolState.brushMode,
                 brushSize: toolState.brushSize,
                 playerId: toolState.selectedPlayer,
                 placementMode: toolState.placementMode
@@ -619,6 +628,7 @@ export class EditorToolsPanel extends BaseComponent {
         return {
             terrain: 1,
             unit: 0,
+            brushMode: "brush",
             brushSize: 0,
             playerId: 1,
             placementMode: 'terrain' as const

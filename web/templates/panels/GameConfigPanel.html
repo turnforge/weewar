@@ -1,0 +1,146 @@
+<!-- World Editor Game Configuration Panel -->
+{{ define "GameConfigPanel" }}
+<div id="game-config-panel" class="h-full overflow-y-auto">
+  <div class="p-4 space-y-4">
+    <!-- Game Configuration Section -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+        ⚙️ Default Game Configuration
+      </h3>
+      <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+        Set default configuration for games created from this world
+      </p>
+
+      <div class="space-y-3">
+        <!-- Number of Players -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Number of Players
+          </label>
+          <input
+            type="number"
+            id="config-num-players"
+            min="2"
+            max="8"
+            value="2"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Starting Coins -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Starting Coins
+          </label>
+          <input
+            type="number"
+            id="config-starting-coins"
+            min="0"
+            step="50"
+            value="300"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Game Income Per Turn -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Game Income (per turn)
+          </label>
+          <input
+            type="number"
+            id="config-game-income"
+            min="0"
+            step="10"
+            value="0"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Land Base Income -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Land Base Income
+          </label>
+          <input
+            type="number"
+            id="config-landbase-income"
+            min="0"
+            step="10"
+            value="100"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Naval Base Income -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Naval Base Income
+          </label>
+          <input
+            type="number"
+            id="config-navalbase-income"
+            min="0"
+            step="10"
+            value="150"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Airport Base Income -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Airport Base Income
+          </label>
+          <input
+            type="number"
+            id="config-airportbase-income"
+            min="0"
+            step="10"
+            value="200"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Missile Silo Income -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Missile Silo Income
+          </label>
+          <input
+            type="number"
+            id="config-missilesilo-income"
+            min="0"
+            step="10"
+            value="300"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Mines Income -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Mines Income
+          </label>
+          <input
+            type="number"
+            id="config-mines-income"
+            min="0"
+            step="10"
+            value="500"
+            class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+
+        <!-- Save Button -->
+        <button
+          id="save-game-config"
+          class="w-full px-3 py-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-medium"
+        >
+          💾 Save Configuration
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{{ end }}

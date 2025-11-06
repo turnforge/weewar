@@ -591,10 +591,10 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     private getPlayerIdForTerrain(terrainType: number, toolState: any): number {
         // Define city terrains that support player ownership
         const cityTerrains = [1, 2, 3, 16, 20]; // Land Base, Naval Base, Airport Base, Missile Silo, Mines
-        
+
         if (cityTerrains.includes(terrainType)) {
             // City terrain - use selected player from city tab
-            return toolState.selectedPlayer || 1; // Default to player 1 if not set
+            return toolState.selectedPlayer ?? 1; // Default to player 1 if not set (use ?? to preserve 0)
         } else {
             // Nature terrain - always use neutral (0)
             return 0;

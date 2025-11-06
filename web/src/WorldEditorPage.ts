@@ -2258,10 +2258,22 @@ class WorldEditorPage extends BasePage {
     private async handlePhaserReady() {
         console.log('EventBus: Phaser editor is ready');
 
+        // Set ReferenceImagePanel dependencies now that Phaser is ready
+        if (this.phaserEditorComponent && this.referenceImagePanel && this.world) {
+            const referenceImageLayer = this.phaserEditorComponent.editorScene.getReferenceImageLayer();
+            if (referenceImageLayer) {
+                this.referenceImagePanel.setReferenceImageLayer(referenceImageLayer);
+            }
+
+            const worldId = this.world.getWorldId();
+            if (worldId) {
+                this.referenceImagePanel.setWorldId(worldId);
+            }
+        }
+
         // Load world data if available
         if (this.world && this.phaserEditorComponent) {
             // Give Phaser time to fully initialize webgl context and scene
-            // Note: loadWorld now handles reference image restoration automatically
             await this.phaserEditorComponent.editorScene.loadWorld(this.world);
             this.hasPendingWorldDataLoad = false;
             this.refreshTileStats();

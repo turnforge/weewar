@@ -2,28 +2,44 @@ import { LCMComponent } from '../lib/LCMComponent';
 import { BaseComponent } from '../lib/Component';
 import { EventBus } from '../lib/EventBus';
 import { EditorEventTypes, ReferenceLoadFromFilePayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload, ReferenceScaleChangedPayload, ReferencePositionChangedPayload, ReferenceStateChangedPayload, ReferenceImageLoadedPayload } from './events';
+import { ReferenceImageDB } from './lib/ReferenceImageDB';
+import { ReferenceImageLayer } from './phaser/layers/ReferenceImageLayer';
 
 /**
- * ReferenceImagePanel - Demonstrates new lifecycle architecture
- * 
- * This component showcases the breadth-first lifecycle pattern:
+ * ReferenceImagePanel - Manages reference image loading and controls
+ *
+ * This component handles ALL reference image loading operations:
+ * - Loading from IndexedDB storage (auto-restore on page load)
+ * - Loading from file uploads
+ * - Loading from clipboard
+ *
+ * It manages:
+ * - IndexedDB persistence (per-world storage)
+ * - localStorage for position/scale offsets
+ * - Direct control of ReferenceImageLayer for display
+ *
+ * The ReferenceImageLayer only handles:
+ * - Display and rendering
+ * - Mouse/touch interaction (drag, scroll)
+ *
+ * Lifecycle:
  * 1. performLocalInit() - Set up UI controls without dependencies
- * 2. setupDependencies() - Receive PhaserEditorComponent when available
- * 3. activate() - Enable functionality once all dependencies ready
- * 
- * Benefits:
- * - No initialization order dependencies
- * - Graceful handling of missing dependencies
- * - Clear separation of concerns across lifecycle phases
+ * 2. setupDependencies() - Receive dependencies (layer, worldId, toast)
+ * 3. activate() - Enable functionality and auto-restore from storage
  */
 export class ReferenceImagePanel extends BaseComponent {
     // Dependencies (injected in phase 2)
     private toastCallback?: (title: string, message: string, type: 'success' | 'error' | 'info') => void;
+    private referenceImageLayer?: ReferenceImageLayer;
+    private worldId?: string;
 
     // Internal state
     private isUIBound = false;
     private isActivated = false;
     private pendingOperations: Array<() => void> = [];
+
+    // IndexedDB storage for reference images
+    private imageDB: ReferenceImageDB = new ReferenceImageDB();
 
     // Reference image state cache (updated via EventBus)
     private referenceState = {
@@ -46,8 +62,6 @@ export class ReferenceImagePanel extends BaseComponent {
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('reference-image-panel', rootElement, eventBus, debugMode);
     }
-    
-    // Dependencies are now set directly using explicit setters instead of ComponentDependencyDeclaration
     
     // LCMComponent Phase 1: Initialize DOM and discover children (no dependencies needed)
     public performLocalInit(): LCMComponent[] {
@@ -73,39 +87,50 @@ export class ReferenceImagePanel extends BaseComponent {
         // This is a leaf component - no children
         return [];
     }
-    
-    // Phase 2: Inject dependencies - simplified to use explicit setters
-    public setupDependencies(): void {
-        this.log('ReferenceImagePanel: Dependencies injection phase - using explicit setters');
-        
-        // Dependencies should be set directly by parent using setters
-        // This phase just validates that required dependencies are available
-        if (!this.toastCallback) {
-            throw new Error('ReferenceImagePanel requires toast callback - use setToastCallback()');
-        }
-        
-        this.log('Dependencies validation complete');
-    }
-    
+
     // Explicit dependency setters
     public setToastCallback(callback: (title: string, message: string, type: 'success' | 'error' | 'info') => void): void {
         this.toastCallback = callback;
         this.log('Toast callback set via explicit setter');
     }
-    
+
+    public setReferenceImageLayer(layer: ReferenceImageLayer): void {
+        this.referenceImageLayer = layer;
+        this.log('ReferenceImageLayer set via explicit setter');
+    }
+
+    public setWorldId(worldId: string): void {
+        this.worldId = worldId;
+
+        // Restore from storage when worldId is set
+        this.loadReferenceFromStorage();
+        this.log(`WorldId set via explicit setter: ${worldId}`);
+    }
+
     // Explicit dependency getters
     public getToastCallback(): ((title: string, message: string, type: 'success' | 'error' | 'info') => void) | undefined {
         return this.toastCallback;
     }
+
+    public getReferenceImageLayer(): ReferenceImageLayer | undefined {
+        return this.referenceImageLayer;
+    }
+
+    public getWorldId(): string | undefined {
+        return this.worldId;
+    }
     
     // Phase 3: Activate component
-    public activate(): void {
+    public async activate(): Promise<void> {
         if (this.isActivated) {
             this.log('Already activated, skipping');
             return;
         }
 
         this.log('Activating ReferenceImagePanel');
+
+        // Initialize IndexedDB
+        await this.imageDB.init();
 
         // Load saved position and scale from localStorage
         this.loadSavedPositionAndScale();
@@ -520,7 +545,36 @@ export class ReferenceImagePanel extends BaseComponent {
     }
     
     // Reference Image Operations (Phase 3 - when dependencies are available)
-    
+
+    /**
+     * Load reference image from IndexedDB storage
+     * Called automatically during activate() if worldId is set
+     */
+    private async loadReferenceFromStorage(): Promise<boolean> {
+        if (!this.worldId) {
+            this.log('Cannot load from storage: worldId not set');
+            return false;
+        }
+
+        this.log(`Loading reference image from storage for world ${this.worldId}`);
+
+        try {
+            const record = await this.imageDB.getImageRecord(this.worldId);
+            if (record) {
+                this.log(`Found reference image in storage: ${record.filename || 'unnamed'}`);
+                await this.loadReferenceFromBlob(record.imageBlob, 'storage');
+                return true;
+            } else {
+                this.log('No reference image found in storage');
+                return false;
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            this.log(`Failed to load from storage: ${errorMessage}`);
+            return false;
+        }
+    }
+
     private async loadReferenceFromClipboard(): Promise<void> {
           this.log('Loading reference image directly from clipboard');
           this.showToast('Loading', 'Loading reference image from clipboard...', 'info');
@@ -567,66 +621,69 @@ export class ReferenceImagePanel extends BaseComponent {
               throw error;
           }
     }
-    
+
     private async loadReferenceFromFile(file: File): Promise<void> {
         this.log(`Loading reference image directly from file: ${file.name} (${file.size} bytes)`);
         this.showToast('Loading', `Loading reference image from ${file.name}...`, 'info');
         this.updateReferenceStatus(`Loading from ${file.name}...`);
-        
+
         // Validate file type
         if (!file.type.startsWith('image/')) {
             throw new Error('Selected file is not an image');
         }
-        
+
         // Load image directly
         await this.loadReferenceFromBlob(file, file.name);
     }
     
     /**
      * Common method to load reference image from blob/file
+     * Handles display via layer and persistence via IndexedDB
      */
     private async loadReferenceFromBlob(blob: Blob, source: string): Promise<void> {
+        if (!this.referenceImageLayer) {
+            throw new Error('ReferenceImageLayer not available');
+        }
+
         // Create object URL for the blob
         const imageUrl = URL.createObjectURL(blob);
-        
+
         // Create image element to validate and get dimensions
         const img = new Image();
-        
+
         await new Promise<void>((resolve, reject) => {
             img.onload = () => resolve();
             img.onerror = () => reject(new Error('Failed to load image'));
             img.src = imageUrl;
         });
-        
+
         this.log(`Reference image loaded successfully: ${img.width}x${img.height} from ${source}`);
-        
+
         // Update UI state first
         this.referenceState.isLoaded = true;
         this.updateReferenceStatus(`Loaded from ${source} (${img.width}x${img.height})`);
         this.showToast('Success', `Reference image loaded from ${source}`, 'success');
         this.updateUIState();
-        
-        // Set default mode to background if currently hidden - BEFORE emitting event
-        this.setDefaultMode();
+
+        // Set the image on the layer for display
+        this.referenceImageLayer.setReferenceImage(imageUrl);
+
+        // Set default mode to background (always use background when loading/restoring)
+        this.referenceImageLayer.setReferenceMode(1); // 1 = background
+        this.referenceState.mode = 1;
+        this.setReferenceMode(1); // Update UI controls
 
         // Apply saved position and scale values from localStorage
         this.applySavedPositionAndScale();
 
-        // Notify EventBus that image was loaded (notification, not request)
-        // This happens AFTER setDefaultMode and applySavedPositionAndScale so Phaser gets the image with correct values
-        this.eventBus.emit<ReferenceImageLoadedPayload>(
-            EditorEventTypes.REFERENCE_IMAGE_LOADED,
-            {
-                source: source,
-                width: img.width,
-                height: img.height,
-                url: imageUrl
-            },
-            this,
-            this
-        );
-        
-        // Clean up the object URL after a delay to allow other components to use it
+        // Save to IndexedDB if not loading from storage
+        if (source !== 'storage' && this.worldId) {
+            const filename = source === 'clipboard' ? 'clipboard-image' : source;
+            await this.imageDB.saveImage(this.worldId, blob, filename);
+            this.log(`Saved reference image to IndexedDB for world ${this.worldId}`);
+        }
+
+        // Clean up the object URL after a delay to allow layer to use it
         setTimeout(() => {
             URL.revokeObjectURL(imageUrl);
         }, 1000);
@@ -961,26 +1018,21 @@ export class ReferenceImagePanel extends BaseComponent {
      * Called when a new reference image is loaded
      */
     private applySavedPositionAndScale(): void {
-        // Apply position
-        this.eventBus.emit<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION,
-            {
-                x: this.referenceState.position.x,
-                y: this.referenceState.position.y
-            },
-            this,
-            this
+        if (!this.referenceImageLayer) {
+            this.log('ReferenceImageLayer not available, cannot apply position/scale');
+            return;
+        }
+
+        // Apply position directly to layer
+        this.referenceImageLayer.setReferencePosition(
+            this.referenceState.position.x,
+            this.referenceState.position.y
         );
 
-        // Apply scale
-        this.eventBus.emit<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE,
-            {
-                scaleX: this.referenceState.scale.x,
-                scaleY: this.referenceState.scale.y
-            },
-            this,
-            this
+        // Apply scale directly to layer
+        this.referenceImageLayer.setReferenceScale(
+            this.referenceState.scale.x,
+            this.referenceState.scale.y
         );
 
         this.log(`Applied saved position (${this.referenceState.position.x}, ${this.referenceState.position.y}) and scale (${this.referenceState.scale.x}, ${this.referenceState.scale.y})`);
@@ -1036,10 +1088,21 @@ export class ReferenceImagePanel extends BaseComponent {
         }, ReferenceImagePanel.SAVE_DEBOUNCE_MS);
     }
 
-    private clearReferenceImage(): void {
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit(EditorEventTypes.REFERENCE_CLEAR, {}, this, this);
-        
+    private async clearReferenceImage(): Promise<void> {
+        if (!this.referenceImageLayer) {
+            this.log('ReferenceImageLayer not available');
+            return;
+        }
+
+        // Clear from layer (display)
+        await this.referenceImageLayer.clearReferenceImage();
+
+        // Clear from IndexedDB (storage)
+        if (this.worldId) {
+            await this.imageDB.deleteImage(this.worldId);
+            this.log(`Cleared reference image from IndexedDB for world ${this.worldId}`);
+        }
+
         // Reset local state cache
         this.referenceState = {
             scale: { x: 1.0, y: 1.0 },
@@ -1048,17 +1111,17 @@ export class ReferenceImagePanel extends BaseComponent {
             mode: 0,
             isLoaded: false
         };
-        
+
         // Reset UI controls - set mode to Hidden (0) and update radio button styling
         this.setReferenceMode(0);
-        
+
         const alphaSlider = this.rootElement.querySelector('#reference-alpha') as HTMLInputElement;
         const alphaValue = this.rootElement.querySelector('#reference-alpha-value') as HTMLElement;
         if (alphaSlider && alphaValue) {
             alphaSlider.value = '50';
             alphaValue.textContent = '50%';
         }
-        
+
         // Hide position controls and reset position button visibility
         const positionControls = this.rootElement.querySelector('#reference-position-controls') as HTMLElement;
         const resetPositionBtn = this.rootElement.querySelector('#reference-reset-position') as HTMLElement;
@@ -1068,7 +1131,7 @@ export class ReferenceImagePanel extends BaseComponent {
         if (resetPositionBtn) {
             resetPositionBtn.style.display = 'block'; // Reset to default state
         }
-        
+
         // Reset position inputs
         const positionXInput = this.rootElement.querySelector('#reference-position-x-value') as HTMLInputElement;
         const positionYInput = this.rootElement.querySelector('#reference-position-y-value') as HTMLInputElement;
@@ -1078,7 +1141,7 @@ export class ReferenceImagePanel extends BaseComponent {
         if (positionYInput) {
             positionYInput.value = '0';
         }
-        
+
         this.updateReferenceStatus('No reference image loaded');
         this.log('Reference image cleared');
         this.showToast('Cleared', 'Reference image removed', 'success');

@@ -8,7 +8,6 @@
 
 import * as Phaser from 'phaser';
 import { BaseLayer, LayerConfig, ClickContext, LayerHitResult } from '../LayerSystem';
-import { ReferenceImageDB } from '../../lib/ReferenceImageDB';
 
 export interface ReferenceImageState {
     mode: number; // 0=hidden, 1=background, 2=overlay
@@ -20,6 +19,16 @@ export interface ReferenceImageState {
 
 /**
  * Reference image layer for editor functionality
+ *
+ * Responsibilities:
+ * - Display reference images in world coordinate space
+ * - Handle mouse/touch interaction (drag, scroll) when in overlay mode
+ * - Provide position, scale, alpha, and mode controls
+ *
+ * Does NOT handle:
+ * - Loading images from storage/file/clipboard (handled by ReferenceImagePanel)
+ * - IndexedDB persistence (handled by ReferenceImagePanel)
+ * - localStorage for position/scale (handled by ReferenceImagePanel)
  */
 export class ReferenceImageLayer extends BaseLayer {
     private referenceImage: Phaser.GameObjects.Image | null = null;
@@ -36,35 +45,13 @@ export class ReferenceImageLayer extends BaseLayer {
     private dragStartImageX: number = 0;
     private dragStartImageY: number = 0;
 
-    // IndexedDB storage for persistent reference images
-    private imageDB: ReferenceImageDB = new ReferenceImageDB();
-    private worldId: string | null = null;
-    
-    constructor(scene: Phaser.Scene, worldId?: string) {
+    constructor(scene: Phaser.Scene) {
         super(scene, {
             name: 'reference-image',
             coordinateSpace: 'world',
             interactive: true, // Can be dragged when in overlay mode
             depth: -1, // Background by default, can be moved to 1000 for overlay
         });
-
-        // Set worldId if provided
-        if (worldId) {
-            this.worldId = worldId;
-        }
-    }
-
-    /**
-     * Initialize lifecycle - setup IndexedDB and load from storage
-     */
-    public async init(): Promise<void> {
-        // Initialize IndexedDB
-        await this.imageDB.init();
-
-        // Load from storage if worldId is set
-        if (this.worldId) {
-            await this.loadFromStorage();
-        }
     }
     
     public hitTest(context: ClickContext): LayerHitResult | null {
@@ -277,7 +264,7 @@ export class ReferenceImageLayer extends BaseLayer {
     }
     
     /**
-     * Clear reference image
+     * Clear reference image (display only)
      */
     public async clearReferenceImage(): Promise<void> {
         if (this.referenceImage) {
@@ -287,94 +274,6 @@ export class ReferenceImageLayer extends BaseLayer {
 
         this.referenceMode = 0;
         this.referenceTextureKey = null;
-
-        // Also clear from IndexedDB storage
-        await this.clearFromStorage();
-    }
-    
-    /**
-     * Load reference image from IndexedDB storage
-     * Called automatically during init() if worldId is set
-     */
-    private async loadFromStorage(): Promise<boolean> {
-        if (!this.worldId) {
-            console.warn('[ReferenceImageLayer] Cannot load from storage: worldId not set');
-            return false;
-        }
-
-        const record = await this.imageDB.getImageRecord(this.worldId);
-        if (record) {
-            const imageUrl = URL.createObjectURL(record.imageBlob);
-            this.setReferenceImage(imageUrl);
-
-            // Always set to background mode when restoring
-            // (Hidden is inconvenient, Overlay risks accidental scale/position changes)
-            this.setReferenceMode(1); // 1 = background
-            console.log('[ReferenceImageLayer] Restored reference image in background mode');
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Clear reference image from IndexedDB storage
-     */
-    public async clearFromStorage(): Promise<void> {
-        if (!this.worldId) {
-            console.warn('[ReferenceImageLayer] Cannot clear from storage: worldId not set');
-            return;
-        }
-
-        await this.imageDB.deleteImage(this.worldId);
-        console.log('[ReferenceImageLayer] Cleared reference image from storage');
-    }
-
-    /**
-     * Load reference image from clipboard
-     */
-    public async loadReferenceFromClipboard(): Promise<boolean> {
-            const items = await navigator.clipboard.read();
-
-            for (const item of items) {
-                if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
-                    const imageBlob = await item.getType(item.types.find(type => type.startsWith('image/')) || '');
-                    const imageUrl = URL.createObjectURL(imageBlob);
-
-                    this.setReferenceImage(imageUrl);
-
-                    // Save to IndexedDB if worldId is set
-                    if (this.worldId) {
-                        await this.imageDB.saveImage(this.worldId, imageBlob);
-                    }
-
-                    return true;
-                }
-            }
-
-            console.warn('[ReferenceImageLayer] No image found in clipboard');
-            return false;
-    }
-
-    /**
-     * Load reference image from file
-     */
-    public async loadReferenceFromFile(file: File): Promise<boolean> {
-            if (!file.type.startsWith('image/')) {
-                console.error('[ReferenceImageLayer] File is not an image:', file.type);
-                return false;
-            }
-
-            const imageUrl = URL.createObjectURL(file);
-            this.setReferenceImage(imageUrl);
-
-            // Save to IndexedDB if worldId is set
-            if (this.worldId) {
-                await this.imageDB.saveImage(this.worldId, file, file.name);
-            }
-
-            return true;
     }
     
     /**

@@ -42,8 +42,10 @@
 - [x] World.rectFrom() method using row/col coordinate space
 - [x] Blue outline preview showing perimeter during rectangle drag
 - [x] Reference image persistence with IndexedDB storage
-- [x] ReferenceImageLayer self-managed lifecycle and storage
-- [x] Automatic restore of reference images on page refresh
+- [x] ReferenceImagePanel manages all loading operations (storage/file/clipboard)
+- [x] ReferenceImageLayer handles only display and mouse/touch interaction
+- [x] Automatic restore of reference images with correct scale/position offsets
+- [x] Clean separation of concerns: Panel=loading/storage, Layer=display/interaction
 
 **Remaining Tasks**:
 - [ ] Implement flood fill algorithm with radial limit
@@ -60,6 +62,12 @@
 - getBrushSizeValues() and getBrushSizeName() read from HTML for flexibility
 - Clear button works with both Brush (area clear) and Fill (flood clear) modes
 - AssetThemePreference priority: URL param > localStorage > cookie > default
+- Reference image architecture:
+  - ReferenceImagePanel: Manages ALL loading (IndexedDB, file, clipboard) and localStorage for position/scale
+  - ReferenceImageLayer: Display-only (rendering, mouse/touch drag, scroll)
+  - Dependencies set by WorldEditorPage in handlePhaserReady()
+  - Auto-restore from storage when worldId is set via setWorldId() setter
+  - Scale/position offsets correctly applied from localStorage on restore
 
 ### CLI Tool Enhancements
 **Priority**: Medium

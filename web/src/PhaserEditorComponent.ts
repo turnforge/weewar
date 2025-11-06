@@ -109,31 +109,28 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      */
     private subscribeToEvents(): void {
         this.log('Subscribing to EventBus events');
-        
-        // Subscribe to reference image events from ReferenceImagePanel
-        this.addSubscription(EditorEventTypes.REFERENCE_IMAGE_LOADED, this);
-        
+
         // Subscribe to grid visibility events from WorldEditorPage
         this.addSubscription(EditorEventTypes.GRID_SET_VISIBILITY, this);
-        
+
         // Subscribe to coordinates visibility events from WorldEditorPage
         this.addSubscription(EditorEventTypes.COORDINATES_SET_VISIBILITY, this);
-        
+
         // Subscribe to health visibility events from WorldEditorPage
         this.addSubscription(EditorEventTypes.HEALTH_SET_VISIBILITY, this);
-        
+
         // Subscribe to reference image control events from ReferenceImagePanel
         this.addSubscription(EditorEventTypes.REFERENCE_SET_MODE, this);
         this.addSubscription(EditorEventTypes.REFERENCE_SET_ALPHA, this);
         this.addSubscription(EditorEventTypes.REFERENCE_SET_POSITION, this);
         this.addSubscription(EditorEventTypes.REFERENCE_SET_SCALE, this);
-        this.addSubscription(EditorEventTypes.REFERENCE_CLEAR, this);
-        
+
         // Subscribe to tool state changes via EventBus
         this.addSubscription(PageStateEventType.TOOL_STATE_CHANGED, this);
-        
+
         // World events are now handled by PhaserWorldScene directly
-        
+        // Note: Reference image loading is now handled directly by ReferenceImagePanel
+
         this.log('EventBus subscriptions complete');
     }
 
@@ -142,48 +139,41 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      */
     public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
         switch(eventType) {
-            case EditorEventTypes.REFERENCE_IMAGE_LOADED:
-                this.handleReferenceImageLoaded(data);
-                break;
-            
             case EditorEventTypes.GRID_SET_VISIBILITY:
                 this.handleGridSetVisibility(data);
                 break;
-            
+
             case EditorEventTypes.COORDINATES_SET_VISIBILITY:
                 this.handleCoordinatesSetVisibility(data);
                 break;
-            
+
             case EditorEventTypes.HEALTH_SET_VISIBILITY:
                 this.handleHealthSetVisibility(data);
                 break;
-            
+
             case EditorEventTypes.REFERENCE_SET_MODE:
                 this.handleReferenceSetMode(data);
                 break;
-            
+
             case EditorEventTypes.REFERENCE_SET_ALPHA:
                 this.handleReferenceSetAlpha(data);
                 break;
-            
+
             case EditorEventTypes.REFERENCE_SET_POSITION:
                 this.handleReferenceSetPosition(data);
                 break;
-            
+
             case EditorEventTypes.REFERENCE_SET_SCALE:
                 this.handleReferenceSetScale(data);
                 break;
-            
-            case EditorEventTypes.REFERENCE_CLEAR:
-                this.handleReferenceClear();
-                break;
-            
+
             case PageStateEventType.TOOL_STATE_CHANGED:
                 this.handleToolStateChanged(data);
                 break;
-            
+
             // World events are now handled by PhaserWorldScene directly
-            
+            // Note: Reference image loading/clearing now handled directly by ReferenceImagePanel
+
             default:
                 // Call parent implementation for unhandled events
                 super.handleBusEvent(eventType, data, target, emitter);
@@ -453,45 +443,6 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         this.log(`Reference scale set to: (${data.scaleX}, ${data.scaleY})`);
     }
     
-    /**
-     * Handle reference image clear event from ReferenceImagePanel
-     */
-    private async handleReferenceClear(): Promise<void> {
-        if (!this.editorScene || !this.isInitialized) {
-            this.log('Phaser not ready, cannot clear reference image');
-            return;
-        }
-
-        // Clear reference image (layer handles storage cleanup internally)
-        await this.editorScene.clearReferenceImage();
-
-        this.log('Reference image cleared');
-    }
-    
-    /**
-     * Handle reference image loaded event from ReferenceImagePanel
-     */
-    private async handleReferenceImageLoaded(data: ReferenceImageLoadedPayload): Promise<void> {
-        this.log(`Reference image loaded: ${data.width}x${data.height} from ${data.source}`);
-        
-        if (!this.editorScene || !this.isInitialized) {
-            this.log('Phaser not ready, cannot load reference image');
-            return;
-        }
-        
-        // Convert the URL back to a blob and create a File object
-        const response = await fetch(data.url);
-        const blob = await response.blob();
-        const file = new File([blob], `reference-${data.source}`, { type: blob.type });
-        
-        // Load the reference image into Phaser using the existing file method
-        const result = await this.editorScene.loadReferenceFromFile(file);
-        if (result) {
-            this.log(`Reference image loaded into Phaser from ${data.source}`);
-        } else {
-            this.log(`Failed to load reference image into Phaser from ${data.source}`);
-        }
-    }
     
     /**
      * Handle tile clicks for painting
@@ -679,26 +630,8 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     }
     
     /**
-     * Reference image methods
+     * Reference image methods (display controls only, loading handled by ReferenceImagePanel)
      */
-    public async loadReferenceFromClipboard(): Promise<boolean> {
-        if (this.editorScene && this.isInitialized) {
-            const result = await this.editorScene.loadReferenceFromClipboard();
-            this.log(result ? 'Reference image loaded from clipboard' : 'No image found in clipboard');
-            return result;
-        }
-        return false;
-    }
-    
-    public async loadReferenceFromFile(file: File): Promise<boolean> {
-        if (this.editorScene && this.isInitialized) {
-            const result = await this.editorScene.loadReferenceFromFile(file);
-            this.log(result ? `Reference image loaded from file: ${file.name}` : 'Failed to load file');
-            return result;
-        }
-        return false;
-    }
-    
     public setReferenceMode(mode: number): void {
         if (this.editorScene && this.isInitialized) {
             this.editorScene.setReferenceMode(mode);

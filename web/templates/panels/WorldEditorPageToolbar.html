@@ -17,7 +17,7 @@
       </div>
 
       <!-- Brush/Fill Tool -->
-      <div class="flex items-center">
+      <div class="flex items-center space-x-2">
         <select
           id="brush-size"
           class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -38,9 +38,20 @@
             <option value="fill:100">100 tiles</option>
           </optgroup>
           <optgroup label="Rectangle">
-            <option value="rect">Rectangle (click & drag)</option>
+            <option value="rect">Rectangle (2 clicks)</option>
           </optgroup>
         </select>
+
+        <!-- Fill/Outline Toggle (shown when rectangle mode is active) -->
+        <label id="shape-fill-toggle" class="flex items-center space-x-1 hidden">
+          <input
+            type="checkbox"
+            id="shape-fill-mode"
+            checked
+            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
+          />
+          <span class="text-xs text-gray-700 dark:text-gray-300">Fill</span>
+        </label>
       </div>
 
       <!-- View Options -->

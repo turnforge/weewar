@@ -5,6 +5,8 @@ import { EventBus } from '../../lib/EventBus';
 import { TILE_WIDTH, hexToPixel, pixelToHex } from './hexUtils';
 import { ReferenceImageLayer } from './layers/ReferenceImageLayer';
 import { ShapeHighlightLayer } from './layers/HexHighlightLayer';
+import { ShapeTool } from './tools/ShapeTool';
+import { RectangleTool } from './tools/RectangleTool';
 
 /**
  * PhaserEditorScene extends PhaserWorldScene with editor-specific functionality.
@@ -37,9 +39,10 @@ export class PhaserEditorScene extends PhaserWorldScene {
     private brushSize: number = 0; // Single tile
     private editorMode: 'terrain' | 'unit' | 'clear' = 'terrain';
 
-    // Rectangle tool state
-    private rectangleStartCoord: { q: number; r: number } | null = null;
-    private isRectangleMode: boolean = false;
+    // Shape tool state (multi-click system)
+    private currentShapeTool: ShapeTool | null = null;
+    private isInShapeDrawingMode: boolean = false;
+    private shapeFillMode: boolean = true; // Fill vs outline mode
 
     constructor(containerElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super(containerElement, eventBus, debugMode);
@@ -48,12 +51,12 @@ export class PhaserEditorScene extends PhaserWorldScene {
     }
 
     /**
-     * Override create to add rectangle mode input handling after input system is ready
+     * Override create to add shape tool input handling after input system is ready
      */
     create() {
         super.create();
-        // Setup rectangle mode input handling after parent's input setup
-        this.setupRectangleInputHandling();
+        // Setup shape tool input handling after parent's input setup
+        this.setupShapeToolInputHandling();
     }
 
     /**
@@ -73,10 +76,66 @@ export class PhaserEditorScene extends PhaserWorldScene {
     }
 
     /**
-     * Setup rectangle mode input handling
+     * Setup shape tool input handling (multi-click system)
      */
-    private setupRectangleInputHandling(): void {
-        // Override the drag zone behavior to handle rectangle mode
+    private setupShapeToolInputHandling(): void {
+        // Handle clicks to collect shape points
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            if (!this.isInShapeDrawingMode || !this.currentShapeTool || pointer.button !== 0) return;
+
+            // Convert pointer to hex coordinates
+            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
+
+            // Add point to the shape tool
+            const needsMorePoints = this.currentShapeTool.addPoint(hexCoord.q, hexCoord.r);
+
+            if (!needsMorePoints) {
+                // Shape is complete - apply it
+                this.applyCurrentShape();
+
+                // Clear preview and reset tool for next shape
+                this.clearShapePreview();
+                this.currentShapeTool.reset();
+            }
+        });
+
+        // Handle mouse movement to show live preview
+        this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+            if (!this.isInShapeDrawingMode || !this.currentShapeTool) return;
+
+            // Convert pointer to hex coordinates
+            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+            const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
+
+            // Get preview tiles from the tool
+            const previewTiles = this.currentShapeTool.getPreviewTiles(hexCoord.q, hexCoord.r);
+
+            // Show preview
+            if (this.shapePreviewLayer && previewTiles.length > 0) {
+                this.shapePreviewLayer.showShapeOutline(previewTiles);
+            }
+        });
+
+        // Handle keyboard input
+        this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+            if (!this.isInShapeDrawingMode || !this.currentShapeTool) return;
+
+            if (event.key === 'Escape') {
+                // Cancel shape drawing
+                this.exitShapeMode();
+            } else if (event.key === 'Enter' && this.currentShapeTool.requiresKeyboardConfirm()) {
+                // Complete shape if it requires keyboard confirmation (polygon, path, etc.)
+                if (this.currentShapeTool.canComplete()) {
+                    this.applyCurrentShape();
+                    this.clearShapePreview();
+                    this.currentShapeTool.reset();
+                }
+            }
+        });
+
+        // Disable camera panning when in shape drawing mode
+        // We'll handle this in the drag handler by checking isInShapeDrawingMode
         if (this.dragZone) {
             // Store the original drag handler
             const originalDragHandler = this.dragZone.listeners('drag')[0];
@@ -84,21 +143,10 @@ export class PhaserEditorScene extends PhaserWorldScene {
             // Remove the original handler
             this.dragZone.off('drag');
 
-            // Add new handler that checks rectangle mode first
+            // Add new handler that disables pan during shape mode
             this.dragZone.on('drag', (pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-                // If in rectangle mode and we have a start coord, handle rectangle preview instead of camera drag
-                if (this.isRectangleMode && this.rectangleStartCoord) {
-                    // Convert pointer to hex coordinates
-                    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-                    const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
-
-                    // Show preview
-                    this.showRectanglePreview(
-                        this.rectangleStartCoord.q,
-                        this.rectangleStartCoord.r,
-                        hexCoord.q,
-                        hexCoord.r
-                    );
+                // Disable camera pan when in shape drawing mode
+                if (this.isInShapeDrawingMode) {
                     return; // Don't pan camera
                 }
 
@@ -108,39 +156,6 @@ export class PhaserEditorScene extends PhaserWorldScene {
                 }
             });
         }
-
-        // Handle pointer down for rectangle mode
-        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            if (!this.isRectangleMode || pointer.button !== 0) return;
-
-            // Convert pointer to hex coordinates
-            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
-
-            // Store start coordinate
-            this.rectangleStartCoord = { q: hexCoord.q, r: hexCoord.r };
-        });
-
-        // Handle pointer up to apply rectangle
-        this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-            if (!this.isRectangleMode || !this.rectangleStartCoord || pointer.button !== 0) return;
-
-            // Convert pointer to hex coordinates
-            const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-            const hexCoord = pixelToHex(worldPoint.x, worldPoint.y);
-
-            // Apply rectangle
-            this.applyRectangle(
-                this.rectangleStartCoord.q,
-                this.rectangleStartCoord.r,
-                hexCoord.q,
-                hexCoord.r
-            );
-
-            // Clear preview and reset
-            this.clearRectanglePreview();
-            this.rectangleStartCoord = null;
-        });
     }
 
     /**
@@ -523,13 +538,17 @@ export class PhaserEditorScene extends PhaserWorldScene {
     }
 
     /**
-     * Enable rectangle mode
+     * Enable rectangle mode (creates and activates RectangleTool)
      */
     public setRectangleMode(enabled: boolean): void {
-        this.isRectangleMode = enabled;
-        if (!enabled) {
-            this.clearRectanglePreview();
-            this.rectangleStartCoord = null;
+        if (enabled) {
+            if (!this.world) return;
+
+            // Create rectangle tool and enter shape drawing mode
+            this.currentShapeTool = new RectangleTool(this.world, this.shapeFillMode);
+            this.isInShapeDrawingMode = true;
+        } else {
+            this.exitShapeMode();
         }
     }
 
@@ -537,42 +556,58 @@ export class PhaserEditorScene extends PhaserWorldScene {
      * Check if rectangle mode is enabled
      */
     public isInRectangleMode(): boolean {
-        return this.isRectangleMode;
+        return this.isInShapeDrawingMode && this.currentShapeTool instanceof RectangleTool;
     }
 
     /**
-     * Show rectangle preview outline
+     * Set fill mode for shapes (filled vs outline)
      */
-    public showRectanglePreview(startQ: number, startR: number, endQ: number, endR: number): void {
-        if (!this.shapePreviewLayer || !this.world) return;
-
-        // Use World's rectFrom method to get outline tiles (filled=false)
-        const outlineTiles = this.world.rectFrom(startQ, startR, endQ, endR, false)
-            .map(([q, r]) => ({ q, r }));
-
-        this.shapePreviewLayer.showShapeOutline(outlineTiles);
+    public setShapeFillMode(filled: boolean): void {
+        this.shapeFillMode = filled;
+        if (this.currentShapeTool) {
+            this.currentShapeTool.setFilled(filled);
+        }
     }
 
     /**
-     * Clear rectangle preview
+     * Get current shape fill mode
      */
-    public clearRectanglePreview(): void {
+    public getShapeFillMode(): boolean {
+        return this.shapeFillMode;
+    }
+
+    /**
+     * Exit shape drawing mode (cancel current shape)
+     */
+    private exitShapeMode(): void {
+        this.isInShapeDrawingMode = false;
+        if (this.currentShapeTool) {
+            this.currentShapeTool.reset();
+            this.currentShapeTool = null;
+        }
+        this.clearShapePreview();
+    }
+
+    /**
+     * Clear shape preview
+     */
+    private clearShapePreview(): void {
         if (this.shapePreviewLayer) {
             this.shapePreviewLayer.clearPreview();
         }
     }
 
     /**
-     * Apply terrain to all tiles in rectangle
+     * Apply current shape to the world
      */
-    public applyRectangle(startQ: number, startR: number, endQ: number, endR: number): void {
-        if (!this.world) return;
+    private applyCurrentShape(): void {
+        if (!this.currentShapeTool || !this.world) return;
 
-        // Use World's rectFrom method to get all tiles (filled=true)
-        const tiles = this.world.rectFrom(startQ, startR, endQ, endR, true);
+        // Get result tiles from the shape tool
+        const tiles = this.currentShapeTool.getResultTiles();
 
-        // Apply terrain to all tiles in the rectangle
-        for (const [q, r] of tiles) {
+        // Apply terrain/units to all tiles in the shape
+        for (const { q, r } of tiles) {
             if (this.editorMode === 'terrain') {
                 this.world.setTileAt(q, r, this.currentTerrain, 0);
             } else if (this.editorMode === 'unit') {

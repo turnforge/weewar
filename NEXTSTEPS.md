@@ -30,17 +30,22 @@
 **Priority**: Medium
 **Status**: 🔄 IN PROGRESS
 
-**Completed (2025-01-05 / 2025-01-06)**:
+**Completed (2025-01-05 / 2025-01-06 / 2025-11-06)**:
 - [x] Fixed neutral player bug - city tiles now correctly save as player=0
 - [x] Asset theme URL query parameter support (?theme=classic)
 - [x] Brush size functionality fixed - added missing event listener
 - [x] Unified Brush/Fill tool dropdown with optgroup sections
 - [x] Dynamic brush size reading from dropdown (single source of truth)
 - [x] Fill tool foundation (5, 10, 20, 50, 100 tile radius options)
-- [x] Rectangle shape tool with drag-to-paint interface
+- [x] Multi-click shape tool system replacing drag-to-paint (2025-11-06)
+- [x] ShapeTool interface for extensible shape tools (2025-11-06)
+- [x] RectangleTool implementation with 2-click workflow (2025-11-06)
+- [x] Fill/Outline toggle UI in toolbar (2025-11-06)
+- [x] Keyboard support (Escape to cancel shape) (2025-11-06)
+- [x] Camera panning disabled during shape mode (2025-11-06)
 - [x] ShapeHighlightLayer for extensible shape tool preview system
 - [x] World.rectFrom() method using row/col coordinate space
-- [x] Blue outline preview showing perimeter during rectangle drag
+- [x] Blue outline preview showing perimeter during shape drawing
 - [x] Reference image persistence with IndexedDB storage
 - [x] ReferenceImagePanel manages all loading operations (storage/file/clipboard)
 - [x] ReferenceImageLayer handles only display and mouse/touch interaction
@@ -48,6 +53,9 @@
 - [x] Clean separation of concerns: Panel=loading/storage, Layer=display/interaction
 
 **Remaining Tasks**:
+- [ ] Fix: First click in shape mode sets tile on underlying layer (should only start shape)
+- [ ] Fix: Escape exits rectangle mode entirely (should just cancel current shape and stay in rectangle mode)
+- [ ] Add visual feedback: cursor change, anchor point markers, status text
 - [ ] Implement flood fill algorithm with radial limit
 - [ ] Context-aware Clear button (brush clear vs flood clear)
 - [ ] Remove dead code: GameViewerPage.ts (replaced by PageBase + variants)

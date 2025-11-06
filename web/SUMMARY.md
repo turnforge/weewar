@@ -320,9 +320,38 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - Panel content divs need `h-full max-h-full overflow-y-auto` for proper scrolling
 - Following same pattern as GameViewerPage panels (TurnOptionsPanel, etc.)
 
+### Recent Achievements (Session 2025-11-06)
+
+#### Multi-Click Shape Tool System (Complete)
+- **Extensible Shape Tool Architecture**: Created ShapeTool interface for multi-click shape drawing workflow
+  - RectangleTool implementation: First click sets corner, mouse move shows preview, second click completes
+  - Replaced fatiguing drag-based system with ergonomic multi-click approach
+  - Camera panning disabled during shape mode to prevent accidental interruptions
+  - Escape key cancels current shape drawing
+- **Fill/Outline Toggle**: Added UI checkbox for switching between filled and outline shapes
+  - Toggle appears automatically when rectangle mode is activated
+  - Updates shape preview in real-time when toggled
+  - Integrated into WorldEditorPageToolbar template
+- **Event Handler Refactoring**: Replaced drag-based rectangle logic with click-based system
+  - pointerdown: Collects shape anchor points
+  - pointermove: Shows live preview without requiring button hold
+  - keyboard: Escape to cancel, Enter for shapes requiring confirmation (polygon, path)
+- **UI Text Updates**: Changed dropdown text from "Rectangle (click & drag)" to "Rectangle (2 clicks)"
+
+**Architecture**:
+- ShapeTool interface defines contract for all shape tools (rectangle, circle, polygon, path)
+- Tools maintain their own state (anchor points, fill mode) and provide preview/result tiles
+- PhaserEditorScene delegates to currentShapeTool for all shape operations
+- ShapeHighlightLayer renders preview independently of tool type
+- Future shapes (circle, polygon) can be added by implementing ShapeTool interface
+
+**Known Issues**:
+- First click in shape mode sets tile on underlying layer (should only start shape)
+- Escape exits rectangle mode entirely instead of just canceling current shape
+
 ## Status
-**Current Version**: 8.10 (UI Polish and Panel Scrolling Fixes)
-**Status**: Production-ready with improved navigation and fixed panel scrolling
+**Current Version**: 8.11 (Multi-Click Shape Tool System)
+**Status**: Development - shape tool refactoring complete, pending bug fixes
 **Build Status**: Clean compilation with all TypeScript errors resolved
 **Testing**: Jest (unit) + Playwright (e2e) with command interface and persistent test worlds
 **Architecture**: Flexible AssetProvider system with presenter-driven animation framework and layer-based interaction system

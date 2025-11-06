@@ -617,6 +617,9 @@ class WorldEditorPage extends BasePage {
 
         // Brush/Fill/Rectangle tool selector
         const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+        const shapeFillToggle = document.getElementById('shape-fill-toggle') as HTMLLabelElement;
+        const shapeFillModeCheckbox = document.getElementById('shape-fill-mode') as HTMLInputElement;
+
         if (brushSizeSelect) {
             brushSizeSelect.addEventListener('change', (e) => {
                 const value = (e.target as HTMLSelectElement).value;
@@ -627,13 +630,21 @@ class WorldEditorPage extends BasePage {
                     if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
                         this.phaserEditorComponent.editorScene.setRectangleMode(true);
                     }
-                    console.log(`Rectangle mode activated`);
+                    // Show fill/outline toggle
+                    if (shapeFillToggle) {
+                        shapeFillToggle.classList.remove('hidden');
+                    }
+                    console.log(`Rectangle mode activated (multi-click)`);
                 } else if (value.startsWith('fill:')) {
                     // Fill mode - extract radius
                     const radius = parseInt(value.substring(5));
                     this.setBrushSize("fill", radius);
                     if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
                         this.phaserEditorComponent.editorScene.setRectangleMode(false);
+                    }
+                    // Hide fill/outline toggle
+                    if (shapeFillToggle) {
+                        shapeFillToggle.classList.add('hidden');
                     }
                     console.log(`Fill mode activated with radius: ${radius}`);
                 } else {
@@ -643,12 +654,28 @@ class WorldEditorPage extends BasePage {
                     if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
                         this.phaserEditorComponent.editorScene.setRectangleMode(false);
                     }
+                    // Hide fill/outline toggle
+                    if (shapeFillToggle) {
+                        shapeFillToggle.classList.add('hidden');
+                    }
                     console.log(`Brush size changed to: ${size}`);
                 }
             });
             console.log('Brush/Fill/Rectangle tool selector event handler bound');
         } else {
             console.log('Brush/Fill/Rectangle tool selector not found');
+        }
+
+        // Shape fill/outline toggle
+        if (shapeFillModeCheckbox) {
+            shapeFillModeCheckbox.addEventListener('change', (e) => {
+                const isFilled = (e.target as HTMLInputElement).checked;
+                if (this.phaserEditorComponent && this.phaserEditorComponent.editorScene) {
+                    this.phaserEditorComponent.editorScene.setShapeFillMode(isFilled);
+                }
+                console.log(`Shape fill mode: ${isFilled ? 'filled' : 'outline'}`);
+            });
+            console.log('Shape fill/outline toggle event handler bound');
         }
     }
 

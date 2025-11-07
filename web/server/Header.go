@@ -37,6 +37,7 @@ type Header struct {
 	HideCenterMenuItems bool
 	IsLoggedIn          bool
 	LoggedInUserId      string
+	Username            string
 }
 
 func (h *Header) SetupDefaults() {
@@ -73,5 +74,17 @@ func (v *Header) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (
 	v.SetupDefaults()
 	v.LoggedInUserId = vc.AuthMiddleware.GetLoggedInUserId(r)
 	v.IsLoggedIn = v.LoggedInUserId != ""
+
+	// Load username if logged in
+	if v.IsLoggedIn && vc.AuthService != nil {
+		user, userErr := vc.AuthService.GetUserById(v.LoggedInUserId)
+		if userErr == nil && user != nil {
+			profile := user.Profile()
+			if username, ok := profile["username"].(string); ok {
+				v.Username = username
+			}
+		}
+	}
+
 	return
 }

@@ -752,13 +752,16 @@ class WorldEditorPage extends BasePage {
                 contextFilter: noModifiersFilter
             },
             
-            // Brush/Fill tool selector (b to open dropdown)
+            // Brush/Fill/Shape tool selector (b + letter)
             {
                 key: 'b',
-                handler: () => this.openBrushDropdown(),
-                description: 'Open brush/fill tool selector',
+                handler: (args?: string) => this.selectBrushGroup(args),
+                previewHandler: (args?: string) => this.previewBrushGroup(args),
+                cancelHandler: () => this.cancelBrushSelection(),
+                description: 'Select brush/fill/shape tool (b=brush, f=fill, s=shapes)',
                 category: 'Tools',
-                requiresArgs: false,
+                requiresArgs: true,
+                argType: 'text',
                 contextFilter: noModifiersFilter
             },
             
@@ -2199,6 +2202,67 @@ class WorldEditorPage extends BasePage {
         }
     }
     
+    private selectBrushGroup(args?: string): void {
+        if (!args) return;
+
+        const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
+        if (!brushSizeSelect) return;
+
+        // Map keys to optgroup labels
+        const groupMap: { [key: string]: string } = {
+            'b': 'Brush',
+            'f': 'Fill',
+            's': 'Shapes'
+        };
+
+        const targetGroup = groupMap[args.toLowerCase()];
+        if (!targetGroup) {
+            this.showToast('Invalid Key', `Press b (brush), f (fill), or s (shapes)`, 'error');
+            return;
+        }
+
+        // Find first option in the target optgroup
+        for (let i = 0; i < brushSizeSelect.options.length; i++) {
+            const option = brushSizeSelect.options[i];
+            const optgroup = option.parentElement;
+
+            if (optgroup && optgroup.tagName === 'OPTGROUP') {
+                const groupLabel = optgroup.getAttribute('label');
+                if (groupLabel === targetGroup) {
+                    // Select this option
+                    brushSizeSelect.value = option.value;
+                    brushSizeSelect.dispatchEvent(new Event('change'));
+                    this.showToast('Tool Selected', `${groupLabel}: ${option.text}`, 'success');
+                    console.log(`Selected ${groupLabel}: ${option.text}`);
+                    return;
+                }
+            }
+        }
+
+        this.showToast('Not Found', `${targetGroup} optgroup not found`, 'error');
+    }
+
+    private previewBrushGroup(args?: string): void {
+        if (!args) return;
+
+        const groupMap: { [key: string]: string } = {
+            'b': 'Brush',
+            'f': 'Fill',
+            's': 'Shapes'
+        };
+
+        const targetGroup = groupMap[args.toLowerCase()];
+        if (targetGroup) {
+            console.log(`Preview: Will select first item in ${targetGroup} group`);
+            // Could show a visual preview here if desired
+        }
+    }
+
+    private cancelBrushSelection(): void {
+        console.log('Cancelled brush selection');
+        // Clean up any preview state if needed
+    }
+
     private openBrushDropdown(): void {
         const brushSizeSelect = document.getElementById('brush-size') as HTMLSelectElement;
         if (brushSizeSelect) {

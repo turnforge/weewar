@@ -4,12 +4,20 @@ import (
 	"net/http"
 )
 
+type LoginConfig struct {
+	EnableEmailLogin    bool
+	EnableGoogleLogin   bool
+	EnableGitHubLogin   bool
+	EnableMicrosoftLogin bool
+	EnableAppleLogin    bool
+}
+
 type LoginPage struct {
 	BasePage
-	Header          Header
-	CallbackURL     string
-	CsrfToken       string
-	EnableUserLogin bool
+	Header      Header
+	CallbackURL string
+	CsrfToken   string
+	Config      LoginConfig
 }
 
 type RegisterPage struct {
@@ -27,6 +35,15 @@ func (p *LoginPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext
 	p.DisableSplashScreen = true
 	err, finished = p.Header.Load(r, w, vc)
 	p.CallbackURL = r.URL.Query().Get("callbackURL")
+
+	// Initialize login config - these can be overridden by environment variables or config
+	p.Config = LoginConfig{
+		EnableEmailLogin:     true,
+		EnableGoogleLogin:    true,
+		EnableGitHubLogin:    true,
+		EnableMicrosoftLogin: false, // Can be enabled when needed
+		EnableAppleLogin:     false, // Can be enabled when needed
+	}
 	return
 }
 

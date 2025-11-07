@@ -761,7 +761,7 @@ class WorldEditorPage extends BasePage {
                 description: 'Select brush/fill/shape tool (b=brush, f=fill, s=shapes)',
                 category: 'Tools',
                 requiresArgs: true,
-                argType: 'text',
+                argType: 'string',
                 contextFilter: noModifiersFilter
             },
             

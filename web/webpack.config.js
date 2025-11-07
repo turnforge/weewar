@@ -26,9 +26,9 @@ const components = [
   ["WorldEditorPage/index", 0, "ts"],
   ["GameListingPage", 0, "ts"],
   ["StartGamePage", 0, "ts"],
-  ["GameViewerPage/GameViewerPageDockView", 0, "ts"],
-  ["GameViewerPage/GameViewerPageGrid", 0, "ts"],
-  ["GameViewerPage/GameViewerPageMobile", 0, "ts"],
+  ["GameViewerPage/index_DockView", 0, "ts"],
+  ["GameViewerPage/index_Grid", 0, "ts"],
+  ["GameViewerPage/index_Mobile", 0, "ts"],
   ["AttackSimulatorPage", 0, "ts"],
 ];
 

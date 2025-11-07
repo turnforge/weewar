@@ -99,7 +99,7 @@ class ProfilePage extends BasePage {
         }
     }
 
-    private showToast(message: string, type: 'success' | 'error'): void {
+    public showToast(message: string, type: 'success' | 'error'): void {
         const toast = document.createElement('div');
         toast.className = `fixed bottom-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 transform translate-y-0 ${
             type === 'success'

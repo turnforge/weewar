@@ -1,19 +1,52 @@
 **Purpose:**
 
-This folder contains the core client-side TypeScript logic for the webapp, managing UI state, user events, API interactions, and DOM manipulation using a modern component-based architecture with strict separation of concerns and event-driven communication.
+This folder contains the page-centric TypeScript source code for the webapp, organized by feature pages with shared common code. Each page directory contains all components specific to that page, while shared code lives in the common/ directory.
 
-**Core Architecture Components:**
+**Directory Structure:**
 
-## Modern Component System (New)
+## Page Organization
 
-*   **`WorldViewer.ts`**: Phaser-based world visualization component with proper DOM scoping and event-driven initialization  
-*   **`WorldStatsPanel.ts`**: Statistics display component with safe DOM selectors and event-driven updates
-*   **`WorldViewerPage.ts`**: Orchestrator page following new architecture - handles data loading and component coordination only
+*   **Root-level Pages** (single-file pages): `HomePage.ts`, `LoginPage.ts`, `StartGamePage.ts`, `GameListingPage.ts`, `WorldListingPage.ts`, `WorldViewerPage.ts`, `UserDetailsPage.ts`, `AttackSimulatorPage.ts`
+*   **GameViewerPage/** - Complex game viewing/playing page with multiple layout variants
+*   **WorldEditorPage/** - World/map editor with tools and panels
+*   **common/** - Shared code, utilities, and animations used across all pages
+
+## Page-Centric Architecture
+
+### GameViewerPage/
+Complex interactive game interface with multiple layout variants:
+*   **GameViewerPageBase.ts** - Abstract base class with all core game logic (WASM, presenter, panels, RPC methods)
+*   **GameViewerPageDockView.ts** - Flexible dockable layout variant
+*   **GameViewerPageGrid.ts** - Static CSS grid layout variant
+*   **GameViewerPageMobile.ts** - Touch-optimized mobile variant
+*   **GameState.ts** - WASM state management component
+*   **PhaserGameScene.ts** - Phaser rendering for game board
+*   **BuildOptionsModal.ts** - Modal for unit construction
+*   **CompactSummaryCard.ts** - Mobile header summary
+*   **TurnOptionsPanel.ts**, **UnitStatsPanel.ts**, **TerrainStatsPanel.ts** - UI panels
+*   **DamageDistributionPanel.ts**, **GameLogPanel.ts** - Information displays
+
+### WorldEditorPage/
+World/map editor with tools and visualization:
+*   **index.ts** - Main editor page orchestrator
+*   **PageState.ts** - Editor state management
+*   **PhaserEditorComponent.ts**, **PhaserEditorScene.ts** - Phaser integration for editing
+*   **ToolsPanel.ts**, **TileStatsPanel.ts**, **ReferenceImagePanel.ts** - UI panels
+*   **ReferenceImageDB.ts**, **ReferenceImageLayer.ts** - Reference image system
+*   **tools/** - Shape drawing tools (ShapeTool, CircleTool, LineTool, OvalTool, RectangleTool)
+
+### common/
+Shared code across all pages:
+*   **Core** - `World.ts`, `PhaserWorldScene.ts`, `LayerSystem.ts`, `BaseMapLayer.ts`, `HexHighlightLayer.ts`
+*   **Utils** - `hexUtils.ts`, `ColorsAndNames.ts`, `ThemeUtils.ts`, `AssetThemePreference.ts`, `RulesTable.ts`
+*   **Events** - `events.ts` (GameEventTypes, WorldEventTypes, EditorEventTypes)
+*   **Panels** - `WorldStatsPanel.ts`
+*   **animations/** - Animation system (`AnimationConfig.ts`, `effects/`)
 
 ## Key Architecture Principles
 
 *   **Separation of Concerns**: Clear boundaries between layout, behavior, and communication responsibilities
-*   **Event-Driven**: Components communicate through EventBus events, never direct method calls  
+*   **Event-Driven**: Components communicate through EventBus events, never direct method calls
 *   **DOM Isolation**: Components only access DOM within their assigned root elements
 *   **Error Resilience**: Component failures are isolated and don't affect other components
 *   **Timing Awareness**: Proper handling of initialization order, race conditions, and async operations
@@ -30,7 +63,7 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 ## Integration Capabilities
 
 *   **Phaser.js**: WebGL-based world rendering with proper timing handling
-*   **HTMX**: Component hydration support for server-driven UI updates  
+*   **HTMX**: Component hydration support for server-driven UI updates
 *   **Canvas/WebGL**: Specialized initialization patterns for graphics contexts
 *   **Toast/Modal Systems**: User feedback and interaction patterns
 *   **Theme Management**: Coordinated theming across component boundaries
@@ -46,7 +79,7 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 - Missing `min-height: 0` constraints on flex children broke one-way sizing flow
 
 **Solutions Implemented:**
-- **PhaserWorldScene.ts**: Removed `object-fit: contain` from canvas styling (line 376)
+- **common/PhaserWorldScene.ts**: Removed `object-fit: contain` from canvas styling
 - **PhaserSceneView Template**: Created reusable BorderLayout component with built-in sizing constraints
 - **FlexMode Parameter**: Automatic application of `flex: 1 1 0%; min-height: 0; min-width: 0;` to wrapper
 - **Go Template Safety**: Fixed ZgotmplZ issue by using inline conditionals instead of style variables
@@ -69,8 +102,8 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 - WorldEditorPage ✅ (toolbar + scene, FlexMode="fixed")
 
 **TypeScript Integration:**
-- PhaserEditorComponent simplified - container ID no longer renamed
-- All scene types (PhaserWorldScene, PhaserEditorScene, PhaserGameScene) work unchanged
+- WorldEditorPage/PhaserEditorComponent.ts simplified - container ID no longer renamed
+- All scene types (common/PhaserWorldScene, WorldEditorPage/PhaserEditorScene, GameViewerPage/PhaserGameScene) work unchanged
 - Container ID from template SceneId parameter used directly
 
 **Documentation:**
@@ -85,15 +118,15 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 *   **Generic WorldViewer**: `WorldViewer<TScene>` with template parameter for proper typing
 *   **GameViewer Specialization**: `GameViewer extends WorldViewer<PhaserGameScene>` with game-specific layer access
 *   **Layer-Based Interaction**: Direct layer manipulation (`getSelectionHighlightLayer()`, `getMovementHighlightLayer()`, etc.)
-*   **Editor Integration**: PhaserEditorComponent uses layer callbacks for painting logic
-*   **Callback Architecture**: Click handling through BaseMapLayer callbacks with validation in components
+*   **Editor Integration**: WorldEditorPage/PhaserEditorComponent.ts uses layer callbacks for painting logic
+*   **Callback Architecture**: Click handling through common/BaseMapLayer.ts callbacks with validation in components
 *   **Brush Size Support**: Multi-tile painting with hex distance calculations in component layer
 
 ### Architecture Improvements ✅
-*   **Scene Separation**: PhaserWorldScene for rendering, components for business logic
-*   **Single Source of Truth**: World model updates trigger observer pattern for visual updates
+*   **Scene Separation**: common/PhaserWorldScene.ts for rendering, page components for business logic
+*   **Single Source of Truth**: common/World.ts model updates trigger observer pattern for visual updates
 *   **Type Safety**: Proper TypeScript generics eliminate casting and improve developer experience
-*   **Clean Separation**: UI logic in components, rendering logic in scenes, interaction through layers
+*   **Clean Separation**: UI logic in page components, rendering logic in common scenes, interaction through layers
 
 ## Recent Session Work (2025-01-22)
 
@@ -130,9 +163,9 @@ This folder contains the core client-side TypeScript logic for the webapp, manag
 *   **Server-Side Template Rendering**: Each variant has its own HTML template with appropriate layout structure
 
 **Mobile Variant Implementation ✅:**
-- **GameViewerPageMobile.ts**: Mobile page with context-aware bottom action bar
-- **MobileBottomDrawer.ts**: Reusable drawer component (60-70% height, auto-close on backdrop tap)
-- **CompactSummaryCard.ts**: Top banner showing terrain+unit selection info
+- **GameViewerPage/GameViewerPageMobile.ts**: Mobile page with context-aware bottom action bar
+- **lib/MobileBottomDrawer.ts**: Reusable drawer component (60-70% height, auto-close on backdrop tap)
+- **GameViewerPage/CompactSummaryCard.ts**: Top banner showing terrain+unit selection info
 - **Context-Aware Button Ordering**: Dynamic reordering inferred from allowed panels (unit/tile/nothing context)
 - **setCompactSummaryCard RPC**: Presenter-rendered HTML sent via RPC (CompactSummaryCard.templar.html)
 - **Bottom Drawers**: 5 drawers (unit stats, terrain stats, damage, actions, log), one open at a time
@@ -245,7 +278,7 @@ private initializeBottomSheet(): void {
 #### Listing Page TypeScript Classes ✅
 Created TypeScript pages for listing pages that previously had no JavaScript:
 
-**WorldListingPage.ts** - Worlds listing page
+**WorldListingPage.ts** - Worlds listing page (root-level)
 ```typescript
 class WorldListingPage {
     constructor() {
@@ -259,7 +292,7 @@ class WorldListingPage {
 }
 ```
 
-**GameListingPage.ts** - Games listing page
+**GameListingPage.ts** - Games listing page (root-level)
 ```typescript
 class GameListingPage {
     constructor() {

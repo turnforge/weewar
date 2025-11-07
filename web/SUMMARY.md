@@ -14,10 +14,10 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 
 ### Core Components
 
-#### Frontend Components (`web/src/`)
-- **World.ts**: Enhanced with Observer pattern, batched events, and self-contained persistence
-- **WorldEditorPage.ts**: Refactored to use World as single source of truth, implements WorldObserver
-- **PhaserEditorComponent.ts**: Phaser.js-based world editor with WebGL rendering
+#### Frontend Components (`web/pages/`)
+- **common/World.ts**: Enhanced with Observer pattern, batched events, and self-contained persistence
+- **WorldEditorPage/index.ts**: Refactored to use World as single source of truth, implements WorldObserver
+- **WorldEditorPage/PhaserEditorComponent.ts**: Phaser.js-based world editor with WebGL rendering
 
 #### Frontend Library Components (`web/lib/`)
 - **LCMComponent.ts**: Lifecycle Managed Component interface with 4-phase initialization
@@ -50,15 +50,15 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 ### Recent Achievements (Session 2025-08-20)
 
 #### World Event Architecture Refactoring & Input System Fixes (Complete)
-- **PhaserWorldScene Event Integration**: Moved world synchronization logic to base scene class
+- **common/PhaserWorldScene Event Integration**: Moved world synchronization logic to base scene class
   - All Phaser scenes now automatically sync with World changes through EventBus
   - Eliminated duplicate world event handling between editor and viewer scenes
-  - Cleaner separation: PhaserEditorComponent handles editor events, PhaserWorldScene handles world sync
+  - Cleaner separation: WorldEditorPage/PhaserEditorComponent handles editor events, common/PhaserWorldScene handles world sync
   - Automatic rendering updates when World state changes via server-changes → world events flow
-- **Event Flow Optimization**: Clarified dual subscription pattern in GameState
+- **Event Flow Optimization**: Clarified dual subscription pattern in GameViewerPage/GameState
   - GameState emits server-changes after processMoves() and subscribes for metadata extraction
-  - World applies actual world changes and re-emits as specific world events
-  - PhaserWorldScene base class handles TILES_CHANGED/UNITS_CHANGED/WORLD_LOADED/WORLD_CLEARED
+  - common/World applies actual world changes and re-emits as specific world events
+  - common/PhaserWorldScene base class handles TILES_CHANGED/UNITS_CHANGED/WORLD_LOADED/WORLD_CLEARED
 - **Input System Refactoring**: Replaced manual drag detection with proper Phaser patterns
   - Separated tap detection (tile painting) from drag detection (camera panning)
   - Used time/distance thresholds for robust tap detection instead of manual mouse tracking
@@ -84,7 +84,7 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 
 #### Phaser Architecture Unification (v8.0)
 - **Wrapper Elimination**: Removed PhaserWorldEditor and PhaserPanel unnecessary wrapper classes
-- **Unified Scene Architecture**: PhaserWorldScene as base class, PhaserEditorScene as editor extension
+- **Unified Scene Architecture**: common/PhaserWorldScene as base class, WorldEditorPage/PhaserEditorScene as editor extension
 - **Container Management Fix**: Resolved canvas placement issues - canvas now properly renders inside target containers
 - **Scale Mode Optimization**: Fixed infinite canvas growth by switching from RESIZE to FIT scale mode
 - **Method Signature Alignment**: Resolved TypeScript compatibility issues between components and scenes
@@ -113,18 +113,18 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - State management simplification and complexity reduction
 
 #### Previous Session: Unified World Architecture Implementation
-- Enhanced World class with comprehensive Observer pattern support
+- Enhanced common/World class with comprehensive Observer pattern support
 - Implemented WorldObserver interface with type-safe event handling
 - Added batched event system for performance optimization
-- Created self-contained persistence methods in World class
-- Refactored WorldEditorPage to use World as single source of truth
+- Created self-contained persistence methods in common/World class
+- Refactored WorldEditorPage/index.ts to use World as single source of truth
 - Removed redundant state properties and manual change tracking
 - Fixed all compilation errors and achieved clean build
 
-#### Previous Session: Component State Management Architecture 
-- Created WorldEditorPageState class for centralized page-level state management
+#### Previous Session: Component State Management Architecture
+- Created WorldEditorPage/PageState class for centralized page-level state management
 - Established proper component encapsulation with DOM ownership principles
-- Refactored EditorToolsPanel to be state generator and exclusive DOM owner
+- Refactored WorldEditorPage/ToolsPanel to be state generator and exclusive DOM owner
 - Eliminated cross-component DOM manipulation violations
 - Implemented clean state flow: User clicks → Component updates state → State emits events → Components observe
 - Separated state levels: Page-level (tools), Application-level (theme), Component-level (local UI)
@@ -184,16 +184,16 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - Scope DOM queries to component containers with findElement()
 
 #### World Operations
-- Use World class methods for all tile/unit operations (single source of truth)
+- Use common/World class methods for all tile/unit operations (single source of truth)
 - Pass World objects (not raw data) to Phaser components via loadWorld() method
 - Subscribe to World events for automatic UI synchronization
-- Let World handle persistence and change tracking automatically
+- Let common/World handle persistence and change tracking automatically
 
 ### Next Development Priorities
 
 #### Component Integration Completion
-- Update PhaserEditorComponent to subscribe to World events
-- Update TileStatsPanel to read from World instead of Phaser
+- Update WorldEditorPage/PhaserEditorComponent to subscribe to World events
+- Update WorldEditorPage/TileStatsPanel to read from World instead of Phaser
 - Remove redundant getTilesData/setTilesData methods
 - Test complete component synchronization via World events
 
@@ -214,11 +214,11 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 
 #### SVG Asset Loading System (Complete)
 - **AssetProvider Architecture**: Created interface-based system for swappable asset loading strategies
-- **Theme Support**: Assets organized under `assets/themes/<themeName>/` with mapping.json configuration
+- **Theme Support**: Assets organized under `web/assets/themes/<themeName>/` with mapping.json configuration
 - **SVG Template Processing**: Dynamic player color replacement using template variables in SVGs
 - **Phaser Integration**: Fixed async loading issues using Phaser's JSON loader for mapping files
 - **Memory Optimization**: 160x160 rasterization for rendering 1000+ tiles efficiently
-- **Provider Independence**: PhaserWorldScene agnostic to specific provider implementations
+- **Provider Independence**: common/PhaserWorldScene agnostic to specific provider implementations
 - **Provider-Specific Display Sizing**: SVG and PNG providers use different display dimensions for proper hex overlap
 - **Unit Label Repositioning**: Moved health/movement labels below units with smaller font to prevent row overlap
 - **Show Health Toggle**: Added checkbox control in editor toolbar to toggle unit health/movement display visibility
@@ -226,9 +226,9 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 ### Recent Achievements (Session 2025-09-08)
 
 #### Damage Distribution Panel Refactoring (Complete)
-- **Component Extraction**: Separated damage distribution visualization from UnitStatsPanel into dedicated DamageDistributionPanel
+- **Component Extraction**: Separated damage distribution visualization from UnitStatsPanel into dedicated GameViewerPage/DamageDistributionPanel
 - **Independent Dockview Panel**: Damage distribution now appears as its own dockable panel in GameViewerPage
-- **Code Organization**: Removed createDamageHistogram() and generateUnitCombatTable() from UnitStatsPanel
+- **Code Organization**: Removed createDamageHistogram() and generateUnitCombatTable() from GameViewerPage/UnitStatsPanel
 - **Template Separation**: Moved combat table templates to DamageDistributionPanel.html
 - **Event Integration**: Both panels receive unit selection events independently for synchronization
 - **UI Flexibility**: Users can now show/hide damage distribution independently from unit stats
@@ -239,9 +239,9 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Presenter-Driven Architecture**: Animations orchestrated by presenter, scene remains a dumb renderer
 - **Promise-Based API**: All animations return Promises for easy sequencing and chaining
 - **Smart Batching**: Splash damage explosions play simultaneously, sequential chains for causality
-- **Configurable Timing**: Single config file controls all animation speeds with instant mode support
-- **Effect Classes**: Modular, self-contained effect implementations (ProjectileEffect, ExplosionEffect, HealBubblesEffect, CaptureEffect)
-- **Scene API Enhancements**: Enhanced PhaserWorldScene with moveUnit(), showAttackEffect(), showHealEffect(), showCaptureEffect()
+- **Configurable Timing**: Single config file (common/animations/AnimationConfig.ts) controls all animation speeds with instant mode support
+- **Effect Classes**: Modular, self-contained effect implementations in common/animations/effects/ (ProjectileEffect, ExplosionEffect, HealBubblesEffect, CaptureEffect)
+- **Scene API Enhancements**: Enhanced common/PhaserWorldScene with moveUnit(), showAttackEffect(), showHealEffect(), showCaptureEffect()
 - **Unit Lifecycle Animations**: setUnit with flash/appear options, removeUnit with fade-out animation
 - **Particle System**: Runtime-generated particle texture with Phaser particle emitters for effects
 - **Path Animation**: Units smoothly slide along hex paths instead of teleporting
@@ -285,7 +285,7 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 ### Recent Achievements (Session 2025-01-05)
 
 #### Reference Image Layer System for World Editor (Complete)
-- **Layer System Integration**: Integrated ReferenceImageLayer into PhaserEditorScene for proper overlay/background handling
+- **Layer System Integration**: Integrated WorldEditorPage/ReferenceImageLayer into WorldEditorPage/PhaserEditorScene for proper overlay/background handling
 - **Independent Drag Handling**: Overlay mode allows dragging reference image without moving tiles or camera
 - **Independent Scroll Handling**: Overlay mode allows scaling reference image with mouse wheel without zooming camera
 - **Event-Driven UI Sync**: Position and scale changes emit events to keep UI controls in sync during drag/scroll
@@ -295,11 +295,11 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **World Coordinate Persistence**: Reference image stays in world coordinates when switching modes (no position jumping)
 
 **Architecture**:
-- ReferenceImageLayer implements full Layer interface with hitTest(), handleClick(), handleDrag(), handleScroll()
-- PhaserWorldScene routes pointer events through LayerManager before camera operations
+- WorldEditorPage/ReferenceImageLayer implements full Layer interface with hitTest(), handleClick(), handleDrag(), handleScroll()
+- common/PhaserWorldScene routes pointer events through LayerManager before camera operations
 - Layers can block camera pan/zoom by returning true from event handlers
 - Scene events bridge layer changes to EventBus for UI synchronization
-- Guard conditions in ReferenceImagePanel prevent circular updates from programmatic input.value changes
+- Guard conditions in WorldEditorPage/ReferenceImagePanel prevent circular updates from programmatic input.value changes
 
 ### Recent Achievements (Session 2025-01-06)
 
@@ -323,19 +323,19 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 ### Recent Achievements (Session 2025-11-06)
 
 #### Multi-Click Shape Tool System (Complete)
-- **Extensible Shape Tool Architecture**: Created ShapeTool interface for multi-click shape drawing workflow
-  - RectangleTool: First click sets corner, mouse move shows preview, second click completes
-  - CircleTool: First click sets center, second click sets radius (2 clicks total)
-  - OvalTool: First click sets center, second click sets radiusX, third click sets radiusY (3 clicks total, axis-aligned)
-  - LineTool: Multi-click path tool - N clicks to add vertices, Enter to finish, Escape to cancel
+- **Extensible Shape Tool Architecture**: Created WorldEditorPage/tools/ShapeTool interface for multi-click shape drawing workflow
+  - WorldEditorPage/tools/RectangleTool: First click sets corner, mouse move shows preview, second click completes
+  - WorldEditorPage/tools/CircleTool: First click sets center, second click sets radius (2 clicks total)
+  - WorldEditorPage/tools/OvalTool: First click sets center, second click sets radiusX, third click sets radiusY (3 clicks total, axis-aligned)
+  - WorldEditorPage/tools/LineTool: Multi-click path tool - N clicks to add vertices, Enter to finish, Escape to cancel
   - Replaced fatiguing drag-based system with ergonomic multi-click approach
   - Camera panning disabled during shape mode to prevent accidental interruptions
   - Escape key cancels current shape but stays in shape mode
-- **World Helper Methods**: Added reusable shape generation methods
+- **World Helper Methods**: Added reusable shape generation methods to common/World.ts
   - World.circleFrom(): Generate circle tiles using hex distance formula
   - World.ovalFrom(): Generate axis-aligned ellipse tiles in row/col space
   - World.lineFrom(): Generate line/path tiles using Bresenham algorithm
-  - hexDistance() utility in hexUtils.ts for hex coordinate distance calculation
+  - hexDistance() utility in common/hexUtils.ts for hex coordinate distance calculation
 - **Fill/Outline Toggle**: Added UI checkbox for switching between filled and outline shapes
   - Toggle appears for Rectangle, Circle, and Oval modes
   - Hidden for Line mode (lines always stroke only)
@@ -355,11 +355,11 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
   - Line/Path (N clicks, Enter to finish)
 
 **Architecture**:
-- ShapeTool interface defines contract for all shape tools
+- WorldEditorPage/tools/ShapeTool interface defines contract for all shape tools
 - Tools maintain their own state (anchor points, fill mode) and provide preview/result tiles
-- PhaserEditorScene delegates to currentShapeTool for all shape operations with unified setShapeMode()
-- ShapeHighlightLayer renders preview independently of tool type
-- World methods use hexUtils (hexDistance, hexToRowCol, rowColToHex) for consistency
+- WorldEditorPage/PhaserEditorScene delegates to currentShapeTool for all shape operations with unified setShapeMode()
+- common/HexHighlightLayer (ShapeHighlightLayer) renders preview independently of tool type
+- common/World methods use common/hexUtils (hexDistance, hexToRowCol, rowColToHex) for consistency
 - Oval is axis-aligned in row/col space (simpler math, easier to reason about)
 - Line uses Bresenham-style interpolation in row/col space
 

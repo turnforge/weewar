@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provides a pluggable animation system for game actions in PhaserGameScene. Animations are presenter-driven, keeping the scene as a dumb renderer that executes visual commands.
+Provides a pluggable animation system for game actions in GameViewerPage/PhaserGameScene. Animations are presenter-driven, keeping the scene as a dumb renderer that executes visual commands.
 
 ## Architecture
 
@@ -132,7 +132,7 @@ await capture.play();
 
 ## Integration Points
 
-### PhaserWorldScene Enhancements
+### common/PhaserWorldScene Enhancements
 
 **Modified methods**:
 - `setUnit()`: Now async with flash/appear options
@@ -211,7 +211,7 @@ Particles are tinted via emitter config to create colored effects.
 
 ### Coordinate Conversion
 
-All effects use `hexToPixel(q, r)` to convert hex coordinates to world pixel positions for rendering.
+All effects use `hexToPixel(q, r)` from common/hexUtils.ts to convert hex coordinates to world pixel positions for rendering.
 
 ### Depth Layering
 
@@ -246,9 +246,9 @@ To add new animations:
    }
    ```
 
-2. Add timing constants to `AnimationConfig.ts`
+2. Add timing constants to `common/animations/AnimationConfig.ts`
 
-3. Add scene method in `PhaserWorldScene.ts`:
+3. Add scene method in `common/PhaserWorldScene.ts`:
    ```typescript
    public showNewEffect(q, r, params): Promise<void> {
      const pos = hexToPixel(q, r);
@@ -262,7 +262,7 @@ To add new animations:
 ## File Structure
 
 ```
-web/src/phaser/animations/
+web/pages/common/animations/
 ├── SUMMARY.md                      # This file
 ├── AnimationConfig.ts              # Timing and visual configuration
 └── effects/

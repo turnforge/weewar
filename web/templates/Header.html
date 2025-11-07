@@ -119,13 +119,14 @@
 /* Desktop: Drawer appears inline with header */
 @media (min-width: 768px) {
   #header-actions-drawer {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 50%;
     transform: translateX(-50%);
     height: 70px;
     width: auto;
-    z-index: 10;
+    z-index: 25;
+    pointer-events: none;
   }
 
   #header-actions-drawer .header-drawer-container {
@@ -145,6 +146,7 @@
     align-items: center;
     gap: 1rem;
     height: 100%;
+    pointer-events: auto;
   }
 
   /* Hide backdrop on desktop */

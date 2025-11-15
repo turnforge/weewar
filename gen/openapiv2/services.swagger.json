@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "dal/v1/annotations.proto",
+    "title": "weewar/v1/models/indexer.proto",
     "version": "version not set"
   },
   "tags": [

@@ -11,7 +11,7 @@ import (
 	sync "sync"
 	unsafe "unsafe"
 
-	_ "github.com/turnforge/weewar/gen/go/dal/v1"
+	_ "github.com/panyam/protoc-gen-dal/protos/gen/dal/v1"
 	_ "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"

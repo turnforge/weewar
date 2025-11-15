@@ -9,10 +9,10 @@ buildweb:
 	cd web ; make build
 
 binlocal: 
-	go build -ldflags "$(LDFLAGS)" -o ./bin/weewar ./main.go
+	go build -ldflags "$(LDFLAGS)" -o ./bin/weewar ./cmd/backend/*.go
 
 serve:
-	WEEWAR_ENV=dev go run main.go
+	WEEWAR_ENV=dev go run cmd/backend/*.go
 
 vars:
 	@echo "GO_ROOT=$(GO_ROOT)"

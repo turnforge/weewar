@@ -35,25 +35,25 @@ func main() {
 }
 
 func DefaultGatewayAddress() string {
-	gateway_addr := os.Getenv("WEEWAR_WEB_PORT")
+	gateway_addr := os.Getenv("WEEWAR_INDEXER_WEB_PORT")
 	if gateway_addr != "" {
 		return gateway_addr
 	}
-	return ":8080"
+	return ":6060"
 }
 
 func DefaultServiceAddress() string {
-	port := os.Getenv("WEEWAR_GRPC_PORT")
+	port := os.Getenv("WEEWAR_INDEXER_GRPC_PORT")
 	if port != "" {
 		return port
 	}
-	return ":9090"
+	return ":7070"
 }
 
 func parseFlags() {
 	envfile := ".env"
-	log.Println("Environment: ", os.Getenv("WEEWAR_ENV"))
-	if os.Getenv("WEEWAR_ENV") == "dev" {
+	log.Println("Environment: ", os.Getenv("WEEWAR_INDEXER_ENV"))
+	if os.Getenv("WEEAR_INDEXER_ENV") == "dev" {
 		envfile = ".env.dev"
 		logger := slog.New(utils.NewPrettyHandler(os.Stdout, utils.PrettyHandlerOptions{
 			SlogOpts: slog.HandlerOptions{
@@ -82,8 +82,8 @@ func (b *Backend) SetupApp() *utils.App {
 	log.Println("gateway, Address: ", gatewayAddress)
 	app.AddServer(&server.Server{Address: b.GrpcAddress})
 
-	isDevMode := os.Getenv("WEEWAR_ENV") == "dev"
-	app.AddServer(&web.WebAppServer{
+	isDevMode := os.Getenv("WEEAR_INDEXER_ENV") == "dev"
+	app.AddServer(&web.IndexerAppServer{
 		GrpcAddress:   b.GrpcAddress,
 		Address:       b.GatewayAddress,
 		AllowLocalDev: isDevMode,

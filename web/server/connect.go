@@ -8,16 +8,25 @@ import (
 
 	"connectrpc.com/connect"
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	svc "github.com/turnforge/weewar/services"
 	"github.com/turnforge/weewar/services/fsbe"
 )
 
 // ConnectIndexerServiceAdapter adapts the gRPC IndexerService to Connect's interface
 type ConnectIndexerServiceAdapter struct {
-	svc *gormbe.IndexerService
+	svc *svc.IndexerService
 }
 
-func NewConnectIndexerServiceAdapter(svc *gormbe.IndexerService) *ConnectIndexerServiceAdapter {
+func NewConnectIndexerServiceAdapter(svc *svc.IndexerService) *ConnectIndexerServiceAdapter {
 	return &ConnectIndexerServiceAdapter{svc: svc}
+}
+
+func (a *ConnectIndexerServiceAdapter) CreateGame(ctx context.Context, req *connect.Request[v1.CreateGameRequest]) (*connect.Response[v1.CreateGameResponse], error) {
+	resp, err := a.svc.CreateGame(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
 }
 
 // ConnectGamesServiceAdapter adapts the gRPC GamesService to Connect's interface

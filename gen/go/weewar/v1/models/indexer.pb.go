@@ -25,7 +25,62 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type EntityIndexState struct {
+type IndexStatus int32
+
+const (
+	IndexStatus_INDEX_STATUS_UNSPECIFIED IndexStatus = 0
+	IndexStatus_INDEX_STATUS_PENDING     IndexStatus = 1
+	IndexStatus_INDEX_STATUS_INDEXING    IndexStatus = 2
+	IndexStatus_INDEX_STATUS_COMPLETED   IndexStatus = 3
+	IndexStatus_INDEX_STATUS_FAILED      IndexStatus = 4
+)
+
+// Enum value maps for IndexStatus.
+var (
+	IndexStatus_name = map[int32]string{
+		0: "INDEX_STATUS_UNSPECIFIED",
+		1: "INDEX_STATUS_PENDING",
+		2: "INDEX_STATUS_INDEXING",
+		3: "INDEX_STATUS_COMPLETED",
+		4: "INDEX_STATUS_FAILED",
+	}
+	IndexStatus_value = map[string]int32{
+		"INDEX_STATUS_UNSPECIFIED": 0,
+		"INDEX_STATUS_PENDING":     1,
+		"INDEX_STATUS_INDEXING":    2,
+		"INDEX_STATUS_COMPLETED":   3,
+		"INDEX_STATUS_FAILED":      4,
+	}
+)
+
+func (x IndexStatus) Enum() *IndexStatus {
+	p := new(IndexStatus)
+	*p = x
+	return p
+}
+
+func (x IndexStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (IndexStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_weewar_v1_models_indexer_proto_enumTypes[0].Descriptor()
+}
+
+func (IndexStatus) Type() protoreflect.EnumType {
+	return &file_weewar_v1_models_indexer_proto_enumTypes[0]
+}
+
+func (x IndexStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use IndexStatus.Descriptor instead.
+func (IndexStatus) EnumDescriptor() ([]byte, []int) {
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{0}
+}
+
+type IndexState struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	EntityType string                 `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
 	EntityId   string                 `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
@@ -33,37 +88,39 @@ type EntityIndexState struct {
 	// EntityType + EntityId + IndexType should be  unique
 	IndexType string `protobuf:"bytes,3,opt,name=index_type,json=indexType,proto3" json:"index_type,omitempty"`
 	// When the last indexing was queued
-	LastQueuedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=last_queued_at,json=lastQueuedAt,proto3" json:"last_queued_at,omitempty"`
-	// when the last indexing was completed
-	LastIndexedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_indexed_at,json=lastIndexedAt,proto3" json:"last_indexed_at,omitempty"`
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// when the last time the entity was recorded for an update (means it is eligible for a re-indexing)
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// When did the last indexing finish
+	IndexedAt *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=indexed_at,json=indexedAt,proto3" json:"indexed_at,omitempty"`
+	// Whether indexing is needed or not
+	NeedsIndexing bool `protobuf:"varint,7,opt,name=needs_indexing,json=needsIndexing,proto3" json:"needs_indexing,omitempty"`
 	// "queued/pending", "indexing", "completed", "failed"
-	Status string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Status IndexStatus `protobuf:"varint,8,opt,name=status,proto3,enum=weewar.v1.IndexStatus" json:"status,omitempty"`
 	// If there was an error in the last indexing
-	LastError string `protobuf:"bytes,7,opt,name=last_error,json=lastError,proto3" json:"last_error,omitempty"`
-	// Keep a hash of the contents for quick check to check updated
-	// (not sure if needed) - This should be provided by the source
-	LastContentHash string `protobuf:"bytes,8,opt,name=last_content_hash,json=lastContentHash,proto3" json:"last_content_hash,omitempty"`
-	RetryCount      int32  `protobuf:"varint,9,opt,name=retry_count,json=retryCount,proto3" json:"retry_count,omitempty"`
-	// Which LRO this entity has been updated via
-	CurrentLroId  string `protobuf:"bytes,10,opt,name=current_lro_id,json=currentLroId,proto3" json:"current_lro_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	LastError string `protobuf:"bytes,9,opt,name=last_error,json=lastError,proto3" json:"last_error,omitempty"`
+	// A way to ignore multiple requests if they are updates but
+	// nothing has changed
+	IdempotencyKey string `protobuf:"bytes,10,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	RetryCount     int32  `protobuf:"varint,11,opt,name=retry_count,json=retryCount,proto3" json:"retry_count,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
-func (x *EntityIndexState) Reset() {
-	*x = EntityIndexState{}
+func (x *IndexState) Reset() {
+	*x = IndexState{}
 	mi := &file_weewar_v1_models_indexer_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EntityIndexState) String() string {
+func (x *IndexState) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EntityIndexState) ProtoMessage() {}
+func (*IndexState) ProtoMessage() {}
 
-func (x *EntityIndexState) ProtoReflect() protoreflect.Message {
+func (x *IndexState) ProtoReflect() protoreflect.Message {
 	mi := &file_weewar_v1_models_indexer_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -75,85 +132,190 @@ func (x *EntityIndexState) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EntityIndexState.ProtoReflect.Descriptor instead.
-func (*EntityIndexState) Descriptor() ([]byte, []int) {
+// Deprecated: Use IndexState.ProtoReflect.Descriptor instead.
+func (*IndexState) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *EntityIndexState) GetEntityType() string {
+func (x *IndexState) GetEntityType() string {
 	if x != nil {
 		return x.EntityType
 	}
 	return ""
 }
 
-func (x *EntityIndexState) GetEntityId() string {
+func (x *IndexState) GetEntityId() string {
 	if x != nil {
 		return x.EntityId
 	}
 	return ""
 }
 
-func (x *EntityIndexState) GetIndexType() string {
+func (x *IndexState) GetIndexType() string {
 	if x != nil {
 		return x.IndexType
 	}
 	return ""
 }
 
-func (x *EntityIndexState) GetLastQueuedAt() *timestamppb.Timestamp {
+func (x *IndexState) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.LastQueuedAt
+		return x.CreatedAt
 	}
 	return nil
 }
 
-func (x *EntityIndexState) GetLastIndexedAt() *timestamppb.Timestamp {
+func (x *IndexState) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.LastIndexedAt
+		return x.UpdatedAt
 	}
 	return nil
 }
 
-func (x *EntityIndexState) GetStatus() string {
+func (x *IndexState) GetIndexedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.IndexedAt
+	}
+	return nil
+}
+
+func (x *IndexState) GetNeedsIndexing() bool {
+	if x != nil {
+		return x.NeedsIndexing
+	}
+	return false
+}
+
+func (x *IndexState) GetStatus() IndexStatus {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return IndexStatus_INDEX_STATUS_UNSPECIFIED
 }
 
-func (x *EntityIndexState) GetLastError() string {
+func (x *IndexState) GetLastError() string {
 	if x != nil {
 		return x.LastError
 	}
 	return ""
 }
 
-func (x *EntityIndexState) GetLastContentHash() string {
+func (x *IndexState) GetIdempotencyKey() string {
 	if x != nil {
-		return x.LastContentHash
+		return x.IdempotencyKey
 	}
 	return ""
 }
 
-func (x *EntityIndexState) GetRetryCount() int32 {
+func (x *IndexState) GetRetryCount() int32 {
 	if x != nil {
 		return x.RetryCount
 	}
 	return 0
 }
 
-func (x *EntityIndexState) GetCurrentLroId() string {
+type EnsureIndexStateRequest struct {
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	IndexState *IndexState            `protobuf:"bytes,1,opt,name=index_state,json=indexState,proto3" json:"index_state,omitempty"`
+	// *
+	// Mask of fields being updated in this Game to make partial changes.
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnsureIndexStateRequest) Reset() {
+	*x = EnsureIndexStateRequest{}
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnsureIndexStateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnsureIndexStateRequest) ProtoMessage() {}
+
+func (x *EnsureIndexStateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[1]
 	if x != nil {
-		return x.CurrentLroId
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return ""
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnsureIndexStateRequest.ProtoReflect.Descriptor instead.
+func (*EnsureIndexStateRequest) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EnsureIndexStateRequest) GetIndexState() *IndexState {
+	if x != nil {
+		return x.IndexState
+	}
+	return nil
+}
+
+func (x *EnsureIndexStateRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+type EnsureIndexStateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IndexState    *IndexState            `protobuf:"bytes,1,opt,name=index_state,json=indexState,proto3" json:"index_state,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnsureIndexStateResponse) Reset() {
+	*x = EnsureIndexStateResponse{}
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnsureIndexStateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnsureIndexStateResponse) ProtoMessage() {}
+
+func (x *EnsureIndexStateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnsureIndexStateResponse.ProtoReflect.Descriptor instead.
+func (*EnsureIndexStateResponse) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *EnsureIndexStateResponse) GetIndexState() *IndexState {
+	if x != nil {
+		return x.IndexState
+	}
+	return nil
 }
 
 type GetIndexStatesRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	EntityType string                 `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	EntityIds  []string               `protobuf:"bytes,2,rep,name=entity_ids,json=entityIds,proto3" json:"entity_ids,omitempty"`
+	EntityId   string                 `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
 	// Optional - can be used to get "all" indexer states or just once specified here
 	IndexTypes    []string `protobuf:"bytes,3,rep,name=index_types,json=indexTypes,proto3" json:"index_types,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -162,7 +324,7 @@ type GetIndexStatesRequest struct {
 
 func (x *GetIndexStatesRequest) Reset() {
 	*x = GetIndexStatesRequest{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[1]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +336,7 @@ func (x *GetIndexStatesRequest) String() string {
 func (*GetIndexStatesRequest) ProtoMessage() {}
 
 func (x *GetIndexStatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[1]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,7 +349,7 @@ func (x *GetIndexStatesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIndexStatesRequest.ProtoReflect.Descriptor instead.
 func (*GetIndexStatesRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{1}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetIndexStatesRequest) GetEntityType() string {
@@ -197,11 +359,11 @@ func (x *GetIndexStatesRequest) GetEntityType() string {
 	return ""
 }
 
-func (x *GetIndexStatesRequest) GetEntityIds() []string {
+func (x *GetIndexStatesRequest) GetEntityId() string {
 	if x != nil {
-		return x.EntityIds
+		return x.EntityId
 	}
-	return nil
+	return ""
 }
 
 func (x *GetIndexStatesRequest) GetIndexTypes() []string {
@@ -211,28 +373,28 @@ func (x *GetIndexStatesRequest) GetIndexTypes() []string {
 	return nil
 }
 
-type EntityIndexStateList struct {
+type IndexStateList struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	States        []*EntityIndexState    `protobuf:"bytes,1,rep,name=states,proto3" json:"states,omitempty"`
+	States        []*IndexState          `protobuf:"bytes,1,rep,name=states,proto3" json:"states,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EntityIndexStateList) Reset() {
-	*x = EntityIndexStateList{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[2]
+func (x *IndexStateList) Reset() {
+	*x = IndexStateList{}
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EntityIndexStateList) String() string {
+func (x *IndexStateList) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EntityIndexStateList) ProtoMessage() {}
+func (*IndexStateList) ProtoMessage() {}
 
-func (x *EntityIndexStateList) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[2]
+func (x *IndexStateList) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -243,12 +405,12 @@ func (x *EntityIndexStateList) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EntityIndexStateList.ProtoReflect.Descriptor instead.
-func (*EntityIndexStateList) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{2}
+// Deprecated: Use IndexStateList.ProtoReflect.Descriptor instead.
+func (*IndexStateList) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *EntityIndexStateList) GetStates() []*EntityIndexState {
+func (x *IndexStateList) GetStates() []*IndexState {
 	if x != nil {
 		return x.States
 	}
@@ -256,15 +418,15 @@ func (x *EntityIndexStateList) GetStates() []*EntityIndexState {
 }
 
 type GetIndexStatesResponse struct {
-	state         protoimpl.MessageState           `protogen:"open.v1"`
-	States        map[string]*EntityIndexStateList `protobuf:"bytes,1,rep,name=states,proto3" json:"states,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	States        map[string]*IndexState `protobuf:"bytes,1,rep,name=states,proto3" json:"states,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetIndexStatesResponse) Reset() {
 	*x = GetIndexStatesResponse{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[3]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -276,7 +438,7 @@ func (x *GetIndexStatesResponse) String() string {
 func (*GetIndexStatesResponse) ProtoMessage() {}
 
 func (x *GetIndexStatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[3]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -289,10 +451,10 @@ func (x *GetIndexStatesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIndexStatesResponse.ProtoReflect.Descriptor instead.
 func (*GetIndexStatesResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{3}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetIndexStatesResponse) GetStates() map[string]*EntityIndexStateList {
+func (x *GetIndexStatesResponse) GetStates() map[string]*IndexState {
 	if x != nil {
 		return x.States
 	}
@@ -303,9 +465,9 @@ type ListIndexStatesRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	EntityType string                 `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
 	// Get records indexed "before" this time
-	IndexedBefore *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=indexed_before,json=indexedBefore,proto3,oneof" json:"indexed_before,omitempty"`
-	// Get records indexed "after" this time
-	IndexedAfter *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=indexed_after,json=indexedAfter,proto3,oneof" json:"indexed_after,omitempty"`
+	UpdatedBefore *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=updated_before,json=updatedBefore,proto3,oneof" json:"updated_before,omitempty"`
+	// Get records updated "after" this time
+	UpdatedAfter *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=updated_after,json=updatedAfter,proto3,oneof" json:"updated_after,omitempty"`
 	// Filter by index types or get all
 	IndexTypes []string `protobuf:"bytes,4,rep,name=index_types,json=indexTypes,proto3" json:"index_types,omitempty"`
 	// "id" or "indexed_at"
@@ -318,7 +480,7 @@ type ListIndexStatesRequest struct {
 
 func (x *ListIndexStatesRequest) Reset() {
 	*x = ListIndexStatesRequest{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[4]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -330,7 +492,7 @@ func (x *ListIndexStatesRequest) String() string {
 func (*ListIndexStatesRequest) ProtoMessage() {}
 
 func (x *ListIndexStatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[4]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -343,7 +505,7 @@ func (x *ListIndexStatesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListIndexStatesRequest.ProtoReflect.Descriptor instead.
 func (*ListIndexStatesRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{4}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListIndexStatesRequest) GetEntityType() string {
@@ -353,16 +515,16 @@ func (x *ListIndexStatesRequest) GetEntityType() string {
 	return ""
 }
 
-func (x *ListIndexStatesRequest) GetIndexedBefore() *timestamppb.Timestamp {
+func (x *ListIndexStatesRequest) GetUpdatedBefore() *timestamppb.Timestamp {
 	if x != nil {
-		return x.IndexedBefore
+		return x.UpdatedBefore
 	}
 	return nil
 }
 
-func (x *ListIndexStatesRequest) GetIndexedAfter() *timestamppb.Timestamp {
+func (x *ListIndexStatesRequest) GetUpdatedAfter() *timestamppb.Timestamp {
 	if x != nil {
-		return x.IndexedAfter
+		return x.UpdatedAfter
 	}
 	return nil
 }
@@ -390,7 +552,7 @@ func (x *ListIndexStatesRequest) GetCount() int32 {
 
 type ListIndexStatesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Items []*EntityIndexState    `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Items []*IndexState          `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	// How to identify the next "page" in this list
 	NextPageKey   string `protobuf:"bytes,2,opt,name=next_page_key,json=nextPageKey,proto3" json:"next_page_key,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -399,7 +561,7 @@ type ListIndexStatesResponse struct {
 
 func (x *ListIndexStatesResponse) Reset() {
 	*x = ListIndexStatesResponse{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[5]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -411,7 +573,7 @@ func (x *ListIndexStatesResponse) String() string {
 func (*ListIndexStatesResponse) ProtoMessage() {}
 
 func (x *ListIndexStatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[5]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -424,10 +586,10 @@ func (x *ListIndexStatesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListIndexStatesResponse.ProtoReflect.Descriptor instead.
 func (*ListIndexStatesResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{5}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *ListIndexStatesResponse) GetItems() []*EntityIndexState {
+func (x *ListIndexStatesResponse) GetItems() []*IndexState {
 	if x != nil {
 		return x.Items
 	}
@@ -444,7 +606,7 @@ func (x *ListIndexStatesResponse) GetNextPageKey() string {
 type DeleteIndexStatesRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	EntityType string                 `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	EntityIds  []string               `protobuf:"bytes,2,rep,name=entity_ids,json=entityIds,proto3" json:"entity_ids,omitempty"`
+	EntityId   string                 `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
 	// Optional - can be used to get "all" indexer states or just once specified here
 	IndexTypes    []string `protobuf:"bytes,3,rep,name=index_types,json=indexTypes,proto3" json:"index_types,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -453,7 +615,7 @@ type DeleteIndexStatesRequest struct {
 
 func (x *DeleteIndexStatesRequest) Reset() {
 	*x = DeleteIndexStatesRequest{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[6]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -465,7 +627,7 @@ func (x *DeleteIndexStatesRequest) String() string {
 func (*DeleteIndexStatesRequest) ProtoMessage() {}
 
 func (x *DeleteIndexStatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[6]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -478,7 +640,7 @@ func (x *DeleteIndexStatesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteIndexStatesRequest.ProtoReflect.Descriptor instead.
 func (*DeleteIndexStatesRequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{6}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteIndexStatesRequest) GetEntityType() string {
@@ -488,11 +650,11 @@ func (x *DeleteIndexStatesRequest) GetEntityType() string {
 	return ""
 }
 
-func (x *DeleteIndexStatesRequest) GetEntityIds() []string {
+func (x *DeleteIndexStatesRequest) GetEntityId() string {
 	if x != nil {
-		return x.EntityIds
+		return x.EntityId
 	}
-	return nil
+	return ""
 }
 
 func (x *DeleteIndexStatesRequest) GetIndexTypes() []string {
@@ -510,7 +672,7 @@ type DeleteIndexStatesResponse struct {
 
 func (x *DeleteIndexStatesResponse) Reset() {
 	*x = DeleteIndexStatesResponse{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[7]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -522,7 +684,7 @@ func (x *DeleteIndexStatesResponse) String() string {
 func (*DeleteIndexStatesResponse) ProtoMessage() {}
 
 func (x *DeleteIndexStatesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[7]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -535,7 +697,7 @@ func (x *DeleteIndexStatesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteIndexStatesResponse.ProtoReflect.Descriptor instead.
 func (*DeleteIndexStatesResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{7}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{9}
 }
 
 // Request messages
@@ -551,7 +713,7 @@ type IndexRecord struct {
 
 func (x *IndexRecord) Reset() {
 	*x = IndexRecord{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[8]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -563,7 +725,7 @@ func (x *IndexRecord) String() string {
 func (*IndexRecord) ProtoMessage() {}
 
 func (x *IndexRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[8]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -576,7 +738,7 @@ func (x *IndexRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IndexRecord.ProtoReflect.Descriptor instead.
 func (*IndexRecord) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{8}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *IndexRecord) GetEntityId() string {
@@ -629,7 +791,7 @@ type IndexRecordsLRO struct {
 
 func (x *IndexRecordsLRO) Reset() {
 	*x = IndexRecordsLRO{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[9]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -641,7 +803,7 @@ func (x *IndexRecordsLRO) String() string {
 func (*IndexRecordsLRO) ProtoMessage() {}
 
 func (x *IndexRecordsLRO) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[9]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -654,7 +816,7 @@ func (x *IndexRecordsLRO) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IndexRecordsLRO.ProtoReflect.Descriptor instead.
 func (*IndexRecordsLRO) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{9}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *IndexRecordsLRO) GetLroId() string {
@@ -708,7 +870,7 @@ type CreateIndexRecordsLRORequest struct {
 
 func (x *CreateIndexRecordsLRORequest) Reset() {
 	*x = CreateIndexRecordsLRORequest{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[10]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -720,7 +882,7 @@ func (x *CreateIndexRecordsLRORequest) String() string {
 func (*CreateIndexRecordsLRORequest) ProtoMessage() {}
 
 func (x *CreateIndexRecordsLRORequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[10]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -733,7 +895,7 @@ func (x *CreateIndexRecordsLRORequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateIndexRecordsLRORequest.ProtoReflect.Descriptor instead.
 func (*CreateIndexRecordsLRORequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{10}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CreateIndexRecordsLRORequest) GetLro() *IndexRecordsLRO {
@@ -752,7 +914,7 @@ type CreateIndexRecordsLROResponse struct {
 
 func (x *CreateIndexRecordsLROResponse) Reset() {
 	*x = CreateIndexRecordsLROResponse{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[11]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -764,7 +926,7 @@ func (x *CreateIndexRecordsLROResponse) String() string {
 func (*CreateIndexRecordsLROResponse) ProtoMessage() {}
 
 func (x *CreateIndexRecordsLROResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[11]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -777,7 +939,7 @@ func (x *CreateIndexRecordsLROResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateIndexRecordsLROResponse.ProtoReflect.Descriptor instead.
 func (*CreateIndexRecordsLROResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{11}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *CreateIndexRecordsLROResponse) GetLro() *IndexRecordsLRO {
@@ -799,7 +961,7 @@ type UpdateIndexRecordsLRORequest struct {
 
 func (x *UpdateIndexRecordsLRORequest) Reset() {
 	*x = UpdateIndexRecordsLRORequest{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[12]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -811,7 +973,7 @@ func (x *UpdateIndexRecordsLRORequest) String() string {
 func (*UpdateIndexRecordsLRORequest) ProtoMessage() {}
 
 func (x *UpdateIndexRecordsLRORequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[12]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -824,7 +986,7 @@ func (x *UpdateIndexRecordsLRORequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateIndexRecordsLRORequest.ProtoReflect.Descriptor instead.
 func (*UpdateIndexRecordsLRORequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{12}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateIndexRecordsLRORequest) GetLro() *IndexRecordsLRO {
@@ -850,7 +1012,7 @@ type UpdateIndexRecordsLROResponse struct {
 
 func (x *UpdateIndexRecordsLROResponse) Reset() {
 	*x = UpdateIndexRecordsLROResponse{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[13]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -862,7 +1024,7 @@ func (x *UpdateIndexRecordsLROResponse) String() string {
 func (*UpdateIndexRecordsLROResponse) ProtoMessage() {}
 
 func (x *UpdateIndexRecordsLROResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[13]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -875,7 +1037,7 @@ func (x *UpdateIndexRecordsLROResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateIndexRecordsLROResponse.ProtoReflect.Descriptor instead.
 func (*UpdateIndexRecordsLROResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{13}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateIndexRecordsLROResponse) GetLro() *IndexRecordsLRO {
@@ -894,7 +1056,7 @@ type GetIndexRecordsLRORequest struct {
 
 func (x *GetIndexRecordsLRORequest) Reset() {
 	*x = GetIndexRecordsLRORequest{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[14]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -906,7 +1068,7 @@ func (x *GetIndexRecordsLRORequest) String() string {
 func (*GetIndexRecordsLRORequest) ProtoMessage() {}
 
 func (x *GetIndexRecordsLRORequest) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[14]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -919,7 +1081,7 @@ func (x *GetIndexRecordsLRORequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIndexRecordsLRORequest.ProtoReflect.Descriptor instead.
 func (*GetIndexRecordsLRORequest) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{14}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetIndexRecordsLRORequest) GetLroId() string {
@@ -938,7 +1100,7 @@ type GetIndexRecordsLROResponse struct {
 
 func (x *GetIndexRecordsLROResponse) Reset() {
 	*x = GetIndexRecordsLROResponse{}
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[15]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -950,7 +1112,7 @@ func (x *GetIndexRecordsLROResponse) String() string {
 func (*GetIndexRecordsLROResponse) ProtoMessage() {}
 
 func (x *GetIndexRecordsLROResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_weewar_v1_models_indexer_proto_msgTypes[15]
+	mi := &file_weewar_v1_models_indexer_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -963,7 +1125,7 @@ func (x *GetIndexRecordsLROResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIndexRecordsLROResponse.ProtoReflect.Descriptor instead.
 func (*GetIndexRecordsLROResponse) Descriptor() ([]byte, []int) {
-	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{15}
+	return file_weewar_v1_models_indexer_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetIndexRecordsLROResponse) GetLro() *IndexRecordsLRO {
@@ -977,56 +1139,67 @@ var File_weewar_v1_models_indexer_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_models_indexer_proto_rawDesc = "" +
 	"\n" +
-	"\x1eweewar/v1/models/indexer.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a google/protobuf/field_mask.proto\"\x9f\x03\n" +
-	"\x10EntityIndexState\x12\x1f\n" +
+	"\x1eweewar/v1/models/indexer.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a google/protobuf/field_mask.proto\"\xda\x03\n" +
+	"\n" +
+	"IndexState\x12\x1f\n" +
 	"\ventity_type\x18\x01 \x01(\tR\n" +
 	"entityType\x12\x1b\n" +
 	"\tentity_id\x18\x02 \x01(\tR\bentityId\x12\x1d\n" +
 	"\n" +
-	"index_type\x18\x03 \x01(\tR\tindexType\x12@\n" +
-	"\x0elast_queued_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\flastQueuedAt\x12B\n" +
-	"\x0flast_indexed_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\rlastIndexedAt\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
+	"index_type\x18\x03 \x01(\tR\tindexType\x129\n" +
 	"\n" +
-	"last_error\x18\a \x01(\tR\tlastError\x12*\n" +
-	"\x11last_content_hash\x18\b \x01(\tR\x0flastContentHash\x12\x1f\n" +
-	"\vretry_count\x18\t \x01(\x05R\n" +
-	"retryCount\x12$\n" +
-	"\x0ecurrent_lro_id\x18\n" +
-	" \x01(\tR\fcurrentLroId\"x\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"\n" +
+	"indexed_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tindexedAt\x12%\n" +
+	"\x0eneeds_indexing\x18\a \x01(\bR\rneedsIndexing\x12.\n" +
+	"\x06status\x18\b \x01(\x0e2\x16.weewar.v1.IndexStatusR\x06status\x12\x1d\n" +
+	"\n" +
+	"last_error\x18\t \x01(\tR\tlastError\x12'\n" +
+	"\x0fidempotency_key\x18\n" +
+	" \x01(\tR\x0eidempotencyKey\x12\x1f\n" +
+	"\vretry_count\x18\v \x01(\x05R\n" +
+	"retryCount\"\x8e\x01\n" +
+	"\x17EnsureIndexStateRequest\x126\n" +
+	"\vindex_state\x18\x01 \x01(\v2\x15.weewar.v1.IndexStateR\n" +
+	"indexState\x12;\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
+	"updateMask\"R\n" +
+	"\x18EnsureIndexStateResponse\x126\n" +
+	"\vindex_state\x18\x01 \x01(\v2\x15.weewar.v1.IndexStateR\n" +
+	"indexState\"v\n" +
 	"\x15GetIndexStatesRequest\x12\x1f\n" +
 	"\ventity_type\x18\x01 \x01(\tR\n" +
-	"entityType\x12\x1d\n" +
-	"\n" +
-	"entity_ids\x18\x02 \x03(\tR\tentityIds\x12\x1f\n" +
+	"entityType\x12\x1b\n" +
+	"\tentity_id\x18\x02 \x01(\tR\bentityId\x12\x1f\n" +
 	"\vindex_types\x18\x03 \x03(\tR\n" +
-	"indexTypes\"K\n" +
-	"\x14EntityIndexStateList\x123\n" +
-	"\x06states\x18\x01 \x03(\v2\x1b.weewar.v1.EntityIndexStateR\x06states\"\xbb\x01\n" +
+	"indexTypes\"?\n" +
+	"\x0eIndexStateList\x12-\n" +
+	"\x06states\x18\x01 \x03(\v2\x15.weewar.v1.IndexStateR\x06states\"\xb1\x01\n" +
 	"\x16GetIndexStatesResponse\x12E\n" +
-	"\x06states\x18\x01 \x03(\v2-.weewar.v1.GetIndexStatesResponse.StatesEntryR\x06states\x1aZ\n" +
+	"\x06states\x18\x01 \x03(\v2-.weewar.v1.GetIndexStatesResponse.StatesEntryR\x06states\x1aP\n" +
 	"\vStatesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x125\n" +
-	"\x05value\x18\x02 \x01(\v2\x1f.weewar.v1.EntityIndexStateListR\x05value:\x028\x01\"\xbe\x02\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12+\n" +
+	"\x05value\x18\x02 \x01(\v2\x15.weewar.v1.IndexStateR\x05value:\x028\x01\"\xbe\x02\n" +
 	"\x16ListIndexStatesRequest\x12\x1f\n" +
 	"\ventity_type\x18\x01 \x01(\tR\n" +
 	"entityType\x12F\n" +
-	"\x0eindexed_before\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\rindexedBefore\x88\x01\x01\x12D\n" +
-	"\rindexed_after\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\findexedAfter\x88\x01\x01\x12\x1f\n" +
+	"\x0eupdated_before\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\rupdatedBefore\x88\x01\x01\x12D\n" +
+	"\rupdated_after\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\fupdatedAfter\x88\x01\x01\x12\x1f\n" +
 	"\vindex_types\x18\x04 \x03(\tR\n" +
 	"indexTypes\x12\x19\n" +
 	"\border_by\x18\x05 \x01(\tR\aorderBy\x12\x14\n" +
 	"\x05count\x18\x06 \x01(\x05R\x05countB\x11\n" +
-	"\x0f_indexed_beforeB\x10\n" +
-	"\x0e_indexed_after\"p\n" +
-	"\x17ListIndexStatesResponse\x121\n" +
-	"\x05items\x18\x01 \x03(\v2\x1b.weewar.v1.EntityIndexStateR\x05items\x12\"\n" +
-	"\rnext_page_key\x18\x02 \x01(\tR\vnextPageKey\"{\n" +
+	"\x0f_updated_beforeB\x10\n" +
+	"\x0e_updated_after\"j\n" +
+	"\x17ListIndexStatesResponse\x12+\n" +
+	"\x05items\x18\x01 \x03(\v2\x15.weewar.v1.IndexStateR\x05items\x12\"\n" +
+	"\rnext_page_key\x18\x02 \x01(\tR\vnextPageKey\"y\n" +
 	"\x18DeleteIndexStatesRequest\x12\x1f\n" +
 	"\ventity_type\x18\x01 \x01(\tR\n" +
-	"entityType\x12\x1d\n" +
-	"\n" +
-	"entity_ids\x18\x02 \x03(\tR\tentityIds\x12\x1f\n" +
+	"entityType\x12\x1b\n" +
+	"\tentity_id\x18\x02 \x01(\tR\bentityId\x12\x1f\n" +
 	"\vindex_types\x18\x03 \x03(\tR\n" +
 	"indexTypes\"\x1b\n" +
 	"\x19DeleteIndexStatesResponse\"\xc1\x01\n" +
@@ -1060,7 +1233,13 @@ const file_weewar_v1_models_indexer_proto_rawDesc = "" +
 	"\x19GetIndexRecordsLRORequest\x12\x15\n" +
 	"\x06lro_id\x18\x01 \x01(\tR\x05lroId\"J\n" +
 	"\x1aGetIndexRecordsLROResponse\x12,\n" +
-	"\x03lro\x18\x01 \x01(\v2\x1a.weewar.v1.IndexRecordsLROR\x03lroB\xa0\x01\n" +
+	"\x03lro\x18\x01 \x01(\v2\x1a.weewar.v1.IndexRecordsLROR\x03lro*\x95\x01\n" +
+	"\vIndexStatus\x12\x1c\n" +
+	"\x18INDEX_STATUS_UNSPECIFIED\x10\x00\x12\x18\n" +
+	"\x14INDEX_STATUS_PENDING\x10\x01\x12\x19\n" +
+	"\x15INDEX_STATUS_INDEXING\x10\x02\x12\x1a\n" +
+	"\x16INDEX_STATUS_COMPLETED\x10\x03\x12\x17\n" +
+	"\x13INDEX_STATUS_FAILED\x10\x04B\xa0\x01\n" +
 	"\rcom.weewar.v1B\fIndexerProtoP\x01Z<github.com/turnforge/weewar/gen/go/weewar/v1/models;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"
 
@@ -1076,54 +1255,63 @@ func file_weewar_v1_models_indexer_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_models_indexer_proto_rawDescData
 }
 
-var file_weewar_v1_models_indexer_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_weewar_v1_models_indexer_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_weewar_v1_models_indexer_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_weewar_v1_models_indexer_proto_goTypes = []any{
-	(*EntityIndexState)(nil),              // 0: weewar.v1.EntityIndexState
-	(*GetIndexStatesRequest)(nil),         // 1: weewar.v1.GetIndexStatesRequest
-	(*EntityIndexStateList)(nil),          // 2: weewar.v1.EntityIndexStateList
-	(*GetIndexStatesResponse)(nil),        // 3: weewar.v1.GetIndexStatesResponse
-	(*ListIndexStatesRequest)(nil),        // 4: weewar.v1.ListIndexStatesRequest
-	(*ListIndexStatesResponse)(nil),       // 5: weewar.v1.ListIndexStatesResponse
-	(*DeleteIndexStatesRequest)(nil),      // 6: weewar.v1.DeleteIndexStatesRequest
-	(*DeleteIndexStatesResponse)(nil),     // 7: weewar.v1.DeleteIndexStatesResponse
-	(*IndexRecord)(nil),                   // 8: weewar.v1.IndexRecord
-	(*IndexRecordsLRO)(nil),               // 9: weewar.v1.IndexRecordsLRO
-	(*CreateIndexRecordsLRORequest)(nil),  // 10: weewar.v1.CreateIndexRecordsLRORequest
-	(*CreateIndexRecordsLROResponse)(nil), // 11: weewar.v1.CreateIndexRecordsLROResponse
-	(*UpdateIndexRecordsLRORequest)(nil),  // 12: weewar.v1.UpdateIndexRecordsLRORequest
-	(*UpdateIndexRecordsLROResponse)(nil), // 13: weewar.v1.UpdateIndexRecordsLROResponse
-	(*GetIndexRecordsLRORequest)(nil),     // 14: weewar.v1.GetIndexRecordsLRORequest
-	(*GetIndexRecordsLROResponse)(nil),    // 15: weewar.v1.GetIndexRecordsLROResponse
-	nil,                                   // 16: weewar.v1.GetIndexStatesResponse.StatesEntry
-	(*timestamppb.Timestamp)(nil),         // 17: google.protobuf.Timestamp
-	(*anypb.Any)(nil),                     // 18: google.protobuf.Any
-	(*fieldmaskpb.FieldMask)(nil),         // 19: google.protobuf.FieldMask
+	(IndexStatus)(0),                      // 0: weewar.v1.IndexStatus
+	(*IndexState)(nil),                    // 1: weewar.v1.IndexState
+	(*EnsureIndexStateRequest)(nil),       // 2: weewar.v1.EnsureIndexStateRequest
+	(*EnsureIndexStateResponse)(nil),      // 3: weewar.v1.EnsureIndexStateResponse
+	(*GetIndexStatesRequest)(nil),         // 4: weewar.v1.GetIndexStatesRequest
+	(*IndexStateList)(nil),                // 5: weewar.v1.IndexStateList
+	(*GetIndexStatesResponse)(nil),        // 6: weewar.v1.GetIndexStatesResponse
+	(*ListIndexStatesRequest)(nil),        // 7: weewar.v1.ListIndexStatesRequest
+	(*ListIndexStatesResponse)(nil),       // 8: weewar.v1.ListIndexStatesResponse
+	(*DeleteIndexStatesRequest)(nil),      // 9: weewar.v1.DeleteIndexStatesRequest
+	(*DeleteIndexStatesResponse)(nil),     // 10: weewar.v1.DeleteIndexStatesResponse
+	(*IndexRecord)(nil),                   // 11: weewar.v1.IndexRecord
+	(*IndexRecordsLRO)(nil),               // 12: weewar.v1.IndexRecordsLRO
+	(*CreateIndexRecordsLRORequest)(nil),  // 13: weewar.v1.CreateIndexRecordsLRORequest
+	(*CreateIndexRecordsLROResponse)(nil), // 14: weewar.v1.CreateIndexRecordsLROResponse
+	(*UpdateIndexRecordsLRORequest)(nil),  // 15: weewar.v1.UpdateIndexRecordsLRORequest
+	(*UpdateIndexRecordsLROResponse)(nil), // 16: weewar.v1.UpdateIndexRecordsLROResponse
+	(*GetIndexRecordsLRORequest)(nil),     // 17: weewar.v1.GetIndexRecordsLRORequest
+	(*GetIndexRecordsLROResponse)(nil),    // 18: weewar.v1.GetIndexRecordsLROResponse
+	nil,                                   // 19: weewar.v1.GetIndexStatesResponse.StatesEntry
+	(*timestamppb.Timestamp)(nil),         // 20: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil),         // 21: google.protobuf.FieldMask
+	(*anypb.Any)(nil),                     // 22: google.protobuf.Any
 }
 var file_weewar_v1_models_indexer_proto_depIdxs = []int32{
-	17, // 0: weewar.v1.EntityIndexState.last_queued_at:type_name -> google.protobuf.Timestamp
-	17, // 1: weewar.v1.EntityIndexState.last_indexed_at:type_name -> google.protobuf.Timestamp
-	0,  // 2: weewar.v1.EntityIndexStateList.states:type_name -> weewar.v1.EntityIndexState
-	16, // 3: weewar.v1.GetIndexStatesResponse.states:type_name -> weewar.v1.GetIndexStatesResponse.StatesEntry
-	17, // 4: weewar.v1.ListIndexStatesRequest.indexed_before:type_name -> google.protobuf.Timestamp
-	17, // 5: weewar.v1.ListIndexStatesRequest.indexed_after:type_name -> google.protobuf.Timestamp
-	0,  // 6: weewar.v1.ListIndexStatesResponse.items:type_name -> weewar.v1.EntityIndexState
-	17, // 7: weewar.v1.IndexRecord.updated_at:type_name -> google.protobuf.Timestamp
-	18, // 8: weewar.v1.IndexRecord.entity_data:type_name -> google.protobuf.Any
-	17, // 9: weewar.v1.IndexRecordsLRO.created_at:type_name -> google.protobuf.Timestamp
-	17, // 10: weewar.v1.IndexRecordsLRO.updated_at:type_name -> google.protobuf.Timestamp
-	8,  // 11: weewar.v1.IndexRecordsLRO.records:type_name -> weewar.v1.IndexRecord
-	9,  // 12: weewar.v1.CreateIndexRecordsLRORequest.lro:type_name -> weewar.v1.IndexRecordsLRO
-	9,  // 13: weewar.v1.CreateIndexRecordsLROResponse.lro:type_name -> weewar.v1.IndexRecordsLRO
-	9,  // 14: weewar.v1.UpdateIndexRecordsLRORequest.lro:type_name -> weewar.v1.IndexRecordsLRO
-	19, // 15: weewar.v1.UpdateIndexRecordsLRORequest.update_mask:type_name -> google.protobuf.FieldMask
-	9,  // 16: weewar.v1.UpdateIndexRecordsLROResponse.lro:type_name -> weewar.v1.IndexRecordsLRO
-	9,  // 17: weewar.v1.GetIndexRecordsLROResponse.lro:type_name -> weewar.v1.IndexRecordsLRO
-	2,  // 18: weewar.v1.GetIndexStatesResponse.StatesEntry.value:type_name -> weewar.v1.EntityIndexStateList
-	19, // [19:19] is the sub-list for method output_type
-	19, // [19:19] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	20, // 0: weewar.v1.IndexState.created_at:type_name -> google.protobuf.Timestamp
+	20, // 1: weewar.v1.IndexState.updated_at:type_name -> google.protobuf.Timestamp
+	20, // 2: weewar.v1.IndexState.indexed_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: weewar.v1.IndexState.status:type_name -> weewar.v1.IndexStatus
+	1,  // 4: weewar.v1.EnsureIndexStateRequest.index_state:type_name -> weewar.v1.IndexState
+	21, // 5: weewar.v1.EnsureIndexStateRequest.update_mask:type_name -> google.protobuf.FieldMask
+	1,  // 6: weewar.v1.EnsureIndexStateResponse.index_state:type_name -> weewar.v1.IndexState
+	1,  // 7: weewar.v1.IndexStateList.states:type_name -> weewar.v1.IndexState
+	19, // 8: weewar.v1.GetIndexStatesResponse.states:type_name -> weewar.v1.GetIndexStatesResponse.StatesEntry
+	20, // 9: weewar.v1.ListIndexStatesRequest.updated_before:type_name -> google.protobuf.Timestamp
+	20, // 10: weewar.v1.ListIndexStatesRequest.updated_after:type_name -> google.protobuf.Timestamp
+	1,  // 11: weewar.v1.ListIndexStatesResponse.items:type_name -> weewar.v1.IndexState
+	20, // 12: weewar.v1.IndexRecord.updated_at:type_name -> google.protobuf.Timestamp
+	22, // 13: weewar.v1.IndexRecord.entity_data:type_name -> google.protobuf.Any
+	20, // 14: weewar.v1.IndexRecordsLRO.created_at:type_name -> google.protobuf.Timestamp
+	20, // 15: weewar.v1.IndexRecordsLRO.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 16: weewar.v1.IndexRecordsLRO.records:type_name -> weewar.v1.IndexRecord
+	12, // 17: weewar.v1.CreateIndexRecordsLRORequest.lro:type_name -> weewar.v1.IndexRecordsLRO
+	12, // 18: weewar.v1.CreateIndexRecordsLROResponse.lro:type_name -> weewar.v1.IndexRecordsLRO
+	12, // 19: weewar.v1.UpdateIndexRecordsLRORequest.lro:type_name -> weewar.v1.IndexRecordsLRO
+	21, // 20: weewar.v1.UpdateIndexRecordsLRORequest.update_mask:type_name -> google.protobuf.FieldMask
+	12, // 21: weewar.v1.UpdateIndexRecordsLROResponse.lro:type_name -> weewar.v1.IndexRecordsLRO
+	12, // 22: weewar.v1.GetIndexRecordsLROResponse.lro:type_name -> weewar.v1.IndexRecordsLRO
+	1,  // 23: weewar.v1.GetIndexStatesResponse.StatesEntry.value:type_name -> weewar.v1.IndexState
+	24, // [24:24] is the sub-list for method output_type
+	24, // [24:24] is the sub-list for method input_type
+	24, // [24:24] is the sub-list for extension type_name
+	24, // [24:24] is the sub-list for extension extendee
+	0,  // [0:24] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_models_indexer_proto_init() }
@@ -1131,19 +1319,20 @@ func file_weewar_v1_models_indexer_proto_init() {
 	if File_weewar_v1_models_indexer_proto != nil {
 		return
 	}
-	file_weewar_v1_models_indexer_proto_msgTypes[4].OneofWrappers = []any{}
+	file_weewar_v1_models_indexer_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_models_indexer_proto_rawDesc), len(file_weewar_v1_models_indexer_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   17,
+			NumEnums:      1,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_weewar_v1_models_indexer_proto_goTypes,
 		DependencyIndexes: file_weewar_v1_models_indexer_proto_depIdxs,
+		EnumInfos:         file_weewar_v1_models_indexer_proto_enumTypes,
 		MessageInfos:      file_weewar_v1_models_indexer_proto_msgTypes,
 	}.Build()
 	File_weewar_v1_models_indexer_proto = out.File

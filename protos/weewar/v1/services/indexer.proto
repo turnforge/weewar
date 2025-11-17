@@ -12,39 +12,19 @@ service IndexerService {
   /**
    * Create a LRO for indexing records
    */
-  rpc CreateIndexRecordsLRO(CreateIndexRecordsLRORequest) returns (CreateIndexRecordsLROResponse) {
+  rpc EnsureIndexState(EnsureIndexStateRequest) returns (EnsureIndexStateResponse) {
     option (google.api.http) = {
-      post: "/v1/indexlro",
+      post: "/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}",
       body: "*",
     };
   }
 
   /**
-   * Get the details of a LRO operation
-   */
-  rpc GetIndexRecordsLRO(GetIndexRecordsLRORequest) returns (GetIndexRecordsLROResponse) {
-    option (google.api.http) = {
-      post: "/v1/indexlro/{lro_id}",
-      body: "*",
-    };
-  }
-
-  /**
-   * Update an LRO operation - internal usage
-   */
-  rpc UpdateIndexRecordsLRO(UpdateIndexRecordsLRORequest) returns (UpdateIndexRecordsLROResponse) {
-    option (google.api.http) = {
-      patch: "/v1/indexlro/{lro.lro_id}",
-      body: "*",
-    };
-  }
-
-  /**
-   * Batch get multiple entity index states
+   * Get the index states for a particular entity
    */
   rpc GetIndexStates(GetIndexStatesRequest) returns (GetIndexStatesResponse) {
     option (google.api.http) = {
-      get: "/v1/index:batchGet/{entity_type}",
+      get: "/v1/indexes/{entity_type}/{entity_id}",
     };
   }
 
@@ -53,14 +33,41 @@ service IndexerService {
    */
   rpc ListIndexStates(ListIndexStatesRequest) returns (ListIndexStatesResponse) { 
     option (google.api.http) = {
-      get: "/v1/index/{entity_type}",
+      get: "/v1/indexes/{entity_type}",
     };
   }
 
   rpc DeleteIndexStates(DeleteIndexStatesRequest) returns (DeleteIndexStatesResponse) { 
     option (google.api.http) = {
-      delete: "/v1/index/{entity_type}",
+      delete: "/v1/indexes/{entity_type}/{entity_id}",
     };
   }
+
+  ///  How do we want to think about "batch" - the idea with LROs was we might want to 
+  // kick off "indexing" of a bunch of items - but not sure if there is immediate value now
+  // This would only be used on a bootstrap but may be we could do in a different
+  /**
+   * Get the details of a LRO operation
+   */
+  /*
+  rpc GetIndexRecordsLRO(GetIndexRecordsLRORequest) returns (GetIndexRecordsLROResponse) {
+    option (google.api.http) = {
+      post: "/v1/indexes/{lro_id}",
+      body: "*",
+    };
+  }
+  */
+
+  /**
+   * Update an LRO operation - internal usage
+   */
+  /*
+  rpc UpdateIndexRecordsLRO(UpdateIndexRecordsLRORequest) returns (UpdateIndexRecordsLROResponse) {
+    option (google.api.http) = {
+      patch: "/v1/indexlro/{lro.lro_id}",
+      body: "*",
+    };
+  }
+  */
 }
 

@@ -36,36 +36,9 @@ var (
 	_ = metadata.Join
 )
 
-func request_IndexerService_CreateIndexRecordsLRO_0(ctx context.Context, marshaler runtime.Marshaler, client IndexerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_IndexerService_EnsureIndexState_0(ctx context.Context, marshaler runtime.Marshaler, client IndexerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq weewarv1.CreateIndexRecordsLRORequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if req.Body != nil {
-		_, _ = io.Copy(io.Discard, req.Body)
-	}
-	msg, err := client.CreateIndexRecordsLRO(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_IndexerService_CreateIndexRecordsLRO_0(ctx context.Context, marshaler runtime.Marshaler, server IndexerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq weewarv1.CreateIndexRecordsLRORequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.CreateIndexRecordsLRO(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-func request_IndexerService_GetIndexRecordsLRO_0(ctx context.Context, marshaler runtime.Marshaler, client IndexerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq weewarv1.GetIndexRecordsLRORequest
+		protoReq weewarv1.EnsureIndexStateRequest
 		metadata runtime.ServerMetadata
 		err      error
 	)
@@ -75,85 +48,72 @@ func request_IndexerService_GetIndexRecordsLRO_0(ctx context.Context, marshaler 
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["lro_id"]
+	val, ok := pathParams["index_state.entity_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lro_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index_state.entity_type")
 	}
-	protoReq.LroId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "index_state.entity_type", val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lro_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index_state.entity_type", err)
 	}
-	msg, err := client.GetIndexRecordsLRO(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	val, ok = pathParams["index_state.entity_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index_state.entity_id")
+	}
+	err = runtime.PopulateFieldFromPath(&protoReq, "index_state.entity_id", val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index_state.entity_id", err)
+	}
+	val, ok = pathParams["index_state.index_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index_state.index_type")
+	}
+	err = runtime.PopulateFieldFromPath(&protoReq, "index_state.index_type", val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index_state.index_type", err)
+	}
+	msg, err := client.EnsureIndexState(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_IndexerService_GetIndexRecordsLRO_0(ctx context.Context, marshaler runtime.Marshaler, server IndexerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_IndexerService_EnsureIndexState_0(ctx context.Context, marshaler runtime.Marshaler, server IndexerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq weewarv1.GetIndexRecordsLRORequest
+		protoReq weewarv1.EnsureIndexStateRequest
 		metadata runtime.ServerMetadata
 		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["lro_id"]
+	val, ok := pathParams["index_state.entity_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lro_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index_state.entity_type")
 	}
-	protoReq.LroId, err = runtime.String(val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "index_state.entity_type", val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lro_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index_state.entity_type", err)
 	}
-	msg, err := server.GetIndexRecordsLRO(ctx, &protoReq)
+	val, ok = pathParams["index_state.entity_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index_state.entity_id")
+	}
+	err = runtime.PopulateFieldFromPath(&protoReq, "index_state.entity_id", val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index_state.entity_id", err)
+	}
+	val, ok = pathParams["index_state.index_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index_state.index_type")
+	}
+	err = runtime.PopulateFieldFromPath(&protoReq, "index_state.index_type", val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index_state.index_type", err)
+	}
+	msg, err := server.EnsureIndexState(ctx, &protoReq)
 	return msg, metadata, err
 }
 
-func request_IndexerService_UpdateIndexRecordsLRO_0(ctx context.Context, marshaler runtime.Marshaler, client IndexerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq weewarv1.UpdateIndexRecordsLRORequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if req.Body != nil {
-		_, _ = io.Copy(io.Discard, req.Body)
-	}
-	val, ok := pathParams["lro.lro_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lro.lro_id")
-	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "lro.lro_id", val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lro.lro_id", err)
-	}
-	msg, err := client.UpdateIndexRecordsLRO(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_IndexerService_UpdateIndexRecordsLRO_0(ctx context.Context, marshaler runtime.Marshaler, server IndexerServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq weewarv1.UpdateIndexRecordsLRORequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	val, ok := pathParams["lro.lro_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "lro.lro_id")
-	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "lro.lro_id", val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "lro.lro_id", err)
-	}
-	msg, err := server.UpdateIndexRecordsLRO(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_IndexerService_GetIndexStates_0 = &utilities.DoubleArray{Encoding: map[string]int{"entity_type": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+var filter_IndexerService_GetIndexStates_0 = &utilities.DoubleArray{Encoding: map[string]int{"entity_type": 0, "entity_id": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
 
 func request_IndexerService_GetIndexStates_0(ctx context.Context, marshaler runtime.Marshaler, client IndexerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -171,6 +131,14 @@ func request_IndexerService_GetIndexStates_0(ctx context.Context, marshaler runt
 	protoReq.EntityType, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_type", err)
+	}
+	val, ok = pathParams["entity_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "entity_id")
+	}
+	protoReq.EntityId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -195,6 +163,14 @@ func local_request_IndexerService_GetIndexStates_0(ctx context.Context, marshale
 	protoReq.EntityType, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_type", err)
+	}
+	val, ok = pathParams["entity_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "entity_id")
+	}
+	protoReq.EntityId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -259,7 +235,7 @@ func local_request_IndexerService_ListIndexStates_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
-var filter_IndexerService_DeleteIndexStates_0 = &utilities.DoubleArray{Encoding: map[string]int{"entity_type": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+var filter_IndexerService_DeleteIndexStates_0 = &utilities.DoubleArray{Encoding: map[string]int{"entity_type": 0, "entity_id": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
 
 func request_IndexerService_DeleteIndexStates_0(ctx context.Context, marshaler runtime.Marshaler, client IndexerServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -277,6 +253,14 @@ func request_IndexerService_DeleteIndexStates_0(ctx context.Context, marshaler r
 	protoReq.EntityType, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_type", err)
+	}
+	val, ok = pathParams["entity_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "entity_id")
+	}
+	protoReq.EntityId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_id", err)
 	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -302,6 +286,14 @@ func local_request_IndexerService_DeleteIndexStates_0(ctx context.Context, marsh
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_type", err)
 	}
+	val, ok = pathParams["entity_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "entity_id")
+	}
+	protoReq.EntityId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "entity_id", err)
+	}
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -318,65 +310,25 @@ func local_request_IndexerService_DeleteIndexStates_0(ctx context.Context, marsh
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterIndexerServiceHandlerFromEndpoint instead.
 // GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
 func RegisterIndexerServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server IndexerServiceServer) error {
-	mux.Handle(http.MethodPost, pattern_IndexerService_CreateIndexRecordsLRO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodPost, pattern_IndexerService_EnsureIndexState_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/CreateIndexRecordsLRO", runtime.WithHTTPPathPattern("/v1/indexlro"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/EnsureIndexState", runtime.WithHTTPPathPattern("/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_IndexerService_CreateIndexRecordsLRO_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_IndexerService_EnsureIndexState_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_IndexerService_CreateIndexRecordsLRO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPost, pattern_IndexerService_GetIndexRecordsLRO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/GetIndexRecordsLRO", runtime.WithHTTPPathPattern("/v1/indexlro/{lro_id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_IndexerService_GetIndexRecordsLRO_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_IndexerService_GetIndexRecordsLRO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPatch, pattern_IndexerService_UpdateIndexRecordsLRO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/UpdateIndexRecordsLRO", runtime.WithHTTPPathPattern("/v1/indexlro/{lro.lro_id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_IndexerService_UpdateIndexRecordsLRO_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_IndexerService_UpdateIndexRecordsLRO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_IndexerService_EnsureIndexState_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_IndexerService_GetIndexStates_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -384,7 +336,7 @@ func RegisterIndexerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/GetIndexStates", runtime.WithHTTPPathPattern("/v1/index:batchGet/{entity_type}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/GetIndexStates", runtime.WithHTTPPathPattern("/v1/indexes/{entity_type}/{entity_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -404,7 +356,7 @@ func RegisterIndexerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/ListIndexStates", runtime.WithHTTPPathPattern("/v1/index/{entity_type}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/ListIndexStates", runtime.WithHTTPPathPattern("/v1/indexes/{entity_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -424,7 +376,7 @@ func RegisterIndexerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/DeleteIndexStates", runtime.WithHTTPPathPattern("/v1/index/{entity_type}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/weewar.v1.IndexerService/DeleteIndexStates", runtime.WithHTTPPathPattern("/v1/indexes/{entity_type}/{entity_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -478,62 +430,28 @@ func RegisterIndexerServiceHandler(ctx context.Context, mux *runtime.ServeMux, c
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
 // "IndexerServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
 func RegisterIndexerServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client IndexerServiceClient) error {
-	mux.Handle(http.MethodPost, pattern_IndexerService_CreateIndexRecordsLRO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodPost, pattern_IndexerService_EnsureIndexState_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/CreateIndexRecordsLRO", runtime.WithHTTPPathPattern("/v1/indexlro"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/EnsureIndexState", runtime.WithHTTPPathPattern("/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_IndexerService_CreateIndexRecordsLRO_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_IndexerService_EnsureIndexState_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_IndexerService_CreateIndexRecordsLRO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPost, pattern_IndexerService_GetIndexRecordsLRO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/GetIndexRecordsLRO", runtime.WithHTTPPathPattern("/v1/indexlro/{lro_id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_IndexerService_GetIndexRecordsLRO_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_IndexerService_GetIndexRecordsLRO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPatch, pattern_IndexerService_UpdateIndexRecordsLRO_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/UpdateIndexRecordsLRO", runtime.WithHTTPPathPattern("/v1/indexlro/{lro.lro_id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_IndexerService_UpdateIndexRecordsLRO_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_IndexerService_UpdateIndexRecordsLRO_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_IndexerService_EnsureIndexState_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_IndexerService_GetIndexStates_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/GetIndexStates", runtime.WithHTTPPathPattern("/v1/index:batchGet/{entity_type}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/GetIndexStates", runtime.WithHTTPPathPattern("/v1/indexes/{entity_type}/{entity_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -550,7 +468,7 @@ func RegisterIndexerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/ListIndexStates", runtime.WithHTTPPathPattern("/v1/index/{entity_type}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/ListIndexStates", runtime.WithHTTPPathPattern("/v1/indexes/{entity_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -567,7 +485,7 @@ func RegisterIndexerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/DeleteIndexStates", runtime.WithHTTPPathPattern("/v1/index/{entity_type}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.IndexerService/DeleteIndexStates", runtime.WithHTTPPathPattern("/v1/indexes/{entity_type}/{entity_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -584,19 +502,15 @@ func RegisterIndexerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_IndexerService_CreateIndexRecordsLRO_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "indexlro"}, ""))
-	pattern_IndexerService_GetIndexRecordsLRO_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "indexlro", "lro_id"}, ""))
-	pattern_IndexerService_UpdateIndexRecordsLRO_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "indexlro", "lro.lro_id"}, ""))
-	pattern_IndexerService_GetIndexStates_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "index:batchGet", "entity_type"}, ""))
-	pattern_IndexerService_ListIndexStates_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "index", "entity_type"}, ""))
-	pattern_IndexerService_DeleteIndexStates_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "index", "entity_type"}, ""))
+	pattern_IndexerService_EnsureIndexState_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "indexes", "index_state.entity_type", "index_state.entity_id", "index_state.index_type"}, ""))
+	pattern_IndexerService_GetIndexStates_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "indexes", "entity_type", "entity_id"}, ""))
+	pattern_IndexerService_ListIndexStates_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "indexes", "entity_type"}, ""))
+	pattern_IndexerService_DeleteIndexStates_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "indexes", "entity_type", "entity_id"}, ""))
 )
 
 var (
-	forward_IndexerService_CreateIndexRecordsLRO_0 = runtime.ForwardResponseMessage
-	forward_IndexerService_GetIndexRecordsLRO_0    = runtime.ForwardResponseMessage
-	forward_IndexerService_UpdateIndexRecordsLRO_0 = runtime.ForwardResponseMessage
-	forward_IndexerService_GetIndexStates_0        = runtime.ForwardResponseMessage
-	forward_IndexerService_ListIndexStates_0       = runtime.ForwardResponseMessage
-	forward_IndexerService_DeleteIndexStates_0     = runtime.ForwardResponseMessage
+	forward_IndexerService_EnsureIndexState_0  = runtime.ForwardResponseMessage
+	forward_IndexerService_GetIndexStates_0    = runtime.ForwardResponseMessage
+	forward_IndexerService_ListIndexStates_0   = runtime.ForwardResponseMessage
+	forward_IndexerService_DeleteIndexStates_0 = runtime.ForwardResponseMessage
 )

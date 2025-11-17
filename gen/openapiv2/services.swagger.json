@@ -494,7 +494,7 @@
         ]
       }
     },
-    "/v1/index/{entityType}": {
+    "/v1/indexes/{entityType}": {
       "get": {
         "summary": "*\nList index entity states by filtering",
         "operationId": "IndexerService_ListIndexStates",
@@ -520,7 +520,7 @@
             "type": "string"
           },
           {
-            "name": "indexedBefore",
+            "name": "updatedBefore",
             "description": "Get records indexed \"before\" this time",
             "in": "query",
             "required": false,
@@ -528,8 +528,8 @@
             "format": "date-time"
           },
           {
-            "name": "indexedAfter",
-            "description": "Get records indexed \"after\" this time",
+            "name": "updatedAfter",
+            "description": "Get records updated \"after\" this time",
             "in": "query",
             "required": false,
             "type": "string",
@@ -565,6 +565,54 @@
         "tags": [
           "IndexerService"
         ]
+      }
+    },
+    "/v1/indexes/{entityType}/{entityId}": {
+      "get": {
+        "summary": "*\nGet the index states for a particular entity",
+        "operationId": "IndexerService_GetIndexStates",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetIndexStatesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "entityType",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "indexTypes",
+            "description": "Optional - can be used to get \"all\" indexer states or just once specified here",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "IndexerService"
+        ]
       },
       "delete": {
         "operationId": "IndexerService_DeleteIndexStates",
@@ -590,68 +638,12 @@
             "type": "string"
           },
           {
-            "name": "entityIds",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "indexTypes",
-            "description": "Optional - can be used to get \"all\" indexer states or just once specified here",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          }
-        ],
-        "tags": [
-          "IndexerService"
-        ]
-      }
-    },
-    "/v1/index:batchGet/{entity_type}": {
-      "get": {
-        "summary": "*\nBatch get multiple entity index states",
-        "operationId": "IndexerService_GetIndexStates",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetIndexStatesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "entityType",
+            "name": "entityId",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "entityIds",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
             "name": "indexTypes",
             "description": "Optional - can be used to get \"all\" indexer states or just once specified here",
             "in": "query",
@@ -668,15 +660,15 @@
         ]
       }
     },
-    "/v1/indexlro": {
+    "/v1/indexes/{indexState.entityType}/{indexState.entityId}/{indexState.indexType}": {
       "post": {
         "summary": "*\nCreate a LRO for indexing records",
-        "operationId": "IndexerService_CreateIndexRecordsLRO",
+        "operationId": "IndexerService_EnsureIndexState",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1CreateIndexRecordsLROResponse"
+              "$ref": "#/definitions/v1EnsureIndexStateResponse"
             }
           },
           "default": {
@@ -688,41 +680,20 @@
         },
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
+            "name": "indexState.entityType",
+            "in": "path",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1CreateIndexRecordsLRORequest"
-            }
-          }
-        ],
-        "tags": [
-          "IndexerService"
-        ]
-      }
-    },
-    "/v1/indexlro/{lro.lroId}": {
-      "patch": {
-        "summary": "*\nUpdate an LRO operation - internal usage",
-        "operationId": "IndexerService_UpdateIndexRecordsLRO",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateIndexRecordsLROResponse"
-            }
+            "type": "string"
           },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
           {
-            "name": "lro.lroId",
-            "description": "Customizable by source if it can guarantee uniqueness",
+            "name": "indexState.entityId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "indexState.indexType",
+            "description": "eg \"screenshots\", \"keywords\" etc\nEntityType + EntityId + IndexType should be  unique",
             "in": "path",
             "required": true,
             "type": "string"
@@ -734,81 +705,51 @@
             "schema": {
               "type": "object",
               "properties": {
-                "lro": {
+                "indexState": {
                   "type": "object",
                   "properties": {
-                    "entityType": {
-                      "type": "string",
-                      "title": "Single entity type in a index request"
-                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time",
-                      "title": "When this request was created"
+                      "title": "When the last indexing was queued"
                     },
                     "updatedAt": {
                       "type": "string",
-                      "format": "date-time"
+                      "format": "date-time",
+                      "title": "when the last time the entity was recorded for an update (means it is eligible for a re-indexing)"
                     },
-                    "callbackUrl": {
+                    "indexedAt": {
                       "type": "string",
-                      "title": "Callback url for this request (if any)\nAll records indexed in this operation will be notified via this url"
+                      "format": "date-time",
+                      "title": "When did the last indexing finish"
                     },
-                    "records": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/definitions/v1IndexRecord"
-                      },
-                      "title": "Records to enqueue - note that indexing by its nature is asynchronous\nso we wont wait for all the indexing to finish"
+                    "needsIndexing": {
+                      "type": "boolean",
+                      "title": "Whether indexing is needed or not"
+                    },
+                    "status": {
+                      "$ref": "#/definitions/v1IndexStatus",
+                      "title": "\"queued/pending\", \"indexing\", \"completed\", \"failed\""
+                    },
+                    "lastError": {
+                      "type": "string",
+                      "title": "If there was an error in the last indexing"
+                    },
+                    "idempotencyKey": {
+                      "type": "string",
+                      "title": "A way to ignore multiple requests if they are updates but\nnothing has changed"
+                    },
+                    "retryCount": {
+                      "type": "integer",
+                      "format": "int32"
                     }
-                  },
-                  "title": "Each IndexRecords gets its own \"long running operation\" \nso we can track how things are"
+                  }
                 },
                 "updateMask": {
                   "type": "string",
                   "description": "*\nMask of fields being updated in this Game to make partial changes."
                 }
               }
-            }
-          }
-        ],
-        "tags": [
-          "IndexerService"
-        ]
-      }
-    },
-    "/v1/indexlro/{lroId}": {
-      "post": {
-        "summary": "*\nGet the details of a LRO operation",
-        "operationId": "IndexerService_GetIndexRecordsLRO",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetIndexRecordsLROResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "lroId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object"
             }
           }
         ],
@@ -1828,22 +1769,6 @@
       },
       "description": "*\nResponse of an game creation."
     },
-    "v1CreateIndexRecordsLRORequest": {
-      "type": "object",
-      "properties": {
-        "lro": {
-          "$ref": "#/definitions/v1IndexRecordsLRO"
-        }
-      }
-    },
-    "v1CreateIndexRecordsLROResponse": {
-      "type": "object",
-      "properties": {
-        "lro": {
-          "$ref": "#/definitions/v1IndexRecordsLRO"
-        }
-      }
-    },
     "v1CreateUserRequest": {
       "type": "object",
       "properties": {
@@ -1933,60 +1858,11 @@
       },
       "title": "Response of a turn option click"
     },
-    "v1EntityIndexState": {
+    "v1EnsureIndexStateResponse": {
       "type": "object",
       "properties": {
-        "entityType": {
-          "type": "string"
-        },
-        "entityId": {
-          "type": "string"
-        },
-        "indexType": {
-          "type": "string",
-          "title": "eg \"screenshots\", \"keywords\" etc\nEntityType + EntityId + IndexType should be  unique"
-        },
-        "lastQueuedAt": {
-          "type": "string",
-          "format": "date-time",
-          "title": "When the last indexing was queued"
-        },
-        "lastIndexedAt": {
-          "type": "string",
-          "format": "date-time",
-          "title": "when the last indexing was completed"
-        },
-        "status": {
-          "type": "string",
-          "title": "\"queued/pending\", \"indexing\", \"completed\", \"failed\""
-        },
-        "lastError": {
-          "type": "string",
-          "title": "If there was an error in the last indexing"
-        },
-        "lastContentHash": {
-          "type": "string",
-          "title": "Keep a hash of the contents for quick check to check updated\n(not sure if needed) - This should be provided by the source"
-        },
-        "retryCount": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "currentLroId": {
-          "type": "string",
-          "title": "Which LRO this entity has been updated via"
-        }
-      }
-    },
-    "v1EntityIndexStateList": {
-      "type": "object",
-      "properties": {
-        "states": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1EntityIndexState"
-          }
+        "indexState": {
+          "$ref": "#/definitions/v1IndexState"
         }
       }
     },
@@ -2392,21 +2268,13 @@
       },
       "title": "*\nGame batch-get response"
     },
-    "v1GetIndexRecordsLROResponse": {
-      "type": "object",
-      "properties": {
-        "lro": {
-          "$ref": "#/definitions/v1IndexRecordsLRO"
-        }
-      }
-    },
     "v1GetIndexStatesResponse": {
       "type": "object",
       "properties": {
         "states": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/v1EntityIndexStateList"
+            "$ref": "#/definitions/v1IndexState"
           }
         }
       }
@@ -2564,62 +2432,66 @@
         }
       }
     },
-    "v1IndexRecord": {
+    "v1IndexState": {
       "type": "object",
       "properties": {
+        "entityType": {
+          "type": "string"
+        },
         "entityId": {
           "type": "string"
         },
-        "updatedAt": {
+        "indexType": {
           "type": "string",
-          "format": "date-time"
-        },
-        "entityData": {
-          "$ref": "#/definitions/protobufAny"
-        },
-        "indexerTypes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "title": "Request messages"
-    },
-    "v1IndexRecordsLRO": {
-      "type": "object",
-      "properties": {
-        "lroId": {
-          "type": "string",
-          "title": "Customizable by source if it can guarantee uniqueness"
-        },
-        "entityType": {
-          "type": "string",
-          "title": "Single entity type in a index request"
+          "title": "eg \"screenshots\", \"keywords\" etc\nEntityType + EntityId + IndexType should be  unique"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time",
-          "title": "When this request was created"
+          "title": "When the last indexing was queued"
         },
         "updatedAt": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "when the last time the entity was recorded for an update (means it is eligible for a re-indexing)"
         },
-        "callbackUrl": {
+        "indexedAt": {
           "type": "string",
-          "title": "Callback url for this request (if any)\nAll records indexed in this operation will be notified via this url"
+          "format": "date-time",
+          "title": "When did the last indexing finish"
         },
-        "records": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1IndexRecord"
-          },
-          "title": "Records to enqueue - note that indexing by its nature is asynchronous\nso we wont wait for all the indexing to finish"
+        "needsIndexing": {
+          "type": "boolean",
+          "title": "Whether indexing is needed or not"
+        },
+        "status": {
+          "$ref": "#/definitions/v1IndexStatus",
+          "title": "\"queued/pending\", \"indexing\", \"completed\", \"failed\""
+        },
+        "lastError": {
+          "type": "string",
+          "title": "If there was an error in the last indexing"
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "title": "A way to ignore multiple requests if they are updates but\nnothing has changed"
+        },
+        "retryCount": {
+          "type": "integer",
+          "format": "int32"
         }
-      },
-      "title": "Each IndexRecords gets its own \"long running operation\" \nso we can track how things are"
+      }
+    },
+    "v1IndexStatus": {
+      "type": "string",
+      "enum": [
+        "INDEX_STATUS_UNSPECIFIED",
+        "INDEX_STATUS_PENDING",
+        "INDEX_STATUS_INDEXING",
+        "INDEX_STATUS_COMPLETED",
+        "INDEX_STATUS_FAILED"
+      ],
+      "default": "INDEX_STATUS_UNSPECIFIED"
     },
     "v1InitializeGameResponse": {
       "type": "object",
@@ -2676,7 +2548,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1EntityIndexState"
+            "$ref": "#/definitions/v1IndexState"
           }
         },
         "nextPageKey": {
@@ -3291,14 +3163,6 @@
     },
     "v1UpdateGameStatusResponse": {
       "type": "object"
-    },
-    "v1UpdateIndexRecordsLROResponse": {
-      "type": "object",
-      "properties": {
-        "lro": {
-          "$ref": "#/definitions/v1IndexRecordsLRO"
-        }
-      }
     },
     "v1UpdateUserResponse": {
       "type": "object",

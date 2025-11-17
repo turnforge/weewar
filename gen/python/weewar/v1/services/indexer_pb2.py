@@ -26,7 +26,7 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from weewar.v1.models import indexer_pb2 as weewar_dot_v1_dot_models_dot_indexer__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n weewar/v1/services/indexer.proto\x12\tweewar.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto2\xac\x06\n\x0eIndexerService\x12\x83\x01\n\x15\x43reateIndexRecordsLRO\x12\'.weewar.v1.CreateIndexRecordsLRORequest\x1a(.weewar.v1.CreateIndexRecordsLROResponse\"\x17\x82\xd3\xe4\x93\x02\x11\"\x0c/v1/indexlro:\x01*\x12\x83\x01\n\x12GetIndexRecordsLRO\x12$.weewar.v1.GetIndexRecordsLRORequest\x1a%.weewar.v1.GetIndexRecordsLROResponse\" \x82\xd3\xe4\x93\x02\x1a\"\x15/v1/indexlro/{lro_id}:\x01*\x12\x90\x01\n\x15UpdateIndexRecordsLRO\x12\'.weewar.v1.UpdateIndexRecordsLRORequest\x1a(.weewar.v1.UpdateIndexRecordsLROResponse\"$\x82\xd3\xe4\x93\x02\x1e\x32\x19/v1/indexlro/{lro.lro_id}:\x01*\x12\x7f\n\x0eGetIndexStates\x12 .weewar.v1.GetIndexStatesRequest\x1a!.weewar.v1.GetIndexStatesResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /v1/index:batchGet/{entity_type}\x12y\n\x0fListIndexStates\x12!.weewar.v1.ListIndexStatesRequest\x1a\".weewar.v1.ListIndexStatesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/v1/index/{entity_type}\x12\x7f\n\x11\x44\x65leteIndexStates\x12#.weewar.v1.DeleteIndexStatesRequest\x1a$.weewar.v1.DeleteIndexStatesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19*\x17/v1/index/{entity_type}B\xa2\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z>github.com/turnforge/weewar/gen/go/weewar/v1/services;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n weewar/v1/services/indexer.proto\x12\tweewar.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto2\xe5\x04\n\x0eIndexerService\x12\xbe\x01\n\x10\x45nsureIndexState\x12\".weewar.v1.EnsureIndexStateRequest\x1a#.weewar.v1.EnsureIndexStateResponse\"a\x82\xd3\xe4\x93\x02[\"V/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}:\x01*\x12\x84\x01\n\x0eGetIndexStates\x12 .weewar.v1.GetIndexStatesRequest\x1a!.weewar.v1.GetIndexStatesResponse\"-\x82\xd3\xe4\x93\x02\'\x12%/v1/indexes/{entity_type}/{entity_id}\x12{\n\x0fListIndexStates\x12!.weewar.v1.ListIndexStatesRequest\x1a\".weewar.v1.ListIndexStatesResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/indexes/{entity_type}\x12\x8d\x01\n\x11\x44\x65leteIndexStates\x12#.weewar.v1.DeleteIndexStatesRequest\x1a$.weewar.v1.DeleteIndexStatesResponse\"-\x82\xd3\xe4\x93\x02\'*%/v1/indexes/{entity_type}/{entity_id}B\xa2\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z>github.com/turnforge/weewar/gen/go/weewar/v1/services;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,18 +34,14 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'weewar.v1.services.indexer_
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\rcom.weewar.v1B\014IndexerProtoP\001Z>github.com/turnforge/weewar/gen/go/weewar/v1/services;weewarv1\242\002\003WXX\252\002\tWeewar.V1\312\002\tWeewar\\V1\342\002\025Weewar\\V1\\GPBMetadata\352\002\nWeewar::V1'
-  _globals['_INDEXERSERVICE'].methods_by_name['CreateIndexRecordsLRO']._loaded_options = None
-  _globals['_INDEXERSERVICE'].methods_by_name['CreateIndexRecordsLRO']._serialized_options = b'\202\323\344\223\002\021\"\014/v1/indexlro:\001*'
-  _globals['_INDEXERSERVICE'].methods_by_name['GetIndexRecordsLRO']._loaded_options = None
-  _globals['_INDEXERSERVICE'].methods_by_name['GetIndexRecordsLRO']._serialized_options = b'\202\323\344\223\002\032\"\025/v1/indexlro/{lro_id}:\001*'
-  _globals['_INDEXERSERVICE'].methods_by_name['UpdateIndexRecordsLRO']._loaded_options = None
-  _globals['_INDEXERSERVICE'].methods_by_name['UpdateIndexRecordsLRO']._serialized_options = b'\202\323\344\223\002\0362\031/v1/indexlro/{lro.lro_id}:\001*'
+  _globals['_INDEXERSERVICE'].methods_by_name['EnsureIndexState']._loaded_options = None
+  _globals['_INDEXERSERVICE'].methods_by_name['EnsureIndexState']._serialized_options = b'\202\323\344\223\002[\"V/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}:\001*'
   _globals['_INDEXERSERVICE'].methods_by_name['GetIndexStates']._loaded_options = None
-  _globals['_INDEXERSERVICE'].methods_by_name['GetIndexStates']._serialized_options = b'\202\323\344\223\002\"\022 /v1/index:batchGet/{entity_type}'
+  _globals['_INDEXERSERVICE'].methods_by_name['GetIndexStates']._serialized_options = b'\202\323\344\223\002\'\022%/v1/indexes/{entity_type}/{entity_id}'
   _globals['_INDEXERSERVICE'].methods_by_name['ListIndexStates']._loaded_options = None
-  _globals['_INDEXERSERVICE'].methods_by_name['ListIndexStates']._serialized_options = b'\202\323\344\223\002\031\022\027/v1/index/{entity_type}'
+  _globals['_INDEXERSERVICE'].methods_by_name['ListIndexStates']._serialized_options = b'\202\323\344\223\002\033\022\031/v1/indexes/{entity_type}'
   _globals['_INDEXERSERVICE'].methods_by_name['DeleteIndexStates']._loaded_options = None
-  _globals['_INDEXERSERVICE'].methods_by_name['DeleteIndexStates']._serialized_options = b'\202\323\344\223\002\031*\027/v1/index/{entity_type}'
+  _globals['_INDEXERSERVICE'].methods_by_name['DeleteIndexStates']._serialized_options = b'\202\323\344\223\002\'*%/v1/indexes/{entity_type}/{entity_id}'
   _globals['_INDEXERSERVICE']._serialized_start=110
-  _globals['_INDEXERSERVICE']._serialized_end=922
+  _globals['_INDEXERSERVICE']._serialized_end=723
 # @@protoc_insertion_point(module_scope)

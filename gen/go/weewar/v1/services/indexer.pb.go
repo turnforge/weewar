@@ -27,49 +27,39 @@ var File_weewar_v1_services_indexer_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_services_indexer_proto_rawDesc = "" +
 	"\n" +
-	" weewar/v1/services/indexer.proto\x12\tweewar.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto2\xac\x06\n" +
-	"\x0eIndexerService\x12\x83\x01\n" +
-	"\x15CreateIndexRecordsLRO\x12'.weewar.v1.CreateIndexRecordsLRORequest\x1a(.weewar.v1.CreateIndexRecordsLROResponse\"\x17\x82\xd3\xe4\x93\x02\x11:\x01*\"\f/v1/indexlro\x12\x83\x01\n" +
-	"\x12GetIndexRecordsLRO\x12$.weewar.v1.GetIndexRecordsLRORequest\x1a%.weewar.v1.GetIndexRecordsLROResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/v1/indexlro/{lro_id}\x12\x90\x01\n" +
-	"\x15UpdateIndexRecordsLRO\x12'.weewar.v1.UpdateIndexRecordsLRORequest\x1a(.weewar.v1.UpdateIndexRecordsLROResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*2\x19/v1/indexlro/{lro.lro_id}\x12\x7f\n" +
-	"\x0eGetIndexStates\x12 .weewar.v1.GetIndexStatesRequest\x1a!.weewar.v1.GetIndexStatesResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /v1/index:batchGet/{entity_type}\x12y\n" +
-	"\x0fListIndexStates\x12!.weewar.v1.ListIndexStatesRequest\x1a\".weewar.v1.ListIndexStatesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/v1/index/{entity_type}\x12\x7f\n" +
-	"\x11DeleteIndexStates\x12#.weewar.v1.DeleteIndexStatesRequest\x1a$.weewar.v1.DeleteIndexStatesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19*\x17/v1/index/{entity_type}B\xa2\x01\n" +
+	" weewar/v1/services/indexer.proto\x12\tweewar.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto2\xe5\x04\n" +
+	"\x0eIndexerService\x12\xbe\x01\n" +
+	"\x10EnsureIndexState\x12\".weewar.v1.EnsureIndexStateRequest\x1a#.weewar.v1.EnsureIndexStateResponse\"a\x82\xd3\xe4\x93\x02[:\x01*\"V/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}\x12\x84\x01\n" +
+	"\x0eGetIndexStates\x12 .weewar.v1.GetIndexStatesRequest\x1a!.weewar.v1.GetIndexStatesResponse\"-\x82\xd3\xe4\x93\x02'\x12%/v1/indexes/{entity_type}/{entity_id}\x12{\n" +
+	"\x0fListIndexStates\x12!.weewar.v1.ListIndexStatesRequest\x1a\".weewar.v1.ListIndexStatesResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/indexes/{entity_type}\x12\x8d\x01\n" +
+	"\x11DeleteIndexStates\x12#.weewar.v1.DeleteIndexStatesRequest\x1a$.weewar.v1.DeleteIndexStatesResponse\"-\x82\xd3\xe4\x93\x02'*%/v1/indexes/{entity_type}/{entity_id}B\xa2\x01\n" +
 	"\rcom.weewar.v1B\fIndexerProtoP\x01Z>github.com/turnforge/weewar/gen/go/weewar/v1/services;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"
 
 var file_weewar_v1_services_indexer_proto_goTypes = []any{
-	(*models.CreateIndexRecordsLRORequest)(nil),  // 0: weewar.v1.CreateIndexRecordsLRORequest
-	(*models.GetIndexRecordsLRORequest)(nil),     // 1: weewar.v1.GetIndexRecordsLRORequest
-	(*models.UpdateIndexRecordsLRORequest)(nil),  // 2: weewar.v1.UpdateIndexRecordsLRORequest
-	(*models.GetIndexStatesRequest)(nil),         // 3: weewar.v1.GetIndexStatesRequest
-	(*models.ListIndexStatesRequest)(nil),        // 4: weewar.v1.ListIndexStatesRequest
-	(*models.DeleteIndexStatesRequest)(nil),      // 5: weewar.v1.DeleteIndexStatesRequest
-	(*models.CreateIndexRecordsLROResponse)(nil), // 6: weewar.v1.CreateIndexRecordsLROResponse
-	(*models.GetIndexRecordsLROResponse)(nil),    // 7: weewar.v1.GetIndexRecordsLROResponse
-	(*models.UpdateIndexRecordsLROResponse)(nil), // 8: weewar.v1.UpdateIndexRecordsLROResponse
-	(*models.GetIndexStatesResponse)(nil),        // 9: weewar.v1.GetIndexStatesResponse
-	(*models.ListIndexStatesResponse)(nil),       // 10: weewar.v1.ListIndexStatesResponse
-	(*models.DeleteIndexStatesResponse)(nil),     // 11: weewar.v1.DeleteIndexStatesResponse
+	(*models.EnsureIndexStateRequest)(nil),   // 0: weewar.v1.EnsureIndexStateRequest
+	(*models.GetIndexStatesRequest)(nil),     // 1: weewar.v1.GetIndexStatesRequest
+	(*models.ListIndexStatesRequest)(nil),    // 2: weewar.v1.ListIndexStatesRequest
+	(*models.DeleteIndexStatesRequest)(nil),  // 3: weewar.v1.DeleteIndexStatesRequest
+	(*models.EnsureIndexStateResponse)(nil),  // 4: weewar.v1.EnsureIndexStateResponse
+	(*models.GetIndexStatesResponse)(nil),    // 5: weewar.v1.GetIndexStatesResponse
+	(*models.ListIndexStatesResponse)(nil),   // 6: weewar.v1.ListIndexStatesResponse
+	(*models.DeleteIndexStatesResponse)(nil), // 7: weewar.v1.DeleteIndexStatesResponse
 }
 var file_weewar_v1_services_indexer_proto_depIdxs = []int32{
-	0,  // 0: weewar.v1.IndexerService.CreateIndexRecordsLRO:input_type -> weewar.v1.CreateIndexRecordsLRORequest
-	1,  // 1: weewar.v1.IndexerService.GetIndexRecordsLRO:input_type -> weewar.v1.GetIndexRecordsLRORequest
-	2,  // 2: weewar.v1.IndexerService.UpdateIndexRecordsLRO:input_type -> weewar.v1.UpdateIndexRecordsLRORequest
-	3,  // 3: weewar.v1.IndexerService.GetIndexStates:input_type -> weewar.v1.GetIndexStatesRequest
-	4,  // 4: weewar.v1.IndexerService.ListIndexStates:input_type -> weewar.v1.ListIndexStatesRequest
-	5,  // 5: weewar.v1.IndexerService.DeleteIndexStates:input_type -> weewar.v1.DeleteIndexStatesRequest
-	6,  // 6: weewar.v1.IndexerService.CreateIndexRecordsLRO:output_type -> weewar.v1.CreateIndexRecordsLROResponse
-	7,  // 7: weewar.v1.IndexerService.GetIndexRecordsLRO:output_type -> weewar.v1.GetIndexRecordsLROResponse
-	8,  // 8: weewar.v1.IndexerService.UpdateIndexRecordsLRO:output_type -> weewar.v1.UpdateIndexRecordsLROResponse
-	9,  // 9: weewar.v1.IndexerService.GetIndexStates:output_type -> weewar.v1.GetIndexStatesResponse
-	10, // 10: weewar.v1.IndexerService.ListIndexStates:output_type -> weewar.v1.ListIndexStatesResponse
-	11, // 11: weewar.v1.IndexerService.DeleteIndexStates:output_type -> weewar.v1.DeleteIndexStatesResponse
-	6,  // [6:12] is the sub-list for method output_type
-	0,  // [0:6] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	0, // 0: weewar.v1.IndexerService.EnsureIndexState:input_type -> weewar.v1.EnsureIndexStateRequest
+	1, // 1: weewar.v1.IndexerService.GetIndexStates:input_type -> weewar.v1.GetIndexStatesRequest
+	2, // 2: weewar.v1.IndexerService.ListIndexStates:input_type -> weewar.v1.ListIndexStatesRequest
+	3, // 3: weewar.v1.IndexerService.DeleteIndexStates:input_type -> weewar.v1.DeleteIndexStatesRequest
+	4, // 4: weewar.v1.IndexerService.EnsureIndexState:output_type -> weewar.v1.EnsureIndexStateResponse
+	5, // 5: weewar.v1.IndexerService.GetIndexStates:output_type -> weewar.v1.GetIndexStatesResponse
+	6, // 6: weewar.v1.IndexerService.ListIndexStates:output_type -> weewar.v1.ListIndexStatesResponse
+	7, // 7: weewar.v1.IndexerService.DeleteIndexStates:output_type -> weewar.v1.DeleteIndexStatesResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_services_indexer_proto_init() }

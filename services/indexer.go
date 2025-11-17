@@ -24,10 +24,6 @@ func (b *BaseIndexerService) DeleteIndexStates(contextcontext *v1.DeleteIndexSta
 	return
 }
 
-func (b *BaseIndexerService) ListIndexStates(contextcontext *v1.ListIndexStatesRequest) (resp *v1.ListIndexStatesResponse, err error) {
-	return
-}
-
 func (b *BaseIndexerService) CreateIndexRecordsLRO(context.Context, *v1.CreateIndexRecordsLRORequest) (resp *v1.CreateIndexRecordsLROResponse, err error) {
 	return
 }

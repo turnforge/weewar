@@ -6,7 +6,15 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/field_mask.proto";
 
-message EntityIndexState {
+enum IndexStatus {
+    INDEX_STATUS_UNSPECIFIED = 0;
+    INDEX_STATUS_PENDING = 1;
+    INDEX_STATUS_INDEXING = 2;
+    INDEX_STATUS_COMPLETED = 3;
+    INDEX_STATUS_FAILED = 4;
+}
+
+message IndexState {
     string entity_type = 1;
     string entity_id = 2;
 
@@ -14,56 +22,71 @@ message EntityIndexState {
     // EntityType + EntityId + IndexType should be  unique
     string index_type = 3;
 
-
     // When the last indexing was queued
-    google.protobuf.Timestamp last_queued_at = 4;
+    google.protobuf.Timestamp created_at = 4;
 
-    // when the last indexing was completed
-    google.protobuf.Timestamp last_indexed_at = 5;
+    // when the last time the entity was recorded for an update (means it is eligible for a re-indexing)
+    google.protobuf.Timestamp updated_at = 5;
+
+    // When did the last indexing finish
+    google.protobuf.Timestamp indexed_at = 6;
+
+    // Whether indexing is needed or not
+    bool needs_indexing = 7;
 
     // "queued/pending", "indexing", "completed", "failed"
-    string status = 6;
+    IndexStatus status = 8;
 
     // If there was an error in the last indexing
-    string last_error = 7;
+    string last_error = 9;
 
-    // Keep a hash of the contents for quick check to check updated
-    // (not sure if needed) - This should be provided by the source
-    string last_content_hash = 8;
+    // A way to ignore multiple requests if they are updates but
+    // nothing has changed
+    string idempotency_key = 10;
 
-    int32 retry_count = 9;
-
-    // Which LRO this entity has been updated via
-    string current_lro_id = 10;
+    int32 retry_count = 11;
 }
 
 
 // Index States specific APIs
 
+message EnsureIndexStateRequest {
+  IndexState index_state = 1;
+
+  /**
+   * Mask of fields being updated in this Game to make partial changes.
+   */
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message EnsureIndexStateResponse {
+  IndexState index_state = 1;
+}
+
 message GetIndexStatesRequest {
   string entity_type = 1;
-  repeated string entity_ids = 2;
+  string entity_id = 2;
 
   // Optional - can be used to get "all" indexer states or just once specified here
   repeated string index_types = 3;   
 }
 
-message EntityIndexStateList {
-  repeated EntityIndexState states = 1;
+message IndexStateList {
+  repeated IndexState states = 1;
 }
 
 message GetIndexStatesResponse {
-  map<string, EntityIndexStateList> states = 1;
+  map<string, IndexState> states = 1;
 }
 
 message ListIndexStatesRequest {
   string entity_type = 1;
 
   // Get records indexed "before" this time
-  optional google.protobuf.Timestamp indexed_before = 2;
+  optional google.protobuf.Timestamp updated_before = 2;
 
-  // Get records indexed "after" this time
-  optional google.protobuf.Timestamp indexed_after = 3;
+  // Get records updated "after" this time
+  optional google.protobuf.Timestamp updated_after = 3;
 
   // Filter by index types or get all
   repeated string index_types = 4;   
@@ -76,7 +99,7 @@ message ListIndexStatesRequest {
 }
 
 message ListIndexStatesResponse {
-  repeated EntityIndexState items = 1;
+  repeated IndexState items = 1;
 
   // How to identify the next "page" in this list
   string next_page_key = 2;
@@ -84,7 +107,7 @@ message ListIndexStatesResponse {
 
 message DeleteIndexStatesRequest {
   string entity_type = 1;
-  repeated string entity_ids = 2;
+  string entity_id = 2;
 
   // Optional - can be used to get "all" indexer states or just once specified here
   repeated string index_types = 3;   
@@ -92,6 +115,7 @@ message DeleteIndexStatesRequest {
 
 message DeleteIndexStatesResponse {
 }
+
 
 // Messages for CRUD on the index LRO itself
 

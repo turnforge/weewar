@@ -47,15 +47,9 @@ type GamesServiceServer interface {
 type IndexerServiceServer interface {
 	/** *
 	Create a LRO for indexing records */
-	CreateIndexRecordsLRO(context.Context, *v1models.CreateIndexRecordsLRORequest) (*v1models.CreateIndexRecordsLROResponse, error)
+	EnsureIndexState(context.Context, *v1models.EnsureIndexStateRequest) (*v1models.EnsureIndexStateResponse, error)
 	/** *
-	Get the details of a LRO operation */
-	GetIndexRecordsLRO(context.Context, *v1models.GetIndexRecordsLRORequest) (*v1models.GetIndexRecordsLROResponse, error)
-	/** *
-	Update an LRO operation - internal usage */
-	UpdateIndexRecordsLRO(context.Context, *v1models.UpdateIndexRecordsLRORequest) (*v1models.UpdateIndexRecordsLROResponse, error)
-	/** *
-	Batch get multiple entity index states */
+	Get the index states for a particular entity */
 	GetIndexStates(context.Context, *v1models.GetIndexStatesRequest) (*v1models.GetIndexStatesResponse, error)
 	/** *
 	List index entity states by filtering */

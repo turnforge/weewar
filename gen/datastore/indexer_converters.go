@@ -5,141 +5,9 @@ import (
 	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 
 	"fmt"
-	"strconv"
-	"time"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"github.com/panyam/protoc-gen-dal/pkg/converters"
 )
-
-// Helper functions for type conversions
-
-// timestampToInt64 converts a protobuf Timestamp to Unix seconds (int64).
-func timestampToInt64(ts *timestamppb.Timestamp) int64 {
-	if ts == nil {
-		return 0
-	}
-	return ts.AsTime().Unix()
-}
-
-// int64ToTimestamp converts Unix seconds to a protobuf Timestamp.
-func int64ToTimestamp(seconds int64) *timestamppb.Timestamp {
-	if seconds == 0 {
-		return nil
-	}
-	return timestamppb.New(time.Unix(seconds, 0))
-}
-
-// mustParseUint parses a string to uint64, panics on error (for generated code).
-func mustParseUint(s string) uint64 {
-	val, err := strconv.ParseUint(s, 10, 32)
-	if err != nil {
-		panic("failed to parse uint: " + err.Error())
-	}
-	return val
-}
-
-// EntityIndexStateToEntityIndexStateDatastore converts a EntityIndexState to EntityIndexStateDatastore.
-//
-// The optional decorator function allows custom field transformations after conversion.
-//
-// Parameters:
-//   - src: Source EntityIndexState message to convert from
-//   - dest: Destination EntityIndexStateDatastore entity (if nil, a new one is created)
-//   - decorator: Optional function for custom transformations
-//
-// Returns:
-//   - Converted EntityIndexStateDatastore entity
-//   - Error if conversion fails
-func EntityIndexStateToEntityIndexStateDatastore(
-	src *models.EntityIndexState,
-	dest *EntityIndexStateDatastore,
-	decorator func(*models.EntityIndexState, *EntityIndexStateDatastore) error,
-) (out *EntityIndexStateDatastore, err error) {
-	if src == nil {
-		return nil, nil
-	}
-	if dest == nil {
-		dest = &EntityIndexStateDatastore{}
-	}
-
-	// Initialize struct with inline values
-	*dest = EntityIndexStateDatastore{
-		EntityType:      src.EntityType,
-		EntityId:        src.EntityId,
-		IndexType:       src.IndexType,
-		Status:          src.Status,
-		LastError:       src.LastError,
-		LastContentHash: src.LastContentHash,
-		RetryCount:      src.RetryCount,
-		CurrentLroId:    src.CurrentLroId,
-	}
-	out = dest
-
-	if src.LastQueuedAt != nil {
-		out.LastQueuedAt = timestampToInt64(src.LastQueuedAt)
-	}
-	if src.LastIndexedAt != nil {
-		out.LastIndexedAt = timestampToInt64(src.LastIndexedAt)
-	}
-
-	// Apply decorator if provided
-	if decorator != nil {
-		if err := decorator(src, dest); err != nil {
-			return nil, err
-		}
-	}
-
-	return dest, nil
-}
-
-// EntityIndexStateFromEntityIndexStateDatastore converts a EntityIndexStateDatastore back to EntityIndexState.
-//
-// The optional decorator function allows custom field transformations after conversion.
-//
-// Parameters:
-//   - dest: Destination EntityIndexState message (if nil, a new one is created)
-//   - src: Source EntityIndexStateDatastore entity to convert from
-//   - decorator: Optional function for custom transformations
-//
-// Returns:
-//   - Converted EntityIndexState message
-//   - Error if conversion fails
-func EntityIndexStateFromEntityIndexStateDatastore(
-	dest *models.EntityIndexState,
-	src *EntityIndexStateDatastore,
-	decorator func(*models.EntityIndexState, *EntityIndexStateDatastore) error,
-) (out *models.EntityIndexState, err error) {
-	if src == nil {
-		return nil, nil
-	}
-	if dest == nil {
-		dest = &models.EntityIndexState{}
-	}
-
-	// Initialize struct with inline values
-	*dest = models.EntityIndexState{
-		EntityType:      src.EntityType,
-		EntityId:        src.EntityId,
-		IndexType:       src.IndexType,
-		LastQueuedAt:    int64ToTimestamp(src.LastQueuedAt),
-		LastIndexedAt:   int64ToTimestamp(src.LastIndexedAt),
-		Status:          src.Status,
-		LastError:       src.LastError,
-		LastContentHash: src.LastContentHash,
-		RetryCount:      src.RetryCount,
-		CurrentLroId:    src.CurrentLroId,
-	}
-	out = dest
-
-	// Apply decorator if provided
-	if decorator != nil {
-		if err := decorator(dest, src); err != nil {
-			return nil, err
-		}
-	}
-
-	return dest, nil
-}
 
 // IndexRecordToIndexRecordDatastore converts a IndexRecord to IndexRecordDatastore.
 //
@@ -173,7 +41,13 @@ func IndexRecordToIndexRecordDatastore(
 	out = dest
 
 	if src.UpdatedAt != nil {
-		out.UpdatedAt = timestampToInt64(src.UpdatedAt)
+		out.UpdatedAt = converters.TimestampToInt64(src.UpdatedAt)
+	}
+	if src.EntityData != nil {
+		out.EntityData, err = converters.AnyToBytes(src.EntityData)
+		if err != nil {
+			return nil, fmt.Errorf("converting EntityData: %w", err)
+		}
 	}
 
 	// Apply decorator if provided
@@ -213,10 +87,17 @@ func IndexRecordFromIndexRecordDatastore(
 	// Initialize struct with inline values
 	*dest = models.IndexRecord{
 		EntityId:     src.EntityId,
-		UpdatedAt:    int64ToTimestamp(src.UpdatedAt),
+		UpdatedAt:    converters.Int64ToTimestamp(src.UpdatedAt),
 		IndexerTypes: src.IndexerTypes,
 	}
 	out = dest
+
+	if src.EntityData != nil {
+		out.EntityData, err = converters.BytesToAny(src.EntityData)
+		if err != nil {
+			return nil, fmt.Errorf("converting EntityData: %w", err)
+		}
+	}
 
 	// Apply decorator if provided
 	if decorator != nil {
@@ -261,10 +142,10 @@ func IndexRecordsLROToIndexRecordsLRODatastore(
 	out = dest
 
 	if src.CreatedAt != nil {
-		out.CreatedAt = timestampToInt64(src.CreatedAt)
+		out.CreatedAt = converters.TimestampToInt64(src.CreatedAt)
 	}
 	if src.UpdatedAt != nil {
-		out.UpdatedAt = timestampToInt64(src.UpdatedAt)
+		out.UpdatedAt = converters.TimestampToInt64(src.UpdatedAt)
 	}
 
 	if src.Records != nil {
@@ -315,8 +196,8 @@ func IndexRecordsLROFromIndexRecordsLRODatastore(
 	*dest = models.IndexRecordsLRO{
 		LroId:       src.LroId,
 		EntityType:  src.EntityType,
-		CreatedAt:   int64ToTimestamp(src.CreatedAt),
-		UpdatedAt:   int64ToTimestamp(src.UpdatedAt),
+		CreatedAt:   converters.Int64ToTimestamp(src.CreatedAt),
+		UpdatedAt:   converters.Int64ToTimestamp(src.UpdatedAt),
 		CallbackUrl: src.CallbackUrl,
 	}
 	out = dest

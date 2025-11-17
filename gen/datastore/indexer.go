@@ -5,36 +5,6 @@ import (
 	"cloud.google.com/go/datastore"
 )
 
-// EntityIndexStateDatastore is the Datastore entity for the source message.
-type EntityIndexStateDatastore struct {
-	Key *datastore.Key `datastore:"-"`
-
-	EntityType string `datastore:"entity_type"`
-
-	EntityId string `datastore:"entity_id"`
-
-	IndexType string `datastore:"index_type"`
-
-	LastQueuedAt int64 `datastore:"last_queued_at"`
-
-	LastIndexedAt int64 `datastore:"last_indexed_at"`
-
-	Status string `datastore:"status"`
-
-	LastError string `datastore:"last_error"`
-
-	LastContentHash string `datastore:"last_content_hash"`
-
-	RetryCount int32 `datastore:"retry_count"`
-
-	CurrentLroId string `datastore:"current_lro_id"`
-}
-
-// Kind returns the Datastore kind name for EntityIndexStateDatastore.
-func (*EntityIndexStateDatastore) Kind() string {
-	return "EntityIndexState"
-}
-
 // IndexRecordDatastore is the Datastore entity for the source message.
 type IndexRecordDatastore struct {
 	Key *datastore.Key `datastore:"-"`
@@ -42,6 +12,8 @@ type IndexRecordDatastore struct {
 	EntityId string `datastore:"entity_id"`
 
 	UpdatedAt int64 `datastore:"updated_at"`
+
+	EntityData []byte `datastore:"entity_data"`
 
 	IndexerTypes []string `datastore:"indexer_types"`
 }

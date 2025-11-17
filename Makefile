@@ -122,10 +122,51 @@ remove-proto-symlinks:
 	echo "Removing turnengine proto symlink..."
 	# rm -Rf protos/wasmjs protos/turnengine
 
+build: down copylinks dockerbuild resymlink
+dockerbuild:
+	BUILDKIT_PROGRESS=plain docker compose build --no-cache
+
+copylinks:
+	rm -Rf locallinks/*
+	cp -r ../goutils locallinks/
+	cp -r ../templar locallinks/
+	cp -r ../protoc-gen-dal locallinks/
+	cp -r ../oneauth locallinks/
+	cp -r ../turnengine locallinks/
+
 resymlink:
 	mkdir -p locallinks
 	rm -Rf locallinks/*
 	cd locallinks && ln -s ../../templar
+	cd locallinks && ln -s ../../protoc-gen-dal
 	cd locallinks && ln -s ../../goutils
 	cd locallinks && ln -s ../../oneauth
 	cd locallinks && ln -s ../../turnengine
+
+####  Docker related commands
+
+up: ensurenetworks
+	docker compose -f docker-compose.yml down
+	BUILDKIT_PROGRESS=plain docker compose -f docker-compose.yml up -d
+
+logs:
+	docker compose -f docker-compose.yml logs -f
+
+# Bring everything down
+down:
+	docker compose -f docker-compose.yml down --remove-orphans
+	docker compose -f db-docker-compose.yml down --remove-orphans
+
+# Bring up DB - only brings down DB containers from before
+updb: dbdirs ensurenetworks
+	BUILDKIT_PROGRESS=plain docker compose -f db-docker-compose.yml down --remove-orphans
+	BUILDKIT_PROGRESS=plain docker compose -f db-docker-compose.yml up -d
+
+dblogs:
+	docker compose -f db-docker-compose.yml logs -f --tail 100
+
+ensurenetworks:
+	-docker network create weewarnetwork
+
+dbdirs:
+	mkdir -p ./data/pgdata

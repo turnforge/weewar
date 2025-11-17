@@ -7,59 +7,12 @@ import "weewar/v1/models/indexer.proto";
 
 option go_package = "github.com/turnforge/weewar/gen/gorm;weewargorm";
 
-// EntityIndexStateGORM is the GORM representation for EntityIndexState
-message EntityIndexStateGORM {
+// IndexStateGORM is the GORM representation for IndexState
+message IndexStateGORM {
   option (dal.v1.gorm) = {
-    source: "weewar.v1.EntityIndexState"
+    source: "weewar.v1.IndexState"
     table: "entity_index_states"
   };
-
-  // Composite primary key: entity_type + entity_id + index_type
-  string entity_type = 1 [(dal.v1.column) = {
-    gorm_tags: ["primaryKey", "type:varchar(100)", "not null"]
-  }];
-
-  string entity_id = 2 [(dal.v1.column) = {
-    gorm_tags: ["primaryKey", "type:varchar(255)", "not null"]
-  }];
-
-  string index_type = 3 [(dal.v1.column) = {
-    gorm_tags: ["primaryKey", "type:varchar(100)", "not null"]
-  }];
-
-  // Timestamps stored as int64 (Unix time)
-  int64 last_queued_at = 4 [(dal.v1.column) = {
-    gorm_tags: ["type:bigint"]
-  }];
-
-  int64 last_indexed_at = 5 [(dal.v1.column) = {
-    gorm_tags: ["type:bigint", "index"]
-  }];
-
-  // Status field
-  string status = 6 [(dal.v1.column) = {
-    gorm_tags: ["type:varchar(50)", "not null", "default:pending", "index"]
-  }];
-
-  // Error tracking
-  string last_error = 7 [(dal.v1.column) = {
-    gorm_tags: ["type:text"]
-  }];
-
-  // Content hash for change detection
-  string last_content_hash = 8 [(dal.v1.column) = {
-    gorm_tags: ["type:varchar(255)"]
-  }];
-
-  // Retry tracking
-  int32 retry_count = 9 [(dal.v1.column) = {
-    gorm_tags: ["type:int", "default:0"]
-  }];
-
-  // LRO tracking
-  string current_lro_id = 10 [(dal.v1.column) = {
-    gorm_tags: ["type:varchar(255)", "index"]
-  }];
 }
 
 // IndexRecord represents a single record within an LRO (stored as JSONB)
@@ -71,36 +24,4 @@ message IndexRecordsLROGORM {
     source: "weewar.v1.IndexRecordsLRO"
     table: "index_records_lros"
   };
-
-  // Primary key
-  string lro_id = 1 [(dal.v1.column) = {
-    gorm_tags: ["primaryKey", "type:varchar(255)"]
-  }];
-
-  // Entity type for all records in this LRO
-  string entity_type = 2 [(dal.v1.column) = {
-    gorm_tags: ["type:varchar(100)", "not null", "index"]
-  }];
-
-  // Timestamps
-  int64 created_at = 3 [(dal.v1.column) = {
-    gorm_tags: ["type:bigint", "not null"]
-  }];
-
-  int64 updated_at = 4 [(dal.v1.column) = {
-    gorm_tags: ["type:bigint", "not null"]
-  }];
-
-  // Callback URL
-  string callback_url = 5 [(dal.v1.column) = {
-    gorm_tags: ["type:varchar(500)"]
-  }];
-
-  // Records stored as JSONB (PostgreSQL-specific)
-  // The repeated IndexRecord will be serialized to JSON
-  // Note: In the proto, this is `repeated IndexRecord` but GORM can't handle
-  // repeated message types directly, so we'll store as JSONB
-  bytes records = 6 [(dal.v1.column) = {
-    gorm_tags: ["type:jsonb"]
-  }];
 }

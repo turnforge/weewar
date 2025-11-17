@@ -26,7 +26,7 @@ from dal.v1 import annotations_pb2 as dal_dot_v1_dot_annotations__pb2
 from weewar.v1.models import indexer_pb2 as weewar_dot_v1_dot_models_dot_indexer__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto\"\xfb\x05\n\x14\x45ntityIndexStateGORM\x12N\n\x0b\x65ntity_type\x18\x01 \x01(\tB-\x92\xa6\x1d)R\nprimaryKeyR\x11type:varchar(100)R\x08not nullR\nentityType\x12J\n\tentity_id\x18\x02 \x01(\tB-\x92\xa6\x1d)R\nprimaryKeyR\x11type:varchar(255)R\x08not nullR\x08\x65ntityId\x12L\n\nindex_type\x18\x03 \x01(\tB-\x92\xa6\x1d)R\nprimaryKeyR\x11type:varchar(100)R\x08not nullR\tindexType\x12\x37\n\x0elast_queued_at\x18\x04 \x01(\x03\x42\x11\x92\xa6\x1d\rR\x0btype:bigintR\x0clastQueuedAt\x12@\n\x0flast_indexed_at\x18\x05 \x01(\x03\x42\x18\x92\xa6\x1d\x14R\x0btype:bigintR\x05indexR\rlastIndexedAt\x12P\n\x06status\x18\x06 \x01(\tB8\x92\xa6\x1d\x34R\x10type:varchar(50)R\x08not nullR\x0f\x64\x65\x66\x61ult:pendingR\x05indexR\x06status\x12.\n\nlast_error\x18\x07 \x01(\tB\x0f\x92\xa6\x1d\x0bR\ttype:textR\tlastError\x12\x43\n\x11last_content_hash\x18\x08 \x01(\tB\x17\x92\xa6\x1d\x13R\x11type:varchar(255)R\x0flastContentHash\x12:\n\x0bretry_count\x18\t \x01(\x05\x42\x19\x92\xa6\x1d\x15R\x08type:intR\tdefault:0R\nretryCount\x12\x44\n\x0e\x63urrent_lro_id\x18\n \x01(\tB\x1e\x92\xa6\x1d\x1aR\x11type:varchar(255)R\x05indexR\x0c\x63urrentLroId:5\xca\xa6\x1d\x31\n\x1aweewar.v1.EntityIndexState\x12\x13\x65ntity_index_states\"\xb1\x03\n\x13IndexRecordsLROGORM\x12:\n\x06lro_id\x18\x01 \x01(\tB#\x92\xa6\x1d\x1fR\nprimaryKeyR\x11type:varchar(255)R\x05lroId\x12I\n\x0b\x65ntity_type\x18\x02 \x01(\tB(\x92\xa6\x1d$R\x11type:varchar(100)R\x08not nullR\x05indexR\nentityType\x12:\n\ncreated_at\x18\x03 \x01(\x03\x42\x1b\x92\xa6\x1d\x17R\x0btype:bigintR\x08not nullR\tcreatedAt\x12:\n\nupdated_at\x18\x04 \x01(\x03\x42\x1b\x92\xa6\x1d\x17R\x0btype:bigintR\x08not nullR\tupdatedAt\x12:\n\x0c\x63\x61llback_url\x18\x05 \x01(\tB\x17\x92\xa6\x1d\x13R\x11type:varchar(500)R\x0b\x63\x61llbackUrl\x12*\n\x07records\x18\x06 \x01(\x0c\x42\x10\x92\xa6\x1d\x0cR\ntype:jsonbR\x07records:3\xca\xa6\x1d/\n\x19weewar.v1.IndexRecordsLRO\x12\x12index_records_lrosB\x9e\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto\"A\n\x0eIndexStateGORM:/\xca\xa6\x1d+\n\x14weewar.v1.IndexState\x12\x13\x65ntity_index_states\"J\n\x13IndexRecordsLROGORM:3\xca\xa6\x1d/\n\x19weewar.v1.IndexRecordsLRO\x12\x12index_records_lrosB\x9e\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,44 +34,12 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'weewar.v1.gorm.indexer_pb2'
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\rcom.weewar.v1B\014IndexerProtoP\001Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\242\002\003WXX\252\002\tWeewar.V1\312\002\tWeewar\\V1\342\002\025Weewar\\V1\\GPBMetadata\352\002\nWeewar::V1'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['entity_type']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['entity_type']._serialized_options = b'\222\246\035)R\nprimaryKeyR\021type:varchar(100)R\010not null'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['entity_id']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['entity_id']._serialized_options = b'\222\246\035)R\nprimaryKeyR\021type:varchar(255)R\010not null'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['index_type']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['index_type']._serialized_options = b'\222\246\035)R\nprimaryKeyR\021type:varchar(100)R\010not null'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_queued_at']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_queued_at']._serialized_options = b'\222\246\035\rR\013type:bigint'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_indexed_at']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_indexed_at']._serialized_options = b'\222\246\035\024R\013type:bigintR\005index'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['status']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['status']._serialized_options = b'\222\246\0354R\020type:varchar(50)R\010not nullR\017default:pendingR\005index'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_error']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_error']._serialized_options = b'\222\246\035\013R\ttype:text'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_content_hash']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['last_content_hash']._serialized_options = b'\222\246\035\023R\021type:varchar(255)'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['retry_count']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['retry_count']._serialized_options = b'\222\246\035\025R\010type:intR\tdefault:0'
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['current_lro_id']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM'].fields_by_name['current_lro_id']._serialized_options = b'\222\246\035\032R\021type:varchar(255)R\005index'
-  _globals['_ENTITYINDEXSTATEGORM']._loaded_options = None
-  _globals['_ENTITYINDEXSTATEGORM']._serialized_options = b'\312\246\0351\n\032weewar.v1.EntityIndexState\022\023entity_index_states'
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['lro_id']._loaded_options = None
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['lro_id']._serialized_options = b'\222\246\035\037R\nprimaryKeyR\021type:varchar(255)'
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['entity_type']._loaded_options = None
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['entity_type']._serialized_options = b'\222\246\035$R\021type:varchar(100)R\010not nullR\005index'
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['created_at']._loaded_options = None
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['created_at']._serialized_options = b'\222\246\035\027R\013type:bigintR\010not null'
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['updated_at']._loaded_options = None
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['updated_at']._serialized_options = b'\222\246\035\027R\013type:bigintR\010not null'
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['callback_url']._loaded_options = None
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['callback_url']._serialized_options = b'\222\246\035\023R\021type:varchar(500)'
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['records']._loaded_options = None
-  _globals['_INDEXRECORDSLROGORM'].fields_by_name['records']._serialized_options = b'\222\246\035\014R\ntype:jsonb'
+  _globals['_INDEXSTATEGORM']._loaded_options = None
+  _globals['_INDEXSTATEGORM']._serialized_options = b'\312\246\035+\n\024weewar.v1.IndexState\022\023entity_index_states'
   _globals['_INDEXRECORDSLROGORM']._loaded_options = None
   _globals['_INDEXRECORDSLROGORM']._serialized_options = b'\312\246\035/\n\031weewar.v1.IndexRecordsLRO\022\022index_records_lros'
-  _globals['_ENTITYINDEXSTATEGORM']._serialized_start=102
-  _globals['_ENTITYINDEXSTATEGORM']._serialized_end=865
-  _globals['_INDEXRECORDSLROGORM']._serialized_start=868
-  _globals['_INDEXRECORDSLROGORM']._serialized_end=1301
+  _globals['_INDEXSTATEGORM']._serialized_start=101
+  _globals['_INDEXSTATEGORM']._serialized_end=166
+  _globals['_INDEXRECORDSLROGORM']._serialized_start=168
+  _globals['_INDEXRECORDSLROGORM']._serialized_end=242
 # @@protoc_insertion_point(module_scope)

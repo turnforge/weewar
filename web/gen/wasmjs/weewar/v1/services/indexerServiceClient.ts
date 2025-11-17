@@ -5,27 +5,21 @@ import { ServiceClient } from '@protoc-gen-go-wasmjs/runtime';
 
 // Import TypeScript types for method signatures
 import {
-    CreateIndexRecordsLRORequest,
-    CreateIndexRecordsLROResponse,
     DeleteIndexStatesRequest,
     DeleteIndexStatesResponse,
-    GetIndexRecordsLRORequest,
-    GetIndexRecordsLROResponse,
+    EnsureIndexStateRequest,
+    EnsureIndexStateResponse,
     GetIndexStatesRequest,
     GetIndexStatesResponse,
     ListIndexStatesRequest,
     ListIndexStatesResponse,
-    UpdateIndexRecordsLRORequest,
-    UpdateIndexRecordsLROResponse,
 } from '../models/interfaces';
 /**
  * IndexerService service client interface
  * Fully typed method signatures with TypeScript interfaces
  */
 export interface IndexerServiceMethods {
-	createIndexRecordsLRO(request: CreateIndexRecordsLRORequest): Promise<CreateIndexRecordsLROResponse>;
-	getIndexRecordsLRO(request: GetIndexRecordsLRORequest): Promise<GetIndexRecordsLROResponse>;
-	updateIndexRecordsLRO(request: UpdateIndexRecordsLRORequest): Promise<UpdateIndexRecordsLROResponse>;
+	ensureIndexState(request: EnsureIndexStateRequest): Promise<EnsureIndexStateResponse>;
 	getIndexStates(request: GetIndexStatesRequest): Promise<GetIndexStatesResponse>;
 	listIndexStates(request: ListIndexStatesRequest): Promise<ListIndexStatesResponse>;
 	deleteIndexStates(request: DeleteIndexStatesRequest): Promise<DeleteIndexStatesResponse>;
@@ -35,14 +29,8 @@ export interface IndexerServiceMethods {
  * Lightweight facade that uses shared WASM bundle
  */
 export class IndexerServiceClient extends ServiceClient implements IndexerServiceMethods {
-    async createIndexRecordsLRO(request: CreateIndexRecordsLRORequest): Promise<CreateIndexRecordsLROResponse> {
-        return this.callMethod('indexerService.createIndexRecordsLRO', request);
-    }
-    async getIndexRecordsLRO(request: GetIndexRecordsLRORequest): Promise<GetIndexRecordsLROResponse> {
-        return this.callMethod('indexerService.getIndexRecordsLRO', request);
-    }
-    async updateIndexRecordsLRO(request: UpdateIndexRecordsLRORequest): Promise<UpdateIndexRecordsLROResponse> {
-        return this.callMethod('indexerService.updateIndexRecordsLRO', request);
+    async ensureIndexState(request: EnsureIndexStateRequest): Promise<EnsureIndexStateResponse> {
+        return this.callMethod('indexerService.ensureIndexState', request);
     }
     async getIndexStates(request: GetIndexStatesRequest): Promise<GetIndexStatesResponse> {
         return this.callMethod('indexerService.getIndexStates', request);

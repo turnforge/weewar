@@ -2974,10 +2974,10 @@ export const SetAllowedPanelsResponseSchema: MessageSchema = {
 
 
 /**
- * Schema for EntityIndexState message
+ * Schema for IndexState message
  */
-export const EntityIndexStateSchema: MessageSchema = {
-  name: "EntityIndexState",
+export const IndexStateSchema: MessageSchema = {
+  name: "IndexState",
   fields: [
     {
       name: "entityType",
@@ -2995,41 +2995,85 @@ export const EntityIndexStateSchema: MessageSchema = {
       id: 3,
     },
     {
-      name: "lastQueuedAt",
+      name: "createdAt",
       type: FieldType.MESSAGE,
       id: 4,
       messageType: "google.protobuf.Timestamp",
     },
     {
-      name: "lastIndexedAt",
+      name: "updatedAt",
       type: FieldType.MESSAGE,
       id: 5,
       messageType: "google.protobuf.Timestamp",
     },
     {
-      name: "status",
-      type: FieldType.STRING,
+      name: "indexedAt",
+      type: FieldType.MESSAGE,
       id: 6,
+      messageType: "google.protobuf.Timestamp",
     },
     {
-      name: "lastError",
-      type: FieldType.STRING,
+      name: "needsIndexing",
+      type: FieldType.BOOLEAN,
       id: 7,
     },
     {
-      name: "lastContentHash",
+      name: "status",
       type: FieldType.STRING,
       id: 8,
     },
     {
-      name: "retryCount",
-      type: FieldType.NUMBER,
+      name: "lastError",
+      type: FieldType.STRING,
       id: 9,
     },
     {
-      name: "currentLroId",
+      name: "idempotencyKey",
       type: FieldType.STRING,
       id: 10,
+    },
+    {
+      name: "retryCount",
+      type: FieldType.NUMBER,
+      id: 11,
+    },
+  ],
+};
+
+
+/**
+ * Schema for EnsureIndexStateRequest message
+ */
+export const EnsureIndexStateRequestSchema: MessageSchema = {
+  name: "EnsureIndexStateRequest",
+  fields: [
+    {
+      name: "indexState",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.IndexState",
+    },
+    {
+      name: "updateMask",
+      type: FieldType.MESSAGE,
+      id: 2,
+      messageType: "google.protobuf.FieldMask",
+    },
+  ],
+};
+
+
+/**
+ * Schema for EnsureIndexStateResponse message
+ */
+export const EnsureIndexStateResponseSchema: MessageSchema = {
+  name: "EnsureIndexStateResponse",
+  fields: [
+    {
+      name: "indexState",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.IndexState",
     },
   ],
 };
@@ -3047,10 +3091,9 @@ export const GetIndexStatesRequestSchema: MessageSchema = {
       id: 1,
     },
     {
-      name: "entityIds",
-      type: FieldType.REPEATED,
+      name: "entityId",
+      type: FieldType.STRING,
       id: 2,
-      repeated: true,
     },
     {
       name: "indexTypes",
@@ -3063,16 +3106,16 @@ export const GetIndexStatesRequestSchema: MessageSchema = {
 
 
 /**
- * Schema for EntityIndexStateList message
+ * Schema for IndexStateList message
  */
-export const EntityIndexStateListSchema: MessageSchema = {
-  name: "EntityIndexStateList",
+export const IndexStateListSchema: MessageSchema = {
+  name: "IndexStateList",
   fields: [
     {
       name: "states",
       type: FieldType.MESSAGE,
       id: 1,
-      messageType: "weewar.v1.EntityIndexState",
+      messageType: "weewar.v1.IndexState",
       repeated: true,
     },
   ],
@@ -3106,19 +3149,19 @@ export const ListIndexStatesRequestSchema: MessageSchema = {
       id: 1,
     },
     {
-      name: "indexedBefore",
+      name: "updatedBefore",
       type: FieldType.MESSAGE,
       id: 2,
       messageType: "google.protobuf.Timestamp",
-      oneofGroup: "_indexed_before",
+      oneofGroup: "_updated_before",
       optional: true,
     },
     {
-      name: "indexedAfter",
+      name: "updatedAfter",
       type: FieldType.MESSAGE,
       id: 3,
       messageType: "google.protobuf.Timestamp",
-      oneofGroup: "_indexed_after",
+      oneofGroup: "_updated_after",
       optional: true,
     },
     {
@@ -3138,7 +3181,7 @@ export const ListIndexStatesRequestSchema: MessageSchema = {
       id: 6,
     },
   ],
-  oneofGroups: ["_indexed_before", "_indexed_after"],
+  oneofGroups: ["_updated_before", "_updated_after"],
 };
 
 
@@ -3152,7 +3195,7 @@ export const ListIndexStatesResponseSchema: MessageSchema = {
       name: "items",
       type: FieldType.MESSAGE,
       id: 1,
-      messageType: "weewar.v1.EntityIndexState",
+      messageType: "weewar.v1.IndexState",
       repeated: true,
     },
     {
@@ -3176,10 +3219,9 @@ export const DeleteIndexStatesRequestSchema: MessageSchema = {
       id: 1,
     },
     {
-      name: "entityIds",
-      type: FieldType.REPEATED,
+      name: "entityId",
+      type: FieldType.STRING,
       id: 2,
-      repeated: true,
     },
     {
       name: "indexTypes",
@@ -3374,6 +3416,134 @@ export const GetIndexRecordsLROResponseSchema: MessageSchema = {
       type: FieldType.MESSAGE,
       id: 1,
       messageType: "weewar.v1.IndexRecordsLRO",
+    },
+  ],
+};
+
+
+/**
+ * Schema for Job message
+ */
+export const JobSchema: MessageSchema = {
+  name: "Job",
+  fields: [
+    {
+      name: "entityType",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "entityId",
+      type: FieldType.STRING,
+      id: 2,
+    },
+    {
+      name: "jobType",
+      type: FieldType.STRING,
+      id: 3,
+    },
+    {
+      name: "createdAt",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "google.protobuf.Timestamp",
+    },
+    {
+      name: "updatedAt",
+      type: FieldType.MESSAGE,
+      id: 5,
+      messageType: "google.protobuf.Timestamp",
+    },
+    {
+      name: "jobData",
+      type: FieldType.MESSAGE,
+      id: 6,
+      messageType: "google.protobuf.Any",
+    },
+    {
+      name: "debounceWindowSeconds",
+      type: FieldType.NUMBER,
+      id: 7,
+    },
+    {
+      name: "repeatInfo",
+      type: FieldType.MESSAGE,
+      id: 8,
+      messageType: "weewar.v1.RepeatInfo",
+    },
+  ],
+};
+
+
+/**
+ * Schema for RepeatInfo message
+ */
+export const RepeatInfoSchema: MessageSchema = {
+  name: "RepeatInfo",
+  fields: [
+  ],
+};
+
+
+/**
+ * Schema for Run message
+ */
+export const RunSchema: MessageSchema = {
+  name: "Run",
+  fields: [
+    {
+      name: "jobId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "runId",
+      type: FieldType.STRING,
+      id: 2,
+    },
+    {
+      name: "createdAt",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "google.protobuf.Timestamp",
+    },
+    {
+      name: "startedAt",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "google.protobuf.Timestamp",
+    },
+    {
+      name: "updatedAt",
+      type: FieldType.MESSAGE,
+      id: 5,
+      messageType: "google.protobuf.Timestamp",
+    },
+    {
+      name: "state",
+      type: FieldType.STRING,
+      id: 6,
+    },
+    {
+      name: "runData",
+      type: FieldType.MESSAGE,
+      id: 7,
+      messageType: "google.protobuf.Any",
+    },
+    {
+      name: "lastError",
+      type: FieldType.STRING,
+      id: 8,
+    },
+    {
+      name: "lastContentHash",
+      type: FieldType.STRING,
+      id: 9,
+    },
+    {
+      name: "retryCount",
+      type: FieldType.NUMBER,
+      id: 10,
     },
   ],
 };
@@ -4517,9 +4687,11 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.ShowCaptureEffectResponse": ShowCaptureEffectResponseSchema,
   "weewar.v1.SetAllowedPanelsRequest": SetAllowedPanelsRequestSchema,
   "weewar.v1.SetAllowedPanelsResponse": SetAllowedPanelsResponseSchema,
-  "weewar.v1.EntityIndexState": EntityIndexStateSchema,
+  "weewar.v1.IndexState": IndexStateSchema,
+  "weewar.v1.EnsureIndexStateRequest": EnsureIndexStateRequestSchema,
+  "weewar.v1.EnsureIndexStateResponse": EnsureIndexStateResponseSchema,
   "weewar.v1.GetIndexStatesRequest": GetIndexStatesRequestSchema,
-  "weewar.v1.EntityIndexStateList": EntityIndexStateListSchema,
+  "weewar.v1.IndexStateList": IndexStateListSchema,
   "weewar.v1.GetIndexStatesResponse": GetIndexStatesResponseSchema,
   "weewar.v1.ListIndexStatesRequest": ListIndexStatesRequestSchema,
   "weewar.v1.ListIndexStatesResponse": ListIndexStatesResponseSchema,
@@ -4533,6 +4705,9 @@ export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
   "weewar.v1.UpdateIndexRecordsLROResponse": UpdateIndexRecordsLROResponseSchema,
   "weewar.v1.GetIndexRecordsLRORequest": GetIndexRecordsLRORequestSchema,
   "weewar.v1.GetIndexRecordsLROResponse": GetIndexRecordsLROResponseSchema,
+  "weewar.v1.Job": JobSchema,
+  "weewar.v1.RepeatInfo": RepeatInfoSchema,
+  "weewar.v1.Run": RunSchema,
   "weewar.v1.InitializeSingletonRequest": InitializeSingletonRequestSchema,
   "weewar.v1.InitializeSingletonResponse": InitializeSingletonResponseSchema,
   "weewar.v1.TurnOptionClickedRequest": TurnOptionClickedRequestSchema,

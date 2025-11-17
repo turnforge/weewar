@@ -2,65 +2,45 @@
 package gorm
 
 import (
-	"time"
-
+	"github.com/panyam/protoc-gen-dal/pkg/converters"
 	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Helper functions for built-in type conversions
-
-// timestampToInt64 converts a protobuf Timestamp to Unix seconds (int64).
-// Returns 0 if timestamp is nil.
-func timestampToInt64(ts *timestamppb.Timestamp) int64 {
-	if ts == nil {
-		return 0
-	}
-	return ts.AsTime().Unix()
-}
-
-// int64ToTimestamp converts Unix seconds (int64) to a protobuf Timestamp.
-// Returns nil if the input is 0.
-func int64ToTimestamp(seconds int64) *timestamppb.Timestamp {
-	if seconds == 0 {
-		return nil
-	}
-	return timestamppb.New(time.Unix(seconds, 0))
-}
-
-// EntityIndexStateToEntityIndexStateGORM converts a models.EntityIndexState to EntityIndexStateGORM.
+// IndexStateToIndexStateGORM converts a models.IndexState to IndexStateGORM.
 // The optional decorator function allows custom field transformations.
-func EntityIndexStateToEntityIndexStateGORM(
-	src *models.EntityIndexState,
-	dest *EntityIndexStateGORM,
-	decorator func(*models.EntityIndexState, *EntityIndexStateGORM) error,
-) (out *EntityIndexStateGORM, err error) {
+func IndexStateToIndexStateGORM(
+	src *models.IndexState,
+	dest *IndexStateGORM,
+	decorator func(*models.IndexState, *IndexStateGORM) error,
+) (out *IndexStateGORM, err error) {
 	if src == nil {
 		return nil, nil
 	}
 	if dest == nil {
-		dest = &EntityIndexStateGORM{}
+		dest = &IndexStateGORM{}
 	}
 
 	// Initialize struct with inline values
-	*dest = EntityIndexStateGORM{
-		EntityType:      src.EntityType,
-		EntityId:        src.EntityId,
-		IndexType:       src.IndexType,
-		Status:          src.Status,
-		LastError:       src.LastError,
-		LastContentHash: src.LastContentHash,
-		RetryCount:      src.RetryCount,
-		CurrentLroId:    src.CurrentLroId,
+	*dest = IndexStateGORM{
+		EntityType:     src.EntityType,
+		EntityId:       src.EntityId,
+		IndexType:      src.IndexType,
+		NeedsIndexing:  src.NeedsIndexing,
+		Status:         src.Status,
+		LastError:      src.LastError,
+		IdempotencyKey: src.IdempotencyKey,
+		RetryCount:     src.RetryCount,
 	}
 	out = dest
 
-	if src.LastQueuedAt != nil {
-		out.LastQueuedAt = timestampToInt64(src.LastQueuedAt)
+	if src.CreatedAt != nil {
+		out.CreatedAt = converters.TimestampToTime(src.CreatedAt)
 	}
-	if src.LastIndexedAt != nil {
-		out.LastIndexedAt = timestampToInt64(src.LastIndexedAt)
+	if src.UpdatedAt != nil {
+		out.UpdatedAt = converters.TimestampToTime(src.UpdatedAt)
+	}
+	if src.IndexedAt != nil {
+		out.IndexedAt = converters.TimestampToTime(src.IndexedAt)
 	}
 
 	// Apply decorator if provided
@@ -73,32 +53,33 @@ func EntityIndexStateToEntityIndexStateGORM(
 	return dest, nil
 }
 
-// EntityIndexStateFromEntityIndexStateGORM converts a EntityIndexStateGORM back to models.EntityIndexState.
+// IndexStateFromIndexStateGORM converts a IndexStateGORM back to models.IndexState.
 // The optional decorator function allows custom field transformations.
-func EntityIndexStateFromEntityIndexStateGORM(
-	dest *models.EntityIndexState,
-	src *EntityIndexStateGORM,
-	decorator func(dest *models.EntityIndexState, src *EntityIndexStateGORM) error,
-) (out *models.EntityIndexState, err error) {
+func IndexStateFromIndexStateGORM(
+	dest *models.IndexState,
+	src *IndexStateGORM,
+	decorator func(dest *models.IndexState, src *IndexStateGORM) error,
+) (out *models.IndexState, err error) {
 	if src == nil {
 		return nil, nil
 	}
 	if dest == nil {
-		dest = &models.EntityIndexState{}
+		dest = &models.IndexState{}
 	}
 
 	// Initialize struct with inline values
-	*dest = models.EntityIndexState{
-		EntityType:      src.EntityType,
-		EntityId:        src.EntityId,
-		IndexType:       src.IndexType,
-		LastQueuedAt:    int64ToTimestamp(src.LastQueuedAt),
-		LastIndexedAt:   int64ToTimestamp(src.LastIndexedAt),
-		Status:          src.Status,
-		LastError:       src.LastError,
-		LastContentHash: src.LastContentHash,
-		RetryCount:      src.RetryCount,
-		CurrentLroId:    src.CurrentLroId,
+	*dest = models.IndexState{
+		EntityType:     src.EntityType,
+		EntityId:       src.EntityId,
+		IndexType:      src.IndexType,
+		CreatedAt:      converters.TimeToTimestamp(src.CreatedAt),
+		UpdatedAt:      converters.TimeToTimestamp(src.UpdatedAt),
+		IndexedAt:      converters.TimeToTimestamp(src.IndexedAt),
+		NeedsIndexing:  src.NeedsIndexing,
+		Status:         src.Status,
+		LastError:      src.LastError,
+		IdempotencyKey: src.IdempotencyKey,
+		RetryCount:     src.RetryCount,
 	}
 	out = dest
 
@@ -135,10 +116,10 @@ func IndexRecordsLROToIndexRecordsLROGORM(
 	out = dest
 
 	if src.CreatedAt != nil {
-		out.CreatedAt = timestampToInt64(src.CreatedAt)
+		out.CreatedAt = converters.TimestampToTime(src.CreatedAt)
 	}
 	if src.UpdatedAt != nil {
-		out.UpdatedAt = timestampToInt64(src.UpdatedAt)
+		out.UpdatedAt = converters.TimestampToTime(src.UpdatedAt)
 	}
 
 	// Apply decorator if provided
@@ -169,8 +150,8 @@ func IndexRecordsLROFromIndexRecordsLROGORM(
 	*dest = models.IndexRecordsLRO{
 		LroId:       src.LroId,
 		EntityType:  src.EntityType,
-		CreatedAt:   int64ToTimestamp(src.CreatedAt),
-		UpdatedAt:   int64ToTimestamp(src.UpdatedAt),
+		CreatedAt:   converters.TimeToTimestamp(src.CreatedAt),
+		UpdatedAt:   converters.TimeToTimestamp(src.UpdatedAt),
 		CallbackUrl: src.CallbackUrl,
 	}
 	out = dest

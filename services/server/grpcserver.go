@@ -14,14 +14,13 @@ import (
 	"log/slog"
 	"net"
 
-	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
-	"github.com/turnforge/weewar/services/fsbe"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type Server struct {
-	Address string
+	Address          string
+	RegisterCallback func(server *grpc.Server) error
 }
 
 func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool) error {
@@ -30,9 +29,6 @@ func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool
 	server := grpc.NewServer(
 	// grpc.UnaryInterceptor(EnsureAccessToken), // Add interceptors if needed
 	)
-
-	// Create GamesService
-	gamesService := fsbe.NewFSGamesService("")
 
 	// Create coordination storage
 	/*
@@ -51,8 +47,7 @@ func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool
 	*/
 
 	// Register services
-	v1s.RegisterGamesServiceServer(server, gamesService)
-	v1s.RegisterWorldsServiceServer(server, fsbe.NewFSWorldsService(""))
+	s.RegisterCallback(server)
 
 	// turnengine.RegisterCoordinatorServiceServer(server, coordService)
 

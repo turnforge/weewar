@@ -5,14 +5,14 @@
 import type { GenFile, GenService } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_google_api_annotations } from "../../../google/api/annotations_pb";
-import type { CreateIndexRecordsLRORequestSchema, CreateIndexRecordsLROResponseSchema, DeleteIndexStatesRequestSchema, DeleteIndexStatesResponseSchema, GetIndexRecordsLRORequestSchema, GetIndexRecordsLROResponseSchema, GetIndexStatesRequestSchema, GetIndexStatesResponseSchema, ListIndexStatesRequestSchema, ListIndexStatesResponseSchema, UpdateIndexRecordsLRORequestSchema, UpdateIndexRecordsLROResponseSchema } from "../models/indexer_pb";
+import type { DeleteIndexStatesRequestSchema, DeleteIndexStatesResponseSchema, EnsureIndexStateRequestSchema, EnsureIndexStateResponseSchema, GetIndexStatesRequestSchema, GetIndexStatesResponseSchema, ListIndexStatesRequestSchema, ListIndexStatesResponseSchema } from "../models/indexer_pb";
 import { file_weewar_v1_models_indexer } from "../models/indexer_pb";
 
 /**
  * Describes the file weewar/v1/services/indexer.proto.
  */
 export const file_weewar_v1_services_indexer: GenFile = /*@__PURE__*/
-  fileDesc("CiB3ZWV3YXIvdjEvc2VydmljZXMvaW5kZXhlci5wcm90bxIJd2Vld2FyLnYxMqwGCg5JbmRleGVyU2VydmljZRKDAQoVQ3JlYXRlSW5kZXhSZWNvcmRzTFJPEicud2Vld2FyLnYxLkNyZWF0ZUluZGV4UmVjb3Jkc0xST1JlcXVlc3QaKC53ZWV3YXIudjEuQ3JlYXRlSW5kZXhSZWNvcmRzTFJPUmVzcG9uc2UiF4LT5JMCEToBKiIML3YxL2luZGV4bHJvEoMBChJHZXRJbmRleFJlY29yZHNMUk8SJC53ZWV3YXIudjEuR2V0SW5kZXhSZWNvcmRzTFJPUmVxdWVzdBolLndlZXdhci52MS5HZXRJbmRleFJlY29yZHNMUk9SZXNwb25zZSIggtPkkwIaOgEqIhUvdjEvaW5kZXhscm8ve2xyb19pZH0SkAEKFVVwZGF0ZUluZGV4UmVjb3Jkc0xSTxInLndlZXdhci52MS5VcGRhdGVJbmRleFJlY29yZHNMUk9SZXF1ZXN0Gigud2Vld2FyLnYxLlVwZGF0ZUluZGV4UmVjb3Jkc0xST1Jlc3BvbnNlIiSC0+STAh46ASoyGS92MS9pbmRleGxyby97bHJvLmxyb19pZH0SfwoOR2V0SW5kZXhTdGF0ZXMSIC53ZWV3YXIudjEuR2V0SW5kZXhTdGF0ZXNSZXF1ZXN0GiEud2Vld2FyLnYxLkdldEluZGV4U3RhdGVzUmVzcG9uc2UiKILT5JMCIhIgL3YxL2luZGV4OmJhdGNoR2V0L3tlbnRpdHlfdHlwZX0SeQoPTGlzdEluZGV4U3RhdGVzEiEud2Vld2FyLnYxLkxpc3RJbmRleFN0YXRlc1JlcXVlc3QaIi53ZWV3YXIudjEuTGlzdEluZGV4U3RhdGVzUmVzcG9uc2UiH4LT5JMCGRIXL3YxL2luZGV4L3tlbnRpdHlfdHlwZX0SfwoRRGVsZXRlSW5kZXhTdGF0ZXMSIy53ZWV3YXIudjEuRGVsZXRlSW5kZXhTdGF0ZXNSZXF1ZXN0GiQud2Vld2FyLnYxLkRlbGV0ZUluZGV4U3RhdGVzUmVzcG9uc2UiH4LT5JMCGSoXL3YxL2luZGV4L3tlbnRpdHlfdHlwZX1CogEKDWNvbS53ZWV3YXIudjFCDEluZGV4ZXJQcm90b1ABWj5naXRodWIuY29tL3R1cm5mb3JnZS93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MS9zZXJ2aWNlczt3ZWV3YXJ2MaICA1dYWKoCCVdlZXdhci5WMcoCCVdlZXdhclxWMeICFVdlZXdhclxWMVxHUEJNZXRhZGF0YeoCCldlZXdhcjo6VjFiBnByb3RvMw", [file_google_api_annotations, file_weewar_v1_models_indexer]);
+  fileDesc("CiB3ZWV3YXIvdjEvc2VydmljZXMvaW5kZXhlci5wcm90bxIJd2Vld2FyLnYxMuUECg5JbmRleGVyU2VydmljZRK+AQoQRW5zdXJlSW5kZXhTdGF0ZRIiLndlZXdhci52MS5FbnN1cmVJbmRleFN0YXRlUmVxdWVzdBojLndlZXdhci52MS5FbnN1cmVJbmRleFN0YXRlUmVzcG9uc2UiYYLT5JMCWzoBKiJWL3YxL2luZGV4ZXMve2luZGV4X3N0YXRlLmVudGl0eV90eXBlfS97aW5kZXhfc3RhdGUuZW50aXR5X2lkfS97aW5kZXhfc3RhdGUuaW5kZXhfdHlwZX0ShAEKDkdldEluZGV4U3RhdGVzEiAud2Vld2FyLnYxLkdldEluZGV4U3RhdGVzUmVxdWVzdBohLndlZXdhci52MS5HZXRJbmRleFN0YXRlc1Jlc3BvbnNlIi2C0+STAicSJS92MS9pbmRleGVzL3tlbnRpdHlfdHlwZX0ve2VudGl0eV9pZH0SewoPTGlzdEluZGV4U3RhdGVzEiEud2Vld2FyLnYxLkxpc3RJbmRleFN0YXRlc1JlcXVlc3QaIi53ZWV3YXIudjEuTGlzdEluZGV4U3RhdGVzUmVzcG9uc2UiIYLT5JMCGxIZL3YxL2luZGV4ZXMve2VudGl0eV90eXBlfRKNAQoRRGVsZXRlSW5kZXhTdGF0ZXMSIy53ZWV3YXIudjEuRGVsZXRlSW5kZXhTdGF0ZXNSZXF1ZXN0GiQud2Vld2FyLnYxLkRlbGV0ZUluZGV4U3RhdGVzUmVzcG9uc2UiLYLT5JMCJyolL3YxL2luZGV4ZXMve2VudGl0eV90eXBlfS97ZW50aXR5X2lkfUKiAQoNY29tLndlZXdhci52MUIMSW5kZXhlclByb3RvUAFaPmdpdGh1Yi5jb20vdHVybmZvcmdlL3dlZXdhci9nZW4vZ28vd2Vld2FyL3YxL3NlcnZpY2VzO3dlZXdhcnYxogIDV1hYqgIJV2Vld2FyLlYxygIJV2Vld2FyXFYx4gIVV2Vld2FyXFYxXEdQQk1ldGFkYXRh6gIKV2Vld2FyOjpWMWIGcHJvdG8z", [file_google_api_annotations, file_weewar_v1_models_indexer]);
 
 /**
  * Manages indexing of entities
@@ -24,38 +24,16 @@ export const IndexerService: GenService<{
    * *
    * Create a LRO for indexing records
    *
-   * @generated from rpc weewar.v1.IndexerService.CreateIndexRecordsLRO
+   * @generated from rpc weewar.v1.IndexerService.EnsureIndexState
    */
-  createIndexRecordsLRO: {
+  ensureIndexState: {
     methodKind: "unary";
-    input: typeof CreateIndexRecordsLRORequestSchema;
-    output: typeof CreateIndexRecordsLROResponseSchema;
+    input: typeof EnsureIndexStateRequestSchema;
+    output: typeof EnsureIndexStateResponseSchema;
   },
   /**
    * *
-   * Get the details of a LRO operation
-   *
-   * @generated from rpc weewar.v1.IndexerService.GetIndexRecordsLRO
-   */
-  getIndexRecordsLRO: {
-    methodKind: "unary";
-    input: typeof GetIndexRecordsLRORequestSchema;
-    output: typeof GetIndexRecordsLROResponseSchema;
-  },
-  /**
-   * *
-   * Update an LRO operation - internal usage
-   *
-   * @generated from rpc weewar.v1.IndexerService.UpdateIndexRecordsLRO
-   */
-  updateIndexRecordsLRO: {
-    methodKind: "unary";
-    input: typeof UpdateIndexRecordsLRORequestSchema;
-    output: typeof UpdateIndexRecordsLROResponseSchema;
-  },
-  /**
-   * *
-   * Batch get multiple entity index states
+   * Get the index states for a particular entity
    *
    * @generated from rpc weewar.v1.IndexerService.GetIndexStates
    */

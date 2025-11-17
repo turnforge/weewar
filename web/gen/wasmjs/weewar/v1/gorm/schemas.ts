@@ -6,61 +6,11 @@ import { FieldType, FieldSchema, MessageSchema, BaseSchemaRegistry } from "@prot
 
 
 /**
- * Schema for EntityIndexStateGORM message
+ * Schema for IndexStateGORM message
  */
-export const EntityIndexStateGORMSchema: MessageSchema = {
-  name: "EntityIndexStateGORM",
+export const IndexStateGORMSchema: MessageSchema = {
+  name: "IndexStateGORM",
   fields: [
-    {
-      name: "entityType",
-      type: FieldType.STRING,
-      id: 1,
-    },
-    {
-      name: "entityId",
-      type: FieldType.STRING,
-      id: 2,
-    },
-    {
-      name: "indexType",
-      type: FieldType.STRING,
-      id: 3,
-    },
-    {
-      name: "lastQueuedAt",
-      type: FieldType.NUMBER,
-      id: 4,
-    },
-    {
-      name: "lastIndexedAt",
-      type: FieldType.NUMBER,
-      id: 5,
-    },
-    {
-      name: "status",
-      type: FieldType.STRING,
-      id: 6,
-    },
-    {
-      name: "lastError",
-      type: FieldType.STRING,
-      id: 7,
-    },
-    {
-      name: "lastContentHash",
-      type: FieldType.STRING,
-      id: 8,
-    },
-    {
-      name: "retryCount",
-      type: FieldType.NUMBER,
-      id: 9,
-    },
-    {
-      name: "currentLroId",
-      type: FieldType.STRING,
-      id: 10,
-    },
   ],
 };
 
@@ -71,36 +21,6 @@ export const EntityIndexStateGORMSchema: MessageSchema = {
 export const IndexRecordsLROGORMSchema: MessageSchema = {
   name: "IndexRecordsLROGORM",
   fields: [
-    {
-      name: "lroId",
-      type: FieldType.STRING,
-      id: 1,
-    },
-    {
-      name: "entityType",
-      type: FieldType.STRING,
-      id: 2,
-    },
-    {
-      name: "createdAt",
-      type: FieldType.NUMBER,
-      id: 3,
-    },
-    {
-      name: "updatedAt",
-      type: FieldType.NUMBER,
-      id: 4,
-    },
-    {
-      name: "callbackUrl",
-      type: FieldType.STRING,
-      id: 5,
-    },
-    {
-      name: "records",
-      type: FieldType.STRING,
-      id: 6,
-    },
   ],
 };
 
@@ -110,7 +30,7 @@ export const IndexRecordsLROGORMSchema: MessageSchema = {
  * Package-scoped schema registry for weewar.v1
  */
 export const weewar_v1SchemaRegistry: Record<string, MessageSchema> = {
-  "weewar.v1.EntityIndexStateGORM": EntityIndexStateGORMSchema,
+  "weewar.v1.IndexStateGORM": IndexStateGORMSchema,
   "weewar.v1.IndexRecordsLROGORM": IndexRecordsLROGORMSchema,
 };
 

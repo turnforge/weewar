@@ -15,20 +15,10 @@ class IndexerServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.CreateIndexRecordsLRO = channel.unary_unary(
-                '/weewar.v1.IndexerService/CreateIndexRecordsLRO',
-                request_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.CreateIndexRecordsLRORequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.CreateIndexRecordsLROResponse.FromString,
-                _registered_method=True)
-        self.GetIndexRecordsLRO = channel.unary_unary(
-                '/weewar.v1.IndexerService/GetIndexRecordsLRO',
-                request_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.GetIndexRecordsLRORequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.GetIndexRecordsLROResponse.FromString,
-                _registered_method=True)
-        self.UpdateIndexRecordsLRO = channel.unary_unary(
-                '/weewar.v1.IndexerService/UpdateIndexRecordsLRO',
-                request_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.UpdateIndexRecordsLRORequest.SerializeToString,
-                response_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.UpdateIndexRecordsLROResponse.FromString,
+        self.EnsureIndexState = channel.unary_unary(
+                '/weewar.v1.IndexerService/EnsureIndexState',
+                request_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.EnsureIndexStateRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.EnsureIndexStateResponse.FromString,
                 _registered_method=True)
         self.GetIndexStates = channel.unary_unary(
                 '/weewar.v1.IndexerService/GetIndexStates',
@@ -51,7 +41,7 @@ class IndexerServiceServicer(object):
     """Manages indexing of entities
     """
 
-    def CreateIndexRecordsLRO(self, request, context):
+    def EnsureIndexState(self, request, context):
         """*
         Create a LRO for indexing records
         """
@@ -59,25 +49,9 @@ class IndexerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetIndexRecordsLRO(self, request, context):
-        """*
-        Get the details of a LRO operation
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def UpdateIndexRecordsLRO(self, request, context):
-        """*
-        Update an LRO operation - internal usage
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def GetIndexStates(self, request, context):
         """*
-        Batch get multiple entity index states
+        Get the index states for a particular entity
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -100,20 +74,10 @@ class IndexerServiceServicer(object):
 
 def add_IndexerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'CreateIndexRecordsLRO': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateIndexRecordsLRO,
-                    request_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.CreateIndexRecordsLRORequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.CreateIndexRecordsLROResponse.SerializeToString,
-            ),
-            'GetIndexRecordsLRO': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetIndexRecordsLRO,
-                    request_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.GetIndexRecordsLRORequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.GetIndexRecordsLROResponse.SerializeToString,
-            ),
-            'UpdateIndexRecordsLRO': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpdateIndexRecordsLRO,
-                    request_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.UpdateIndexRecordsLRORequest.FromString,
-                    response_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.UpdateIndexRecordsLROResponse.SerializeToString,
+            'EnsureIndexState': grpc.unary_unary_rpc_method_handler(
+                    servicer.EnsureIndexState,
+                    request_deserializer=weewar_dot_v1_dot_models_dot_indexer__pb2.EnsureIndexStateRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_models_dot_indexer__pb2.EnsureIndexStateResponse.SerializeToString,
             ),
             'GetIndexStates': grpc.unary_unary_rpc_method_handler(
                     servicer.GetIndexStates,
@@ -143,7 +107,7 @@ class IndexerService(object):
     """
 
     @staticmethod
-    def CreateIndexRecordsLRO(request,
+    def EnsureIndexState(request,
             target,
             options=(),
             channel_credentials=None,
@@ -156,63 +120,9 @@ class IndexerService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/weewar.v1.IndexerService/CreateIndexRecordsLRO',
-            weewar_dot_v1_dot_models_dot_indexer__pb2.CreateIndexRecordsLRORequest.SerializeToString,
-            weewar_dot_v1_dot_models_dot_indexer__pb2.CreateIndexRecordsLROResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetIndexRecordsLRO(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/weewar.v1.IndexerService/GetIndexRecordsLRO',
-            weewar_dot_v1_dot_models_dot_indexer__pb2.GetIndexRecordsLRORequest.SerializeToString,
-            weewar_dot_v1_dot_models_dot_indexer__pb2.GetIndexRecordsLROResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def UpdateIndexRecordsLRO(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/weewar.v1.IndexerService/UpdateIndexRecordsLRO',
-            weewar_dot_v1_dot_models_dot_indexer__pb2.UpdateIndexRecordsLRORequest.SerializeToString,
-            weewar_dot_v1_dot_models_dot_indexer__pb2.UpdateIndexRecordsLROResponse.FromString,
+            '/weewar.v1.IndexerService/EnsureIndexState',
+            weewar_dot_v1_dot_models_dot_indexer__pb2.EnsureIndexStateRequest.SerializeToString,
+            weewar_dot_v1_dot_models_dot_indexer__pb2.EnsureIndexStateResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -13,15 +13,20 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/panyam/goutils v0.1.11
 	github.com/panyam/oneauth v0.0.15
+	github.com/panyam/protoc-gen-dal v0.0.2
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.28
 	github.com/panyam/templar v0.0.22
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/turnforge/turnengine v0.0.1
+	go.opentelemetry.io/contrib/bridges/otelslog v0.13.0
+	go.opentelemetry.io/otel v1.38.0
 	golang.org/x/oauth2 v0.33.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251111163417-95abcf5c77ba
 	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10
+	gorm.io/driver/postgres v1.6.0
+	gorm.io/gorm v1.25.10
 )
 
 require (
@@ -39,6 +44,12 @@ require (
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/pgx/v5 v5.6.0 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/panyam/gocurrent v0.0.2 // indirect
@@ -53,9 +64,9 @@ require (
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.61.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0 // indirect
-	go.opentelemetry.io/otel v1.37.0 // indirect
-	go.opentelemetry.io/otel/metric v1.37.0 // indirect
-	go.opentelemetry.io/otel/trace v1.37.0 // indirect
+	go.opentelemetry.io/otel/log v0.14.0 // indirect
+	go.opentelemetry.io/otel/metric v1.38.0 // indirect
+	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
@@ -72,3 +83,5 @@ require (
 // replace github.com/panyam/s3gen v0.0.32 => ./locallinks/s3gen/
 // replace github.com/panyam/templar v0.0.2 => ./locallinks/templar/
 replace github.com/turnforge/turnengine v0.0.1 => ./locallinks/turnengine/
+
+replace github.com/panyam/protoc-gen-dal v0.0.2 => ./locallinks/protoc-gen-dal

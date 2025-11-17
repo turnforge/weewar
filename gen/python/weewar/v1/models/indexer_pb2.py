@@ -27,7 +27,7 @@ from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
 from google.protobuf import field_mask_pb2 as google_dot_protobuf_dot_field__mask__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1eweewar/v1/models/indexer.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a google/protobuf/field_mask.proto\"\x9f\x03\n\x10\x45ntityIndexState\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x1b\n\tentity_id\x18\x02 \x01(\tR\x08\x65ntityId\x12\x1d\n\nindex_type\x18\x03 \x01(\tR\tindexType\x12@\n\x0elast_queued_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x0clastQueuedAt\x12\x42\n\x0flast_indexed_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\rlastIndexedAt\x12\x16\n\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n\nlast_error\x18\x07 \x01(\tR\tlastError\x12*\n\x11last_content_hash\x18\x08 \x01(\tR\x0flastContentHash\x12\x1f\n\x0bretry_count\x18\t \x01(\x05R\nretryCount\x12$\n\x0e\x63urrent_lro_id\x18\n \x01(\tR\x0c\x63urrentLroId\"x\n\x15GetIndexStatesRequest\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x1d\n\nentity_ids\x18\x02 \x03(\tR\tentityIds\x12\x1f\n\x0bindex_types\x18\x03 \x03(\tR\nindexTypes\"K\n\x14\x45ntityIndexStateList\x12\x33\n\x06states\x18\x01 \x03(\x0b\x32\x1b.weewar.v1.EntityIndexStateR\x06states\"\xbb\x01\n\x16GetIndexStatesResponse\x12\x45\n\x06states\x18\x01 \x03(\x0b\x32-.weewar.v1.GetIndexStatesResponse.StatesEntryR\x06states\x1aZ\n\x0bStatesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x35\n\x05value\x18\x02 \x01(\x0b\x32\x1f.weewar.v1.EntityIndexStateListR\x05value:\x02\x38\x01\"\xbe\x02\n\x16ListIndexStatesRequest\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x46\n\x0eindexed_before\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00R\rindexedBefore\x88\x01\x01\x12\x44\n\rindexed_after\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01R\x0cindexedAfter\x88\x01\x01\x12\x1f\n\x0bindex_types\x18\x04 \x03(\tR\nindexTypes\x12\x19\n\x08order_by\x18\x05 \x01(\tR\x07orderBy\x12\x14\n\x05\x63ount\x18\x06 \x01(\x05R\x05\x63ountB\x11\n\x0f_indexed_beforeB\x10\n\x0e_indexed_after\"p\n\x17ListIndexStatesResponse\x12\x31\n\x05items\x18\x01 \x03(\x0b\x32\x1b.weewar.v1.EntityIndexStateR\x05items\x12\"\n\rnext_page_key\x18\x02 \x01(\tR\x0bnextPageKey\"{\n\x18\x44\x65leteIndexStatesRequest\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x1d\n\nentity_ids\x18\x02 \x03(\tR\tentityIds\x12\x1f\n\x0bindex_types\x18\x03 \x03(\tR\nindexTypes\"\x1b\n\x19\x44\x65leteIndexStatesResponse\"\xc1\x01\n\x0bIndexRecord\x12\x1b\n\tentity_id\x18\x02 \x01(\tR\x08\x65ntityId\x12\x39\n\nupdated_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x35\n\x0b\x65ntity_data\x18\x04 \x01(\x0b\x32\x14.google.protobuf.AnyR\nentityData\x12#\n\rindexer_types\x18\x05 \x03(\tR\x0cindexerTypes\"\x94\x02\n\x0fIndexRecordsLRO\x12\x15\n\x06lro_id\x18\x01 \x01(\tR\x05lroId\x12\x1f\n\x0b\x65ntity_type\x18\x02 \x01(\tR\nentityType\x12\x39\n\ncreated_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12!\n\x0c\x63\x61llback_url\x18\x05 \x01(\tR\x0b\x63\x61llbackUrl\x12\x30\n\x07records\x18\x06 \x03(\x0b\x32\x16.weewar.v1.IndexRecordR\x07records\"L\n\x1c\x43reateIndexRecordsLRORequest\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\"M\n\x1d\x43reateIndexRecordsLROResponse\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\"\x89\x01\n\x1cUpdateIndexRecordsLRORequest\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\x12;\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskR\nupdateMask\"M\n\x1dUpdateIndexRecordsLROResponse\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\"2\n\x19GetIndexRecordsLRORequest\x12\x15\n\x06lro_id\x18\x01 \x01(\tR\x05lroId\"J\n\x1aGetIndexRecordsLROResponse\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lroB\xa0\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z<github.com/turnforge/weewar/gen/go/weewar/v1/models;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1eweewar/v1/models/indexer.proto\x12\tweewar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a google/protobuf/field_mask.proto\"\xda\x03\n\nIndexState\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x1b\n\tentity_id\x18\x02 \x01(\tR\x08\x65ntityId\x12\x1d\n\nindex_type\x18\x03 \x01(\tR\tindexType\x12\x39\n\ncreated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x39\n\nindexed_at\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tindexedAt\x12%\n\x0eneeds_indexing\x18\x07 \x01(\x08R\rneedsIndexing\x12.\n\x06status\x18\x08 \x01(\x0e\x32\x16.weewar.v1.IndexStatusR\x06status\x12\x1d\n\nlast_error\x18\t \x01(\tR\tlastError\x12\'\n\x0fidempotency_key\x18\n \x01(\tR\x0eidempotencyKey\x12\x1f\n\x0bretry_count\x18\x0b \x01(\x05R\nretryCount\"\x8e\x01\n\x17\x45nsureIndexStateRequest\x12\x36\n\x0bindex_state\x18\x01 \x01(\x0b\x32\x15.weewar.v1.IndexStateR\nindexState\x12;\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskR\nupdateMask\"R\n\x18\x45nsureIndexStateResponse\x12\x36\n\x0bindex_state\x18\x01 \x01(\x0b\x32\x15.weewar.v1.IndexStateR\nindexState\"v\n\x15GetIndexStatesRequest\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x1b\n\tentity_id\x18\x02 \x01(\tR\x08\x65ntityId\x12\x1f\n\x0bindex_types\x18\x03 \x03(\tR\nindexTypes\"?\n\x0eIndexStateList\x12-\n\x06states\x18\x01 \x03(\x0b\x32\x15.weewar.v1.IndexStateR\x06states\"\xb1\x01\n\x16GetIndexStatesResponse\x12\x45\n\x06states\x18\x01 \x03(\x0b\x32-.weewar.v1.GetIndexStatesResponse.StatesEntryR\x06states\x1aP\n\x0bStatesEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12+\n\x05value\x18\x02 \x01(\x0b\x32\x15.weewar.v1.IndexStateR\x05value:\x02\x38\x01\"\xbe\x02\n\x16ListIndexStatesRequest\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x46\n\x0eupdated_before\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00R\rupdatedBefore\x88\x01\x01\x12\x44\n\rupdated_after\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01R\x0cupdatedAfter\x88\x01\x01\x12\x1f\n\x0bindex_types\x18\x04 \x03(\tR\nindexTypes\x12\x19\n\x08order_by\x18\x05 \x01(\tR\x07orderBy\x12\x14\n\x05\x63ount\x18\x06 \x01(\x05R\x05\x63ountB\x11\n\x0f_updated_beforeB\x10\n\x0e_updated_after\"j\n\x17ListIndexStatesResponse\x12+\n\x05items\x18\x01 \x03(\x0b\x32\x15.weewar.v1.IndexStateR\x05items\x12\"\n\rnext_page_key\x18\x02 \x01(\tR\x0bnextPageKey\"y\n\x18\x44\x65leteIndexStatesRequest\x12\x1f\n\x0b\x65ntity_type\x18\x01 \x01(\tR\nentityType\x12\x1b\n\tentity_id\x18\x02 \x01(\tR\x08\x65ntityId\x12\x1f\n\x0bindex_types\x18\x03 \x03(\tR\nindexTypes\"\x1b\n\x19\x44\x65leteIndexStatesResponse\"\xc1\x01\n\x0bIndexRecord\x12\x1b\n\tentity_id\x18\x02 \x01(\tR\x08\x65ntityId\x12\x39\n\nupdated_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x35\n\x0b\x65ntity_data\x18\x04 \x01(\x0b\x32\x14.google.protobuf.AnyR\nentityData\x12#\n\rindexer_types\x18\x05 \x03(\tR\x0cindexerTypes\"\x94\x02\n\x0fIndexRecordsLRO\x12\x15\n\x06lro_id\x18\x01 \x01(\tR\x05lroId\x12\x1f\n\x0b\x65ntity_type\x18\x02 \x01(\tR\nentityType\x12\x39\n\ncreated_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x39\n\nupdated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\tupdatedAt\x12!\n\x0c\x63\x61llback_url\x18\x05 \x01(\tR\x0b\x63\x61llbackUrl\x12\x30\n\x07records\x18\x06 \x03(\x0b\x32\x16.weewar.v1.IndexRecordR\x07records\"L\n\x1c\x43reateIndexRecordsLRORequest\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\"M\n\x1d\x43reateIndexRecordsLROResponse\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\"\x89\x01\n\x1cUpdateIndexRecordsLRORequest\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\x12;\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.FieldMaskR\nupdateMask\"M\n\x1dUpdateIndexRecordsLROResponse\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro\"2\n\x19GetIndexRecordsLRORequest\x12\x15\n\x06lro_id\x18\x01 \x01(\tR\x05lroId\"J\n\x1aGetIndexRecordsLROResponse\x12,\n\x03lro\x18\x01 \x01(\x0b\x32\x1a.weewar.v1.IndexRecordsLROR\x03lro*\x95\x01\n\x0bIndexStatus\x12\x1c\n\x18INDEX_STATUS_UNSPECIFIED\x10\x00\x12\x18\n\x14INDEX_STATUS_PENDING\x10\x01\x12\x19\n\x15INDEX_STATUS_INDEXING\x10\x02\x12\x1a\n\x16INDEX_STATUS_COMPLETED\x10\x03\x12\x17\n\x13INDEX_STATUS_FAILED\x10\x04\x42\xa0\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z<github.com/turnforge/weewar/gen/go/weewar/v1/models;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,38 +37,44 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._serialized_options = b'\n\rcom.weewar.v1B\014IndexerProtoP\001Z<github.com/turnforge/weewar/gen/go/weewar/v1/models;weewarv1\242\002\003WXX\252\002\tWeewar.V1\312\002\tWeewar\\V1\342\002\025Weewar\\V1\\GPBMetadata\352\002\nWeewar::V1'
   _globals['_GETINDEXSTATESRESPONSE_STATESENTRY']._loaded_options = None
   _globals['_GETINDEXSTATESRESPONSE_STATESENTRY']._serialized_options = b'8\001'
-  _globals['_ENTITYINDEXSTATE']._serialized_start=140
-  _globals['_ENTITYINDEXSTATE']._serialized_end=555
-  _globals['_GETINDEXSTATESREQUEST']._serialized_start=557
-  _globals['_GETINDEXSTATESREQUEST']._serialized_end=677
-  _globals['_ENTITYINDEXSTATELIST']._serialized_start=679
-  _globals['_ENTITYINDEXSTATELIST']._serialized_end=754
-  _globals['_GETINDEXSTATESRESPONSE']._serialized_start=757
-  _globals['_GETINDEXSTATESRESPONSE']._serialized_end=944
-  _globals['_GETINDEXSTATESRESPONSE_STATESENTRY']._serialized_start=854
-  _globals['_GETINDEXSTATESRESPONSE_STATESENTRY']._serialized_end=944
-  _globals['_LISTINDEXSTATESREQUEST']._serialized_start=947
-  _globals['_LISTINDEXSTATESREQUEST']._serialized_end=1265
-  _globals['_LISTINDEXSTATESRESPONSE']._serialized_start=1267
-  _globals['_LISTINDEXSTATESRESPONSE']._serialized_end=1379
-  _globals['_DELETEINDEXSTATESREQUEST']._serialized_start=1381
-  _globals['_DELETEINDEXSTATESREQUEST']._serialized_end=1504
-  _globals['_DELETEINDEXSTATESRESPONSE']._serialized_start=1506
-  _globals['_DELETEINDEXSTATESRESPONSE']._serialized_end=1533
-  _globals['_INDEXRECORD']._serialized_start=1536
-  _globals['_INDEXRECORD']._serialized_end=1729
-  _globals['_INDEXRECORDSLRO']._serialized_start=1732
-  _globals['_INDEXRECORDSLRO']._serialized_end=2008
-  _globals['_CREATEINDEXRECORDSLROREQUEST']._serialized_start=2010
-  _globals['_CREATEINDEXRECORDSLROREQUEST']._serialized_end=2086
-  _globals['_CREATEINDEXRECORDSLRORESPONSE']._serialized_start=2088
-  _globals['_CREATEINDEXRECORDSLRORESPONSE']._serialized_end=2165
-  _globals['_UPDATEINDEXRECORDSLROREQUEST']._serialized_start=2168
-  _globals['_UPDATEINDEXRECORDSLROREQUEST']._serialized_end=2305
-  _globals['_UPDATEINDEXRECORDSLRORESPONSE']._serialized_start=2307
-  _globals['_UPDATEINDEXRECORDSLRORESPONSE']._serialized_end=2384
-  _globals['_GETINDEXRECORDSLROREQUEST']._serialized_start=2386
-  _globals['_GETINDEXRECORDSLROREQUEST']._serialized_end=2436
-  _globals['_GETINDEXRECORDSLRORESPONSE']._serialized_start=2438
-  _globals['_GETINDEXRECORDSLRORESPONSE']._serialized_end=2512
+  _globals['_INDEXSTATUS']._serialized_start=2771
+  _globals['_INDEXSTATUS']._serialized_end=2920
+  _globals['_INDEXSTATE']._serialized_start=140
+  _globals['_INDEXSTATE']._serialized_end=614
+  _globals['_ENSUREINDEXSTATEREQUEST']._serialized_start=617
+  _globals['_ENSUREINDEXSTATEREQUEST']._serialized_end=759
+  _globals['_ENSUREINDEXSTATERESPONSE']._serialized_start=761
+  _globals['_ENSUREINDEXSTATERESPONSE']._serialized_end=843
+  _globals['_GETINDEXSTATESREQUEST']._serialized_start=845
+  _globals['_GETINDEXSTATESREQUEST']._serialized_end=963
+  _globals['_INDEXSTATELIST']._serialized_start=965
+  _globals['_INDEXSTATELIST']._serialized_end=1028
+  _globals['_GETINDEXSTATESRESPONSE']._serialized_start=1031
+  _globals['_GETINDEXSTATESRESPONSE']._serialized_end=1208
+  _globals['_GETINDEXSTATESRESPONSE_STATESENTRY']._serialized_start=1128
+  _globals['_GETINDEXSTATESRESPONSE_STATESENTRY']._serialized_end=1208
+  _globals['_LISTINDEXSTATESREQUEST']._serialized_start=1211
+  _globals['_LISTINDEXSTATESREQUEST']._serialized_end=1529
+  _globals['_LISTINDEXSTATESRESPONSE']._serialized_start=1531
+  _globals['_LISTINDEXSTATESRESPONSE']._serialized_end=1637
+  _globals['_DELETEINDEXSTATESREQUEST']._serialized_start=1639
+  _globals['_DELETEINDEXSTATESREQUEST']._serialized_end=1760
+  _globals['_DELETEINDEXSTATESRESPONSE']._serialized_start=1762
+  _globals['_DELETEINDEXSTATESRESPONSE']._serialized_end=1789
+  _globals['_INDEXRECORD']._serialized_start=1792
+  _globals['_INDEXRECORD']._serialized_end=1985
+  _globals['_INDEXRECORDSLRO']._serialized_start=1988
+  _globals['_INDEXRECORDSLRO']._serialized_end=2264
+  _globals['_CREATEINDEXRECORDSLROREQUEST']._serialized_start=2266
+  _globals['_CREATEINDEXRECORDSLROREQUEST']._serialized_end=2342
+  _globals['_CREATEINDEXRECORDSLRORESPONSE']._serialized_start=2344
+  _globals['_CREATEINDEXRECORDSLRORESPONSE']._serialized_end=2421
+  _globals['_UPDATEINDEXRECORDSLROREQUEST']._serialized_start=2424
+  _globals['_UPDATEINDEXRECORDSLROREQUEST']._serialized_end=2561
+  _globals['_UPDATEINDEXRECORDSLRORESPONSE']._serialized_start=2563
+  _globals['_UPDATEINDEXRECORDSLRORESPONSE']._serialized_end=2640
+  _globals['_GETINDEXRECORDSLROREQUEST']._serialized_start=2642
+  _globals['_GETINDEXRECORDSLROREQUEST']._serialized_end=2692
+  _globals['_GETINDEXRECORDSLRORESPONSE']._serialized_start=2694
+  _globals['_GETINDEXRECORDSLRORESPONSE']._serialized_end=2768
 # @@protoc_insertion_point(module_scope)

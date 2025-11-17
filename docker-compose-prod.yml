@@ -1,0 +1,71 @@
+services:
+#    pgadmin:
+#      image: dpage/pgadmin4
+#      ports:
+#        - ${PGADMIN_LISTEN_PORT}:${PGADMIN_LISTEN_PORT}
+#      environment:
+#        PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
+#        PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+#        PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+#      volumes:
+#        - ./.data/pgadmin:/var/lib/pgadmin
+
+  postgres:
+    image: postgres:18.1
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./.data/pgdata:/var/lib/postgresql/data
+    ports:
+      - 54321:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./webroot:/www/webroot:ro
+      - ./configs/server.key:/root/ssl/server.key
+      - ./configs/server.crt:/root/ssl/server.crt
+    ports:
+      - 7443:443
+      - 7080:80
+    depends_on:
+      - onehub
+      - ohfe
+
+  weewar:
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      # - ./.air.toml:/app/.air.toml:ro
+      # - ./go.mod:/app/go.mod:ro
+      # - ./go.sum:/app/go.sum:ro
+      - ./cmd:/app/cmd
+      - ./gen:/app/gen
+      - ./dbsync:/app/dbsync
+      - ./clients:/app/clients
+      - ./datastore:/app/datastore
+      - ./protos:/app/protos
+      - ./services:/app/services
+        # command: ["air", "-c", "cmd/backend/.air.toml"]
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ONEHUB_DB_ENDPOINT: ${ONEHUB_DB_ENDOINT}
+    ports:
+      - 9080:9080
+      - 9000:9000
+      - 9092:9091

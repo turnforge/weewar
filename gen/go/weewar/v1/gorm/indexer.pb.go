@@ -24,44 +24,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// EntityIndexStateGORM is the GORM representation for EntityIndexState
-type EntityIndexStateGORM struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Composite primary key: entity_type + entity_id + index_type
-	EntityType string `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	EntityId   string `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
-	IndexType  string `protobuf:"bytes,3,opt,name=index_type,json=indexType,proto3" json:"index_type,omitempty"`
-	// Timestamps stored as int64 (Unix time)
-	LastQueuedAt  int64 `protobuf:"varint,4,opt,name=last_queued_at,json=lastQueuedAt,proto3" json:"last_queued_at,omitempty"`
-	LastIndexedAt int64 `protobuf:"varint,5,opt,name=last_indexed_at,json=lastIndexedAt,proto3" json:"last_indexed_at,omitempty"`
-	// Status field
-	Status string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	// Error tracking
-	LastError string `protobuf:"bytes,7,opt,name=last_error,json=lastError,proto3" json:"last_error,omitempty"`
-	// Content hash for change detection
-	LastContentHash string `protobuf:"bytes,8,opt,name=last_content_hash,json=lastContentHash,proto3" json:"last_content_hash,omitempty"`
-	// Retry tracking
-	RetryCount int32 `protobuf:"varint,9,opt,name=retry_count,json=retryCount,proto3" json:"retry_count,omitempty"`
-	// LRO tracking
-	CurrentLroId  string `protobuf:"bytes,10,opt,name=current_lro_id,json=currentLroId,proto3" json:"current_lro_id,omitempty"`
+// IndexStateGORM is the GORM representation for IndexState
+type IndexStateGORM struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EntityIndexStateGORM) Reset() {
-	*x = EntityIndexStateGORM{}
+func (x *IndexStateGORM) Reset() {
+	*x = IndexStateGORM{}
 	mi := &file_weewar_v1_gorm_indexer_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EntityIndexStateGORM) String() string {
+func (x *IndexStateGORM) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EntityIndexStateGORM) ProtoMessage() {}
+func (*IndexStateGORM) ProtoMessage() {}
 
-func (x *EntityIndexStateGORM) ProtoReflect() protoreflect.Message {
+func (x *IndexStateGORM) ProtoReflect() protoreflect.Message {
 	mi := &file_weewar_v1_gorm_indexer_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -73,98 +56,14 @@ func (x *EntityIndexStateGORM) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EntityIndexStateGORM.ProtoReflect.Descriptor instead.
-func (*EntityIndexStateGORM) Descriptor() ([]byte, []int) {
+// Deprecated: Use IndexStateGORM.ProtoReflect.Descriptor instead.
+func (*IndexStateGORM) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_gorm_indexer_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *EntityIndexStateGORM) GetEntityType() string {
-	if x != nil {
-		return x.EntityType
-	}
-	return ""
-}
-
-func (x *EntityIndexStateGORM) GetEntityId() string {
-	if x != nil {
-		return x.EntityId
-	}
-	return ""
-}
-
-func (x *EntityIndexStateGORM) GetIndexType() string {
-	if x != nil {
-		return x.IndexType
-	}
-	return ""
-}
-
-func (x *EntityIndexStateGORM) GetLastQueuedAt() int64 {
-	if x != nil {
-		return x.LastQueuedAt
-	}
-	return 0
-}
-
-func (x *EntityIndexStateGORM) GetLastIndexedAt() int64 {
-	if x != nil {
-		return x.LastIndexedAt
-	}
-	return 0
-}
-
-func (x *EntityIndexStateGORM) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-func (x *EntityIndexStateGORM) GetLastError() string {
-	if x != nil {
-		return x.LastError
-	}
-	return ""
-}
-
-func (x *EntityIndexStateGORM) GetLastContentHash() string {
-	if x != nil {
-		return x.LastContentHash
-	}
-	return ""
-}
-
-func (x *EntityIndexStateGORM) GetRetryCount() int32 {
-	if x != nil {
-		return x.RetryCount
-	}
-	return 0
-}
-
-func (x *EntityIndexStateGORM) GetCurrentLroId() string {
-	if x != nil {
-		return x.CurrentLroId
-	}
-	return ""
 }
 
 // IndexRecordsLROGORM is the GORM representation for IndexRecordsLRO
 type IndexRecordsLROGORM struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Primary key
-	LroId string `protobuf:"bytes,1,opt,name=lro_id,json=lroId,proto3" json:"lro_id,omitempty"`
-	// Entity type for all records in this LRO
-	EntityType string `protobuf:"bytes,2,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
-	// Timestamps
-	CreatedAt int64 `protobuf:"varint,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt int64 `protobuf:"varint,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	// Callback URL
-	CallbackUrl string `protobuf:"bytes,5,opt,name=callback_url,json=callbackUrl,proto3" json:"callback_url,omitempty"`
-	// Records stored as JSONB (PostgreSQL-specific)
-	// The repeated IndexRecord will be serialized to JSON
-	// Note: In the proto, this is `repeated IndexRecord` but GORM can't handle
-	// repeated message types directly, so we'll store as JSONB
-	Records       []byte `protobuf:"bytes,6,opt,name=records,proto3" json:"records,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -199,85 +98,14 @@ func (*IndexRecordsLROGORM) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_gorm_indexer_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *IndexRecordsLROGORM) GetLroId() string {
-	if x != nil {
-		return x.LroId
-	}
-	return ""
-}
-
-func (x *IndexRecordsLROGORM) GetEntityType() string {
-	if x != nil {
-		return x.EntityType
-	}
-	return ""
-}
-
-func (x *IndexRecordsLROGORM) GetCreatedAt() int64 {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return 0
-}
-
-func (x *IndexRecordsLROGORM) GetUpdatedAt() int64 {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return 0
-}
-
-func (x *IndexRecordsLROGORM) GetCallbackUrl() string {
-	if x != nil {
-		return x.CallbackUrl
-	}
-	return ""
-}
-
-func (x *IndexRecordsLROGORM) GetRecords() []byte {
-	if x != nil {
-		return x.Records
-	}
-	return nil
-}
-
 var File_weewar_v1_gorm_indexer_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_gorm_indexer_proto_rawDesc = "" +
 	"\n" +
-	"\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto\"\xfb\x05\n" +
-	"\x14EntityIndexStateGORM\x12N\n" +
-	"\ventity_type\x18\x01 \x01(\tB-\x92\xa6\x1d)R\n" +
-	"primaryKeyR\x11type:varchar(100)R\bnot nullR\n" +
-	"entityType\x12J\n" +
-	"\tentity_id\x18\x02 \x01(\tB-\x92\xa6\x1d)R\n" +
-	"primaryKeyR\x11type:varchar(255)R\bnot nullR\bentityId\x12L\n" +
-	"\n" +
-	"index_type\x18\x03 \x01(\tB-\x92\xa6\x1d)R\n" +
-	"primaryKeyR\x11type:varchar(100)R\bnot nullR\tindexType\x127\n" +
-	"\x0elast_queued_at\x18\x04 \x01(\x03B\x11\x92\xa6\x1d\rR\vtype:bigintR\flastQueuedAt\x12@\n" +
-	"\x0flast_indexed_at\x18\x05 \x01(\x03B\x18\x92\xa6\x1d\x14R\vtype:bigintR\x05indexR\rlastIndexedAt\x12P\n" +
-	"\x06status\x18\x06 \x01(\tB8\x92\xa6\x1d4R\x10type:varchar(50)R\bnot nullR\x0fdefault:pendingR\x05indexR\x06status\x12.\n" +
-	"\n" +
-	"last_error\x18\a \x01(\tB\x0f\x92\xa6\x1d\vR\ttype:textR\tlastError\x12C\n" +
-	"\x11last_content_hash\x18\b \x01(\tB\x17\x92\xa6\x1d\x13R\x11type:varchar(255)R\x0flastContentHash\x12:\n" +
-	"\vretry_count\x18\t \x01(\x05B\x19\x92\xa6\x1d\x15R\btype:intR\tdefault:0R\n" +
-	"retryCount\x12D\n" +
-	"\x0ecurrent_lro_id\x18\n" +
-	" \x01(\tB\x1e\x92\xa6\x1d\x1aR\x11type:varchar(255)R\x05indexR\fcurrentLroId:5ʦ\x1d1\n" +
-	"\x1aweewar.v1.EntityIndexState\x12\x13entity_index_states\"\xb1\x03\n" +
-	"\x13IndexRecordsLROGORM\x12:\n" +
-	"\x06lro_id\x18\x01 \x01(\tB#\x92\xa6\x1d\x1fR\n" +
-	"primaryKeyR\x11type:varchar(255)R\x05lroId\x12I\n" +
-	"\ventity_type\x18\x02 \x01(\tB(\x92\xa6\x1d$R\x11type:varchar(100)R\bnot nullR\x05indexR\n" +
-	"entityType\x12:\n" +
-	"\n" +
-	"created_at\x18\x03 \x01(\x03B\x1b\x92\xa6\x1d\x17R\vtype:bigintR\bnot nullR\tcreatedAt\x12:\n" +
-	"\n" +
-	"updated_at\x18\x04 \x01(\x03B\x1b\x92\xa6\x1d\x17R\vtype:bigintR\bnot nullR\tupdatedAt\x12:\n" +
-	"\fcallback_url\x18\x05 \x01(\tB\x17\x92\xa6\x1d\x13R\x11type:varchar(500)R\vcallbackUrl\x12*\n" +
-	"\arecords\x18\x06 \x01(\fB\x10\x92\xa6\x1d\fR\n" +
-	"type:jsonbR\arecords:3ʦ\x1d/\n" +
+	"\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto\"A\n" +
+	"\x0eIndexStateGORM:/ʦ\x1d+\n" +
+	"\x14weewar.v1.IndexState\x12\x13entity_index_states\"J\n" +
+	"\x13IndexRecordsLROGORM:3ʦ\x1d/\n" +
 	"\x19weewar.v1.IndexRecordsLRO\x12\x12index_records_lrosB\x9e\x01\n" +
 	"\rcom.weewar.v1B\fIndexerProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"
@@ -296,8 +124,8 @@ func file_weewar_v1_gorm_indexer_proto_rawDescGZIP() []byte {
 
 var file_weewar_v1_gorm_indexer_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_weewar_v1_gorm_indexer_proto_goTypes = []any{
-	(*EntityIndexStateGORM)(nil), // 0: weewar.v1.EntityIndexStateGORM
-	(*IndexRecordsLROGORM)(nil),  // 1: weewar.v1.IndexRecordsLROGORM
+	(*IndexStateGORM)(nil),      // 0: weewar.v1.IndexStateGORM
+	(*IndexRecordsLROGORM)(nil), // 1: weewar.v1.IndexRecordsLROGORM
 }
 var file_weewar_v1_gorm_indexer_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

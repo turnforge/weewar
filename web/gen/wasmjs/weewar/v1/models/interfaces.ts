@@ -26,6 +26,22 @@ export enum PathDirection {
 }
 
 
+export enum IndexStatus {
+  INDEX_STATUS_UNSPECIFIED = 0,
+  INDEX_STATUS_PENDING = 1,
+  INDEX_STATUS_INDEXING = 2,
+  INDEX_STATUS_COMPLETED = 3,
+  INDEX_STATUS_FAILED = 4,
+}
+
+
+export enum RunState {
+  RUN_STATE_UNSPECIFIED = 0,
+  RUN_STATE_STARTED = 1,
+  RUN_STATE_FINISHED = 2,
+}
+
+
 export enum Type {
   TYPE_UNSPECIFIED = 0,
   TYPE_PATH = 1,
@@ -1310,47 +1326,64 @@ export interface SetAllowedPanelsResponse {
 
 
 
-export interface EntityIndexState {
+export interface IndexState {
   entityType: string;
   entityId: string;
   /** eg "screenshots", "keywords" etc
  EntityType + EntityId + IndexType should be  unique */
   indexType: string;
   /** When the last indexing was queued */
-  lastQueuedAt?: Timestamp;
-  /** when the last indexing was completed */
-  lastIndexedAt?: Timestamp;
+  createdAt?: Timestamp;
+  /** when the last time the entity was recorded for an update (means it is eligible for a re-indexing) */
+  updatedAt?: Timestamp;
+  /** When did the last indexing finish */
+  indexedAt?: Timestamp;
+  /** Whether indexing is needed or not */
+  needsIndexing: boolean;
   /** "queued/pending", "indexing", "completed", "failed" */
-  status: string;
+  status: IndexStatus;
   /** If there was an error in the last indexing */
   lastError: string;
-  /** Keep a hash of the contents for quick check to check updated
- (not sure if needed) - This should be provided by the source */
-  lastContentHash: string;
+  /** A way to ignore multiple requests if they are updates but
+ nothing has changed */
+  idempotencyKey: string;
   retryCount: number;
-  /** Which LRO this entity has been updated via */
-  currentLroId: string;
+}
+
+
+
+export interface EnsureIndexStateRequest {
+  indexState?: IndexState;
+  /** *
+ Mask of fields being updated in this Game to make partial changes. */
+  updateMask?: FieldMask;
+}
+
+
+
+export interface EnsureIndexStateResponse {
+  indexState?: IndexState;
 }
 
 
 
 export interface GetIndexStatesRequest {
   entityType: string;
-  entityIds: string[];
+  entityId: string;
   /** Optional - can be used to get "all" indexer states or just once specified here */
   indexTypes: string[];
 }
 
 
 
-export interface EntityIndexStateList {
-  states?: EntityIndexState[];
+export interface IndexStateList {
+  states?: IndexState[];
 }
 
 
 
 export interface GetIndexStatesResponse {
-  states: Record<string, EntityIndexStateList>;
+  states: Record<string, IndexState>;
 }
 
 
@@ -1358,9 +1391,9 @@ export interface GetIndexStatesResponse {
 export interface ListIndexStatesRequest {
   entityType: string;
   /** Get records indexed "before" this time */
-  indexedBefore?: Timestamp | undefined;
-  /** Get records indexed "after" this time */
-  indexedAfter?: Timestamp | undefined;
+  updatedBefore?: Timestamp | undefined;
+  /** Get records updated "after" this time */
+  updatedAfter?: Timestamp | undefined;
   /** Filter by index types or get all */
   indexTypes: string[];
   /** "id" or "indexed_at" */
@@ -1372,7 +1405,7 @@ export interface ListIndexStatesRequest {
 
 
 export interface ListIndexStatesResponse {
-  items?: EntityIndexState[];
+  items?: IndexState[];
   /** How to identify the next "page" in this list */
   nextPageKey: string;
 }
@@ -1381,7 +1414,7 @@ export interface ListIndexStatesResponse {
 
 export interface DeleteIndexStatesRequest {
   entityType: string;
-  entityIds: string[];
+  entityId: string;
   /** Optional - can be used to get "all" indexer states or just once specified here */
   indexTypes: string[];
 }
@@ -1459,6 +1492,52 @@ export interface GetIndexRecordsLRORequest {
 
 export interface GetIndexRecordsLROResponse {
   lro?: IndexRecordsLRO;
+}
+
+
+/**
+ * Job describes the work that needs to be done.
+ */
+export interface Job {
+  entityType: string;
+  entityId: string;
+  jobType: string;
+  /** When the last indexing was queued */
+  createdAt?: Timestamp;
+  /** when the last indexing was completed */
+  updatedAt?: Timestamp;
+  /** Job specific data */
+  jobData?: Any;
+  /** Debounce so we dont run it too many time within this many seconds */
+  debounceWindowSeconds: number;
+  /** Whether the job is a oneoff or can repeat */
+  repeatInfo?: RepeatInfo;
+}
+
+
+
+export interface RepeatInfo {
+}
+
+
+
+export interface Run {
+  jobId: string;
+  /** A unique run_id */
+  runId: string;
+  createdAt?: Timestamp;
+  startedAt?: Timestamp;
+  updatedAt?: Timestamp;
+  state: RunState;
+  /** Run specific data */
+  runData?: Any;
+  /** If there was an error in the last indexing */
+  lastError: string;
+  /** Keep a hash of the contents for quick check to check updated
+ (not sure if needed) - This should be provided by the source */
+  lastContentHash: string;
+  /** If there were retries */
+  retryCount: number;
 }
 
 

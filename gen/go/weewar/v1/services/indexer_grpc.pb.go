@@ -21,12 +21,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	IndexerService_CreateIndexRecordsLRO_FullMethodName = "/weewar.v1.IndexerService/CreateIndexRecordsLRO"
-	IndexerService_GetIndexRecordsLRO_FullMethodName    = "/weewar.v1.IndexerService/GetIndexRecordsLRO"
-	IndexerService_UpdateIndexRecordsLRO_FullMethodName = "/weewar.v1.IndexerService/UpdateIndexRecordsLRO"
-	IndexerService_GetIndexStates_FullMethodName        = "/weewar.v1.IndexerService/GetIndexStates"
-	IndexerService_ListIndexStates_FullMethodName       = "/weewar.v1.IndexerService/ListIndexStates"
-	IndexerService_DeleteIndexStates_FullMethodName     = "/weewar.v1.IndexerService/DeleteIndexStates"
+	IndexerService_EnsureIndexState_FullMethodName  = "/weewar.v1.IndexerService/EnsureIndexState"
+	IndexerService_GetIndexStates_FullMethodName    = "/weewar.v1.IndexerService/GetIndexStates"
+	IndexerService_ListIndexStates_FullMethodName   = "/weewar.v1.IndexerService/ListIndexStates"
+	IndexerService_DeleteIndexStates_FullMethodName = "/weewar.v1.IndexerService/DeleteIndexStates"
 )
 
 // IndexerServiceClient is the client API for IndexerService service.
@@ -37,15 +35,9 @@ const (
 type IndexerServiceClient interface {
 	// *
 	// Create a LRO for indexing records
-	CreateIndexRecordsLRO(ctx context.Context, in *models.CreateIndexRecordsLRORequest, opts ...grpc.CallOption) (*models.CreateIndexRecordsLROResponse, error)
+	EnsureIndexState(ctx context.Context, in *models.EnsureIndexStateRequest, opts ...grpc.CallOption) (*models.EnsureIndexStateResponse, error)
 	// *
-	// Get the details of a LRO operation
-	GetIndexRecordsLRO(ctx context.Context, in *models.GetIndexRecordsLRORequest, opts ...grpc.CallOption) (*models.GetIndexRecordsLROResponse, error)
-	// *
-	// Update an LRO operation - internal usage
-	UpdateIndexRecordsLRO(ctx context.Context, in *models.UpdateIndexRecordsLRORequest, opts ...grpc.CallOption) (*models.UpdateIndexRecordsLROResponse, error)
-	// *
-	// Batch get multiple entity index states
+	// Get the index states for a particular entity
 	GetIndexStates(ctx context.Context, in *models.GetIndexStatesRequest, opts ...grpc.CallOption) (*models.GetIndexStatesResponse, error)
 	// *
 	// List index entity states by filtering
@@ -61,30 +53,10 @@ func NewIndexerServiceClient(cc grpc.ClientConnInterface) IndexerServiceClient {
 	return &indexerServiceClient{cc}
 }
 
-func (c *indexerServiceClient) CreateIndexRecordsLRO(ctx context.Context, in *models.CreateIndexRecordsLRORequest, opts ...grpc.CallOption) (*models.CreateIndexRecordsLROResponse, error) {
+func (c *indexerServiceClient) EnsureIndexState(ctx context.Context, in *models.EnsureIndexStateRequest, opts ...grpc.CallOption) (*models.EnsureIndexStateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(models.CreateIndexRecordsLROResponse)
-	err := c.cc.Invoke(ctx, IndexerService_CreateIndexRecordsLRO_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *indexerServiceClient) GetIndexRecordsLRO(ctx context.Context, in *models.GetIndexRecordsLRORequest, opts ...grpc.CallOption) (*models.GetIndexRecordsLROResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(models.GetIndexRecordsLROResponse)
-	err := c.cc.Invoke(ctx, IndexerService_GetIndexRecordsLRO_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *indexerServiceClient) UpdateIndexRecordsLRO(ctx context.Context, in *models.UpdateIndexRecordsLRORequest, opts ...grpc.CallOption) (*models.UpdateIndexRecordsLROResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(models.UpdateIndexRecordsLROResponse)
-	err := c.cc.Invoke(ctx, IndexerService_UpdateIndexRecordsLRO_FullMethodName, in, out, cOpts...)
+	out := new(models.EnsureIndexStateResponse)
+	err := c.cc.Invoke(ctx, IndexerService_EnsureIndexState_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -129,15 +101,9 @@ func (c *indexerServiceClient) DeleteIndexStates(ctx context.Context, in *models
 type IndexerServiceServer interface {
 	// *
 	// Create a LRO for indexing records
-	CreateIndexRecordsLRO(context.Context, *models.CreateIndexRecordsLRORequest) (*models.CreateIndexRecordsLROResponse, error)
+	EnsureIndexState(context.Context, *models.EnsureIndexStateRequest) (*models.EnsureIndexStateResponse, error)
 	// *
-	// Get the details of a LRO operation
-	GetIndexRecordsLRO(context.Context, *models.GetIndexRecordsLRORequest) (*models.GetIndexRecordsLROResponse, error)
-	// *
-	// Update an LRO operation - internal usage
-	UpdateIndexRecordsLRO(context.Context, *models.UpdateIndexRecordsLRORequest) (*models.UpdateIndexRecordsLROResponse, error)
-	// *
-	// Batch get multiple entity index states
+	// Get the index states for a particular entity
 	GetIndexStates(context.Context, *models.GetIndexStatesRequest) (*models.GetIndexStatesResponse, error)
 	// *
 	// List index entity states by filtering
@@ -152,14 +118,8 @@ type IndexerServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIndexerServiceServer struct{}
 
-func (UnimplementedIndexerServiceServer) CreateIndexRecordsLRO(context.Context, *models.CreateIndexRecordsLRORequest) (*models.CreateIndexRecordsLROResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateIndexRecordsLRO not implemented")
-}
-func (UnimplementedIndexerServiceServer) GetIndexRecordsLRO(context.Context, *models.GetIndexRecordsLRORequest) (*models.GetIndexRecordsLROResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetIndexRecordsLRO not implemented")
-}
-func (UnimplementedIndexerServiceServer) UpdateIndexRecordsLRO(context.Context, *models.UpdateIndexRecordsLRORequest) (*models.UpdateIndexRecordsLROResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateIndexRecordsLRO not implemented")
+func (UnimplementedIndexerServiceServer) EnsureIndexState(context.Context, *models.EnsureIndexStateRequest) (*models.EnsureIndexStateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnsureIndexState not implemented")
 }
 func (UnimplementedIndexerServiceServer) GetIndexStates(context.Context, *models.GetIndexStatesRequest) (*models.GetIndexStatesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIndexStates not implemented")
@@ -190,56 +150,20 @@ func RegisterIndexerServiceServer(s grpc.ServiceRegistrar, srv IndexerServiceSer
 	s.RegisterService(&IndexerService_ServiceDesc, srv)
 }
 
-func _IndexerService_CreateIndexRecordsLRO_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(models.CreateIndexRecordsLRORequest)
+func _IndexerService_EnsureIndexState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(models.EnsureIndexStateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(IndexerServiceServer).CreateIndexRecordsLRO(ctx, in)
+		return srv.(IndexerServiceServer).EnsureIndexState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: IndexerService_CreateIndexRecordsLRO_FullMethodName,
+		FullMethod: IndexerService_EnsureIndexState_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IndexerServiceServer).CreateIndexRecordsLRO(ctx, req.(*models.CreateIndexRecordsLRORequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IndexerService_GetIndexRecordsLRO_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(models.GetIndexRecordsLRORequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IndexerServiceServer).GetIndexRecordsLRO(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IndexerService_GetIndexRecordsLRO_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IndexerServiceServer).GetIndexRecordsLRO(ctx, req.(*models.GetIndexRecordsLRORequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IndexerService_UpdateIndexRecordsLRO_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(models.UpdateIndexRecordsLRORequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IndexerServiceServer).UpdateIndexRecordsLRO(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IndexerService_UpdateIndexRecordsLRO_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IndexerServiceServer).UpdateIndexRecordsLRO(ctx, req.(*models.UpdateIndexRecordsLRORequest))
+		return srv.(IndexerServiceServer).EnsureIndexState(ctx, req.(*models.EnsureIndexStateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -306,16 +230,8 @@ var IndexerService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*IndexerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateIndexRecordsLRO",
-			Handler:    _IndexerService_CreateIndexRecordsLRO_Handler,
-		},
-		{
-			MethodName: "GetIndexRecordsLRO",
-			Handler:    _IndexerService_GetIndexRecordsLRO_Handler,
-		},
-		{
-			MethodName: "UpdateIndexRecordsLRO",
-			Handler:    _IndexerService_UpdateIndexRecordsLRO_Handler,
+			MethodName: "EnsureIndexState",
+			Handler:    _IndexerService_EnsureIndexState_Handler,
 		},
 		{
 			MethodName: "GetIndexStates",

@@ -2,8 +2,8 @@
 // @generated from file weewar/v1/models/indexer.proto (package weewar.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Any, FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_any, file_google_protobuf_field_mask, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
@@ -12,12 +12,12 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/models/indexer.proto.
  */
 export const file_weewar_v1_models_indexer: GenFile = /*@__PURE__*/
-  fileDesc("Ch53ZWV3YXIvdjEvbW9kZWxzL2luZGV4ZXIucHJvdG8SCXdlZXdhci52MSKjAgoQRW50aXR5SW5kZXhTdGF0ZRITCgtlbnRpdHlfdHlwZRgBIAEoCRIRCgllbnRpdHlfaWQYAiABKAkSEgoKaW5kZXhfdHlwZRgDIAEoCRIyCg5sYXN0X3F1ZXVlZF9hdBgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASMwoPbGFzdF9pbmRleGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIOCgZzdGF0dXMYBiABKAkSEgoKbGFzdF9lcnJvchgHIAEoCRIZChFsYXN0X2NvbnRlbnRfaGFzaBgIIAEoCRITCgtyZXRyeV9jb3VudBgJIAEoBRIWCg5jdXJyZW50X2xyb19pZBgKIAEoCSJVChVHZXRJbmRleFN0YXRlc1JlcXVlc3QSEwoLZW50aXR5X3R5cGUYASABKAkSEgoKZW50aXR5X2lkcxgCIAMoCRITCgtpbmRleF90eXBlcxgDIAMoCSJDChRFbnRpdHlJbmRleFN0YXRlTGlzdBIrCgZzdGF0ZXMYASADKAsyGy53ZWV3YXIudjEuRW50aXR5SW5kZXhTdGF0ZSKnAQoWR2V0SW5kZXhTdGF0ZXNSZXNwb25zZRI9CgZzdGF0ZXMYASADKAsyLS53ZWV3YXIudjEuR2V0SW5kZXhTdGF0ZXNSZXNwb25zZS5TdGF0ZXNFbnRyeRpOCgtTdGF0ZXNFbnRyeRILCgNrZXkYASABKAkSLgoFdmFsdWUYAiABKAsyHy53ZWV3YXIudjEuRW50aXR5SW5kZXhTdGF0ZUxpc3Q6AjgBIvkBChZMaXN0SW5kZXhTdGF0ZXNSZXF1ZXN0EhMKC2VudGl0eV90eXBlGAEgASgJEjcKDmluZGV4ZWRfYmVmb3JlGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEgAiAEBEjYKDWluZGV4ZWRfYWZ0ZXIYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAGIAQESEwoLaW5kZXhfdHlwZXMYBCADKAkSEAoIb3JkZXJfYnkYBSABKAkSDQoFY291bnQYBiABKAVCEQoPX2luZGV4ZWRfYmVmb3JlQhAKDl9pbmRleGVkX2FmdGVyIlwKF0xpc3RJbmRleFN0YXRlc1Jlc3BvbnNlEioKBWl0ZW1zGAEgAygLMhsud2Vld2FyLnYxLkVudGl0eUluZGV4U3RhdGUSFQoNbmV4dF9wYWdlX2tleRgCIAEoCSJYChhEZWxldGVJbmRleFN0YXRlc1JlcXVlc3QSEwoLZW50aXR5X3R5cGUYASABKAkSEgoKZW50aXR5X2lkcxgCIAMoCRITCgtpbmRleF90eXBlcxgDIAMoCSIbChlEZWxldGVJbmRleFN0YXRlc1Jlc3BvbnNlIpIBCgtJbmRleFJlY29yZBIRCgllbnRpdHlfaWQYAiABKAkSLgoKdXBkYXRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASKQoLZW50aXR5X2RhdGEYBCABKAsyFC5nb29nbGUucHJvdG9idWYuQW55EhUKDWluZGV4ZXJfdHlwZXMYBSADKAki1QEKD0luZGV4UmVjb3Jkc0xSTxIOCgZscm9faWQYASABKAkSEwoLZW50aXR5X3R5cGUYAiABKAkSLgoKY3JlYXRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLgoKdXBkYXRlZF9hdBgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASFAoMY2FsbGJhY2tfdXJsGAUgASgJEicKB3JlY29yZHMYBiADKAsyFi53ZWV3YXIudjEuSW5kZXhSZWNvcmQiRwocQ3JlYXRlSW5kZXhSZWNvcmRzTFJPUmVxdWVzdBInCgNscm8YASABKAsyGi53ZWV3YXIudjEuSW5kZXhSZWNvcmRzTFJPIkgKHUNyZWF0ZUluZGV4UmVjb3Jkc0xST1Jlc3BvbnNlEicKA2xybxgBIAEoCzIaLndlZXdhci52MS5JbmRleFJlY29yZHNMUk8ieAocVXBkYXRlSW5kZXhSZWNvcmRzTFJPUmVxdWVzdBInCgNscm8YASABKAsyGi53ZWV3YXIudjEuSW5kZXhSZWNvcmRzTFJPEi8KC3VwZGF0ZV9tYXNrGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLkZpZWxkTWFzayJICh1VcGRhdGVJbmRleFJlY29yZHNMUk9SZXNwb25zZRInCgNscm8YASABKAsyGi53ZWV3YXIudjEuSW5kZXhSZWNvcmRzTFJPIisKGUdldEluZGV4UmVjb3Jkc0xST1JlcXVlc3QSDgoGbHJvX2lkGAEgASgJIkUKGkdldEluZGV4UmVjb3Jkc0xST1Jlc3BvbnNlEicKA2xybxgBIAEoCzIaLndlZXdhci52MS5JbmRleFJlY29yZHNMUk9CoAEKDWNvbS53ZWV3YXIudjFCDEluZGV4ZXJQcm90b1ABWjxnaXRodWIuY29tL3R1cm5mb3JnZS93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MS9tb2RlbHM7d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_any, file_google_protobuf_field_mask]);
+  fileDesc("Ch53ZWV3YXIvdjEvbW9kZWxzL2luZGV4ZXIucHJvdG8SCXdlZXdhci52MSLaAgoKSW5kZXhTdGF0ZRITCgtlbnRpdHlfdHlwZRgBIAEoCRIRCgllbnRpdHlfaWQYAiABKAkSEgoKaW5kZXhfdHlwZRgDIAEoCRIuCgpjcmVhdGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgppbmRleGVkX2F0GAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIWCg5uZWVkc19pbmRleGluZxgHIAEoCBImCgZzdGF0dXMYCCABKA4yFi53ZWV3YXIudjEuSW5kZXhTdGF0dXMSEgoKbGFzdF9lcnJvchgJIAEoCRIXCg9pZGVtcG90ZW5jeV9rZXkYCiABKAkSEwoLcmV0cnlfY291bnQYCyABKAUidgoXRW5zdXJlSW5kZXhTdGF0ZVJlcXVlc3QSKgoLaW5kZXhfc3RhdGUYASABKAsyFS53ZWV3YXIudjEuSW5kZXhTdGF0ZRIvCgt1cGRhdGVfbWFzaxgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2siRgoYRW5zdXJlSW5kZXhTdGF0ZVJlc3BvbnNlEioKC2luZGV4X3N0YXRlGAEgASgLMhUud2Vld2FyLnYxLkluZGV4U3RhdGUiVAoVR2V0SW5kZXhTdGF0ZXNSZXF1ZXN0EhMKC2VudGl0eV90eXBlGAEgASgJEhEKCWVudGl0eV9pZBgCIAEoCRITCgtpbmRleF90eXBlcxgDIAMoCSI3Cg5JbmRleFN0YXRlTGlzdBIlCgZzdGF0ZXMYASADKAsyFS53ZWV3YXIudjEuSW5kZXhTdGF0ZSKdAQoWR2V0SW5kZXhTdGF0ZXNSZXNwb25zZRI9CgZzdGF0ZXMYASADKAsyLS53ZWV3YXIudjEuR2V0SW5kZXhTdGF0ZXNSZXNwb25zZS5TdGF0ZXNFbnRyeRpECgtTdGF0ZXNFbnRyeRILCgNrZXkYASABKAkSJAoFdmFsdWUYAiABKAsyFS53ZWV3YXIudjEuSW5kZXhTdGF0ZToCOAEi+QEKFkxpc3RJbmRleFN0YXRlc1JlcXVlc3QSEwoLZW50aXR5X3R5cGUYASABKAkSNwoOdXBkYXRlZF9iZWZvcmUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSACIAQESNgoNdXBkYXRlZF9hZnRlchgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAYgBARITCgtpbmRleF90eXBlcxgEIAMoCRIQCghvcmRlcl9ieRgFIAEoCRINCgVjb3VudBgGIAEoBUIRCg9fdXBkYXRlZF9iZWZvcmVCEAoOX3VwZGF0ZWRfYWZ0ZXIiVgoXTGlzdEluZGV4U3RhdGVzUmVzcG9uc2USJAoFaXRlbXMYASADKAsyFS53ZWV3YXIudjEuSW5kZXhTdGF0ZRIVCg1uZXh0X3BhZ2Vfa2V5GAIgASgJIlcKGERlbGV0ZUluZGV4U3RhdGVzUmVxdWVzdBITCgtlbnRpdHlfdHlwZRgBIAEoCRIRCgllbnRpdHlfaWQYAiABKAkSEwoLaW5kZXhfdHlwZXMYAyADKAkiGwoZRGVsZXRlSW5kZXhTdGF0ZXNSZXNwb25zZSKSAQoLSW5kZXhSZWNvcmQSEQoJZW50aXR5X2lkGAIgASgJEi4KCnVwZGF0ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEikKC2VudGl0eV9kYXRhGAQgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueRIVCg1pbmRleGVyX3R5cGVzGAUgAygJItUBCg9JbmRleFJlY29yZHNMUk8SDgoGbHJvX2lkGAEgASgJEhMKC2VudGl0eV90eXBlGAIgASgJEi4KCmNyZWF0ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi4KCnVwZGF0ZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhQKDGNhbGxiYWNrX3VybBgFIAEoCRInCgdyZWNvcmRzGAYgAygLMhYud2Vld2FyLnYxLkluZGV4UmVjb3JkIkcKHENyZWF0ZUluZGV4UmVjb3Jkc0xST1JlcXVlc3QSJwoDbHJvGAEgASgLMhoud2Vld2FyLnYxLkluZGV4UmVjb3Jkc0xSTyJICh1DcmVhdGVJbmRleFJlY29yZHNMUk9SZXNwb25zZRInCgNscm8YASABKAsyGi53ZWV3YXIudjEuSW5kZXhSZWNvcmRzTFJPIngKHFVwZGF0ZUluZGV4UmVjb3Jkc0xST1JlcXVlc3QSJwoDbHJvGAEgASgLMhoud2Vld2FyLnYxLkluZGV4UmVjb3Jkc0xSTxIvCgt1cGRhdGVfbWFzaxgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2siSAodVXBkYXRlSW5kZXhSZWNvcmRzTFJPUmVzcG9uc2USJwoDbHJvGAEgASgLMhoud2Vld2FyLnYxLkluZGV4UmVjb3Jkc0xSTyIrChlHZXRJbmRleFJlY29yZHNMUk9SZXF1ZXN0Eg4KBmxyb19pZBgBIAEoCSJFChpHZXRJbmRleFJlY29yZHNMUk9SZXNwb25zZRInCgNscm8YASABKAsyGi53ZWV3YXIudjEuSW5kZXhSZWNvcmRzTFJPKpUBCgtJbmRleFN0YXR1cxIcChhJTkRFWF9TVEFUVVNfVU5TUEVDSUZJRUQQABIYChRJTkRFWF9TVEFUVVNfUEVORElORxABEhkKFUlOREVYX1NUQVRVU19JTkRFWElORxACEhoKFklOREVYX1NUQVRVU19DT01QTEVURUQQAxIXChNJTkRFWF9TVEFUVVNfRkFJTEVEEARCoAEKDWNvbS53ZWV3YXIudjFCDEluZGV4ZXJQcm90b1ABWjxnaXRodWIuY29tL3R1cm5mb3JnZS93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MS9tb2RlbHM7d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_any, file_google_protobuf_field_mask]);
 
 /**
- * @generated from message weewar.v1.EntityIndexState
+ * @generated from message weewar.v1.IndexState
  */
-export type EntityIndexState = Message<"weewar.v1.EntityIndexState"> & {
+export type IndexState = Message<"weewar.v1.IndexState"> & {
   /**
    * @generated from field: string entity_type = 1;
    */
@@ -39,58 +39,107 @@ export type EntityIndexState = Message<"weewar.v1.EntityIndexState"> & {
   /**
    * When the last indexing was queued
    *
-   * @generated from field: google.protobuf.Timestamp last_queued_at = 4;
+   * @generated from field: google.protobuf.Timestamp created_at = 4;
    */
-  lastQueuedAt?: Timestamp;
+  createdAt?: Timestamp;
 
   /**
-   * when the last indexing was completed
+   * when the last time the entity was recorded for an update (means it is eligible for a re-indexing)
    *
-   * @generated from field: google.protobuf.Timestamp last_indexed_at = 5;
+   * @generated from field: google.protobuf.Timestamp updated_at = 5;
    */
-  lastIndexedAt?: Timestamp;
+  updatedAt?: Timestamp;
+
+  /**
+   * When did the last indexing finish
+   *
+   * @generated from field: google.protobuf.Timestamp indexed_at = 6;
+   */
+  indexedAt?: Timestamp;
+
+  /**
+   * Whether indexing is needed or not
+   *
+   * @generated from field: bool needs_indexing = 7;
+   */
+  needsIndexing: boolean;
 
   /**
    * "queued/pending", "indexing", "completed", "failed"
    *
-   * @generated from field: string status = 6;
+   * @generated from field: weewar.v1.IndexStatus status = 8;
    */
-  status: string;
+  status: IndexStatus;
 
   /**
    * If there was an error in the last indexing
    *
-   * @generated from field: string last_error = 7;
+   * @generated from field: string last_error = 9;
    */
   lastError: string;
 
   /**
-   * Keep a hash of the contents for quick check to check updated
-   * (not sure if needed) - This should be provided by the source
+   * A way to ignore multiple requests if they are updates but
+   * nothing has changed
    *
-   * @generated from field: string last_content_hash = 8;
+   * @generated from field: string idempotency_key = 10;
    */
-  lastContentHash: string;
+  idempotencyKey: string;
 
   /**
-   * @generated from field: int32 retry_count = 9;
+   * @generated from field: int32 retry_count = 11;
    */
   retryCount: number;
-
-  /**
-   * Which LRO this entity has been updated via
-   *
-   * @generated from field: string current_lro_id = 10;
-   */
-  currentLroId: string;
 };
 
 /**
- * Describes the message weewar.v1.EntityIndexState.
- * Use `create(EntityIndexStateSchema)` to create a new message.
+ * Describes the message weewar.v1.IndexState.
+ * Use `create(IndexStateSchema)` to create a new message.
  */
-export const EntityIndexStateSchema: GenMessage<EntityIndexState> = /*@__PURE__*/
+export const IndexStateSchema: GenMessage<IndexState> = /*@__PURE__*/
   messageDesc(file_weewar_v1_models_indexer, 0);
+
+/**
+ * @generated from message weewar.v1.EnsureIndexStateRequest
+ */
+export type EnsureIndexStateRequest = Message<"weewar.v1.EnsureIndexStateRequest"> & {
+  /**
+   * @generated from field: weewar.v1.IndexState index_state = 1;
+   */
+  indexState?: IndexState;
+
+  /**
+   * *
+   * Mask of fields being updated in this Game to make partial changes.
+   *
+   * @generated from field: google.protobuf.FieldMask update_mask = 2;
+   */
+  updateMask?: FieldMask;
+};
+
+/**
+ * Describes the message weewar.v1.EnsureIndexStateRequest.
+ * Use `create(EnsureIndexStateRequestSchema)` to create a new message.
+ */
+export const EnsureIndexStateRequestSchema: GenMessage<EnsureIndexStateRequest> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_models_indexer, 1);
+
+/**
+ * @generated from message weewar.v1.EnsureIndexStateResponse
+ */
+export type EnsureIndexStateResponse = Message<"weewar.v1.EnsureIndexStateResponse"> & {
+  /**
+   * @generated from field: weewar.v1.IndexState index_state = 1;
+   */
+  indexState?: IndexState;
+};
+
+/**
+ * Describes the message weewar.v1.EnsureIndexStateResponse.
+ * Use `create(EnsureIndexStateResponseSchema)` to create a new message.
+ */
+export const EnsureIndexStateResponseSchema: GenMessage<EnsureIndexStateResponse> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_models_indexer, 2);
 
 /**
  * @generated from message weewar.v1.GetIndexStatesRequest
@@ -102,9 +151,9 @@ export type GetIndexStatesRequest = Message<"weewar.v1.GetIndexStatesRequest"> &
   entityType: string;
 
   /**
-   * @generated from field: repeated string entity_ids = 2;
+   * @generated from field: string entity_id = 2;
    */
-  entityIds: string[];
+  entityId: string;
 
   /**
    * Optional - can be used to get "all" indexer states or just once specified here
@@ -119,33 +168,33 @@ export type GetIndexStatesRequest = Message<"weewar.v1.GetIndexStatesRequest"> &
  * Use `create(GetIndexStatesRequestSchema)` to create a new message.
  */
 export const GetIndexStatesRequestSchema: GenMessage<GetIndexStatesRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 1);
+  messageDesc(file_weewar_v1_models_indexer, 3);
 
 /**
- * @generated from message weewar.v1.EntityIndexStateList
+ * @generated from message weewar.v1.IndexStateList
  */
-export type EntityIndexStateList = Message<"weewar.v1.EntityIndexStateList"> & {
+export type IndexStateList = Message<"weewar.v1.IndexStateList"> & {
   /**
-   * @generated from field: repeated weewar.v1.EntityIndexState states = 1;
+   * @generated from field: repeated weewar.v1.IndexState states = 1;
    */
-  states: EntityIndexState[];
+  states: IndexState[];
 };
 
 /**
- * Describes the message weewar.v1.EntityIndexStateList.
- * Use `create(EntityIndexStateListSchema)` to create a new message.
+ * Describes the message weewar.v1.IndexStateList.
+ * Use `create(IndexStateListSchema)` to create a new message.
  */
-export const EntityIndexStateListSchema: GenMessage<EntityIndexStateList> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 2);
+export const IndexStateListSchema: GenMessage<IndexStateList> = /*@__PURE__*/
+  messageDesc(file_weewar_v1_models_indexer, 4);
 
 /**
  * @generated from message weewar.v1.GetIndexStatesResponse
  */
 export type GetIndexStatesResponse = Message<"weewar.v1.GetIndexStatesResponse"> & {
   /**
-   * @generated from field: map<string, weewar.v1.EntityIndexStateList> states = 1;
+   * @generated from field: map<string, weewar.v1.IndexState> states = 1;
    */
-  states: { [key: string]: EntityIndexStateList };
+  states: { [key: string]: IndexState };
 };
 
 /**
@@ -153,7 +202,7 @@ export type GetIndexStatesResponse = Message<"weewar.v1.GetIndexStatesResponse">
  * Use `create(GetIndexStatesResponseSchema)` to create a new message.
  */
 export const GetIndexStatesResponseSchema: GenMessage<GetIndexStatesResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 3);
+  messageDesc(file_weewar_v1_models_indexer, 5);
 
 /**
  * @generated from message weewar.v1.ListIndexStatesRequest
@@ -167,16 +216,16 @@ export type ListIndexStatesRequest = Message<"weewar.v1.ListIndexStatesRequest">
   /**
    * Get records indexed "before" this time
    *
-   * @generated from field: optional google.protobuf.Timestamp indexed_before = 2;
+   * @generated from field: optional google.protobuf.Timestamp updated_before = 2;
    */
-  indexedBefore?: Timestamp;
+  updatedBefore?: Timestamp;
 
   /**
-   * Get records indexed "after" this time
+   * Get records updated "after" this time
    *
-   * @generated from field: optional google.protobuf.Timestamp indexed_after = 3;
+   * @generated from field: optional google.protobuf.Timestamp updated_after = 3;
    */
-  indexedAfter?: Timestamp;
+  updatedAfter?: Timestamp;
 
   /**
    * Filter by index types or get all
@@ -205,16 +254,16 @@ export type ListIndexStatesRequest = Message<"weewar.v1.ListIndexStatesRequest">
  * Use `create(ListIndexStatesRequestSchema)` to create a new message.
  */
 export const ListIndexStatesRequestSchema: GenMessage<ListIndexStatesRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 4);
+  messageDesc(file_weewar_v1_models_indexer, 6);
 
 /**
  * @generated from message weewar.v1.ListIndexStatesResponse
  */
 export type ListIndexStatesResponse = Message<"weewar.v1.ListIndexStatesResponse"> & {
   /**
-   * @generated from field: repeated weewar.v1.EntityIndexState items = 1;
+   * @generated from field: repeated weewar.v1.IndexState items = 1;
    */
-  items: EntityIndexState[];
+  items: IndexState[];
 
   /**
    * How to identify the next "page" in this list
@@ -229,7 +278,7 @@ export type ListIndexStatesResponse = Message<"weewar.v1.ListIndexStatesResponse
  * Use `create(ListIndexStatesResponseSchema)` to create a new message.
  */
 export const ListIndexStatesResponseSchema: GenMessage<ListIndexStatesResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 5);
+  messageDesc(file_weewar_v1_models_indexer, 7);
 
 /**
  * @generated from message weewar.v1.DeleteIndexStatesRequest
@@ -241,9 +290,9 @@ export type DeleteIndexStatesRequest = Message<"weewar.v1.DeleteIndexStatesReque
   entityType: string;
 
   /**
-   * @generated from field: repeated string entity_ids = 2;
+   * @generated from field: string entity_id = 2;
    */
-  entityIds: string[];
+  entityId: string;
 
   /**
    * Optional - can be used to get "all" indexer states or just once specified here
@@ -258,7 +307,7 @@ export type DeleteIndexStatesRequest = Message<"weewar.v1.DeleteIndexStatesReque
  * Use `create(DeleteIndexStatesRequestSchema)` to create a new message.
  */
 export const DeleteIndexStatesRequestSchema: GenMessage<DeleteIndexStatesRequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 6);
+  messageDesc(file_weewar_v1_models_indexer, 8);
 
 /**
  * @generated from message weewar.v1.DeleteIndexStatesResponse
@@ -271,7 +320,7 @@ export type DeleteIndexStatesResponse = Message<"weewar.v1.DeleteIndexStatesResp
  * Use `create(DeleteIndexStatesResponseSchema)` to create a new message.
  */
 export const DeleteIndexStatesResponseSchema: GenMessage<DeleteIndexStatesResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 7);
+  messageDesc(file_weewar_v1_models_indexer, 9);
 
 /**
  * Request messages
@@ -305,7 +354,7 @@ export type IndexRecord = Message<"weewar.v1.IndexRecord"> & {
  * Use `create(IndexRecordSchema)` to create a new message.
  */
 export const IndexRecordSchema: GenMessage<IndexRecord> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 8);
+  messageDesc(file_weewar_v1_models_indexer, 10);
 
 /**
  * Each IndexRecords gets its own "long running operation" 
@@ -362,7 +411,7 @@ export type IndexRecordsLRO = Message<"weewar.v1.IndexRecordsLRO"> & {
  * Use `create(IndexRecordsLROSchema)` to create a new message.
  */
 export const IndexRecordsLROSchema: GenMessage<IndexRecordsLRO> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 9);
+  messageDesc(file_weewar_v1_models_indexer, 11);
 
 /**
  * @generated from message weewar.v1.CreateIndexRecordsLRORequest
@@ -379,7 +428,7 @@ export type CreateIndexRecordsLRORequest = Message<"weewar.v1.CreateIndexRecords
  * Use `create(CreateIndexRecordsLRORequestSchema)` to create a new message.
  */
 export const CreateIndexRecordsLRORequestSchema: GenMessage<CreateIndexRecordsLRORequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 10);
+  messageDesc(file_weewar_v1_models_indexer, 12);
 
 /**
  * @generated from message weewar.v1.CreateIndexRecordsLROResponse
@@ -396,7 +445,7 @@ export type CreateIndexRecordsLROResponse = Message<"weewar.v1.CreateIndexRecord
  * Use `create(CreateIndexRecordsLROResponseSchema)` to create a new message.
  */
 export const CreateIndexRecordsLROResponseSchema: GenMessage<CreateIndexRecordsLROResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 11);
+  messageDesc(file_weewar_v1_models_indexer, 13);
 
 /**
  * @generated from message weewar.v1.UpdateIndexRecordsLRORequest
@@ -421,7 +470,7 @@ export type UpdateIndexRecordsLRORequest = Message<"weewar.v1.UpdateIndexRecords
  * Use `create(UpdateIndexRecordsLRORequestSchema)` to create a new message.
  */
 export const UpdateIndexRecordsLRORequestSchema: GenMessage<UpdateIndexRecordsLRORequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 12);
+  messageDesc(file_weewar_v1_models_indexer, 14);
 
 /**
  * @generated from message weewar.v1.UpdateIndexRecordsLROResponse
@@ -438,7 +487,7 @@ export type UpdateIndexRecordsLROResponse = Message<"weewar.v1.UpdateIndexRecord
  * Use `create(UpdateIndexRecordsLROResponseSchema)` to create a new message.
  */
 export const UpdateIndexRecordsLROResponseSchema: GenMessage<UpdateIndexRecordsLROResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 13);
+  messageDesc(file_weewar_v1_models_indexer, 15);
 
 /**
  * @generated from message weewar.v1.GetIndexRecordsLRORequest
@@ -455,7 +504,7 @@ export type GetIndexRecordsLRORequest = Message<"weewar.v1.GetIndexRecordsLROReq
  * Use `create(GetIndexRecordsLRORequestSchema)` to create a new message.
  */
 export const GetIndexRecordsLRORequestSchema: GenMessage<GetIndexRecordsLRORequest> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 14);
+  messageDesc(file_weewar_v1_models_indexer, 16);
 
 /**
  * @generated from message weewar.v1.GetIndexRecordsLROResponse
@@ -472,5 +521,41 @@ export type GetIndexRecordsLROResponse = Message<"weewar.v1.GetIndexRecordsLRORe
  * Use `create(GetIndexRecordsLROResponseSchema)` to create a new message.
  */
 export const GetIndexRecordsLROResponseSchema: GenMessage<GetIndexRecordsLROResponse> = /*@__PURE__*/
-  messageDesc(file_weewar_v1_models_indexer, 15);
+  messageDesc(file_weewar_v1_models_indexer, 17);
+
+/**
+ * @generated from enum weewar.v1.IndexStatus
+ */
+export enum IndexStatus {
+  /**
+   * @generated from enum value: INDEX_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: INDEX_STATUS_PENDING = 1;
+   */
+  PENDING = 1,
+
+  /**
+   * @generated from enum value: INDEX_STATUS_INDEXING = 2;
+   */
+  INDEXING = 2,
+
+  /**
+   * @generated from enum value: INDEX_STATUS_COMPLETED = 3;
+   */
+  COMPLETED = 3,
+
+  /**
+   * @generated from enum value: INDEX_STATUS_FAILED = 4;
+   */
+  FAILED = 4,
+}
+
+/**
+ * Describes the enum weewar.v1.IndexStatus.
+ */
+export const IndexStatusSchema: GenEnum<IndexStatus> = /*@__PURE__*/
+  enumDesc(file_weewar_v1_models_indexer, 0);
 

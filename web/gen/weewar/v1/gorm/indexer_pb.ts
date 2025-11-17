@@ -12,84 +12,21 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/gorm/indexer.proto.
  */
 export const file_weewar_v1_gorm_indexer: GenFile = /*@__PURE__*/
-  fileDesc("Chx3ZWV3YXIvdjEvZ29ybS9pbmRleGVyLnByb3RvEgl3ZWV3YXIudjEi/wQKFEVudGl0eUluZGV4U3RhdGVHT1JNEkIKC2VudGl0eV90eXBlGAEgASgJQi2Sph0pUgpwcmltYXJ5S2V5UhF0eXBlOnZhcmNoYXIoMTAwKVIIbm90IG51bGwSQAoJZW50aXR5X2lkGAIgASgJQi2Sph0pUgpwcmltYXJ5S2V5UhF0eXBlOnZhcmNoYXIoMjU1KVIIbm90IG51bGwSQQoKaW5kZXhfdHlwZRgDIAEoCUItkqYdKVIKcHJpbWFyeUtleVIRdHlwZTp2YXJjaGFyKDEwMClSCG5vdCBudWxsEikKDmxhc3RfcXVldWVkX2F0GAQgASgDQhGSph0NUgt0eXBlOmJpZ2ludBIxCg9sYXN0X2luZGV4ZWRfYXQYBSABKANCGJKmHRRSC3R5cGU6YmlnaW50UgVpbmRleBJICgZzdGF0dXMYBiABKAlCOJKmHTRSEHR5cGU6dmFyY2hhcig1MClSCG5vdCBudWxsUg9kZWZhdWx0OnBlbmRpbmdSBWluZGV4EiMKCmxhc3RfZXJyb3IYByABKAlCD5KmHQtSCXR5cGU6dGV4dBIyChFsYXN0X2NvbnRlbnRfaGFzaBgIIAEoCUIXkqYdE1IRdHlwZTp2YXJjaGFyKDI1NSkSLgoLcmV0cnlfY291bnQYCSABKAVCGZKmHRVSCHR5cGU6aW50UglkZWZhdWx0OjASNgoOY3VycmVudF9scm9faWQYCiABKAlCHpKmHRpSEXR5cGU6dmFyY2hhcigyNTUpUgVpbmRleDo1yqYdMQoad2Vld2FyLnYxLkVudGl0eUluZGV4U3RhdGUSE2VudGl0eV9pbmRleF9zdGF0ZXMi8gIKE0luZGV4UmVjb3Jkc0xST0dPUk0SMwoGbHJvX2lkGAEgASgJQiOSph0fUgpwcmltYXJ5S2V5UhF0eXBlOnZhcmNoYXIoMjU1KRI9CgtlbnRpdHlfdHlwZRgCIAEoCUIokqYdJFIRdHlwZTp2YXJjaGFyKDEwMClSCG5vdCBudWxsUgVpbmRleBIvCgpjcmVhdGVkX2F0GAMgASgDQhuSph0XUgt0eXBlOmJpZ2ludFIIbm90IG51bGwSLwoKdXBkYXRlZF9hdBgEIAEoA0IbkqYdF1ILdHlwZTpiaWdpbnRSCG5vdCBudWxsEi0KDGNhbGxiYWNrX3VybBgFIAEoCUIXkqYdE1IRdHlwZTp2YXJjaGFyKDUwMCkSIQoHcmVjb3JkcxgGIAEoDEIQkqYdDFIKdHlwZTpqc29uYjozyqYdLwoZd2Vld2FyLnYxLkluZGV4UmVjb3Jkc0xSTxISaW5kZXhfcmVjb3Jkc19scm9zQp4BCg1jb20ud2Vld2FyLnYxQgxJbmRleGVyUHJvdG9QAVo6Z2l0aHViLmNvbS90dXJuZm9yZ2Uvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjEvZ29ybTt3ZWV3YXJ2MaICA1dYWKoCCVdlZXdhci5WMcoCCVdlZXdhclxWMeICFVdlZXdhclxWMVxHUEJNZXRhZGF0YeoCCldlZXdhcjo6VjFiBnByb3RvMw", [file_dal_v1_annotations, file_weewar_v1_models_indexer]);
+  fileDesc("Chx3ZWV3YXIvdjEvZ29ybS9pbmRleGVyLnByb3RvEgl3ZWV3YXIudjEiQQoOSW5kZXhTdGF0ZUdPUk06L8qmHSsKFHdlZXdhci52MS5JbmRleFN0YXRlEhNlbnRpdHlfaW5kZXhfc3RhdGVzIkoKE0luZGV4UmVjb3Jkc0xST0dPUk06M8qmHS8KGXdlZXdhci52MS5JbmRleFJlY29yZHNMUk8SEmluZGV4X3JlY29yZHNfbHJvc0KeAQoNY29tLndlZXdhci52MUIMSW5kZXhlclByb3RvUAFaOmdpdGh1Yi5jb20vdHVybmZvcmdlL3dlZXdhci9nZW4vZ28vd2Vld2FyL3YxL2dvcm07d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_dal_v1_annotations, file_weewar_v1_models_indexer]);
 
 /**
- * EntityIndexStateGORM is the GORM representation for EntityIndexState
+ * IndexStateGORM is the GORM representation for IndexState
  *
- * @generated from message weewar.v1.EntityIndexStateGORM
+ * @generated from message weewar.v1.IndexStateGORM
  */
-export type EntityIndexStateGORM = Message<"weewar.v1.EntityIndexStateGORM"> & {
-  /**
-   * Composite primary key: entity_type + entity_id + index_type
-   *
-   * @generated from field: string entity_type = 1;
-   */
-  entityType: string;
-
-  /**
-   * @generated from field: string entity_id = 2;
-   */
-  entityId: string;
-
-  /**
-   * @generated from field: string index_type = 3;
-   */
-  indexType: string;
-
-  /**
-   * Timestamps stored as int64 (Unix time)
-   *
-   * @generated from field: int64 last_queued_at = 4;
-   */
-  lastQueuedAt: bigint;
-
-  /**
-   * @generated from field: int64 last_indexed_at = 5;
-   */
-  lastIndexedAt: bigint;
-
-  /**
-   * Status field
-   *
-   * @generated from field: string status = 6;
-   */
-  status: string;
-
-  /**
-   * Error tracking
-   *
-   * @generated from field: string last_error = 7;
-   */
-  lastError: string;
-
-  /**
-   * Content hash for change detection
-   *
-   * @generated from field: string last_content_hash = 8;
-   */
-  lastContentHash: string;
-
-  /**
-   * Retry tracking
-   *
-   * @generated from field: int32 retry_count = 9;
-   */
-  retryCount: number;
-
-  /**
-   * LRO tracking
-   *
-   * @generated from field: string current_lro_id = 10;
-   */
-  currentLroId: string;
+export type IndexStateGORM = Message<"weewar.v1.IndexStateGORM"> & {
 };
 
 /**
- * Describes the message weewar.v1.EntityIndexStateGORM.
- * Use `create(EntityIndexStateGORMSchema)` to create a new message.
+ * Describes the message weewar.v1.IndexStateGORM.
+ * Use `create(IndexStateGORMSchema)` to create a new message.
  */
-export const EntityIndexStateGORMSchema: GenMessage<EntityIndexStateGORM> = /*@__PURE__*/
+export const IndexStateGORMSchema: GenMessage<IndexStateGORM> = /*@__PURE__*/
   messageDesc(file_weewar_v1_gorm_indexer, 0);
 
 /**
@@ -98,48 +35,6 @@ export const EntityIndexStateGORMSchema: GenMessage<EntityIndexStateGORM> = /*@_
  * @generated from message weewar.v1.IndexRecordsLROGORM
  */
 export type IndexRecordsLROGORM = Message<"weewar.v1.IndexRecordsLROGORM"> & {
-  /**
-   * Primary key
-   *
-   * @generated from field: string lro_id = 1;
-   */
-  lroId: string;
-
-  /**
-   * Entity type for all records in this LRO
-   *
-   * @generated from field: string entity_type = 2;
-   */
-  entityType: string;
-
-  /**
-   * Timestamps
-   *
-   * @generated from field: int64 created_at = 3;
-   */
-  createdAt: bigint;
-
-  /**
-   * @generated from field: int64 updated_at = 4;
-   */
-  updatedAt: bigint;
-
-  /**
-   * Callback URL
-   *
-   * @generated from field: string callback_url = 5;
-   */
-  callbackUrl: string;
-
-  /**
-   * Records stored as JSONB (PostgreSQL-specific)
-   * The repeated IndexRecord will be serialized to JSON
-   * Note: In the proto, this is `repeated IndexRecord` but GORM can't handle
-   * repeated message types directly, so we'll store as JSONB
-   *
-   * @generated from field: bytes records = 6;
-   */
-  records: Uint8Array;
 };
 
 /**

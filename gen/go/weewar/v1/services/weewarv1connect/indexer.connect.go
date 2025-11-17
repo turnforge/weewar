@@ -35,15 +35,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// IndexerServiceCreateIndexRecordsLROProcedure is the fully-qualified name of the IndexerService's
-	// CreateIndexRecordsLRO RPC.
-	IndexerServiceCreateIndexRecordsLROProcedure = "/weewar.v1.IndexerService/CreateIndexRecordsLRO"
-	// IndexerServiceGetIndexRecordsLROProcedure is the fully-qualified name of the IndexerService's
-	// GetIndexRecordsLRO RPC.
-	IndexerServiceGetIndexRecordsLROProcedure = "/weewar.v1.IndexerService/GetIndexRecordsLRO"
-	// IndexerServiceUpdateIndexRecordsLROProcedure is the fully-qualified name of the IndexerService's
-	// UpdateIndexRecordsLRO RPC.
-	IndexerServiceUpdateIndexRecordsLROProcedure = "/weewar.v1.IndexerService/UpdateIndexRecordsLRO"
+	// IndexerServiceEnsureIndexStateProcedure is the fully-qualified name of the IndexerService's
+	// EnsureIndexState RPC.
+	IndexerServiceEnsureIndexStateProcedure = "/weewar.v1.IndexerService/EnsureIndexState"
 	// IndexerServiceGetIndexStatesProcedure is the fully-qualified name of the IndexerService's
 	// GetIndexStates RPC.
 	IndexerServiceGetIndexStatesProcedure = "/weewar.v1.IndexerService/GetIndexStates"
@@ -59,15 +53,9 @@ const (
 type IndexerServiceClient interface {
 	// *
 	// Create a LRO for indexing records
-	CreateIndexRecordsLRO(context.Context, *connect.Request[models.CreateIndexRecordsLRORequest]) (*connect.Response[models.CreateIndexRecordsLROResponse], error)
+	EnsureIndexState(context.Context, *connect.Request[models.EnsureIndexStateRequest]) (*connect.Response[models.EnsureIndexStateResponse], error)
 	// *
-	// Get the details of a LRO operation
-	GetIndexRecordsLRO(context.Context, *connect.Request[models.GetIndexRecordsLRORequest]) (*connect.Response[models.GetIndexRecordsLROResponse], error)
-	// *
-	// Update an LRO operation - internal usage
-	UpdateIndexRecordsLRO(context.Context, *connect.Request[models.UpdateIndexRecordsLRORequest]) (*connect.Response[models.UpdateIndexRecordsLROResponse], error)
-	// *
-	// Batch get multiple entity index states
+	// Get the index states for a particular entity
 	GetIndexStates(context.Context, *connect.Request[models.GetIndexStatesRequest]) (*connect.Response[models.GetIndexStatesResponse], error)
 	// *
 	// List index entity states by filtering
@@ -86,22 +74,10 @@ func NewIndexerServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 	baseURL = strings.TrimRight(baseURL, "/")
 	indexerServiceMethods := services.File_weewar_v1_services_indexer_proto.Services().ByName("IndexerService").Methods()
 	return &indexerServiceClient{
-		createIndexRecordsLRO: connect.NewClient[models.CreateIndexRecordsLRORequest, models.CreateIndexRecordsLROResponse](
+		ensureIndexState: connect.NewClient[models.EnsureIndexStateRequest, models.EnsureIndexStateResponse](
 			httpClient,
-			baseURL+IndexerServiceCreateIndexRecordsLROProcedure,
-			connect.WithSchema(indexerServiceMethods.ByName("CreateIndexRecordsLRO")),
-			connect.WithClientOptions(opts...),
-		),
-		getIndexRecordsLRO: connect.NewClient[models.GetIndexRecordsLRORequest, models.GetIndexRecordsLROResponse](
-			httpClient,
-			baseURL+IndexerServiceGetIndexRecordsLROProcedure,
-			connect.WithSchema(indexerServiceMethods.ByName("GetIndexRecordsLRO")),
-			connect.WithClientOptions(opts...),
-		),
-		updateIndexRecordsLRO: connect.NewClient[models.UpdateIndexRecordsLRORequest, models.UpdateIndexRecordsLROResponse](
-			httpClient,
-			baseURL+IndexerServiceUpdateIndexRecordsLROProcedure,
-			connect.WithSchema(indexerServiceMethods.ByName("UpdateIndexRecordsLRO")),
+			baseURL+IndexerServiceEnsureIndexStateProcedure,
+			connect.WithSchema(indexerServiceMethods.ByName("EnsureIndexState")),
 			connect.WithClientOptions(opts...),
 		),
 		getIndexStates: connect.NewClient[models.GetIndexStatesRequest, models.GetIndexStatesResponse](
@@ -127,27 +103,15 @@ func NewIndexerServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // indexerServiceClient implements IndexerServiceClient.
 type indexerServiceClient struct {
-	createIndexRecordsLRO *connect.Client[models.CreateIndexRecordsLRORequest, models.CreateIndexRecordsLROResponse]
-	getIndexRecordsLRO    *connect.Client[models.GetIndexRecordsLRORequest, models.GetIndexRecordsLROResponse]
-	updateIndexRecordsLRO *connect.Client[models.UpdateIndexRecordsLRORequest, models.UpdateIndexRecordsLROResponse]
-	getIndexStates        *connect.Client[models.GetIndexStatesRequest, models.GetIndexStatesResponse]
-	listIndexStates       *connect.Client[models.ListIndexStatesRequest, models.ListIndexStatesResponse]
-	deleteIndexStates     *connect.Client[models.DeleteIndexStatesRequest, models.DeleteIndexStatesResponse]
+	ensureIndexState  *connect.Client[models.EnsureIndexStateRequest, models.EnsureIndexStateResponse]
+	getIndexStates    *connect.Client[models.GetIndexStatesRequest, models.GetIndexStatesResponse]
+	listIndexStates   *connect.Client[models.ListIndexStatesRequest, models.ListIndexStatesResponse]
+	deleteIndexStates *connect.Client[models.DeleteIndexStatesRequest, models.DeleteIndexStatesResponse]
 }
 
-// CreateIndexRecordsLRO calls weewar.v1.IndexerService.CreateIndexRecordsLRO.
-func (c *indexerServiceClient) CreateIndexRecordsLRO(ctx context.Context, req *connect.Request[models.CreateIndexRecordsLRORequest]) (*connect.Response[models.CreateIndexRecordsLROResponse], error) {
-	return c.createIndexRecordsLRO.CallUnary(ctx, req)
-}
-
-// GetIndexRecordsLRO calls weewar.v1.IndexerService.GetIndexRecordsLRO.
-func (c *indexerServiceClient) GetIndexRecordsLRO(ctx context.Context, req *connect.Request[models.GetIndexRecordsLRORequest]) (*connect.Response[models.GetIndexRecordsLROResponse], error) {
-	return c.getIndexRecordsLRO.CallUnary(ctx, req)
-}
-
-// UpdateIndexRecordsLRO calls weewar.v1.IndexerService.UpdateIndexRecordsLRO.
-func (c *indexerServiceClient) UpdateIndexRecordsLRO(ctx context.Context, req *connect.Request[models.UpdateIndexRecordsLRORequest]) (*connect.Response[models.UpdateIndexRecordsLROResponse], error) {
-	return c.updateIndexRecordsLRO.CallUnary(ctx, req)
+// EnsureIndexState calls weewar.v1.IndexerService.EnsureIndexState.
+func (c *indexerServiceClient) EnsureIndexState(ctx context.Context, req *connect.Request[models.EnsureIndexStateRequest]) (*connect.Response[models.EnsureIndexStateResponse], error) {
+	return c.ensureIndexState.CallUnary(ctx, req)
 }
 
 // GetIndexStates calls weewar.v1.IndexerService.GetIndexStates.
@@ -169,15 +133,9 @@ func (c *indexerServiceClient) DeleteIndexStates(ctx context.Context, req *conne
 type IndexerServiceHandler interface {
 	// *
 	// Create a LRO for indexing records
-	CreateIndexRecordsLRO(context.Context, *connect.Request[models.CreateIndexRecordsLRORequest]) (*connect.Response[models.CreateIndexRecordsLROResponse], error)
+	EnsureIndexState(context.Context, *connect.Request[models.EnsureIndexStateRequest]) (*connect.Response[models.EnsureIndexStateResponse], error)
 	// *
-	// Get the details of a LRO operation
-	GetIndexRecordsLRO(context.Context, *connect.Request[models.GetIndexRecordsLRORequest]) (*connect.Response[models.GetIndexRecordsLROResponse], error)
-	// *
-	// Update an LRO operation - internal usage
-	UpdateIndexRecordsLRO(context.Context, *connect.Request[models.UpdateIndexRecordsLRORequest]) (*connect.Response[models.UpdateIndexRecordsLROResponse], error)
-	// *
-	// Batch get multiple entity index states
+	// Get the index states for a particular entity
 	GetIndexStates(context.Context, *connect.Request[models.GetIndexStatesRequest]) (*connect.Response[models.GetIndexStatesResponse], error)
 	// *
 	// List index entity states by filtering
@@ -192,22 +150,10 @@ type IndexerServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewIndexerServiceHandler(svc IndexerServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	indexerServiceMethods := services.File_weewar_v1_services_indexer_proto.Services().ByName("IndexerService").Methods()
-	indexerServiceCreateIndexRecordsLROHandler := connect.NewUnaryHandler(
-		IndexerServiceCreateIndexRecordsLROProcedure,
-		svc.CreateIndexRecordsLRO,
-		connect.WithSchema(indexerServiceMethods.ByName("CreateIndexRecordsLRO")),
-		connect.WithHandlerOptions(opts...),
-	)
-	indexerServiceGetIndexRecordsLROHandler := connect.NewUnaryHandler(
-		IndexerServiceGetIndexRecordsLROProcedure,
-		svc.GetIndexRecordsLRO,
-		connect.WithSchema(indexerServiceMethods.ByName("GetIndexRecordsLRO")),
-		connect.WithHandlerOptions(opts...),
-	)
-	indexerServiceUpdateIndexRecordsLROHandler := connect.NewUnaryHandler(
-		IndexerServiceUpdateIndexRecordsLROProcedure,
-		svc.UpdateIndexRecordsLRO,
-		connect.WithSchema(indexerServiceMethods.ByName("UpdateIndexRecordsLRO")),
+	indexerServiceEnsureIndexStateHandler := connect.NewUnaryHandler(
+		IndexerServiceEnsureIndexStateProcedure,
+		svc.EnsureIndexState,
+		connect.WithSchema(indexerServiceMethods.ByName("EnsureIndexState")),
 		connect.WithHandlerOptions(opts...),
 	)
 	indexerServiceGetIndexStatesHandler := connect.NewUnaryHandler(
@@ -230,12 +176,8 @@ func NewIndexerServiceHandler(svc IndexerServiceHandler, opts ...connect.Handler
 	)
 	return "/weewar.v1.IndexerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case IndexerServiceCreateIndexRecordsLROProcedure:
-			indexerServiceCreateIndexRecordsLROHandler.ServeHTTP(w, r)
-		case IndexerServiceGetIndexRecordsLROProcedure:
-			indexerServiceGetIndexRecordsLROHandler.ServeHTTP(w, r)
-		case IndexerServiceUpdateIndexRecordsLROProcedure:
-			indexerServiceUpdateIndexRecordsLROHandler.ServeHTTP(w, r)
+		case IndexerServiceEnsureIndexStateProcedure:
+			indexerServiceEnsureIndexStateHandler.ServeHTTP(w, r)
 		case IndexerServiceGetIndexStatesProcedure:
 			indexerServiceGetIndexStatesHandler.ServeHTTP(w, r)
 		case IndexerServiceListIndexStatesProcedure:
@@ -251,16 +193,8 @@ func NewIndexerServiceHandler(svc IndexerServiceHandler, opts ...connect.Handler
 // UnimplementedIndexerServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedIndexerServiceHandler struct{}
 
-func (UnimplementedIndexerServiceHandler) CreateIndexRecordsLRO(context.Context, *connect.Request[models.CreateIndexRecordsLRORequest]) (*connect.Response[models.CreateIndexRecordsLROResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.IndexerService.CreateIndexRecordsLRO is not implemented"))
-}
-
-func (UnimplementedIndexerServiceHandler) GetIndexRecordsLRO(context.Context, *connect.Request[models.GetIndexRecordsLRORequest]) (*connect.Response[models.GetIndexRecordsLROResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.IndexerService.GetIndexRecordsLRO is not implemented"))
-}
-
-func (UnimplementedIndexerServiceHandler) UpdateIndexRecordsLRO(context.Context, *connect.Request[models.UpdateIndexRecordsLRORequest]) (*connect.Response[models.UpdateIndexRecordsLROResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.IndexerService.UpdateIndexRecordsLRO is not implemented"))
+func (UnimplementedIndexerServiceHandler) EnsureIndexState(context.Context, *connect.Request[models.EnsureIndexStateRequest]) (*connect.Response[models.EnsureIndexStateResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.IndexerService.EnsureIndexState is not implemented"))
 }
 
 func (UnimplementedIndexerServiceHandler) GetIndexStates(context.Context, *connect.Request[models.GetIndexStatesRequest]) (*connect.Response[models.GetIndexStatesResponse], error) {

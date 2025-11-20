@@ -81,21 +81,18 @@ func (s *BaseGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMove
 	// state has not changed and neither has the Runtime Game object.  Both the
 	// GameState and the Runtime Game are checkpointed at before the moves started
 	var dmp MoveProcessor
-	results, err := dmp.ProcessMoves(rtGame, req.Moves)
+	err = dmp.ProcessMoves(rtGame, req.Moves)
 	if err != nil {
 		return nil, err
 	}
-	resp = &v1.ProcessMovesResponse{
-		MoveResults: results,
-	}
+	resp = &v1.ProcessMovesResponse{Moves: req.Moves}
 
 	// Create a new move group to track this batch of processed moves
 	startTime := time.Now()
 	moveGroup := &v1.GameMoveGroup{
-		StartedAt:   timestamppb.New(startTime),
-		EndedAt:     timestamppb.New(startTime), // TODO: Set proper end time after processing
-		Moves:       req.Moves,
-		MoveResults: results,
+		StartedAt: timestamppb.New(startTime),
+		EndedAt:   timestamppb.New(startTime), // TODO: Set proper end time after processing
+		Moves:     req.Moves,
 	}
 
 	// Add the move group to history
@@ -106,7 +103,7 @@ func (s *BaseGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMove
 	// It is upto the storage to see how the runtime game is also updated.  For example
 	// a storage that persists the gameState may just not do anythign and let it be
 	// reconstructed on the next load
-	s.ApplyChangeResults(results, rtGame, gameresp.Game, gameresp.State, gameresp.History)
+	s.ApplyChangeResults(req.Moves, rtGame, gameresp.Game, gameresp.State, gameresp.History)
 
 	// Update the end time after processing is complete
 	moveGroup.EndedAt = timestamppb.New(time.Now())
@@ -327,7 +324,7 @@ func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsA
 	}, nil
 }
 
-func (b *BaseGamesService) ApplyChangeResults(changes []*v1.GameMoveResult, rtGame *Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
+func (b *BaseGamesService) ApplyChangeResults(changes []*v1.GameMove, rtGame *Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
 
 	// TRANSACTIONAL FIX: Temporary rollback to original world for ordered application
 	if parent := rtGame.World.Pop(); parent != nil {

@@ -51,14 +51,12 @@ func copyUnit(unit *v1.Unit) *v1.Unit {
 }
 
 // Process a set of moves in a transaction and returns a "log entry" of the changes as a result
-func (m *MoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (results []*v1.GameMoveResult, err error) {
-	results = []*v1.GameMoveResult{}
+func (m *MoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (err error) {
 	for _, move := range moves {
-		result, err := m.ProcessMove(game, move)
+		err := m.ProcessMove(game, move)
 		if err != nil {
-			return results, err
+			return err
 		}
-		results = append(results, result)
 	}
 	return
 }
@@ -73,10 +71,13 @@ func (m *MoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (results 
 // For example we may have 3 moves where first two units are moved to a common location
 // and then they attack another unit.  Here If we treat it as a single unit attacking it
 // will have different outcomes than a "combined" attack.
-func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (results *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (err error) {
 	if move.MoveType == nil {
-		return nil, fmt.Errorf("move type is nil")
+		return fmt.Errorf("move type is nil")
 	}
+	move.IsPermanent = false
+	move.SequenceNum = 0 // TODO: Set proper sequence number
+	move.Changes = []*v1.WorldChange{}
 
 	switch a := move.MoveType.(type) {
 	case *v1.GameMove_MoveUnit:
@@ -88,38 +89,34 @@ func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (results *v1.
 	case *v1.GameMove_EndTurn:
 		return m.ProcessEndTurn(game, move, a.EndTurn)
 	default:
-		return nil, fmt.Errorf("unknown move type: %T", move.MoveType)
+		return fmt.Errorf("unknown move type: %T", move.MoveType)
 	}
 }
 
 // BuildUnit creates a new unit at the specified tile
-func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.BuildUnitAction) (result *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.BuildUnitAction) (err error) {
 	// Initialize the result object
-	result = &v1.GameMoveResult{
-		IsPermanent: true, // Builds are permanent
-		SequenceNum: 0,    // TODO: Set proper sequence number
-		Changes:     []*v1.WorldChange{},
-	}
+	move.IsPermanent = true // Builds are permanent
 
 	coord := CoordFromInt32(action.Q, action.R)
 	tile := g.World.TileAt(coord)
 	if tile == nil {
-		return nil, fmt.Errorf("no tile at position %v", coord)
+		return fmt.Errorf("no tile at position %v", coord)
 	}
 
 	// Check if tile belongs to the current player
 	if tile.Player != g.CurrentPlayer {
-		return nil, fmt.Errorf("tile at %v does not belong to player %d", coord, g.CurrentPlayer)
+		return fmt.Errorf("tile at %v does not belong to player %d", coord, g.CurrentPlayer)
 	}
 
 	// Check if tile can build (must be a building that can produce units)
 	terrainData, err := g.RulesEngine.GetTerrainData(tile.TileType)
 	if err != nil || terrainData == nil {
-		return nil, fmt.Errorf("terrain data not found for tile type %d", tile.TileType)
+		return fmt.Errorf("terrain data not found for tile type %d", tile.TileType)
 	}
 
 	if len(terrainData.BuildableUnitIds) == 0 {
-		return nil, fmt.Errorf("tile at %v cannot build units", coord)
+		return fmt.Errorf("tile at %v cannot build units", coord)
 	}
 
 	// Check if the requested unit type can be built at this tile
@@ -131,24 +128,24 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 		}
 	}
 	if !canBuild {
-		return nil, fmt.Errorf("tile at %v cannot build unit type %d", coord, action.UnitType)
+		return fmt.Errorf("tile at %v cannot build unit type %d", coord, action.UnitType)
 	}
 
 	// Check if tile has already built this turn (one build per turn per tile)
 	if tile.LastActedTurn == g.TurnCounter {
-		return nil, fmt.Errorf("tile at %v has already built a unit this turn", coord)
+		return fmt.Errorf("tile at %v has already built a unit this turn", coord)
 	}
 
 	// Check if there's already a unit at this position
 	existingUnit := g.World.UnitAt(coord)
 	if existingUnit != nil {
-		return nil, fmt.Errorf("cannot build unit at %v: position already occupied by unit %s", coord, existingUnit.Shortcut)
+		return fmt.Errorf("cannot build unit at %v: position already occupied by unit %s", coord, existingUnit.Shortcut)
 	}
 
 	// Get unit definition for cost validation
 	unitData, err := g.RulesEngine.GetUnitData(action.UnitType)
 	if err != nil || unitData == nil {
-		return nil, fmt.Errorf("unit data not found for unit type %d", action.UnitType)
+		return fmt.Errorf("unit data not found for unit type %d", action.UnitType)
 	}
 
 	// Check if player has enough coins
@@ -161,7 +158,7 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 	}
 
 	if playerCoins < unitData.Coins {
-		return nil, fmt.Errorf("insufficient coins: need %d, have %d", unitData.Coins, playerCoins)
+		return fmt.Errorf("insufficient coins: need %d, have %d", unitData.Coins, playerCoins)
 	}
 
 	// Deduct coins from player
@@ -210,7 +207,7 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 			},
 		},
 	}
-	result.Changes = append(result.Changes, buildChange)
+	move.Changes = append(move.Changes, buildChange)
 
 	// Record the coin deduction
 	coinsChange := &v1.WorldChange{
@@ -223,22 +220,15 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 			},
 		},
 	}
-	result.Changes = append(result.Changes, coinsChange)
+	move.Changes = append(move.Changes, coinsChange)
 
-	return result, nil
+	return nil
 }
 
 // EndTurn advances to next player's turn
 // For now a player can just end turn but in other games there may be some mandatory
 // moves left
-func (m *MoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.EndTurnAction) (results *v1.GameMoveResult, err error) {
-	// Initialize the result object
-	results = &v1.GameMoveResult{
-		IsPermanent: false,
-		SequenceNum: 0, // TODO: Set proper sequence number
-		Changes:     []*v1.WorldChange{},
-	}
-
+func (m *MoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.EndTurnAction) (err error) {
 	// Store previous state for GameLog
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	previousPlayer := g.CurrentPlayer
@@ -290,7 +280,7 @@ func (m *MoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.En
 				},
 			},
 		}
-		results.Changes = append(results.Changes, coinsChange)
+		move.Changes = append(move.Changes, coinsChange)
 	}
 
 	// Capture the reset units AFTER reset (with refreshed movement points)
@@ -341,7 +331,7 @@ func (m *MoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.En
 		},
 	}
 
-	results.Changes = append(results.Changes, change)
+	move.Changes = append(move.Changes, change)
 
 	return
 }
@@ -370,45 +360,40 @@ func (g *Game) IsValidMove(from, to AxialCoord) bool {
 }
 
 // MoveUnit executes unit movement using cube coordinates
-func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction) (result *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction) (err error) {
 	// Initialize the result object
-	result = &v1.GameMoveResult{
-		IsPermanent: false,
-		SequenceNum: 0, // TODO: Set proper sequence number
-		Changes:     []*v1.WorldChange{},
-	}
 
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	from := CoordFromInt32(action.FromQ, action.FromR)
 	to := CoordFromInt32(action.ToQ, action.ToR)
 	unit := g.World.UnitAt(from)
 	if unit == nil {
-		return nil, fmt.Errorf("unit is nil")
+		return fmt.Errorf("unit is nil")
 	}
 
 	// Apply lazy top-up pattern - ensure unit has current turn's movement points
 	if err := g.TopUpUnitIfNeeded(unit); err != nil {
-		return nil, fmt.Errorf("failed to top-up unit: %w", err)
+		return fmt.Errorf("failed to top-up unit: %w", err)
 	}
 
 	// Check if it's the correct player's turn
 	if unit.Player != g.CurrentPlayer {
-		return nil, fmt.Errorf("not player %d's turn", unit.Player)
+		return fmt.Errorf("not player %d's turn", unit.Player)
 	}
 
 	// Check if move is valid
 	if !g.CanMoveUnit(unit, to) {
 		unitCoord := UnitGetCoord(unit)
-		return nil, fmt.Errorf("invalid move from %v to %v", unitCoord, to)
+		return fmt.Errorf("invalid move from %v to %v", unitCoord, to)
 	}
 
 	// Get movement cost using RulesEngine
 	cost, err := g.RulesEngine.GetMovementCost(g.World, unit, to)
 	if err != nil {
-		return nil, fmt.Errorf("failed to calculate movement cost: %w", err)
+		return fmt.Errorf("failed to calculate movement cost: %w", err)
 	}
 	if cost > unit.DistanceLeft {
-		return nil, fmt.Errorf("insufficient movement points: need %f, have %f", cost, unit.DistanceLeft)
+		return fmt.Errorf("insufficient movement points: need %f, have %f", cost, unit.DistanceLeft)
 	}
 
 	// Capture unit state before move
@@ -417,13 +402,13 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	// Move unit using World unit management
 	err = g.World.MoveUnit(unit, to)
 	if err != nil {
-		return nil, fmt.Errorf("failed to move unit: %w", err)
+		return fmt.Errorf("failed to move unit: %w", err)
 	}
 
 	// Get the moved unit from the world (handles copy-on-write correctly)
 	movedUnit := g.World.UnitAt(to)
 	if movedUnit == nil {
-		return nil, fmt.Errorf("moved unit not found at destination %v", to)
+		return fmt.Errorf("moved unit not found at destination %v", to)
 	}
 
 	// Update unit stats on the moved unit
@@ -453,42 +438,38 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 		},
 	}
 
-	result.Changes = append(result.Changes, change)
-	return result, nil
+	move.Changes = append(move.Changes, change)
+	return nil
 }
 
 // AttackUnit executes combat between units
-func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1.AttackUnitAction) (result *v1.GameMoveResult, err error) {
+func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1.AttackUnitAction) (err error) {
 	// Initialize the result object
-	result = &v1.GameMoveResult{
-		IsPermanent: true, // Attacks are permanent (cannot be undone)
-		SequenceNum: 0,    // TODO: Set proper sequence number
-		Changes:     []*v1.WorldChange{},
-	}
+	move.IsPermanent = true // Attacks are permanent (cannot be undone)
 
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	attacker := g.World.UnitAt(CoordFromInt32(action.AttackerQ, action.AttackerR))
 	defender := g.World.UnitAt(CoordFromInt32(action.DefenderQ, action.DefenderR))
 	if attacker == nil || defender == nil {
-		return nil, fmt.Errorf("attacker or defender is nil")
+		return fmt.Errorf("attacker or defender is nil")
 	}
 
 	// Apply lazy top-up pattern for both units
 	if err := g.TopUpUnitIfNeeded(attacker); err != nil {
-		return nil, fmt.Errorf("failed to top-up attacker: %w", err)
+		return fmt.Errorf("failed to top-up attacker: %w", err)
 	}
 	if err := g.TopUpUnitIfNeeded(defender); err != nil {
-		return nil, fmt.Errorf("failed to top-up defender: %w", err)
+		return fmt.Errorf("failed to top-up defender: %w", err)
 	}
 
 	// Check if it's the correct player's turn
 	if attacker.Player != g.CurrentPlayer {
-		return nil, fmt.Errorf("not player %d's turn", attacker.Player)
+		return fmt.Errorf("not player %d's turn", attacker.Player)
 	}
 
 	// Check if units can attack each other
 	if !g.CanAttackUnit(attacker, defender) {
-		return nil, fmt.Errorf("attacker cannot attack defender")
+		return fmt.Errorf("attacker cannot attack defender")
 	}
 
 	// Store original health for world changes
@@ -516,7 +497,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 	// Calculate damage using formula-based system
 	defenderDamage, err := g.RulesEngine.SimulateCombatDamage(attackerCtx, g.rng)
 	if err != nil {
-		return nil, fmt.Errorf("failed to calculate combat damage: %w", err)
+		return fmt.Errorf("failed to calculate combat damage: %w", err)
 	}
 
 	// Check if defender can counter-attack
@@ -606,7 +587,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 				},
 			},
 		}
-		result.Changes = append(result.Changes, change)
+		move.Changes = append(move.Changes, change)
 	}
 
 	if attackerDamage > 0 {
@@ -625,7 +606,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 				},
 			},
 		}
-		result.Changes = append(result.Changes, change)
+		move.Changes = append(move.Changes, change)
 	}
 
 	// Add kill changes if units were killed
@@ -641,7 +622,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 				},
 			},
 		}
-		result.Changes = append(result.Changes, change)
+		move.Changes = append(move.Changes, change)
 		g.World.RemoveUnit(defender)
 	}
 
@@ -657,7 +638,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 				},
 			},
 		}
-		result.Changes = append(result.Changes, change)
+		move.Changes = append(move.Changes, change)
 		g.World.RemoveUnit(attacker)
 	}
 
@@ -714,7 +695,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 							},
 						},
 					}
-					result.Changes = append(result.Changes, change)
+					move.Changes = append(move.Changes, change)
 
 					// Add kill change if unit was killed by splash
 					if targetKilled {
@@ -725,7 +706,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 								},
 							},
 						}
-						result.Changes = append(result.Changes, killChange)
+						move.Changes = append(move.Changes, killChange)
 						g.World.RemoveUnit(target.Unit)
 					}
 				}
@@ -736,7 +717,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 	// Update timestamp
 	g.GameState.UpdatedAt = tspb.New(time.Now())
 
-	return result, nil
+	return nil
 }
 
 // CanMoveUnit validates potential movement using Dijkstra-based pathfinding

@@ -146,7 +146,7 @@ export class GameState {
 
         // Extract world changes from move results (each move result contains its own changes)
         const worldChanges: WorldChange[] = [];
-        for (const moveResult of response.moveResults || []) {
+        for (const moveResult of response.moves || []) {
             worldChanges.push(...(moveResult.changes || []));
         }
 

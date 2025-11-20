@@ -501,7 +501,7 @@ func (s *GameViewPresenter) executeMovementAction(ctx context.Context, game *v1.
 	fmt.Println("[Presenter] Move executed successfully")
 
 	// Apply other incremental updates (skip UnitMoved animations since we handled above)
-	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults, gameMove)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.Moves, gameMove)
 
 	return nil
 }
@@ -522,7 +522,7 @@ func (s *GameViewPresenter) executeBuildAction(ctx context.Context, game *v1.Gam
 	s.BuildOptionsModal.Hide(ctx)
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults, gameMove)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.Moves, gameMove)
 }
 
 func (s *GameViewPresenter) executeEndTurnAction(ctx context.Context, game *v1.Game, gameState *v1.GameState) {
@@ -549,11 +549,11 @@ func (s *GameViewPresenter) executeEndTurnAction(ctx context.Context, game *v1.G
 	fmt.Printf("[Presenter] Turn ended, new current player: %d\n", gameState.CurrentPlayer)
 
 	// Apply incremental updates from the move results
-	s.applyIncrementalChanges(ctx, game, gameState, resp.MoveResults, gameMove)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.Moves, gameMove)
 }
 
 // applyIncrementalChanges processes WorldChange objects and calls incremental browser update methods
-func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v1.Game, gameState *v1.GameState, moveResults []*v1.GameMoveResult, gameMove *v1.GameMove) {
+func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v1.Game, gameState *v1.GameState, moveResults []*v1.GameMove, gameMove *v1.GameMove) {
 	// Clear selection and highlights
 	s.clearHighlightsAndSelection(ctx)
 	s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)

@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file weewar/v1/gorm/models.proto.
  */
 export const file_weewar_v1_gorm_models: GenFile = /*@__PURE__*/
-  fileDesc("Cht3ZWV3YXIvdjEvZ29ybS9tb2RlbHMucHJvdG8SCXdlZXdhci52MSIqCg1JbmRleEluZm9HT1JNOhnKph0VChN3ZWV3YXIudjEuSW5kZXhJbmZvIiAKCFRpbGVHT1JNOhTKph0QCg53ZWV3YXIudjEuVGlsZSIgCghVbml0R09STToUyqYdEAoOd2Vld2FyLnYxLlVuaXQiMAoQQXR0YWNrUmVjb3JkR09STTocyqYdGAoWd2Vld2FyLnYxLkF0dGFja1JlY29yZCIqCglXb3JsZEdPUk06HcqmHRkKD3dlZXdhci52MS5Xb3JsZBIGd29ybGRzIjYKDVdvcmxkRGF0YUdPUk06JcqmHSEKE3dlZXdhci52MS5Xb3JsZERhdGESCndvcmxkX2RhdGEiJwoIR2FtZUdPUk06G8qmHRcKDndlZXdhci52MS5HYW1lEgVnYW1lcyI6ChVHYW1lQ29uZmlndXJhdGlvbkdPUk06IcqmHR0KG3dlZXdhci52MS5HYW1lQ29uZmlndXJhdGlvbiIwChBJbmNvbWVDb25maWdHT1JNOhzKph0YChZ3ZWV3YXIudjEuSW5jb21lQ29uZmlnIiwKDkdhbWVQbGF5ZXJHT1JNOhrKph0WChR3ZWV3YXIudjEuR2FtZVBsYXllciIoCgxHYW1lVGVhbUdPUk06GMqmHRQKEndlZXdhci52MS5HYW1lVGVhbSIwChBHYW1lU2V0dGluZ3NHT1JNOhzKph0YChZ3ZWV3YXIudjEuR2FtZVNldHRpbmdzIioKDUdhbWVTdGF0ZUdPUk06GcqmHRUKE3dlZXdhci52MS5HYW1lU3RhdGUiNgoTR2FtZU1vdmVIaXN0b3J5R09STTofyqYdGwoZd2Vld2FyLnYxLkdhbWVNb3ZlSGlzdG9yeSIyChFHYW1lTW92ZUdyb3VwR09STTodyqYdGQoXd2Vld2FyLnYxLkdhbWVNb3ZlR3JvdXAi3gEKDEdhbWVNb3ZlR09STRInCgltb3ZlX3R5cGUYASABKAsyFC5nb29nbGUucHJvdG9idWYuQW55EhcKCW1vdmVfdW5pdBgEIAEoCEIEuKYdARIZCgthdHRhY2tfdW5pdBgFIAEoCEIEuKYdARIWCghlbmRfdHVybhgGIAEoCEIEuKYdARIYCgpidWlsZF91bml0GAcgASgIQgS4ph0BEiUKB2NoYW5nZXMYAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55OhjKph0UChJ3ZWV3YXIudjEuR2FtZU1vdmVCnQEKDWNvbS53ZWV3YXIudjFCC01vZGVsc1Byb3RvUAFaOmdpdGh1Yi5jb20vdHVybmZvcmdlL3dlZXdhci9nZW4vZ28vd2Vld2FyL3YxL2dvcm07d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxYgZwcm90bzM", [file_dal_v1_annotations, file_weewar_v1_models_models, file_google_protobuf_any]);
+  fileDesc("Cht3ZWV3YXIvdjEvZ29ybS9tb2RlbHMucHJvdG8SCXdlZXdhci52MSIqCg1JbmRleEluZm9HT1JNOhnKph0VChN3ZWV3YXIudjEuSW5kZXhJbmZvIiIKCFRpbGVHT1JNOhbKph0SCg53ZWV3YXIudjEuVGlsZSABIiIKCFVuaXRHT1JNOhbKph0SCg53ZWV3YXIudjEuVW5pdCABIjIKEEF0dGFja1JlY29yZEdPUk06HsqmHRoKFndlZXdhci52MS5BdHRhY2tSZWNvcmQgASKwAwoJV29ybGRHT1JNEhwKAmlkGAEgASgJQhCSph0MUgpwcmltYXJ5S2V5EiMKBHRhZ3MYByADKAlCFZKmHRFSD3NlcmlhbGl6ZXI6anNvbhJGCgp3b3JsZF9kYXRhGAkgASgLMhgud2Vld2FyLnYxLldvcmxkRGF0YUdPUk1CGJKmHRRSEmZvcmVpZ25LZXk6V29ybGRJZBIrCgxwcmV2aWV3X3VybHMYCyADKAlCFZKmHRFSD3NlcmlhbGl6ZXI6anNvbhJpChVzY3JlZW5zaG90X2luZGV4X2luZm8YDSABKAsyGC53ZWV3YXIudjEuSW5kZXhJbmZvR09STUIwkqYdLFIIZW1iZWRkZWRSIGVtYmVkZGVkUHJlZml4OnNjcmVlbnNob3RfaW5kZXhfEmEKEXNlYXJjaF9pbmRleF9pbmZvGA4gASgLMhgud2Vld2FyLnYxLkluZGV4SW5mb0dPUk1CLJKmHShSCGVtYmVkZGVkUhxlbWJlZGRlZFByZWZpeDpzZWFyY2hfaW5kZXhfOh3Kph0ZCg93ZWV3YXIudjEuV29ybGQSBndvcmxkcyLSAQoNV29ybGREYXRhR09STRI5CgV0aWxlcxgBIAMoCzITLndlZXdhci52MS5UaWxlR09STUIVkqYdEVIPc2VyaWFsaXplcjpqc29uEiIKCHdvcmxkX2lkGAIgASgJQhCSph0MUgpwcmltYXJ5S2V5EjkKBXVuaXRzGAMgAygLMhMud2Vld2FyLnYxLlVuaXRHT1JNQhWSph0RUg9zZXJpYWxpemVyOmpzb246J8qmHSMKE3dlZXdhci52MS5Xb3JsZERhdGESCndvcmxkX2RhdGEgASLlAgoIR2FtZUdPUk0SHAoCaWQYASABKAlCEJKmHQxSCnByaW1hcnlLZXkSIwoEdGFncxgHIAMoCUIVkqYdEVIPc2VyaWFsaXplcjpqc29uEisKDHByZXZpZXdfdXJscxgLIAMoCUIVkqYdEVIPc2VyaWFsaXplcjpqc29uEmkKFXNjcmVlbnNob3RfaW5kZXhfaW5mbxgMIAEoCzIYLndlZXdhci52MS5JbmRleEluZm9HT1JNQjCSph0sUghlbWJlZGRlZFIgZW1iZWRkZWRQcmVmaXg6c2NyZWVuc2hvdF9pbmRleF8SYQoRc2VhcmNoX2luZGV4X2luZm8YDSABKAsyGC53ZWV3YXIudjEuSW5kZXhJbmZvR09STUIskqYdKFIIZW1iZWRkZWRSHGVtYmVkZGVkUHJlZml4OnNlYXJjaF9pbmRleF86G8qmHRcKDndlZXdhci52MS5HYW1lEgVnYW1lcyKwAQoVR2FtZUNvbmZpZ3VyYXRpb25HT1JNEkMKDmluY29tZV9jb25maWdzGAMgASgLMhsud2Vld2FyLnYxLkluY29tZUNvbmZpZ0dPUk1CDpKmHQpSCGVtYmVkZGVkEi0KCHNldHRpbmdzGAQgASgLMhsud2Vld2FyLnYxLkdhbWVTZXR0aW5nc0dPUk06I8qmHR8KG3dlZXdhci52MS5HYW1lQ29uZmlndXJhdGlvbiABIjAKEEluY29tZUNvbmZpZ0dPUk06HMqmHRgKFndlZXdhci52MS5JbmNvbWVDb25maWciLgoOR2FtZVBsYXllckdPUk06HMqmHRgKFHdlZXdhci52MS5HYW1lUGxheWVyIAEiKgoMR2FtZVRlYW1HT1JNOhrKph0WChJ3ZWV3YXIudjEuR2FtZVRlYW0gASJeChBHYW1lU2V0dGluZ3NHT1JNEiwKDWFsbG93ZWRfdW5pdHMYASADKAVCFZKmHRFSD3NlcmlhbGl6ZXI6anNvbjocyqYdGAoWd2Vld2FyLnYxLkdhbWVTZXR0aW5ncyJNCg1HYW1lU3RhdGVHT1JNEiEKB2dhbWVfaWQYASABKAlCEJKmHQxSCnByaW1hcnlLZXk6GcqmHRUKE3dlZXdhci52MS5HYW1lU3RhdGUiNgoTR2FtZU1vdmVIaXN0b3J5R09STTofyqYdGwoZd2Vld2FyLnYxLkdhbWVNb3ZlSGlzdG9yeSIyChFHYW1lTW92ZUdyb3VwR09STTodyqYdGQoXd2Vld2FyLnYxLkdhbWVNb3ZlR3JvdXAimAIKDEdhbWVNb3ZlR09STRIhCgdnYW1lX2lkGAEgASgJQhCSph0MUgpwcmltYXJ5S2V5EiYKDGdyb3VwX251bWJlchgCIAEoCUIQkqYdDFIKcHJpbWFyeUtleRIlCgttb3ZlX251bWJlchgDIAEoBUIQkqYdDFIKcHJpbWFyeUtleRI+Cgltb3ZlX3R5cGUYBCABKAsyFC5nb29nbGUucHJvdG9idWYuQW55QhWSph0RUg9zZXJpYWxpemVyOmpzb24SPAoHY2hhbmdlcxgFIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnlCFZKmHRFSD3NlcmlhbGl6ZXI6anNvbjoYyqYdFAoSd2Vld2FyLnYxLkdhbWVNb3ZlQp0BCg1jb20ud2Vld2FyLnYxQgtNb2RlbHNQcm90b1ABWjpnaXRodWIuY29tL3R1cm5mb3JnZS93ZWV3YXIvZ2VuL2dvL3dlZXdhci92MS9nb3JtO3dlZXdhcnYxogIDV1hYqgIJV2Vld2FyLlYxygIJV2Vld2FyXFYx4gIVV2Vld2FyXFYxXEdQQk1ldGFkYXRh6gIKV2Vld2FyOjpWMWIGcHJvdG8z", [file_dal_v1_annotations, file_weewar_v1_models_models, file_google_protobuf_any]);
 
 /**
  * @generated from message weewar.v1.IndexInfoGORM
@@ -72,6 +72,46 @@ export const AttackRecordGORMSchema: GenMessage<AttackRecordGORM> = /*@__PURE__*
  * @generated from message weewar.v1.WorldGORM
  */
 export type WorldGORM = Message<"weewar.v1.WorldGORM"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * Tags as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated string tags = 7;
+   */
+  tags: string[];
+
+  /**
+   * WorldData has-one relationship via foreign key
+   *
+   * @generated from field: weewar.v1.WorldDataGORM world_data = 9;
+   */
+  worldData?: WorldDataGORM;
+
+  /**
+   * PreviewUrls as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated string preview_urls = 11;
+   */
+  previewUrls: string[];
+
+  /**
+   * DefaultGameConfig as JSON for cross-DB compatibility
+   * ScreenshotIndexInfo embedded
+   *
+   * @generated from field: weewar.v1.IndexInfoGORM screenshot_index_info = 13;
+   */
+  screenshotIndexInfo?: IndexInfoGORM;
+
+  /**
+   * SearchIndexInfo embedded
+   *
+   * @generated from field: weewar.v1.IndexInfoGORM search_index_info = 14;
+   */
+  searchIndexInfo?: IndexInfoGORM;
 };
 
 /**
@@ -85,6 +125,24 @@ export const WorldGORMSchema: GenMessage<WorldGORM> = /*@__PURE__*/
  * @generated from message weewar.v1.WorldDataGORM
  */
 export type WorldDataGORM = Message<"weewar.v1.WorldDataGORM"> & {
+  /**
+   * Tiles as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated weewar.v1.TileGORM tiles = 1;
+   */
+  tiles: TileGORM[];
+
+  /**
+   * @generated from field: string world_id = 2;
+   */
+  worldId: string;
+
+  /**
+   * Units as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated weewar.v1.UnitGORM units = 3;
+   */
+  units: UnitGORM[];
 };
 
 /**
@@ -100,6 +158,38 @@ export const WorldDataGORMSchema: GenMessage<WorldDataGORM> = /*@__PURE__*/
  * @generated from message weewar.v1.GameGORM
  */
 export type GameGORM = Message<"weewar.v1.GameGORM"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * Tags as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated string tags = 7;
+   */
+  tags: string[];
+
+  /**
+   * PreviewUrls as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated string preview_urls = 11;
+   */
+  previewUrls: string[];
+
+  /**
+   * ScreenshotIndexInfo embedded
+   *
+   * @generated from field: weewar.v1.IndexInfoGORM screenshot_index_info = 12;
+   */
+  screenshotIndexInfo?: IndexInfoGORM;
+
+  /**
+   * SearchIndexInfo embedded
+   *
+   * @generated from field: weewar.v1.IndexInfoGORM search_index_info = 13;
+   */
+  searchIndexInfo?: IndexInfoGORM;
 };
 
 /**
@@ -113,6 +203,19 @@ export const GameGORMSchema: GenMessage<GameGORM> = /*@__PURE__*/
  * @generated from message weewar.v1.GameConfigurationGORM
  */
 export type GameConfigurationGORM = Message<"weewar.v1.GameConfigurationGORM"> & {
+  /**
+   * IncomeConfigs embedded
+   *
+   * @generated from field: weewar.v1.IncomeConfigGORM income_configs = 3;
+   */
+  incomeConfigs?: IncomeConfigGORM;
+
+  /**
+   * Settings as foreign key relationship
+   *
+   * @generated from field: weewar.v1.GameSettingsGORM settings = 4;
+   */
+  settings?: GameSettingsGORM;
 };
 
 /**
@@ -165,6 +268,12 @@ export const GameTeamGORMSchema: GenMessage<GameTeamGORM> = /*@__PURE__*/
  * @generated from message weewar.v1.GameSettingsGORM
  */
 export type GameSettingsGORM = Message<"weewar.v1.GameSettingsGORM"> & {
+  /**
+   * AllowedUnits as JSON for cross-DB compatibility
+   *
+   * @generated from field: repeated int32 allowed_units = 1;
+   */
+  allowedUnits: number[];
 };
 
 /**
@@ -180,6 +289,10 @@ export const GameSettingsGORMSchema: GenMessage<GameSettingsGORM> = /*@__PURE__*
  * @generated from message weewar.v1.GameStateGORM
  */
 export type GameStateGORM = Message<"weewar.v1.GameStateGORM"> & {
+  /**
+   * @generated from field: string game_id = 1;
+   */
+  gameId: string;
 };
 
 /**
@@ -227,38 +340,32 @@ export const GameMoveGroupGORMSchema: GenMessage<GameMoveGroupGORM> = /*@__PURE_
  */
 export type GameMoveGORM = Message<"weewar.v1.GameMoveGORM"> & {
   /**
-   * Store the oneof move_type as serialized Any
+   * @generated from field: string game_id = 1;
+   */
+  gameId: string;
+
+  /**
+   * @generated from field: string group_number = 2;
+   */
+  groupNumber: string;
+
+  /**
+   * @generated from field: int32 move_number = 3;
+   */
+  moveNumber: number;
+
+  /**
+   * Field named "move_type" matches the oneof name in source
+   * This automatically skips all oneof members (move_unit, attack_unit, end_turn, build_unit)
    *
-   * @generated from field: google.protobuf.Any move_type = 1;
+   * @generated from field: google.protobuf.Any move_type = 4;
    */
   moveType?: Any;
 
   /**
-   * Skip the individual oneof fields from the source (field names, not oneof name!)
-   *
-   * @generated from field: bool move_unit = 4;
+   * @generated from field: repeated google.protobuf.Any changes = 5;
    */
-  moveUnit: boolean;
-
-  /**
-   * @generated from field: bool attack_unit = 5;
-   */
-  attackUnit: boolean;
-
-  /**
-   * @generated from field: bool end_turn = 6;
-   */
-  endTurn: boolean;
-
-  /**
-   * @generated from field: bool build_unit = 7;
-   */
-  buildUnit: boolean;
-
-  /**
-   * @generated from field: google.protobuf.Any changes = 2;
-   */
-  changes?: Any;
+  changes: Any[];
 };
 
 /**

@@ -41,11 +41,28 @@ export interface AttackRecordGORM {
 
 
 export interface WorldGORM {
+  id: string;
+  /** Tags as JSON for cross-DB compatibility */
+  tags: string[];
+  /** WorldData has-one relationship via foreign key */
+  worldData?: WorldDataGORM;
+  /** PreviewUrls as JSON for cross-DB compatibility */
+  previewUrls: string[];
+  /** DefaultGameConfig as JSON for cross-DB compatibility
+ ScreenshotIndexInfo embedded */
+  screenshotIndexInfo?: IndexInfoGORM;
+  /** SearchIndexInfo embedded */
+  searchIndexInfo?: IndexInfoGORM;
 }
 
 
 
 export interface WorldDataGORM {
+  /** Tiles as JSON for cross-DB compatibility */
+  tiles?: TileGORM[];
+  worldId: string;
+  /** Units as JSON for cross-DB compatibility */
+  units?: UnitGORM[];
 }
 
 
@@ -53,11 +70,24 @@ export interface WorldDataGORM {
  * Describes a game and its metadata
  */
 export interface GameGORM {
+  id: string;
+  /** Tags as JSON for cross-DB compatibility */
+  tags: string[];
+  /** PreviewUrls as JSON for cross-DB compatibility */
+  previewUrls: string[];
+  /** ScreenshotIndexInfo embedded */
+  screenshotIndexInfo?: IndexInfoGORM;
+  /** SearchIndexInfo embedded */
+  searchIndexInfo?: IndexInfoGORM;
 }
 
 
 
 export interface GameConfigurationGORM {
+  /** IncomeConfigs embedded */
+  incomeConfigs?: IncomeConfigGORM;
+  /** Settings as foreign key relationship */
+  settings?: GameSettingsGORM;
 }
 
 
@@ -78,6 +108,8 @@ export interface GameTeamGORM {
 
 
 export interface GameSettingsGORM {
+  /** AllowedUnits as JSON for cross-DB compatibility */
+  allowedUnits: number[];
 }
 
 
@@ -85,6 +117,7 @@ export interface GameSettingsGORM {
  * Holds the game's Active/Current state (eg world state)
  */
 export interface GameStateGORM {
+  gameId: string;
 }
 
 
@@ -107,13 +140,12 @@ export interface GameMoveGroupGORM {
  Represents a single move which can be one of many actions in the game
  */
 export interface GameMoveGORM {
-  /** Store the oneof move_type as serialized Any */
+  gameId: string;
+  groupNumber: string;
+  moveNumber: number;
+  /** Field named "move_type" matches the oneof name in source
+ This automatically skips all oneof members (move_unit, attack_unit, end_turn, build_unit) */
   moveType?: Any;
-  /** Skip the individual oneof fields from the source (field names, not oneof name!) */
-  moveUnit: boolean;
-  attackUnit: boolean;
-  endTurn: boolean;
-  buildUnit: boolean;
-  changes?: Any;
+  changes?: Any[];
 }
 

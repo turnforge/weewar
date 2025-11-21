@@ -5,37 +5,80 @@ package gormbe
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/turnforge/turnengine/engine/storage"
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	v1gorm "github.com/turnforge/weewar/gen/gorm"
+	v1dal "github.com/turnforge/weewar/gen/gorm/dal"
 	"github.com/turnforge/weewar/services"
-	tspb "google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
 // WorldsService implements the WorldsService gRPC interface
 type WorldsService struct {
 	services.BaseWorldsService
-	storage     *gorm.DB
-	MaxPageSize int
+	storage      *gorm.DB
+	MaxPageSize  int
+	WorldDAL     v1dal.WorldGORMDAL
+	WorldDataDAL v1dal.WorldDataGORMDAL
 }
 
 // NewWorldsService creates a new WorldsService implementation
 func NewWorldsService(db *gorm.DB) *WorldsService {
 	// db.AutoMigrate(&v1gorm.IndexRecordsLROGORM{})
-	db.AutoMigrate(&v1gorm.IndexStateGORM{})
+	db.AutoMigrate(&v1gorm.WorldGORM{})
+	db.AutoMigrate(&v1gorm.WorldDataGORM{})
 
 	service := &WorldsService{
 		storage:     db,
 		MaxPageSize: 1000,
 	}
+	service.WorldDAL.WillCreate = func(ctx context.Context, world *v1gorm.WorldGORM) error {
+		world.UpdatedAt = time.Now()
+		world.CreatedAt = time.Now()
+		return nil
+	}
 	service.Self = service
 
 	return service
+}
+
+// CreateWorld creates a new world
+func (s *WorldsService) CreateWorld(ctx context.Context, req *v1.CreateWorldRequest) (resp *v1.CreateWorldResponse, err error) {
+	resp = &v1.CreateWorldResponse{}
+	if req.World == nil {
+		return nil, fmt.Errorf("world data is required")
+	}
+	ctx, span := Tracer.Start(ctx, "CreateWorld")
+	defer span.End()
+
+	worldGorm, err := v1gorm.WorldToWorldGORM(req.World, nil, nil)
+	if err != nil {
+		return
+	}
+	worldGorm.Id = NewID(s.storage, "worlds")
+	if err = s.WorldDAL.Save(ctx, s.storage, worldGorm); err != nil {
+		return
+	}
+	resp.World, err = v1gorm.WorldFromWorldGORM(nil, worldGorm, nil)
+
+	// see if we have world data too
+	worldDataGorm, err := v1gorm.WorldDataToWorldDataGORM(req.WorldData, nil, nil)
+	if err != nil {
+		return
+	}
+	worldDataGorm.WorldId = worldGorm.Id
+	if err = s.WorldDataDAL.Save(ctx, s.storage, worldDataGorm); err != nil {
+		return
+	}
+	resp.WorldData, err = v1gorm.WorldDataFromWorldDataGORM(nil, worldDataGorm, nil)
+	if err == nil {
+		go VerifyID(s.storage, "worlds", worldGorm.Id)
+	}
+	return
 }
 
 // ListWorlds returns all available worlds (metadata only for performance)
@@ -43,20 +86,21 @@ func (s *WorldsService) ListWorlds(ctx context.Context, req *v1.ListWorldsReques
 	ctx, span := Tracer.Start(ctx, "ListWorlds")
 	defer span.End()
 
-	var out []*v1gorm.WorldGORM
-	query := s.storage.Order("name asc")
+	// Step 0: Preamble + Auth + Validate request
+
 	resp = &v1.ListWorldsResponse{
 		Pagination: &v1.PaginationResponse{
 			HasMore:      false,
 			TotalResults: 0,
 		},
 	}
-	err = query.Find(&out).Error
-	if err == nil {
-		log.Println("Error listing worlds: ", err)
+	gormWorlds, err := s.WorldDAL.List(ctx, s.storage.Order("name asc"))
+	if err != nil {
 		return
 	}
-	for _, input := range out {
+
+	// Step 3: Convert query results to proto results
+	for _, input := range gormWorlds {
 		output, err := v1gorm.WorldFromWorldGORM(nil, input, nil)
 		if err == nil {
 			// Populate screenshot URLs for all worlds
@@ -79,29 +123,32 @@ func (s *WorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest) (
 		return nil, fmt.Errorf("world ID is required")
 	}
 
-	world, err := storage.LoadFSArtifact[*v1.World](s.storage, req.Id, "metadata")
+	// Step 0: Preamble + Auth + Validate request
+	resp = &v1.GetWorldResponse{}
+	ctx, span := Tracer.Start(ctx, "GetWorld")
+	defer span.End()
+
+	// Step 1: Build query for world
+	// Step 2: Execute query for world
+	world, worldData, err := s.getWorldAndData(ctx, req.Id)
 	if err != nil {
-		return nil, fmt.Errorf("world metadata not found: %w", err)
+		return
 	}
 
+	// Step 3: Convert query results to proto results
 	// Populate screenshot URL if not set
 	if len(world.PreviewUrls) == 0 {
 		world.PreviewUrls = []string{fmt.Sprintf("/worlds/%s/screenshots/default", world.Id)}
 	}
-
-	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.Id, "data")
+	resp.World, err = v1gorm.WorldFromWorldGORM(nil, world, nil)
 	if err != nil {
-		return nil, fmt.Errorf("world data not found: %w", err)
+		return
 	}
-
-	world.WorldData = worldData
-
-	resp = &v1.GetWorldResponse{
-		World:     world,
-		WorldData: worldData,
+	resp.WorldData, err = v1gorm.WorldDataFromWorldDataGORM(nil, worldData, nil)
+	if err != nil {
+		return
 	}
-
-	return resp, nil
+	return
 }
 
 // UpdateWorld updates an existing world
@@ -109,11 +156,15 @@ func (s *WorldsService) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequ
 	if req.World == nil || req.World.Id == "" {
 		return nil, fmt.Errorf("world ID is required")
 	}
+	resp = &v1.UpdateWorldResponse{}
+	ctx, span := Tracer.Start(ctx, "UpdateWorld")
+	defer span.End()
 
-	// Load existing metadata
-	world, err := storage.LoadFSArtifact[*v1.World](s.storage, req.World.Id, "metadata")
+	// Step 1: Build query for world
+	// Step 2: Execute query for world
+	world, worldData, err := s.getWorldAndData(ctx, req.World.Id)
 	if err != nil {
-		return nil, fmt.Errorf("world not found: %w", err)
+		return
 	}
 
 	// Update metadata fields
@@ -129,78 +180,54 @@ func (s *WorldsService) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequ
 	if req.World.Difficulty != "" {
 		world.Difficulty = req.World.Difficulty
 	}
-	world.UpdatedAt = tspb.New(time.Now())
+	world.UpdatedAt = time.Now()
 
-	if err := s.storage.SaveArtifact(req.World.Id, "metadata", world); err != nil {
-		return nil, fmt.Errorf("failed to update world metadata: %w", err)
-	}
-
-	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.World.Id, "data")
+	err = s.WorldDAL.Save(ctx, s.storage, world)
 	if err != nil {
-		return nil, fmt.Errorf("world not found: %w", err)
+		return
 	}
 
 	// Update world data if provided
-	var updated bool
+	worldDataSaved := false
 	if req.ClearWorld {
-		updated = true
 		req.WorldData = &v1.WorldData{}
+		worldData = &v1gorm.WorldDataGORM{}
+		worldDataSaved = true
 	} else if req.WorldData != nil {
-		updated = true
-		if req.WorldData.Tiles != nil {
-			worldData.Tiles = req.WorldData.Tiles
+		worldDataSaved = true
+		protoWorldData, err := v1gorm.WorldDataFromWorldDataGORM(nil, worldData, nil)
+		if err != nil {
+			return resp, err
 		}
-		if req.WorldData.Units != nil {
-			worldData.Units = req.WorldData.Units
+		if req.WorldData.Tiles == nil {
+			req.WorldData.Tiles = protoWorldData.Tiles
 		}
+		if req.WorldData.Units == nil {
+			req.WorldData.Units = protoWorldData.Units
+		}
+		worldData, err = v1gorm.WorldDataToWorldDataGORM(protoWorldData, nil, nil)
 	}
 
-	if updated {
-		err = s.storage.SaveArtifact(req.World.Id, "data", req.WorldData)
+	if err == nil && worldDataSaved {
+		err = s.WorldDataDAL.Save(ctx, s.storage, worldData)
+		resp.World, err = v1gorm.WorldFromWorldGORM(nil, world, nil)
+		resp.WorldData, err = v1gorm.WorldDataFromWorldDataGORM(nil, worldData, nil)
 	}
 	return resp, err
 }
 
 // DeleteWorld deletes a world
 func (s *WorldsService) DeleteWorld(ctx context.Context, req *v1.DeleteWorldRequest) (resp *v1.DeleteWorldResponse, err error) {
-	if req.Id == "" {
-		return nil, fmt.Errorf("world ID is required")
-	}
-	err = s.storage.DeleteEntity(req.Id)
-
+	err = s.WorldDAL.Delete(ctx, s.storage, req.Id)
+	err = errors.Join(err, s.WorldDataDAL.Delete(ctx, s.storage, req.Id))
 	resp = &v1.DeleteWorldResponse{}
 	return resp, err
 }
 
-// CreateWorld creates a new world
-func (s *WorldsService) CreateWorld(ctx context.Context, req *v1.CreateWorldRequest) (resp *v1.CreateWorldResponse, err error) {
-	if req.World == nil {
-		return nil, fmt.Errorf("world data is required")
+func (s *WorldsService) getWorldAndData(ctx context.Context, worldId string) (world *v1gorm.WorldGORM, worldData *v1gorm.WorldDataGORM, err error) {
+	world, err = s.WorldDAL.Get(ctx, s.storage, worldId)
+	if err == nil {
+		worldData, err = s.WorldDataDAL.Get(ctx, s.storage, worldId)
 	}
-
-	worldId, err := s.storage.CreateEntity(req.World.Id)
-	if err != nil {
-		return resp, err
-	}
-	req.World.Id = worldId
-
-	now := time.Now()
-	req.World.CreatedAt = tspb.New(now)
-	req.World.UpdatedAt = tspb.New(now)
-
-	if err := s.storage.SaveArtifact(req.World.Id, "metadata", req.World); err != nil {
-		return nil, fmt.Errorf("failed to create world: %w", err)
-	}
-
-	// Create world data with tiles and units from request
-	if err := s.storage.SaveArtifact(worldId, "data", req.WorldData); err != nil {
-		log.Printf("Failed to create data.json for world %s: %v", worldId, err)
-	}
-
-	resp = &v1.CreateWorldResponse{
-		World:     req.World,
-		WorldData: req.WorldData,
-	}
-
-	return resp, nil
+	return
 }

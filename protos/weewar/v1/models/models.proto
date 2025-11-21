@@ -1,11 +1,7 @@
-// protos/apptemplate/v1/models.proto
-
 syntax = "proto3";
 
 package weewar.v1;
-
 import "google/protobuf/timestamp.proto";
-//import "turnengine/v1/coordinator.proto";
 option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1";
 
 message IndexInfo {

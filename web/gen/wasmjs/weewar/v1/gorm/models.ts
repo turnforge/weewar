@@ -96,6 +96,18 @@ export class WorldGORM implements WorldGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.WorldGORM";
   readonly __MESSAGE_TYPE = WorldGORM.MESSAGE_TYPE;
 
+  id: string = "";
+  /** Tags as JSON for cross-DB compatibility */
+  tags: string[] = [];
+  /** WorldData has-one relationship via foreign key */
+  worldData?: WorldDataGORM;
+  /** PreviewUrls as JSON for cross-DB compatibility */
+  previewUrls: string[] = [];
+  /** DefaultGameConfig as JSON for cross-DB compatibility
+ ScreenshotIndexInfo embedded */
+  screenshotIndexInfo?: IndexInfoGORM;
+  /** SearchIndexInfo embedded */
+  searchIndexInfo?: IndexInfoGORM;
 
   
 }
@@ -109,6 +121,11 @@ export class WorldDataGORM implements WorldDataGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.WorldDataGORM";
   readonly __MESSAGE_TYPE = WorldDataGORM.MESSAGE_TYPE;
 
+  /** Tiles as JSON for cross-DB compatibility */
+  tiles: TileGORM[] = [];
+  worldId: string = "";
+  /** Units as JSON for cross-DB compatibility */
+  units: UnitGORM[] = [];
 
   
 }
@@ -124,6 +141,15 @@ export class GameGORM implements GameGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.GameGORM";
   readonly __MESSAGE_TYPE = GameGORM.MESSAGE_TYPE;
 
+  id: string = "";
+  /** Tags as JSON for cross-DB compatibility */
+  tags: string[] = [];
+  /** PreviewUrls as JSON for cross-DB compatibility */
+  previewUrls: string[] = [];
+  /** ScreenshotIndexInfo embedded */
+  screenshotIndexInfo?: IndexInfoGORM;
+  /** SearchIndexInfo embedded */
+  searchIndexInfo?: IndexInfoGORM;
 
   
 }
@@ -137,6 +163,10 @@ export class GameConfigurationGORM implements GameConfigurationGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.GameConfigurationGORM";
   readonly __MESSAGE_TYPE = GameConfigurationGORM.MESSAGE_TYPE;
 
+  /** IncomeConfigs embedded */
+  incomeConfigs?: IncomeConfigGORM;
+  /** Settings as foreign key relationship */
+  settings?: GameSettingsGORM;
 
   
 }
@@ -189,6 +219,8 @@ export class GameSettingsGORM implements GameSettingsGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.GameSettingsGORM";
   readonly __MESSAGE_TYPE = GameSettingsGORM.MESSAGE_TYPE;
 
+  /** AllowedUnits as JSON for cross-DB compatibility */
+  allowedUnits: number[] = [];
 
   
 }
@@ -204,6 +236,7 @@ export class GameStateGORM implements GameStateGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.GameStateGORM";
   readonly __MESSAGE_TYPE = GameStateGORM.MESSAGE_TYPE;
 
+  gameId: string = "";
 
   
 }
@@ -250,14 +283,13 @@ export class GameMoveGORM implements GameMoveGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.GameMoveGORM";
   readonly __MESSAGE_TYPE = GameMoveGORM.MESSAGE_TYPE;
 
-  /** Store the oneof move_type as serialized Any */
+  gameId: string = "";
+  groupNumber: string = "";
+  moveNumber: number = 0;
+  /** Field named "move_type" matches the oneof name in source
+ This automatically skips all oneof members (move_unit, attack_unit, end_turn, build_unit) */
   moveType?: Any;
-  /** Skip the individual oneof fields from the source (field names, not oneof name!) */
-  moveUnit: boolean = false;
-  attackUnit: boolean = false;
-  endTurn: boolean = false;
-  buildUnit: boolean = false;
-  changes?: Any;
+  changes: Any[] = [];
 
   
 }

@@ -71,6 +71,41 @@ export const AttackRecordGORMSchema: MessageSchema = {
 export const WorldGORMSchema: MessageSchema = {
   name: "WorldGORM",
   fields: [
+    {
+      name: "id",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "tags",
+      type: FieldType.REPEATED,
+      id: 7,
+      repeated: true,
+    },
+    {
+      name: "worldData",
+      type: FieldType.MESSAGE,
+      id: 9,
+      messageType: "weewar.v1.WorldDataGORM",
+    },
+    {
+      name: "previewUrls",
+      type: FieldType.REPEATED,
+      id: 11,
+      repeated: true,
+    },
+    {
+      name: "screenshotIndexInfo",
+      type: FieldType.MESSAGE,
+      id: 13,
+      messageType: "weewar.v1.IndexInfoGORM",
+    },
+    {
+      name: "searchIndexInfo",
+      type: FieldType.MESSAGE,
+      id: 14,
+      messageType: "weewar.v1.IndexInfoGORM",
+    },
   ],
 };
 
@@ -81,6 +116,25 @@ export const WorldGORMSchema: MessageSchema = {
 export const WorldDataGORMSchema: MessageSchema = {
   name: "WorldDataGORM",
   fields: [
+    {
+      name: "tiles",
+      type: FieldType.MESSAGE,
+      id: 1,
+      messageType: "weewar.v1.TileGORM",
+      repeated: true,
+    },
+    {
+      name: "worldId",
+      type: FieldType.STRING,
+      id: 2,
+    },
+    {
+      name: "units",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "weewar.v1.UnitGORM",
+      repeated: true,
+    },
   ],
 };
 
@@ -91,6 +145,35 @@ export const WorldDataGORMSchema: MessageSchema = {
 export const GameGORMSchema: MessageSchema = {
   name: "GameGORM",
   fields: [
+    {
+      name: "id",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "tags",
+      type: FieldType.REPEATED,
+      id: 7,
+      repeated: true,
+    },
+    {
+      name: "previewUrls",
+      type: FieldType.REPEATED,
+      id: 11,
+      repeated: true,
+    },
+    {
+      name: "screenshotIndexInfo",
+      type: FieldType.MESSAGE,
+      id: 12,
+      messageType: "weewar.v1.IndexInfoGORM",
+    },
+    {
+      name: "searchIndexInfo",
+      type: FieldType.MESSAGE,
+      id: 13,
+      messageType: "weewar.v1.IndexInfoGORM",
+    },
   ],
 };
 
@@ -101,6 +184,18 @@ export const GameGORMSchema: MessageSchema = {
 export const GameConfigurationGORMSchema: MessageSchema = {
   name: "GameConfigurationGORM",
   fields: [
+    {
+      name: "incomeConfigs",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "weewar.v1.IncomeConfigGORM",
+    },
+    {
+      name: "settings",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "weewar.v1.GameSettingsGORM",
+    },
   ],
 };
 
@@ -141,6 +236,12 @@ export const GameTeamGORMSchema: MessageSchema = {
 export const GameSettingsGORMSchema: MessageSchema = {
   name: "GameSettingsGORM",
   fields: [
+    {
+      name: "allowedUnits",
+      type: FieldType.REPEATED,
+      id: 1,
+      repeated: true,
+    },
   ],
 };
 
@@ -151,6 +252,11 @@ export const GameSettingsGORMSchema: MessageSchema = {
 export const GameStateGORMSchema: MessageSchema = {
   name: "GameStateGORM",
   fields: [
+    {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
   ],
 };
 
@@ -182,36 +288,32 @@ export const GameMoveGORMSchema: MessageSchema = {
   name: "GameMoveGORM",
   fields: [
     {
+      name: "gameId",
+      type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "groupNumber",
+      type: FieldType.STRING,
+      id: 2,
+    },
+    {
+      name: "moveNumber",
+      type: FieldType.NUMBER,
+      id: 3,
+    },
+    {
       name: "moveType",
       type: FieldType.MESSAGE,
-      id: 1,
-      messageType: "google.protobuf.Any",
-    },
-    {
-      name: "moveUnit",
-      type: FieldType.BOOLEAN,
       id: 4,
-    },
-    {
-      name: "attackUnit",
-      type: FieldType.BOOLEAN,
-      id: 5,
-    },
-    {
-      name: "endTurn",
-      type: FieldType.BOOLEAN,
-      id: 6,
-    },
-    {
-      name: "buildUnit",
-      type: FieldType.BOOLEAN,
-      id: 7,
+      messageType: "google.protobuf.Any",
     },
     {
       name: "changes",
       type: FieldType.MESSAGE,
-      id: 2,
+      id: 5,
       messageType: "google.protobuf.Any",
+      repeated: true,
     },
   ],
 };

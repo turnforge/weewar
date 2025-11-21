@@ -14,23 +14,63 @@ message IndexInfoGORM {
 }
 
 message TileGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.Tile" };
+  option (dal.v1.gorm) = { source: "weewar.v1.Tile", implement_scanner: true  };
 }
 
 message UnitGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.Unit" };
+  option (dal.v1.gorm) = { source: "weewar.v1.Unit", implement_scanner: true };
+  /*
+  repeated AttackRecordGORM attack_history = 10 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  */
 }
 
 message AttackRecordGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.AttackRecord" };
+  option (dal.v1.gorm) = { source: "weewar.v1.AttackRecord", implement_scanner: true };
 }
 
 message WorldGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.World", table: "worlds" };
+  string id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+  // Tags as JSON for cross-DB compatibility
+  repeated string tags = 7 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // WorldData has-one relationship via foreign key
+  WorldDataGORM world_data = 9 [(dal.v1.column) = {
+    gorm_tags: ["foreignKey:WorldId"]
+  }];
+  // PreviewUrls as JSON for cross-DB compatibility
+  repeated string preview_urls = 11 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // DefaultGameConfig as JSON for cross-DB compatibility
+  // ScreenshotIndexInfo embedded
+  IndexInfoGORM screenshot_index_info = 13 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:screenshot_index_"]
+  }];
+  // SearchIndexInfo embedded
+  IndexInfoGORM search_index_info = 14 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:search_index_"]
+  }];
 }
 
 message WorldDataGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.WorldData", table: "world_data" };
+  option (dal.v1.gorm) = { source: "weewar.v1.WorldData", table: "world_data", implement_scanner: true };
+  // Tiles as JSON for cross-DB compatibility
+  repeated TileGORM tiles = 1 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  string world_id = 2 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+  // Units as JSON for cross-DB compatibility
+  repeated UnitGORM units = 3 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
 }
 
 ///////// Game related models
@@ -39,10 +79,35 @@ message WorldDataGORM {
 // Describes a game and its metadata
 message GameGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.Game", table: "games" };
+  string id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+  // Tags as JSON for cross-DB compatibility
+  repeated string tags = 7 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // PreviewUrls as JSON for cross-DB compatibility
+  repeated string preview_urls = 11 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // ScreenshotIndexInfo embedded
+  IndexInfoGORM screenshot_index_info = 12 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:screenshot_index_"]
+  }];
+  // SearchIndexInfo embedded
+  IndexInfoGORM search_index_info = 13 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:search_index_"]
+  }];
 }
 
 message GameConfigurationGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.GameConfiguration" };
+  option (dal.v1.gorm) = { source: "weewar.v1.GameConfiguration", implement_scanner: true };
+  // IncomeConfigs embedded
+  IncomeConfigGORM income_configs = 3 [(dal.v1.column) = {
+    gorm_tags: ["embedded"]
+  }];
+  // Settings as foreign key relationship
+  GameSettingsGORM settings = 4;
 }
 
 message IncomeConfigGORM {
@@ -50,20 +115,27 @@ message IncomeConfigGORM {
 }
 
 message GamePlayerGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.GamePlayer" };
+  option (dal.v1.gorm) = { source: "weewar.v1.GamePlayer", implement_scanner: true  };
 }
 
 message GameTeamGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.GameTeam" };
+  option (dal.v1.gorm) = { source: "weewar.v1.GameTeam", implement_scanner: true };
 }
 
 message GameSettingsGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.GameSettings" };
+  // AllowedUnits as JSON for cross-DB compatibility
+  repeated int32 allowed_units = 1 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
 }
 
 // Holds the game's Active/Current state (eg world state)
 message GameStateGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.GameState" };
+  string game_id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
 }
 
 // Holds the game's move history (can be used as a replay log)
@@ -82,14 +154,17 @@ message GameMoveGroupGORM {
 message GameMoveGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.GameMove" };
 
-  // Store the oneof move_type as serialized Any
-  google.protobuf.Any move_type = 1;
+  string game_id = 1 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
+  string group_number = 2 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
+  int32 move_number = 3 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
 
-  // Skip the individual oneof fields from the source (field names, not oneof name!)
-  bool move_unit = 4 [(dal.v1.skip_field) = true];
-  bool attack_unit = 5 [(dal.v1.skip_field) = true];
-  bool end_turn = 6 [(dal.v1.skip_field) = true];
-  bool build_unit = 7 [(dal.v1.skip_field) = true];
+  // Field named "move_type" matches the oneof name in source
+  // This automatically skips all oneof members (move_unit, attack_unit, end_turn, build_unit)
+  google.protobuf.Any move_type = 4 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
 
-  google.protobuf.Any changes = 2;
+  repeated google.protobuf.Any changes = 5 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
 }

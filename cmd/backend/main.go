@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const DEFAULT_DB_ENDPOINT = "postgres://postgres:docker@localhost:5432/weewardb"
+const DEFAULT_DB_ENDPOINT = "postgres://postgres:password@localhost:5432/weewardb"
 
 var (
 	grpcAddress    = flag.String("grpcAddress", DefaultServiceAddress(), "Address where the gRPC endpoint is running")
@@ -93,10 +93,11 @@ func (b *Backend) SetupApp() *utils.App {
 		gamesService := fsbe.NewFSGamesService("")
 		v1s.RegisterGamesServiceServer(server, gamesService)
 
-		v1s.RegisterWorldsServiceServer(server, fsbe.NewFSWorldsService(""))
+		db := gormbe.OpenWeewarDB(*db_endpoint, DEFAULT_DB_ENDPOINT)
+		// v1s.RegisterWorldsServiceServer(server, fsbe.NewFSWorldsService(""))
+		v1s.RegisterWorldsServiceServer(server, gormbe.NewWorldsService(db))
 
 		// TODO - use diferent kinds of db based on setup
-		db := gormbe.OpenWeewarDB(*db_endpoint, DEFAULT_DB_ENDPOINT)
 		v1s.RegisterIndexerServiceServer(server, gormbe.NewIndexerService(db))
 		return nil
 	}

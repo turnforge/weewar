@@ -27,7 +27,7 @@ from weewar.v1.models import models_pb2 as weewar_dot_v1_dot_models_dot_models__
 from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bweewar/v1/gorm/models.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\"*\n\rIndexInfoGORM:\x19\xca\xa6\x1d\x15\n\x13weewar.v1.IndexInfo\"\"\n\x08TileGORM:\x16\xca\xa6\x1d\x12\n\x0eweewar.v1.Tile \x01\"\"\n\x08UnitGORM:\x16\xca\xa6\x1d\x12\n\x0eweewar.v1.Unit \x01\"2\n\x10\x41ttackRecordGORM:\x1e\xca\xa6\x1d\x1a\n\x16weewar.v1.AttackRecord \x01\"\xf8\x03\n\tWorldGORM\x12 \n\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x02id\x12)\n\x04tags\x18\x07 \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x12Q\n\nworld_data\x18\t \x01(\x0b\x32\x18.weewar.v1.WorldDataGORMB\x18\x92\xa6\x1d\x14R\x12\x66oreignKey:WorldIdR\tworldData\x12\x38\n\x0cpreview_urls\x18\x0b \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x0bpreviewUrls\x12~\n\x15screenshot_index_info\x18\r \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\x08\x65mbeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12r\n\x11search_index_info\x18\x0e \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\x08\x65mbeddedR\x1c\x65mbeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1d\xca\xa6\x1d\x19\n\x0fweewar.v1.World\x12\x06worlds\"\xe9\x01\n\rWorldDataGORM\x12@\n\x05tiles\x18\x01 \x03(\x0b\x32\x13.weewar.v1.TileGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05tiles\x12+\n\x08world_id\x18\x02 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x07worldId\x12@\n\x05units\x18\x03 \x03(\x0b\x32\x13.weewar.v1.UnitGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05units:\'\xca\xa6\x1d#\n\x13weewar.v1.WorldData\x12\nworld_data \x01\"\xa2\x03\n\x08GameGORM\x12 \n\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x02id\x12)\n\x04tags\x18\x07 \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x12\x38\n\x0cpreview_urls\x18\x0b \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x0bpreviewUrls\x12~\n\x15screenshot_index_info\x18\x0c \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\x08\x65mbeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12r\n\x11search_index_info\x18\r \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\x08\x65mbeddedR\x1c\x65mbeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1b\xca\xa6\x1d\x17\n\x0eweewar.v1.Game\x12\x05games\"\xc9\x01\n\x15GameConfigurationGORM\x12R\n\x0eincome_configs\x18\x03 \x01(\x0b\x32\x1b.weewar.v1.IncomeConfigGORMB\x0e\x92\xa6\x1d\nR\x08\x65mbeddedR\rincomeConfigs\x12\x37\n\x08settings\x18\x04 \x01(\x0b\x32\x1b.weewar.v1.GameSettingsGORMR\x08settings:#\xca\xa6\x1d\x1f\n\x1bweewar.v1.GameConfiguration \x01\"0\n\x10IncomeConfigGORM:\x1c\xca\xa6\x1d\x18\n\x16weewar.v1.IncomeConfig\".\n\x0eGamePlayerGORM:\x1c\xca\xa6\x1d\x18\n\x14weewar.v1.GamePlayer \x01\"*\n\x0cGameTeamGORM:\x1a\xca\xa6\x1d\x16\n\x12weewar.v1.GameTeam \x01\"l\n\x10GameSettingsGORM\x12:\n\rallowed_units\x18\x01 \x03(\x05\x42\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x0c\x61llowedUnits:\x1c\xca\xa6\x1d\x18\n\x16weewar.v1.GameSettings\"U\n\rGameStateGORM\x12)\n\x07game_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x06gameId:\x19\xca\xa6\x1d\x15\n\x13weewar.v1.GameState\"6\n\x13GameMoveHistoryGORM:\x1f\xca\xa6\x1d\x1b\n\x19weewar.v1.GameMoveHistory\"2\n\x11GameMoveGroupGORM:\x1d\xca\xa6\x1d\x19\n\x17weewar.v1.GameMoveGroup\"\xcc\x02\n\x0cGameMoveGORM\x12)\n\x07game_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x06gameId\x12\x33\n\x0cgroup_number\x18\x02 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x0bgroupNumber\x12\x31\n\x0bmove_number\x18\x03 \x01(\x05\x42\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\nmoveNumber\x12H\n\tmove_type\x18\x04 \x01(\x0b\x32\x14.google.protobuf.AnyB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x08moveType\x12\x45\n\x07\x63hanges\x18\x05 \x03(\x0b\x32\x14.google.protobuf.AnyB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x07\x63hanges:\x18\xca\xa6\x1d\x14\n\x12weewar.v1.GameMoveB\x9d\x01\n\rcom.weewar.v1B\x0bModelsProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bweewar/v1/gorm/models.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\"*\n\rIndexInfoGORM:\x19\xca\xa6\x1d\x15\n\x13weewar.v1.IndexInfo\"\"\n\x08TileGORM:\x16\xca\xa6\x1d\x12\n\x0eweewar.v1.Tile \x01\"\"\n\x08UnitGORM:\x16\xca\xa6\x1d\x12\n\x0eweewar.v1.Unit \x01\"2\n\x10\x41ttackRecordGORM:\x1e\xca\xa6\x1d\x1a\n\x16weewar.v1.AttackRecord \x01\"\xa5\x03\n\tWorldGORM\x12 \n\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x02id\x12)\n\x04tags\x18\x07 \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x12\x38\n\x0cpreview_urls\x18\x0b \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x0bpreviewUrls\x12~\n\x15screenshot_index_info\x18\r \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\x08\x65mbeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12r\n\x11search_index_info\x18\x0e \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\x08\x65mbeddedR\x1c\x65mbeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1d\xca\xa6\x1d\x19\n\x0fweewar.v1.World\x12\x06worlds\"\xe9\x01\n\rWorldDataGORM\x12@\n\x05tiles\x18\x01 \x03(\x0b\x32\x13.weewar.v1.TileGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05tiles\x12+\n\x08world_id\x18\x02 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x07worldId\x12@\n\x05units\x18\x03 \x03(\x0b\x32\x13.weewar.v1.UnitGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05units:\'\xca\xa6\x1d#\n\x13weewar.v1.WorldData\x12\nworld_data \x01\"\xa2\x03\n\x08GameGORM\x12 \n\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x02id\x12)\n\x04tags\x18\x07 \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x12\x38\n\x0cpreview_urls\x18\x0b \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x0bpreviewUrls\x12~\n\x15screenshot_index_info\x18\x0c \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\x08\x65mbeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12r\n\x11search_index_info\x18\r \x01(\x0b\x32\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\x08\x65mbeddedR\x1c\x65mbeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1b\xca\xa6\x1d\x17\n\x0eweewar.v1.Game\x12\x05games\"\xc9\x01\n\x15GameConfigurationGORM\x12R\n\x0eincome_configs\x18\x03 \x01(\x0b\x32\x1b.weewar.v1.IncomeConfigGORMB\x0e\x92\xa6\x1d\nR\x08\x65mbeddedR\rincomeConfigs\x12\x37\n\x08settings\x18\x04 \x01(\x0b\x32\x1b.weewar.v1.GameSettingsGORMR\x08settings:#\xca\xa6\x1d\x1f\n\x1bweewar.v1.GameConfiguration \x01\"0\n\x10IncomeConfigGORM:\x1c\xca\xa6\x1d\x18\n\x16weewar.v1.IncomeConfig\".\n\x0eGamePlayerGORM:\x1c\xca\xa6\x1d\x18\n\x14weewar.v1.GamePlayer \x01\"*\n\x0cGameTeamGORM:\x1a\xca\xa6\x1d\x16\n\x12weewar.v1.GameTeam \x01\"l\n\x10GameSettingsGORM\x12:\n\rallowed_units\x18\x01 \x03(\x05\x42\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x0c\x61llowedUnits:\x1c\xca\xa6\x1d\x18\n\x16weewar.v1.GameSettings\"U\n\rGameStateGORM\x12)\n\x07game_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x06gameId:\x19\xca\xa6\x1d\x15\n\x13weewar.v1.GameState\"6\n\x13GameMoveHistoryGORM:\x1f\xca\xa6\x1d\x1b\n\x19weewar.v1.GameMoveHistory\"2\n\x11GameMoveGroupGORM:\x1d\xca\xa6\x1d\x19\n\x17weewar.v1.GameMoveGroup\"\xcc\x02\n\x0cGameMoveGORM\x12)\n\x07game_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x06gameId\x12\x33\n\x0cgroup_number\x18\x02 \x01(\tB\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\x0bgroupNumber\x12\x31\n\x0bmove_number\x18\x03 \x01(\x05\x42\x10\x92\xa6\x1d\x0cR\nprimaryKeyR\nmoveNumber\x12H\n\tmove_type\x18\x04 \x01(\x0b\x32\x14.google.protobuf.AnyB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x08moveType\x12\x45\n\x07\x63hanges\x18\x05 \x03(\x0b\x32\x14.google.protobuf.AnyB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x07\x63hanges:\x18\xca\xa6\x1d\x14\n\x12weewar.v1.GameMoveB\x9d\x01\n\rcom.weewar.v1B\x0bModelsProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -47,8 +47,6 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_WORLDGORM'].fields_by_name['id']._serialized_options = b'\222\246\035\014R\nprimaryKey'
   _globals['_WORLDGORM'].fields_by_name['tags']._loaded_options = None
   _globals['_WORLDGORM'].fields_by_name['tags']._serialized_options = b'\222\246\035\021R\017serializer:json'
-  _globals['_WORLDGORM'].fields_by_name['world_data']._loaded_options = None
-  _globals['_WORLDGORM'].fields_by_name['world_data']._serialized_options = b'\222\246\035\024R\022foreignKey:WorldId'
   _globals['_WORLDGORM'].fields_by_name['preview_urls']._loaded_options = None
   _globals['_WORLDGORM'].fields_by_name['preview_urls']._serialized_options = b'\222\246\035\021R\017serializer:json'
   _globals['_WORLDGORM'].fields_by_name['screenshot_index_info']._loaded_options = None
@@ -120,27 +118,27 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_ATTACKRECORDGORM']._serialized_start=242
   _globals['_ATTACKRECORDGORM']._serialized_end=292
   _globals['_WORLDGORM']._serialized_start=295
-  _globals['_WORLDGORM']._serialized_end=799
-  _globals['_WORLDDATAGORM']._serialized_start=802
-  _globals['_WORLDDATAGORM']._serialized_end=1035
-  _globals['_GAMEGORM']._serialized_start=1038
-  _globals['_GAMEGORM']._serialized_end=1456
-  _globals['_GAMECONFIGURATIONGORM']._serialized_start=1459
-  _globals['_GAMECONFIGURATIONGORM']._serialized_end=1660
-  _globals['_INCOMECONFIGGORM']._serialized_start=1662
-  _globals['_INCOMECONFIGGORM']._serialized_end=1710
-  _globals['_GAMEPLAYERGORM']._serialized_start=1712
-  _globals['_GAMEPLAYERGORM']._serialized_end=1758
-  _globals['_GAMETEAMGORM']._serialized_start=1760
-  _globals['_GAMETEAMGORM']._serialized_end=1802
-  _globals['_GAMESETTINGSGORM']._serialized_start=1804
-  _globals['_GAMESETTINGSGORM']._serialized_end=1912
-  _globals['_GAMESTATEGORM']._serialized_start=1914
-  _globals['_GAMESTATEGORM']._serialized_end=1999
-  _globals['_GAMEMOVEHISTORYGORM']._serialized_start=2001
-  _globals['_GAMEMOVEHISTORYGORM']._serialized_end=2055
-  _globals['_GAMEMOVEGROUPGORM']._serialized_start=2057
-  _globals['_GAMEMOVEGROUPGORM']._serialized_end=2107
-  _globals['_GAMEMOVEGORM']._serialized_start=2110
-  _globals['_GAMEMOVEGORM']._serialized_end=2442
+  _globals['_WORLDGORM']._serialized_end=716
+  _globals['_WORLDDATAGORM']._serialized_start=719
+  _globals['_WORLDDATAGORM']._serialized_end=952
+  _globals['_GAMEGORM']._serialized_start=955
+  _globals['_GAMEGORM']._serialized_end=1373
+  _globals['_GAMECONFIGURATIONGORM']._serialized_start=1376
+  _globals['_GAMECONFIGURATIONGORM']._serialized_end=1577
+  _globals['_INCOMECONFIGGORM']._serialized_start=1579
+  _globals['_INCOMECONFIGGORM']._serialized_end=1627
+  _globals['_GAMEPLAYERGORM']._serialized_start=1629
+  _globals['_GAMEPLAYERGORM']._serialized_end=1675
+  _globals['_GAMETEAMGORM']._serialized_start=1677
+  _globals['_GAMETEAMGORM']._serialized_end=1719
+  _globals['_GAMESETTINGSGORM']._serialized_start=1721
+  _globals['_GAMESETTINGSGORM']._serialized_end=1829
+  _globals['_GAMESTATEGORM']._serialized_start=1831
+  _globals['_GAMESTATEGORM']._serialized_end=1916
+  _globals['_GAMEMOVEHISTORYGORM']._serialized_start=1918
+  _globals['_GAMEMOVEHISTORYGORM']._serialized_end=1972
+  _globals['_GAMEMOVEGROUPGORM']._serialized_start=1974
+  _globals['_GAMEMOVEGROUPGORM']._serialized_end=2024
+  _globals['_GAMEMOVEGORM']._serialized_start=2027
+  _globals['_GAMEMOVEGORM']._serialized_end=2359
 # @@protoc_insertion_point(module_scope)

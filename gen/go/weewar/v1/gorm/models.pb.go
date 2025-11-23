@@ -174,8 +174,6 @@ type WorldGORM struct {
 	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Tags as JSON for cross-DB compatibility
 	Tags []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
-	// WorldData has-one relationship via foreign key
-	WorldData *WorldDataGORM `protobuf:"bytes,9,opt,name=world_data,json=worldData,proto3" json:"world_data,omitempty"`
 	// PreviewUrls as JSON for cross-DB compatibility
 	PreviewUrls []string `protobuf:"bytes,11,rep,name=preview_urls,json=previewUrls,proto3" json:"preview_urls,omitempty"`
 	// DefaultGameConfig as JSON for cross-DB compatibility
@@ -227,13 +225,6 @@ func (x *WorldGORM) GetId() string {
 func (x *WorldGORM) GetTags() []string {
 	if x != nil {
 		return x.Tags
-	}
-	return nil
-}
-
-func (x *WorldGORM) GetWorldData() *WorldDataGORM {
-	if x != nil {
-		return x.WorldData
 	}
 	return nil
 }
@@ -820,13 +811,11 @@ const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\bUnitGORM:\x16ʦ\x1d\x12\n" +
 	"\x0eweewar.v1.Unit \x01\"2\n" +
 	"\x10AttackRecordGORM:\x1eʦ\x1d\x1a\n" +
-	"\x16weewar.v1.AttackRecord \x01\"\xf8\x03\n" +
+	"\x16weewar.v1.AttackRecord \x01\"\xa5\x03\n" +
 	"\tWorldGORM\x12 \n" +
 	"\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
 	"primaryKeyR\x02id\x12)\n" +
-	"\x04tags\x18\a \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x12Q\n" +
-	"\n" +
-	"world_data\x18\t \x01(\v2\x18.weewar.v1.WorldDataGORMB\x18\x92\xa6\x1d\x14R\x12foreignKey:WorldIdR\tworldData\x128\n" +
+	"\x04tags\x18\a \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x128\n" +
 	"\fpreview_urls\x18\v \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\vpreviewUrls\x12~\n" +
 	"\x15screenshot_index_info\x18\r \x01(\v2\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\bembeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12r\n" +
 	"\x11search_index_info\x18\x0e \x01(\v2\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\bembeddedR\x1cembeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1dʦ\x1d\x19\n" +
@@ -915,22 +904,21 @@ var file_weewar_v1_gorm_models_proto_goTypes = []any{
 	(*anypb.Any)(nil),             // 16: google.protobuf.Any
 }
 var file_weewar_v1_gorm_models_proto_depIdxs = []int32{
-	5,  // 0: weewar.v1.WorldGORM.world_data:type_name -> weewar.v1.WorldDataGORM
-	0,  // 1: weewar.v1.WorldGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
-	0,  // 2: weewar.v1.WorldGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
-	1,  // 3: weewar.v1.WorldDataGORM.tiles:type_name -> weewar.v1.TileGORM
-	2,  // 4: weewar.v1.WorldDataGORM.units:type_name -> weewar.v1.UnitGORM
-	0,  // 5: weewar.v1.GameGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
-	0,  // 6: weewar.v1.GameGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
-	8,  // 7: weewar.v1.GameConfigurationGORM.income_configs:type_name -> weewar.v1.IncomeConfigGORM
-	11, // 8: weewar.v1.GameConfigurationGORM.settings:type_name -> weewar.v1.GameSettingsGORM
-	16, // 9: weewar.v1.GameMoveGORM.move_type:type_name -> google.protobuf.Any
-	16, // 10: weewar.v1.GameMoveGORM.changes:type_name -> google.protobuf.Any
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	0,  // 0: weewar.v1.WorldGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
+	0,  // 1: weewar.v1.WorldGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
+	1,  // 2: weewar.v1.WorldDataGORM.tiles:type_name -> weewar.v1.TileGORM
+	2,  // 3: weewar.v1.WorldDataGORM.units:type_name -> weewar.v1.UnitGORM
+	0,  // 4: weewar.v1.GameGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
+	0,  // 5: weewar.v1.GameGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
+	8,  // 6: weewar.v1.GameConfigurationGORM.income_configs:type_name -> weewar.v1.IncomeConfigGORM
+	11, // 7: weewar.v1.GameConfigurationGORM.settings:type_name -> weewar.v1.GameSettingsGORM
+	16, // 8: weewar.v1.GameMoveGORM.move_type:type_name -> google.protobuf.Any
+	16, // 9: weewar.v1.GameMoveGORM.changes:type_name -> google.protobuf.Any
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_gorm_models_proto_init() }

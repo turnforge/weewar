@@ -10,9 +10,10 @@ import (
 
 type WorldViewerPage struct {
 	BasePage
-	Header  Header
-	World   *protos.World // Use the same type as WorldEditorPage for consistency
-	WorldId string
+	Header    Header
+	World     *protos.World     // Use the same type as WorldEditorPage for consistency
+	WorldData *protos.WorldData // Use the same type as WorldDataEditorPage for consistency
+	WorldId   string
 }
 
 func (p *WorldViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
@@ -47,6 +48,7 @@ func (p *WorldViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewC
 	if resp.World != nil {
 		// Use the World data for display
 		p.World = resp.World
+		p.WorldData = resp.WorldData
 		p.Title = p.World.Name
 	}
 

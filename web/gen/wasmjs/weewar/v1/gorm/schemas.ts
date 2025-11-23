@@ -83,12 +83,6 @@ export const WorldGORMSchema: MessageSchema = {
       repeated: true,
     },
     {
-      name: "worldData",
-      type: FieldType.MESSAGE,
-      id: 9,
-      messageType: "weewar.v1.WorldDataGORM",
-    },
-    {
       name: "previewUrls",
       type: FieldType.REPEATED,
       id: 11,

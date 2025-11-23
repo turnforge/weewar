@@ -99,8 +99,6 @@ export class WorldGORM implements WorldGORMInterface {
   id: string = "";
   /** Tags as JSON for cross-DB compatibility */
   tags: string[] = [];
-  /** WorldData has-one relationship via foreign key */
-  worldData?: WorldDataGORM;
   /** PreviewUrls as JSON for cross-DB compatibility */
   previewUrls: string[] = [];
   /** DefaultGameConfig as JSON for cross-DB compatibility

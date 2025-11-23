@@ -78,8 +78,6 @@ func (s *FSWorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest)
 		return nil, fmt.Errorf("world data not found: %w", err)
 	}
 
-	world.WorldData = worldData
-
 	resp = &v1.GetWorldResponse{
 		World:     world,
 		WorldData: worldData,

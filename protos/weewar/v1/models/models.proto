@@ -107,7 +107,7 @@ message World {
   string difficulty = 9;
 
   // The actual world contents/data
-  WorldData world_data = 10;
+  // WorldData world_data = 10;
 
   // URL to screenshot/preview image (defaults to /worlds/{id}/screenshots/{screenshotName})
   // Can be overridden to point to CDN or external hosting

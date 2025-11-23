@@ -562,11 +562,9 @@ export class World {
             method = 'POST';
         } else {
             // UpdateWorldRequest  
+            const world = WD.from(models.World,{ ...worldMetadata, id: this.worldId!  })
             request = WD.from(models.UpdateWorldRequest,{
-                world: WD.from(models.World,{
-                    ...worldMetadata,
-                    id: this.worldId!
-                }),
+                world: world,
                 worldData: worldData,
                 clearWorld: false // Don't clear existing data
                 // Note: update_mask is optional, omitting for now

@@ -40,9 +40,8 @@ message WorldGORM {
     gorm_tags: ["serializer:json"]
   }];
   // WorldData has-one relationship via foreign key
-  WorldDataGORM world_data = 9 [(dal.v1.column) = {
-    gorm_tags: ["foreignKey:WorldId"]
-  }];
+  // WorldDataGORM world_data = 9 [(dal.v1.column) = { gorm_tags: ["foreignKey:WorldId"] }];
+
   // PreviewUrls as JSON for cross-DB compatibility
   repeated string preview_urls = 11 [(dal.v1.column) = {
     gorm_tags: ["serializer:json"]

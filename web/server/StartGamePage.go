@@ -16,6 +16,7 @@ type StartGamePage struct {
 	BasePage
 	Header            Header
 	World             *protos.World
+	WorldData         *protos.WorldData
 	WorldId           string
 	UnitTypes         []UnitType
 	GameConfiguration *protos.GameConfiguration
@@ -54,6 +55,7 @@ func (p *StartGamePage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCon
 				p.WorldId = ""
 			} else if resp.World != nil {
 				p.World = resp.World
+				p.WorldData = resp.WorldData
 				p.Title = "New Game - " + p.World.Name
 			}
 		}

@@ -353,12 +353,6 @@ func WorldToWorldGORM(
 		out.UpdatedAt = converters.TimestampToTime(src.UpdatedAt)
 	}
 
-	if src.WorldData != nil {
-		_, err = WorldDataToWorldDataGORM(src.WorldData, &out.WorldData, nil)
-		if err != nil {
-			return nil, fmt.Errorf("converting WorldData: %w", err)
-		}
-	}
 	if src.DefaultGameConfig != nil {
 		_, err = GameConfigurationToGameConfigurationGORM(src.DefaultGameConfig, &out.DefaultGameConfig, nil)
 		if err != nil {
@@ -417,10 +411,6 @@ func WorldFromWorldGORM(
 	}
 	out = dest
 
-	out.WorldData, err = WorldDataFromWorldDataGORM(nil, &src.WorldData, nil)
-	if err != nil {
-		return nil, fmt.Errorf("converting WorldData: %w", err)
-	}
 	out.DefaultGameConfig, err = GameConfigurationFromGameConfigurationGORM(nil, &src.DefaultGameConfig, nil)
 	if err != nil {
 		return nil, fmt.Errorf("converting DefaultGameConfig: %w", err)

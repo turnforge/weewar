@@ -14,6 +14,8 @@ import (
 	v1gorm "github.com/turnforge/weewar/gen/gorm"
 	v1dal "github.com/turnforge/weewar/gen/gorm/dal"
 	"github.com/turnforge/weewar/services"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
@@ -59,7 +61,15 @@ func (s *WorldsService) CreateWorld(ctx context.Context, req *v1.CreateWorldRequ
 	if err != nil {
 		return
 	}
-	worldGorm.Id = NewID(s.storage, "worlds")
+	if worldGorm.Id == "" {
+		worldGorm.Id = NewID(s.storage, "worlds")
+	} else {
+		// Check if world with this ID already exists
+		existing, _ := s.WorldDAL.Get(ctx, s.storage, worldGorm.Id)
+		if existing != nil {
+			return nil, fmt.Errorf("world with ID %q already exists", worldGorm.Id)
+		}
+	}
 	if err = s.WorldDAL.Save(ctx, s.storage, worldGorm); err != nil {
 		return
 	}
@@ -69,6 +79,9 @@ func (s *WorldsService) CreateWorld(ctx context.Context, req *v1.CreateWorldRequ
 	worldDataGorm, err := v1gorm.WorldDataToWorldDataGORM(req.WorldData, nil, nil)
 	if err != nil {
 		return
+	}
+	if worldDataGorm == nil {
+		worldDataGorm = &v1gorm.WorldDataGORM{}
 	}
 	worldDataGorm.WorldId = worldGorm.Id
 	if err = s.WorldDataDAL.Save(ctx, s.storage, worldDataGorm); err != nil {
@@ -132,6 +145,9 @@ func (s *WorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest) (
 	// Step 2: Execute query for world
 	world, worldData, err := s.getWorldAndData(ctx, req.Id)
 	if err != nil {
+		return
+	} else if world == nil {
+		err = status.Error(codes.NotFound, fmt.Sprintf("World with id '%s' not found", req.Id))
 		return
 	}
 
@@ -205,11 +221,17 @@ func (s *WorldsService) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequ
 		if req.WorldData.Units == nil {
 			req.WorldData.Units = protoWorldData.Units
 		}
-		worldData, err = v1gorm.WorldDataToWorldDataGORM(protoWorldData, nil, nil)
+		log.Println("Req world data: ", req.WorldData)
+		log.Println("New Proto world data: ", protoWorldData)
+		worldData, err = v1gorm.WorldDataToWorldDataGORM(req.WorldData, nil, nil)
+		worldData.WorldId = req.World.Id
 	}
 
+	log.Println("On Update, err: ", err)
+	log.Println("On Update, wds: ", worldDataSaved)
 	if err == nil && worldDataSaved {
 		err = s.WorldDataDAL.Save(ctx, s.storage, worldData)
+		log.Println("New world data: ", worldData, err)
 		resp.World, err = v1gorm.WorldFromWorldGORM(nil, world, nil)
 		resp.WorldData, err = v1gorm.WorldDataFromWorldDataGORM(nil, worldData, nil)
 	}

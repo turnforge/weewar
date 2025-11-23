@@ -6,11 +6,18 @@ import type { GenFile } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_weewar_v1_models_models } from "./models/models_pb";
 import { file_weewar_v1_models_indexer } from "./models/indexer_pb";
+import { file_weewar_v1_models_world_service } from "./models/world_service_pb";
+import { file_weewar_v1_models_games_service } from "./models/games_service_pb";
+import { file_weewar_v1_models_presenter } from "./models/presenter_pb";
+import { file_weewar_v1_models_gameviewerpage } from "./models/gameviewerpage_pb";
+import { file_weewar_v1_models_user_service } from "./models/user_service_pb";
+import { file_weewar_v1_models_jobs } from "./models/jobs_pb";
+import { file_weewar_v1_models_themes } from "./models/themes_pb";
 import { file_wasmjs_v1_annotations } from "../../wasmjs/v1/annotations_pb";
 
 /**
  * Describes the file weewar/v1/factory.proto.
  */
 export const file_weewar_v1_factory: GenFile = /*@__PURE__*/
-  fileDesc("Chd3ZWV3YXIvdjEvZmFjdG9yeS5wcm90bxIJd2Vld2FyLnYxQp0BCg1jb20ud2Vld2FyLnYxQgxGYWN0b3J5UHJvdG9QAVo1Z2l0aHViLmNvbS90dXJuZm9yZ2Uvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjE7d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxyLUYAWIGcHJvdG8z", [file_weewar_v1_models_models, file_weewar_v1_models_indexer, file_wasmjs_v1_annotations]);
+  fileDesc("Chd3ZWV3YXIvdjEvZmFjdG9yeS5wcm90bxIJd2Vld2FyLnYxQp0BCg1jb20ud2Vld2FyLnYxQgxGYWN0b3J5UHJvdG9QAVo1Z2l0aHViLmNvbS90dXJuZm9yZ2Uvd2Vld2FyL2dlbi9nby93ZWV3YXIvdjE7d2Vld2FydjGiAgNXWFiqAglXZWV3YXIuVjHKAglXZWV3YXJcVjHiAhVXZWV3YXJcVjFcR1BCTWV0YWRhdGHqAgpXZWV3YXI6OlYxyLUYAWIGcHJvdG8z", [file_weewar_v1_models_models, file_weewar_v1_models_indexer, file_weewar_v1_models_world_service, file_weewar_v1_models_games_service, file_weewar_v1_models_presenter, file_weewar_v1_models_gameviewerpage, file_weewar_v1_models_user_service, file_weewar_v1_models_jobs, file_weewar_v1_models_themes, file_wasmjs_v1_annotations]);
 

@@ -11,7 +11,6 @@ import (
 	sync "sync"
 	unsafe "unsafe"
 
-	_ "github.com/panyam/protoc-gen-go-wasmjs/proto/gen/go/wasmjs/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
@@ -2011,7 +2010,7 @@ var File_weewar_v1_models_gameviewerpage_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_models_gameviewerpage_proto_rawDesc = "" +
 	"\n" +
-	"%weewar/v1/models/gameviewerpage.proto\x12\tweewar.v1\x1a\x1bwasmjs/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\"\x0e\n" +
+	"%weewar/v1/models/gameviewerpage.proto\x12\tweewar.v1\x1a\x1dweewar/v1/models/models.proto\"\x0e\n" +
 	"\fEmptyRequest\"\x0f\n" +
 	"\rEmptyResponse\"2\n" +
 	"\x11SetContentRequest\x12\x1d\n" +

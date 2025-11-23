@@ -127,8 +127,6 @@ export class World implements WorldInterface {
   imageUrl: string = "";
   /** Difficulty - example attribute */
   difficulty: string = "";
-  /** The actual world contents/data */
-  worldData?: WorldData;
   /** URL to screenshot/preview image (defaults to /worlds/{id}/screenshots/{screenshotName})
  Can be overridden to point to CDN or external hosting */
   previewUrls: string[] = [];

@@ -195,12 +195,6 @@ export const WorldSchema: MessageSchema = {
       id: 9,
     },
     {
-      name: "worldData",
-      type: FieldType.MESSAGE,
-      id: 10,
-      messageType: "weewar.v1.WorldData",
-    },
-    {
       name: "previewUrls",
       type: FieldType.REPEATED,
       id: 11,

@@ -136,8 +136,7 @@ type WorldGORM struct {
 	Tags                []string `gorm:"serializer:json"`
 	ImageUrl            string
 	Difficulty          string
-	WorldData           WorldDataGORM `gorm:"foreignKey:WorldId"`
-	PreviewUrls         []string      `gorm:"serializer:json"`
+	PreviewUrls         []string `gorm:"serializer:json"`
 	DefaultGameConfig   GameConfigurationGORM
 	ScreenshotIndexInfo IndexInfoGORM `gorm:"embedded;embeddedPrefix:screenshot_index_"`
 	SearchIndexInfo     IndexInfoGORM `gorm:"embedded;embeddedPrefix:search_index_"`
@@ -356,10 +355,10 @@ type GameMoveGroupGORM struct {
 
 // GameMoveGORM is the GORM model for weewar.v1.GameMove
 type GameMoveGORM struct {
-	GameId      string `gorm:"primaryKey"`
 	Player      int32
-	Timestamp   time.Time
+	GameId      string `gorm:"primaryKey"`
 	GroupNumber string `gorm:"primaryKey"`
+	Timestamp   time.Time
 	MoveNumber  int32  `gorm:"primaryKey"`
 	MoveType    []byte `gorm:"serializer:json"`
 	SequenceNum int64

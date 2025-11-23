@@ -1472,10 +1472,6 @@
                       "type": "string",
                       "title": "Difficulty - example attribute"
                     },
-                    "worldData": {
-                      "$ref": "#/definitions/v1WorldData",
-                      "title": "The actual world contents/data"
-                    },
                     "previewUrls": {
                       "type": "array",
                       "items": {
@@ -3271,10 +3267,6 @@
         "difficulty": {
           "type": "string",
           "title": "Difficulty - example attribute"
-        },
-        "worldData": {
-          "$ref": "#/definitions/v1WorldData",
-          "title": "The actual world contents/data"
         },
         "previewUrls": {
           "type": "array",

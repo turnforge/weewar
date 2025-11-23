@@ -60,6 +60,7 @@ type WorldEditorPage struct {
 	IsOwner        bool
 	WorldId        string
 	World          *protos.World
+	WorldData      *protos.WorldData
 	Errors         map[string]string
 	TBButtons      []*TBButton
 	AllowCustomId  bool
@@ -242,6 +243,7 @@ func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewC
 		}
 		v.IsOwner = true
 		v.World = &protos.World{}
+		v.WorldData = &protos.WorldData{}
 		if v.World.Name == "" {
 			v.World.Name = "Untitled World"
 		}
@@ -270,6 +272,7 @@ func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewC
 		}
 
 		v.World = resp.World
+		v.WorldData = resp.WorldData
 		v.Header.RightMenuItems = []HeaderMenuItem{
 			{Title: "Save", Id: "saveRightButton", Link: "javascript:void(0)"},
 			{Title: "Delete", Id: "deleteRightButton", Link: "javascript:void(0)"},

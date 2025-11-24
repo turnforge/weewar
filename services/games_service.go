@@ -39,8 +39,7 @@ type GamesService interface {
 }
 
 type BaseGamesService struct {
-	Self      GamesService // The actual implementation
-	ClientMgr *ClientMgr
+	Self GamesService // The actual implementation
 }
 
 func (s *BaseGamesService) ListMoves(ctx context.Context, req *v1.ListMovesRequest) (resp *v1.ListMovesResponse, err error) {

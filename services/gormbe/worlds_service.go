@@ -11,7 +11,6 @@ import (
 	"time"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 	v1gorm "github.com/turnforge/weewar/gen/gorm"
 	v1dal "github.com/turnforge/weewar/gen/gorm/dal"
 	"github.com/turnforge/weewar/services"
@@ -23,11 +22,11 @@ import (
 // WorldsService implements the WorldsService gRPC interface
 type WorldsService struct {
 	services.BaseWorldsService
-	indexerClient v1s.IndexerServiceClient
-	storage       *gorm.DB
-	MaxPageSize   int
-	WorldDAL      v1dal.WorldGORMDAL
-	WorldDataDAL  v1dal.WorldDataGORMDAL
+	ClientMgr    *services.ClientMgr
+	storage      *gorm.DB
+	MaxPageSize  int
+	WorldDAL     v1dal.WorldGORMDAL
+	WorldDataDAL v1dal.WorldDataGORMDAL
 
 	// The chan where we write world event updates to
 	updateEventChan chan *v1gorm.WorldDataGORM

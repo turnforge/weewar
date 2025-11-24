@@ -23,7 +23,8 @@ var GAMES_STORAGE_DIR = ""
 // FSGamesService implements the GamesService gRPC interface
 type FSGamesService struct {
 	services.BaseGamesService
-	storage *storage.FileStorage // Storage area for all files
+	storage   *storage.FileStorage // Storage area for all files
+	ClientMgr *services.ClientMgr
 
 	// Simple caches - maps with game ID as key
 	gameCache    map[string]*v1.Game
@@ -41,7 +42,8 @@ func NewFSGamesService(storageDir string, clientMgr *services.ClientMgr) *FSGame
 		storageDir = GAMES_STORAGE_DIR
 	}
 	service := &FSGamesService{
-		BaseGamesService: services.BaseGamesService{ClientMgr: clientMgr},
+		BaseGamesService: services.BaseGamesService{},
+		ClientMgr:        clientMgr,
 		storage:          storage.NewFileStorage(storageDir),
 		gameCache:        make(map[string]*v1.Game),
 		stateCache:       make(map[string]*v1.GameState),

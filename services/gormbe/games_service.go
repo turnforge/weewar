@@ -22,6 +22,7 @@ import (
 type GamesService struct {
 	services.BaseGamesService
 	storage      *gorm.DB
+	ClientMgr    *services.ClientMgr
 	MaxPageSize  int
 	GameDAL      v1dal.GameGORMDAL
 	GameStateDAL v1dal.GameStateGORMDAL
@@ -38,8 +39,8 @@ func NewGamesService(db *gorm.DB, clientMgr *services.ClientMgr) *GamesService {
 	service := &GamesService{
 		storage:     db,
 		MaxPageSize: 1000,
+		ClientMgr:   clientMgr,
 	}
-	service.ClientMgr = clientMgr
 	service.GameDAL.WillCreate = func(ctx context.Context, game *v1gorm.GameGORM) error {
 		game.UpdatedAt = time.Now()
 		game.CreatedAt = time.Now()

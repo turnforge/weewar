@@ -30,7 +30,7 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 	ctx := context.Background()
 
 	// Load game from disk using FSGamesService
-	fsService := fsbe.NewFSGamesService("")
+	fsService := fsbe.NewFSGamesService("", nil)
 	gameResp, err := fsService.GetGame(ctx, &v1.GetGameRequest{Id: gameID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to load game %s: %w", gameID, err)

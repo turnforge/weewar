@@ -20,7 +20,8 @@ var WORLDS_STORAGE_DIR = ""
 // FSWorldsService implements the FSWorldsService gRPC interface
 type FSWorldsService struct {
 	services.BaseWorldsService
-	storage *storage.FileStorage
+	storage   *storage.FileStorage
+	ClientMgr *services.ClientMgr
 }
 
 // NewFSWorldsService creates a new FSWorldsService implementation

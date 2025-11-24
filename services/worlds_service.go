@@ -25,6 +25,5 @@ type WorldsService interface {
 }
 
 type BaseWorldsService struct {
-	Self      WorldsService // The actual implementation
-	ClientMgr *ClientMgr
+	Self WorldsService // The actual implementation
 }

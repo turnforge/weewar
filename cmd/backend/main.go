@@ -10,6 +10,7 @@ import (
 
 	"github.com/joho/godotenv"
 	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
+	"github.com/turnforge/weewar/services"
 	"github.com/turnforge/weewar/services/fsbe"
 	"github.com/turnforge/weewar/services/gormbe"
 	"github.com/turnforge/weewar/services/server"
@@ -91,6 +92,7 @@ func (b *Backend) SetupApp() *utils.App {
 	log.Println("Grpc, Address: ", grpcAddress)
 	log.Println("gateway, Address: ", gatewayAddress)
 	grpcServer := &server.Server{Address: b.GrpcAddress}
+	clientMgr := services.NewClientMgr(b.GrpcAddress)
 	grpcServer.RegisterCallback = func(server *grpc.Server) error {
 		var gamesService v1s.GamesServiceServer
 		var worldsService v1s.WorldsServiceServer
@@ -101,16 +103,16 @@ func (b *Backend) SetupApp() *utils.App {
 		case "pg":
 			worldsService = gormbe.NewWorldsService(db)
 		case "local":
-			worldsService = fsbe.NewFSWorldsService("")
+			worldsService = fsbe.NewFSWorldsService("", clientMgr)
 		default:
 			panic("Invalid world service be: " + *worlds_service_be)
 		}
 
 		switch *games_service_be {
 		case "local":
-			gamesService = fsbe.NewFSGamesService("")
+			gamesService = fsbe.NewFSGamesService("", clientMgr)
 		case "pg":
-			gamesService = gormbe.NewGamesService(db, worldsService)
+			gamesService = gormbe.NewGamesService(db, clientMgr)
 		default:
 			panic("Invalid game service be: " + *games_service_be)
 		}

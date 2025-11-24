@@ -14,8 +14,7 @@ type IndexerService interface {
 }
 
 type BaseIndexerService struct {
-	Self      IndexerService // The actual implementation
-	ClientMgr *ClientMgr
+	Self IndexerService // The actual implementation
 	v1s.UnimplementedIndexerServiceServer
 	indexStateChan chan *v1.IndexState
 }

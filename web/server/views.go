@@ -15,7 +15,7 @@ import (
 	gotl "github.com/panyam/goutils/template"
 	oa "github.com/panyam/oneauth"
 	tmplr "github.com/panyam/templar"
-	"github.com/turnforge/weewar/services/server"
+	"github.com/turnforge/weewar/services"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -31,7 +31,7 @@ const STATIC_FOLDER = "./web/static"
 type ViewContext struct {
 	AuthMiddleware *oa.Middleware
 	AuthService    oa.AuthUserStore
-	ClientMgr      *server.ClientMgr
+	ClientMgr      *services.ClientMgr
 	Ctx            context.Context
 	Templates      *tmplr.TemplateGroup
 	HideGames      bool
@@ -57,7 +57,7 @@ type RootViewsHandler struct {
 	Context *ViewContext
 }
 
-func NewRootViewsHandler(middleware *oa.Middleware, authService oa.AuthUserStore, clients *server.ClientMgr) *RootViewsHandler {
+func NewRootViewsHandler(middleware *oa.Middleware, authService oa.AuthUserStore, clients *services.ClientMgr) *RootViewsHandler {
 	out := RootViewsHandler{
 		mux: http.NewServeMux(),
 	}

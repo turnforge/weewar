@@ -20,6 +20,7 @@ func (r *RootViewsHandler) setupGamesMux() *http.ServeMux {
 	})
 	mux.HandleFunc("/{gameId}/screenshots/{screenshotName}/", r.handleResourceScreenshot("game"))
 	mux.HandleFunc("/{gameId}/screenshots/{screenshotName}", r.handleResourceScreenshot("game"))
+	mux.HandleFunc("/{gameId}/screenshot/live", r.handleGameScreenshotLive)
 	mux.HandleFunc("/{gameId}", r.handleGameActions)
 	return mux
 }
@@ -94,12 +95,7 @@ func (r *RootViewsHandler) deleteGameHandler(w http.ResponseWriter, req *http.Re
 	log.Printf("Delete game request: gameId=%s, userId=%s", gameId, loggedInUserId)
 
 	// Get games service client
-	client, err := r.Context.ClientMgr.GetGamesSvcClient()
-	if err != nil {
-		log.Printf("Failed to get games service client: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	client := r.Context.ClientMgr.GetGamesSvcClient()
 
 	// Create delete request
 	deleteReq := &protos.DeleteGameRequest{
@@ -107,7 +103,7 @@ func (r *RootViewsHandler) deleteGameHandler(w http.ResponseWriter, req *http.Re
 	}
 
 	// Call DeleteGame service
-	_, err = client.DeleteGame(context.Background(), deleteReq)
+	_, err := client.DeleteGame(context.Background(), deleteReq)
 	if err != nil {
 		log.Printf("Failed to delete game %s: %v", gameId, err)
 		http.Error(w, "Failed to delete game", http.StatusInternalServerError)

@@ -8,21 +8,20 @@ import (
 
 	"connectrpc.com/connect"
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	svc "github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/fsbe"
+	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 )
 
 // ConnectIndexerServiceAdapter adapts the gRPC IndexerService to Connect's interface
 type ConnectIndexerServiceAdapter struct {
-	svc svc.IndexerService
+	client v1s.IndexerServiceClient
 }
 
-func NewConnectIndexerServiceAdapter(svc svc.IndexerService) *ConnectIndexerServiceAdapter {
-	return &ConnectIndexerServiceAdapter{svc: svc}
+func NewConnectIndexerServiceAdapter(client v1s.IndexerServiceClient) *ConnectIndexerServiceAdapter {
+	return &ConnectIndexerServiceAdapter{client: client}
 }
 
 func (a *ConnectIndexerServiceAdapter) EnsureIndexState(ctx context.Context, req *connect.Request[v1.EnsureIndexStateRequest]) (*connect.Response[v1.EnsureIndexStateResponse], error) {
-	resp, err := a.svc.EnsureIndexState(ctx, req.Msg)
+	resp, err := a.client.EnsureIndexState(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -31,15 +30,15 @@ func (a *ConnectIndexerServiceAdapter) EnsureIndexState(ctx context.Context, req
 
 // ConnectGamesServiceAdapter adapts the gRPC GamesService to Connect's interface
 type ConnectGamesServiceAdapter struct {
-	svc *fsbe.FSGamesService
+	client v1s.GamesServiceClient
 }
 
-func NewConnectGamesServiceAdapter(svc *fsbe.FSGamesService) *ConnectGamesServiceAdapter {
-	return &ConnectGamesServiceAdapter{svc: svc}
+func NewConnectGamesServiceAdapter(client v1s.GamesServiceClient) *ConnectGamesServiceAdapter {
+	return &ConnectGamesServiceAdapter{client: client}
 }
 
 func (a *ConnectGamesServiceAdapter) CreateGame(ctx context.Context, req *connect.Request[v1.CreateGameRequest]) (*connect.Response[v1.CreateGameResponse], error) {
-	resp, err := a.svc.CreateGame(ctx, req.Msg)
+	resp, err := a.client.CreateGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +46,7 @@ func (a *ConnectGamesServiceAdapter) CreateGame(ctx context.Context, req *connec
 }
 
 func (a *ConnectGamesServiceAdapter) ListGames(ctx context.Context, req *connect.Request[v1.ListGamesRequest]) (*connect.Response[v1.ListGamesResponse], error) {
-	resp, err := a.svc.ListGames(ctx, req.Msg)
+	resp, err := a.client.ListGames(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +54,7 @@ func (a *ConnectGamesServiceAdapter) ListGames(ctx context.Context, req *connect
 }
 
 func (a *ConnectGamesServiceAdapter) GetGame(ctx context.Context, req *connect.Request[v1.GetGameRequest]) (*connect.Response[v1.GetGameResponse], error) {
-	resp, err := a.svc.GetGame(ctx, req.Msg)
+	resp, err := a.client.GetGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +62,7 @@ func (a *ConnectGamesServiceAdapter) GetGame(ctx context.Context, req *connect.R
 }
 
 func (a *ConnectGamesServiceAdapter) GetGames(ctx context.Context, req *connect.Request[v1.GetGamesRequest]) (*connect.Response[v1.GetGamesResponse], error) {
-	resp, err := a.svc.GetGames(ctx, req.Msg)
+	resp, err := a.client.GetGames(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +70,7 @@ func (a *ConnectGamesServiceAdapter) GetGames(ctx context.Context, req *connect.
 }
 
 func (a *ConnectGamesServiceAdapter) DeleteGame(ctx context.Context, req *connect.Request[v1.DeleteGameRequest]) (*connect.Response[v1.DeleteGameResponse], error) {
-	resp, err := a.svc.DeleteGame(ctx, req.Msg)
+	resp, err := a.client.DeleteGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +78,7 @@ func (a *ConnectGamesServiceAdapter) DeleteGame(ctx context.Context, req *connec
 }
 
 func (a *ConnectGamesServiceAdapter) UpdateGame(ctx context.Context, req *connect.Request[v1.UpdateGameRequest]) (*connect.Response[v1.UpdateGameResponse], error) {
-	resp, err := a.svc.UpdateGame(ctx, req.Msg)
+	resp, err := a.client.UpdateGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func (a *ConnectGamesServiceAdapter) UpdateGame(ctx context.Context, req *connec
 }
 
 func (a *ConnectGamesServiceAdapter) ProcessMoves(ctx context.Context, req *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error) {
-	resp, err := a.svc.ProcessMoves(ctx, req.Msg)
+	resp, err := a.client.ProcessMoves(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +94,7 @@ func (a *ConnectGamesServiceAdapter) ProcessMoves(ctx context.Context, req *conn
 }
 
 func (a *ConnectGamesServiceAdapter) GetOptionsAt(ctx context.Context, req *connect.Request[v1.GetOptionsAtRequest]) (*connect.Response[v1.GetOptionsAtResponse], error) {
-	resp, err := a.svc.GetOptionsAt(ctx, req.Msg)
+	resp, err := a.client.GetOptionsAt(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +102,7 @@ func (a *ConnectGamesServiceAdapter) GetOptionsAt(ctx context.Context, req *conn
 }
 
 func (a *ConnectGamesServiceAdapter) ListMoves(ctx context.Context, req *connect.Request[v1.ListMovesRequest]) (*connect.Response[v1.ListMovesResponse], error) {
-	resp, err := a.svc.ListMoves(ctx, req.Msg)
+	resp, err := a.client.ListMoves(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +110,7 @@ func (a *ConnectGamesServiceAdapter) ListMoves(ctx context.Context, req *connect
 }
 
 func (a *ConnectGamesServiceAdapter) SimulateAttack(ctx context.Context, req *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error) {
-	resp, err := a.svc.SimulateAttack(ctx, req.Msg)
+	resp, err := a.client.SimulateAttack(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +118,7 @@ func (a *ConnectGamesServiceAdapter) SimulateAttack(ctx context.Context, req *co
 }
 
 func (a *ConnectGamesServiceAdapter) GetGameState(ctx context.Context, req *connect.Request[v1.GetGameStateRequest]) (*connect.Response[v1.GetGameStateResponse], error) {
-	resp, err := a.svc.GetGameState(ctx, req.Msg)
+	resp, err := a.client.GetGameState(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -135,21 +134,21 @@ func (a *ConnectGameServiceAdapter) StreamSomeThing(ctx context.Context, req *co
 	}
 
 	// Call your existing gRPC streaming method
-	return a.svc.StreamSomeThing(req.Msg, bridgeStream)
+	return a.client.StreamSomeThing(req.Msg, bridgeStream)
 }
 */
 
 // ConnectWorldsServiceAdapter adapts the gRPC WorldsService to Connect's interface
 type ConnectWorldsServiceAdapter struct {
-	svc *fsbe.FSWorldsService
+	client v1s.WorldsServiceClient
 }
 
-func NewConnectWorldsServiceAdapter(svc *fsbe.FSWorldsService) *ConnectWorldsServiceAdapter {
-	return &ConnectWorldsServiceAdapter{svc: svc}
+func NewConnectWorldsServiceAdapter(client v1s.WorldsServiceClient) *ConnectWorldsServiceAdapter {
+	return &ConnectWorldsServiceAdapter{client: client}
 }
 
 func (a *ConnectWorldsServiceAdapter) CreateWorld(ctx context.Context, req *connect.Request[v1.CreateWorldRequest]) (*connect.Response[v1.CreateWorldResponse], error) {
-	resp, err := a.svc.CreateWorld(ctx, req.Msg)
+	resp, err := a.client.CreateWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +156,7 @@ func (a *ConnectWorldsServiceAdapter) CreateWorld(ctx context.Context, req *conn
 }
 
 func (a *ConnectWorldsServiceAdapter) ListWorlds(ctx context.Context, req *connect.Request[v1.ListWorldsRequest]) (*connect.Response[v1.ListWorldsResponse], error) {
-	resp, err := a.svc.ListWorlds(ctx, req.Msg)
+	resp, err := a.client.ListWorlds(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +164,7 @@ func (a *ConnectWorldsServiceAdapter) ListWorlds(ctx context.Context, req *conne
 }
 
 func (a *ConnectWorldsServiceAdapter) GetWorld(ctx context.Context, req *connect.Request[v1.GetWorldRequest]) (*connect.Response[v1.GetWorldResponse], error) {
-	resp, err := a.svc.GetWorld(ctx, req.Msg)
+	resp, err := a.client.GetWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +172,7 @@ func (a *ConnectWorldsServiceAdapter) GetWorld(ctx context.Context, req *connect
 }
 
 func (a *ConnectWorldsServiceAdapter) GetWorlds(ctx context.Context, req *connect.Request[v1.GetWorldsRequest]) (*connect.Response[v1.GetWorldsResponse], error) {
-	resp, err := a.svc.GetWorlds(ctx, req.Msg)
+	resp, err := a.client.GetWorlds(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +180,7 @@ func (a *ConnectWorldsServiceAdapter) GetWorlds(ctx context.Context, req *connec
 }
 
 func (a *ConnectWorldsServiceAdapter) DeleteWorld(ctx context.Context, req *connect.Request[v1.DeleteWorldRequest]) (*connect.Response[v1.DeleteWorldResponse], error) {
-	resp, err := a.svc.DeleteWorld(ctx, req.Msg)
+	resp, err := a.client.DeleteWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +188,7 @@ func (a *ConnectWorldsServiceAdapter) DeleteWorld(ctx context.Context, req *conn
 }
 
 func (a *ConnectWorldsServiceAdapter) UpdateWorld(ctx context.Context, req *connect.Request[v1.UpdateWorldRequest]) (*connect.Response[v1.UpdateWorldResponse], error) {
-	resp, err := a.svc.UpdateWorld(ctx, req.Msg)
+	resp, err := a.client.UpdateWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +204,6 @@ func (a *ConnectWorldServiceAdapter) StreamSomeThing(ctx context.Context, req *c
 	}
 
 	// Call your existing gRPC streaming method
-	return a.svc.StreamSomeThing(req.Msg, bridgeStream)
+	return a.client.StreamSomeThing(req.Msg, bridgeStream)
 }
 */

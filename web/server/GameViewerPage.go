@@ -48,12 +48,7 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCo
 	}
 
 	// Load the world (same as WorldEditorPage)
-	client, err := vc.ClientMgr.GetGamesSvcClient()
-	if err != nil {
-		log.Printf("Error getting Games client: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return nil, true
-	}
+	client := vc.ClientMgr.GetGamesSvcClient()
 
 	req := &protos.GetGameRequest{Id: p.GameId}
 

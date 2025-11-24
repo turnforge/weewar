@@ -27,12 +27,7 @@ func (p *WorldViewerPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewC
 	p.Header.Load(r, w, vc)
 
 	// Fetch the World using the client manager
-	client, err := vc.ClientMgr.GetWorldsSvcClient()
-	if err != nil {
-		log.Printf("Error getting Worlds client: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return nil, true
-	}
+	client := vc.ClientMgr.GetWorldsSvcClient()
 
 	req := &protos.GetWorldRequest{
 		Id: p.WorldId,

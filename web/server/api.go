@@ -10,8 +10,7 @@ import (
 	oa "github.com/panyam/oneauth"
 	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 	v1connect "github.com/turnforge/weewar/gen/go/weewar/v1/services/weewarv1connect"
-	"github.com/turnforge/weewar/services/fsbe"
-	"github.com/turnforge/weewar/services/server"
+	"github.com/turnforge/weewar/services"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -23,7 +22,7 @@ import (
 type ApiHandler struct {
 	mux            *http.ServeMux
 	AuthMiddleware *oa.Middleware
-	ClientMgr      *server.ClientMgr
+	ClientMgr      *services.ClientMgr
 
 	// Here we can have to ways of accessing the services - either via clients or by actual service instead if you are not
 	// running the services on a dedicated port
@@ -54,14 +53,16 @@ func (out *ApiHandler) setupConnectHandlers() error {
 	// We will do this for each service we have registered
 	if !out.DisableGamesService {
 		log.Println("Adding Games Connect handler...")
-		gamesAdapter := NewConnectGamesServiceAdapter(fsbe.NewFSGamesService(""))
+		gamesSvcClient := out.ClientMgr.GetGamesSvcClient()
+		gamesAdapter := NewConnectGamesServiceAdapter(gamesSvcClient)
 		gamesConnectPath, gamesConnectHandler := v1connect.NewGamesServiceHandler(gamesAdapter)
 		out.mux.Handle(gamesConnectPath, gamesConnectHandler)
 		log.Printf("Registered Games Connect handler at: %s", gamesConnectPath)
 	}
 
 	if !out.DisableWorldsService {
-		worldsAdapter := NewConnectWorldsServiceAdapter(fsbe.NewFSWorldsService(""))
+		worldsSvcClient := out.ClientMgr.GetWorldsSvcClient()
+		worldsAdapter := NewConnectWorldsServiceAdapter(worldsSvcClient)
 		worldsConnectPath, worldsConnectHandler := v1connect.NewWorldsServiceHandler(worldsAdapter)
 		out.mux.Handle(worldsConnectPath, worldsConnectHandler)
 		log.Printf("Registered Worlds Connect handler at: %s", worldsConnectPath)
@@ -72,7 +73,8 @@ func (out *ApiHandler) setupConnectHandlers() error {
 		/* - TODO we are creating a new service via NewIndexService - instead this pattern should be using the client.
 		* Needs to be investigated
 		log.Println("Adding Indexer Connect handler...")
-		indexerAdapter := NewConnectIndexerServiceAdapter(gormbe.NewIndexerService(""))
+		indexerSvcClient := out.ClientMgr.GetIndexerSvcClient()
+		indexerAdapter := NewConnectIndexerServiceAdapter(indexerSvcClient)
 		indexerConnectPath, indexerConnectHandler := v1connect.NewIndexerServiceHandler(indexerAdapter)
 		out.mux.Handle(indexerConnectPath, indexerConnectHandler)
 		log.Printf("Registered Indexer Connect handler at: %s", indexerConnectPath)

@@ -44,11 +44,7 @@ func (p *WorldListView) Load(r *http.Request, w http.ResponseWriter, vc *ViewCon
 		p.ActionMode = "manage"
 	}
 
-	client, err := vc.ClientMgr.GetWorldsSvcClient()
-	if err != nil {
-		log.Printf("Error getting worlds service client: %v", err)
-		return err, false
-	}
+	client := vc.ClientMgr.GetWorldsSvcClient()
 
 	req := protos.ListWorldsRequest{
 		Pagination: &protos.Pagination{

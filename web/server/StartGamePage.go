@@ -38,26 +38,20 @@ func (p *StartGamePage) Load(r *http.Request, w http.ResponseWriter, vc *ViewCon
 	// If a worldId is provided, fetch the world data
 	if p.WorldId != "" {
 		// Fetch the World using the client manager
-		client, err := vc.ClientMgr.GetWorldsSvcClient()
-		if err != nil {
-			log.Printf("Error getting Worlds client: %v", err)
-			// Don't fail the page, just log the error
-			p.WorldId = ""
-		} else {
-			req := &protos.GetWorldRequest{
-				Id: p.WorldId,
-			}
+		client := vc.ClientMgr.GetWorldsSvcClient()
+		req := &protos.GetWorldRequest{
+			Id: p.WorldId,
+		}
 
-			resp, err := client.GetWorld(context.Background(), req)
-			if err != nil {
-				log.Printf("Error fetching World %s: %v", p.WorldId, err)
-				// Don't fail the page, just clear the worldId
-				p.WorldId = ""
-			} else if resp.World != nil {
-				p.World = resp.World
-				p.WorldData = resp.WorldData
-				p.Title = "New Game - " + p.World.Name
-			}
+		resp, err := client.GetWorld(context.Background(), req)
+		if err != nil {
+			log.Printf("Error fetching World %s: %v", p.WorldId, err)
+			// Don't fail the page, just clear the worldId
+			p.WorldId = ""
+		} else if resp.World != nil {
+			p.World = resp.World
+			p.WorldData = resp.WorldData
+			p.Title = "New Game - " + p.World.Name
 		}
 	}
 

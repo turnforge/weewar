@@ -10,7 +10,6 @@ import (
 	oa "github.com/panyam/oneauth"
 	oa2 "github.com/panyam/oneauth/oauth2"
 	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/server"
 )
 
 // You can all this anything - but App is just a convention for all "top level" routes and handlers
@@ -19,7 +18,7 @@ type App struct {
 	Auth        *oa.OneAuth // One auth gives us alots of things out of the box
 	AuthService *services.AuthService
 	Session     *scs.SessionManager // Session and auth go together
-	ClientMgr   *server.ClientMgr
+	ClientMgr   *services.ClientMgr
 
 	// Instead of giving each resource its own dedicated handler we are having a top level "Views"
 	// handler.  This is responsible for handling all views/pages/static resources.  In the Views
@@ -31,7 +30,7 @@ type App struct {
 	BaseUrl string
 }
 
-func NewApp(ClientMgr *server.ClientMgr) (app *App, err error) {
+func NewApp(ClientMgr *services.ClientMgr) (app *App, err error) {
 	session := scs.New()
 	// session.Store = NewMemoryStore(0)
 

@@ -249,7 +249,7 @@ func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewC
 		}
 		log.Println("Using template: ", templateName)
 	} else {
-		client, _ := vc.ClientMgr.GetWorldsSvcClient()
+		client := vc.ClientMgr.GetWorldsSvcClient()
 		resp, err := client.GetWorld(context.Background(), &protos.GetWorldRequest{
 			Id: v.WorldId,
 		})

@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/turnforge/weewar/services/server"
+	"github.com/turnforge/weewar/services"
 	"github.com/turnforge/weewar/utils"
 )
 
@@ -13,7 +13,7 @@ type WebAppServer struct {
 
 // func (s *WebAppServer) Start(ctx context.Context, mux http.Handler, gw_addr string, srvErr chan error, stopChan chan bool) {
 func (s *WebAppServer) Start(ctx context.Context, srvErr chan error, stopChan chan bool) error {
-	cm := server.NewClientMgr(s.GrpcAddress)
+	cm := services.NewClientMgr(s.GrpcAddress)
 	app, _ := NewApp(cm)
 	return s.StartWithHandler(ctx, app.Handler(), srvErr, stopChan)
 }

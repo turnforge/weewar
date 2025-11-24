@@ -22,7 +22,7 @@ func (p *GameListView) Load(r *http.Request, w http.ResponseWriter, vc *ViewCont
 	// otherwise those will be passed in
 	_, _ = p.Paginator.Load(r, w, vc)
 
-	client, _ := vc.ClientMgr.GetGamesSvcClient()
+	client := vc.ClientMgr.GetGamesSvcClient()
 
 	req := protos.ListGamesRequest{
 		Pagination: &protos.Pagination{

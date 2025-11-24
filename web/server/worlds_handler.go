@@ -27,6 +27,7 @@ func (r *RootViewsHandler) setupWorldsMux() *http.ServeMux {
 	})
 	mux.HandleFunc("/{worldId}/screenshots/{screenshotName}/", r.handleResourceScreenshot("world"))
 	mux.HandleFunc("/{worldId}/screenshots/{screenshotName}", r.handleResourceScreenshot("world"))
+	mux.HandleFunc("/{worldId}/screenshot/live", r.handleWorldScreenshotLive)
 	mux.HandleFunc("/{worldId}", r.handleWorldActions)
 	return mux
 }
@@ -43,12 +44,7 @@ func (r *RootViewsHandler) createNewWorldHandler(w http.ResponseWriter, req *htt
 	// }
 
 	// Get worlds service client
-	client, err := r.Context.ClientMgr.GetWorldsSvcClient()
-	if err != nil {
-		log.Printf("Failed to get worlds service client: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	client := r.Context.ClientMgr.GetWorldsSvcClient()
 
 	// Create a new world with minimal data
 	createReq := &protos.CreateWorldRequest{
@@ -99,12 +95,7 @@ func (r *RootViewsHandler) deleteWorldHandler(w http.ResponseWriter, req *http.R
 	log.Printf("Delete world request: worldId=%s, userId=%s", worldId, loggedInUserId)
 
 	// Get worlds service client
-	client, err := r.Context.ClientMgr.GetWorldsSvcClient()
-	if err != nil {
-		log.Printf("Failed to get worlds service client: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	client := r.Context.ClientMgr.GetWorldsSvcClient()
 
 	// Create delete request
 	deleteReq := &protos.DeleteWorldRequest{
@@ -112,7 +103,7 @@ func (r *RootViewsHandler) deleteWorldHandler(w http.ResponseWriter, req *http.R
 	}
 
 	// Call DeleteWorld service
-	_, err = client.DeleteWorld(context.Background(), deleteReq)
+	_, err := client.DeleteWorld(context.Background(), deleteReq)
 	if err != nil {
 		log.Printf("Failed to delete world %s: %v", worldId, err)
 		http.Error(w, "Failed to delete world", http.StatusInternalServerError)

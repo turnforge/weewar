@@ -13,6 +13,7 @@ import (
 	"github.com/turnforge/weewar/services"
 	"github.com/turnforge/weewar/services/fsbe"
 	"github.com/turnforge/weewar/services/gormbe"
+	"github.com/turnforge/weewar/services/r2"
 	"github.com/turnforge/weewar/services/server"
 	"github.com/turnforge/weewar/utils"
 	web "github.com/turnforge/weewar/web/server"
@@ -27,6 +28,7 @@ var (
 	db_endpoint       = flag.String("db_endpoint", "", fmt.Sprintf("Endpoint of DB where all data is persisted.  Default value: WEEWAR_DB_ENDPOINT environment variable or %s", DEFAULT_DB_ENDPOINT))
 	worlds_service_be = flag.String("worlds_service_be", "pg", "Storage for worlds service - 'local', 'pg', 'datastore'.  ")
 	games_service_be  = flag.String("games_service_be", "pg", "Storage for games service - 'local', 'pg', 'datastore'.  ")
+	filestore_be      = flag.String("filestore_be", "local", "Storage for filestore - 'r2' or 'local', 'pg', 'datastore'.  ")
 )
 
 type Backend struct {
@@ -96,6 +98,7 @@ func (b *Backend) SetupApp() *utils.App {
 	grpcServer.RegisterCallback = func(server *grpc.Server) error {
 		var gamesService v1s.GamesServiceServer
 		var worldsService v1s.WorldsServiceServer
+		var filestore v1s.FileStoreServiceServer
 
 		db := gormbe.OpenWeewarDB(*db_endpoint, DEFAULT_DB_ENDPOINT)
 		// v1s.RegisterWorldsServiceServer(server, fsbe.NewFSWorldsService(""))
@@ -116,8 +119,29 @@ func (b *Backend) SetupApp() *utils.App {
 		default:
 			panic("Invalid game service be: " + *games_service_be)
 		}
+
+		switch *filestore_be {
+		case "local":
+			filestore = fsbe.NewFileStoreService("", clientMgr)
+		case "r2":
+			r2Client, err := r2.NewR2Client(r2.R2Config{
+				AccountID:       os.Getenv("R2_ACCOUNT_ID"),
+				AccessKeyID:     os.Getenv("R2_ACCESS_KEY_ID"),
+				SecretAccessKey: os.Getenv("R2_SECRET_ACCESS_KEY"),
+				Bucket:          "weewar-assets",
+				PublicURL:       "", // Leave empty for private bucket
+			})
+			if err != nil {
+				panic(fmt.Sprintf("Could not instantiate r2 client: %v", err))
+			}
+			filestore = r2.NewR2FileStoreService(r2Client)
+		default:
+			panic("Invalid filestore be: " + *filestore_be)
+		}
+
 		v1s.RegisterWorldsServiceServer(server, worldsService)
 		v1s.RegisterGamesServiceServer(server, gamesService)
+		v1s.RegisterFileStoreServiceServer(server, filestore)
 
 		// TODO - use diferent kinds of db based on setup
 		v1s.RegisterIndexerServiceServer(server, gormbe.NewIndexerService(db))

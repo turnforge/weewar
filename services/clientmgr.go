@@ -24,11 +24,12 @@ const APP_ID = "weewar"
 var ErrNoSuchEntity = errors.New("entity not found")
 
 type ClientMgr struct {
-	svcAddr          string
-	indexerSvcClient v1s.IndexerServiceClient
-	worldsSvcClient  v1s.WorldsServiceClient
-	gamesSvcClient   v1s.GamesServiceClient
-	authSvc          *AuthService
+	svcAddr            string
+	indexerSvcClient   v1s.IndexerServiceClient
+	worldsSvcClient    v1s.WorldsServiceClient
+	gamesSvcClient     v1s.GamesServiceClient
+	filestoreSvcClient v1s.FileStoreServiceClient
+	authSvc            *AuthService
 	// We may need an auth svc at some point
 }
 
@@ -98,4 +99,17 @@ func (c *ClientMgr) GetWorldsSvcClient() (out v1s.WorldsServiceClient) {
 		c.worldsSvcClient = v1s.NewWorldsServiceClient(worldsSvcConn)
 	}
 	return c.worldsSvcClient
+}
+
+func (c *ClientMgr) GetFileStoreSvcClient() (out v1s.FileStoreServiceClient) {
+	if c.filestoreSvcClient == nil {
+		filestoreSvcConn, err := grpc.NewClient(c.svcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			panic(fmt.Sprintf("cannot connect with server %v", err))
+			// return nil, err
+		}
+
+		c.filestoreSvcClient = v1s.NewFileStoreServiceClient(filestoreSvcConn)
+	}
+	return c.filestoreSvcClient
 }

@@ -474,11 +474,10 @@ type World struct {
 	// Can be overridden to point to CDN or external hosting
 	PreviewUrls []string `protobuf:"bytes,11,rep,name=preview_urls,json=previewUrls,proto3" json:"preview_urls,omitempty"`
 	// Default game configs
-	DefaultGameConfig   *GameConfiguration `protobuf:"bytes,12,opt,name=default_game_config,json=defaultGameConfig,proto3" json:"default_game_config,omitempty"`
-	ScreenshotIndexInfo *IndexInfo         `protobuf:"bytes,13,opt,name=screenshot_index_info,json=screenshotIndexInfo,proto3" json:"screenshot_index_info,omitempty"`
-	SearchIndexInfo     *IndexInfo         `protobuf:"bytes,14,opt,name=search_index_info,json=searchIndexInfo,proto3" json:"search_index_info,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	DefaultGameConfig *GameConfiguration `protobuf:"bytes,12,opt,name=default_game_config,json=defaultGameConfig,proto3" json:"default_game_config,omitempty"`
+	SearchIndexInfo   *IndexInfo         `protobuf:"bytes,13,opt,name=search_index_info,json=searchIndexInfo,proto3" json:"search_index_info,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *World) Reset() {
@@ -588,13 +587,6 @@ func (x *World) GetDefaultGameConfig() *GameConfiguration {
 	return nil
 }
 
-func (x *World) GetScreenshotIndexInfo() *IndexInfo {
-	if x != nil {
-		return x.ScreenshotIndexInfo
-	}
-	return nil
-}
-
 func (x *World) GetSearchIndexInfo() *IndexInfo {
 	if x != nil {
 		return x.SearchIndexInfo
@@ -607,7 +599,11 @@ type WorldData struct {
 	// JSON-fied tile data about what units and terrains are at each location
 	Tiles []*Tile `protobuf:"bytes,1,rep,name=tiles,proto3" json:"tiles,omitempty"`
 	// All units on the world and who they belong to
-	Units         []*Unit `protobuf:"bytes,2,rep,name=units,proto3" json:"units,omitempty"`
+	Units []*Unit `protobuf:"bytes,2,rep,name=units,proto3" json:"units,omitempty"`
+	// When this world data was updated (may have happened without world updating)
+	ScreenshotIndexInfo *IndexInfo `protobuf:"bytes,3,opt,name=screenshot_index_info,json=screenshotIndexInfo,proto3" json:"screenshot_index_info,omitempty"`
+	// We will only update if hash's are different
+	ContentHash   string `protobuf:"bytes,4,opt,name=content_hash,json=contentHash,proto3" json:"content_hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -654,6 +650,20 @@ func (x *WorldData) GetUnits() []*Unit {
 		return x.Units
 	}
 	return nil
+}
+
+func (x *WorldData) GetScreenshotIndexInfo() *IndexInfo {
+	if x != nil {
+		return x.ScreenshotIndexInfo
+	}
+	return nil
+}
+
+func (x *WorldData) GetContentHash() string {
+	if x != nil {
+		return x.ContentHash
+	}
+	return ""
 }
 
 type Tile struct {
@@ -3831,7 +3841,7 @@ const file_weewar_v1_models_models_proto_rawDesc = "" +
 	"\rnext_page_key\x18\x02 \x01(\tR\vnextPageKey\x12(\n" +
 	"\x10next_page_offset\x18\x03 \x01(\x05R\x0enextPageOffset\x12\x19\n" +
 	"\bhas_more\x18\x04 \x01(\bR\ahasMore\x12#\n" +
-	"\rtotal_results\x18\x05 \x01(\x05R\ftotalResults\"\xb0\x04\n" +
+	"\rtotal_results\x18\x05 \x01(\x05R\ftotalResults\"\xe6\x03\n" +
 	"\x05World\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -3848,12 +3858,13 @@ const file_weewar_v1_models_models_proto_rawDesc = "" +
 	"difficulty\x18\t \x01(\tR\n" +
 	"difficulty\x12!\n" +
 	"\fpreview_urls\x18\v \x03(\tR\vpreviewUrls\x12L\n" +
-	"\x13default_game_config\x18\f \x01(\v2\x1c.weewar.v1.GameConfigurationR\x11defaultGameConfig\x12H\n" +
-	"\x15screenshot_index_info\x18\r \x01(\v2\x14.weewar.v1.IndexInfoR\x13screenshotIndexInfo\x12@\n" +
-	"\x11search_index_info\x18\x0e \x01(\v2\x14.weewar.v1.IndexInfoR\x0fsearchIndexInfo\"Y\n" +
+	"\x13default_game_config\x18\f \x01(\v2\x1c.weewar.v1.GameConfigurationR\x11defaultGameConfig\x12@\n" +
+	"\x11search_index_info\x18\r \x01(\v2\x14.weewar.v1.IndexInfoR\x0fsearchIndexInfo\"\xc6\x01\n" +
 	"\tWorldData\x12%\n" +
 	"\x05tiles\x18\x01 \x03(\v2\x0f.weewar.v1.TileR\x05tiles\x12%\n" +
-	"\x05units\x18\x02 \x03(\v2\x0f.weewar.v1.UnitR\x05units\"\xc9\x01\n" +
+	"\x05units\x18\x02 \x03(\v2\x0f.weewar.v1.UnitR\x05units\x12H\n" +
+	"\x15screenshot_index_info\x18\x03 \x01(\v2\x14.weewar.v1.IndexInfoR\x13screenshotIndexInfo\x12!\n" +
+	"\fcontent_hash\x18\x04 \x01(\tR\vcontentHash\"\xc9\x01\n" +
 	"\x04Tile\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x1b\n" +
@@ -4262,10 +4273,10 @@ var file_weewar_v1_models_models_proto_depIdxs = []int32{
 	52, // 4: weewar.v1.World.created_at:type_name -> google.protobuf.Timestamp
 	52, // 5: weewar.v1.World.updated_at:type_name -> google.protobuf.Timestamp
 	19, // 6: weewar.v1.World.default_game_config:type_name -> weewar.v1.GameConfiguration
-	2,  // 7: weewar.v1.World.screenshot_index_info:type_name -> weewar.v1.IndexInfo
-	2,  // 8: weewar.v1.World.search_index_info:type_name -> weewar.v1.IndexInfo
-	8,  // 9: weewar.v1.WorldData.tiles:type_name -> weewar.v1.Tile
-	9,  // 10: weewar.v1.WorldData.units:type_name -> weewar.v1.Unit
+	2,  // 7: weewar.v1.World.search_index_info:type_name -> weewar.v1.IndexInfo
+	8,  // 8: weewar.v1.WorldData.tiles:type_name -> weewar.v1.Tile
+	9,  // 9: weewar.v1.WorldData.units:type_name -> weewar.v1.Unit
+	2,  // 10: weewar.v1.WorldData.screenshot_index_info:type_name -> weewar.v1.IndexInfo
 	10, // 11: weewar.v1.Unit.attack_history:type_name -> weewar.v1.AttackRecord
 	43, // 12: weewar.v1.TerrainDefinition.unit_properties:type_name -> weewar.v1.TerrainDefinition.UnitPropertiesEntry
 	44, // 13: weewar.v1.UnitDefinition.terrain_properties:type_name -> weewar.v1.UnitDefinition.TerrainPropertiesEntry

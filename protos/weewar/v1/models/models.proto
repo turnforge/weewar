@@ -2,7 +2,8 @@ syntax = "proto3";
 
 package weewar.v1;
 import "google/protobuf/timestamp.proto";
-option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1";
+
+option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
 
 message IndexInfo {
   // We maintain an IndexInfo for each type of "indexing" operation needed
@@ -116,8 +117,7 @@ message World {
   // Default game configs
   GameConfiguration default_game_config = 12;
 
-  IndexInfo screenshot_index_info = 13;
-  IndexInfo search_index_info = 14;
+  IndexInfo search_index_info = 13;
 }
 
 message WorldData {
@@ -126,6 +126,12 @@ message WorldData {
 
   // All units on the world and who they belong to
   repeated Unit units = 2;
+
+  // When this world data was updated (may have happened without world updating)
+  IndexInfo screenshot_index_info = 3;
+
+  // We will only update if hash's are different
+  string content_hash = 4;
 }
 
 message Tile {

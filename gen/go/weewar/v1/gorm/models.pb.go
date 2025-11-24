@@ -177,10 +177,8 @@ type WorldGORM struct {
 	// PreviewUrls as JSON for cross-DB compatibility
 	PreviewUrls []string `protobuf:"bytes,11,rep,name=preview_urls,json=previewUrls,proto3" json:"preview_urls,omitempty"`
 	// DefaultGameConfig as JSON for cross-DB compatibility
-	// ScreenshotIndexInfo embedded
-	ScreenshotIndexInfo *IndexInfoGORM `protobuf:"bytes,13,opt,name=screenshot_index_info,json=screenshotIndexInfo,proto3" json:"screenshot_index_info,omitempty"`
 	// SearchIndexInfo embedded
-	SearchIndexInfo *IndexInfoGORM `protobuf:"bytes,14,opt,name=search_index_info,json=searchIndexInfo,proto3" json:"search_index_info,omitempty"`
+	SearchIndexInfo *IndexInfoGORM `protobuf:"bytes,13,opt,name=search_index_info,json=searchIndexInfo,proto3" json:"search_index_info,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -236,13 +234,6 @@ func (x *WorldGORM) GetPreviewUrls() []string {
 	return nil
 }
 
-func (x *WorldGORM) GetScreenshotIndexInfo() *IndexInfoGORM {
-	if x != nil {
-		return x.ScreenshotIndexInfo
-	}
-	return nil
-}
-
 func (x *WorldGORM) GetSearchIndexInfo() *IndexInfoGORM {
 	if x != nil {
 		return x.SearchIndexInfo
@@ -251,14 +242,16 @@ func (x *WorldGORM) GetSearchIndexInfo() *IndexInfoGORM {
 }
 
 type WorldDataGORM struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	WorldId string                 `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	// Tiles as JSON for cross-DB compatibility
-	Tiles   []*TileGORM `protobuf:"bytes,1,rep,name=tiles,proto3" json:"tiles,omitempty"`
-	WorldId string      `protobuf:"bytes,2,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	Tiles []*TileGORM `protobuf:"bytes,2,rep,name=tiles,proto3" json:"tiles,omitempty"`
 	// Units as JSON for cross-DB compatibility
-	Units         []*UnitGORM `protobuf:"bytes,3,rep,name=units,proto3" json:"units,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Units []*UnitGORM `protobuf:"bytes,3,rep,name=units,proto3" json:"units,omitempty"`
+	// ScreenshotIndexInfo embedded
+	ScreenshotIndexInfo *IndexInfoGORM `protobuf:"bytes,4,opt,name=screenshot_index_info,json=screenshotIndexInfo,proto3" json:"screenshot_index_info,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *WorldDataGORM) Reset() {
@@ -291,13 +284,6 @@ func (*WorldDataGORM) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_gorm_models_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *WorldDataGORM) GetTiles() []*TileGORM {
-	if x != nil {
-		return x.Tiles
-	}
-	return nil
-}
-
 func (x *WorldDataGORM) GetWorldId() string {
 	if x != nil {
 		return x.WorldId
@@ -305,9 +291,23 @@ func (x *WorldDataGORM) GetWorldId() string {
 	return ""
 }
 
+func (x *WorldDataGORM) GetTiles() []*TileGORM {
+	if x != nil {
+		return x.Tiles
+	}
+	return nil
+}
+
 func (x *WorldDataGORM) GetUnits() []*UnitGORM {
 	if x != nil {
 		return x.Units
+	}
+	return nil
+}
+
+func (x *WorldDataGORM) GetScreenshotIndexInfo() *IndexInfoGORM {
+	if x != nil {
+		return x.ScreenshotIndexInfo
 	}
 	return nil
 }
@@ -811,20 +811,20 @@ const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\bUnitGORM:\x16ʦ\x1d\x12\n" +
 	"\x0eweewar.v1.Unit \x01\"2\n" +
 	"\x10AttackRecordGORM:\x1eʦ\x1d\x1a\n" +
-	"\x16weewar.v1.AttackRecord \x01\"\xa5\x03\n" +
+	"\x16weewar.v1.AttackRecord \x01\"\xa5\x02\n" +
 	"\tWorldGORM\x12 \n" +
 	"\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
 	"primaryKeyR\x02id\x12)\n" +
 	"\x04tags\x18\a \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x128\n" +
-	"\fpreview_urls\x18\v \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\vpreviewUrls\x12~\n" +
-	"\x15screenshot_index_info\x18\r \x01(\v2\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\bembeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12r\n" +
-	"\x11search_index_info\x18\x0e \x01(\v2\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\bembeddedR\x1cembeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1dʦ\x1d\x19\n" +
-	"\x0fweewar.v1.World\x12\x06worlds\"\xe9\x01\n" +
-	"\rWorldDataGORM\x12@\n" +
-	"\x05tiles\x18\x01 \x03(\v2\x13.weewar.v1.TileGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05tiles\x12+\n" +
-	"\bworld_id\x18\x02 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
+	"\fpreview_urls\x18\v \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\vpreviewUrls\x12r\n" +
+	"\x11search_index_info\x18\r \x01(\v2\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\bembeddedR\x1cembeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1dʦ\x1d\x19\n" +
+	"\x0fweewar.v1.World\x12\x06worlds\"\xe9\x02\n" +
+	"\rWorldDataGORM\x12+\n" +
+	"\bworld_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
 	"primaryKeyR\aworldId\x12@\n" +
-	"\x05units\x18\x03 \x03(\v2\x13.weewar.v1.UnitGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05units:'ʦ\x1d#\n" +
+	"\x05tiles\x18\x02 \x03(\v2\x13.weewar.v1.TileGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05tiles\x12@\n" +
+	"\x05units\x18\x03 \x03(\v2\x13.weewar.v1.UnitGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05units\x12~\n" +
+	"\x15screenshot_index_info\x18\x04 \x01(\v2\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\bembeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo:'ʦ\x1d#\n" +
 	"\x13weewar.v1.WorldData\x12\n" +
 	"world_data \x01\"\xa2\x03\n" +
 	"\bGameGORM\x12 \n" +
@@ -906,10 +906,10 @@ var file_weewar_v1_gorm_models_proto_goTypes = []any{
 	(*anypb.Any)(nil),             // 16: google.protobuf.Any
 }
 var file_weewar_v1_gorm_models_proto_depIdxs = []int32{
-	0,  // 0: weewar.v1.WorldGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
-	0,  // 1: weewar.v1.WorldGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
-	1,  // 2: weewar.v1.WorldDataGORM.tiles:type_name -> weewar.v1.TileGORM
-	2,  // 3: weewar.v1.WorldDataGORM.units:type_name -> weewar.v1.UnitGORM
+	0,  // 0: weewar.v1.WorldGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
+	1,  // 1: weewar.v1.WorldDataGORM.tiles:type_name -> weewar.v1.TileGORM
+	2,  // 2: weewar.v1.WorldDataGORM.units:type_name -> weewar.v1.UnitGORM
+	0,  // 3: weewar.v1.WorldDataGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
 	0,  // 4: weewar.v1.GameGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
 	0,  // 5: weewar.v1.GameGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
 	8,  // 6: weewar.v1.GameConfigurationGORM.income_configs:type_name -> weewar.v1.IncomeConfigGORM

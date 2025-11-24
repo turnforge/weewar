@@ -6,7 +6,7 @@ package weewar.v1;
 // import "wasmjs/v1/annotations.proto";
 import "weewar/v1/models/models.proto";
 
-// option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
+option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
 
 message EmptyRequest {}
 message EmptyResponse {}

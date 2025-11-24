@@ -89,15 +89,9 @@ export const WorldGORMSchema: MessageSchema = {
       repeated: true,
     },
     {
-      name: "screenshotIndexInfo",
-      type: FieldType.MESSAGE,
-      id: 13,
-      messageType: "weewar.v1.IndexInfoGORM",
-    },
-    {
       name: "searchIndexInfo",
       type: FieldType.MESSAGE,
-      id: 14,
+      id: 13,
       messageType: "weewar.v1.IndexInfoGORM",
     },
   ],
@@ -111,16 +105,16 @@ export const WorldDataGORMSchema: MessageSchema = {
   name: "WorldDataGORM",
   fields: [
     {
-      name: "tiles",
-      type: FieldType.MESSAGE,
-      id: 1,
-      messageType: "weewar.v1.TileGORM",
-      repeated: true,
-    },
-    {
       name: "worldId",
       type: FieldType.STRING,
+      id: 1,
+    },
+    {
+      name: "tiles",
+      type: FieldType.MESSAGE,
       id: 2,
+      messageType: "weewar.v1.TileGORM",
+      repeated: true,
     },
     {
       name: "units",
@@ -128,6 +122,12 @@ export const WorldDataGORMSchema: MessageSchema = {
       id: 3,
       messageType: "weewar.v1.UnitGORM",
       repeated: true,
+    },
+    {
+      name: "screenshotIndexInfo",
+      type: FieldType.MESSAGE,
+      id: 4,
+      messageType: "weewar.v1.IndexInfoGORM",
     },
   ],
 };

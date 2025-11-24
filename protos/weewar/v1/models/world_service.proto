@@ -7,7 +7,7 @@ import "weewar/v1/models/models.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-// option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
+option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
 
 // WorldInfo represents a world in the catalog
 message WorldInfo {

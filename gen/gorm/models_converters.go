@@ -359,12 +359,6 @@ func WorldToWorldGORM(
 			return nil, fmt.Errorf("converting DefaultGameConfig: %w", err)
 		}
 	}
-	if src.ScreenshotIndexInfo != nil {
-		_, err = IndexInfoToIndexInfoGORM(src.ScreenshotIndexInfo, &out.ScreenshotIndexInfo, nil)
-		if err != nil {
-			return nil, fmt.Errorf("converting ScreenshotIndexInfo: %w", err)
-		}
-	}
 	if src.SearchIndexInfo != nil {
 		_, err = IndexInfoToIndexInfoGORM(src.SearchIndexInfo, &out.SearchIndexInfo, nil)
 		if err != nil {
@@ -415,10 +409,6 @@ func WorldFromWorldGORM(
 	if err != nil {
 		return nil, fmt.Errorf("converting DefaultGameConfig: %w", err)
 	}
-	out.ScreenshotIndexInfo, err = IndexInfoFromIndexInfoGORM(nil, &src.ScreenshotIndexInfo, nil)
-	if err != nil {
-		return nil, fmt.Errorf("converting ScreenshotIndexInfo: %w", err)
-	}
 	out.SearchIndexInfo, err = IndexInfoFromIndexInfoGORM(nil, &src.SearchIndexInfo, nil)
 	if err != nil {
 		return nil, fmt.Errorf("converting SearchIndexInfo: %w", err)
@@ -449,8 +439,17 @@ func WorldDataToWorldDataGORM(
 	}
 
 	// Initialize struct with inline values
-	*dest = WorldDataGORM{}
+	*dest = WorldDataGORM{
+		ContentHash: src.ContentHash,
+	}
 	out = dest
+
+	if src.ScreenshotIndexInfo != nil {
+		_, err = IndexInfoToIndexInfoGORM(src.ScreenshotIndexInfo, &out.ScreenshotIndexInfo, nil)
+		if err != nil {
+			return nil, fmt.Errorf("converting ScreenshotIndexInfo: %w", err)
+		}
+	}
 
 	if src.Tiles != nil {
 		out.Tiles = make([]TileGORM, len(src.Tiles))
@@ -496,8 +495,15 @@ func WorldDataFromWorldDataGORM(
 	}
 
 	// Initialize struct with inline values
-	*dest = models.WorldData{}
+	*dest = models.WorldData{
+		ContentHash: src.ContentHash,
+	}
 	out = dest
+
+	out.ScreenshotIndexInfo, err = IndexInfoFromIndexInfoGORM(nil, &src.ScreenshotIndexInfo, nil)
+	if err != nil {
+		return nil, fmt.Errorf("converting ScreenshotIndexInfo: %w", err)
+	}
 
 	if src.Tiles != nil {
 		out.Tiles = make([]*models.Tile, len(src.Tiles))

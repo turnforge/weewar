@@ -138,7 +138,6 @@ export interface World {
   previewUrls: string[];
   /** Default game configs */
   defaultGameConfig?: GameConfiguration;
-  screenshotIndexInfo?: IndexInfo;
   searchIndexInfo?: IndexInfo;
 }
 
@@ -149,6 +148,10 @@ export interface WorldData {
   tiles?: Tile[];
   /** All units on the world and who they belong to */
   units?: Unit[];
+  /** When this world data was updated (may have happened without world updating) */
+  screenshotIndexInfo?: IndexInfo;
+  /** We will only update if hash's are different */
+  contentHash: string;
 }
 
 

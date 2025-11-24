@@ -127,19 +127,18 @@ func (m *AttackRecordGORM) Scan(value interface{}) error {
 
 // WorldGORM is the GORM model for weewar.v1.World
 type WorldGORM struct {
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
-	Id                  string `gorm:"primaryKey"`
-	CreatorId           string
-	Name                string
-	Description         string
-	Tags                []string `gorm:"serializer:json"`
-	ImageUrl            string
-	Difficulty          string
-	PreviewUrls         []string `gorm:"serializer:json"`
-	DefaultGameConfig   GameConfigurationGORM
-	ScreenshotIndexInfo IndexInfoGORM `gorm:"embedded;embeddedPrefix:screenshot_index_"`
-	SearchIndexInfo     IndexInfoGORM `gorm:"embedded;embeddedPrefix:search_index_"`
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	Id                string `gorm:"primaryKey"`
+	CreatorId         string
+	Name              string
+	Description       string
+	Tags              []string `gorm:"serializer:json"`
+	ImageUrl          string
+	Difficulty        string
+	PreviewUrls       []string `gorm:"serializer:json"`
+	DefaultGameConfig GameConfigurationGORM
+	SearchIndexInfo   IndexInfoGORM `gorm:"embedded;embeddedPrefix:search_index_"`
 }
 
 // TableName returns the table name for WorldGORM
@@ -149,9 +148,11 @@ func (*WorldGORM) TableName() string {
 
 // WorldDataGORM is the GORM model for weewar.v1.WorldData
 type WorldDataGORM struct {
-	Tiles   []TileGORM `gorm:"serializer:json"`
-	WorldId string     `gorm:"primaryKey"`
-	Units   []UnitGORM `gorm:"serializer:json"`
+	Tiles               []TileGORM    `gorm:"serializer:json"`
+	WorldId             string        `gorm:"primaryKey"`
+	Units               []UnitGORM    `gorm:"serializer:json"`
+	ScreenshotIndexInfo IndexInfoGORM `gorm:"embedded;embeddedPrefix:screenshot_index_"`
+	ContentHash         string
 }
 
 // TableName returns the table name for WorldDataGORM
@@ -360,8 +361,8 @@ type GameMoveGroupGORM struct {
 
 // GameMoveGORM is the GORM model for weewar.v1.GameMove
 type GameMoveGORM struct {
-	Player      int32
 	GameId      string `gorm:"primaryKey"`
+	Player      int32
 	Timestamp   time.Time
 	GroupNumber string `gorm:"primaryKey"`
 	MoveNumber  int32  `gorm:"primaryKey"`

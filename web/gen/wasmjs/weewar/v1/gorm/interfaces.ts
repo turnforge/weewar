@@ -47,20 +47,20 @@ export interface WorldGORM {
   /** PreviewUrls as JSON for cross-DB compatibility */
   previewUrls: string[];
   /** DefaultGameConfig as JSON for cross-DB compatibility
- ScreenshotIndexInfo embedded */
-  screenshotIndexInfo?: IndexInfoGORM;
-  /** SearchIndexInfo embedded */
+ SearchIndexInfo embedded */
   searchIndexInfo?: IndexInfoGORM;
 }
 
 
 
 export interface WorldDataGORM {
+  worldId: string;
   /** Tiles as JSON for cross-DB compatibility */
   tiles?: TileGORM[];
-  worldId: string;
   /** Units as JSON for cross-DB compatibility */
   units?: UnitGORM[];
+  /** ScreenshotIndexInfo embedded */
+  screenshotIndexInfo?: IndexInfoGORM;
 }
 
 

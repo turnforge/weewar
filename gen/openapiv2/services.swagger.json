@@ -1483,9 +1483,6 @@
                       "$ref": "#/definitions/v1GameConfiguration",
                       "title": "Default game configs"
                     },
-                    "screenshotIndexInfo": {
-                      "$ref": "#/definitions/v1IndexInfo"
-                    },
                     "searchIndexInfo": {
                       "$ref": "#/definitions/v1IndexInfo"
                     }
@@ -3279,9 +3276,6 @@
           "$ref": "#/definitions/v1GameConfiguration",
           "title": "Default game configs"
         },
-        "screenshotIndexInfo": {
-          "$ref": "#/definitions/v1IndexInfo"
-        },
         "searchIndexInfo": {
           "$ref": "#/definitions/v1IndexInfo"
         }
@@ -3329,6 +3323,14 @@
             "$ref": "#/definitions/v1Unit"
           },
           "title": "All units on the world and who they belong to"
+        },
+        "screenshotIndexInfo": {
+          "$ref": "#/definitions/v1IndexInfo",
+          "title": "When this world data was updated (may have happened without world updating)"
+        },
+        "contentHash": {
+          "type": "string",
+          "title": "We will only update if hash's are different"
         }
       }
     }

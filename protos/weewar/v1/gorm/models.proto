@@ -47,28 +47,29 @@ message WorldGORM {
     gorm_tags: ["serializer:json"]
   }];
   // DefaultGameConfig as JSON for cross-DB compatibility
-  // ScreenshotIndexInfo embedded
-  IndexInfoGORM screenshot_index_info = 13 [(dal.v1.column) = {
-    gorm_tags: ["embedded", "embeddedPrefix:screenshot_index_"]
-  }];
   // SearchIndexInfo embedded
-  IndexInfoGORM search_index_info = 14 [(dal.v1.column) = {
+  IndexInfoGORM search_index_info = 13 [(dal.v1.column) = {
     gorm_tags: ["embedded", "embeddedPrefix:search_index_"]
   }];
 }
 
 message WorldDataGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.WorldData", table: "world_data", implement_scanner: true };
-  // Tiles as JSON for cross-DB compatibility
-  repeated TileGORM tiles = 1 [(dal.v1.column) = {
-    gorm_tags: ["serializer:json"]
-  }];
-  string world_id = 2 [(dal.v1.column) = {
+  string world_id = 1 [(dal.v1.column) = {
     gorm_tags: ["primaryKey"]
+  }];
+
+  // Tiles as JSON for cross-DB compatibility
+  repeated TileGORM tiles = 2 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
   }];
   // Units as JSON for cross-DB compatibility
   repeated UnitGORM units = 3 [(dal.v1.column) = {
     gorm_tags: ["serializer:json"]
+  }];
+  // ScreenshotIndexInfo embedded
+  IndexInfoGORM screenshot_index_info = 4 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:screenshot_index_"]
   }];
 }
 

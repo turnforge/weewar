@@ -207,15 +207,9 @@ export const WorldSchema: MessageSchema = {
       messageType: "weewar.v1.GameConfiguration",
     },
     {
-      name: "screenshotIndexInfo",
-      type: FieldType.MESSAGE,
-      id: 13,
-      messageType: "weewar.v1.IndexInfo",
-    },
-    {
       name: "searchIndexInfo",
       type: FieldType.MESSAGE,
-      id: 14,
+      id: 13,
       messageType: "weewar.v1.IndexInfo",
     },
   ],
@@ -241,6 +235,17 @@ export const WorldDataSchema: MessageSchema = {
       id: 2,
       messageType: "weewar.v1.Unit",
       repeated: true,
+    },
+    {
+      name: "screenshotIndexInfo",
+      type: FieldType.MESSAGE,
+      id: 3,
+      messageType: "weewar.v1.IndexInfo",
+    },
+    {
+      name: "contentHash",
+      type: FieldType.STRING,
+      id: 4,
     },
   ],
 };

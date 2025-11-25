@@ -3,21 +3,14 @@
 // Define common event types for type safety
 export const WorldEventTypes = {
     WORLD_DATA_LOADED: 'world-data-loaded',
-    WORLD_DATA_ERROR: 'world-data-error', 
     WORLD_STATS_UPDATED: 'world-stats-updated',
     WORLD_VIEWER_READY: 'world-viewer-ready',
-    WORLD_VIEWER_ERROR: 'world-viewer-error',
     TILES_CHANGED: 'tiles-changed',      // Batch tile operations
     UNITS_CHANGED: 'units-changed',      // Batch unit operations
     WORLD_LOADED: 'world-loaded',
     WORLD_SAVED: 'world-saved',
     WORLD_CLEARED: 'world-cleared',
     WORLD_METADATA_CHANGED: 'world-metadata-changed'
-} as const;
-
-export const GameEventTypes = {
-    GAME_DATA_LOADED: 'game-data-loaded',
-    GAME_DATA_ERROR: 'game-data-error', 
 } as const;
 
 // Editor-specific event types for WorldEditorPage components

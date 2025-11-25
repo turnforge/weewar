@@ -79,8 +79,6 @@ func (s *ScreenShotIndexer) start() {
 
 // TODO - Put this into a worker pool later and/or with rate limiting
 func (s *ScreenShotIndexer) startBatchProcessing(batch map[string]ScreenShotItem) {
-	log.Println("Starting batch processing...")
-
 	results := []ScreenShotItem{}
 	for _, item := range batch {
 		log.Printf("Creating screenshots for %s: %s", item.Kind, item.Id)

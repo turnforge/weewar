@@ -3,7 +3,7 @@ import { EventBus } from '../../lib/EventBus';
 import { LCMComponent } from '../../lib/LCMComponent';
 import { PLAYER_COLORS } from '../common/ColorsAndNames'
 import { WorldEventType, WorldEventTypes } from '../common/events';
-import { Unit, Tile, World, WorldEvent, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from '../common/World';
+import { Unit, Tile, World, WorldEvent } from '../common/World';
 
 /**
  * TileStatsPanel displays statistics about tiles and units on the world

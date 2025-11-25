@@ -83,27 +83,13 @@ export class EventBus {
      * @param emitter - The entity that emitted the event
      */
     public emit<T = any>(eventType: string, data: T, subject: any, emitter: any): void {
-        // Temporary debug logging for server-changes event
-        if (eventType === 'server-changes') {
-            console.log(`[EventBus.emit] 🔥 EMITTING server-changes event:`, {
-                eventType,
-                data,
-                dataChangesCount: (data as any)?.changes?.length || 0,
-                subject: subject?.constructor?.name || 'unknown',
-                emitter: emitter?.constructor?.name || 'unknown'
-            });
-        }
-        
         const subscribers = this.subscribers.get(eventType);
         
         if (!subscribers || subscribers.size === 0) {
-            if (this.debugMode || eventType === 'server-changes') {
-                console.log(`[EventBus] ❌ NO SUBSCRIBERS for event '${eventType}'`);
-            }
             return;
         }
         
-        if (this.debugMode || eventType === 'server-changes') {
+        if (this.debugMode) {
             console.log(`[EventBus] 📡 Emitting '${eventType}' to ${subscribers.size} subscribers:`, 
                 Array.from(subscribers).map(s => s.constructor.name));
         }
@@ -114,14 +100,8 @@ export class EventBus {
         // Call EventSubscriber handlers with error isolation
         subscribers.forEach(subscriber => {
             try {
-                if (eventType === 'server-changes') {
-                    console.log(`[EventBus] 🎯 Calling handleBusEvent on ${subscriber.constructor.name}...`);
-                }
                 subscriber.handleBusEvent(eventType, data, subject, emitter);
                 successCount++;
-                if (eventType === 'server-changes') {
-                    console.log(`[EventBus] ✅ handleBusEvent completed on ${subscriber.constructor.name}`);
-                }
             } catch (error) {
                 errorCount++;
                 console.error(
@@ -133,7 +113,7 @@ export class EventBus {
             }
         });
         
-        if (this.debugMode || eventType === 'server-changes') {
+        if (this.debugMode) {
             console.log(
                 `[EventBus] Event '${eventType}' completed: ` +
                 `${successCount} success, ${errorCount} errors`

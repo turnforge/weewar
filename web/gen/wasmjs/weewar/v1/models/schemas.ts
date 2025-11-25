@@ -658,7 +658,7 @@ export const UnitUnitPropertiesSchema: MessageSchema = {
       messageType: "weewar.v1.DamageDistribution",
     },
   ],
-  oneofGroups: ["_attack_override", "_defense_override"],
+  oneofGroups: ["_defense_override", "_attack_override"],
 };
 
 

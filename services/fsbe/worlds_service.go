@@ -170,8 +170,15 @@ func (s *FSWorldsService) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRe
 		worldDataSaved = true
 	} else if req.WorldData != nil {
 		worldDataSaved = true
-		// Server controls version - don't trust client
-		req.WorldData.Version = worldData.Version
+
+		// Optimistic lock: verify client version matches server version
+		clientVersion := req.WorldData.Version
+		serverVersion := worldData.Version
+		if clientVersion != serverVersion {
+			return nil, fmt.Errorf("optimistic lock failed: client has version %d but server has version %d", clientVersion, serverVersion)
+		}
+
+		// Use client version for the update
 		if req.WorldData.Tiles == nil {
 			req.WorldData.Tiles = worldData.Tiles
 		}

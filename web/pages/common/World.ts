@@ -98,6 +98,7 @@ export class World {
     private worldId: string | null = null;
     private isNewWorld: boolean = true;
     private hasUnsavedChanges: boolean = false;
+    private version: number = 0;  // Version for optimistic locking (from WorldData.version)
     
     // EventBus for decentralized communication
     private eventBus: EventBus;
@@ -541,10 +542,11 @@ export class World {
             defaultGameConfig: this.metadata.defaultGameConfig || undefined
         });
 
-        // Build WorldData (tiles and units)
+        // Build WorldData (tiles, units, and version for optimistic locking)
         const worldData: ProtoWorldData = WD.from(models.WorldData,{
             tiles: tiles,
-            units: units
+            units: units,
+            version: this.version
         });
 
         // Build request payload based on whether it's a new world or update
@@ -586,18 +588,23 @@ export class World {
         if (response.ok) {
             const result = await response.json();
             const newWorldId = result.world?.id || result.id;
-            
+
             if (this.isNewWorld && newWorldId) {
                 this.worldId = newWorldId;
                 this.isNewWorld = false;
             }
-            
+
+            // Update version from response for optimistic locking
+            if (result.worldData?.version !== undefined) {
+                this.version = result.worldData.version;
+            }
+
             this.markAsSaved();
-            
+
             this.emitStateChange(WorldEventTypes.WORLD_SAVED, {
                 worldId: this.worldId, success: true
             });
-            
+
             return { success: true, worldId: newWorldId };
         } else {
             const errorText = await response.text();
@@ -636,7 +643,10 @@ export class World {
 
             // World tiles and units
             tiles: worldTilesData.tiles || [],
-            units: worldTilesData.units || []
+            units: worldTilesData.units || [],
+
+            // Version for optimistic locking
+            version: worldTilesData.version || 0
         };
         
         // Calculate actual dimensions from tile bounds
@@ -670,6 +680,9 @@ export class World {
         if (data.width) this.metadata.width = data.width;
         if (data.height) this.metadata.height = data.height;
         if (data.defaultGameConfig) this.metadata.defaultGameConfig = data.defaultGameConfig;
+
+        // Load version for optimistic locking
+        if (data.version !== undefined) this.version = data.version;
 
         return this.loadTilesAndUnits(data.tiles, data.units)
     }

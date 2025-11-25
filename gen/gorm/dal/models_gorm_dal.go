@@ -11,15 +11,36 @@ import (
 
 // WorldGORMDAL provides database access helper methods for gorm.WorldGORM.
 type WorldGORMDAL struct {
+	// TableName overrides the table for all operations.
+	// If empty, uses the struct's TableName() method (if any) or GORM's default.
+	TableName string
+
 	// WillCreate hook is called when Save detects the record doesn't exist and will create it.
 	// Return an error to prevent creation.
 	WillCreate func(context.Context, *gorm.WorldGORM) error
 }
 
+// NewWorldGORMDAL creates a new WorldGORMDAL instance.
+// If tableName is empty, operations will use the struct's TableName() method
+// or GORM's default table naming convention.
+func NewWorldGORMDAL(tableName string) *WorldGORMDAL {
+	return &WorldGORMDAL{TableName: tableName}
+}
+
+// db returns a *gorm.DB scoped to the correct table.
+// If TableName is set, uses db.Table(); otherwise returns db unchanged
+// to let GORM resolve the table name from the struct's TableName() method.
+func (d *WorldGORMDAL) db(db *gormlib.DB) *gormlib.DB {
+	if d.TableName != "" {
+		return db.Table(d.TableName)
+	}
+	return db
+}
+
 // Create creates a new gorm.WorldGORM record.
 // Returns an error if the record already exists.
 func (d *WorldGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.WorldGORM) error {
-	return db.Create(obj).Error
+	return d.db(db).Create(obj).Error
 }
 
 // Update updates an existing gorm.WorldGORM record.
@@ -28,7 +49,7 @@ func (d *WorldGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.Wor
 //
 //	dal.Update(ctx, db.Where("version = ?", oldVersion), obj)
 func (d *WorldGORMDAL) Update(ctx context.Context, db *gormlib.DB, obj *gorm.WorldGORM) error {
-	result := db.Updates(obj)
+	result := d.db(db).Updates(obj)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -54,7 +75,7 @@ func (d *WorldGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.World
 
 	// Check if record exists by trying to fetch it
 	var existing gorm.WorldGORM
-	err := db.First(&existing, "id = ?", obj.Id).Error
+	err := d.db(db).First(&existing, "id = ?", obj.Id).Error
 
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
@@ -71,14 +92,14 @@ func (d *WorldGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.World
 	}
 
 	// Save (create or update)
-	return db.Save(obj).Error
+	return d.db(db).Save(obj).Error
 }
 
 // Get retrieves a gorm.WorldGORM record by primary key.
 // Returns (nil, nil) if the record is not found (not an error).
 func (d *WorldGORMDAL) Get(ctx context.Context, db *gormlib.DB, id string) (*gorm.WorldGORM, error) {
 	var out gorm.WorldGORM
-	err := db.First(&out, "id = ?", id).Error
+	err := d.db(db).First(&out, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
 			return nil, nil
@@ -90,14 +111,14 @@ func (d *WorldGORMDAL) Get(ctx context.Context, db *gormlib.DB, id string) (*gor
 
 // Delete removes a gorm.WorldGORM record by primary key.
 func (d *WorldGORMDAL) Delete(ctx context.Context, db *gormlib.DB, id string) error {
-	return db.Where("id = ?", id).Delete(&gorm.WorldGORM{}).Error
+	return d.db(db).Where("id = ?", id).Delete(&gorm.WorldGORM{}).Error
 }
 
 // List retrieves multiple gorm.WorldGORM records using the provided query.
 // The caller is responsible for adding filters, ordering, and pagination to the query.
 func (d *WorldGORMDAL) List(ctx context.Context, query *gormlib.DB) ([]*gorm.WorldGORM, error) {
 	var out []*gorm.WorldGORM
-	err := query.Find(&out).Error
+	err := d.db(query).Find(&out).Error
 	return out, err
 }
 
@@ -109,21 +130,42 @@ func (d *WorldGORMDAL) BatchGet(ctx context.Context, db *gormlib.DB, ids []strin
 	}
 
 	var out []*gorm.WorldGORM
-	err := db.Where("id IN ?", ids).Find(&out).Error
+	err := d.db(db).Where("id IN ?", ids).Find(&out).Error
 	return out, err
 }
 
 // WorldDataGORMDAL provides database access helper methods for gorm.WorldDataGORM.
 type WorldDataGORMDAL struct {
+	// TableName overrides the table for all operations.
+	// If empty, uses the struct's TableName() method (if any) or GORM's default.
+	TableName string
+
 	// WillCreate hook is called when Save detects the record doesn't exist and will create it.
 	// Return an error to prevent creation.
 	WillCreate func(context.Context, *gorm.WorldDataGORM) error
 }
 
+// NewWorldDataGORMDAL creates a new WorldDataGORMDAL instance.
+// If tableName is empty, operations will use the struct's TableName() method
+// or GORM's default table naming convention.
+func NewWorldDataGORMDAL(tableName string) *WorldDataGORMDAL {
+	return &WorldDataGORMDAL{TableName: tableName}
+}
+
+// db returns a *gorm.DB scoped to the correct table.
+// If TableName is set, uses db.Table(); otherwise returns db unchanged
+// to let GORM resolve the table name from the struct's TableName() method.
+func (d *WorldDataGORMDAL) db(db *gormlib.DB) *gormlib.DB {
+	if d.TableName != "" {
+		return db.Table(d.TableName)
+	}
+	return db
+}
+
 // Create creates a new gorm.WorldDataGORM record.
 // Returns an error if the record already exists.
 func (d *WorldDataGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.WorldDataGORM) error {
-	return db.Create(obj).Error
+	return d.db(db).Create(obj).Error
 }
 
 // Update updates an existing gorm.WorldDataGORM record.
@@ -132,7 +174,7 @@ func (d *WorldDataGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm
 //
 //	dal.Update(ctx, db.Where("version = ?", oldVersion), obj)
 func (d *WorldDataGORMDAL) Update(ctx context.Context, db *gormlib.DB, obj *gorm.WorldDataGORM) error {
-	result := db.Updates(obj)
+	result := d.db(db).Updates(obj)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -158,7 +200,7 @@ func (d *WorldDataGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.W
 
 	// Check if record exists by trying to fetch it
 	var existing gorm.WorldDataGORM
-	err := db.First(&existing, "world_id = ?", obj.WorldId).Error
+	err := d.db(db).First(&existing, "world_id = ?", obj.WorldId).Error
 
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
@@ -175,14 +217,14 @@ func (d *WorldDataGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.W
 	}
 
 	// Save (create or update)
-	return db.Save(obj).Error
+	return d.db(db).Save(obj).Error
 }
 
 // Get retrieves a gorm.WorldDataGORM record by primary key.
 // Returns (nil, nil) if the record is not found (not an error).
 func (d *WorldDataGORMDAL) Get(ctx context.Context, db *gormlib.DB, worldId string) (*gorm.WorldDataGORM, error) {
 	var out gorm.WorldDataGORM
-	err := db.First(&out, "world_id = ?", worldId).Error
+	err := d.db(db).First(&out, "world_id = ?", worldId).Error
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
 			return nil, nil
@@ -194,14 +236,14 @@ func (d *WorldDataGORMDAL) Get(ctx context.Context, db *gormlib.DB, worldId stri
 
 // Delete removes a gorm.WorldDataGORM record by primary key.
 func (d *WorldDataGORMDAL) Delete(ctx context.Context, db *gormlib.DB, worldId string) error {
-	return db.Where("world_id = ?", worldId).Delete(&gorm.WorldDataGORM{}).Error
+	return d.db(db).Where("world_id = ?", worldId).Delete(&gorm.WorldDataGORM{}).Error
 }
 
 // List retrieves multiple gorm.WorldDataGORM records using the provided query.
 // The caller is responsible for adding filters, ordering, and pagination to the query.
 func (d *WorldDataGORMDAL) List(ctx context.Context, query *gormlib.DB) ([]*gorm.WorldDataGORM, error) {
 	var out []*gorm.WorldDataGORM
-	err := query.Find(&out).Error
+	err := d.db(query).Find(&out).Error
 	return out, err
 }
 
@@ -213,21 +255,42 @@ func (d *WorldDataGORMDAL) BatchGet(ctx context.Context, db *gormlib.DB, worldId
 	}
 
 	var out []*gorm.WorldDataGORM
-	err := db.Where("world_id IN ?", worldIds).Find(&out).Error
+	err := d.db(db).Where("world_id IN ?", worldIds).Find(&out).Error
 	return out, err
 }
 
 // GameGORMDAL provides database access helper methods for gorm.GameGORM.
 type GameGORMDAL struct {
+	// TableName overrides the table for all operations.
+	// If empty, uses the struct's TableName() method (if any) or GORM's default.
+	TableName string
+
 	// WillCreate hook is called when Save detects the record doesn't exist and will create it.
 	// Return an error to prevent creation.
 	WillCreate func(context.Context, *gorm.GameGORM) error
 }
 
+// NewGameGORMDAL creates a new GameGORMDAL instance.
+// If tableName is empty, operations will use the struct's TableName() method
+// or GORM's default table naming convention.
+func NewGameGORMDAL(tableName string) *GameGORMDAL {
+	return &GameGORMDAL{TableName: tableName}
+}
+
+// db returns a *gorm.DB scoped to the correct table.
+// If TableName is set, uses db.Table(); otherwise returns db unchanged
+// to let GORM resolve the table name from the struct's TableName() method.
+func (d *GameGORMDAL) db(db *gormlib.DB) *gormlib.DB {
+	if d.TableName != "" {
+		return db.Table(d.TableName)
+	}
+	return db
+}
+
 // Create creates a new gorm.GameGORM record.
 // Returns an error if the record already exists.
 func (d *GameGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.GameGORM) error {
-	return db.Create(obj).Error
+	return d.db(db).Create(obj).Error
 }
 
 // Update updates an existing gorm.GameGORM record.
@@ -236,7 +299,7 @@ func (d *GameGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.Game
 //
 //	dal.Update(ctx, db.Where("version = ?", oldVersion), obj)
 func (d *GameGORMDAL) Update(ctx context.Context, db *gormlib.DB, obj *gorm.GameGORM) error {
-	result := db.Updates(obj)
+	result := d.db(db).Updates(obj)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -262,7 +325,7 @@ func (d *GameGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.GameGO
 
 	// Check if record exists by trying to fetch it
 	var existing gorm.GameGORM
-	err := db.First(&existing, "id = ?", obj.Id).Error
+	err := d.db(db).First(&existing, "id = ?", obj.Id).Error
 
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
@@ -279,14 +342,14 @@ func (d *GameGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.GameGO
 	}
 
 	// Save (create or update)
-	return db.Save(obj).Error
+	return d.db(db).Save(obj).Error
 }
 
 // Get retrieves a gorm.GameGORM record by primary key.
 // Returns (nil, nil) if the record is not found (not an error).
 func (d *GameGORMDAL) Get(ctx context.Context, db *gormlib.DB, id string) (*gorm.GameGORM, error) {
 	var out gorm.GameGORM
-	err := db.First(&out, "id = ?", id).Error
+	err := d.db(db).First(&out, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
 			return nil, nil
@@ -298,14 +361,14 @@ func (d *GameGORMDAL) Get(ctx context.Context, db *gormlib.DB, id string) (*gorm
 
 // Delete removes a gorm.GameGORM record by primary key.
 func (d *GameGORMDAL) Delete(ctx context.Context, db *gormlib.DB, id string) error {
-	return db.Where("id = ?", id).Delete(&gorm.GameGORM{}).Error
+	return d.db(db).Where("id = ?", id).Delete(&gorm.GameGORM{}).Error
 }
 
 // List retrieves multiple gorm.GameGORM records using the provided query.
 // The caller is responsible for adding filters, ordering, and pagination to the query.
 func (d *GameGORMDAL) List(ctx context.Context, query *gormlib.DB) ([]*gorm.GameGORM, error) {
 	var out []*gorm.GameGORM
-	err := query.Find(&out).Error
+	err := d.db(query).Find(&out).Error
 	return out, err
 }
 
@@ -317,21 +380,42 @@ func (d *GameGORMDAL) BatchGet(ctx context.Context, db *gormlib.DB, ids []string
 	}
 
 	var out []*gorm.GameGORM
-	err := db.Where("id IN ?", ids).Find(&out).Error
+	err := d.db(db).Where("id IN ?", ids).Find(&out).Error
 	return out, err
 }
 
 // GameStateGORMDAL provides database access helper methods for gorm.GameStateGORM.
 type GameStateGORMDAL struct {
+	// TableName overrides the table for all operations.
+	// If empty, uses the struct's TableName() method (if any) or GORM's default.
+	TableName string
+
 	// WillCreate hook is called when Save detects the record doesn't exist and will create it.
 	// Return an error to prevent creation.
 	WillCreate func(context.Context, *gorm.GameStateGORM) error
 }
 
+// NewGameStateGORMDAL creates a new GameStateGORMDAL instance.
+// If tableName is empty, operations will use the struct's TableName() method
+// or GORM's default table naming convention.
+func NewGameStateGORMDAL(tableName string) *GameStateGORMDAL {
+	return &GameStateGORMDAL{TableName: tableName}
+}
+
+// db returns a *gorm.DB scoped to the correct table.
+// If TableName is set, uses db.Table(); otherwise returns db unchanged
+// to let GORM resolve the table name from the struct's TableName() method.
+func (d *GameStateGORMDAL) db(db *gormlib.DB) *gormlib.DB {
+	if d.TableName != "" {
+		return db.Table(d.TableName)
+	}
+	return db
+}
+
 // Create creates a new gorm.GameStateGORM record.
 // Returns an error if the record already exists.
 func (d *GameStateGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.GameStateGORM) error {
-	return db.Create(obj).Error
+	return d.db(db).Create(obj).Error
 }
 
 // Update updates an existing gorm.GameStateGORM record.
@@ -340,7 +424,7 @@ func (d *GameStateGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm
 //
 //	dal.Update(ctx, db.Where("version = ?", oldVersion), obj)
 func (d *GameStateGORMDAL) Update(ctx context.Context, db *gormlib.DB, obj *gorm.GameStateGORM) error {
-	result := db.Updates(obj)
+	result := d.db(db).Updates(obj)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -366,7 +450,7 @@ func (d *GameStateGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.G
 
 	// Check if record exists by trying to fetch it
 	var existing gorm.GameStateGORM
-	err := db.First(&existing, "game_id = ?", obj.GameId).Error
+	err := d.db(db).First(&existing, "game_id = ?", obj.GameId).Error
 
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
@@ -383,14 +467,14 @@ func (d *GameStateGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.G
 	}
 
 	// Save (create or update)
-	return db.Save(obj).Error
+	return d.db(db).Save(obj).Error
 }
 
 // Get retrieves a gorm.GameStateGORM record by primary key.
 // Returns (nil, nil) if the record is not found (not an error).
 func (d *GameStateGORMDAL) Get(ctx context.Context, db *gormlib.DB, gameId string) (*gorm.GameStateGORM, error) {
 	var out gorm.GameStateGORM
-	err := db.First(&out, "game_id = ?", gameId).Error
+	err := d.db(db).First(&out, "game_id = ?", gameId).Error
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
 			return nil, nil
@@ -402,14 +486,14 @@ func (d *GameStateGORMDAL) Get(ctx context.Context, db *gormlib.DB, gameId strin
 
 // Delete removes a gorm.GameStateGORM record by primary key.
 func (d *GameStateGORMDAL) Delete(ctx context.Context, db *gormlib.DB, gameId string) error {
-	return db.Where("game_id = ?", gameId).Delete(&gorm.GameStateGORM{}).Error
+	return d.db(db).Where("game_id = ?", gameId).Delete(&gorm.GameStateGORM{}).Error
 }
 
 // List retrieves multiple gorm.GameStateGORM records using the provided query.
 // The caller is responsible for adding filters, ordering, and pagination to the query.
 func (d *GameStateGORMDAL) List(ctx context.Context, query *gormlib.DB) ([]*gorm.GameStateGORM, error) {
 	var out []*gorm.GameStateGORM
-	err := query.Find(&out).Error
+	err := d.db(query).Find(&out).Error
 	return out, err
 }
 
@@ -421,7 +505,7 @@ func (d *GameStateGORMDAL) BatchGet(ctx context.Context, db *gormlib.DB, gameIds
 	}
 
 	var out []*gorm.GameStateGORM
-	err := db.Where("game_id IN ?", gameIds).Find(&out).Error
+	err := d.db(db).Where("game_id IN ?", gameIds).Find(&out).Error
 	return out, err
 }
 
@@ -434,15 +518,36 @@ type GameMoveKey struct {
 
 // GameMoveGORMDAL provides database access helper methods for gorm.GameMoveGORM.
 type GameMoveGORMDAL struct {
+	// TableName overrides the table for all operations.
+	// If empty, uses the struct's TableName() method (if any) or GORM's default.
+	TableName string
+
 	// WillCreate hook is called when Save detects the record doesn't exist and will create it.
 	// Return an error to prevent creation.
 	WillCreate func(context.Context, *gorm.GameMoveGORM) error
 }
 
+// NewGameMoveGORMDAL creates a new GameMoveGORMDAL instance.
+// If tableName is empty, operations will use the struct's TableName() method
+// or GORM's default table naming convention.
+func NewGameMoveGORMDAL(tableName string) *GameMoveGORMDAL {
+	return &GameMoveGORMDAL{TableName: tableName}
+}
+
+// db returns a *gorm.DB scoped to the correct table.
+// If TableName is set, uses db.Table(); otherwise returns db unchanged
+// to let GORM resolve the table name from the struct's TableName() method.
+func (d *GameMoveGORMDAL) db(db *gormlib.DB) *gormlib.DB {
+	if d.TableName != "" {
+		return db.Table(d.TableName)
+	}
+	return db
+}
+
 // Create creates a new gorm.GameMoveGORM record.
 // Returns an error if the record already exists.
 func (d *GameMoveGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.GameMoveGORM) error {
-	return db.Create(obj).Error
+	return d.db(db).Create(obj).Error
 }
 
 // Update updates an existing gorm.GameMoveGORM record.
@@ -451,7 +556,7 @@ func (d *GameMoveGORMDAL) Create(ctx context.Context, db *gormlib.DB, obj *gorm.
 //
 //	dal.Update(ctx, db.Where("version = ?", oldVersion), obj)
 func (d *GameMoveGORMDAL) Update(ctx context.Context, db *gormlib.DB, obj *gorm.GameMoveGORM) error {
-	result := db.Updates(obj)
+	result := d.db(db).Updates(obj)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -483,7 +588,7 @@ func (d *GameMoveGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.Ga
 
 	// Check if record exists by trying to fetch it
 	var existing gorm.GameMoveGORM
-	err := db.First(&existing, "game_id = ?", "group_number = ?", "move_number = ?", obj.GameId, obj.GroupNumber, obj.MoveNumber).Error
+	err := d.db(db).First(&existing, "game_id = ?", "group_number = ?", "move_number = ?", obj.GameId, obj.GroupNumber, obj.MoveNumber).Error
 
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
@@ -500,14 +605,14 @@ func (d *GameMoveGORMDAL) Save(ctx context.Context, db *gormlib.DB, obj *gorm.Ga
 	}
 
 	// Save (create or update)
-	return db.Save(obj).Error
+	return d.db(db).Save(obj).Error
 }
 
 // Get retrieves a gorm.GameMoveGORM record by primary keys.
 // Returns (nil, nil) if the record is not found (not an error).
 func (d *GameMoveGORMDAL) Get(ctx context.Context, db *gormlib.DB, gameId string, groupNumber string, moveNumber int32) (*gorm.GameMoveGORM, error) {
 	var out gorm.GameMoveGORM
-	err := db.First(&out, "game_id = ? AND group_number = ? AND move_number = ?", gameId, groupNumber, moveNumber).Error
+	err := d.db(db).First(&out, "game_id = ? AND group_number = ? AND move_number = ?", gameId, groupNumber, moveNumber).Error
 	if err != nil {
 		if errors.Is(err, gormlib.ErrRecordNotFound) {
 			return nil, nil
@@ -519,14 +624,14 @@ func (d *GameMoveGORMDAL) Get(ctx context.Context, db *gormlib.DB, gameId string
 
 // Delete removes a gorm.GameMoveGORM record by primary keys.
 func (d *GameMoveGORMDAL) Delete(ctx context.Context, db *gormlib.DB, gameId string, groupNumber string, moveNumber int32) error {
-	return db.Where("game_id = ? AND group_number = ? AND move_number = ?", gameId, groupNumber, moveNumber).Delete(&gorm.GameMoveGORM{}).Error
+	return d.db(db).Where("game_id = ? AND group_number = ? AND move_number = ?", gameId, groupNumber, moveNumber).Delete(&gorm.GameMoveGORM{}).Error
 }
 
 // List retrieves multiple gorm.GameMoveGORM records using the provided query.
 // The caller is responsible for adding filters, ordering, and pagination to the query.
 func (d *GameMoveGORMDAL) List(ctx context.Context, query *gormlib.DB) ([]*gorm.GameMoveGORM, error) {
 	var out []*gorm.GameMoveGORM
-	err := query.Find(&out).Error
+	err := d.db(query).Find(&out).Error
 	return out, err
 }
 
@@ -538,7 +643,7 @@ func (d *GameMoveGORMDAL) BatchGet(ctx context.Context, db *gormlib.DB, keys []G
 	}
 
 	// Build OR query for each key combination
-	query := db.Where("1 = 0") // Start with false condition
+	query := d.db(db).Where("1 = 0") // Start with false condition
 	for _, key := range keys {
 		query = query.Or("game_id = ? AND group_number = ? AND move_number = ?", key.GameId, key.GroupNumber, key.MoveNumber)
 	}

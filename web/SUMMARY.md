@@ -54,9 +54,7 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
   - All Phaser scenes now automatically sync with World changes through EventBus
   - Eliminated duplicate world event handling between editor and viewer scenes
   - Cleaner separation: WorldEditorPage/PhaserEditorComponent handles editor events, common/PhaserWorldScene handles world sync
-  - Automatic rendering updates when World state changes via server-changes → world events flow
 - **Event Flow Optimization**: Clarified dual subscription pattern in GameViewerPage/GameState
-  - GameState emits server-changes after processMoves() and subscribes for metadata extraction
   - common/World applies actual world changes and re-emits as specific world events
   - common/PhaserWorldScene base class handles TILES_CHANGED/UNITS_CHANGED/WORLD_LOADED/WORLD_CLEARED
 - **Input System Refactoring**: Replaced manual drag detection with proper Phaser patterns

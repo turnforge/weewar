@@ -2,7 +2,6 @@ import { GameViewPresenterClient as  GameViewPresenterClient } from '../../gen/w
 import { BaseComponent } from '../../lib/Component';
 import { EventBus } from '../../lib/EventBus';
 import { LCMComponent } from '../../lib/LCMComponent';
-import { GameState } from './GameState';
 import { World } from '../common/World';
 import { ITheme } from '../../assets/themes/BaseTheme';
 import { ThemeUtils } from '../common/ThemeUtils';

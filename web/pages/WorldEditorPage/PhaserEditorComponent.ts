@@ -4,7 +4,7 @@ import { EventBus } from '../../lib/EventBus';
 import { WorldEventType, WorldEventTypes, EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload, ReferenceImageLoadedPayload, GridSetVisibilityPayload, CoordinatesSetVisibilityPayload, HealthSetVisibilityPayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload } from '../common/events';
 import { PhaserEditorScene } from './PhaserEditorScene';
 import { PageState, PageStateEventType } from './PageState';
-import { Unit, Tile, World , TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from '../common/World';
+import { Unit, Tile, World } from '../common/World';
 
 /**
  * PhaserEditorComponent - Manages the Phaser.js-based world editor interface using BaseComponent architecture

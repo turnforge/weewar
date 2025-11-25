@@ -250,10 +250,18 @@ func (s *WorldsService) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRequ
 	} else if req.WorldData != nil {
 		worldDataSaved = true
 		protoWorldData, err := v1gorm.WorldDataFromWorldDataGORM(nil, worldData, nil)
-		req.WorldData.Version = protoWorldData.Version
 		if err != nil {
 			return resp, err
 		}
+
+		// Optimistic lock: verify client version matches server version
+		clientVersion := req.WorldData.Version
+		serverVersion := protoWorldData.Version
+		if clientVersion != serverVersion {
+			return resp, fmt.Errorf("optimistic lock failed: client has version %d but server has version %d", clientVersion, serverVersion)
+		}
+
+		// Use client version for the update
 		if req.WorldData.Tiles == nil {
 			req.WorldData.Tiles = protoWorldData.Tiles
 		}

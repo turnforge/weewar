@@ -18,8 +18,7 @@ func (r *RootViewsHandler) setupGamesMux() *http.ServeMux {
 		gameId := r.PathValue("gameId")
 		http.Redirect(w, r, fmt.Sprintf("/games/new?copyFrom=%s", gameId), http.StatusFound)
 	})
-	mux.HandleFunc("/{gameId}/screenshots/{screenshotName}/", r.handleResourceScreenshot("game"))
-	mux.HandleFunc("/{gameId}/screenshots/{screenshotName}", r.handleResourceScreenshot("game"))
+	// Screenshots now served via /screenshots/ static handler
 	mux.HandleFunc("/{gameId}/screenshot/live", r.handleGameScreenshotLive)
 	mux.HandleFunc("/{gameId}", r.handleGameActions)
 	return mux

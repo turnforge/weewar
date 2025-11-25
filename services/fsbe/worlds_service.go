@@ -87,7 +87,7 @@ func (s *FSWorldsService) ListWorlds(ctx context.Context, req *v1.ListWorldsRequ
 	// Populate screenshot URLs for all worlds
 	for _, world := range resp.Items {
 		if len(world.PreviewUrls) == 0 {
-			world.PreviewUrls = []string{fmt.Sprintf("/worlds/%s/screenshots/default", world.Id)}
+			world.PreviewUrls = []string{fmt.Sprintf("/screenshots/worlds/%s/default.png", world.Id)}
 		}
 	}
 
@@ -107,7 +107,7 @@ func (s *FSWorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest)
 
 	// Populate screenshot URL if not set
 	if len(world.PreviewUrls) == 0 {
-		world.PreviewUrls = []string{fmt.Sprintf("/worlds/%s/screenshots/default", world.Id)}
+		world.PreviewUrls = []string{fmt.Sprintf("/screenshots/worlds/%s/default.png", world.Id)}
 	}
 
 	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.Id, "data")

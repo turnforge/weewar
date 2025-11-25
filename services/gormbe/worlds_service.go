@@ -158,7 +158,7 @@ func (s *WorldsService) ListWorlds(ctx context.Context, req *v1.ListWorldsReques
 		if err == nil {
 			// Populate screenshot URLs for all worlds
 			if len(output.PreviewUrls) == 0 {
-				output.PreviewUrls = []string{fmt.Sprintf("/worlds/%s/screenshots/default", output.Id)}
+				output.PreviewUrls = []string{fmt.Sprintf("/screenshots/worlds/%s/default.png", output.Id)}
 			}
 			resp.Items = append(resp.Items, output)
 		} else {
@@ -194,7 +194,7 @@ func (s *WorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest) (
 	// Step 3: Convert query results to proto results
 	// Populate screenshot URL if not set
 	if len(world.PreviewUrls) == 0 {
-		world.PreviewUrls = []string{fmt.Sprintf("/worlds/%s/screenshots/default", world.Id)}
+		world.PreviewUrls = []string{fmt.Sprintf("/screenshots/worlds/%s/default.png", world.Id)}
 	}
 	resp.World, err = v1gorm.WorldFromWorldGORM(nil, world, nil)
 	if err != nil {

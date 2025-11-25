@@ -25,8 +25,7 @@ func (r *RootViewsHandler) setupWorldsMux() *http.ServeMux {
 		notationId := r.PathValue("notationId")
 		http.Redirect(w, r, fmt.Sprintf("/appitems/new?copyFrom=%s", notationId), http.StatusFound)
 	})
-	mux.HandleFunc("/{worldId}/screenshots/{screenshotName}/", r.handleResourceScreenshot("world"))
-	mux.HandleFunc("/{worldId}/screenshots/{screenshotName}", r.handleResourceScreenshot("world"))
+	// Screenshots now served via /screenshots/ static handler
 	mux.HandleFunc("/{worldId}/screenshot/live", r.handleWorldScreenshotLive)
 	mux.HandleFunc("/{worldId}", r.handleWorldActions)
 	return mux

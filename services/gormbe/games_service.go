@@ -98,7 +98,7 @@ func (s *GamesService) ListGames(ctx context.Context, req *v1.ListGamesRequest) 
 	resp.Items = gfn.Map(games, func(g *v1gorm.GameGORM) *v1.Game {
 		out, _ := v1gorm.GameFromGameGORM(nil, g, nil)
 		if len(out.PreviewUrls) == 0 {
-			out.PreviewUrls = []string{fmt.Sprintf("/games/%s/screenshots/default", out.Id)}
+			out.PreviewUrls = []string{fmt.Sprintf("/screenshots/games/%s/default.png", out.Id)}
 		}
 		return out
 	})
@@ -128,7 +128,7 @@ func (s *GamesService) GetGame(ctx context.Context, req *v1.GetGameRequest) (res
 
 	// Populate screenshot URL if not set
 	if len(game.PreviewUrls) == 0 {
-		game.PreviewUrls = []string{fmt.Sprintf("/games/%s/screenshots/default", game.Id)}
+		game.PreviewUrls = []string{fmt.Sprintf("/screenshots/games/%s/default.png", game.Id)}
 	}
 
 	// Cache everything

@@ -16,6 +16,7 @@ import (
 	oa "github.com/panyam/oneauth"
 	tmplr "github.com/panyam/templar"
 	"github.com/turnforge/weewar/services"
+	"github.com/turnforge/weewar/services/fsbe"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -203,6 +204,19 @@ func (n *RootViewsHandler) setupRoutes() {
 		n.mux.Handle("/static/", http.StripPrefix("/static", GzipFileServer(http.Dir(STATIC_FOLDER))))
 	} else {
 		n.mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir(STATIC_FOLDER))))
+	}
+
+	// Serve screenshots from filestore
+	// Path format: /screenshots/worlds/{worldId}/{theme}.png
+	//              /screenshots/games/{gameId}/{theme}.png
+	screenshotsDir := fsbe.FILES_STORAGE_DIR
+	if screenshotsDir == "" {
+		screenshotsDir = fsbe.DevDataPath("storage/files")
+	}
+	if ServeGzippedResources {
+		n.mux.Handle("/screenshots/", http.StripPrefix("/screenshots", GzipFileServer(http.Dir(screenshotsDir+"/screenshots"))))
+	} else {
+		n.mux.Handle("/screenshots/", http.StripPrefix("/screenshots", http.FileServer(http.Dir(screenshotsDir+"/screenshots"))))
 	}
 
 	// Then setup your "resource" specific endpoints

@@ -37,7 +37,7 @@ type ScreenShotIndexer struct {
 func NewScreenShotIndexer(clientMgr *ClientMgr) *ScreenShotIndexer {
 	s := ScreenShotIndexer{ClientMgr: clientMgr}
 	s.reducer = gocurrent.NewReducer2(
-		gocurrent.WithFlushPeriod2[ScreenShotItem, map[string]ScreenShotItem](30 * time.Second),
+		gocurrent.WithFlushPeriod2[ScreenShotItem, map[string]ScreenShotItem](5 * time.Second),
 	)
 	s.reducer.CollectFunc = func(collection map[string]ScreenShotItem, items ...ScreenShotItem) (map[string]ScreenShotItem, bool) {
 		if collection == nil {

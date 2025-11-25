@@ -61,18 +61,31 @@ func (s *WorldsService) GetWorldData(ctx context.Context, id string) (int64, err
 }
 
 // UpdateWorldDataIndexInfo implements WorldDataUpdater interface
-func (s *WorldsService) UpdateWorldDataIndexInfo(ctx context.Context, id string, oldVersion int64, lastIndexedAt time.Time, needsIndexing bool) error {
-	worldData, err := s.WorldDataDAL.Get(ctx, s.storage, id)
-	if err != nil {
-		return err
-	}
+func (s *WorldsService) UpdateWorldDataIndexInfo(ctx context.Context, id string, oldVersion int64, lastIndexedAt time.Time, needsIndexing bool) (err error) {
+	/*
+		worldData, err := s.WorldDataDAL.Get(ctx, s.storage, id)
+		if err != nil {
+			return err
+		}
 
+		worldData.ScreenshotIndexInfo.LastIndexedAt = lastIndexedAt
+		worldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
+		worldData.Version = oldVersion + 1
+
+		// Optimistic lock: update only if version matches
+		err = s.WorldDataDAL.Save(ctx, s.storage.Where("world_id = ? and version = ?", id, oldVersion), worldData)
+	*/
+	worldData := &v1gorm.WorldDataGORM{WorldId: id}
 	worldData.ScreenshotIndexInfo.LastIndexedAt = lastIndexedAt
 	worldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
-	worldData.Version = oldVersion + 1
-
-	// Optimistic lock: update only if version matches
-	err = s.WorldDataDAL.Save(ctx, s.storage.Where("version = ?", id, oldVersion), worldData)
+	result := s.storage.Model(&v1gorm.WorldDataGORM{}).
+		Where("world_id = ? AND version = ?", worldData.WorldId, oldVersion).
+		Updates(map[string]any{
+			"version":                          oldVersion + 1,
+			"screenshot_index_last_indexed_at": lastIndexedAt,
+			"screenshot_index_needs_indexing":  needsIndexing,
+		})
+	err = result.Error
 	if err != nil {
 		return fmt.Errorf("optimistic lock failed or save error: %w", err)
 	}

@@ -486,13 +486,11 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
     }
 
     public onReferencePositionUpdatedFromScene(x: number, y: number): void {
-        // TODO: Add updatePositionDisplay method to ReferenceImagePanel in Phase 2
-        // This will allow the scene to notify the panel when position changes via drag
+        this.referenceImagePanel?.updatePositionDisplay(x, y);
     }
 
     public onReferenceScaleUpdatedFromScene(scaleX: number, scaleY: number): void {
-        // TODO: Add updateScaleDisplay method to ReferenceImagePanel in Phase 2
-        // This will allow the scene to notify the panel when scale changes via drag
+        this.referenceImagePanel?.updateScaleDisplay(scaleX, scaleY);
     }
 
     // =========================================================================

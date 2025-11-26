@@ -86,7 +86,8 @@ class WorldEditorPage extends BasePage {
             this.referenceImagePanel.setToastCallback((title: string, message: string, type: 'success' | 'error' | 'info') => {
                 this.showToast(title, message, type);
             });
-            
+            this.referenceImagePanel.setPresenter(this.presenter);
+
             childComponents.push(this.referenceImagePanel);
         }
         

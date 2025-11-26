@@ -380,10 +380,17 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - **Console Panel Removal**: Removed unused console panel code from WorldEditorPage
   - Removed editorOutput property and initialization
   - Removed console panel sizing from setPanelSizes()
+- **Reference Image Event Migration**: Replaced all REFERENCE_* EventBus events with presenter calls
+  - ReferenceImagePanel calls presenter.setReferenceMode/Alpha/Position/Scale() directly
+  - PhaserEditorComponent notifies presenter.onReferenceScaleUpdatedFromScene/onReferencePositionUpdatedFromScene()
+  - Presenter calls ReferenceImagePanel.updateScaleDisplay/updatePositionDisplay() directly
+  - Removed all 13 REFERENCE_* event types and 11 payload interfaces from events.ts
 - **Simplified Data Flow**:
   - Tool selection: ToolsPanel.onClick() → presenter.selectTerrain() → updates state + calls phaserEditor directly
   - Visual state: index.ts.setShowGrid() → presenter.setShowGrid() → updates state + calls phaserEditor directly
   - Tile clicks: PhaserEditorComponent.handleTileClick() → presenter.handleTileClick() → modifies World data
+  - Reference image controls: ReferenceImagePanel → presenter → PhaserEditorComponent.editorScene
+  - Reference image drag/scroll: PhaserEditorScene → PhaserEditorComponent → presenter → ReferenceImagePanel
 
 **Architecture Benefits**:
 - Eliminated EventBus intermediary for UI state, reducing indirection
@@ -393,8 +400,8 @@ The web module provides a modern web interface for the WeeWar turn-based strateg
 - Simpler debugging with direct method calls instead of pub/sub events
 
 ## Status
-**Current Version**: 8.13 (WorldEditorPresenter Architecture)
-**Status**: Production-ready - Presenter pattern replaces PageState for cleaner state management
+**Current Version**: 8.14 (Reference Image Event Migration)
+**Status**: Production-ready - All UI events migrated to presenter pattern
 **Build Status**: Clean compilation with all TypeScript errors resolved
 **Testing**: Jest (unit) + Playwright (e2e) with command interface and persistent test worlds
 **Architecture**: Flexible AssetProvider system with presenter-driven animation framework, layer-based interaction system, and presenter-based UI state management

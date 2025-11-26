@@ -1,7 +1,7 @@
 import { BaseComponent } from '../../lib/Component';
 import { LCMComponent } from '../../lib/LCMComponent';
 import { EventBus } from '../../lib/EventBus';
-import { WorldEventType, WorldEventTypes, EditorEventTypes, TileClickedPayload, PhaserReadyPayload, TilePaintedPayload, UnitPlacedPayload, TileClearedPayload, UnitRemovedPayload, ReferenceImageLoadedPayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload } from '../common/events';
+import { EditorEventTypes } from '../common/events';
 import { PhaserEditorScene } from './PhaserEditorScene';
 import { IWorldEditorPresenter } from './WorldEditorPresenter';
 import { Unit, Tile, World } from '../common/World';
@@ -108,51 +108,10 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
      * Subscribe to all EventBus events (called in activate phase)
      */
     private subscribeToEvents(): void {
-        this.log('Subscribing to EventBus events');
-
-        // Presenter handles visual state and tool state directly (no EventBus needed)
-        // Subscribe to reference image control events from ReferenceImagePanel
-        // TODO: These could be migrated to presenter in a future refactor
-        this.addSubscription(EditorEventTypes.REFERENCE_SET_MODE, this);
-        this.addSubscription(EditorEventTypes.REFERENCE_SET_ALPHA, this);
-        this.addSubscription(EditorEventTypes.REFERENCE_SET_POSITION, this);
-        this.addSubscription(EditorEventTypes.REFERENCE_SET_SCALE, this);
-
-        // World events are now handled by PhaserWorldScene directly
-        // Note: Reference image loading is now handled directly by ReferenceImagePanel
-
-        this.log('EventBus subscriptions complete');
-    }
-
-    /**
-     * Handle events from the EventBus
-     */
-    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
-        switch(eventType) {
-            case EditorEventTypes.REFERENCE_SET_MODE:
-                this.handleReferenceSetMode(data);
-                break;
-
-            case EditorEventTypes.REFERENCE_SET_ALPHA:
-                this.handleReferenceSetAlpha(data);
-                break;
-
-            case EditorEventTypes.REFERENCE_SET_POSITION:
-                this.handleReferenceSetPosition(data);
-                break;
-
-            case EditorEventTypes.REFERENCE_SET_SCALE:
-                this.handleReferenceSetScale(data);
-                break;
-
-            // World events are now handled by PhaserWorldScene directly
-            // Note: Reference image loading/clearing now handled directly by ReferenceImagePanel
-            // Note: Visual state (grid, coordinates, health) and tool state handled by presenter
-
-            default:
-                // Call parent implementation for unhandled events
-                super.handleBusEvent(eventType, data, target, emitter);
-        }
+        // World events and visual state are handled by PhaserWorldScene directly
+        // Reference image events now go through presenter
+        // No EventBus subscriptions needed
+        this.log('No EventBus subscriptions needed - presenter handles all events');
     }
     
     /**
@@ -277,70 +236,18 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
             this.log('World changed in Phaser');
             this.emit(EditorEventTypes.WORLD_CHANGED, {}, this, this);
         });
-        
-        // Handle reference scale changes
+
+        // Handle reference scale changes - notify presenter to update panel
         this.editorScene.onReferenceScaleChange((x: number, y: number) => {
-            this.emit(EditorEventTypes.REFERENCE_SCALE_CHANGED, { scaleX: x, scaleY: y }, this, this);
+            this.presenter?.onReferenceScaleUpdatedFromScene(x, y);
         });
 
-        // Handle reference position changes
+        // Handle reference position changes - notify presenter to update panel
         this.editorScene.onReferencePositionChange((x: number, y: number) => {
-            this.emit(EditorEventTypes.REFERENCE_POSITION_CHANGED, { x, y }, this, this);
+            this.presenter?.onReferencePositionUpdatedFromScene(x, y);
         });
 
         this.log('Phaser event handlers setup complete');
-    }
-    
-    /**
-     * Handle reference image mode set event from ReferenceImagePanel
-     */
-    private handleReferenceSetMode(data: ReferenceSetModePayload): void {
-        if (!this.editorScene || !this.isInitialized) {
-            this.log('Phaser not ready, cannot set reference mode');
-            return;
-        }
-        
-        this.editorScene.setReferenceMode(data.mode);
-        this.log(`Reference mode set to: ${data.mode}`);
-    }
-    
-    /**
-     * Handle reference image alpha set event from ReferenceImagePanel
-     */
-    private handleReferenceSetAlpha(data: ReferenceSetAlphaPayload): void {
-        if (!this.editorScene || !this.isInitialized) {
-            this.log('Phaser not ready, cannot set reference alpha');
-            return;
-        }
-        
-        this.editorScene.setReferenceAlpha(data.alpha);
-        this.log(`Reference alpha set to: ${data.alpha}`);
-    }
-    
-    /**
-     * Handle reference image position set event from ReferenceImagePanel
-     */
-    private handleReferenceSetPosition(data: ReferenceSetPositionPayload): void {
-        if (!this.editorScene || !this.isInitialized) {
-            this.log('Phaser not ready, cannot set reference position');
-            return;
-        }
-        
-        this.editorScene.setReferencePosition(data.x, data.y);
-        this.log(`Reference position set to: (${data.x}, ${data.y})`);
-    }
-    
-    /**
-     * Handle reference image scale set event from ReferenceImagePanel
-     */
-    private handleReferenceSetScale(data: ReferenceSetScalePayload): void {
-        if (!this.editorScene || !this.isInitialized) {
-            this.log('Phaser not ready, cannot set reference scale');
-            return;
-        }
-        
-        this.editorScene.setReferenceScale(data.scaleX, data.scaleY);
-        this.log(`Reference scale set to: (${data.scaleX}, ${data.scaleY})`);
     }
     
     

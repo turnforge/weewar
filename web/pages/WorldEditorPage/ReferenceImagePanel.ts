@@ -1,9 +1,9 @@
 import { LCMComponent } from '../../lib/LCMComponent';
 import { BaseComponent } from '../../lib/Component';
 import { EventBus } from '../../lib/EventBus';
-import { EditorEventTypes, ReferenceLoadFromFilePayload, ReferenceSetModePayload, ReferenceSetAlphaPayload, ReferenceSetPositionPayload, ReferenceSetScalePayload, ReferenceScaleChangedPayload, ReferencePositionChangedPayload, ReferenceStateChangedPayload, ReferenceImageLoadedPayload } from '../common/events';
 import { ReferenceImageDB } from './ReferenceImageDB';
 import { ReferenceImageLayer } from './ReferenceImageLayer';
+import { IWorldEditorPresenter } from './WorldEditorPresenter';
 
 /**
  * ReferenceImagePanel - Manages reference image loading and controls
@@ -32,6 +32,7 @@ export class ReferenceImagePanel extends BaseComponent {
     private toastCallback?: (title: string, message: string, type: 'success' | 'error' | 'info') => void;
     private referenceImageLayer?: ReferenceImageLayer;
     private worldId?: string;
+    private presenter: IWorldEditorPresenter | null = null;
 
     // Internal state
     private isUIBound = false;
@@ -107,6 +108,11 @@ export class ReferenceImagePanel extends BaseComponent {
         this.log(`WorldId set via explicit setter: ${worldId}`);
     }
 
+    public setPresenter(presenter: IWorldEditorPresenter): void {
+        this.presenter = presenter;
+        this.log('Presenter set via explicit setter');
+    }
+
     // Explicit dependency getters
     public getToastCallback(): ((title: string, message: string, type: 'success' | 'error' | 'info') => void) | undefined {
         return this.toastCallback;
@@ -119,7 +125,34 @@ export class ReferenceImagePanel extends BaseComponent {
     public getWorldId(): string | undefined {
         return this.worldId;
     }
-    
+
+    // Public methods called by presenter when scale/position change from scene drag/scroll
+    public updateScaleDisplay(scaleX: number, scaleY: number): void {
+        // Only update if values actually changed (prevent circular updates)
+        const changed = this.referenceState.scale.x !== scaleX ||
+                       this.referenceState.scale.y !== scaleY;
+        if (!changed) return;
+
+        this.referenceState.scale.x = scaleX;
+        this.referenceState.scale.y = scaleY;
+        this.updateReferenceScaleDisplay();
+        this.saveScaleToLocalStorage();
+        this.log(`Scale display updated: ${scaleX}, ${scaleY}`);
+    }
+
+    public updatePositionDisplay(x: number, y: number): void {
+        // Only update if values actually changed (prevent circular updates)
+        const changed = this.referenceState.position.x !== x ||
+                       this.referenceState.position.y !== y;
+        if (!changed) return;
+
+        this.referenceState.position.x = x;
+        this.referenceState.position.y = y;
+        this.updateReferencePositionDisplay();
+        this.savePositionToLocalStorage();
+        this.log(`Position display updated: ${x}, ${y}`);
+    }
+
     // Phase 3: Activate component
     public async activate(): Promise<void> {
         if (this.isActivated) {
@@ -135,9 +168,6 @@ export class ReferenceImagePanel extends BaseComponent {
         // Load saved position and scale from localStorage
         this.loadSavedPositionAndScale();
 
-        // Subscribe to EventBus events from PhaserEditorComponent
-        this.subscribeToReferenceEvents();
-
         // Process any operations that were queued during UI binding
         this.processPendingOperations();
 
@@ -147,128 +177,7 @@ export class ReferenceImagePanel extends BaseComponent {
         this.isActivated = true;
         this.log('ReferenceImagePanel activated successfully');
     }
-    
-    /**
-     * Subscribe to reference image events from PhaserEditorComponent
-     */
-    private subscribeToReferenceEvents(): void {
-        // Subscribe to scale changes from direct Phaser interaction
-        this.addSubscription(EditorEventTypes.REFERENCE_SCALE_CHANGED, this);
 
-        // Subscribe to position changes from direct Phaser interaction
-        this.addSubscription(EditorEventTypes.REFERENCE_POSITION_CHANGED, this);
-
-        // Subscribe to state changes from direct Phaser interaction
-        this.addSubscription(EditorEventTypes.REFERENCE_STATE_CHANGED, this);
-
-        this.log('Subscribed to reference image EventBus events');
-    }
-
-    /**
-     * Handle events from the EventBus
-     */
-    public handleBusEvent(eventType: string, data: any, target: any, emitter: any): void {
-        switch(eventType) {
-            case EditorEventTypes.REFERENCE_SCALE_CHANGED:
-                this.handleReferenceScaleChanged(data);
-                break;
-
-            case EditorEventTypes.REFERENCE_POSITION_CHANGED:
-                this.handleReferencePositionChanged(data);
-                break;
-
-            case EditorEventTypes.REFERENCE_STATE_CHANGED:
-                this.handleReferenceStateChanged(data);
-                break;
-
-            default:
-                // Call parent implementation for unhandled events
-                super.handleBusEvent(eventType, data, target, emitter);
-        }
-    }
-    
-    /**
-     * Handle reference scale changed event from PhaserEditorComponent
-     */
-    private handleReferenceScaleChanged(data: ReferenceScaleChangedPayload): void {
-        this.log(`Received reference scale changed: ${data.scaleX}, ${data.scaleY}`);
-
-        // Only update if values actually changed (prevent circular updates)
-        const changed = this.referenceState.scale.x !== data.scaleX ||
-                       this.referenceState.scale.y !== data.scaleY;
-
-        if (!changed) {
-            return;
-        }
-
-        // Update local state cache
-        this.referenceState.scale.x = data.scaleX;
-        this.referenceState.scale.y = data.scaleY;
-
-        // Update UI display
-        this.updateReferenceScaleDisplay();
-
-        // Save to localStorage with debouncing
-        this.saveScaleToLocalStorage();
-    }
-
-    /**
-     * Handle reference position changed event from PhaserEditorComponent
-     */
-    private handleReferencePositionChanged(data: ReferencePositionChangedPayload): void {
-        this.log(`Received reference position changed: ${data.x}, ${data.y}`);
-
-        // Only update if values actually changed (prevent circular updates)
-        const changed = this.referenceState.position.x !== data.x ||
-                       this.referenceState.position.y !== data.y;
-
-        if (!changed) {
-            return;
-        }
-
-        // Update local state cache
-        this.referenceState.position.x = data.x;
-        this.referenceState.position.y = data.y;
-
-        // Update UI display
-        this.updateReferencePositionDisplay();
-
-        // Save to localStorage with debouncing
-        this.savePositionToLocalStorage();
-    }
-
-    /**
-     * Handle reference state changed event from PhaserEditorComponent
-     */
-    private handleReferenceStateChanged(data: ReferenceStateChangedPayload): void {
-        this.log(`Received reference state changed:`, data);
-        
-        // Update local state cache safely, preserving structure
-        if (data.scale) {
-            this.referenceState.scale = { ...data.scale };
-        }
-        if (data.position) {
-            this.referenceState.position = { ...data.position };
-        }
-        if (typeof data.alpha === 'number') {
-            this.referenceState.alpha = data.alpha;
-        }
-        if (typeof data.mode === 'number') {
-            this.referenceState.mode = data.mode;
-        }
-        if (typeof data.isLoaded === 'boolean') {
-            this.referenceState.isLoaded = data.isLoaded;
-        }
-        
-        // Update UI based on new state
-        this.updateReferenceScaleDisplay();
-        this.updateReferencePositionDisplay();
-        this.updateReferenceStatus(data.isLoaded ? 
-            (data.mode === 0 ? 'Hidden' : ['Hidden', 'Background', 'Overlay'][data.mode] + ' mode') : 
-            'No reference image loaded'
-        );
-    }
-    
     // Phase 4: Deactivate component
     public deactivate(): void {
         this.log('Deactivating ReferenceImagePanel');
@@ -699,14 +608,9 @@ export class ReferenceImagePanel extends BaseComponent {
     }
     
     private setReferenceMode(mode: number): void {
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetModePayload>(
-            EditorEventTypes.REFERENCE_SET_MODE, 
-            { mode }, 
-            this,
-            this
-        );
-        
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceMode(mode);
+
         // Update UI radio buttons to reflect current mode
         const modeRadios = this.rootElement.querySelectorAll('input[name="reference-mode"]') as NodeListOf<HTMLInputElement>;
         modeRadios.forEach(radio => {
@@ -757,54 +661,37 @@ export class ReferenceImagePanel extends BaseComponent {
     }
     
     private setReferenceAlpha(alpha: number): void {
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetAlphaPayload>(
-            EditorEventTypes.REFERENCE_SET_ALPHA, 
-            { alpha }, 
-            this,
-            this
-        );
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceAlpha(alpha);
         this.log(`Reference alpha set to: ${Math.round(alpha * 100)}%`);
     }
     
     private resetReferencePosition(): void {
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION, 
-            { x: 0, y: 0 }, 
-            this,
-            this
-        );
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferencePosition(0, 0);
+        this.referenceState.position = { x: 0, y: 0 };
+        this.updateReferencePositionDisplay();
         this.log('Reference position reset to center');
         this.showToast('Position Reset', 'Reference image centered', 'success');
     }
     
     private resetReferenceScale(): void {
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: 1, scaleY: 1 }, 
-            this,
-            this
-        );
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceScale(1, 1);
+        this.referenceState.scale = { x: 1, y: 1 };
+        this.updateReferenceScaleDisplay();
         this.log('Reference scale reset to 100%');
         this.showToast('Scale Reset', 'Reference image scale reset', 'success');
-        // Scale display will be updated when PhaserEditorComponent responds via EventBus
     }
     
     private adjustReferenceScaleX(delta: number): void {
         const currentScaleX = this.referenceState?.scale?.x ?? 1.0;
         const currentScaleY = this.referenceState?.scale?.y ?? 1.0;
         const newScaleX = Math.max(0.1, Math.min(5.0, currentScaleX + delta));
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: newScaleX, scaleY: currentScaleY }, 
-            this,
-            this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceScale(newScaleX, currentScaleY);
+
         // Update local state cache
         if (this.referenceState?.scale) {
             this.referenceState.scale.x = newScaleX;
@@ -812,20 +699,15 @@ export class ReferenceImagePanel extends BaseComponent {
         this.updateReferenceScaleDisplay();
         this.log(`Reference X scale: ${newScaleX.toFixed(2)}`);
     }
-    
+
     private adjustReferenceScaleY(delta: number): void {
         const currentScaleX = this.referenceState?.scale?.x ?? 1.0;
         const currentScaleY = this.referenceState?.scale?.y ?? 1.0;
         const newScaleY = Math.max(0.1, Math.min(5.0, currentScaleY + delta));
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: currentScaleX, scaleY: newScaleY }, 
-            this,
-            this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceScale(currentScaleX, newScaleY);
+
         // Update local state cache
         if (this.referenceState?.scale) {
             this.referenceState.scale.y = newScaleY;
@@ -833,19 +715,14 @@ export class ReferenceImagePanel extends BaseComponent {
         this.updateReferenceScaleDisplay();
         this.log(`Reference Y scale: ${newScaleY.toFixed(2)}`);
     }
-    
+
     private setReferenceScaleX(scaleX: number): void {
         const clampedScale = Math.max(0.1, Math.min(5.0, scaleX));
         const currentScaleY = this.referenceState?.scale?.y ?? 1.0;
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: clampedScale, scaleY: currentScaleY }, 
-            this,
-            this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceScale(clampedScale, currentScaleY);
+
         // Update local state cache
         if (this.referenceState?.scale) {
             this.referenceState.scale.x = clampedScale;
@@ -853,19 +730,14 @@ export class ReferenceImagePanel extends BaseComponent {
         this.updateReferenceScaleDisplay();
         this.log(`Reference X scale: ${clampedScale.toFixed(2)}`);
     }
-    
+
     private setReferenceScaleY(scaleY: number): void {
         const clampedScale = Math.max(0.1, Math.min(5.0, scaleY));
         const currentScaleX = this.referenceState?.scale?.x ?? 1.0;
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetScalePayload>(
-            EditorEventTypes.REFERENCE_SET_SCALE, 
-            { scaleX: currentScaleX, scaleY: clampedScale }, 
-            this,
-            this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferenceScale(currentScaleX, clampedScale);
+
         // Update local state cache
         if (this.referenceState?.scale) {
             this.referenceState.scale.y = clampedScale;
@@ -895,14 +767,10 @@ export class ReferenceImagePanel extends BaseComponent {
         const currentPositionX = this.referenceState?.position?.x ?? 0;
         const currentPositionY = this.referenceState?.position?.y ?? 0;
         const newPositionX = currentPositionX + delta;
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION, 
-            { x: newPositionX, y: currentPositionY }, 
-            this, this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferencePosition(newPositionX, currentPositionY);
+
         // Update local state cache
         if (this.referenceState?.position) {
             this.referenceState.position.x = newPositionX;
@@ -910,19 +778,15 @@ export class ReferenceImagePanel extends BaseComponent {
         this.updateReferencePositionDisplay();
         this.log(`Reference X position: ${newPositionX}`);
     }
-    
+
     private adjustReferencePositionY(delta: number): void {
         const currentPositionX = this.referenceState?.position?.x ?? 0;
         const currentPositionY = this.referenceState?.position?.y ?? 0;
         const newPositionY = currentPositionY + delta;
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION, 
-            { x: currentPositionX, y: newPositionY }, 
-            this, this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferencePosition(currentPositionX, newPositionY);
+
         // Update local state cache
         if (this.referenceState?.position) {
             this.referenceState.position.y = newPositionY;
@@ -930,17 +794,13 @@ export class ReferenceImagePanel extends BaseComponent {
         this.updateReferencePositionDisplay();
         this.log(`Reference Y position: ${newPositionY}`);
     }
-    
+
     private setReferencePositionX(positionX: number): void {
         const currentPositionY = this.referenceState?.position?.y ?? 0;
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION, 
-            { x: positionX, y: currentPositionY }, 
-            this, this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferencePosition(positionX, currentPositionY);
+
         // Update local state cache
         if (this.referenceState?.position) {
             this.referenceState.position.x = positionX;
@@ -948,17 +808,13 @@ export class ReferenceImagePanel extends BaseComponent {
         this.updateReferencePositionDisplay();
         this.log(`Reference X position: ${positionX}`);
     }
-    
+
     private setReferencePositionY(positionY: number): void {
         const currentPositionX = this.referenceState?.position?.x ?? 0;
-        
-        // Emit event to PhaserEditorComponent via EventBus
-        this.eventBus.emit<ReferenceSetPositionPayload>(
-            EditorEventTypes.REFERENCE_SET_POSITION, 
-            { x: currentPositionX, y: positionY }, 
-            this, this
-        );
-        
+
+        // Notify presenter to update Phaser scene
+        this.presenter?.setReferencePosition(currentPositionX, positionY);
+
         // Update local state cache
         if (this.referenceState?.position) {
             this.referenceState.position.y = positionY;

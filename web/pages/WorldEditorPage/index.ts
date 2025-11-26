@@ -1478,16 +1478,6 @@ class WorldEditorPage extends BasePage {
             position: { direction: 'below', referencePanel: 'tilestats' }
         });
 
-        // Add console panel below Phaser (250px height)
-        /*
-        this.dockview.addPanel({
-            id: 'console',
-            component: 'console',
-            title: '💻 Console',
-            position: { direction: 'below', referencePanel: 'phaser' }
-        });
-       */
-
         // Set panel sizes after layout is created
         setTimeout(() => {
             this.setPanelSizes();
@@ -1583,16 +1573,6 @@ class WorldEditorPage extends BasePage {
     
     // Phaser panel methods
     // OLD METHOD REMOVED: initializePhaserPanel - now handled by PhaserEditorComponent
-    
-        
-    private refreshTileStats(): void {
-        if (!this.tileStatsPanel || !this.tileStatsPanel.getIsInitialized()) {
-            return;
-        }
-        
-        // TileStatsPanel now reads directly from World
-        this.tileStatsPanel.refreshStats();
-    }
     
     /**
      * Center the camera on the loaded world by calculating bounds and focusing on center
@@ -2281,7 +2261,7 @@ class WorldEditorPage extends BasePage {
             // Give Phaser time to fully initialize webgl context and scene
             await this.phaserEditorComponent.editorScene.loadWorld(this.world);
             this.hasPendingWorldDataLoad = false;
-            this.refreshTileStats();
+            this.tileStatsPanel.refreshStats();
         }
 
         // Dismiss splash screen once everything is loaded and ready

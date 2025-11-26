@@ -28,6 +28,7 @@ class WorldViewerPage extends BasePage implements LCMComponent {
     // Component instances
     private worldScene: PhaserWorldScene;
     private worldStatsPanel: WorldStatsPanel;
+    private worldStatsPanelMobile: WorldStatsPanel | null = null;
 
     // =============================================================================
     // LCMComponent Interface Implementation
@@ -51,6 +52,9 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         const childComponents: LCMComponent[] = [];
         childComponents.push(this.worldScene!); // Should exist - fail if not
         childComponents.push(this.worldStatsPanel as any); // Should exist - fail if not
+        if (this.worldStatsPanelMobile) {
+            childComponents.push(this.worldStatsPanelMobile as any);
+        }
         return childComponents;
     }
 
@@ -86,17 +90,22 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         
         // Clean up components
         if (this.worldScene) {
-            this.worldScene.activate();
+            this.worldScene.deactivate();
             // Force set as null.  We are pushing for fail fast on values
             // that should NOT be null
             this.worldScene = null as any;
         }
         
         if (this.worldStatsPanel) {
-            this.worldStatsPanel.activate();
+            this.worldStatsPanel.deactivate();
             this.worldStatsPanel = null as any;
         }
-        
+
+        if (this.worldStatsPanelMobile) {
+            this.worldStatsPanelMobile.deactivate();
+            this.worldStatsPanelMobile = null;
+        }
+
         // Clean up world data
         this.world = null as any
         this.currentWorldId = null;
@@ -110,12 +119,17 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         const phaserContainer = this.ensureElement('#world-viewer-scene', 'world-viewer-scene');
         this.worldScene = new PhaserWorldScene(phaserContainer, this.eventBus, true);
 
-        // Create WorldStatsPanel component - pass the container, panel creates its own DOM
+        // Create WorldStatsPanel component for desktop sidebar
         const worldStatsContainer = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');
         this.worldStatsPanel = new WorldStatsPanel(worldStatsContainer, this.eventBus, true);
-
-        // Set world dependency
         this.worldStatsPanel.setWorld(this.world);
+
+        // Create WorldStatsPanel component for mobile bottom sheet (if container exists)
+        const mobileStatsContainer = document.querySelector('[data-component="world-stats-panel-mobile"]') as HTMLElement;
+        if (mobileStatsContainer) {
+            this.worldStatsPanelMobile = new WorldStatsPanel(mobileStatsContainer, this.eventBus, true);
+            this.worldStatsPanelMobile.setWorld(this.world);
+        }
     }
 
     /**

@@ -58,7 +58,7 @@
         <!-- World Content -->
         <div class="flex-1 flex max-w-9xl mx-auto w-full" style="min-height: 0;">
             <!-- World Preview Section - WorldViewer Component Root -->
-            <div class="flex-1 p-6 lg:pr-3 w-full lg:w-[calc(100%-250px)]">
+            <div class="flex-1 p-6 lg:pr-3 w-full lg:w-[calc(100%-450px)]">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col" data-component="world-viewer">
                     <!-- Header -->
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -76,78 +76,13 @@
             </div>
 
             <!-- World Stats Sidebar - Desktop Only -->
-            <div class="hidden lg:block p-6 pl-3" style="width: 250px; flex-shrink: 0;">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700" data-component="world-stats-panel">
+            <div class="hidden lg:block p-6 pl-3" style="width: 450px; flex-shrink: 0;">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-white">World Statistics</h2>
                     </div>
-                    <div class="p-4 space-y-4">
-                        <!-- Basic Stats -->
-                        <div data-stat-section="basic">
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Basic Info</h3>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Dimensions:</span>
-                                    <span class="text-gray-900 dark:text-white" data-stat="dimensions">8 × 8</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Total Tiles:</span>
-                                    <span class="text-gray-900 dark:text-white" data-stat="total-tiles">64</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Total Units:</span>
-                                    <span class="text-gray-900 dark:text-white" data-stat="total-units">0</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Terrain Distribution -->
-                        <div data-stat-section="terrain">
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Terrain Distribution</h3>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">🌱 Grass:</span>
-                                    <span class="text-gray-900 dark:text-white" data-terrain="1">32 (50%)</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">🏜️ Desert:</span>
-                                    <span class="text-gray-900 dark:text-white" data-terrain="2">12 (19%)</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">🌊 Water:</span>
-                                    <span class="text-gray-900 dark:text-white" data-terrain="3">8 (13%)</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">⛰️ Mountain:</span>
-                                    <span class="text-gray-900 dark:text-white" data-terrain="16">8 (13%)</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">🗿 Rock:</span>
-                                    <span class="text-gray-900 dark:text-white" data-terrain="20">4 (6%)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Game Stats (Coming Soon) -->
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Game Statistics</h3>
-                            <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                                <div class="flex justify-between">
-                                    <span>Games Played:</span>
-                                    <span>Coming Soon</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Avg Game Duration:</span>
-                                    <span>Coming Soon</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Win Rate:</span>
-                                    <span>Coming Soon</span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                    <!-- WorldStatsPanel renders its content here -->
+                    <div data-component="world-stats-panel"></div>
                 </div>
             </div>
         </div>
@@ -203,73 +138,8 @@
                     </button>
                 </div>
 
-                <!-- Scrollable Content -->
-                <div class="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-                    <!-- Basic Stats -->
-                    <div data-stat-section="basic">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Basic Info</h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-gray-600 dark:text-gray-400">Dimensions:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-stat="dimensions">8 × 8</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-gray-600 dark:text-gray-400">Total Tiles:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-stat="total-tiles">64</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-600 dark:text-gray-400">Total Units:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-stat="total-units">0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Terrain Distribution -->
-                    <div data-stat-section="terrain">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Terrain Distribution</h3>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-gray-600 dark:text-gray-400">🌱 Grass:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-terrain="1">32 (50%)</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-gray-600 dark:text-gray-400">🏜️ Desert:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-terrain="2">12 (19%)</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-gray-600 dark:text-gray-400">🌊 Water:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-terrain="3">8 (13%)</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span class="text-gray-600 dark:text-gray-400">⛰️ Mountain:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-terrain="16">8 (13%)</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-600 dark:text-gray-400">🗿 Rock:</span>
-                                <span class="font-medium text-gray-900 dark:text-white" data-terrain="20">4 (6%)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Game Stats (Coming Soon) -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Game Statistics</h3>
-                        <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span>Games Played:</span>
-                                <span>Coming Soon</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                                <span>Avg Game Duration:</span>
-                                <span>Coming Soon</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span>Win Rate:</span>
-                                <span>Coming Soon</span>
-                            </div>
-                        </div>
-                    </div>
-
+                <!-- Scrollable Content - WorldStatsPanel will render here -->
+                <div class="flex-1 overflow-y-auto" data-component="world-stats-panel-mobile">
                 </div>
             </div>
         </div>

@@ -209,8 +209,34 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
 
         this.updateTilesGrid(tiles);
         this.updateUnitsGrid(units);
-        this.updatePlayerTilesTable(tiles);
-        this.updatePlayerUnitsTable(units);
+
+        // Collect all unique players from both tiles and units for consistent table columns
+        const allPlayers = this.collectAllPlayers(tiles, units);
+        this.updatePlayerTilesTable(tiles, allPlayers);
+        this.updatePlayerUnitsTable(units, allPlayers);
+    }
+
+    /**
+     * Collect all unique player IDs from tiles and units
+     */
+    private collectAllPlayers(tiles: Tile[], units: Unit[]): number[] {
+        const playerSet = new Set<number>();
+
+        // Collect from tiles (only player-owned tiles)
+        tiles.forEach(tile => {
+            if (tile.player > 0) {
+                playerSet.add(tile.player);
+            }
+        });
+
+        // Collect from units
+        units.forEach(unit => {
+            if (unit.player > 0) {
+                playerSet.add(unit.player);
+            }
+        });
+
+        return Array.from(playerSet).sort((a, b) => a - b);
     }
 
     // =========================================================================
@@ -322,11 +348,11 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
     // Player Distribution Tables
     // =========================================================================
 
-    private updatePlayerTilesTable(tiles: Tile[]): void {
+    private updatePlayerTilesTable(tiles: Tile[], allPlayers: number[]): void {
         const container = this.findElement('#player-tiles-table');
         if (!container) return;
 
-        // Get unique players from tiles (only city tiles have player ownership)
+        // Get tile counts per player
         const playerTileCounts = new Map<number, Map<number, number>>();
         const allTileTypes = new Set<number>();
 
@@ -342,25 +368,24 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             }
         });
 
-        if (playerTileCounts.size === 0) {
+        if (allTileTypes.size === 0) {
             container.innerHTML = '<div class="text-gray-500 dark:text-gray-400 italic">No player-owned tiles</div>';
             return;
         }
 
-        // Sort players; sort tile types by name
-        const players = Array.from(playerTileCounts.keys()).sort((a, b) => a - b);
+        // Sort tile types by name
         const tileTypesWithNames = Array.from(allTileTypes).map(t => ({
             type: t,
             name: this.theme.getTerrainName(t) || `Type ${t}`
         }));
         tileTypesWithNames.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Build table
+        // Build table using allPlayers for consistent columns
         let html = '<table class="w-full border-collapse">';
 
         // Header row
         html += '<thead><tr><th class="text-center p-1 border-b border-gray-200 dark:border-gray-600">Tile</th>';
-        for (const player of players) {
+        for (const player of allPlayers) {
             html += `<th class="text-center p-1 border-b border-gray-200 dark:border-gray-600">P${player}</th>`;
         }
         html += '</tr></thead><tbody>';
@@ -374,7 +399,7 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
                         <span class="text-xs text-gray-700 dark:text-gray-300">${name}</span>
                     </div>
                 </td>`;
-            for (const player of players) {
+            for (const player of allPlayers) {
                 const count = playerTileCounts.get(player)?.get(tileType) || 0;
                 html += `<td class="text-center p-1 text-gray-600 dark:text-gray-400 align-middle">${count || '-'}</td>`;
             }
@@ -397,42 +422,43 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
         }
     }
 
-    private updatePlayerUnitsTable(units: Unit[]): void {
+    private updatePlayerUnitsTable(units: Unit[], allPlayers: number[]): void {
         const container = this.findElement('#player-units-table');
         if (!container) return;
 
-        // Get unique players and unit types
+        // Get unit counts per player
         const playerUnitCounts = new Map<number, Map<number, number>>();
         const allUnitTypes = new Set<number>();
 
         units.forEach(unit => {
-            if (!playerUnitCounts.has(unit.player)) {
-                playerUnitCounts.set(unit.player, new Map());
+            if (unit.player > 0) {
+                if (!playerUnitCounts.has(unit.player)) {
+                    playerUnitCounts.set(unit.player, new Map());
+                }
+                const playerMap = playerUnitCounts.get(unit.player)!;
+                playerMap.set(unit.unitType, (playerMap.get(unit.unitType) || 0) + 1);
+                allUnitTypes.add(unit.unitType);
             }
-            const playerMap = playerUnitCounts.get(unit.player)!;
-            playerMap.set(unit.unitType, (playerMap.get(unit.unitType) || 0) + 1);
-            allUnitTypes.add(unit.unitType);
         });
 
-        if (playerUnitCounts.size === 0) {
+        if (allUnitTypes.size === 0) {
             container.innerHTML = '<div class="text-gray-500 dark:text-gray-400 italic">No units</div>';
             return;
         }
 
-        // Sort players; sort unit types by name
-        const players = Array.from(playerUnitCounts.keys()).sort((a, b) => a - b);
+        // Sort unit types by name
         const unitTypesWithNames = Array.from(allUnitTypes).map(t => ({
             type: t,
             name: this.theme.getUnitName(t) || `Type ${t}`
         }));
         unitTypesWithNames.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Build table
+        // Build table using allPlayers for consistent columns
         let html = '<table class="w-full border-collapse">';
 
         // Header row
         html += '<thead><tr><th class="text-center p-1 border-b border-gray-200 dark:border-gray-600">Unit</th>';
-        for (const player of players) {
+        for (const player of allPlayers) {
             html += `<th class="text-center p-1 border-b border-gray-200 dark:border-gray-600">P${player}</th>`;
         }
         html += '</tr></thead><tbody>';
@@ -446,7 +472,7 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
                         <span class="text-xs text-gray-700 dark:text-gray-300">${name}</span>
                     </div>
                 </td>`;
-            for (const player of players) {
+            for (const player of allPlayers) {
                 const count = playerUnitCounts.get(player)?.get(unitType) || 0;
                 html += `<td class="text-center p-1 text-gray-600 dark:text-gray-400 align-middle">${count || '-'}</td>`;
             }

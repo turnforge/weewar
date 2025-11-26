@@ -49,20 +49,23 @@ func (s *FSWorldsService) GetWorldData(ctx context.Context, id string) (int64, e
 }
 
 // UpdateWorldDataIndexInfo implements WorldDataUpdater interface
+// Note: This does NOT increment version - IndexInfo is internal bookkeeping
+// that shouldn't invalidate user's optimistic lock
 func (s *FSWorldsService) UpdateWorldDataIndexInfo(ctx context.Context, id string, oldVersion int64, lastIndexedAt time.Time, needsIndexing bool) error {
 	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, id, "data")
 	if err != nil {
 		return err
 	}
 
-	// Check version matches (optimistic lock)
+	// Check version matches - if not, content was updated and we'll re-index later
 	if worldData.Version != oldVersion {
-		return fmt.Errorf("optimistic lock failed: expected version %d, got %d", oldVersion, worldData.Version)
+		return fmt.Errorf("version mismatch - content was updated, will re-index later")
 	}
 
+	// Update only IndexInfo fields, don't touch version
 	worldData.ScreenshotIndexInfo.LastIndexedAt = tspb.New(lastIndexedAt)
 	worldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
-	worldData.Version = oldVersion + 1
+	// Note: NOT incrementing version - this is internal bookkeeping
 
 	// Save updated data
 	err = s.storage.SaveArtifact(id, "data", worldData)

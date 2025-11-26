@@ -68,13 +68,13 @@ func (s *BackendGamesService) handleScreenshotCompletion(items []ScreenShotItem)
 			log.Printf("Screenshot errors for game %s: %v", item.Id, item.ThemeErrors)
 		}
 
-		// Optimistic lock: update only if version matches
+		// Update IndexInfo (does not increment version - internal bookkeeping only)
 		err = s.GameStateUpdater.UpdateGameStateScreenshotIndexInfo(ctx, item.Id, item.Version, lastIndexedAt, needsIndexing)
 		if err != nil {
 			log.Printf("Failed to update GameState IndexInfo for %s: %v", item.Id, err)
 		} else {
-			log.Printf("Successfully updated IndexInfo for game %s (version %d -> %d)",
-				item.Id, item.Version, item.Version+1)
+			log.Printf("Successfully updated IndexInfo for game %s (version %d)",
+				item.Id, item.Version)
 		}
 	}
 	return nil

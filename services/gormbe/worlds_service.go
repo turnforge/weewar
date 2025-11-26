@@ -61,33 +61,26 @@ func (s *WorldsService) GetWorldData(ctx context.Context, id string) (int64, err
 }
 
 // UpdateWorldDataIndexInfo implements WorldDataUpdater interface
+// Note: This does NOT increment version - IndexInfo is internal bookkeeping
+// that shouldn't invalidate user's optimistic lock
 func (s *WorldsService) UpdateWorldDataIndexInfo(ctx context.Context, id string, oldVersion int64, lastIndexedAt time.Time, needsIndexing bool) (err error) {
-	/*
-		worldData, err := s.WorldDataDAL.Get(ctx, s.storage, id)
-		if err != nil {
-			return err
-		}
-
-		worldData.ScreenshotIndexInfo.LastIndexedAt = lastIndexedAt
-		worldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
-		worldData.Version = oldVersion + 1
-
-		// Optimistic lock: update only if version matches
-		err = s.WorldDataDAL.Save(ctx, s.storage.Where("world_id = ? and version = ?", id, oldVersion), worldData)
-	*/
-	worldData := &v1gorm.WorldDataGORM{WorldId: id}
-	worldData.ScreenshotIndexInfo.LastIndexedAt = lastIndexedAt
-	worldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
+	// Update only IndexInfo fields, don't touch version
+	// We still check version to ensure we're updating the right state,
+	// but we don't increment it since this isn't a content change
 	result := s.storage.Model(&v1gorm.WorldDataGORM{}).
-		Where("world_id = ? AND version = ?", worldData.WorldId, oldVersion).
+		Where("world_id = ? AND version = ?", id, oldVersion).
 		Updates(map[string]any{
-			"version":                          oldVersion + 1,
 			"screenshot_index_last_indexed_at": lastIndexedAt,
 			"screenshot_index_needs_indexing":  needsIndexing,
 		})
 	err = result.Error
 	if err != nil {
-		return fmt.Errorf("optimistic lock failed or save error: %w", err)
+		return fmt.Errorf("failed to update IndexInfo: %w", err)
+	}
+	if result.RowsAffected == 0 {
+		// Version changed - this is fine, just means content was updated
+		// and we'll re-index on the next screenshot cycle
+		return fmt.Errorf("version mismatch - content was updated, will re-index later")
 	}
 	return nil
 }

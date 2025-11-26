@@ -1,7 +1,7 @@
 import { BasePage } from '../../lib/BasePage';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { PhaserEditorComponent } from './PhaserEditorComponent';
-import { TileStatsPanel } from './TileStatsPanel';
+import { WorldStatsPanel } from '../common/WorldStatsPanel';
 import { AssetThemePreference } from '../common/AssetThemePreference';
 import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from '../../lib/KeyboardShortcutManager';
 import { shouldIgnoreShortcut } from '../../lib/DOMUtils';
@@ -29,8 +29,8 @@ class WorldEditorPage extends BasePage {
     // Phaser editor component for world editing
     private phaserEditorComponent: PhaserEditorComponent;
     
-    // TileStats panel for displaying statistics
-    private tileStatsPanel: TileStatsPanel;
+    // WorldStats panel for displaying statistics
+    private worldStatsPanel: WorldStatsPanel;
     
     // Editor tools panel for terrain/unit selection
     private editorToolsPanel: EditorToolsPanel;
@@ -102,21 +102,21 @@ class WorldEditorPage extends BasePage {
             childComponents.push(this.editorToolsPanel);
         }
         
-        // Create TileStatsPanel as a lifecycle-managed component using template
-        const tileStatsTemplate = document.getElementById('tilestats-panel-template');
-        if (!tileStatsTemplate) {
+        // Create WorldStatsPanel as a lifecycle-managed component using template
+        const worldStatsTemplate = document.getElementById('tilestats-panel-template');
+        if (!worldStatsTemplate) {
             throw new Error('tilestats-panel-template not found in DOM');
         }
-        
+
         // Use the template element directly - it already has proper structure and styling
-        this.tileStatsPanel = new TileStatsPanel(tileStatsTemplate, this.eventBus, true);
-        
+        this.worldStatsPanel = new WorldStatsPanel(worldStatsTemplate, this.eventBus, true);
+
         // Set dependencies directly using explicit setters
         if (this.world) {
-            this.tileStatsPanel.setWorld(this.world);
+            this.worldStatsPanel.setWorld(this.world);
         }
-        
-        childComponents.push(this.tileStatsPanel);
+
+        childComponents.push(this.worldStatsPanel);
         
         // Create PhaserEditorComponent as a lifecycle-managed component using template
         const canvasTemplate = document.getElementById('canvas-panel-template');
@@ -136,7 +136,7 @@ class WorldEditorPage extends BasePage {
         // Register components with presenter
         this.presenter.registerPhaserEditor(this.phaserEditorComponent);
         this.presenter.registerToolsPanel(this.editorToolsPanel);
-        this.presenter.registerTileStatsPanel(this.tileStatsPanel);
+        this.presenter.registerWorldStatsPanel(this.worldStatsPanel);
         this.presenter.registerReferenceImagePanel(this.referenceImagePanel);
 
         // Initialize dockview now that all child components are ready
@@ -197,24 +197,10 @@ class WorldEditorPage extends BasePage {
     public deactivate(): void {
         // Save layout before destroying
         this.saveDockviewLayout();
-        
         // Dispose dockview
-        if (this.dockview) {
-            this.dockview.dispose();
-        }
-        
-        // Destroy Phaser component if it exists (will be handled by dockview component disposal)
-        // this.phaserEditorComponent cleanup is handled in createPhaserComponent dispose callback
-        
-        // Destroy TileStats panel if it exists
-        if (this.tileStatsPanel) {
-            this.tileStatsPanel.destroy();
-        }
-        
-        // Destroy keyboard shortcut manager if it exists
-        if (this.keyboardShortcutManager) {
-            this.keyboardShortcutManager.destroy();
-        }
+        this.dockview.dispose();
+        this.worldStatsPanel.destroy();
+        this.keyboardShortcutManager.destroy();
     }
     
     // Dependencies are set directly using explicit setters - no ComponentDependencyDeclaration needed
@@ -1347,35 +1333,34 @@ class WorldEditorPage extends BasePage {
     }
 
     private createTileStatsComponent() {
-        // Use the lifecycle-managed TileStatsPanel if available
-        if (this.tileStatsPanel) {
-            const container = this.tileStatsPanel.rootElement;
+        // Use the lifecycle-managed WorldStatsPanel if available
+        if (this.worldStatsPanel) {
+            const container = this.worldStatsPanel.rootElement;
             return {
                 element: container,
                 init: () => {
-                    // Panel is already initialized through lifecycle controller
-                    console.log('TileStatsPanel dockview component initialized (lifecycle-managed)');
+                    console.log('WorldStatsPanel dockview component initialized (lifecycle-managed)');
                 },
                 dispose: () => {
                     // Cleanup handled by lifecycle controller
                 }
             };
         }
-        
+
         // Fallback: use the template element directly from the DOM
         const template = document.getElementById('tilestats-panel-template');
         if (!template) {
-            console.error('TileStats panel template not found');
+            console.error('WorldStats panel template not found');
             return { element: document.createElement('div'), init: () => {}, dispose: () => {} };
         }
-        
+
         // Use the template element directly - no cloning needed
         template.style.display = 'block';
-        
+
         return {
             element: template,
             init: () => {
-                console.log('TileStatsPanel dockview component initialized (fallback mode using template)');
+                console.log('WorldStatsPanel dockview component initialized (fallback mode using template)');
             },
             dispose: () => {}
         };
@@ -1462,15 +1447,15 @@ class WorldEditorPage extends BasePage {
             position: { direction: 'right', referencePanel: 'phaser' }
         });
 
-        // Add TileStats panel below the Game Config panel
+        // Add World Stats panel below the Game Config panel
         this.dockview.addPanel({
             id: 'tilestats',
             component: 'tilestats',
             title: '📊 World Statistics',
             position: { direction: 'below', referencePanel: 'gameConfig' }
         });
-        
-        // Add Reference Image panel below the TileStats panel
+
+        // Add Reference Image panel below the World Stats panel
         this.dockview.addPanel({
             id: 'referenceImage',
             component: 'referenceImage',
@@ -2261,7 +2246,7 @@ class WorldEditorPage extends BasePage {
             // Give Phaser time to fully initialize webgl context and scene
             await this.phaserEditorComponent.editorScene.loadWorld(this.world);
             this.hasPendingWorldDataLoad = false;
-            this.tileStatsPanel.refreshStats();
+            this.worldStatsPanel.refreshStats();
         }
 
         // Dismiss splash screen once everything is loaded and ready

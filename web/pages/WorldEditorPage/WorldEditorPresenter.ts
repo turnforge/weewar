@@ -16,7 +16,7 @@ import { World, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventDa
 import { WorldEventTypes } from '../common/events';
 import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { EditorToolsPanel } from './ToolsPanel';
-import { TileStatsPanel } from './TileStatsPanel';
+import { WorldStatsPanel } from '../common/WorldStatsPanel';
 import { ReferenceImagePanel } from './ReferenceImagePanel';
 
 // =========================================================================
@@ -137,7 +137,7 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
     // Component References
     private phaserEditor: PhaserEditorComponent | null = null;
     private toolsPanel: EditorToolsPanel | null = null;
-    private tileStatsPanel: TileStatsPanel | null = null;
+    private worldStatsPanel: WorldStatsPanel | null = null;
     private referenceImagePanel: ReferenceImagePanel | null = null;
 
     // Tool State
@@ -259,8 +259,8 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
         this.toolsPanel = panel;
     }
 
-    public registerTileStatsPanel(panel: TileStatsPanel): void {
-        this.tileStatsPanel = panel;
+    public registerWorldStatsPanel(panel: WorldStatsPanel): void {
+        this.worldStatsPanel = panel;
     }
 
     public registerReferenceImagePanel(panel: ReferenceImagePanel): void {

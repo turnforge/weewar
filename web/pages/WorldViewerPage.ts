@@ -109,14 +109,13 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         // Create PhaserWorldScene component - uses PhaserSceneView template with SceneId: "world-viewer-scene"
         const phaserContainer = this.ensureElement('#world-viewer-scene', 'world-viewer-scene');
         this.worldScene = new PhaserWorldScene(phaserContainer, this.eventBus, true);
-        
-        // Create WorldStatsPanel component - pass the content div, not the container with header
+
+        // Create WorldStatsPanel component - pass the container, panel creates its own DOM
         const worldStatsContainer = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');
-        const worldStatsContent = worldStatsContainer.querySelector('.p-4.space-y-4') as HTMLElement;
-        if (!worldStatsContent) {
-            throw new Error('WorldViewerPage: WorldStatsPanel content div not found');
-        }
-        this.worldStatsPanel = new WorldStatsPanel(worldStatsContent, this.eventBus, true);
+        this.worldStatsPanel = new WorldStatsPanel(worldStatsContainer, this.eventBus, true);
+
+        // Set world dependency
+        this.worldStatsPanel.setWorld(this.world);
     }
 
     /**

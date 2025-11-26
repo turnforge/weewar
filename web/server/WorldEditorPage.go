@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"sort"
+	"strings"
 
 	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	weewar "github.com/turnforge/weewar/services"
@@ -136,7 +137,7 @@ func (v *WorldEditorPage) SetupDefaults() {
 	// Clear should always be first in Nature Terrains
 	sort.Slice(v.CityTerrains, func(i, j int) bool {
 		//return v.CityTerrains[i].Name < v.CityTerrains[j].Name
-		return v.CityTerrains[i].ID < v.CityTerrains[j].ID
+		return strings.Compare(v.CityTerrains[i].Name, v.CityTerrains[j].Name) < 0
 	})
 	sort.Slice(v.NatureTerrains, func(i, j int) bool {
 		// Clear (ID 0) should always be first
@@ -146,8 +147,9 @@ func (v *WorldEditorPage) SetupDefaults() {
 		if v.NatureTerrains[j].ID == 0 {
 			return false
 		}
+		return strings.Compare(v.NatureTerrains[i].Name, v.NatureTerrains[j].Name) < 0
 		// return v.NatureTerrains[i].Name < v.NatureTerrains[j].Name
-		return v.NatureTerrains[i].ID < v.NatureTerrains[j].ID
+		// return v.NatureTerrains[i].ID < v.NatureTerrains[j].ID
 	})
 
 	// Load unit types with icons
@@ -169,6 +171,10 @@ func (v *WorldEditorPage) SetupDefaults() {
 			})
 		}
 	}
+	sort.Slice(v.UnitTypes, func(i, j int) bool {
+		//return v.CityTerrains[i].Name < v.CityTerrains[j].Name
+		return strings.Compare(v.UnitTypes[i].Name, v.UnitTypes[j].Name) < 0
+	})
 
 	v.Header.Styles = map[string]any{
 		"FixedHeightHeader":          true,

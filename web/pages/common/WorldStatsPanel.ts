@@ -32,6 +32,9 @@ const THEME_REGISTRY: Record<string, new () => ITheme> = {
  * - Component creates its own DOM structure
  * - Automatically updates when world data changes
  */
+type SortField = 'name' | 'count';
+type SortDirection = 'asc' | 'desc';
+
 export class WorldStatsPanel extends BaseComponent implements LCMComponent {
     // Dependencies
     private world: World | null = null;
@@ -40,6 +43,12 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
     // Internal state
     private isUIBound = false;
     private isActivated = false;
+
+    // Sorting state for tiles and units grids
+    private tilesSortField: SortField = 'count';
+    private tilesSortDirection: SortDirection = 'desc';
+    private unitsSortField: SortField = 'count';
+    private unitsSortDirection: SortDirection = 'desc';
 
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('world-stats-panel', rootElement, eventBus, debugMode);
@@ -161,7 +170,12 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             <div class="world-stats-panel h-full bg-white dark:bg-gray-800 overflow-y-auto p-2">
                 <!-- Tiles Section -->
                 <div class="mb-4">
-                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tiles</h4>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Tiles</h4>
+                        <div id="tiles-sort-controls" class="hidden flex items-center gap-1">
+                            ${this.createSortControls('tiles')}
+                        </div>
+                    </div>
                     <div id="tiles-grid" class="flex flex-wrap gap-2">
                         <!-- Tile stats will be populated here -->
                     </div>
@@ -169,7 +183,12 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
 
                 <!-- Units Section -->
                 <div class="mb-4">
-                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Units (Initial)</h4>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Units (Initial)</h4>
+                        <div id="units-sort-controls" class="hidden flex items-center gap-1">
+                            ${this.createSortControls('units')}
+                        </div>
+                    </div>
                     <div id="units-grid" class="flex flex-wrap gap-2">
                         <!-- Unit stats will be populated here -->
                     </div>
@@ -192,6 +211,96 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
                 </div>
             </div>
         `;
+
+        // Bind sort control event handlers
+        this.bindSortControls();
+    }
+
+    private createSortControls(prefix: string): string {
+        const sortField = prefix === 'tiles' ? this.tilesSortField : this.unitsSortField;
+        const sortDirection = prefix === 'tiles' ? this.tilesSortDirection : this.unitsSortDirection;
+
+        const nameSelected = sortField === 'name' ? 'selected' : '';
+        const countSelected = sortField === 'count' ? 'selected' : '';
+
+        const directionIcon = sortDirection === 'asc'
+            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />'
+            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v12m0 0l-4-4m4 4l4-4m6 0V4m0 0l4 4m-4-4l-4 4" />';
+        const directionTitle = sortDirection === 'asc' ? 'Ascending (click to change)' : 'Descending (click to change)';
+
+        return `
+            <select id="${prefix}-sort-field" class="text-xs px-1 py-0.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                <option value="name" ${nameSelected}>Name</option>
+                <option value="count" ${countSelected}>Count</option>
+            </select>
+            <button id="${prefix}-sort-direction" class="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400" title="${directionTitle}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    ${directionIcon}
+                </svg>
+            </button>
+        `;
+    }
+
+    private bindSortControls(): void {
+        // Tiles sort controls
+        const tilesSortField = this.findElement('#tiles-sort-field') as HTMLSelectElement;
+        const tilesSortDirection = this.findElement('#tiles-sort-direction') as HTMLButtonElement;
+
+        if (tilesSortField) {
+            tilesSortField.addEventListener('change', () => {
+                this.tilesSortField = tilesSortField.value as SortField;
+                this.refreshTilesGrid();
+            });
+        }
+
+        if (tilesSortDirection) {
+            tilesSortDirection.addEventListener('click', () => {
+                this.tilesSortDirection = this.tilesSortDirection === 'asc' ? 'desc' : 'asc';
+                this.updateSortDirectionIcon('tiles', this.tilesSortDirection);
+                this.refreshTilesGrid();
+            });
+        }
+
+        // Units sort controls
+        const unitsSortField = this.findElement('#units-sort-field') as HTMLSelectElement;
+        const unitsSortDirection = this.findElement('#units-sort-direction') as HTMLButtonElement;
+
+        if (unitsSortField) {
+            unitsSortField.addEventListener('change', () => {
+                this.unitsSortField = unitsSortField.value as SortField;
+                this.refreshUnitsGrid();
+            });
+        }
+
+        if (unitsSortDirection) {
+            unitsSortDirection.addEventListener('click', () => {
+                this.unitsSortDirection = this.unitsSortDirection === 'asc' ? 'desc' : 'asc';
+                this.updateSortDirectionIcon('units', this.unitsSortDirection);
+                this.refreshUnitsGrid();
+            });
+        }
+    }
+
+    private updateSortDirectionIcon(prefix: string, direction: SortDirection): void {
+        const button = this.findElement(`#${prefix}-sort-direction`) as HTMLButtonElement;
+        if (!button) return;
+
+        // Up arrow for ascending, down arrow for descending
+        const svg = direction === 'asc'
+            ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>'
+            : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v12m0 0l-4-4m4 4l4-4m6 0V4m0 0l4 4m-4-4l-4 4" /></svg>';
+        button.innerHTML = svg;
+        button.title = direction === 'asc' ? 'Ascending (click to change)' : 'Descending (click to change)';
+    }
+
+    private refreshTilesGrid(): void {
+        if (!this.world) return;
+        this.updateTilesGrid(this.world.getAllTiles());
+    }
+
+    private refreshUnitsGrid(): void {
+        if (!this.world) return;
+        this.updateUnitsGrid(this.world.getAllUnits());
     }
 
     // =========================================================================
@@ -245,6 +354,7 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
 
     private updateTilesGrid(tiles: Tile[]): void {
         const container = this.findElement('#tiles-grid');
+        const sortControls = this.findElement('#tiles-sort-controls');
         if (!container) return;
 
         // Count tiles by type
@@ -261,8 +371,25 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             name: this.theme.getTerrainName(tileType) || `Type ${tileType}`
         }));
 
-        // Sort alphabetically by name
-        tileData.sort((a, b) => a.name.localeCompare(b.name));
+        // Show/hide sort controls based on item count
+        if (sortControls) {
+            if (tileData.length > 1) {
+                sortControls.classList.remove('hidden');
+            } else {
+                sortControls.classList.add('hidden');
+            }
+        }
+
+        // Sort based on current sort settings
+        tileData.sort((a, b) => {
+            let comparison: number;
+            if (this.tilesSortField === 'name') {
+                comparison = a.name.localeCompare(b.name);
+            } else {
+                comparison = a.count - b.count;
+            }
+            return this.tilesSortDirection === 'asc' ? comparison : -comparison;
+        });
 
         // Generate grid items with icon, name, and count
         let html = '';
@@ -297,6 +424,7 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
 
     private updateUnitsGrid(units: Unit[]): void {
         const container = this.findElement('#units-grid');
+        const sortControls = this.findElement('#units-sort-controls');
         if (!container) return;
 
         // Count units by type
@@ -313,8 +441,25 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             name: this.theme.getUnitName(unitType) || `Type ${unitType}`
         }));
 
-        // Sort alphabetically by name
-        unitData.sort((a, b) => a.name.localeCompare(b.name));
+        // Show/hide sort controls based on item count
+        if (sortControls) {
+            if (unitData.length > 1) {
+                sortControls.classList.remove('hidden');
+            } else {
+                sortControls.classList.add('hidden');
+            }
+        }
+
+        // Sort based on current sort settings
+        unitData.sort((a, b) => {
+            let comparison: number;
+            if (this.unitsSortField === 'name') {
+                comparison = a.name.localeCompare(b.name);
+            } else {
+                comparison = a.count - b.count;
+            }
+            return this.unitsSortDirection === 'asc' ? comparison : -comparison;
+        });
 
         // Generate grid items with icon, name, and count
         let html = '';

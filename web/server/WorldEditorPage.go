@@ -1,12 +1,8 @@
 package server
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
-	"image"
-	"image/png"
 	"log"
 	"log/slog"
 	"net/http"
@@ -72,18 +68,6 @@ type WorldEditorPage struct {
 }
 
 func (g *WorldEditorPage) Copy() View { return &WorldEditorPage{} }
-
-// imageToDataURL converts an image to a data URL
-func imageToDataURL(img image.Image) (string, error) {
-	var buf bytes.Buffer
-	if err := png.Encode(&buf, img); err != nil {
-		return "", err
-	}
-
-	// Encode as base64
-	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
-	return fmt.Sprintf("data:image/png;base64,%s", encoded), nil
-}
 
 func (v *WorldEditorPage) SetupDefaults() {
 	v.Header.Width = "w-full"

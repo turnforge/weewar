@@ -140,6 +140,11 @@ export class CrossingLayer extends BaseLayer {
             for (const direction of connectionDirections) {
                 this.drawConnectionInDirection(graphics, q, r, direction, crossing.type);
             }
+
+            // Draw center cap to cover join points (only if multiple connections)
+            if (connectionDirections.length > 1) {
+                this.drawCenterCap(graphics, crossing.type);
+            }
         }
 
         this.crossingGraphics.set(key, graphics);
@@ -150,24 +155,158 @@ export class CrossingLayer extends BaseLayer {
      */
     private drawDefaultCrossing(graphics: Phaser.GameObjects.Graphics, crossingType: CrossingType): void {
         const halfWidth = this.tileWidth / 2;
-        const lineWidth = crossingType === CrossingType.CROSSING_TYPE_BRIDGE ? 12 : 10;
+        const startX = -halfWidth * 0.7;
+        const endX = halfWidth * 0.7;
 
         if (crossingType === CrossingType.CROSSING_TYPE_ROAD) {
-            // Road: tan/brown color
-            graphics.lineStyle(lineWidth, 0x8B7355, 0.9);
-            graphics.lineBetween(-halfWidth * 0.7, 0, halfWidth * 0.7, 0);
-            // Edge lines
-            graphics.lineStyle(2, 0x5D4E37, 0.8);
-            graphics.lineBetween(-halfWidth * 0.7, -lineWidth / 2, halfWidth * 0.7, -lineWidth / 2);
-            graphics.lineBetween(-halfWidth * 0.7, lineWidth / 2, halfWidth * 0.7, lineWidth / 2);
+            this.drawRoadSegment(graphics, startX, 0, endX, 0);
         } else {
-            // Bridge: wooden brown
-            graphics.lineStyle(lineWidth, 0x8B4513, 0.9);
-            graphics.lineBetween(-halfWidth * 0.7, 0, halfWidth * 0.7, 0);
-            // Railings
-            graphics.lineStyle(3, 0x654321, 1.0);
-            graphics.lineBetween(-halfWidth * 0.7, -lineWidth / 2, halfWidth * 0.7, -lineWidth / 2);
-            graphics.lineBetween(-halfWidth * 0.7, lineWidth / 2, halfWidth * 0.7, lineWidth / 2);
+            this.drawBridgeSegment(graphics, startX, 0, endX, 0);
+        }
+    }
+
+    // Standard width for crossings
+    private static readonly CROSSING_WIDTH = 20;
+
+    /**
+     * Draw a center cap to cover join points where multiple segments meet
+     */
+    private drawCenterCap(graphics: Phaser.GameObjects.Graphics, crossingType: CrossingType): void {
+        const width = CrossingLayer.CROSSING_WIDTH;
+        const hw = width / 2;
+
+        // Light border circle
+        graphics.fillStyle(0x888888, 1.0);
+        graphics.fillCircle(0, 0, hw + 1);
+
+        // Dark surface circle
+        graphics.fillStyle(0x3a3a3a, 1.0);
+        graphics.fillCircle(0, 0, hw);
+    }
+
+    /**
+     * Draw a filled polygon given an array of [x,y,x,y,...] coordinates
+     */
+    private fillPolygon(graphics: Phaser.GameObjects.Graphics, points: number[], color: number, alpha: number = 1.0): void {
+        graphics.fillStyle(color, alpha);
+        graphics.beginPath();
+        graphics.moveTo(points[0], points[1]);
+        for (let i = 2; i < points.length; i += 2) {
+            graphics.lineTo(points[i], points[i + 1]);
+        }
+        graphics.closePath();
+        graphics.fillPath();
+    }
+
+    /**
+     * Draw a road segment - dark surface with light borders and yellow dashed center
+     */
+    private drawRoadSegment(graphics: Phaser.GameObjects.Graphics, x1: number, y1: number, x2: number, y2: number): void {
+        const width = CrossingLayer.CROSSING_WIDTH;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        if (length === 0) return;
+
+        // Perpendicular vector
+        const perpX = (-dy / length);
+        const perpY = (dx / length);
+        const hw = width / 2;
+
+        // Light border/edge
+        this.fillPolygon(graphics, [
+            x1 + perpX * (hw + 1), y1 + perpY * (hw + 1),
+            x2 + perpX * (hw + 1), y2 + perpY * (hw + 1),
+            x2 - perpX * (hw + 1), y2 - perpY * (hw + 1),
+            x1 - perpX * (hw + 1), y1 - perpY * (hw + 1),
+        ], 0x888888);
+
+        // Dark road surface
+        this.fillPolygon(graphics, [
+            x1 + perpX * hw, y1 + perpY * hw,
+            x2 + perpX * hw, y2 + perpY * hw,
+            x2 - perpX * hw, y2 - perpY * hw,
+            x1 - perpX * hw, y1 - perpY * hw,
+        ], 0x3a3a3a);
+
+        // Yellow dashed center line
+        graphics.lineStyle(2, 0xe0b000, 1.0);
+        const dashLength = 5;
+        const gapLength = 4;
+        let currentPos = 2;
+
+        while (currentPos < length - 2) {
+            const dashEnd = Math.min(currentPos + dashLength, length - 2);
+            const t1 = currentPos / length;
+            const t2 = dashEnd / length;
+            graphics.lineBetween(
+                x1 + dx * t1, y1 + dy * t1,
+                x1 + dx * t2, y1 + dy * t2
+            );
+            currentPos += dashLength + gapLength;
+        }
+    }
+
+    /**
+     * Draw a bridge segment - like road but with support pillars on each side
+     */
+    private drawBridgeSegment(graphics: Phaser.GameObjects.Graphics, x1: number, y1: number, x2: number, y2: number): void {
+        const width = CrossingLayer.CROSSING_WIDTH;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        if (length === 0) return;
+
+        // Perpendicular vector
+        const perpX = (-dy / length);
+        const perpY = (dx / length);
+        const hw = width / 2;
+
+        // Light border/edge (same as road)
+        this.fillPolygon(graphics, [
+            x1 + perpX * (hw + 1), y1 + perpY * (hw + 1),
+            x2 + perpX * (hw + 1), y2 + perpY * (hw + 1),
+            x2 - perpX * (hw + 1), y2 - perpY * (hw + 1),
+            x1 - perpX * (hw + 1), y1 - perpY * (hw + 1),
+        ], 0x888888);
+
+        // Dark bridge surface
+        this.fillPolygon(graphics, [
+            x1 + perpX * hw, y1 + perpY * hw,
+            x2 + perpX * hw, y2 + perpY * hw,
+            x2 - perpX * hw, y2 - perpY * hw,
+            x1 - perpX * hw, y1 - perpY * hw,
+        ], 0x3a3a3a);
+
+        // Draw 3 support pillars on each side: start, middle, end
+        const pillarRadius = 3;
+        const pillarOffset = hw + pillarRadius + 1;
+
+        graphics.fillStyle(0x505050, 1.0);
+        for (const t of [0.1, 0.5, 0.9]) {
+            const px = x1 + dx * t;
+            const py = y1 + dy * t;
+
+            // Pillar on each side
+            graphics.fillCircle(px + perpX * pillarOffset, py + perpY * pillarOffset, pillarRadius);
+            graphics.fillCircle(px - perpX * pillarOffset, py - perpY * pillarOffset, pillarRadius);
+        }
+
+        // Yellow dashed center line (same as road)
+        graphics.lineStyle(2, 0xe0b000, 1.0);
+        const dashLength = 5;
+        const gapLength = 4;
+        let currentPos = 2;
+
+        while (currentPos < length - 2) {
+            const dashEnd = Math.min(currentPos + dashLength, length - 2);
+            const t1 = currentPos / length;
+            const t2 = dashEnd / length;
+            graphics.lineBetween(
+                x1 + dx * t1, y1 + dy * t1,
+                x1 + dx * t2, y1 + dy * t2
+            );
+            currentPos += dashLength + gapLength;
         }
     }
 
@@ -196,36 +335,10 @@ export class CrossingLayer extends BaseLayer {
         const endX = dx / 2;
         const endY = dy / 2;
 
-        const lineWidth = crossingType === CrossingType.CROSSING_TYPE_BRIDGE ? 12 : 10;
-
         if (crossingType === CrossingType.CROSSING_TYPE_ROAD) {
-            // Road: tan/brown with edge lines
-            graphics.lineStyle(lineWidth, 0x8B7355, 0.9);
-            graphics.lineBetween(0, 0, endX, endY);
-
-            // Draw edge lines parallel to the path
-            const length = Math.sqrt(endX * endX + endY * endY);
-            if (length > 0) {
-                const perpX = (-endY / length) * (lineWidth / 2);
-                const perpY = (endX / length) * (lineWidth / 2);
-                graphics.lineStyle(2, 0x5D4E37, 0.8);
-                graphics.lineBetween(perpX, perpY, endX + perpX, endY + perpY);
-                graphics.lineBetween(-perpX, -perpY, endX - perpX, endY - perpY);
-            }
+            this.drawRoadSegment(graphics, 0, 0, endX, endY);
         } else {
-            // Bridge: wooden with railings
-            graphics.lineStyle(lineWidth, 0x8B4513, 0.9);
-            graphics.lineBetween(0, 0, endX, endY);
-
-            // Draw railings parallel to the path
-            const length = Math.sqrt(endX * endX + endY * endY);
-            if (length > 0) {
-                const perpX = (-endY / length) * (lineWidth / 2);
-                const perpY = (endX / length) * (lineWidth / 2);
-                graphics.lineStyle(3, 0x654321, 1.0);
-                graphics.lineBetween(perpX, perpY, endX + perpX, endY + perpY);
-                graphics.lineBetween(-perpX, -perpY, endX - perpX, endY - perpY);
-            }
+            this.drawBridgeSegment(graphics, 0, 0, endX, endY);
         }
     }
 

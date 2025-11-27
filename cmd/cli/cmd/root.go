@@ -10,12 +10,13 @@ import (
 )
 
 var (
-	cfgFile  string
-	gameID   string
-	jsonOut  bool
-	verbose  bool
-	dryrun   bool
-	confirm  bool
+	cfgFile   string
+	gameID    string
+	serverURL string
+	jsonOut   bool
+	verbose   bool
+	dryrun    bool
+	confirm   bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -33,7 +34,8 @@ Examples:
   ww units                         List all units
 
 Global Flags:
-  --game-id string       Game ID to operate on (or set GAME_ID env var)
+  --game-id string       Game ID to operate on (or set WEEWAR_GAME_ID env var)
+  --server string        Server URL to connect to (or set WEEWAR_SERVER env var)
   --json                 Output in JSON format
   --verbose              Show detailed debug information
   --dryrun               Preview changes without saving to disk`,
@@ -49,7 +51,8 @@ func init() {
 
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weewar.yaml)")
-	rootCmd.PersistentFlags().StringVar(&gameID, "game-id", "", "game ID to operate on (env: GAME_ID)")
+	rootCmd.PersistentFlags().StringVar(&gameID, "game-id", "", "game ID to operate on (env: WEEWAR_GAME_ID)")
+	rootCmd.PersistentFlags().StringVar(&serverURL, "server", "", "server URL to connect to (env: WEEWAR_SERVER)")
 	rootCmd.PersistentFlags().BoolVar(&jsonOut, "json", false, "output in JSON format")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "show detailed debug information")
 	rootCmd.PersistentFlags().BoolVar(&dryrun, "dryrun", false, "preview changes without saving to disk")
@@ -57,6 +60,7 @@ func init() {
 
 	// Bind flags to viper
 	viper.BindPFlag("game-id", rootCmd.PersistentFlags().Lookup("game-id"))
+	viper.BindPFlag("server", rootCmd.PersistentFlags().Lookup("server"))
 	viper.BindPFlag("json", rootCmd.PersistentFlags().Lookup("json"))
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 	viper.BindPFlag("dryrun", rootCmd.PersistentFlags().Lookup("dryrun"))
@@ -130,4 +134,12 @@ func isDryrun() bool {
 // shouldConfirm returns whether confirmation prompts should be shown
 func shouldConfirm() bool {
 	return viper.GetBool("confirm")
+}
+
+// getServerURL returns the server URL if configured, empty string for local mode
+func getServerURL() string {
+	if rootCmd.PersistentFlags().Changed("server") {
+		return serverURL
+	}
+	return viper.GetString("server")
 }

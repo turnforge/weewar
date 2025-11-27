@@ -6,8 +6,8 @@ import (
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	"github.com/turnforge/weewar/services"
+	"github.com/turnforge/weewar/services/connectclient"
 	"github.com/turnforge/weewar/services/fsbe"
-	"github.com/turnforge/weewar/services/singleton"
 )
 
 // PresenterContext holds the presenter and associated panels for CLI operations
@@ -22,29 +22,45 @@ type PresenterContext struct {
 	CompactSummaryCard *services.BaseCompactSummaryCardPanel
 	GameScene          *services.BaseGameScene
 	GameID             string
-	FSService          *fsbe.FSGamesService
+	GamesService       services.GamesService // The underlying service (Connect or Singleton)
+	IsRemote           bool                  // Whether using remote server
 }
 
-// createPresenter loads a game from disk into an in-memory presenter
+// createPresenter loads a game and creates a presenter
+// If serverURL is provided, connects to remote server via Connect protocol
+// Otherwise, uses local FSGamesService for file-based storage
 func createPresenter(gameID string) (*PresenterContext, error) {
 	ctx := context.Background()
+	serverURL := getServerURL()
 
-	// Load game from disk using FSGamesService
-	fsService := fsbe.NewFSGamesService("", nil)
-	gameResp, err := fsService.GetGame(ctx, &v1.GetGameRequest{Id: gameID})
+	var gamesService services.GamesService
+	var isRemote bool
+
+	if serverURL != "" {
+		// Use Connect client to connect to remote server
+		gamesService = connectclient.NewConnectGamesClient(serverURL)
+		isRemote = true
+		if isVerbose() {
+			fmt.Printf("[VERBOSE] Connecting to server: %s\n", serverURL)
+		}
+	} else {
+		// Use FSGamesService for local file-based storage
+		gamesService = fsbe.NewFSGamesService("", nil)
+		isRemote = false
+		if isVerbose() {
+			fmt.Println("[VERBOSE] Using local file storage")
+		}
+	}
+
+	// Load game data
+	gameResp, err := gamesService.GetGame(ctx, &v1.GetGameRequest{Id: gameID})
 	if err != nil {
 		return nil, fmt.Errorf("failed to load game %s: %w", gameID, err)
 	}
 
-	// Always use SingletonGamesService for in-memory operations
-	singletonService := singleton.NewSingletonGamesService()
-	singletonService.SingletonGame = gameResp.Game
-	singletonService.SingletonGameState = gameResp.State
-	singletonService.SingletonGameMoveHistory = gameResp.History
-
 	// Create presenter (already initializes RulesEngine and Theme)
 	presenter := services.NewGameViewPresenter()
-	presenter.GamesService = singletonService
+	presenter.GamesService = gamesService
 
 	// Create base panels (data-only, no HTML rendering)
 	gameState := &services.BaseGameState{
@@ -80,15 +96,18 @@ func createPresenter(gameID string) (*PresenterContext, error) {
 		CompactSummaryCard: compactSummaryCard,
 		GameScene:          gameScene,
 		GameID:             gameID,
-		FSService:          fsService,
+		GamesService:       gamesService,
+		IsRemote:           isRemote,
 	}, nil
 }
 
-// savePresenterState persists the current presenter state back to disk
+// savePresenterState persists the current presenter state
+// For remote mode, saves via Connect client to server
+// For local mode, saves via the games service
 func savePresenterState(pc *PresenterContext, dryrun bool) error {
 	if dryrun {
 		if isVerbose() {
-			fmt.Println("[VERBOSE] Dryrun mode: skipping save to disk")
+			fmt.Println("[VERBOSE] Dryrun mode: skipping save")
 		}
 		return nil
 	}
@@ -99,8 +118,8 @@ func savePresenterState(pc *PresenterContext, dryrun bool) error {
 		panic(err)
 	}
 
-	// Save game state back to disk using FSGamesService
-	_, err = pc.FSService.UpdateGame(ctx, &v1.UpdateGameRequest{
+	// Save game state using the games service (works for both local and remote)
+	_, err = pc.GamesService.UpdateGame(ctx, &v1.UpdateGameRequest{
 		GameId:     pc.GameID,
 		NewGame:    game,
 		NewState:   gameState,
@@ -112,7 +131,11 @@ func savePresenterState(pc *PresenterContext, dryrun bool) error {
 	}
 
 	if isVerbose() {
-		fmt.Printf("[VERBOSE] Game state saved to disk for game %s\n", pc.GameID)
+		if pc.IsRemote {
+			fmt.Printf("[VERBOSE] Game state saved to server for game %s\n", pc.GameID)
+		} else {
+			fmt.Printf("[VERBOSE] Game state saved locally for game %s\n", pc.GameID)
+		}
 	}
 
 	return nil

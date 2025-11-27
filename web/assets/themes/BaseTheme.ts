@@ -15,6 +15,22 @@ export const UNIT_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 
 
 export const ALLOWED_UNIT_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 37, 38, 39, 40, 41, 44];
 
+export const WATER_TERRAIN_IDS = [10, 14, 15, 23]
+
+// Tile type constants - crossings map to these for display purposes
+export const TILE_TYPE_PLAINS = 5;
+export const TILE_TYPE_ROAD = 22;
+export const TILE_TYPE_BRIDGE_SHALLOW = 18;
+export const TILE_TYPE_BRIDGE_REGULAR = 17;
+export const TILE_TYPE_BRIDGE_ROCKY = 23;
+export const TILE_TYPE_BRIDGE_DEEP = 19;
+
+// Underlying water tile types for determining bridge depth
+export const TILE_TYPE_WATER_SHALLOW = 14;
+export const TILE_TYPE_WATER_REGULAR = 10;
+export const TILE_TYPE_WATER_ROCKY = 23;
+export const TILE_TYPE_WATER_DEEP = 15;
+
 // Player color definitions - matches ColorsAndNames.ts and original Weewar colors
 // Based on the PLAYER_COLORS text classes in dark mode (which is what's typically shown)
 // These also need to match the PNG asset player colors (1.png = red, 2.png = blue, etc.)
@@ -41,6 +57,7 @@ export interface ITheme {
   loadUnit(unitId: number, playerId: number): Promise<string>;
   loadTile(terrainId: number, playerId?: number): Promise<string>;
   isCityTile(tileId: number): boolean
+  isWaterTile(tileId: number): boolean
   getUnitPath(unitId: number): string | undefined;
   getTilePath(terrainId: number): string | undefined;
   getUnitAssetPath?(unitId: number, playerId: number): string | undefined;
@@ -55,6 +72,8 @@ export interface ITheme {
   setUnitImage(unitId: number, playerId: number, targetElement: HTMLElement): Promise<void>;
   setTileImage(tileId: number, playerId: number, targetElement: HTMLElement): Promise<void>;
   applyPlayerColors?(svgContent: string, playerId: number): string;
+  canPlaceCrossing(tileType: number, crossingType: number): boolean;
+  defaultCrossingTerrain(crossingType: number): number;
 }
 
 export interface ThemeInfo {
@@ -205,6 +224,10 @@ export abstract class BaseTheme implements ITheme {
    */
   isCityTile(terrainId: number): boolean {
     return CITY_TERRAIN_IDS.includes(terrainId);
+  }
+
+  isWaterTile(tileType: number): boolean {
+    return WATER_TERRAIN_IDS.includes(tileType)
   }
 
   /**
@@ -369,4 +392,21 @@ export abstract class BaseTheme implements ITheme {
       targetElement.innerHTML = '🏞️';
     }
   }
+
+    canPlaceCrossing(tileType: number, crossingType: number): boolean {
+      if (crossingType == CrossingType.CROSSING_TYPE_ROAD) {
+        return !this.isWaterTile(tileType) && !this.isCityTile(tileType)
+      } else if (crossingType == CrossingType.CROSSING_TYPE_BRIDGE) {
+        return this.isWaterTile(tileType)
+      }
+      return false
+    }
+
+    defaultCrossingTerrain(crossingType: number): number {
+      if (crossingType == CrossingType.CROSSING_TYPE_ROAD) {
+        return TILE_TYPE_PLAINS;
+      } else if (crossingType == CrossingType.CROSSING_TYPE_BRIDGE) {
+        return TILE_TYPE_WATER_REGULAR;
+      }
+    }
 }

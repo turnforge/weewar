@@ -3,25 +3,11 @@ import { EventBus } from '../../lib/EventBus';
 import { LCMComponent } from '../../lib/LCMComponent';
 import { WorldEventTypes } from './events';
 import { Unit, Tile, World, CrossingType, Crossing } from './World';
-import { ITheme } from '../../assets/themes/BaseTheme';
+import { ITheme, TILE_TYPE_WATER_REGULAR } from '../../assets/themes/BaseTheme';
 import DefaultTheme from '../../assets/themes/default';
 import ModernTheme from '../../assets/themes/modern';
 import FantasyTheme from '../../assets/themes/fantasy';
 import { AssetThemePreference } from './AssetThemePreference';
-import {
-    TILE_TYPE_PLAINS,
-    TILE_TYPE_ROAD, 
-    TILE_TYPE_BRIDGE_SHALLOW, 
-    TILE_TYPE_BRIDGE_REGULAR, 
-    TILE_TYPE_BRIDGE_ROCKY, 
-    TILE_TYPE_BRIDGE_DEEP, 
-
-    // Underlying water tile types for determining bridge depth
-    TILE_TYPE_WATER_SHALLOW, 
-    TILE_TYPE_WATER_REGULAR, 
-    TILE_TYPE_WATER_ROCKY, 
-    TILE_TYPE_WATER_DEEP, 
-} from "../../assets/themes/default"
 
 /**
  * Theme registry for creating theme instances
@@ -537,34 +523,16 @@ export class WorldStatsPanel extends BaseComponent implements LCMComponent {
             tileTypeMap.set(`${tile.q},${tile.r}`, tile.tileType);
         });
 
-        // Count crossings by their display tile type (road=22, bridges=17/18/19)
+        // Count crossings by their display tile type using theme's method
         const crossingCounts = new Map<number, number>();
 
         crossings.forEach(({ q, r, crossing }) => {
-            let displayTileType: number;
-
-            if (crossing.type === CrossingType.CROSSING_TYPE_ROAD) {
-                displayTileType = TILE_TYPE_ROAD;
-            } else if (crossing.type === CrossingType.CROSSING_TYPE_BRIDGE) {
-                // Determine bridge type based on underlying water tile
-                const tileType = tileTypeMap.get(`${q},${r}`) || TILE_TYPE_WATER_REGULAR;
-                switch (tileType) {
-                    case TILE_TYPE_WATER_SHALLOW:
-                        displayTileType = TILE_TYPE_BRIDGE_SHALLOW;
-                        break;
-                    case TILE_TYPE_WATER_ROCKY:
-                        displayTileType = TILE_TYPE_BRIDGE_SHALLOW;
-                        break;
-                    case TILE_TYPE_WATER_DEEP:
-                        displayTileType = TILE_TYPE_BRIDGE_DEEP;
-                        break;
-                    default:
-                        displayTileType = TILE_TYPE_BRIDGE_REGULAR;
-                        break;
-                }
-            } else {
+            if (crossing.type === CrossingType.CROSSING_TYPE_UNSPECIFIED) {
                 return; // Skip unspecified crossings
             }
+
+            const underlyingTileType = tileTypeMap.get(`${q},${r}`) || TILE_TYPE_WATER_REGULAR;
+            const displayTileType = this.theme.getCrossingDisplayTileType(crossing.type, underlyingTileType);
 
             crossingCounts.set(displayTileType, (crossingCounts.get(displayTileType) || 0) + 1);
         });

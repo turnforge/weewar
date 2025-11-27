@@ -29,11 +29,11 @@
 
 ### 4. Concrete Themes
 
-**DefaultTheme** (`web/assets/themes/default.go`)
+**DefaultTheme** (`web/assets/themes/default.go` / `web/assets/themes/default.ts`)
 - PNG-based (original v1 assets)
-- No mapping.json needed
-- Returns full paths: `/static/assets/v1/Units/1/2.png`
-- Hardcoded unit/terrain names
+- Now uses `mapping.json` like other themes (consolidated approach)
+- Returns full paths: `/static/assets/themes/default/Units/1/2.png`
+- TypeScript version extends `BaseTheme` for shared functionality
 
 **FantasyTheme** (`web/assets/themes/fantasy.go`)
 - SVG-based (Medieval Fantasy)
@@ -61,6 +61,8 @@
 ### 7. Shared mapping.json Files
 ```
 assets/themes/
+├── default/
+│   └── mapping.json  ✅ Used by TS DefaultTheme (PNG paths, natureTerrains)
 ├── fantasy/
 │   ├── mapping.json  ✅ Embedded in Go, read by TS
 │   ├── Units/*.svg
@@ -215,6 +217,30 @@ Root Level:
 5. **Co-located**: Go + TS files together
 6. **Type-safe**: Proto-generated structs
 7. **Tested**: All themes load and work correctly
+
+## Recent Session Work (2025-11-27)
+
+### DefaultTheme Refactoring
+Refactored `default.ts` to extend `BaseTheme` instead of implementing `ITheme` directly:
+
+**Changes:**
+- `DefaultTheme` now extends `BaseTheme` for shared functionality
+- Added `mapping.json` for default theme (like fantasy/modern themes)
+- Consolidated assets from `web/static/assets/v1/` to `web/static/assets/themes/default/`
+- Added `getCrossingDisplayTileType()` method to `ITheme` interface and `BaseTheme`
+- Updated `WorldStatsPanel` to use theme method instead of hardcoded tile type constants
+
+**Benefits:**
+- Consistent theme architecture across all themes
+- Shared methods from `BaseTheme` reduce code duplication
+- Single location for v1 assets (`web/static/assets/themes/default/`)
+- Theme can provide crossing display tile types for WorldStatsPanel
+
+**Files Changed:**
+- `web/assets/themes/default.ts` - Refactored to extend BaseTheme
+- `web/assets/themes/BaseTheme.ts` - Added `getCrossingDisplayTileType()` method
+- `web/assets/themes/default/mapping.json` - New mapping file for default theme
+- `web/pages/common/WorldStatsPanel.ts` - Uses theme method for crossing display
 
 ## Next Steps
 

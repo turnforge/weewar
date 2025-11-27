@@ -349,41 +349,55 @@ class GameListingPage {
 
 ## Recent Session Work (2025-11-27)
 
-### Crossing Layer Implementation (Roads & Bridges)
+### Crossing System Redesign with Explicit Connectivity
 
-Implemented a complete crossing layer system for roads and bridges in the world editor:
+Complete redesign of the crossing system to use explicit connectivity instead of automatic neighbor detection:
 
-**Architecture:**
-- **CrossingType enum** (from proto): `CROSSING_TYPE_UNSPECIFIED`, `CROSSING_TYPE_ROAD`, `CROSSING_TYPE_BRIDGE`
-- **CrossingLayer** (`common/CrossingLayer.ts`): Phaser layer at depth 5 (between tiles and units)
-- **Connection-based rendering**: Crossings draw lines from center to center of neighboring compatible crossings
-- **Type compatibility**: Roads only connect to roads, bridges only connect to bridges
+**New Crossing Data Model:**
+- Changed from `CrossingType` enum to `Crossing` struct with `type` and `connectsTo[6]` boolean array
+- Direction indices: 0=LEFT, 1=TOP_LEFT, 2=TOP_RIGHT, 3=RIGHT, 4=BOTTOM_RIGHT, 5=BOTTOM_LEFT
+- Proto schema updated: `crossings` map now stores `Crossing` objects instead of `CrossingType` values
 
-**Event System:**
-- Added `CROSSINGS_CHANGED` event type to `events.ts`
-- `World.ts` emits `CROSSINGS_CHANGED` events on crossing modifications
-- `PhaserWorldScene.ts` subscribes to events and updates `CrossingLayer`
+**Crossing Direction Preset UI:**
+- Interactive hex SVG with 6 clickable direction lines
+- Dropdown presets: Horizontal (L-R), Diagonal (TL-BR), T-Junction, Crossroad, Full
+- Individual direction toggles via clicking on hex spokes
+- Visual feedback: active directions show amber (#d97706), inactive show gray (#d1d5db)
+- Larger interactive hex (w-32 h-32) for easier selection
 
-**Editor UI Changes:**
-- Reduced from 3 tabs (Nature, City, Units) to 2 tabs (Tiles, Units)
-- Tiles tab contains: Clear button, Nature section, Crossings section (Road/Bridge), Structures section
-- Crossings have toggle behavior (click to place, click again to remove)
-- Auto-terrain placement: Roads set land (Plains) if on water/empty, bridges set water if on non-water/empty
-
-**Persistence:**
-- Crossings stored in proto `WorldData.crossings` map (key = "q,r", value = CrossingType)
-- Fixed JSON serialization: Added `UseEnumNumbers: true` to protojson marshaling for proper TypeScript enum compatibility
-- Fixed loading order: Crossings load in both `setWorld()` and `create()` to handle initialization timing
+**Editor Behavior Changes:**
+- `toggleCrossing` now uses `deleteCrossing()` instead of `removeCrossing()` to only affect clicked tile
+- Removing a crossing no longer affects neighbor connections
+- Placing a crossing uses the preset `connectsTo` configuration from ToolsPanel
 
 **Files Changed:**
-- `common/events.ts`: Added CROSSINGS_CHANGED
-- `common/World.ts`: Added crossing change tracking and event emission
-- `common/CrossingLayer.ts`: Complete rewrite with connection-based rendering
-- `common/PhaserWorldScene.ts`: CrossingLayer integration, event handling, loading
-- `WorldEditorPage/WorldEditorPresenter.ts`: Crossing placement logic with auto-terrain
-- `WorldEditorPage/ToolsPanel.ts`: Updated for 2-tab layout with crossings section
-- `WorldEditorPage/PhaserEditorComponent.ts`: Pass world to scene
-- `WorldEditorPage/index.ts`: Tab switching updates
-- `web/server/WorldEditorPage.go`: Crossings palette data
-- `web/server/views.go`: UseEnumNumbers for proto JSON
-- `web/templates/panels/ToolsPanel.html`: Restructured layout
+- `protos/weewar/v1/game.proto`: Changed `Crossing` from enum to message with connectsTo array
+- `common/hexUtils.ts`: Added `getOppositeDirection()` helper
+- `common/World.ts`: Added `deleteCrossing()` method, updated crossing APIs
+- `common/CrossingLayer.ts`: Render connections based on explicit `connectsTo` array
+- `WorldEditorPage/WorldEditorPresenter.ts`: Added `setCrossingConnectsTo()`, updated toggle logic
+- `WorldEditorPage/ToolsPanel.ts`: Crossing direction preset UI, SVG interaction
+- `web/templates/panels/ToolsPanel.html`: Interactive hex SVG markup
+
+### DefaultTheme Refactoring
+
+Refactored `default.ts` to extend `BaseTheme` for consistency with other themes:
+
+**Changes:**
+- `DefaultTheme` now extends `BaseTheme` instead of implementing `ITheme` directly
+- Added `mapping.json` for default theme with unit/terrain mappings and `natureTerrains` array
+- Consolidated assets from `web/static/assets/v1/` to `web/static/assets/themes/default/`
+- Added `getCrossingDisplayTileType()` method to `ITheme` interface and `BaseTheme`
+- `WorldStatsPanel` now uses theme method instead of hardcoded tile type constants
+
+**Benefits:**
+- Consistent theme architecture across all themes (default, fantasy, modern)
+- Shared `BaseTheme` methods reduce code duplication
+- Single location for v1 assets
+- Theme can provide crossing display tile types for WorldStatsPanel
+
+**Files Changed:**
+- `web/assets/themes/default.ts`: Refactored to extend BaseTheme
+- `web/assets/themes/BaseTheme.ts`: Added `getCrossingDisplayTileType()` method
+- `web/assets/themes/default/mapping.json`: New mapping file
+- `web/pages/common/WorldStatsPanel.ts`: Uses theme method for crossing display

@@ -1,87 +1,48 @@
-import { ITheme, ThemeInfo, BRIDGE_TERRAIN_IDS, NATURE_TERRAIN_IDS, PLAYER_COLORS, CITY_TERRAIN_IDS } from './BaseTheme';
+/**
+ * Default Theme Provider
+ * Extends BaseTheme with PNG-specific asset loading
+ * Uses pre-colored PNG assets that don't need post-processing
+ */
+
+import { BaseTheme, ThemeInfo, PLAYER_COLORS } from './BaseTheme';
+import mappingData from './default/mapping.json';
+
+// Type for the extended mapping with natureTerrains
+interface DefaultMappingData {
+    themeInfo: {
+        name: string;
+        version: string;
+        base_path: string;
+        asset_type: string;
+        needs_post_processing: boolean;
+    };
+    units: { [key: string]: { old: string; name: string; image: string } };
+    terrains: { [key: string]: { old: string; name: string; image: string } };
+    natureTerrains: number[];
+}
+
+const mapping = mappingData as DefaultMappingData;
 
 /**
- * Default theme using the original PNG assets from v1
- * These assets are pre-colored for each player and don't need post-processing
+ * Default Theme Implementation
+ * Uses PNG assets with pre-colored player variants
  */
-export default class DefaultTheme implements ITheme {
-    protected basePath = '/static/assets/v1';
+export default class DefaultTheme extends BaseTheme {
+    protected basePath = '/static/assets/themes/default';
     protected themeName = 'Default (PNG)';
     protected themeVersion = '1.0.0';
-    
-    // Unit names from the original game
-    private unitNames: { [key: number]: string } = {
-        1: 'Infantry',
-        2: 'Mech',
-        3: 'Recon',
-        4: 'Tank',
-        5: 'Medium Tank',
-        6: 'Neo Tank',
-        7: 'APC',
-        8: 'Artillery',
-        9: 'Rocket',
-        10: 'Anti-Air',
-        11: 'Missile',
-        12: 'Fighter',
-        13: 'Bomber',
-        14: 'B-Copter',
-        15: 'T-Copter',
-        16: 'Battleship',
-        17: 'Cruiser',
-        18: 'Lander',
-        19: 'Sub',
-        20: 'Mech',
-        21: 'Missile (Std)',
-        22: 'Missile (Nuke)',
-        24: 'Sailboat',
-        25: 'Artillery (Mega)',
-        26: 'Artillery (Quick)',
-        27: 'Medic',
-        28: 'Stratotanker',
-        29: 'Engineer',
-        30: 'Goliath RC',
-        31: 'Tugboat',
-        32: 'Sea Mine',
-        33: 'Drone',
-        37: 'Cruiser',
-        38: 'Missile (Anti Air)',
-        39: 'Aircraft Carrier',
-        40: 'Miner',
-        41: 'Paratrooper',
-        44: 'Anti Aircraft (Advanced)',
-    };
-    
-    // Terrain names from the original game
-    private terrainNames: { [key: number]: string } = {
-        0: 'Clear',
-        1: 'Land Base',
-        2: 'Naval Base',
-        3: 'Airport Base',
-        4: 'Dessert',
-        5: 'Grass',
-        6: 'Hospital',
-        7: 'Mountains',
-        8: 'Swamp',
-        9: 'Forest',
-        10: 'Water (Regular)',
-        12: 'Lava',
-        14: 'Water (Shallow)',
-        15: 'Water (Deep)',
-        16: 'Missile Silo',
-        17: 'Bridge (Regular)',
-        18: 'Bridge (Shallow)',
-        19: 'Bridge (Deep)',
-        20: 'Mines',
-        21: 'City',
-        22: 'Road',
-        23: 'Water (Rocky)',
-        25: 'Guard Tower',
-        26: 'Snow',
-    };
-    
-    // Nature terrains that only have neutral colors
-    private natureTerrains = [4, 5, 7, 8, 9, 10, 12, 14, 15, 17, 18, 19, 22, 23, 26];
-    
+
+    // Nature terrains that only have neutral colors (no player variants)
+    private natureTerrains: number[];
+
+    constructor() {
+        super(mapping);
+        this.natureTerrains = mapping.natureTerrains;
+    }
+
+    /**
+     * Override getThemeInfo for PNG-specific settings
+     */
     getThemeInfo(): ThemeInfo {
         return {
             name: this.themeName,
@@ -94,98 +55,65 @@ export default class DefaultTheme implements ITheme {
         };
     }
 
-  /**
-   * Checks if a terrain ID is a city/building tile that should be tinted
-   */
-  isCityTile(terrainId: number): boolean {
-    return CITY_TERRAIN_IDS.includes(terrainId);
-  }
-
-  /**
-   * Checks if a terrain ID is a nature tile
-   */
-  isNatureTile(terrainId: number): boolean {
-    return NATURE_TERRAIN_IDS.includes(terrainId);
-  }
-
-  /**
-   * Checks if a terrain ID is a bridge
-   */
-  isBridgeTile(terrainId: number): boolean {
-    return BRIDGE_TERRAIN_IDS.includes(terrainId);
-  }
-    
-    getUnitName(unitId: number): string | undefined {
-        return this.unitNames[unitId];
-    }
-    
-    getTerrainName(terrainId: number): string | undefined {
-        return this.terrainNames[terrainId];
-    }
-    
-    getUnitDescription(unitId: number): string | undefined {
-        // Return undefined - no custom descriptions for default theme
-        return undefined;
-    }
-    
-    getTerrainDescription(terrainId: number): string | undefined {
-        // Return undefined - no custom descriptions for default theme
-        return undefined;
-    }
-    
+    /**
+     * Override getUnitPath - PNG assets don't use template paths
+     */
     getUnitPath(unitId: number): string | undefined {
-        // PNG assets don't use templates, return undefined
+        // PNG assets use getUnitAssetPath instead
         return undefined;
     }
-    
+
+    /**
+     * Override getTilePath - PNG assets don't use template paths
+     */
     getTilePath(terrainId: number): string | undefined {
-        // PNG assets don't use templates, return undefined
+        // PNG assets use getTileAssetPath instead
         return undefined;
     }
-    
+
     /**
      * Returns the direct path to a pre-colored unit asset
      */
     getUnitAssetPath(unitId: number, playerId: number): string | undefined {
-        if (!this.unitNames[unitId]) {
+        const unit = this.unitMapping[unitId.toString()];
+        if (!unit) {
             return undefined;
         }
-        return `${this.basePath}/Units/${unitId}/${playerId}.png`;
+        // PNG assets are stored as: Units/{unitId}/{playerId}.png
+        return `${this.basePath}/${unit.image}/${playerId}.png`;
     }
-    
+
     /**
      * Returns the direct path to a pre-colored terrain asset
      */
     getTileAssetPath(terrainId: number, playerId: number): string | undefined {
-        if (!this.terrainNames[terrainId]) {
+        const terrain = this.terrainMapping[terrainId.toString()];
+        if (!terrain) {
             return undefined;
         }
-        
+
         // Nature terrains always use player 0 (neutral)
         const effectivePlayer = this.natureTerrains.includes(terrainId) ? 0 : playerId;
-        return `${this.basePath}/Tiles/${terrainId}/${effectivePlayer}.png`;
+        // PNG assets are stored as: Tiles/{terrainId}/{playerId}.png
+        return `${this.basePath}/${terrain.image}/${effectivePlayer}.png`;
     }
-    
-    getAvailableUnits(): number[] {
-        return Object.keys(this.unitNames).map(id => parseInt(id));
-    }
-    
-    getAvailableTerrains(): number[] {
-        return Object.keys(this.terrainNames).map(id => parseInt(id));
-    }
-    
+
+    /**
+     * Override loadUnit - PNG theme uses pre-colored assets
+     */
     async loadUnit(unitId: number, playerId: number): Promise<string> {
-        // PNG assets are loaded directly, not as SVG templates
         throw new Error('Default theme uses pre-colored PNG assets. Use getUnitAssetPath() instead.');
     }
-    
+
+    /**
+     * Override loadTile - PNG theme uses pre-colored assets
+     */
     async loadTile(terrainId: number, playerId?: number): Promise<string> {
-        // PNG assets are loaded directly, not as SVG templates
         throw new Error('Default theme uses pre-colored PNG assets. Use getTileAssetPath() instead.');
     }
-    
+
     /**
-     * Sets a unit PNG image in the target HTML element
+     * Override setUnitImage for PNG assets
      */
     async setUnitImage(unitId: number, playerId: number, targetElement: HTMLElement): Promise<void> {
         const path = this.getUnitAssetPath(unitId, playerId);
@@ -193,23 +121,23 @@ export default class DefaultTheme implements ITheme {
             targetElement.innerHTML = '⚔️';
             return;
         }
-        
+
         targetElement.innerHTML = '';
         const img = document.createElement('img');
         img.src = path;
         img.alt = this.getUnitName(unitId) || `Unit ${unitId}`;
         img.className = 'w-full h-full object-contain';
         img.style.imageRendering = 'pixelated';
-        
+
         img.onerror = () => {
             targetElement.innerHTML = '⚔️';
         };
-        
+
         targetElement.appendChild(img);
     }
-    
+
     /**
-     * Sets a tile PNG image in the target HTML element
+     * Override setTileImage for PNG assets
      */
     async setTileImage(tileId: number, playerId: number, targetElement: HTMLElement): Promise<void> {
         const path = this.getTileAssetPath(tileId, playerId);
@@ -217,18 +145,18 @@ export default class DefaultTheme implements ITheme {
             targetElement.innerHTML = '🏞️';
             return;
         }
-        
+
         targetElement.innerHTML = '';
         const img = document.createElement('img');
         img.src = path;
         img.alt = this.getTerrainName(tileId) || `Terrain ${tileId}`;
         img.className = 'w-full h-full object-contain';
         img.style.imageRendering = 'pixelated';
-        
+
         img.onerror = () => {
             targetElement.innerHTML = '🏞️';
         };
-        
+
         targetElement.appendChild(img);
     }
 }

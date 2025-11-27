@@ -481,10 +481,10 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
 
         const tile = this.world.getTileAt(q, r);
         const isRoad = crossingType === CrossingType.CROSSING_TYPE_ROAD;
-        const theme = this.phaserEditor?.editorScene?.getAssetProvider()?.getTheme();
+        const theme = this.phaserEditor?.editorScene?.getAssetProvider()?.getTheme()!;
 
-        if (!tile || theme.canPlaceCrossing(tile, crossingType)) {
-            this.world.setTileAt(q, r, theme.defaultTerrainForCrossing(crossingType), 0);
+        if (!tile || theme.canPlaceCrossing(tile.tileType, crossingType)) {
+            this.world.setTileAt(q, r, theme.defaultCrossingTerrain(crossingType), 0);
         }
     }
 

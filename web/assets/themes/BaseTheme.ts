@@ -1,3 +1,5 @@
+import { CrossingType } from "../../gen/weewar/v1/models/models_pb"
+
 /**
  * Base Theme Class
  * Contains common functionality for all themes
@@ -74,6 +76,7 @@ export interface ITheme {
   applyPlayerColors?(svgContent: string, playerId: number): string;
   canPlaceCrossing(tileType: number, crossingType: number): boolean;
   defaultCrossingTerrain(crossingType: number): number;
+  getCrossingDisplayTileType(crossingType: number, underlyingTileType: number): number;
 }
 
 export interface ThemeInfo {
@@ -394,19 +397,44 @@ export abstract class BaseTheme implements ITheme {
   }
 
     canPlaceCrossing(tileType: number, crossingType: number): boolean {
-      if (crossingType == CrossingType.CROSSING_TYPE_ROAD) {
+      if (crossingType == CrossingType.ROAD) {
         return !this.isWaterTile(tileType) && !this.isCityTile(tileType)
-      } else if (crossingType == CrossingType.CROSSING_TYPE_BRIDGE) {
+      } else if (crossingType == CrossingType.BRIDGE) {
         return this.isWaterTile(tileType)
       }
       return false
     }
 
     defaultCrossingTerrain(crossingType: number): number {
-      if (crossingType == CrossingType.CROSSING_TYPE_ROAD) {
+      if (crossingType == CrossingType.ROAD) {
         return TILE_TYPE_PLAINS;
-      } else if (crossingType == CrossingType.CROSSING_TYPE_BRIDGE) {
+      } else if (crossingType == CrossingType.BRIDGE) {
         return TILE_TYPE_WATER_REGULAR;
       }
+      return TILE_TYPE_PLAINS;
+    }
+
+    /**
+     * Get the display tile type for a crossing based on its type and underlying terrain
+     * Roads always display as TILE_TYPE_ROAD
+     * Bridges display as different bridge types based on underlying water depth
+     */
+    getCrossingDisplayTileType(crossingType: number, underlyingTileType: number): number {
+      if (crossingType === CrossingType.ROAD) {
+        return TILE_TYPE_ROAD;
+      } else if (crossingType === CrossingType.BRIDGE) {
+        // Map water tile types to corresponding bridge types
+        switch (underlyingTileType) {
+          case TILE_TYPE_WATER_SHALLOW:
+            return TILE_TYPE_BRIDGE_SHALLOW;
+          case TILE_TYPE_WATER_ROCKY:
+            return TILE_TYPE_BRIDGE_ROCKY;
+          case TILE_TYPE_WATER_DEEP:
+            return TILE_TYPE_BRIDGE_DEEP;
+          default:
+            return TILE_TYPE_BRIDGE_REGULAR;
+        }
+      }
+      return TILE_TYPE_ROAD; // Default fallback
     }
 }

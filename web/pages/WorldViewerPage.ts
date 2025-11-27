@@ -118,6 +118,7 @@ class WorldViewerPage extends BasePage implements LCMComponent {
         // Create PhaserWorldScene component - uses PhaserSceneView template with SceneId: "world-viewer-scene"
         const phaserContainer = this.ensureElement('#world-viewer-scene', 'world-viewer-scene');
         this.worldScene = new PhaserWorldScene(phaserContainer, this.eventBus, true);
+        this.worldScene.setWorld(this.world);
 
         // Create WorldStatsPanel component for desktop sidebar
         const worldStatsContainer = this.ensureElement('[data-component="world-stats-panel"]', 'world-stats-root');

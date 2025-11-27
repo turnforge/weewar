@@ -88,7 +88,11 @@ func (tm *ThemeManager) GetTerrainIconURL(terrainID int32, useTheme bool, themeN
 	// Look up the terrain in the mapping
 	terrainKey := fmt.Sprintf("%d", terrainID)
 	if entry, exists := mapping.Terrains[terrainKey]; exists {
-		// Return the themed asset URL
+		// For PNG themes (like default), image is a directory - append /0.png for neutral
+		// For SVG themes, image is the full file path
+		if themeName == "default" {
+			return fmt.Sprintf("/static/assets/themes/%s/%s/0.png", themeName, entry.Image)
+		}
 		return fmt.Sprintf("/static/assets/themes/%s/%s", themeName, entry.Image)
 	}
 
@@ -115,7 +119,11 @@ func (tm *ThemeManager) GetUnitIconURL(unitID int32, useTheme bool, themeName st
 	// Look up the unit in the mapping
 	unitKey := fmt.Sprintf("%d", unitID)
 	if entry, exists := mapping.Units[unitKey]; exists {
-		// Return the themed asset URL
+		// For PNG themes (like default), image is a directory - append /0.png for neutral
+		// For SVG themes, image is the full file path
+		if themeName == "default" {
+			return fmt.Sprintf("/static/assets/themes/%s/%s/0.png", themeName, entry.Image)
+		}
 		return fmt.Sprintf("/static/assets/themes/%s/%s", themeName, entry.Image)
 	}
 

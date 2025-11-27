@@ -79,7 +79,8 @@ export default class DefaultTheme extends BaseTheme {
         if (!unit) {
             return undefined;
         }
-        // PNG assets are stored as: Units/{unitId}/{playerId}.png
+        // PNG assets are stored as: {basePath}/{image}/{playerId}.png
+        // where image is a directory like "Units/15"
         return `${this.basePath}/${unit.image}/${playerId}.png`;
     }
 
@@ -94,7 +95,8 @@ export default class DefaultTheme extends BaseTheme {
 
         // Nature terrains always use player 0 (neutral)
         const effectivePlayer = this.natureTerrains.includes(terrainId) ? 0 : playerId;
-        // PNG assets are stored as: Tiles/{terrainId}/{playerId}.png
+        // PNG assets are stored as: {basePath}/{image}/{playerId}.png
+        // where image is a directory like "Tiles/5"
         return `${this.basePath}/${terrain.image}/${effectivePlayer}.png`;
     }
 

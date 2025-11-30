@@ -1,72 +1,99 @@
 package themes
 
 import (
+	_ "embed"
+	"encoding/json"
 	"fmt"
+	"strconv"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 )
 
-// DefaultTheme implements the Theme interface for PNG-based default assets
-// Mirrors default.ts but focused on metadata
-type DefaultTheme struct {
-	basePath string
+//go:embed default/mapping.json
+var defaultMappingJSON []byte
 
-	// Simple mappings for the default theme (no mapping.json for v1 assets)
-	unitNames      map[int32]string
-	terrainNames   map[int32]string
+// ThemeMappingEntry represents a single unit or terrain entry in mapping.json
+type ThemeMappingEntry struct {
+	Old   string `json:"old"`
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+
+// ThemeInfo from mapping.json
+type ThemeInfoJSON struct {
+	Name                string `json:"name"`
+	Version             string `json:"version"`
+	BasePath            string `json:"base_path"`
+	AssetType           string `json:"asset_type"`
+	NeedsPostProcessing bool   `json:"needs_post_processing"`
+}
+
+// ThemeMapping represents the full mapping.json structure
+type ThemeMappingJSON struct {
+	ThemeInfo      ThemeInfoJSON                `json:"themeInfo"`
+	Units          map[string]ThemeMappingEntry `json:"units"`
+	Terrains       map[string]ThemeMappingEntry `json:"terrains"`
+	NatureTerrains []int32                      `json:"natureTerrains"`
+}
+
+// DefaultTheme implements the Theme interface for PNG-based default assets
+// Loads data from embedded mapping.json
+type DefaultTheme struct {
+	themeInfo      ThemeInfoJSON
+	units          map[int32]ThemeMappingEntry
+	terrains       map[int32]ThemeMappingEntry
 	natureTerrains map[int32]bool
 }
 
-// NewDefaultTheme creates a new default theme instance
+// NewDefaultTheme creates a new default theme instance by parsing embedded mapping.json
 func NewDefaultTheme() *DefaultTheme {
-	// Initialize unit names (matches default.ts)
-	unitNames := map[int32]string{
-		1: "Infantry", 2: "Mech", 3: "Recon", 4: "Tank", 5: "Medium Tank",
-		6: "Neo Tank", 7: "APC", 8: "Artillery", 9: "Rocket", 10: "Anti-Air",
-		12: "Fighter", 13: "Bomber", 14: "B-Copter", 15: "T-Copter",
-		16: "Battleship", 17: "Cruiser", 18: "Lander", 19: "Sub",
-		20: "Mech", 21: "Missile (Std)", 22: "Missile (Nuke)",
-		24: "Sailboat", 25: "Artillery (Mega)", 26: "Artillery (Quick)",
-		27: "Medic", 28: "Stratotanker", 29: "Engineer", 30: "Goliath RC",
-		31: "Tugboat", 32: "Sea Mine", 33: "Drone", 37: "Cruiser",
-		38: "Missile (Anti Air)", 39: "Aircraft Carrier", 40: "Miner",
-		41: "Paratrooper", 44: "Anti Aircraft (Advanced)",
+	var mapping ThemeMappingJSON
+	if err := json.Unmarshal(defaultMappingJSON, &mapping); err != nil {
+		panic(fmt.Sprintf("failed to parse embedded default theme mapping: %v", err))
 	}
 
-	// Initialize terrain names (matches default.ts)
-	terrainNames := map[int32]string{
-		0: "Clear", 1: "Land Base", 2: "Naval Base", 3: "Airport Base",
-		4: "Desert", 5: "Grass", 6: "Hospital", 7: "Mountains", 8: "Swamp",
-		9: "Forest", 10: "Water (Regular)", 12: "Lava", 14: "Water (Shallow)",
-		15: "Water (Deep)", 16: "Missile Silo", 17: "Bridge (Regular)",
-		18: "Bridge (Shallow)", 19: "Bridge (Deep)", 20: "Mines", 21: "City",
-		22: "Road", 23: "Water (Rocky)", 25: "Guard Tower", 26: "Snow",
+	// Convert string keys to int32 for units
+	units := make(map[int32]ThemeMappingEntry)
+	for key, entry := range mapping.Units {
+		id, err := strconv.ParseInt(key, 10, 32)
+		if err == nil {
+			units[int32(id)] = entry
+		}
 	}
 
-	// Nature terrains (matches default.ts)
+	// Convert string keys to int32 for terrains
+	terrains := make(map[int32]ThemeMappingEntry)
+	for key, entry := range mapping.Terrains {
+		id, err := strconv.ParseInt(key, 10, 32)
+		if err == nil {
+			terrains[int32(id)] = entry
+		}
+	}
+
+	// Build nature terrains lookup
 	natureTerrains := make(map[int32]bool)
-	for _, id := range []int32{4, 5, 7, 8, 9, 10, 12, 14, 15, 17, 18, 19, 22, 23, 26} {
+	for _, id := range mapping.NatureTerrains {
 		natureTerrains[id] = true
 	}
 
 	return &DefaultTheme{
-		basePath:       "/static/assets/v1",
-		unitNames:      unitNames,
-		terrainNames:   terrainNames,
+		themeInfo:      mapping.ThemeInfo,
+		units:          units,
+		terrains:       terrains,
 		natureTerrains: natureTerrains,
 	}
 }
 
 func (d *DefaultTheme) GetUnitName(unitId int32) string {
-	if name, ok := d.unitNames[unitId]; ok {
-		return name
+	if entry, ok := d.units[unitId]; ok {
+		return entry.Name
 	}
 	return ""
 }
 
 func (d *DefaultTheme) GetTerrainName(terrainId int32) string {
-	if name, ok := d.terrainNames[terrainId]; ok {
-		return name
+	if entry, ok := d.terrains[terrainId]; ok {
+		return entry.Name
 	}
 	return ""
 }
@@ -84,38 +111,37 @@ func (d *DefaultTheme) GetTerrainDescription(terrainId int32) string {
 // GetUnitPath returns the directory path for a unit's assets
 // For PNG themes, this is the directory containing player-colored variants
 func (d *DefaultTheme) GetUnitPath(unitId int32) string {
-	if _, ok := d.unitNames[unitId]; ok {
-		return fmt.Sprintf("%s/Units/%d", d.basePath, unitId)
+	if entry, ok := d.units[unitId]; ok {
+		return fmt.Sprintf("%s/%s", d.themeInfo.BasePath, entry.Image)
 	}
 	return ""
 }
 
 // GetTilePath returns the directory path for a terrain's assets
 func (d *DefaultTheme) GetTilePath(terrainId int32) string {
-	if _, ok := d.terrainNames[terrainId]; ok {
-		return fmt.Sprintf("%s/Tiles/%d", d.basePath, terrainId)
+	if entry, ok := d.terrains[terrainId]; ok {
+		return fmt.Sprintf("%s/%s", d.themeInfo.BasePath, entry.Image)
 	}
 	return ""
 }
 
 // GetUnitAssetPath returns the full path to a specific unit+player PNG file
-// This is a helper method specific to PNG themes
 func (d *DefaultTheme) GetUnitAssetPath(unitId, playerId int32) string {
-	if _, ok := d.unitNames[unitId]; ok {
-		return fmt.Sprintf("%s/Units/%d/%d.png", d.basePath, unitId, playerId)
+	if entry, ok := d.units[unitId]; ok {
+		return fmt.Sprintf("%s/%s/%d.png", d.themeInfo.BasePath, entry.Image, playerId)
 	}
 	return ""
 }
 
 // GetTileAssetPath returns the full path to a specific terrain+player PNG file
 func (d *DefaultTheme) GetTileAssetPath(terrainId, playerId int32) string {
-	if _, ok := d.terrainNames[terrainId]; ok {
+	if entry, ok := d.terrains[terrainId]; ok {
 		// Nature terrains always use player 0 (neutral)
 		effectivePlayer := playerId
 		if d.natureTerrains[terrainId] {
 			effectivePlayer = 0
 		}
-		return fmt.Sprintf("%s/Tiles/%d/%d.png", d.basePath, terrainId, effectivePlayer)
+		return fmt.Sprintf("%s/%s/%d.png", d.themeInfo.BasePath, entry.Image, effectivePlayer)
 	}
 	return ""
 }
@@ -134,42 +160,41 @@ func (d *DefaultTheme) IsBridgeTile(terrainId int32) bool {
 
 func (d *DefaultTheme) GetThemeInfo() *v1.ThemeInfo {
 	return &v1.ThemeInfo{
-		Name:                "Default (PNG)",
-		Version:             "1.0.0",
-		BasePath:            d.basePath,
-		AssetType:           "png",
-		NeedsPostProcessing: false,
+		Name:                d.themeInfo.Name,
+		Version:             d.themeInfo.Version,
+		BasePath:            d.themeInfo.BasePath,
+		AssetType:           d.themeInfo.AssetType,
+		NeedsPostProcessing: d.themeInfo.NeedsPostProcessing,
 	}
 }
 
 func (d *DefaultTheme) GetAvailableUnits() []int32 {
-	units := make([]int32, 0, len(d.unitNames))
-	for id := range d.unitNames {
+	units := make([]int32, 0, len(d.units))
+	for id := range d.units {
 		units = append(units, id)
 	}
 	return units
 }
 
 func (d *DefaultTheme) GetAvailableTerrains() []int32 {
-	terrains := make([]int32, 0, len(d.terrainNames))
-	for id := range d.terrainNames {
+	terrains := make([]int32, 0, len(d.terrains))
+	for id := range d.terrains {
 		terrains = append(terrains, id)
 	}
 	return terrains
 }
 
 func (d *DefaultTheme) HasUnit(unitId int32) bool {
-	_, ok := d.unitNames[unitId]
+	_, ok := d.units[unitId]
 	return ok
 }
 
 func (d *DefaultTheme) HasTerrain(terrainId int32) bool {
-	_, ok := d.terrainNames[terrainId]
+	_, ok := d.terrains[terrainId]
 	return ok
 }
 
 // GetAssetPathForTemplate is a helper for templates to get either unit or tile paths
-// Returns the full path to the PNG file
 func (d *DefaultTheme) GetAssetPathForTemplate(assetType string, assetId, playerId int32) string {
 	switch assetType {
 	case "unit":

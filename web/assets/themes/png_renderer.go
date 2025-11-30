@@ -7,7 +7,6 @@ import (
 	"image/draw"
 	"image/png"
 	"os"
-	"path/filepath"
 	"sync"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
@@ -16,8 +15,7 @@ import (
 
 // PNGWorldRenderer renders worlds using PNG assets (for default theme)
 type PNGWorldRenderer struct {
-	theme     *DefaultTheme
-	assetRoot string // Root directory for PNG assets on filesystem
+	theme *DefaultTheme
 
 	// Cache for loaded images
 	tileCache  map[string]image.Image
@@ -32,21 +30,11 @@ func NewPNGWorldRenderer(theme Theme) (*PNGWorldRenderer, error) {
 		return nil, fmt.Errorf("PNGWorldRenderer requires a DefaultTheme")
 	}
 
-	// Determine the asset root path - need to convert web path to filesystem path
-	// The theme's basePath is "/static/assets/v1" which corresponds to "web/static/assets/v1"
-	assetRoot := "web/static/assets/v1"
-
 	return &PNGWorldRenderer{
 		theme:     defaultTheme,
-		assetRoot: assetRoot,
 		tileCache: make(map[string]image.Image),
 		unitCache: make(map[string]image.Image),
 	}, nil
-}
-
-// SetAssetRoot allows overriding the asset root directory
-func (r *PNGWorldRenderer) SetAssetRoot(root string) {
-	r.assetRoot = root
 }
 
 // Render produces a composite PNG image of the world
@@ -181,11 +169,19 @@ func (r *PNGWorldRenderer) getTileImage(tileType, playerId int32) (image.Image, 
 	}
 	r.cacheMutex.RUnlock()
 
-	// Load from filesystem
-	path := filepath.Join(r.assetRoot, "Tiles", fmt.Sprintf("%d", tileType), fmt.Sprintf("%d.png", effectivePlayer))
+	// Get path from theme and convert web path to filesystem path
+	// Theme returns "/static/assets/themes/default/Tiles/1/0.png"
+	// We need "web/static/assets/themes/default/Tiles/1/0.png"
+	webPath := r.theme.GetTileAssetPath(tileType, effectivePlayer)
+	if webPath == "" {
+		return nil, fmt.Errorf("tile %d not found in theme", tileType)
+	}
+	// Convert web path to filesystem path (remove leading "/" and prepend "web")
+	path := "web" + webPath
+
 	img, err := r.loadPNG(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load tile %d for player %d: %w", tileType, effectivePlayer, err)
+		return nil, fmt.Errorf("failed to load tile %d for player %d from %s: %w", tileType, effectivePlayer, path, err)
 	}
 
 	// Cache it
@@ -208,11 +204,19 @@ func (r *PNGWorldRenderer) getUnitImage(unitType, playerId int32) (image.Image, 
 	}
 	r.cacheMutex.RUnlock()
 
-	// Load from filesystem
-	path := filepath.Join(r.assetRoot, "Units", fmt.Sprintf("%d", unitType), fmt.Sprintf("%d.png", playerId))
+	// Get path from theme and convert web path to filesystem path
+	// Theme returns "/static/assets/themes/default/Units/1/0.png"
+	// We need "web/static/assets/themes/default/Units/1/0.png"
+	webPath := r.theme.GetUnitAssetPath(unitType, playerId)
+	if webPath == "" {
+		return nil, fmt.Errorf("unit %d not found in theme", unitType)
+	}
+	// Convert web path to filesystem path (remove leading "/" and prepend "web")
+	path := "web" + webPath
+
 	img, err := r.loadPNG(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load unit %d for player %d: %w", unitType, playerId, err)
+		return nil, fmt.Errorf("failed to load unit %d for player %d from %s: %w", unitType, playerId, path, err)
 	}
 
 	// Cache it

@@ -58,7 +58,7 @@ type Theme interface {
 // Separated from Theme to allow phased implementation
 type ThemeAssets interface {
 	// GetUnitAsset returns the asset for a unit (either path or rendered SVG)
-	// For PNG themes: returns AssetResult with Type=PATH, Data="/static/assets/v1/Units/1/0.png"
+	// For PNG themes: returns AssetResult with Type=PATH, Data="/static/assets/themes/default/Units/1/0.png"
 	// For SVG themes: returns AssetResult with Type=SVG, Data="<svg>...</svg>" (with player colors)
 	GetUnitAsset(unitId, playerId int32) (*v1.AssetResult, error)
 

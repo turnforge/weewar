@@ -91,7 +91,7 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
                 this.theme.setUnitImage(unitType, playerId, iconElement);
             } else {
                 // Fallback to default PNG assets
-                const imagePath = `/static/assets/v1/Units/${unitType}/${playerId}.png`;
+                const imagePath = `/static/assets/themes/default/Units/${unitType}/${playerId}.png`;
                 iconElement.innerHTML = `<img src="${imagePath}" alt="Unit ${unitType}" class="w-8 h-8 object-contain" style="image-rendering: pixelated;" onerror="this.style.display='none'; this.nextSibling.style.display='inline';">
                                          <span style="display:none;">⚔️</span>`;
             }

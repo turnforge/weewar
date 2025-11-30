@@ -1,4 +1,5 @@
 __debug*
+.DS_Store
 buf.lock
 .data
 locallinks

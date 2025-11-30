@@ -74,7 +74,7 @@ func (tm *ThemeManager) LoadThemeMapping(themeName string) (*ThemeMapping, error
 func (tm *ThemeManager) GetTerrainIconURL(terrainID int32, useTheme bool, themeName string) string {
 	if !useTheme {
 		// Use PNG assets
-		return fmt.Sprintf("/static/assets/v1/Tiles/%d/0.png", terrainID)
+		return fmt.Sprintf("/static/assets/themes/default/Tiles/%d/0.png", terrainID)
 	}
 
 	// Try to get from theme mapping
@@ -82,7 +82,7 @@ func (tm *ThemeManager) GetTerrainIconURL(terrainID int32, useTheme bool, themeN
 	if err != nil {
 		log.Printf("Failed to load theme mapping: %v", err)
 		// Fallback to PNG
-		return fmt.Sprintf("/static/assets/v1/Tiles/%d/0.png", terrainID)
+		return fmt.Sprintf("/static/assets/themes/default/Tiles/%d/0.png", terrainID)
 	}
 
 	// Look up the terrain in the mapping
@@ -98,14 +98,14 @@ func (tm *ThemeManager) GetTerrainIconURL(terrainID int32, useTheme bool, themeN
 
 	// Terrain not in theme, fallback to PNG
 	log.Printf("Terrain %d not found in theme %s, using PNG fallback", terrainID, themeName)
-	return fmt.Sprintf("/static/assets/v1/Tiles/%d/0.png", terrainID)
+	return fmt.Sprintf("/static/assets/themes/default/Tiles/%d/0.png", terrainID)
 }
 
 // GetUnitIconURL returns the icon URL for a unit ID
 func (tm *ThemeManager) GetUnitIconURL(unitID int32, useTheme bool, themeName string) string {
 	if !useTheme {
 		// Use PNG assets
-		return fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
+		return fmt.Sprintf("/static/assets/themes/default/Units/%d/0.png", unitID)
 	}
 
 	// Try to get from theme mapping
@@ -113,7 +113,7 @@ func (tm *ThemeManager) GetUnitIconURL(unitID int32, useTheme bool, themeName st
 	if err != nil {
 		log.Printf("Failed to load theme mapping: %v", err)
 		// Fallback to PNG
-		return fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
+		return fmt.Sprintf("/static/assets/themes/default/Units/%d/0.png", unitID)
 	}
 
 	// Look up the unit in the mapping
@@ -129,7 +129,7 @@ func (tm *ThemeManager) GetUnitIconURL(unitID int32, useTheme bool, themeName st
 
 	// Unit not in theme, fallback to PNG
 	log.Printf("Unit %d not found in theme %s, using PNG fallback", unitID, themeName)
-	return fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
+	return fmt.Sprintf("/static/assets/themes/default/Units/%d/0.png", unitID)
 }
 
 // GetTerrainName returns the themed name for a terrain, or the default name if not themed

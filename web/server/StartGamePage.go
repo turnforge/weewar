@@ -77,7 +77,7 @@ func (p *StartGamePage) loadUnitTypes() {
 		unitData, err := rulesEngine.GetUnitData(unitID)
 		if unitData != nil && err == nil {
 			// Use web-accessible static URL path for the unit asset
-			iconDataURL := fmt.Sprintf("/static/assets/v1/Units/%d/0.png", unitID)
+			iconDataURL := fmt.Sprintf("/static/assets/themes/default/Units/%d/0.png", unitID)
 
 			p.UnitTypes = append(p.UnitTypes, UnitType{
 				UnitDefinition: unitData,

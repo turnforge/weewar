@@ -715,6 +715,8 @@ export class GameMove implements GameMoveInterface {
   /** The corresponding "result" for the move.  This can be "proposed" or can be evaluated.
  Keeping this colocated with the Move for consistency and simplicity */
   changes: WorldChange[] = [];
+  /** Human redable description for say recording "commands" if any */
+  description: string = "";
 
   
 }

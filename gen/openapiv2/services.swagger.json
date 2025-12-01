@@ -2326,6 +2326,10 @@
             "$ref": "#/definitions/v1WorldChange"
           },
           "title": "The corresponding \"result\" for the move.  This can be \"proposed\" or can be evaluated.\nKeeping this colocated with the Move for consistency and simplicity"
+        },
+        "description": {
+          "type": "string",
+          "title": "Human redable description for say recording \"commands\" if any"
         }
       },
       "title": "*\nRepresents a single move which can be one of many actions in the game"

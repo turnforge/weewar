@@ -80,6 +80,9 @@ func (s *FSGamesService) UpdateGameStateScreenshotIndexInfo(ctx context.Context,
 	}
 
 	// Update only IndexInfo fields, don't touch version
+	if gameState.WorldData.ScreenshotIndexInfo == nil {
+		gameState.WorldData.ScreenshotIndexInfo = &v1.IndexInfo{}
+	}
 	gameState.WorldData.ScreenshotIndexInfo.LastIndexedAt = tspb.New(lastIndexedAt)
 	gameState.WorldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
 	// Note: NOT incrementing version - this is internal bookkeeping
@@ -308,6 +311,9 @@ func (s *FSGamesService) UpdateGame(ctx context.Context, req *v1.UpdateGameReque
 		}
 
 		oldVersion := gameState.Version
+		if req.NewState.WorldData.ScreenshotIndexInfo == nil {
+			req.NewState.WorldData.ScreenshotIndexInfo = &v1.IndexInfo{}
+		}
 		req.NewState.WorldData.ScreenshotIndexInfo.LastUpdatedAt = tspb.New(time.Now())
 		req.NewState.WorldData.ScreenshotIndexInfo.NeedsIndexing = true
 		req.NewState.Version = oldVersion + 1

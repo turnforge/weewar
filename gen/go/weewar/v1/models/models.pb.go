@@ -2757,7 +2757,9 @@ type GameMove struct {
 	IsPermanent bool `protobuf:"varint,10,opt,name=is_permanent,json=isPermanent,proto3" json:"is_permanent,omitempty"`
 	// The corresponding "result" for the move.  This can be "proposed" or can be evaluated.
 	// Keeping this colocated with the Move for consistency and simplicity
-	Changes       []*WorldChange `protobuf:"bytes,11,rep,name=changes,proto3" json:"changes,omitempty"`
+	Changes []*WorldChange `protobuf:"bytes,11,rep,name=changes,proto3" json:"changes,omitempty"`
+	// Human redable description for say recording "commands" if any
+	Description   string `protobuf:"bytes,12,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2882,6 +2884,13 @@ func (x *GameMove) GetChanges() []*WorldChange {
 		return x.Changes
 	}
 	return nil
+}
+
+func (x *GameMove) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 type isGameMove_MoveType interface {
@@ -4330,7 +4339,7 @@ const file_weewar_v1_models_models_proto_rawDesc = "" +
 	"started_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\x125\n" +
 	"\bended_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\aendedAt\x12!\n" +
 	"\fgroup_number\x18\x04 \x01(\x03R\vgroupNumber\x12)\n" +
-	"\x05moves\x18\x05 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\"\x93\x04\n" +
+	"\x05moves\x18\x05 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\"\xb5\x04\n" +
 	"\bGameMove\x12\x16\n" +
 	"\x06player\x18\x01 \x01(\x05R\x06player\x12!\n" +
 	"\fgroup_number\x18\x02 \x01(\x03R\vgroupNumber\x12\x1f\n" +
@@ -4346,7 +4355,8 @@ const file_weewar_v1_models_models_proto_rawDesc = "" +
 	"\fsequence_num\x18\t \x01(\x03R\vsequenceNum\x12!\n" +
 	"\fis_permanent\x18\n" +
 	" \x01(\bR\visPermanent\x120\n" +
-	"\achanges\x18\v \x03(\v2\x16.weewar.v1.WorldChangeR\achangesB\v\n" +
+	"\achanges\x18\v \x03(\v2\x16.weewar.v1.WorldChangeR\achanges\x12 \n" +
+	"\vdescription\x18\f \x01(\tR\vdescriptionB\v\n" +
 	"\tmove_type\"\xc9\x01\n" +
 	"\x0eMoveUnitAction\x12\x15\n" +
 	"\x06from_q\x18\x01 \x01(\x05R\x05fromQ\x12\x15\n" +

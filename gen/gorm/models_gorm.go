@@ -179,8 +179,8 @@ func (*WorldGORM) TableName() string {
 
 // WorldDataGORM is the GORM model for weewar.v1.WorldData
 type WorldDataGORM struct {
-	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
 	WorldId             string              `gorm:"primaryKey"`
+	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
 	UnitsMap            map[string]UnitGORM `gorm:"serializer:json"`
 	ScreenshotIndexInfo IndexInfoGORM       `gorm:"embedded;embeddedPrefix:screenshot_index_"`
 	ContentHash         string
@@ -410,12 +410,13 @@ type GameMoveGORM struct {
 	GameId      string `gorm:"primaryKey"`
 	GroupNumber int64  `gorm:"primaryKey"`
 	MoveNumber  int64  `gorm:"primaryKey"`
-	Timestamp   time.Time
 	Version     int64
+	Timestamp   time.Time
 	MoveType    []byte `gorm:"serializer:json"`
 	SequenceNum int64
 	IsPermanent bool
 	Changes     [][]byte `gorm:"serializer:json"`
+	Description string
 }
 
 // TableName returns the table name for GameMoveGORM

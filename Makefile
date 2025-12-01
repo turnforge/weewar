@@ -15,7 +15,7 @@ serve:
 	WEEWAR_ENV=dev go run cmd/backend/*.go
 
 servelocal:
-	WEEWAR_ENV=dev go run cmd/backend/*.go -games_service_be=local -worlds_service_be=local -gatewayAddress=:6060 -grpcAddress=:7070
+	WEEWAR_ENV=dev go run cmd/backend/*.go -games_service_be=local -worlds_service_be=local # -gatewayAddress=:6060 -grpcAddress=:7070
 
 vars:
 	@echo "GO_ROOT=$(GO_ROOT)"

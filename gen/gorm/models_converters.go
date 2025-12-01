@@ -1550,6 +1550,7 @@ func GameMoveToGameMoveGORM(
 		MoveNumber:  src.MoveNumber,
 		SequenceNum: src.SequenceNum,
 		IsPermanent: src.IsPermanent,
+		Description: src.Description,
 	}
 	out = dest
 
@@ -1599,6 +1600,7 @@ func GameMoveFromGameMoveGORM(
 		Timestamp:   converters.TimeToTimestamp(src.Timestamp),
 		SequenceNum: src.SequenceNum,
 		IsPermanent: src.IsPermanent,
+		Description: src.Description,
 	}
 	out = dest
 

@@ -1254,6 +1254,11 @@ export const GameMoveSchema: MessageSchema = {
       messageType: "weewar.v1.WorldChange",
       repeated: true,
     },
+    {
+      name: "description",
+      type: FieldType.STRING,
+      id: 12,
+    },
   ],
   oneofGroups: ["move_type"],
 };

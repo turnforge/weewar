@@ -64,6 +64,9 @@ func (s *FSWorldsService) UpdateWorldDataIndexInfo(ctx context.Context, id strin
 	}
 
 	// Update only IndexInfo fields, don't touch version
+	if worldData.ScreenshotIndexInfo == nil {
+		worldData.ScreenshotIndexInfo = &v1.IndexInfo{}
+	}
 	worldData.ScreenshotIndexInfo.LastIndexedAt = tspb.New(lastIndexedAt)
 	worldData.ScreenshotIndexInfo.NeedsIndexing = needsIndexing
 	// Note: NOT incrementing version - this is internal bookkeeping
@@ -206,6 +209,9 @@ func (s *FSWorldsService) UpdateWorld(ctx context.Context, req *v1.UpdateWorldRe
 	}
 
 	if worldDataSaved {
+		if worldData.ScreenshotIndexInfo == nil {
+			worldData.ScreenshotIndexInfo = &v1.IndexInfo{}
+		}
 		worldData.ScreenshotIndexInfo.LastUpdatedAt = tspb.New(time.Now())
 		worldData.ScreenshotIndexInfo.NeedsIndexing = true
 		worldData.Version = worldData.Version + 1

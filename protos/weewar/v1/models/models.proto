@@ -581,6 +581,9 @@ message GameMove {
    * Keeping this colocated with the Move for consistency and simplicity
    */
   repeated WorldChange changes = 11;
+
+  // Human redable description for say recording "commands" if any
+  string description = 12;
 }
 
 /**

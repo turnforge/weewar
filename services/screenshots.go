@@ -51,7 +51,7 @@ func NewScreenShotIndexer(clientMgr *ClientMgr) *ScreenShotIndexer {
 			curr, ok := collection[item.Id]
 			if curr.WorldData == nil || !ok {
 				collection[item.Id] = item
-			} else {
+			} else if curr.WorldData.ScreenshotIndexInfo != nil && item.WorldData.ScreenshotIndexInfo != nil {
 				currLastUpdated := curr.WorldData.ScreenshotIndexInfo.LastUpdatedAt.AsTime()
 				itemLastUpdated := item.WorldData.ScreenshotIndexInfo.LastUpdatedAt.AsTime()
 				if currLastUpdated.Before(itemLastUpdated) {

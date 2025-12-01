@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { TILE_WIDTH, TILE_HEIGHT } from '../../pages/common/hexUtils';
-import { ITheme, PLAYER_COLORS } from '../themes/BaseTheme';
+import { ITheme, DEFAULT_PLAYER_COLORS } from '../themes/BaseTheme';
 import DefaultTheme from '../themes/default';
 import ModernTheme from '../themes/modern';
 import FantasyTheme from '../themes/fantasy';
@@ -291,7 +291,7 @@ export class AssetProvider {
         
         const gradient = svgDoc.querySelector('linearGradient#playerColor');
         if (gradient) {
-            const colors = PLAYER_COLORS[playerId] || PLAYER_COLORS[0];
+            const colors = DEFAULT_PLAYER_COLORS[playerId] || DEFAULT_PLAYER_COLORS[0];
             const stops = gradient.querySelectorAll('stop');
             if (stops.length >= 2) {
                 stops[0].setAttribute('stop-color', colors.secondary);

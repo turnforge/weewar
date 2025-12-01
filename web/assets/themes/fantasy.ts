@@ -3,19 +3,17 @@
  * Extends BaseTheme with Medieval Fantasy specific configuration
  */
 
-import { BaseTheme } from './BaseTheme';
+import { BaseTheme, parseThemeManifest } from './BaseTheme';
 import mappingData from '../../static/assets/themes/fantasy/mapping.json';
+
+const manifest = parseThemeManifest(mappingData);
 
 /**
  * Medieval Fantasy Theme Implementation
  */
 export class FantasyTheme extends BaseTheme {
-  protected basePath = '/static/assets/themes/fantasy';
-  protected themeName = 'Medieval Fantasy';
-  protected themeVersion = '1.0.0';
-
   constructor() {
-    super(mappingData);
+    super(manifest);
   }
 }
 

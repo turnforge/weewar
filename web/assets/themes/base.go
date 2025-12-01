@@ -20,6 +20,16 @@ func NewBaseTheme(manifest *v1.ThemeManifest, cityTerrains map[int32]bool) *Base
 	}
 }
 
+// Manifest returns the underlying ThemeManifest for subclasses
+func (b *BaseTheme) Manifest() *v1.ThemeManifest {
+	return b.manifest
+}
+
+// CityTerrains returns the city terrains map for subclasses
+func (b *BaseTheme) CityTerrains() map[int32]bool {
+	return b.cityTerrains
+}
+
 func (b *BaseTheme) GetUnitName(unitId int32) string {
 	if mapping, ok := b.manifest.Units[unitId]; ok {
 		return mapping.Name

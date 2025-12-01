@@ -4,48 +4,33 @@
  * Uses pre-colored PNG assets that don't need post-processing
  */
 
-import { BaseTheme, ThemeInfo, ThemeMapping, PlayerColor } from './BaseTheme';
+import { BaseTheme, parseThemeManifest, ThemeInfoRuntime, CITY_TERRAIN_IDS } from './BaseTheme';
 import mappingData from './default/mapping.json';
 
-// Type for the extended mapping with playerColors
-interface DefaultMappingData extends ThemeMapping {
-    themeInfo: {
-        name: string;
-        version: string;
-        base_path: string;
-        asset_type: string;
-        needs_post_processing: boolean;
-    };
-    playerColors: { [key: string]: PlayerColor };
-}
-
-const mapping = mappingData as DefaultMappingData;
+const manifest = parseThemeManifest(mappingData);
 
 /**
  * Default Theme Implementation
  * Uses PNG assets with pre-colored player variants
  */
 export default class DefaultTheme extends BaseTheme {
-    protected basePath = '/static/assets/themes/default';
-    protected themeName = 'Default (PNG)';
-    protected themeVersion = '1.0.0';
-
     constructor() {
-        super(mapping);
+        super(manifest);
     }
 
     /**
      * Override getThemeInfo for PNG-specific settings
      */
-    getThemeInfo(): ThemeInfo {
+    getThemeInfo(): ThemeInfoRuntime {
+        const info = this.manifest.themeInfo;
         return {
-            name: this.themeName,
-            version: this.themeVersion,
-            basePath: this.basePath,
+            name: info?.name ?? 'Default (PNG)',
+            version: info?.version ?? '1.0.0',
+            basePath: info?.basePath ?? '/static/assets/themes/default',
             supportsTinting: false,
             needsPostProcessing: false,
             assetType: 'png',
-            playerColors: this.playerColors as any,
+            playerColors: this.manifest.playerColors as any,
         };
     }
 
@@ -69,29 +54,28 @@ export default class DefaultTheme extends BaseTheme {
      * Returns the direct path to a pre-colored unit asset
      */
     getUnitAssetPath(unitId: number, playerId: number): string | undefined {
-        const unit = this.unitMapping[unitId.toString()];
+        const unit = this.manifest.units[unitId];
         if (!unit) {
             return undefined;
         }
+        const basePath = this.manifest.themeInfo?.basePath ?? '/static/assets/themes/default';
         // PNG assets are stored as: {basePath}/{image}/{playerId}.png
-        // where image is a directory like "Units/15"
-        return `${this.basePath}/${unit.image}/${playerId}.png`;
+        return `${basePath}/${unit.image}/${playerId}.png`;
     }
 
     /**
      * Returns the direct path to a pre-colored terrain asset
      */
     getTileAssetPath(terrainId: number, playerId: number): string | undefined {
-        const terrain = this.terrainMapping[terrainId.toString()];
+        const terrain = this.manifest.terrains[terrainId];
         if (!terrain) {
             return undefined;
         }
 
+        const basePath = this.manifest.themeInfo?.basePath ?? '/static/assets/themes/default';
         // Only city terrains use player colors; all others use player 0 (neutral)
-        const effectivePlayer = this.isCityTile(terrainId) ? playerId : 0;
-        // PNG assets are stored as: {basePath}/{image}/{playerId}.png
-        // where image is a directory like "Tiles/5"
-        return `${this.basePath}/${terrain.image}/${effectivePlayer}.png`;
+        const effectivePlayer = CITY_TERRAIN_IDS.includes(terrainId) ? playerId : 0;
+        return `${basePath}/${terrain.image}/${effectivePlayer}.png`;
     }
 
     /**

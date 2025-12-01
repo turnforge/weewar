@@ -516,24 +516,6 @@ func WorldDataToWorldDataGORM(
 		}
 	}
 
-	if src.Tiles != nil {
-		out.Tiles = make([]TileGORM, len(src.Tiles))
-		for i, item := range src.Tiles {
-			_, err = TileToTileGORM(item, &out.Tiles[i], nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Tiles[%d]: %w", i, err)
-			}
-		}
-	}
-	if src.Units != nil {
-		out.Units = make([]UnitGORM, len(src.Units))
-		for i, item := range src.Units {
-			_, err = UnitToUnitGORM(item, &out.Units[i], nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Units[%d]: %w", i, err)
-			}
-		}
-	}
 	if src.TilesMap != nil {
 		out.TilesMap = make(map[string]TileGORM, len(src.TilesMap))
 		for key, value := range src.TilesMap {
@@ -604,24 +586,6 @@ func WorldDataFromWorldDataGORM(
 		return nil, fmt.Errorf("converting ScreenshotIndexInfo: %w", err)
 	}
 
-	if src.Tiles != nil {
-		out.Tiles = make([]*models.Tile, len(src.Tiles))
-		for i, item := range src.Tiles {
-			out.Tiles[i], err = TileFromTileGORM(nil, &item, nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Tiles[%d]: %w", i, err)
-			}
-		}
-	}
-	if src.Units != nil {
-		out.Units = make([]*models.Unit, len(src.Units))
-		for i, item := range src.Units {
-			out.Units[i], err = UnitFromUnitGORM(nil, &item, nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Units[%d]: %w", i, err)
-			}
-		}
-	}
 	if src.TilesMap != nil {
 		out.TilesMap = make(map[string]*models.Tile, len(src.TilesMap))
 		for key, value := range src.TilesMap {
@@ -1192,24 +1156,6 @@ func WorldDataToGameWorldDataGORM(
 		}
 	}
 
-	if src.Tiles != nil {
-		out.Tiles = make([]TileGORM, len(src.Tiles))
-		for i, item := range src.Tiles {
-			_, err = TileToTileGORM(item, &out.Tiles[i], nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Tiles[%d]: %w", i, err)
-			}
-		}
-	}
-	if src.Units != nil {
-		out.Units = make([]UnitGORM, len(src.Units))
-		for i, item := range src.Units {
-			_, err = UnitToUnitGORM(item, &out.Units[i], nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Units[%d]: %w", i, err)
-			}
-		}
-	}
 	if src.TilesMap != nil {
 		out.TilesMap = make(map[string]TileGORM, len(src.TilesMap))
 		for key, value := range src.TilesMap {
@@ -1280,24 +1226,6 @@ func WorldDataFromGameWorldDataGORM(
 		return nil, fmt.Errorf("converting ScreenshotIndexInfo: %w", err)
 	}
 
-	if src.Tiles != nil {
-		out.Tiles = make([]*models.Tile, len(src.Tiles))
-		for i, item := range src.Tiles {
-			out.Tiles[i], err = TileFromTileGORM(nil, &item, nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Tiles[%d]: %w", i, err)
-			}
-		}
-	}
-	if src.Units != nil {
-		out.Units = make([]*models.Unit, len(src.Units))
-		for i, item := range src.Units {
-			out.Units[i], err = UnitFromUnitGORM(nil, &item, nil)
-			if err != nil {
-				return nil, fmt.Errorf("converting Units[%d]: %w", i, err)
-			}
-		}
-	}
 	if src.TilesMap != nil {
 		out.TilesMap = make(map[string]*models.Tile, len(src.TilesMap))
 		for key, value := range src.TilesMap {

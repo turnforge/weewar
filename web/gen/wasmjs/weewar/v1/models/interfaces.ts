@@ -167,19 +167,15 @@ export interface World {
 
 
 export interface WorldData {
-  /** DEPRECATED: Use tiles_map instead - kept for backward compatibility during migration */
-  tiles?: Tile[];
-  /** DEPRECATED: Use units_map instead - kept for backward compatibility during migration */
-  units?: Unit[];
+  /** New map-based storage (key = "q,r" coordinate string) */
+  tilesMap: Record<string, Tile>;
+  unitsMap: Record<string, Unit>;
   /** When this world data was updated (may have happened without world updating) */
   screenshotIndexInfo?: IndexInfo;
   /** We will only update if hash's are different */
   contentHash: string;
   /** Version for Optimistic concurrent locking */
   version: number;
-  /** New map-based storage (key = "q,r" coordinate string) */
-  tilesMap: Record<string, Tile>;
-  unitsMap: Record<string, Unit>;
   /** Improvement layer - crossings (roads on land, bridges on water) */
   crossings: Record<string, Crossing>;
 }
@@ -1011,6 +1007,8 @@ export interface ProcessMovesRequest {
  or by itself.  If it is not provided then the server will validate it and return
  the changes. */
   expectedResponse?: ProcessMovesResponse;
+  /** Whether to only perform a dryrun and return results instead of comitting it */
+  dryRun: boolean;
 }
 
 

@@ -169,7 +169,7 @@ message ProcessMovesRequest {
   /**
    * List of moves to add
    */
-  repeated GameMove moves = 3;
+  repeated GameMove moves = 2;
 
   /**
    * The player can submit a list of "Expected" changes when in local-first mode
@@ -177,7 +177,10 @@ message ProcessMovesRequest {
    * or by itself.  If it is not provided then the server will validate it and return
    * the changes.
    */
-  ProcessMovesResponse expected_response = 2;
+  ProcessMovesResponse expected_response = 3;
+
+  // Whether to only perform a dryrun and return results instead of comitting it
+  bool dry_run = 4;
 }
 
 /**

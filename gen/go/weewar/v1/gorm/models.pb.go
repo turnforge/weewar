@@ -280,10 +280,6 @@ func (x *WorldGORM) GetSearchIndexInfo() *IndexInfoGORM {
 type WorldDataGORM struct {
 	state   protoimpl.MessageState `protogen:"open.v1"`
 	WorldId string                 `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
-	// Tiles as JSON for cross-DB compatibility
-	Tiles []*TileGORM `protobuf:"bytes,2,rep,name=tiles,proto3" json:"tiles,omitempty"`
-	// Units as JSON for cross-DB compatibility
-	Units []*UnitGORM `protobuf:"bytes,3,rep,name=units,proto3" json:"units,omitempty"`
 	// Units as JSON for cross-DB compatibility
 	Crossings map[string]*CrossingGORM `protobuf:"bytes,4,rep,name=crossings,proto3" json:"crossings,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// ScreenshotIndexInfo embedded
@@ -331,20 +327,6 @@ func (x *WorldDataGORM) GetWorldId() string {
 		return x.WorldId
 	}
 	return ""
-}
-
-func (x *WorldDataGORM) GetTiles() []*TileGORM {
-	if x != nil {
-		return x.Tiles
-	}
-	return nil
-}
-
-func (x *WorldDataGORM) GetUnits() []*UnitGORM {
-	if x != nil {
-		return x.Units
-	}
-	return nil
 }
 
 func (x *WorldDataGORM) GetCrossings() map[string]*CrossingGORM {
@@ -658,10 +640,6 @@ func (x *GameSettingsGORM) GetAllowedUnits() []int32 {
 // primary key so it can be embedded
 type GameWorldDataGORM struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Tiles as JSON for cross-DB compatibility
-	Tiles []*TileGORM `protobuf:"bytes,2,rep,name=tiles,proto3" json:"tiles,omitempty"`
-	// Units as JSON for cross-DB compatibility
-	Units []*UnitGORM `protobuf:"bytes,3,rep,name=units,proto3" json:"units,omitempty"`
 	// ScreenshotIndexInfo embedded
 	ScreenshotIndexInfo *IndexInfoGORM `protobuf:"bytes,4,opt,name=screenshot_index_info,json=screenshotIndexInfo,proto3" json:"screenshot_index_info,omitempty"`
 	// Units as JSON for cross-DB compatibility
@@ -702,20 +680,6 @@ func (x *GameWorldDataGORM) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GameWorldDataGORM.ProtoReflect.Descriptor instead.
 func (*GameWorldDataGORM) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_gorm_models_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *GameWorldDataGORM) GetTiles() []*TileGORM {
-	if x != nil {
-		return x.Tiles
-	}
-	return nil
-}
-
-func (x *GameWorldDataGORM) GetUnits() []*UnitGORM {
-	if x != nil {
-		return x.Units
-	}
-	return nil
 }
 
 func (x *GameWorldDataGORM) GetScreenshotIndexInfo() *IndexInfoGORM {
@@ -984,12 +948,10 @@ const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\x04tags\x18\a \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x128\n" +
 	"\fpreview_urls\x18\v \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\vpreviewUrls\x12r\n" +
 	"\x11search_index_info\x18\r \x01(\v2\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\bembeddedR\x1cembeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1dʦ\x1d\x19\n" +
-	"\x0fweewar.v1.World\x12\x06worlds\"\xfa\x06\n" +
+	"\x0fweewar.v1.World\x12\x06worlds\"\xf6\x05\n" +
 	"\rWorldDataGORM\x12+\n" +
 	"\bworld_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
-	"primaryKeyR\aworldId\x12@\n" +
-	"\x05tiles\x18\x02 \x03(\v2\x13.weewar.v1.TileGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05tiles\x12@\n" +
-	"\x05units\x18\x03 \x03(\v2\x13.weewar.v1.UnitGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05units\x12\\\n" +
+	"primaryKeyR\aworldId\x12\\\n" +
 	"\tcrossings\x18\x04 \x03(\v2'.weewar.v1.WorldDataGORM.CrossingsEntryB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\tcrossings\x12~\n" +
 	"\x15screenshot_index_info\x18\x05 \x01(\v2\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\bembeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12Z\n" +
 	"\ttiles_map\x18\x06 \x03(\v2&.weewar.v1.WorldDataGORM.TilesMapEntryB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\btilesMap\x12Z\n" +
@@ -1025,10 +987,8 @@ const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\x12weewar.v1.GameTeam \x01\"l\n" +
 	"\x10GameSettingsGORM\x12:\n" +
 	"\rallowed_units\x18\x01 \x03(\x05B\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\fallowedUnits:\x1cʦ\x1d\x18\n" +
-	"\x16weewar.v1.GameSettings\"\xcf\x06\n" +
-	"\x11GameWorldDataGORM\x12@\n" +
-	"\x05tiles\x18\x02 \x03(\v2\x13.weewar.v1.TileGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05tiles\x12@\n" +
-	"\x05units\x18\x03 \x03(\v2\x13.weewar.v1.UnitGORMB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x05units\x12~\n" +
+	"\x16weewar.v1.GameSettings\"\xcb\x05\n" +
+	"\x11GameWorldDataGORM\x12~\n" +
 	"\x15screenshot_index_info\x18\x04 \x01(\v2\x18.weewar.v1.IndexInfoGORMB0\x92\xa6\x1d,R\bembeddedR embeddedPrefix:screenshot_index_R\x13screenshotIndexInfo\x12`\n" +
 	"\tcrossings\x18\x05 \x03(\v2+.weewar.v1.GameWorldDataGORM.CrossingsEntryB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\tcrossings\x12^\n" +
 	"\ttiles_map\x18\x06 \x03(\v2*.weewar.v1.GameWorldDataGORM.TilesMapEntryB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\btilesMap\x12^\n" +
@@ -1112,35 +1072,31 @@ var file_weewar_v1_gorm_models_proto_goTypes = []any{
 }
 var file_weewar_v1_gorm_models_proto_depIdxs = []int32{
 	0,  // 0: weewar.v1.WorldGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
-	1,  // 1: weewar.v1.WorldDataGORM.tiles:type_name -> weewar.v1.TileGORM
-	3,  // 2: weewar.v1.WorldDataGORM.units:type_name -> weewar.v1.UnitGORM
-	18, // 3: weewar.v1.WorldDataGORM.crossings:type_name -> weewar.v1.WorldDataGORM.CrossingsEntry
-	0,  // 4: weewar.v1.WorldDataGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
-	19, // 5: weewar.v1.WorldDataGORM.tiles_map:type_name -> weewar.v1.WorldDataGORM.TilesMapEntry
-	20, // 6: weewar.v1.WorldDataGORM.units_map:type_name -> weewar.v1.WorldDataGORM.UnitsMapEntry
-	0,  // 7: weewar.v1.GameGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
-	9,  // 8: weewar.v1.GameConfigurationGORM.income_configs:type_name -> weewar.v1.IncomeConfigGORM
-	12, // 9: weewar.v1.GameConfigurationGORM.settings:type_name -> weewar.v1.GameSettingsGORM
-	1,  // 10: weewar.v1.GameWorldDataGORM.tiles:type_name -> weewar.v1.TileGORM
-	3,  // 11: weewar.v1.GameWorldDataGORM.units:type_name -> weewar.v1.UnitGORM
-	0,  // 12: weewar.v1.GameWorldDataGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
-	21, // 13: weewar.v1.GameWorldDataGORM.crossings:type_name -> weewar.v1.GameWorldDataGORM.CrossingsEntry
-	22, // 14: weewar.v1.GameWorldDataGORM.tiles_map:type_name -> weewar.v1.GameWorldDataGORM.TilesMapEntry
-	23, // 15: weewar.v1.GameWorldDataGORM.units_map:type_name -> weewar.v1.GameWorldDataGORM.UnitsMapEntry
-	13, // 16: weewar.v1.GameStateGORM.world_data:type_name -> weewar.v1.GameWorldDataGORM
-	24, // 17: weewar.v1.GameMoveGORM.move_type:type_name -> google.protobuf.Any
-	24, // 18: weewar.v1.GameMoveGORM.changes:type_name -> google.protobuf.Any
-	2,  // 19: weewar.v1.WorldDataGORM.CrossingsEntry.value:type_name -> weewar.v1.CrossingGORM
-	1,  // 20: weewar.v1.WorldDataGORM.TilesMapEntry.value:type_name -> weewar.v1.TileGORM
-	3,  // 21: weewar.v1.WorldDataGORM.UnitsMapEntry.value:type_name -> weewar.v1.UnitGORM
-	2,  // 22: weewar.v1.GameWorldDataGORM.CrossingsEntry.value:type_name -> weewar.v1.CrossingGORM
-	1,  // 23: weewar.v1.GameWorldDataGORM.TilesMapEntry.value:type_name -> weewar.v1.TileGORM
-	3,  // 24: weewar.v1.GameWorldDataGORM.UnitsMapEntry.value:type_name -> weewar.v1.UnitGORM
-	25, // [25:25] is the sub-list for method output_type
-	25, // [25:25] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	18, // 1: weewar.v1.WorldDataGORM.crossings:type_name -> weewar.v1.WorldDataGORM.CrossingsEntry
+	0,  // 2: weewar.v1.WorldDataGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
+	19, // 3: weewar.v1.WorldDataGORM.tiles_map:type_name -> weewar.v1.WorldDataGORM.TilesMapEntry
+	20, // 4: weewar.v1.WorldDataGORM.units_map:type_name -> weewar.v1.WorldDataGORM.UnitsMapEntry
+	0,  // 5: weewar.v1.GameGORM.search_index_info:type_name -> weewar.v1.IndexInfoGORM
+	9,  // 6: weewar.v1.GameConfigurationGORM.income_configs:type_name -> weewar.v1.IncomeConfigGORM
+	12, // 7: weewar.v1.GameConfigurationGORM.settings:type_name -> weewar.v1.GameSettingsGORM
+	0,  // 8: weewar.v1.GameWorldDataGORM.screenshot_index_info:type_name -> weewar.v1.IndexInfoGORM
+	21, // 9: weewar.v1.GameWorldDataGORM.crossings:type_name -> weewar.v1.GameWorldDataGORM.CrossingsEntry
+	22, // 10: weewar.v1.GameWorldDataGORM.tiles_map:type_name -> weewar.v1.GameWorldDataGORM.TilesMapEntry
+	23, // 11: weewar.v1.GameWorldDataGORM.units_map:type_name -> weewar.v1.GameWorldDataGORM.UnitsMapEntry
+	13, // 12: weewar.v1.GameStateGORM.world_data:type_name -> weewar.v1.GameWorldDataGORM
+	24, // 13: weewar.v1.GameMoveGORM.move_type:type_name -> google.protobuf.Any
+	24, // 14: weewar.v1.GameMoveGORM.changes:type_name -> google.protobuf.Any
+	2,  // 15: weewar.v1.WorldDataGORM.CrossingsEntry.value:type_name -> weewar.v1.CrossingGORM
+	1,  // 16: weewar.v1.WorldDataGORM.TilesMapEntry.value:type_name -> weewar.v1.TileGORM
+	3,  // 17: weewar.v1.WorldDataGORM.UnitsMapEntry.value:type_name -> weewar.v1.UnitGORM
+	2,  // 18: weewar.v1.GameWorldDataGORM.CrossingsEntry.value:type_name -> weewar.v1.CrossingGORM
+	1,  // 19: weewar.v1.GameWorldDataGORM.TilesMapEntry.value:type_name -> weewar.v1.TileGORM
+	3,  // 20: weewar.v1.GameWorldDataGORM.UnitsMapEntry.value:type_name -> weewar.v1.UnitGORM
+	21, // [21:21] is the sub-list for method output_type
+	21, // [21:21] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_gorm_models_proto_init() }

@@ -521,6 +521,10 @@
                 "expectedResponse": {
                   "$ref": "#/definitions/v1ProcessMovesResponse",
                   "description": "*\nThe player can submit a list of \"Expected\" changes when in local-first mode\nIf this is list provided the server will validate it - either via the coordinator\nor by itself.  If it is not provided then the server will validate it and return\nthe changes."
+                },
+                "dryRun": {
+                  "type": "boolean",
+                  "title": "Whether to only perform a dryrun and return results instead of comitting it"
                 }
               },
               "description": "*\nRequest to add moves to a game\nThe model is that a game in each \"tick\" can handle multiple moves (by possibly various players).\nIt is upto the move manager/processor in the game to ensure the \"transaction\" of moves is handled\natomically.\n\nFor example we may have 3 moves where first two units are moved to a common location\nand then they attack another unit.  Here If we treat it as a single unit attacking it\nwill have different outcomes than a \"combined\" attack."
@@ -3647,21 +3651,18 @@
     "v1WorldData": {
       "type": "object",
       "properties": {
-        "tiles": {
-          "type": "array",
-          "items": {
-            "type": "object",
+        "tilesMap": {
+          "type": "object",
+          "additionalProperties": {
             "$ref": "#/definitions/v1Tile"
           },
-          "title": "DEPRECATED: Use tiles_map instead - kept for backward compatibility during migration"
+          "title": "New map-based storage (key = \"q,r\" coordinate string)"
         },
-        "units": {
-          "type": "array",
-          "items": {
-            "type": "object",
+        "unitsMap": {
+          "type": "object",
+          "additionalProperties": {
             "$ref": "#/definitions/v1Unit"
-          },
-          "title": "DEPRECATED: Use units_map instead - kept for backward compatibility during migration"
+          }
         },
         "screenshotIndexInfo": {
           "$ref": "#/definitions/v1IndexInfo",
@@ -3675,19 +3676,6 @@
           "type": "string",
           "format": "int64",
           "title": "Version for Optimistic concurrent locking"
-        },
-        "tilesMap": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/v1Tile"
-          },
-          "title": "New map-based storage (key = \"q,r\" coordinate string)"
-        },
-        "unitsMap": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/v1Unit"
-          }
         },
         "crossings": {
           "type": "object",

@@ -60,10 +60,6 @@ export interface WorldGORM {
 
 export interface WorldDataGORM {
   worldId: string;
-  /** Tiles as JSON for cross-DB compatibility */
-  tiles?: TileGORM[];
-  /** Units as JSON for cross-DB compatibility */
-  units?: UnitGORM[];
   /** Units as JSON for cross-DB compatibility */
   crossings: Record<string, CrossingGORM>;
   /** ScreenshotIndexInfo embedded */
@@ -125,10 +121,6 @@ export interface GameSettingsGORM {
  primary key so it can be embedded
  */
 export interface GameWorldDataGORM {
-  /** Tiles as JSON for cross-DB compatibility */
-  tiles?: TileGORM[];
-  /** Units as JSON for cross-DB compatibility */
-  units?: UnitGORM[];
   /** ScreenshotIndexInfo embedded */
   screenshotIndexInfo?: IndexInfoGORM;
   /** Units as JSON for cross-DB compatibility */

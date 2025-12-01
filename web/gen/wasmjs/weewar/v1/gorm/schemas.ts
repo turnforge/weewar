@@ -120,20 +120,6 @@ export const WorldDataGORMSchema: MessageSchema = {
       id: 1,
     },
     {
-      name: "tiles",
-      type: FieldType.MESSAGE,
-      id: 2,
-      messageType: "weewar.v1.TileGORM",
-      repeated: true,
-    },
-    {
-      name: "units",
-      type: FieldType.MESSAGE,
-      id: 3,
-      messageType: "weewar.v1.UnitGORM",
-      repeated: true,
-    },
-    {
       name: "crossings",
       type: FieldType.STRING,
       id: 4,
@@ -265,20 +251,6 @@ export const GameSettingsGORMSchema: MessageSchema = {
 export const GameWorldDataGORMSchema: MessageSchema = {
   name: "GameWorldDataGORM",
   fields: [
-    {
-      name: "tiles",
-      type: FieldType.MESSAGE,
-      id: 2,
-      messageType: "weewar.v1.TileGORM",
-      repeated: true,
-    },
-    {
-      name: "units",
-      type: FieldType.MESSAGE,
-      id: 3,
-      messageType: "weewar.v1.UnitGORM",
-      repeated: true,
-    },
     {
       name: "screenshotIndexInfo",
       type: FieldType.MESSAGE,

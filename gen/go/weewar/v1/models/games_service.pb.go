@@ -798,15 +798,17 @@ type ProcessMovesRequest struct {
 	GameId string `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
 	// *
 	// List of moves to add
-	Moves []*GameMove `protobuf:"bytes,3,rep,name=moves,proto3" json:"moves,omitempty"`
+	Moves []*GameMove `protobuf:"bytes,2,rep,name=moves,proto3" json:"moves,omitempty"`
 	// *
 	// The player can submit a list of "Expected" changes when in local-first mode
 	// If this is list provided the server will validate it - either via the coordinator
 	// or by itself.  If it is not provided then the server will validate it and return
 	// the changes.
-	ExpectedResponse *ProcessMovesResponse `protobuf:"bytes,2,opt,name=expected_response,json=expectedResponse,proto3" json:"expected_response,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	ExpectedResponse *ProcessMovesResponse `protobuf:"bytes,3,opt,name=expected_response,json=expectedResponse,proto3" json:"expected_response,omitempty"`
+	// Whether to only perform a dryrun and return results instead of comitting it
+	DryRun        bool `protobuf:"varint,4,opt,name=dry_run,json=dryRun,proto3" json:"dry_run,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProcessMovesRequest) Reset() {
@@ -858,6 +860,13 @@ func (x *ProcessMovesRequest) GetExpectedResponse() *ProcessMovesResponse {
 		return x.ExpectedResponse
 	}
 	return nil
+}
+
+func (x *ProcessMovesRequest) GetDryRun() bool {
+	if x != nil {
+		return x.DryRun
+	}
+	return false
 }
 
 // *
@@ -1641,11 +1650,12 @@ const file_weewar_v1_models_games_service_proto_rawDesc = "" +
 	"\ffield_errors\x18\x03 \x03(\v2..weewar.v1.CreateGameResponse.FieldErrorsEntryR\vfieldErrors\x1a>\n" +
 	"\x10FieldErrorsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa7\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc0\x01\n" +
 	"\x13ProcessMovesRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12)\n" +
-	"\x05moves\x18\x03 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\x12L\n" +
-	"\x11expected_response\x18\x02 \x01(\v2\x1f.weewar.v1.ProcessMovesResponseR\x10expectedResponse\"A\n" +
+	"\x05moves\x18\x02 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\x12L\n" +
+	"\x11expected_response\x18\x03 \x01(\v2\x1f.weewar.v1.ProcessMovesResponseR\x10expectedResponse\x12\x17\n" +
+	"\adry_run\x18\x04 \x01(\bR\x06dryRun\"A\n" +
 	"\x14ProcessMovesResponse\x12)\n" +
 	"\x05moves\x18\x03 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\".\n" +
 	"\x13GetGameStateRequest\x12\x17\n" +

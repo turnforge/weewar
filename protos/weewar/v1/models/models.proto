@@ -124,11 +124,9 @@ message World {
 }
 
 message WorldData {
-  // DEPRECATED: Use tiles_map instead - kept for backward compatibility during migration
-  repeated Tile tiles = 1 [deprecated = true];
-
-  // DEPRECATED: Use units_map instead - kept for backward compatibility during migration
-  repeated Unit units = 2 [deprecated = true];
+  // New map-based storage (key = "q,r" coordinate string)
+  map<string, Tile> tiles_map = 1;
+  map<string, Unit> units_map = 2;
 
   // When this world data was updated (may have happened without world updating)
   IndexInfo screenshot_index_info = 3;
@@ -138,10 +136,6 @@ message WorldData {
 
   // Version for Optimistic concurrent locking
   int64 version = 5;
-
-  // New map-based storage (key = "q,r" coordinate string)
-  map<string, Tile> tiles_map = 6;
-  map<string, Unit> units_map = 7;
 
   // Improvement layer - crossings (roads on land, bridges on water)
   map<string, Crossing> crossings = 8;  // key = "q,r", value = crossing with connectivity

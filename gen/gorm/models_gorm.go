@@ -179,14 +179,12 @@ func (*WorldGORM) TableName() string {
 
 // WorldDataGORM is the GORM model for weewar.v1.WorldData
 type WorldDataGORM struct {
-	Tiles               []TileGORM    `gorm:"serializer:json"`
-	WorldId             string        `gorm:"primaryKey"`
-	Units               []UnitGORM    `gorm:"serializer:json"`
-	ScreenshotIndexInfo IndexInfoGORM `gorm:"embedded;embeddedPrefix:screenshot_index_"`
+	WorldId             string              `gorm:"primaryKey"`
+	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
+	UnitsMap            map[string]UnitGORM `gorm:"serializer:json"`
+	ScreenshotIndexInfo IndexInfoGORM       `gorm:"embedded;embeddedPrefix:screenshot_index_"`
 	ContentHash         string
 	Version             int64
-	TilesMap            map[string]TileGORM     `gorm:"serializer:json"`
-	UnitsMap            map[string]UnitGORM     `gorm:"serializer:json"`
 	Crossings           map[string]CrossingGORM `gorm:"serializer:json"`
 }
 
@@ -363,13 +361,11 @@ type GameSettingsGORM struct {
 
 // GameWorldDataGORM is the GORM model for weewar.v1.WorldData
 type GameWorldDataGORM struct {
-	Tiles               []TileGORM    `gorm:"serializer:json"`
-	Units               []UnitGORM    `gorm:"serializer:json"`
-	ScreenshotIndexInfo IndexInfoGORM `gorm:"embedded;embeddedPrefix:screenshot_index_"`
+	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
+	UnitsMap            map[string]UnitGORM `gorm:"serializer:json"`
+	ScreenshotIndexInfo IndexInfoGORM       `gorm:"embedded;embeddedPrefix:screenshot_index_"`
 	ContentHash         string
 	Version             int64
-	TilesMap            map[string]TileGORM     `gorm:"serializer:json"`
-	UnitsMap            map[string]UnitGORM     `gorm:"serializer:json"`
 	Crossings           map[string]CrossingGORM `gorm:"serializer:json"`
 }
 

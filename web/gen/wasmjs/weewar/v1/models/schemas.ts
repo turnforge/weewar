@@ -228,18 +228,14 @@ export const WorldDataSchema: MessageSchema = {
   name: "WorldData",
   fields: [
     {
-      name: "tiles",
-      type: FieldType.MESSAGE,
+      name: "tilesMap",
+      type: FieldType.STRING,
       id: 1,
-      messageType: "weewar.v1.Tile",
-      repeated: true,
     },
     {
-      name: "units",
-      type: FieldType.MESSAGE,
+      name: "unitsMap",
+      type: FieldType.STRING,
       id: 2,
-      messageType: "weewar.v1.Unit",
-      repeated: true,
     },
     {
       name: "screenshotIndexInfo",
@@ -256,16 +252,6 @@ export const WorldDataSchema: MessageSchema = {
       name: "version",
       type: FieldType.NUMBER,
       id: 5,
-    },
-    {
-      name: "tilesMap",
-      type: FieldType.STRING,
-      id: 6,
-    },
-    {
-      name: "unitsMap",
-      type: FieldType.STRING,
-      id: 7,
     },
     {
       name: "crossings",
@@ -694,7 +680,7 @@ export const UnitUnitPropertiesSchema: MessageSchema = {
       messageType: "weewar.v1.DamageDistribution",
     },
   ],
-  oneofGroups: ["_attack_override", "_defense_override"],
+  oneofGroups: ["_defense_override", "_attack_override"],
 };
 
 
@@ -2238,15 +2224,20 @@ export const ProcessMovesRequestSchema: MessageSchema = {
     {
       name: "moves",
       type: FieldType.MESSAGE,
-      id: 3,
+      id: 2,
       messageType: "weewar.v1.GameMove",
       repeated: true,
     },
     {
       name: "expectedResponse",
       type: FieldType.MESSAGE,
-      id: 2,
+      id: 3,
       messageType: "weewar.v1.ProcessMovesResponse",
+    },
+    {
+      name: "dryRun",
+      type: FieldType.BOOLEAN,
+      id: 4,
     },
   ],
 };

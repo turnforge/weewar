@@ -131,10 +131,6 @@ export class WorldDataGORM implements WorldDataGORMInterface {
   readonly __MESSAGE_TYPE = WorldDataGORM.MESSAGE_TYPE;
 
   worldId: string = "";
-  /** Tiles as JSON for cross-DB compatibility */
-  tiles: TileGORM[] = [];
-  /** Units as JSON for cross-DB compatibility */
-  units: UnitGORM[] = [];
   /** Units as JSON for cross-DB compatibility */
   crossings: Record<string, CrossingGORM> = {};
   /** ScreenshotIndexInfo embedded */
@@ -252,10 +248,6 @@ export class GameWorldDataGORM implements GameWorldDataGORMInterface {
   static readonly MESSAGE_TYPE = "weewar.v1.GameWorldDataGORM";
   readonly __MESSAGE_TYPE = GameWorldDataGORM.MESSAGE_TYPE;
 
-  /** Tiles as JSON for cross-DB compatibility */
-  tiles: TileGORM[] = [];
-  /** Units as JSON for cross-DB compatibility */
-  units: UnitGORM[] = [];
   /** ScreenshotIndexInfo embedded */
   screenshotIndexInfo?: IndexInfoGORM;
   /** Units as JSON for cross-DB compatibility */

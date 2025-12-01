@@ -544,8 +544,8 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         const game = req.game!;
 
         // Handle both map format (tilesMap/unitsMap) and array format (tiles/units)
-        const tiles = (worldData as any).tilesMap || (worldData as any).tiles_map || worldData.tiles || [];
-        const units = (worldData as any).unitsMap || (worldData as any).units_map || worldData.units || [];
+        const tiles = (worldData as any).tilesMap || (worldData as any).tiles_map || [];
+        const units = (worldData as any).unitsMap || (worldData as any).units_map || [];
         this.world.loadTilesAndUnits(tiles, units);
         this.world.setName(game.name || 'Untitled Game');
 

@@ -412,7 +412,7 @@ func HexToPixelInt32(q, r int32, opts *RenderOptions) (x, y int) {
 
 // ComputeWorldBounds calculates the pixel bounding box for tiles and units
 // Returns bounds where (MinX, MinY) is the top-left corner of the top-left-most tile
-func ComputeWorldBounds(tiles []*v1.Tile, units []*v1.Unit, opts *RenderOptions) WorldBounds {
+func ComputeWorldBounds(tiles map[string]*v1.Tile, units map[string]*v1.Unit, opts *RenderOptions) WorldBounds {
 	if len(tiles) == 0 && len(units) == 0 {
 		return WorldBounds{}
 	}

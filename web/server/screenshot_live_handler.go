@@ -39,7 +39,7 @@ func (r *RootViewsHandler) handleWorldScreenshotLive(w http.ResponseWriter, req 
 	}
 
 	// Render the screenshot
-	r.renderScreenshot(w, resp.WorldData.Tiles, resp.WorldData.Units, themeName)
+	r.renderScreenshot(w, resp.WorldData.TilesMap, resp.WorldData.UnitsMap, themeName)
 }
 
 // handleGameScreenshotLive dynamically renders a game screenshot using the specified theme
@@ -71,11 +71,11 @@ func (r *RootViewsHandler) handleGameScreenshotLive(w http.ResponseWriter, req *
 	}
 
 	// Render the screenshot
-	r.renderScreenshot(w, resp.State.WorldData.Tiles, resp.State.WorldData.Units, themeName)
+	r.renderScreenshot(w, resp.State.WorldData.TilesMap, resp.State.WorldData.UnitsMap, themeName)
 }
 
 // renderScreenshot renders tiles and units using the specified theme
-func (r *RootViewsHandler) renderScreenshot(w http.ResponseWriter, tiles []*protos.Tile, units []*protos.Unit, themeName string) {
+func (r *RootViewsHandler) renderScreenshot(w http.ResponseWriter, tiles map[string]*protos.Tile, units map[string]*protos.Unit, themeName string) {
 	// Create theme
 	re := lib.DefaultRulesEngine()
 	theme, err := themes.CreateTheme(themeName, re.GetCityTerrains())

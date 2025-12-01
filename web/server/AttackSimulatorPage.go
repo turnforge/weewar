@@ -29,6 +29,7 @@ type AttackSimulatorPage struct {
 }
 
 func (p *AttackSimulatorPage) Load(r *http.Request, w http.ResponseWriter, vc *ViewContext) (err error, finished bool) {
+	p.DisableSplashScreen = true
 	p.Title = "Attack Simulator"
 	p.Header.Load(r, w, vc)
 

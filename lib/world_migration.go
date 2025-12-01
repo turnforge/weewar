@@ -1,6 +1,9 @@
 package lib
 
 import (
+	"fmt"
+	"strconv"
+
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 )
 
@@ -17,7 +20,7 @@ const (
 )
 
 // MigrateWorldData converts old list-based WorldData to map-based storage.
-// It also extracts crossings (roads, bridges) from tile types.
+// It also extracts crossings (roads, bridges) from tile types and ensures shortcuts exist.
 // This function is idempotent - calling it multiple times is safe.
 func MigrateWorldData(wd *v1.WorldData) {
 	if wd == nil {
@@ -35,30 +38,79 @@ func MigrateWorldData(wd *v1.WorldData) {
 		wd.Crossings = make(map[string]*v1.Crossing)
 	}
 
-	// Migrate tiles from deprecated list to map (if not already done)
-	if len(wd.Tiles) > 0 && len(wd.TilesMap) == 0 {
-		for _, tile := range wd.Tiles {
-			key := CoordKey(tile.Q, tile.R)
-			wd.TilesMap[key] = tile
-		}
-	}
-
-	// Migrate units from deprecated list to map (if not already done)
-	if len(wd.Units) > 0 && len(wd.UnitsMap) == 0 {
-		for _, unit := range wd.Units {
-			key := CoordKey(unit.Q, unit.R)
-			wd.UnitsMap[key] = unit
-		}
-	}
-
 	// Extract crossings from tile types
 	extractCrossings(wd)
+}
 
-	// Clear deprecated lists after migration
-	// Use empty slices instead of nil to ensure they're serialized as empty arrays
-	// This ensures the old data is actually removed from storage on save
-	wd.Tiles = []*v1.Tile{}
-	wd.Units = []*v1.Unit{}
+// EnsureShortcuts generates shortcuts for tiles and units that don't have them.
+// This is idempotent - tiles/units with existing shortcuts are left unchanged.
+func EnsureShortcuts(wd *v1.WorldData) {
+	if wd == nil {
+		return
+	}
+
+	// Track counters per player to generate unique shortcuts
+	tileCounters := make(map[int32]int32)
+	unitCounters := make(map[int32]int32)
+
+	// First pass: find max existing counters for tiles
+	for _, tile := range wd.TilesMap {
+		if tile.Player > 0 && tile.Shortcut != "" {
+			if len(tile.Shortcut) >= 2 {
+				playerLetter := tile.Shortcut[0]
+				if playerLetter >= 'A' && playerLetter <= 'Z' {
+					if num, err := strconv.Atoi(tile.Shortcut[1:]); err == nil {
+						playerID := int32(playerLetter - 'A' + 1)
+						if current, ok := tileCounters[playerID]; !ok || int32(num) >= current {
+							tileCounters[playerID] = int32(num + 1)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// First pass: find max existing counters for units
+	for _, unit := range wd.UnitsMap {
+		if unit.Player > 0 && unit.Shortcut != "" {
+			if len(unit.Shortcut) >= 2 {
+				playerLetter := unit.Shortcut[0]
+				if playerLetter >= 'A' && playerLetter <= 'Z' {
+					if num, err := strconv.Atoi(unit.Shortcut[1:]); err == nil {
+						playerID := int32(playerLetter - 'A' + 1)
+						if current, ok := unitCounters[playerID]; !ok || int32(num) >= current {
+							unitCounters[playerID] = int32(num + 1)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Second pass: generate shortcuts for tiles without them
+	for _, tile := range wd.TilesMap {
+		if tile.Player > 0 && tile.Shortcut == "" {
+			tile.Shortcut = generateShortcut(tile.Player, tileCounters)
+		}
+	}
+
+	// Second pass: generate shortcuts for units without them
+	for _, unit := range wd.UnitsMap {
+		if unit.Player > 0 && unit.Shortcut == "" {
+			unit.Shortcut = generateShortcut(unit.Player, unitCounters)
+		}
+	}
+}
+
+// generateShortcut generates a shortcut like "A1", "B2" for a player and increments the counter
+func generateShortcut(playerID int32, counters map[int32]int32) string {
+	if playerID <= 0 || playerID > 26 {
+		return ""
+	}
+	counter := counters[playerID]
+	counters[playerID] = counter + 1
+	letter := byte('A' + playerID - 1)
+	return fmt.Sprintf("%c%d", letter, counter+1)
 }
 
 // extractCrossings extracts roads and bridges from tile types into the crossings map

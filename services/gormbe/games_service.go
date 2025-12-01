@@ -213,6 +213,9 @@ func (s *GamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest
 	// Auto-migrate WorldData from old list-based format to new map-based format
 	lib.MigrateWorldData(gs.WorldData)
 
+	// Generate shortcuts for tiles and units
+	lib.EnsureShortcuts(gs.WorldData)
+
 	gameStateGorm, err := v1gorm.GameStateToGameStateGORM(gs, nil, nil)
 	if err != nil {
 		log.Println("Here 1 ????: ", err)

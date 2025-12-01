@@ -220,6 +220,9 @@ func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameReque
 	// Auto-migrate WorldData from old list-based format to new map-based format
 	lib.MigrateWorldData(gs.WorldData)
 
+	// Generate shortcuts for tiles and units
+	lib.EnsureShortcuts(gs.WorldData)
+
 	// Units start with default zero values (current_turn=0, distance_left=0, available_health=0)
 	// They will be lazily topped-up when accessed if unit.current_turn < game.turn_counter
 	// This eliminates the need to initialize all units at game creation

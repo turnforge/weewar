@@ -132,6 +132,14 @@ func (w *World) buildIndexes() {
 		}
 	}
 
+	// Second pass: generate shortcuts for tiles without them
+	for _, tile := range w.data.TilesMap {
+		if tile.Player > 0 && tile.Shortcut == "" {
+			tile.Shortcut = w.GenerateTileShortcut(tile.Player)
+			w.tilesByShortcut[tile.Shortcut] = tile
+		}
+	}
+
 	// First pass: track existing unit shortcuts and find max counters
 	for _, unit := range w.data.UnitsMap {
 		if unit.Shortcut != "" {
@@ -148,6 +156,14 @@ func (w *World) buildIndexes() {
 					}
 				}
 			}
+		}
+	}
+
+	// Second pass: generate shortcuts for units without them and build player index
+	for _, unit := range w.data.UnitsMap {
+		if unit.Player > 0 && unit.Shortcut == "" {
+			unit.Shortcut = w.GenerateUnitShortcut(unit.Player)
+			w.unitsByShortcut[unit.Shortcut] = unit
 		}
 
 		// Build unitsByPlayer index

@@ -53,7 +53,7 @@ func (r *SVGWorldRenderer) SetAssetRoot(root string) {
 }
 
 // Render produces a composite SVG of the world
-func (r *SVGWorldRenderer) Render(tiles []*v1.Tile, units []*v1.Unit, options *lib.RenderOptions) ([]byte, string, error) {
+func (r *SVGWorldRenderer) Render(tiles map[string]*v1.Tile, units map[string]*v1.Unit, options *lib.RenderOptions) ([]byte, string, error) {
 	if options == nil {
 		options = lib.DefaultRenderOptions()
 	}

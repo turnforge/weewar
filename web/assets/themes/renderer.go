@@ -11,7 +11,7 @@ import (
 type WorldRenderer interface {
 	// Render produces a composite image of the world
 	// Returns the image bytes and the content type (e.g., "image/png", "image/svg+xml")
-	Render(tiles []*v1.Tile, units []*v1.Unit, options *lib.RenderOptions) ([]byte, string, error)
+	Render(tiles map[string]*v1.Tile, units map[string]*v1.Unit, options *lib.RenderOptions) ([]byte, string, error)
 }
 
 // CreateWorldRenderer returns the appropriate renderer for a theme
@@ -33,7 +33,7 @@ func CreateWorldRenderer(theme Theme) (WorldRenderer, error) {
 
 // computeBounds calculates the bounding box for tiles and units
 // Returns minX, minY, width, height in pixel coordinates
-func computeBounds(tiles []*v1.Tile, units []*v1.Unit, opts *lib.RenderOptions) (minX, minY, width, height int) {
+func computeBounds(tiles map[string]*v1.Tile, units map[string]*v1.Unit, opts *lib.RenderOptions) (minX, minY, width, height int) {
 	bounds := lib.ComputeWorldBounds(tiles, units, opts)
 	return bounds.MinX, bounds.MinY, bounds.Width, bounds.Height
 }

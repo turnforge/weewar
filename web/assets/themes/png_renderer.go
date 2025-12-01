@@ -38,7 +38,7 @@ func NewPNGWorldRenderer(theme Theme) (*PNGWorldRenderer, error) {
 }
 
 // Render produces a composite PNG image of the world
-func (r *PNGWorldRenderer) Render(tiles []*v1.Tile, units []*v1.Unit, options *lib.RenderOptions) ([]byte, string, error) {
+func (r *PNGWorldRenderer) Render(tiles map[string]*v1.Tile, units map[string]*v1.Unit, options *lib.RenderOptions) ([]byte, string, error) {
 	if options == nil {
 		options = lib.DefaultRenderOptions()
 	}

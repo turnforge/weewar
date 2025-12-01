@@ -231,8 +231,9 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 
 		// Get options at this position (handles both unit and tile actions)
 		optionsResp, err := s.GamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
-			Q: q,
-			R: r,
+			GameId: req.GameId,
+			Q:      q,
+			R:      r,
 		})
 		if err == nil && optionsResp != nil && len(optionsResp.Options) > 0 {
 			// Check if there are ONLY build options (no movement/attack options)
@@ -495,7 +496,7 @@ func (s *GameViewPresenter) executeMovementAction(ctx context.Context, game *v1.
 	}
 
 	// Call ProcessMoves to execute the move
-	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{Moves: []*v1.GameMove{gameMove}})
+	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{GameId: game.Id, Moves: []*v1.GameMove{gameMove}})
 	if err != nil {
 		return fmt.Errorf("move execution failed: %w", err)
 	}
@@ -512,7 +513,7 @@ func (s *GameViewPresenter) executeMovementAction(ctx context.Context, game *v1.
 // executeBuildAction processes a build unit action
 func (s *GameViewPresenter) executeBuildAction(ctx context.Context, game *v1.Game, gameState *v1.GameState, gameMove *v1.GameMove) {
 	// Call ProcessMoves to execute the build
-	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{Moves: []*v1.GameMove{gameMove}})
+	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{GameId: game.Id, Moves: []*v1.GameMove{gameMove}})
 	if err != nil {
 		fmt.Printf("[Presenter] Build action failed: %v\n", err)
 		return
@@ -540,7 +541,8 @@ func (s *GameViewPresenter) executeEndTurnAction(ctx context.Context, game *v1.G
 
 	// Call ProcessMoves to execute end turn
 	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
-		Moves: []*v1.GameMove{gameMove},
+		GameId: game.Id,
+		Moves:  []*v1.GameMove{gameMove},
 	})
 
 	if err != nil {

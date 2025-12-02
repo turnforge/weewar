@@ -154,7 +154,7 @@ func (s *GameViewPresenter) InitializeGame(ctx context.Context, req *v1.Initiali
 	// Initialize mobile panels (no-op for desktop/grid)
 	if s.GameViewerPage != nil {
 		go s.GameViewerPage.SetAllowedPanels(ctx, &v1.SetAllowedPanelsRequest{
-			PanelIds: []string{"game-log", "turn-options"},
+			PanelIds: []string{"game-state", "game-log", "turn-options"},
 		})
 	}
 
@@ -231,7 +231,7 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 		// Update mobile-specific panels
 		if s.GameViewerPage != nil {
 			// Update allowed panels based on what's selected
-			allowedPanels := []string{"game-log", "turn-options"}
+			allowedPanels := []string{"game-state", "game-log", "turn-options"}
 			if tile != nil {
 				allowedPanels = append(allowedPanels, "terrain-stats")
 			}

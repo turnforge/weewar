@@ -71,16 +71,5 @@
     "7": { "old": "Mountains", "name": "Mountains", "image": "Tiles/MountainRange.svg"},
     "8": { "old": "Swamp", "name": "Marsh", "image": "Tiles/Marsh.svg"},
     "9": { "old": "Forest", "name": "Forest", "image": "Tiles/Forest.svg"}
-  },
-  "playerColors": {
-    "0": { "primary": "#888888", "secondary": "#666666", "name": "Neutral" },
-    "1": { "primary": "#f87171", "secondary": "#dc2626", "name": "Red" },
-    "2": { "primary": "#60a5fa", "secondary": "#2563eb", "name": "Blue" },
-    "3": { "primary": "#4ade80", "secondary": "#16a34a", "name": "Green" },
-    "4": { "primary": "#facc15", "secondary": "#ca8a04", "name": "Yellow" },
-    "5": { "primary": "#fb923c", "secondary": "#ea580c", "name": "Orange" },
-    "6": { "primary": "#c084fc", "secondary": "#9333ea", "name": "Purple" },
-    "7": { "primary": "#f472b6", "secondary": "#db2777", "name": "Pink" },
-    "8": { "primary": "#22d3ee", "secondary": "#0891b2", "name": "Cyan" }
   }
 }

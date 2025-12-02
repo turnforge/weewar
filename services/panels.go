@@ -298,6 +298,18 @@ func (b *BaseGameStatePanel) ComputeCurrentPlayerIncome() {
 	b.IncomeBreakdown = b.buildIncomeBreakdown(baseCounts, incomeConfig)
 }
 
+// GetPlayerColorHex returns the primary hex color for a player from the theme
+func (b *BaseGameStatePanel) GetPlayerColorHex(playerId int32) string {
+	if b.Theme == nil {
+		panic("Theme not set on BaseGameStatePanel")
+	}
+	color := b.Theme.GetPlayerColor(playerId)
+	if color != nil && color.Primary != "" {
+		return color.Primary
+	}
+	return "#888888"
+}
+
 // buildIncomeBreakdown creates a human-readable income breakdown string
 func (b *BaseGameStatePanel) buildIncomeBreakdown(baseCounts map[int32]int32, incomeConfig *v1.IncomeConfig) string {
 	if len(baseCounts) == 0 {

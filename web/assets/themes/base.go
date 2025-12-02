@@ -11,9 +11,33 @@ type BaseTheme struct {
 	cityTerrains map[int32]bool // Terrains that use player colors (from RulesEngine)
 }
 
+// Default player colors - used when manifest doesn't specify playerColors
+var defaultPlayerColors = map[int32]*v1.PlayerColor{
+	0:  {Primary: "#888888", Secondary: "#666666", Name: "Neutral"},
+	1:  {Primary: "#60a5fa", Secondary: "#2563eb", Name: "Blue"},
+	2:  {Primary: "#f87171", Secondary: "#dc2626", Name: "Red"},
+	3:  {Primary: "#facc15", Secondary: "#ca8a04", Name: "Yellow"},
+	4:  {Primary: "#f0f0f0", Secondary: "#888888", Name: "White"},
+	5:  {Primary: "#f472b6", Secondary: "#db2777", Name: "Pink"},
+	6:  {Primary: "#fb923c", Secondary: "#ea580c", Name: "Orange"},
+	7:  {Primary: "#1f2937", Secondary: "#111827", Name: "Black"},
+	8:  {Primary: "#2dd4bf", Secondary: "#14b8a6", Name: "Teal"},
+	9:  {Primary: "#1e3a8a", Secondary: "#1e40af", Name: "Navy Blue"},
+	10: {Primary: "#a16207", Secondary: "#854d0e", Name: "Brown"},
+	11: {Primary: "#22d3ee", Secondary: "#0891b2", Name: "Cyan"},
+	12: {Primary: "#c084fc", Secondary: "#9333ea", Name: "Purple"},
+}
+
 // NewBaseTheme creates a new BaseTheme from a pre-loaded manifest
 // cityTerrains is a map of terrain IDs that use player colors (from RulesEngine.TerrainTypes)
 func NewBaseTheme(manifest *v1.ThemeManifest, cityTerrains map[int32]bool) *BaseTheme {
+	// Populate default player colors if not specified in manifest
+	if len(manifest.PlayerColors) == 0 {
+		manifest.PlayerColors = make(map[int32]*v1.PlayerColor)
+		for k, v := range defaultPlayerColors {
+			manifest.PlayerColors[k] = v
+		}
+	}
 	return &BaseTheme{
 		manifest:     manifest,
 		cityTerrains: cityTerrains,

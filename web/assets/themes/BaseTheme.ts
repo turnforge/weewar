@@ -40,15 +40,19 @@ export const TILE_TYPE_WATER_DEEP = 15;
 
 // Fallback player colors (used if mapping.json doesn't have playerColors)
 export const DEFAULT_PLAYER_COLORS: { [key: number]: PlayerColor } = {
-  0: { primary: '#888888', secondary: '#666666', name: 'Neutral' },
-  1: { primary: '#f87171', secondary: '#dc2626', name: 'Red' },
-  2: { primary: '#60a5fa', secondary: '#2563eb', name: 'Blue' },
-  3: { primary: '#4ade80', secondary: '#16a34a', name: 'Green' },
-  4: { primary: '#facc15', secondary: '#ca8a04', name: 'Yellow' },
-  5: { primary: '#fb923c', secondary: '#ea580c', name: 'Orange' },
-  6: { primary: '#c084fc', secondary: '#9333ea', name: 'Purple' },
-  7: { primary: '#f472b6', secondary: '#db2777', name: 'Pink' },
-  8: { primary: '#22d3ee', secondary: '#0891b2', name: 'Cyan' },
+  0:  { primary: '#888888', secondary: '#666666', name: 'Neutral' },
+  1:  { primary: '#60a5fa', secondary: '#2563eb', name: 'Blue' },
+  2:  { primary: '#f87171', secondary: '#dc2626', name: 'Red' },
+  3:  { primary: '#facc15', secondary: '#ca8a04', name: 'Yellow' },
+  4:  { primary: '#f0f0f0', secondary: '#888888', name: 'White' },
+  5:  { primary: '#f472b6', secondary: '#db2777', name: 'Pink' },
+  6:  { primary: '#fb923c', secondary: '#ea580c', name: 'Orange' },
+  7:  { primary: '#1f2937', secondary: '#111827', name: 'Black' },
+  8:  { primary: '#2dd4bf', secondary: '#14b8a6', name: 'Teal' },
+  9:  { primary: '#1e3a8a', secondary: '#1e40af', name: 'Navy Blue' },
+  10: { primary: '#a16207', secondary: '#854d0e', name: 'Brown' },
+  11: { primary: '#22d3ee', secondary: '#0891b2', name: 'Cyan' },
+  12: { primary: '#c084fc', secondary: '#9333ea', name: 'Purple' },
 } as any;
 
 /**
@@ -108,6 +112,10 @@ export abstract class BaseTheme implements ITheme {
 
   constructor(manifest: ThemeManifest) {
     this.manifest = manifest;
+    // Populate default player colors if not specified in manifest
+    if (!this.manifest.playerColors || Object.keys(this.manifest.playerColors).length === 0) {
+      this.manifest.playerColors = { ...DEFAULT_PLAYER_COLORS };
+    }
   }
 
   /**

@@ -1,42 +1,8 @@
-<!-- Game Viewer Main Panel using PhaserSceneView -->
+<!-- Game Viewer Main Panel using PhaserSceneView (DockView version - no header, info in Players panel) -->
 
 {{# include "components/PhaserSceneView.html" #}}
 
-{{/* Define North region (game header) by extending PhaserSceneView_North block */}}
-{{ define "PhaserSceneView_North" }}
-<div
-  id="phaser-scene-view-north"
-  class="flex-shrink-0"
-  style="flex-shrink: 0"
->
-    <div id="game-view-header" class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <span id="game-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                Game Loading...
-            </span>
-            <div class="text-sm text-gray-600 dark:text-gray-300">
-                <span id="game-name">Game Name</span>
-                <span class="mx-2">•</span>
-                <span id="game-players">2 Players</span>
-            </div>
-        </div>
-        <div class="flex items-center space-x-2">
-            <div id="turn-counter" class="text-sm text-gray-600 dark:text-gray-300">
-                Turn 1
-            </div>
-            <button id="toggle-game-header-btn" type="button"
-                class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                title="Toggle game info header">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
-</div>
-{{ end }}
-
-{{/* Use PhaserSceneView - game header is defined above via block extension */}}
+{{/* No North region - game info is displayed in the Players panel */}}
 {{ define "GameViewerPageScenePanel" }}
     {{ template "PhaserSceneView" (dict
         "SceneId" "game-viewer-scene"

@@ -188,10 +188,19 @@ func (s *FSGamesService) GetGame(ctx context.Context, req *v1.GetGameRequest) (r
 
 // CreateGame creates a new game
 func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest) (resp *v1.CreateGameResponse, err error) {
-	if req.Game == nil {
-		return nil, fmt.Errorf("game data is required")
+	// Load world data first so we can validate players have units/tiles
+	worldsSvcClient := s.ClientMgr.GetWorldsSvcClient()
+	world, err := worldsSvcClient.GetWorld(ctx, &v1.GetWorldRequest{Id: req.Game.WorldId})
+	if err != nil {
+		return nil, fmt.Errorf("Error loading world: %w", err)
 	}
 
+	// Validate the request (duplicate players, players with units/tiles, etc.)
+	if err := s.ValidateCreateGameRequest(req.Game, world.WorldData); err != nil {
+		return nil, err
+	}
+
+	// Create game entity directory
 	req.Game.Id, err = s.storage.CreateEntity(req.Game.Id)
 	if err != nil {
 		return resp, err
@@ -201,15 +210,9 @@ func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameReque
 	req.Game.CreatedAt = tspb.New(now)
 	req.Game.UpdatedAt = tspb.New(now)
 
-	// Save game metadta
+	// Save game metadata
 	if err := s.storage.SaveArtifact(req.Game.Id, "metadata", req.Game); err != nil {
 		return nil, fmt.Errorf("failed to create game: %w", err)
-	}
-
-	worldsSvcClient := s.ClientMgr.GetWorldsSvcClient()
-	world, err := worldsSvcClient.GetWorld(ctx, &v1.GetWorldRequest{Id: req.Game.WorldId})
-	if err != nil {
-		return nil, fmt.Errorf("Error loading world: %w", err)
 	}
 
 	// Save a new empty game state and a new move list

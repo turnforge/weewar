@@ -221,16 +221,20 @@ class StartGamePage extends BasePage implements LCMComponent {
      */
     private initializeGameConfiguration(): void {
         // Load player configuration from server-rendered elements
-        this.gameConfig.players = [];
+        // Use a Map to deduplicate by playerId (same template may be rendered in both desktop and mobile views)
+        const playerMap = new Map<number, GamePlayer>();
         const playerElements = document.querySelectorAll('[data-config-section="players"] [data-player]');
         playerElements.forEach(el => {
             const playerId = parseInt((el as HTMLElement).dataset.player || '0');
+            // Skip if we already have this player (deduplication)
+            if (playerMap.has(playerId)) return;
+
             const typeSelect = el.querySelector('[data-config="type"]') as HTMLSelectElement;
             const teamSelect = el.querySelector('[data-config="team"]') as HTMLSelectElement;
             const coinsInput = el.querySelector('[data-config="coins"]') as HTMLInputElement;
 
             if (typeSelect && teamSelect && coinsInput) {
-                this.gameConfig.players?.push({
+                playerMap.set(playerId, {
                     playerId: playerId,
                     playerType: typeSelect.value,
                     color: '', // Color is handled by server rendering
@@ -242,6 +246,7 @@ class StartGamePage extends BasePage implements LCMComponent {
                 });
             }
         });
+        this.gameConfig.players = Array.from(playerMap.values());
 
         // Load allowed units from server-rendered checkboxes
         const unitCheckboxes = document.querySelectorAll('#unit-restriction-grid input[type="checkbox"]');

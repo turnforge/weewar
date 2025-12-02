@@ -173,14 +173,16 @@ func (s *GamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest
 	ctx, span := Tracer.Start(ctx, "CreateGames")
 	defer span.End()
 	resp = &v1.CreateGameResponse{}
-	if req.Game == nil {
-		return nil, fmt.Errorf("game data is required")
-	}
 
 	// Make sure world exists - for now we must be given a worldId to create game from
 	world, err := s.ClientMgr.GetWorldsSvcClient().GetWorld(ctx, &v1.GetWorldRequest{Id: req.Game.WorldId})
 	if err != nil {
 		return nil, fmt.Errorf("Error loading world: %w", err)
+	}
+
+	// Validate the request (duplicate players, players with units/tiles, etc.)
+	if err := s.ValidateCreateGameRequest(req.Game, world.WorldData); err != nil {
+		return nil, err
 	}
 
 	now := time.Now()

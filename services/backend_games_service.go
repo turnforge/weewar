@@ -5,8 +5,11 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
+
+	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 )
 
 // GameStateUpdater is an interface for updating GameState with optimistic locking
@@ -32,6 +35,56 @@ type BackendGamesService struct {
 func (s *BackendGamesService) InitializeScreenshotIndexer() {
 	s.ScreenShotIndexer = NewScreenShotIndexer(s.ClientMgr)
 	s.ScreenShotIndexer.OnComplete = s.handleScreenshotCompletion
+}
+
+// ValidateCreateGameRequest validates a CreateGameRequest for common errors
+// that apply to all backend implementations (fsbe, gormbe, etc.)
+func (s *BackendGamesService) ValidateCreateGameRequest(game *v1.Game, worldData *v1.WorldData) error {
+	if game == nil {
+		return fmt.Errorf("game data is required")
+	}
+
+	// Check for duplicate player IDs
+	if game.Config != nil && len(game.Config.Players) > 0 {
+		seenPlayerIds := make(map[int32]bool)
+		for _, player := range game.Config.Players {
+			if seenPlayerIds[player.PlayerId] {
+				return fmt.Errorf("duplicate player ID: %d", player.PlayerId)
+			}
+			seenPlayerIds[player.PlayerId] = true
+		}
+
+		// Check that each player has at least one unit or tile in the world
+		if worldData != nil {
+			for _, player := range game.Config.Players {
+				hasUnitOrTile := false
+
+				// Check tiles owned by this player
+				for _, tile := range worldData.TilesMap {
+					if tile.Player == player.PlayerId {
+						hasUnitOrTile = true
+						break
+					}
+				}
+
+				// Check units owned by this player
+				if !hasUnitOrTile {
+					for _, unit := range worldData.UnitsMap {
+						if unit.Player == player.PlayerId {
+							hasUnitOrTile = true
+							break
+						}
+					}
+				}
+
+				if !hasUnitOrTile {
+					return fmt.Errorf("player %d has no units or tiles in the world", player.PlayerId)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // handleScreenshotCompletion updates IndexInfo after screenshots are generated

@@ -1,0 +1,96 @@
+<!-- Mobile Game Configuration Bottom Sheet Content -->
+<!-- Used in StartGamePage.html for mobile bottom sheet -->
+<!-- Note: Uses data-player-mobile to avoid conflicts with desktop version -->
+
+<!-- Player Configuration -->
+<div data-config-section="players-mobile">
+    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Players</h3>
+    <div class="space-y-3">
+        {{ range $index, $player := .GameConfiguration.Players }}
+        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg" data-player-mobile="{{ $player.PlayerId }}">
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-{{ $player.Color }}-500 rounded-full border border-gray-300"></div>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">Player {{ $player.PlayerId }}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <select class="text-xs border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        data-player-mobile="{{ $player.PlayerId }}"
+                        data-config="type"
+                        {{ if eq $index 0 }}disabled{{ end }}>
+                    <option value="human" {{ if eq $player.PlayerType "human" }}selected{{ end }}>Human</option>
+                    <option value="ai" {{ if eq $player.PlayerType "ai" }}selected{{ end }}>AI</option>
+                </select>
+                <select class="text-xs border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        data-player-mobile="{{ $player.PlayerId }}"
+                        data-config="team">
+                    <option value="0">None</option>
+                    <option value="1" {{ if eq $player.TeamId 1 }}selected{{ end }}>Team 1</option>
+                    <option value="2" {{ if eq $player.TeamId 2 }}selected{{ end }}>Team 2</option>
+                </select>
+                <input type="number"
+                       class="text-xs w-20 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                       data-player-mobile="{{ $player.PlayerId }}"
+                       data-config="coins"
+                       value="{{ $player.StartingCoins }}"
+                       min="0"
+                       step="50">
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+
+<!-- Unit Restrictions -->
+<div data-config-section="units-mobile">
+    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Allowed Units</h3>
+    <div id="unit-restriction-grid-mobile" class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+        {{ range .UnitTypes }}
+        <button type="button"
+                class="unit-restriction-button-mobile relative p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                data-unit-mobile="{{ .Id }}">
+            <input type="checkbox" {{ if contains $.GameConfiguration.Settings.AllowedUnits .Id }}checked{{ end }}
+                   class="absolute top-1 left-1 w-3 h-3 rounded"
+                   data-unit-mobile="{{ .Id }}">
+            <div class="flex justify-center mb-1">
+                <img src="{{ .IconDataURL }}" alt="{{ .Name }}" class="w-6 h-6 object-contain">
+            </div>
+            <div class="text-xs truncate">{{ .Name }}</div>
+        </button>
+        {{ end }}
+    </div>
+</div>
+
+<!-- Turn Settings -->
+<div data-config-section="turns-mobile">
+    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Turn Settings</h3>
+    <div>
+        <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Turn Time Limit</label>
+        <select class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white" data-config="turn-limit-mobile">
+            <option value="0">No Limit</option>
+            <option value="300">5 Minutes</option>
+            <option value="600">10 Minutes</option>
+            <option value="1800">30 Minutes</option>
+            <option value="3600">1 Hour</option>
+            <option value="86400">1 Day</option>
+        </select>
+    </div>
+</div>
+
+<!-- Income Settings -->
+<div data-config-section="income-mobile">
+    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Income</h3>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Land Base</label>
+            <input type="number" class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md" data-config="landbase-income-mobile" value="{{ .GameConfiguration.IncomeConfigs.LandbaseIncome }}" min="0" step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Naval Base</label>
+            <input type="number" class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md" data-config="navalbase-income-mobile" value="{{ .GameConfiguration.IncomeConfigs.NavalbaseIncome }}" min="0" step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Airport Base</label>
+            <input type="number" class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md" data-config="airportbase-income-mobile" value="{{ .GameConfiguration.IncomeConfigs.AirportbaseIncome }}" min="0" step="10">
+        </div>
+    </div>
+</div>

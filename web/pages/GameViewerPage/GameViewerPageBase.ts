@@ -163,8 +163,6 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         // Create panels (implementation-specific)
         const panels = this.createPanels();
 
-        this.updateGameStatusBanner('Game Loading...');
-
         // Kick off WASM loading
         await this.loadWASM();
 
@@ -362,19 +360,6 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     }
 
     /**
-     * Update game status banner
-     */
-    protected updateGameStatusBanner(status: string, currentPlayer?: number): void {
-        const statusElement = document.getElementById('game-status');
-        if (statusElement) {
-            statusElement.textContent = status;
-
-            const playerColorClass = currentPlayer ? PLAYER_BG_COLORS[currentPlayer] : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-            statusElement.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${playerColorClass}`;
-        }
-    }
-
-    /**
      * Update turn counter display
      */
     protected updateTurnCounter(turnCounter: number): void {
@@ -388,7 +373,6 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
      * Update game UI from game state
      */
     protected updateGameUIFromState(gameState: ProtoGameState): void {
-        this.updateGameStatusBanner(`Ready - Player ${gameState.currentPlayer}'s Turn`, gameState.currentPlayer);
         this.updateTurnCounter(gameState.turnCounter);
     }
 
@@ -641,7 +625,6 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
 
     async updateGameStatus(request: { currentPlayer: number, turnCounter: number }) {
         console.log("updateGameStatus called on the browser:", request);
-        this.updateGameStatusBanner(`Ready - Player ${request.currentPlayer}'s Turn`, request.currentPlayer);
         this.updateTurnCounter(request.turnCounter);
         this.updateEndTurnButtonState(request.currentPlayer);
         return {};

@@ -1,0 +1,141 @@
+<!-- Game Configuration Panel Content -->
+<!-- Used in StartGamePage.html for both desktop sidebar and mobile bottom sheet -->
+
+{{ define "GameConfigDesktop" }}
+<!-- Player Configuration -->
+<div data-config-section="players">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Players</h3>
+    <div class="space-y-3">
+        {{ range $index, $player := .GameConfiguration.Players }}
+        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded" data-player="{{ $player.PlayerId }}">
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-{{ $player.Color }}-500 rounded-full border border-gray-300"></div>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">Player {{ $player.PlayerId }}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <select class="text-xs border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        data-player="{{ $player.PlayerId }}"
+                        data-config="type"
+                        {{ if eq $index 0 }}disabled{{ end }}>
+                    <option value="human" {{ if eq $player.PlayerType "human" }}selected{{ end }}>Human</option>
+                    <option value="ai" {{ if eq $player.PlayerType "ai" }}selected{{ end }}>AI</option>
+                    <option value="open" disabled>Open Invite</option>
+                </select>
+                <select class="text-xs border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        data-player="{{ $player.PlayerId }}"
+                        data-config="team">
+                    <option value="0">None</option>
+                    <option value="1" {{ if eq $player.TeamId 1 }}selected{{ end }}>Team 1</option>
+                    <option value="2" {{ if eq $player.TeamId 2 }}selected{{ end }}>Team 2</option>
+                    <option value="3" {{ if eq $player.TeamId 3 }}selected{{ end }}>Team 3</option>
+                    <option value="4" {{ if eq $player.TeamId 4 }}selected{{ end }}>Team 4</option>
+                </select>
+                <input type="number"
+                       class="text-xs w-20 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                       data-player="{{ $player.PlayerId }}"
+                       data-config="coins"
+                       value="{{ $player.StartingCoins }}"
+                       min="0"
+                       step="50">
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+
+<!-- Unit Restrictions -->
+<div data-config-section="units">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Allowed Units</h3>
+    <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Select which units are allowed in this game</p>
+    <div id="unit-restriction-grid" class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+        {{ range .UnitTypes }}
+        <button type="button"
+                class="unit-restriction-button relative p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors overflow-hidden"
+                data-unit="{{ .Id }}"
+                title="{{ .Name }}">
+            <input type="checkbox" {{ if contains $.GameConfiguration.Settings.AllowedUnits .Id }}checked{{ end }}
+                   class="absolute top-1 left-1 w-3 h-3 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                   data-unit="{{ .Id }}">
+            <div class="flex justify-center mb-1">
+                <img src="{{ .IconDataURL }}"
+                     alt="{{ .Name }}"
+                     class="w-6 h-6 object-contain unit-icon">
+            </div>
+            <div class="text-xs truncate">{{ .Name }}</div>
+            <div class="absolute inset-0 bg-gray-500 dark:bg-gray-700 opacity-0 transition-opacity unit-mask pointer-events-none"></div>
+        </button>
+        {{ end }}
+    </div>
+</div>
+
+<!-- Turn Settings -->
+<div data-config-section="turns">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Turn Settings</h3>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Turn Time Limit</label>
+            <select class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white" data-config="turn-limit">
+                <option value="0">No Limit</option>
+                <option value="300">5 Minutes</option>
+                <option value="600">10 Minutes</option>
+                <option value="1800">30 Minutes</option>
+                <option value="3600">1 Hour</option>
+                <option value="86400">1 Day</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Income Settings -->
+<div data-config-section="income">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Income</h3>
+    <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Configure income generated per base type at turn end</p>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Land Base Income</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="landbase-income"
+                   value="{{ .GameConfiguration.IncomeConfigs.LandbaseIncome }}"
+                   min="0"
+                   step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Naval Base Income</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="navalbase-income"
+                   value="{{ .GameConfiguration.IncomeConfigs.NavalbaseIncome }}"
+                   min="0"
+                   step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Airport Base Income</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="airportbase-income"
+                   value="{{ .GameConfiguration.IncomeConfigs.AirportbaseIncome }}"
+                   min="0"
+                   step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Missile Silo Income</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="missilesilo-income"
+                   value="{{ .GameConfiguration.IncomeConfigs.MissilesiloIncome }}"
+                   min="0"
+                   step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Mines Income</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="mines-income"
+                   value="{{ .GameConfiguration.IncomeConfigs.MinesIncome }}"
+                   min="0"
+                   step="10">
+        </div>
+    </div>
+</div>
+{{ end }}

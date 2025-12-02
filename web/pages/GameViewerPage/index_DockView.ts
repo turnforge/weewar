@@ -191,9 +191,14 @@ export class GameViewerPageDockView extends GameViewerPageBase {
 
     /**
      * Configure the default DockView layout
+     *
+     * Layout:
+     * - Left Column: Top = Players + Game Log tabs (Players selected), Bottom = Turn Options
+     * - Center Column: Game scene
+     * - Right Column: Top = Terrain Stats, Bottom = Unit Stats + Damage Distribution tabs (Unit Stats selected)
      */
     private configureDefaultGameLayout(): void {
-        // Add main game panel (center)
+        // === CENTER COLUMN: Main game panel ===
         this.dockview.addPanel({
             id: 'main-game-panel',
             component: 'main-game',
@@ -201,51 +206,8 @@ export class GameViewerPageDockView extends GameViewerPageBase {
             position: { direction: 'right' }
         });
 
-        // Add terrain stats panel (right side)
-        this.dockview.addPanel({
-            id: 'terrain-stats-panel',
-            component: 'terrain-stats',
-            title: 'Terrain Info',
-            position: {
-                direction: 'right',
-                referencePanel: 'main-game-panel'
-            }
-        });
-
-        // Add unit stats panel (below terrain stats panel)
-        this.dockview.addPanel({
-            id: 'unit-stats-panel',
-            component: 'unit-stats',
-            title: 'Unit Info',
-            position: {
-                direction: 'below',
-                referencePanel: 'terrain-stats-panel'
-            }
-        });
-
-        // Add damage distribution panel (below unit stats panel)
-        this.dockview.addPanel({
-            id: 'damage-distribution-panel',
-            component: 'damage-distribution',
-            title: 'Damage Distribution',
-            position: {
-                direction: 'below',
-                referencePanel: 'unit-stats-panel'
-            }
-        });
-
-        // Add turn options panel (below damage distribution panel)
-        this.dockview.addPanel({
-            id: 'turn-options-panel',
-            component: 'turn-options',
-            title: 'Turn Options',
-            position: {
-                direction: 'below',
-                referencePanel: 'damage-distribution-panel'
-            }
-        });
-
-        // Add game state panel (left side)
+        // === LEFT COLUMN ===
+        // Top row: Players panel (will have Game Log as tab)
         this.dockview.addPanel({
             id: 'game-state-panel',
             component: 'game-state',
@@ -256,21 +218,71 @@ export class GameViewerPageDockView extends GameViewerPageBase {
             }
         });
 
-        // Add game log panel (below game state)
+        // Add Game Log as tab within Players panel group (Players stays selected by default since it was added first)
         this.dockview.addPanel({
             id: 'game-log-panel',
             component: 'game-log',
             title: 'Game Log',
+            position: {
+                direction: 'within',
+                referencePanel: 'game-state-panel'
+            }
+        });
+
+        // Bottom row: Turn Options panel
+        this.dockview.addPanel({
+            id: 'turn-options-panel',
+            component: 'turn-options',
+            title: 'Turn Options',
             position: {
                 direction: 'below',
                 referencePanel: 'game-state-panel'
             }
         });
 
-        // Set panel sizes for optimal viewing
+        // === RIGHT COLUMN ===
+        // Top row: Terrain Stats panel
+        this.dockview.addPanel({
+            id: 'terrain-stats-panel',
+            component: 'terrain-stats',
+            title: 'Terrain Info',
+            position: {
+                direction: 'right',
+                referencePanel: 'main-game-panel'
+            }
+        });
+
+        // Bottom row: Unit Stats panel (will have Damage Distribution as tab)
+        this.dockview.addPanel({
+            id: 'unit-stats-panel',
+            component: 'unit-stats',
+            title: 'Unit Info',
+            position: {
+                direction: 'below',
+                referencePanel: 'terrain-stats-panel'
+            }
+        });
+
+        // Add Damage Distribution as tab within Unit Stats panel group (Unit Stats stays selected by default)
+        this.dockview.addPanel({
+            id: 'damage-distribution-panel',
+            component: 'damage-distribution',
+            title: 'Damage Distribution',
+            position: {
+                direction: 'within',
+                referencePanel: 'unit-stats-panel'
+            }
+        });
+
+        // Set panel sizes and ensure correct tabs are selected
         setTimeout(() => {
             this.dockview.getPanel('terrain-stats-panel')?.api.setSize({ width: 320 });
             this.dockview.getPanel('game-state-panel')?.api.setSize({ width: 280 });
+
+            // Ensure Players tab is selected (not Game Log)
+            this.dockview.getPanel('game-state-panel')?.api.setActive();
+            // Ensure Unit Info tab is selected (not Damage Distribution)
+            this.dockview.getPanel('unit-stats-panel')?.api.setActive();
         }, 100);
     }
 

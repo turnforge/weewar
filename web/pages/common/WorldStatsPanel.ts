@@ -1,6 +1,4 @@
-import { BaseComponent } from '../../lib/Component';
-import { EventBus } from '../../lib/EventBus';
-import { LCMComponent } from '../../lib/LCMComponent';
+import { BaseComponent, EventBus, LCMComponent } from '@panyam/tsappkit';
 import { WorldEventTypes } from './events';
 import { Unit, Tile, World, CrossingType, Crossing } from './World';
 import { ITheme, TILE_TYPE_WATER_REGULAR } from '../../assets/themes/BaseTheme';

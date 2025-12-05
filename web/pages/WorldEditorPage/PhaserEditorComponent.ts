@@ -1,6 +1,4 @@
-import { BaseComponent } from '../../lib/Component';
-import { LCMComponent } from '../../lib/LCMComponent';
-import { EventBus } from '../../lib/EventBus';
+import { BaseComponent, LCMComponent, EventBus } from '@panyam/tsappkit';
 import { EditorEventTypes } from '../common/events';
 import { PhaserEditorScene } from './PhaserEditorScene';
 import { IWorldEditorPresenter } from './WorldEditorPresenter';

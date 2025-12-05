@@ -4,7 +4,7 @@
  */
 
 import { GameState } from '../../src/GameState';
-import { EventBus } from '../../lib/EventBus';
+import { EventBus } from '@panyam/tsappkit';
 
 /**
  * Create a minimal DOM environment for testing GameState

@@ -1,5 +1,5 @@
 import { GameViewerPageBase, PanelId } from './GameViewerPageBase';
-import { LCMComponent } from '../../lib/LCMComponent';
+import { LCMComponent } from '@panyam/tsappkit';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
 import { UnitStatsPanel } from './UnitStatsPanel';
 import { DamageDistributionPanel } from './DamageDistributionPanel';

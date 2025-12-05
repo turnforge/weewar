@@ -1,5 +1,4 @@
-import { BasePage } from '../lib/BasePage';
-import { LCMComponent } from '../lib/LCMComponent';
+import { BasePage, LCMComponent } from '@panyam/tsappkit';
 
 class ProfilePage extends BasePage {
     private resendVerificationForm: HTMLFormElement | null = null;

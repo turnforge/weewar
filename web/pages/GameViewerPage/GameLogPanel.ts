@@ -1,5 +1,4 @@
-import { LCMComponent } from '../../lib/LCMComponent';
-import { EventBus } from '../../lib/EventBus';
+import { LCMComponent, EventBus } from '@panyam/tsappkit';
 
 /**
  * GameLogPanel - Manages game event logging and filtering

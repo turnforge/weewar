@@ -11,7 +11,7 @@
  * 4. Subscribes to World events (TILES_CHANGED, etc.) for coordination
  */
 
-import { EventBus, EventSubscriber } from '../../lib/EventBus';
+import { EventBus, EventSubscriber } from '@panyam/tsappkit';
 import { World, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData, CrossingType } from '../common/World';
 import { WorldEventTypes } from '../common/events';
 import { PhaserEditorComponent } from './PhaserEditorComponent';

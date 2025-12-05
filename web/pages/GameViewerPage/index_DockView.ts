@@ -1,5 +1,5 @@
 import { GameViewerPageBase, PanelId } from './GameViewerPageBase';
-import { LCMComponent } from '../../lib/LCMComponent';
+import { LCMComponent } from '@panyam/tsappkit';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
 import { UnitStatsPanel } from './UnitStatsPanel';

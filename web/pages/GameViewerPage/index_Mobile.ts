@@ -1,6 +1,5 @@
 import { GameViewerPageBase, PanelId } from './GameViewerPageBase';
-import { LCMComponent } from '../../lib/LCMComponent';
-import { MobileBottomDrawer } from '../../lib/MobileBottomDrawer';
+import { LCMComponent, MobileBottomDrawer } from '@panyam/tsappkit';
 import { CompactSummaryCard } from './CompactSummaryCard';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
 import { UnitStatsPanel } from './UnitStatsPanel';

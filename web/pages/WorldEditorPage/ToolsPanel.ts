@@ -1,6 +1,4 @@
-import { BaseComponent } from '../../lib/Component';
-import { EventBus } from '../../lib/EventBus';
-import { LCMComponent } from '../../lib/LCMComponent';
+import { BaseComponent, EventBus, LCMComponent } from '@panyam/tsappkit';
 import { EditorEventTypes } from '../common/events';
 import { BRUSH_SIZE_NAMES } from '../common/ColorsAndNames'
 import { IWorldEditorPresenter } from './WorldEditorPresenter';

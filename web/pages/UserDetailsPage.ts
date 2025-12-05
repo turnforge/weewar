@@ -1,6 +1,4 @@
-import { ThemeManager } from '../lib/ThemeManager';
-import { Modal } from '../lib/Modal';
-import { ToastManager } from '../lib/ToastManager';
+import { ThemeManager, Modal, ToastManager } from '@panyam/tsappkit';
 
 /**
  * Main application initialization

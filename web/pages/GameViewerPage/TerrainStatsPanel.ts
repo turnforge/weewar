@@ -1,6 +1,4 @@
-import { BaseComponent } from '../../lib/Component';
-import { EventBus } from '../../lib/EventBus';
-import { LCMComponent } from '../../lib/LCMComponent';
+import { BaseComponent, EventBus, LCMComponent } from '@panyam/tsappkit';
 import { TerrainStats , RulesTable } from '../common/RulesTable';
 import { ITheme } from '../../assets/themes/BaseTheme';
 import { ThemeUtils } from '../common/ThemeUtils';

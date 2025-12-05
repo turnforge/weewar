@@ -1,7 +1,4 @@
-import { BasePage } from '../lib/BasePage';
-import { EventBus } from '../lib/EventBus';
-import { LCMComponent } from '../lib/LCMComponent';
-import { LifecycleController } from '../lib/LifecycleController';
+import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
 import { ITheme } from '../assets/themes/BaseTheme';
 import DefaultTheme from '../assets/themes/default';
 import WeewarBundle from '../gen/wasmjs';

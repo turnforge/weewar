@@ -1,6 +1,4 @@
-import { LCMComponent } from '../../lib/LCMComponent';
-import { BaseComponent } from '../../lib/Component';
-import { EventBus } from '../../lib/EventBus';
+import { LCMComponent, BaseComponent, EventBus } from '@panyam/tsappkit';
 import { ReferenceImageDB } from './ReferenceImageDB';
 import { ReferenceImageLayer } from './ReferenceImageLayer';
 import { IWorldEditorPresenter } from './WorldEditorPresenter';

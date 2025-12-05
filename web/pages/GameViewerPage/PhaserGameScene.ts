@@ -3,7 +3,7 @@ import { PhaserWorldScene } from '../common/PhaserWorldScene';
 import { hexToPixel } from '../common/hexUtils';
 import { World } from '../common/World';
 import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer } from '../common/HexHighlightLayer';
-import { EventBus } from '../../lib/EventBus';
+import { EventBus } from '@panyam/tsappkit';
 import { GameViewPresenterClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/services/gameViewPresenterClient';
 import { MoveUnitAction, AttackUnitAction, HighlightSpec } from '../../gen/wasmjs/weewar/v1/models/interfaces';
 

@@ -1,8 +1,4 @@
-
-import { ThemeManager } from '../lib/ThemeManager'; // For theme consistency if needed later
-import { Modal } from '../lib/Modal';
-import { ToastManager } from '../lib/ToastManager';
-import { SplashScreen } from '../lib/SplashScreen';
+import { ThemeManager, Modal, ToastManager, SplashScreen } from '@panyam/tsappkit';
 
 /**
  * Manages the listing page logic

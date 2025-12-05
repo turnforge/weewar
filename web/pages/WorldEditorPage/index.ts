@@ -1,18 +1,13 @@
-import { BasePage } from '../../lib/BasePage';
+import { BasePage, EventBus, LCMComponent, LifecycleController, KeyboardShortcutManager, ShortcutConfig, KeyboardState, shouldIgnoreShortcut } from '@panyam/tsappkit';
 import { DockviewApi, DockviewComponent } from 'dockview-core';
 import { PhaserEditorComponent } from './PhaserEditorComponent';
 import { WorldStatsPanel } from '../common/WorldStatsPanel';
 import { AssetThemePreference } from '../common/AssetThemePreference';
-import { KeyboardShortcutManager, ShortcutConfig, KeyboardState } from '../../lib/KeyboardShortcutManager';
-import { shouldIgnoreShortcut } from '../../lib/DOMUtils';
 import { Unit, Tile, World, TilesChangedEventData, UnitsChangedEventData, WorldLoadedEventData } from '../common/World';
 import { ToolState } from './WorldEditorPresenter';
-import { EventBus } from '../../lib/EventBus';
 import { WorldEventType, WorldEventTypes, EditorEventTypes, TerrainSelectedPayload, UnitSelectedPayload, BrushSizeChangedPayload, PlacementModeChangedPayload, PlayerChangedPayload, TileClickedPayload, PhaserReadyPayload } from '../common/events';
 import { EditorToolsPanel } from './ToolsPanel';
 import { ReferenceImagePanel } from './ReferenceImagePanel';
-import { LCMComponent } from '../../lib/LCMComponent';
-import { LifecycleController } from '../../lib/LifecycleController';
 import { WorldEditorPresenter } from './WorldEditorPresenter';
 
 /**
@@ -878,27 +873,27 @@ class WorldEditorPage extends BasePage {
         const missilesiloIncome = parseInt((document.getElementById('config-missilesilo-income') as HTMLInputElement)?.value || '300');
         const minesIncome = parseInt((document.getElementById('config-mines-income') as HTMLInputElement)?.value || '500');
 
-        // Create GameConfiguration object
+        // Create GameConfiguration object using camelCase (proto3 JSON standard)
         const gameConfig = {
             players: Array.from({ length: numPlayers }, (_, i) => ({
-                player_id: i + 1,
-                player_type: 'human',
+                playerId: i + 1,
+                playerType: 'human',
                 color: `player${i + 1}`,
-                team_id: 0,
+                teamId: 0,
                 name: `Player ${i + 1}`,
-                is_active: true,
-                starting_coins: startingCoins,
+                isActive: true,
+                startingCoins: startingCoins,
                 coins: startingCoins
             })),
             teams: [],
-            income_configs: {
-                starting_coins: startingCoins,
-                game_income: gameIncome,
-                landbase_income: landbaseIncome,
-                navalbase_income: navalbaseIncome,
-                airportbase_income: airportbaseIncome,
-                missilesilo_income: missilesiloIncome,
-                mines_income: minesIncome
+            incomeConfigs: {
+                startingCoins: startingCoins,
+                gameIncome: gameIncome,
+                landbaseIncome: landbaseIncome,
+                navalbaseIncome: navalbaseIncome,
+                airportbaseIncome: airportbaseIncome,
+                missilesiloIncome: missilesiloIncome,
+                minesIncome: minesIncome
             },
             settings: {}
         };

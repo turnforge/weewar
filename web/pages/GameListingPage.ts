@@ -1,6 +1,4 @@
-import { ThemeManager } from '../lib/ThemeManager';
-import { SplashScreen } from '../lib/SplashScreen';
-import { BasePage } from '../lib/BasePage';
+import { ThemeManager, SplashScreen, BasePage } from '@panyam/tsappkit';
 
 /**
  * Manages the game listing page logic

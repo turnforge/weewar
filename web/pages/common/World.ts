@@ -1,4 +1,4 @@
-import { EventBus } from '../../lib/EventBus';
+import { EventBus } from '@panyam/tsappkit';
 import { WorldEventTypes, WorldEventType } from './events';
 import { rowColToHex, hexToRowCol, axialNeighbors, hexDistance, getDirectionIndex, getOppositeDirection, getNeighborCoord } from "./hexUtils";
 import { Weewar_v1Deserializer as WD } from '../../gen/wasmjs/weewar/v1/factory';

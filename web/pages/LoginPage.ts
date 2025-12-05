@@ -1,7 +1,4 @@
-
-import { BasePage } from '../lib/BasePage';
-import { EventBus } from '../lib/EventBus';
-import { LCMComponent } from '../lib/LCMComponent';
+import { BasePage, EventBus, LCMComponent } from '@panyam/tsappkit';
 
 class LoginPage extends BasePage {
     private form: HTMLFormElement | null;

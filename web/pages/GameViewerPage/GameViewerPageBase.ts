@@ -1,10 +1,9 @@
-import { BasePage } from '../../lib/BasePage';
+import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
 import WeewarBundle from '../../gen/wasmjs';
 import { GamesServiceClient } from '../../gen/wasmjs/weewar/v1/services/gamesServiceClient';
 import { GameViewerPageMethods, GameViewerPageClient as GameViewerPageClient } from '../../gen/wasmjs/weewar/v1/services/gameViewerPageClient';
 import { GameViewPresenterClient as GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/services/gameViewPresenterClient';
 import { SingletonInitializerServiceClient as SingletonInitializerClient } from '../../gen/wasmjs/weewar/v1/services/singletonInitializerServiceClient';
-import { EventBus } from '../../lib/EventBus';
 import { AssetThemePreference } from '../common/AssetThemePreference';
 import { PhaserGameScene } from './PhaserGameScene';
 import { Unit, Tile, World } from '../common/World';
@@ -29,8 +28,6 @@ import {
 } from '../../gen/wasmjs/weewar/v1/models/interfaces';
 import * as models from '../../gen/wasmjs/weewar/v1/models/models';
 import { create } from '@bufbuild/protobuf';
-import { LCMComponent } from '../../lib/LCMComponent';
-import { LifecycleController } from '../../lib/LifecycleController';
 import { PLAYER_BG_COLORS } from '../common/ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
 import { UnitStatsPanel } from './UnitStatsPanel';

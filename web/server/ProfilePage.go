@@ -7,27 +7,17 @@ import (
 	oa "github.com/panyam/oneauth"
 )
 
+// ProfilePage extends goapplib.SampleProfilePage with app-specific features.
 type ProfilePage struct {
-	BasePage
+	goal.SampleProfilePage[*WeewarApp]
 	Header Header
 
-	// User information
-	User              oa.User
-	UserID            string
-	Email             string
-	EmailVerified     bool
-	Username          string
-	Profile           map[string]any
-	VerificationSent  bool
-	VerificationError string
+	// App-specific user information
+	User oa.User
 }
 
 func (p *ProfilePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
-	p.Title = "Profile"
-	p.ActiveTab = "profile"
-	p.DisableSplashScreen = true
-
-	err, finished = p.Header.Load(r, w, app)
+	err, finished = goal.LoadAll(r, w, app, &p.SampleProfilePage, &p.Header)
 	if err != nil || finished {
 		return
 	}
@@ -61,13 +51,6 @@ func (p *ProfilePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App
 				p.EmailVerified = identity.Verified
 			}
 		}
-	}
-
-	if r.URL.Query().Get("verification_sent") == "true" {
-		p.VerificationSent = true
-	}
-	if verifyErr := r.URL.Query().Get("verification_error"); verifyErr != "" {
-		p.VerificationError = verifyErr
 	}
 
 	return

@@ -6,40 +6,25 @@ import (
 	goal "github.com/panyam/goapplib"
 )
 
-type LoginConfig struct {
-	EnableEmailLogin     bool
-	EnableGoogleLogin    bool
-	EnableGitHubLogin    bool
-	EnableMicrosoftLogin bool
-	EnableAppleLogin     bool
-}
-
+// LoginPage extends goapplib.SampleLoginPage with app-specific features.
 type LoginPage struct {
-	BasePage
-	Header      Header
-	CallbackURL string
-	CsrfToken   string
-	Config      LoginConfig
+	goal.SampleLoginPage[*WeewarApp]
+	Header Header
 }
 
+// RegisterPage extends goapplib.SampleRegisterPage with app-specific features.
 type RegisterPage struct {
-	BasePage
-	Header         Header
-	CallbackURL    string
-	CsrfToken      string
-	Name           string
-	Email          string
-	Password       string
-	VerifyPassword string
-	Errors         map[string]string
+	goal.SampleRegisterPage[*WeewarApp]
+	Header Header
 }
 
 func (p *LoginPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
-	p.DisableSplashScreen = true
-	err, finished = p.Header.Load(r, w, app)
-	p.CallbackURL = r.URL.Query().Get("callbackURL")
+	err, finished = goal.LoadAll(r, w, app, &p.SampleLoginPage, &p.Header)
+	if err != nil || finished {
+		return
+	}
 
-	p.Config = LoginConfig{
+	p.Config = goal.LoginConfig{
 		EnableEmailLogin:     true,
 		EnableGoogleLogin:    true,
 		EnableGitHubLogin:    true,
@@ -50,7 +35,5 @@ func (p *LoginPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*
 }
 
 func (p *RegisterPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
-	err, finished = p.Header.Load(r, w, app)
-	p.CallbackURL = r.URL.Query().Get("callbackURL")
-	return
+	return goal.LoadAll(r, w, app, &p.SampleRegisterPage, &p.Header)
 }

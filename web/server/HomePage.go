@@ -7,6 +7,15 @@ import (
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 )
 
+type GenericPage struct {
+	BasePage
+	Header Header
+}
+
+func (v *GenericPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+	return
+}
+
 type HomePage struct {
 	BasePage
 	Header Header

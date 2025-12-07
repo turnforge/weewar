@@ -63,7 +63,8 @@ func (g *GamesGroup) gameViewerHandler(w http.ResponseWriter, req *http.Request)
 	}
 
 	// Render with selected template
-	if renderErr := g.goalApp.RenderTemplate(w, templateName, view); renderErr != nil {
+	fileName, blockName := goal.ParseTemplateSpec(templateName)
+	if renderErr := g.goalApp.RenderTemplate(w, fileName, blockName, view); renderErr != nil {
 		http.Error(w, "Template render error", http.StatusInternalServerError)
 	}
 }

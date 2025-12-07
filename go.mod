@@ -15,7 +15,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/joho/godotenv v1.5.1
-	github.com/panyam/goapplib v0.0.0-00010101000000-000000000000
+	github.com/panyam/goapplib v0.0.1
 	github.com/panyam/gocurrent v0.0.9
 	github.com/panyam/goutils v0.1.11
 	github.com/panyam/oneauth v0.0.15
@@ -110,4 +110,4 @@ replace github.com/panyam/gocurrent v0.0.9 => ./locallinks/gocurrent
 
 replace github.com/panyam/goutils v0.1.11 => ./locallinks/goutils
 
-replace github.com/panyam/goapplib => ./locallinks/goapplib
+replace github.com/panyam/goapplib v0.0.1 => ./locallinks/goapplib

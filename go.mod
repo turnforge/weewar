@@ -21,7 +21,7 @@ require (
 	github.com/panyam/oneauth v0.0.15
 	github.com/panyam/protoc-gen-dal v0.0.2
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.28
-	github.com/panyam/templar v0.0.23
+	github.com/panyam/templar v0.0.24
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/turnforge/turnengine v0.0.1
@@ -112,4 +112,4 @@ replace github.com/panyam/goutils v0.1.11 => ./locallinks/goutils
 
 replace github.com/panyam/goapplib v0.0.1 => ./locallinks/goapplib
 
-replace github.com/panyam/templar v0.0.23 => ./locallinks/templar
+// replace github.com/panyam/templar v0.0.24 => ./locallinks/templar

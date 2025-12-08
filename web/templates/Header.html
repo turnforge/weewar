@@ -1,309 +1,34 @@
-<!-- templates/Header.html -->
-{{ define "Header" }}
-<header
-  class="bg-white dark:bg-gray-800 shadow-sm px-4 py-3 flex items-center justify-between"
->
-  <!-- Logo and Site Name -->
-  <div class="flex items-center">
-    <div class="flex items-center space-x-2">
-      <!-- Logo -->
-      <a href="/">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-8 w-8 text-blue-600 dark:text-blue-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </a>
+<!-- weewar/web/templates/Header.html -->
+<!--
+This template extends goapplib's Header with weewar-specific navigation tabs.
+Uses templar's extend to override NavigationTabs while keeping
+all other header functionality from goapplib.
 
-      <!-- Site Name -->
-      <a href="/">
-        <span class="font-bold text-xl text-gray-900 dark:text-white"
-          >WeeWar</span
-        >
-      </a>
-    </div>
-  </div>
+NOTE: This file is included by weewar/BasePage.html after it namespaces
+goapplib/BasePage.html as "GoalBase". Therefore, we extend the namespaced
+templates: GoalBase:HeaderActionsDrawer, GoalBase:NavigationTabs.
 
-  <!-- Action Buttons -->
-  <div class="flex items-center space-x-2">
-    <!-- Menu Button (shows drawer on mobile, hides on desktop) -->
-    <button
-      id="header-actions-menu-btn"
-      type="button"
-      class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-      aria-label="Page actions"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-      </svg>
-    </button>
+CUSTOMIZABLE BLOCKS (inherited from goapplib):
+- HeaderLogo: Logo and app name (uses goapplib default)
+- NavigationTabs: Center navigation (overridden with Games/Worlds)
+- HeaderActions: Right-side action buttons (uses goapplib default)
+- ExtraHeaderButtons: Additional buttons (overridable by pages)
+-->
 
-    {{ if .IsLoggedIn }}
-    <!-- Username Display -->
-    <a href="/profile" class="hidden md:flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-      <span>{{ if .Username }}{{ .Username }}{{ else }}Profile{{ end }}</span>
-    </a>
+{{# extend "GoalBase:HeaderActionsDrawer" "HeaderActionsDrawer" "GoalBase:NavigationTabs" "WeewarNavigationTabs" #}}
 
-    <!-- Logout Button -->
-    <a href="/auth/logout"
-       class="hidden md:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-       title="Logout">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-      </svg>
-    </a>
-    {{ else }}
-    <!-- Login Button (when not logged in) -->
-    <a href="/login" class="hidden md:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-      </svg>
-      Login
+<!-- Weewar-specific navigation tabs -->
+{{ define "WeewarNavigationTabs" }}
+<nav class="navigation-tabs-container md:mr-auto">
+    {{ if not (Ctx).HideGames }}
+    <a href="/games/" class="navigation-tab {{ if eq .ActiveTab "games" }}active{{ end }}">
+        Games
     </a>
     {{ end }}
-
-    <!-- Theme Toggle Button -->
-    <button
-      id="theme-toggle-button"
-      type="button"
-      class="p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-      aria-label="Toggle theme"
-    >
-      <span id="theme-toggle-icon" class="inline-block h-5 w-5">
-        <!-- Icon will be populated by JS -->
-      </span>
-    </button>
-  </div>
-</header>
-{{ end }}
-
-<!-- Header Actions Drawer - Separate template to be rendered as sibling -->
-{{ define "HeaderActionsDrawer" }}
-<div id="header-actions-drawer" class="print:hidden fixed z-[60] hidden">
-  <!-- Backdrop (mobile only) -->
-  <div class="header-drawer-backdrop absolute inset-0 transition-opacity duration-300 md:hidden"></div>
-
-  <!-- Drawer Container -->
-  <div class="header-drawer-container bg-white dark:bg-gray-800 transition-transform duration-300 ease-out">
-    <!-- Drawer Content -->
-    <div class="header-actions-drawer-content p-4 md:p-0 space-y-2 md:space-y-0">
-      <!-- Navigation Tabs -->
-      {{ block "NavigationTabs" . }}
-      <nav class="navigation-tabs-container md:mr-auto">
-        {{ if not (Ctx).HideGames }}
-        <a href="/games/" class="navigation-tab {{ if eq .ActiveTab "games" }}active{{ end }}">
-          Games
-        </a>
-        {{ end }}
-        {{ if not (Ctx).HideWorlds }}
-        <a href="/worlds/" class="navigation-tab {{ if eq .ActiveTab "worlds" }}active{{ end }}">
-          Worlds
-        </a>
-        {{ end }}
-      </nav>
-      {{ end }}
-
-      <!-- User Actions (mobile only) -->
-      <div class="md:hidden flex flex-col space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-        {{ if .Header.IsLoggedIn }}
-        <a href="/profile" class="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          <span>{{ if .Header.Username }}{{ .Header.Username }}{{ else }}Profile{{ end }}</span>
-        </a>
-        <a href="/auth/logout" class="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          <span>Logout</span>
-        </a>
-        {{ else }}
-        <a href="/login" class="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-          </svg>
-          <span>Login</span>
-        </a>
-        {{ end }}
-      </div>
-
-      <!-- Page-specific buttons (if any) -->
-      {{ block "ExtraHeaderButtons" . }} {{ end }}
-    </div>
-  </div>
-</div>
-
-<style>
-/* Navigation tabs styling */
-.navigation-tabs-container {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.navigation-tab {
-  display: block;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  @apply text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700;
-}
-
-.navigation-tab.active {
-  @apply bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200;
-}
-
-/* Desktop: Drawer appears inline with header */
-@media (min-width: 768px) {
-  #header-actions-drawer {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 70px;
-    width: auto;
-    z-index: 25;
-    pointer-events: none;
-  }
-
-  #header-actions-drawer .header-drawer-container {
-    background: transparent;
-    box-shadow: none;
-    border: none;
-    transform: none;
-    height: 100%;
-    display: flex;
-    align-items: center;
-  }
-
-  #header-actions-drawer .header-actions-drawer-content {
-    padding: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-    height: 100%;
-    pointer-events: auto;
-  }
-
-  /* Hide backdrop on desktop */
-  #header-actions-drawer .header-drawer-backdrop {
-    display: none;
-  }
-
-  /* Show drawer always on desktop */
-  #header-actions-drawer {
-    display: block !important;
-  }
-
-  /* Navigation tabs horizontal on desktop */
-  .navigation-tabs-container {
-    flex-direction: row;
-  }
-}
-
-/* Mobile: Drawer slides from top */
-@media (max-width: 767px) {
-  #header-actions-drawer {
-    inset: 0;
-  }
-
-  #header-actions-drawer.hidden {
-    pointer-events: none;
-  }
-
-  #header-actions-drawer.open {
-    pointer-events: auto;
-  }
-
-  #header-actions-drawer .header-drawer-container {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 70px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid;
-    @apply border-gray-200 dark:border-gray-700;
-    transform: translateY(-100%);
-    max-height: calc(100vh - 70px);
-    overflow-y: auto;
-  }
-
-  #header-actions-drawer.open .header-drawer-container {
-    transform: translateY(0);
-  }
-
-  #header-actions-drawer .header-drawer-backdrop {
-    opacity: 0;
-  }
-
-  #header-actions-drawer.open .header-drawer-backdrop {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.5);
-  }
-
-  /* Stack everything vertically in drawer */
-  #header-actions-drawer .header-actions-drawer-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  /* Navigation tabs vertical on mobile */
-  .navigation-tabs-container {
-    flex-direction: column;
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid;
-    @apply border-gray-200 dark:border-gray-700;
-  }
-
-  .navigation-tab {
-    width: 100%;
-    text-align: left;
-  }
-
-  /* Override the wrapper div to stack vertically on mobile */
-  #header-actions-drawer .header-actions-drawer-content > div {
-    display: flex;
-    flex-direction: column !important;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  /* Remove horizontal spacing from wrapper */
-  #header-actions-drawer .header-actions-drawer-content > div.space-x-2 {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  #header-actions-drawer .header-actions-drawer-content > div.space-x-2 > * {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  #header-actions-drawer .header-action-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Hide non-button elements in mobile drawer (like player display, turn counter) */
-  #header-actions-drawer .header-actions-drawer-content > div > div:not(.header-action-btn):not(button) {
-    display: none;
-  }
-}
-</style>
-
+    {{ if not (Ctx).HideWorlds }}
+    <a href="/worlds/" class="navigation-tab {{ if eq .ActiveTab "worlds" }}active{{ end }}">
+        Worlds
+    </a>
+    {{ end }}
+</nav>
 {{ end }}

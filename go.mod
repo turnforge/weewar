@@ -21,7 +21,7 @@ require (
 	github.com/panyam/oneauth v0.0.15
 	github.com/panyam/protoc-gen-dal v0.0.2
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.28
-	github.com/panyam/templar v0.0.26
+	github.com/panyam/templar v0.0.27
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/turnforge/turnengine v0.0.1
@@ -97,11 +97,9 @@ require (
 	google.golang.org/api v0.247.0 // indirect
 	google.golang.org/genproto v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251103181224-f26f9409b101 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/panyam/goutils v0.1.1 => ./locallinks/goutils/
-// replace github.com/panyam/s3gen v0.0.32 => ./locallinks/s3gen/
-// replace github.com/panyam/templar v0.0.2 => ./locallinks/templar/
 replace github.com/turnforge/turnengine v0.0.1 => ./locallinks/turnengine/
 
 replace github.com/panyam/protoc-gen-dal v0.0.2 => ./locallinks/protoc-gen-dal
@@ -112,4 +110,4 @@ replace github.com/panyam/goutils v0.1.11 => ./locallinks/goutils
 
 replace github.com/panyam/goapplib v0.0.4 => ./locallinks/goapplib
 
-replace github.com/panyam/templar v0.0.24 => ./locallinks/templar
+replace github.com/panyam/templar v0.0.27 => ./locallinks/templar

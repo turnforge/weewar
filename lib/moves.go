@@ -81,7 +81,7 @@ func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (err error) {
 
 	switch a := move.MoveType.(type) {
 	case *v1.GameMove_MoveUnit:
-		return m.ProcessMoveUnit(game, move, a.MoveUnit)
+		return m.ProcessMoveUnit(game, move, a.MoveUnit, false)
 	case *v1.GameMove_AttackUnit:
 		return m.ProcessAttackUnit(game, move, a.AttackUnit)
 	case *v1.GameMove_BuildUnit:
@@ -368,7 +368,7 @@ func (g *Game) IsValidMove(from, to AxialCoord) bool {
 }
 
 // MoveUnit executes unit movement using cube coordinates
-func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction) (err error) {
+func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction, preventPassThrough bool) (err error) {
 	// Initialize the result object
 
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
@@ -390,13 +390,13 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	}
 
 	// Check if move is valid
-	if !g.CanMoveUnit(unit, to) {
+	if !g.CanMoveUnit(unit, to, preventPassThrough) {
 		unitCoord := UnitGetCoord(unit)
 		return fmt.Errorf("invalid move from %v to %v", unitCoord, to)
 	}
 
 	// Get movement cost using RulesEngine
-	cost, err := g.RulesEngine.GetMovementCost(g.World, unit, to)
+	cost, err := g.RulesEngine.GetMovementCost(g.World, unit, to, preventPassThrough)
 	if err != nil {
 		return fmt.Errorf("failed to calculate movement cost: %w", err)
 	}
@@ -730,7 +730,7 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 
 // CanMoveUnit validates potential movement using Dijkstra-based pathfinding
 // This checks if the target is reachable given terrain costs and available movement points
-func (g *Game) CanMoveUnit(unit *v1.Unit, to AxialCoord) bool {
+func (g *Game) CanMoveUnit(unit *v1.Unit, to AxialCoord, preventPassThrough bool) bool {
 	if unit == nil {
 		return false
 	}
@@ -747,7 +747,7 @@ func (g *Game) CanMoveUnit(unit *v1.Unit, to AxialCoord) bool {
 	}
 
 	// Use Dijkstra to compute all reachable tiles based on terrain and movement points
-	allPaths, err := g.RulesEngine.GetMovementOptions(g.World, unit, int(unit.DistanceLeft))
+	allPaths, err := g.RulesEngine.GetMovementOptions(g.World, unit, int(unit.DistanceLeft), preventPassThrough)
 	if err != nil {
 		return false
 	}
@@ -798,7 +798,7 @@ func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {
 }
 
 // GetMovementOptions returns movement options for unit at given coordinates with full validation
-func (m *MoveProcessor) GetMovementOptions(game *Game, q, r int32) (*v1.AllPaths, error) {
+func (m *MoveProcessor) GetMovementOptions(game *Game, q, r int32, preventPassThrough bool) (*v1.AllPaths, error) {
 	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
@@ -812,7 +812,7 @@ func (m *MoveProcessor) GetMovementOptions(game *Game, q, r int32) (*v1.AllPaths
 	if unit.DistanceLeft <= 0 {
 		return nil, fmt.Errorf("unit has no movement points remaining")
 	}
-	return game.RulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft))
+	return game.RulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft), preventPassThrough)
 }
 
 // GetAttackOptions returns attack options for unit at given coordinates with full validation
@@ -846,9 +846,9 @@ func (m *MoveProcessor) CanSelectUnit(game *Game, q, r int32) (bool, string) {
 }
 
 // CanMove validates potential movement using position coordinates
-func (g *Game) CanMove(from, to Position) (bool, error) {
+func (g *Game) CanMove(from, to Position, preventPassThrough bool) (bool, error) {
 	unit := g.World.UnitAt(from)
-	return g.CanMoveUnit(unit, to), nil
+	return g.CanMoveUnit(unit, to, preventPassThrough), nil
 }
 
 // GetUnitAttackOptions returns all positions a unit can attack using rules engine

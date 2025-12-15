@@ -241,7 +241,7 @@ func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsA
 
 		// Get movement options if unit has movement left and move is allowed
 		if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 && moveAllowed {
-			pathsResult, err := dmp.GetMovementOptions(rtGame, req.Q, req.R)
+			pathsResult, err := dmp.GetMovementOptions(rtGame, req.Q, req.R, false)
 			if err == nil {
 				allPaths = pathsResult
 

@@ -219,6 +219,29 @@ func (s *GamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest
 	// Generate shortcuts for tiles and units
 	lib.EnsureShortcuts(gs.WorldData)
 
+	// Add initial base income to each player's starting coins
+	// This ensures players start with their configured coins PLUS income from their starting bases
+	if req.Game.Config != nil {
+		var incomeConfig *v1.IncomeConfig
+		if req.Game.Config.IncomeConfigs != nil {
+			incomeConfig = req.Game.Config.IncomeConfigs
+		}
+		for i, player := range req.Game.Config.Players {
+			baseIncome := lib.CalculatePlayerBaseIncome(player.PlayerId, gs.WorldData, incomeConfig)
+			req.Game.Config.Players[i].Coins += baseIncome
+		}
+		// Update the game record with new coin values
+		gameGorm, err = v1gorm.GameToGameGORM(req.Game, nil, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert game: %w", err)
+		}
+		gameGorm.Id = req.Game.Id
+		if err = s.GameDAL.Save(ctx, s.storage, gameGorm); err != nil {
+			return nil, fmt.Errorf("failed to update game with initial coins: %w", err)
+		}
+		resp.Game = req.Game
+	}
+
 	gameStateGorm, err := v1gorm.GameStateToGameStateGORM(gs, nil, nil)
 	if err != nil {
 		log.Println("Here 1 ????: ", err)

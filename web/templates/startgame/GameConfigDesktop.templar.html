@@ -47,7 +47,7 @@
 <div data-config-section="units">
     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Allowed Units</h3>
     <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Select which units are allowed in this game</p>
-    <div id="unit-restriction-grid" class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+    <div id="unit-restriction-grid" class="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
         {{ range .UnitTypes }}
         <button type="button"
                 class="unit-restriction-button relative p-2 text-center border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors overflow-hidden"
@@ -86,13 +86,49 @@
     </div>
 </div>
 
+<!-- Advanced Settings -->
+<div data-config-section="advanced">
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Advanced</h3>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Custom Game ID (optional)</label>
+            <input type="text"
+                   id="custom-game-id"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                   data-config="game-id"
+                   placeholder="Leave empty for auto-generated ID"
+                   pattern="[a-zA-Z0-9_-]+"
+                   maxlength="32">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Letters, numbers, dashes, underscores only</p>
+        </div>
+    </div>
+</div>
+
 <!-- Income Settings -->
 <div data-config-section="income">
     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Income</h3>
-    <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Configure income generated per base type at turn end</p>
-    <div class="space-y-3">
+    <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Configure starting coins and income per base type at turn end</p>
+    <div class="grid grid-cols-2 gap-3">
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Land Base Income</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Starting Coins</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="starting-coins"
+                   value="{{ .GameConfiguration.IncomeConfigs.StartingCoins }}"
+                   min="0"
+                   step="50">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Game Income</label>
+            <input type="number"
+                   class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                   data-config="game-income"
+                   value="{{ .GameConfiguration.IncomeConfigs.GameIncome }}"
+                   min="0"
+                   step="10">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Land Base</label>
             <input type="number"
                    class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                    data-config="landbase-income"
@@ -101,7 +137,7 @@
                    step="10">
         </div>
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Naval Base Income</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Naval Base</label>
             <input type="number"
                    class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                    data-config="navalbase-income"
@@ -110,7 +146,7 @@
                    step="10">
         </div>
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Airport Base Income</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Airport</label>
             <input type="number"
                    class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                    data-config="airportbase-income"
@@ -119,7 +155,7 @@
                    step="10">
         </div>
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Missile Silo Income</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Missile Silo</label>
             <input type="number"
                    class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                    data-config="missilesilo-income"
@@ -128,7 +164,7 @@
                    step="10">
         </div>
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Mines Income</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Mines</label>
             <input type="number"
                    class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                    data-config="mines-income"

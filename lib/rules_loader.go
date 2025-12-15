@@ -73,6 +73,27 @@ func GetTileIncomeFromConfig(tileType int32, incomeConfig *v1.IncomeConfig) int3
 	return 0
 }
 
+// CalculatePlayerBaseIncome calculates the total base income for a player based on their owned tiles.
+// This is used during game creation to give players their initial base income.
+func CalculatePlayerBaseIncome(playerId int32, worldData *v1.WorldData, incomeConfig *v1.IncomeConfig) int32 {
+	totalIncome := int32(0)
+
+	// Calculate income from owned tiles
+	for _, tile := range worldData.TilesMap {
+		if tile.Player == playerId {
+			tileIncome := GetTileIncomeFromConfig(tile.TileType, incomeConfig)
+			totalIncome += tileIncome
+		}
+	}
+
+	// Add base game income if configured
+	if incomeConfig != nil && incomeConfig.GameIncome > 0 {
+		totalIncome += incomeConfig.GameIncome
+	}
+
+	return totalIncome
+}
+
 // LoadRulesEngineFromFile loads a RulesEngine from separate rules and damage JSON files
 // damageFilename can be empty string if damage distributions are not needed
 func LoadRulesEngineFromFile(rulesFilename string, damageFilename string) (*RulesEngine, error) {

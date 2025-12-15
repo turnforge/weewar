@@ -210,11 +210,6 @@ func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameReque
 	req.Game.CreatedAt = tspb.New(now)
 	req.Game.UpdatedAt = tspb.New(now)
 
-	// Save game metadata
-	if err := s.storage.SaveArtifact(req.Game.Id, "metadata", req.Game); err != nil {
-		return nil, fmt.Errorf("failed to create game: %w", err)
-	}
-
 	// Save a new empty game state and a new move list
 	gs := &v1.GameState{
 		GameId:        req.Game.Id,
@@ -228,6 +223,24 @@ func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameReque
 
 	// Generate shortcuts for tiles and units
 	lib.EnsureShortcuts(gs.WorldData)
+
+	// Add initial base income to each player's starting coins
+	// This ensures players start with their configured coins PLUS income from their starting bases
+	if req.Game.Config != nil {
+		var incomeConfig *v1.IncomeConfig
+		if req.Game.Config.IncomeConfigs != nil {
+			incomeConfig = req.Game.Config.IncomeConfigs
+		}
+		for i, player := range req.Game.Config.Players {
+			baseIncome := lib.CalculatePlayerBaseIncome(player.PlayerId, gs.WorldData, incomeConfig)
+			req.Game.Config.Players[i].Coins += baseIncome
+		}
+	}
+
+	// Save game metadata (after adding base income to player coins)
+	if err := s.storage.SaveArtifact(req.Game.Id, "metadata", req.Game); err != nil {
+		return nil, fmt.Errorf("failed to create game: %w", err)
+	}
 
 	// Units start with default zero values (current_turn=0, distance_left=0, available_health=0)
 	// They will be lazily topped-up when accessed if unit.current_turn < game.turn_counter

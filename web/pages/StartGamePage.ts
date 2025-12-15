@@ -125,7 +125,7 @@ class StartGamePage extends BasePage implements LCMComponent {
         }
 
         // Bind income input fields
-        const incomeFields = ['landbase-income', 'navalbase-income', 'airportbase-income', 'missilesilo-income', 'mines-income'];
+        const incomeFields = ['starting-coins', 'game-income', 'landbase-income', 'navalbase-income', 'airportbase-income', 'missilesilo-income', 'mines-income'];
         incomeFields.forEach(field => {
             const input = document.querySelector(`[data-config="${field}"]`);
             if (input) {
@@ -251,8 +251,34 @@ class StartGamePage extends BasePage implements LCMComponent {
             .filter(cb => (cb as HTMLInputElement).checked)
             .map(cb => parseInt((cb as HTMLInputElement).dataset.unit || '0'));
 
+        // Load income configuration from server-rendered inputs
+        this.initializeIncomeConfiguration();
+
         // Bind event listeners to server-rendered elements
         this.bindPlayerConfigurationEvents();
+    }
+
+    /**
+     * Initialize income configuration from server-rendered HTML inputs
+     */
+    private initializeIncomeConfiguration(): void {
+        const incomeFieldMap: Record<string, keyof IncomeConfig> = {
+            'starting-coins': 'startingCoins',
+            'game-income': 'gameIncome',
+            'landbase-income': 'landbaseIncome',
+            'navalbase-income': 'navalbaseIncome',
+            'airportbase-income': 'airportbaseIncome',
+            'missilesilo-income': 'missilesiloIncome',
+            'mines-income': 'minesIncome'
+        };
+
+        for (const [dataConfig, configKey] of Object.entries(incomeFieldMap)) {
+            const input = document.querySelector(`[data-config="${dataConfig}"]`) as HTMLInputElement;
+            if (input) {
+                const value = parseInt(input.value) || 0;
+                this.gameConfig.incomeConfigs![configKey] = value;
+            }
+        }
     }
 
     /**
@@ -369,6 +395,12 @@ class StartGamePage extends BasePage implements LCMComponent {
         }
 
         switch (configType) {
+            case 'starting-coins':
+                this.gameConfig.incomeConfigs.startingCoins = value;
+                break;
+            case 'game-income':
+                this.gameConfig.incomeConfigs.gameIncome = value;
+                break;
             case 'landbase-income':
                 this.gameConfig.incomeConfigs.landbaseIncome = value;
                 break;
@@ -427,19 +459,24 @@ class StartGamePage extends BasePage implements LCMComponent {
             return;
         }
 
-        this.showToast('Success', 'Creating game...', 'success');
-        
-        // Call the CreateGame API
-        const result = await this.callCreateGameAPI();
-        
-        // Redirect to the newly created game
-        const gameViewerUrl = `/games/${result.gameId}/view`;
-        this.showToast('Success', 'Game created! Redirecting...', 'success');
-        
-        // Small delay to show the toast
-        setTimeout(() => {
-            window.location.href = gameViewerUrl;
-        }, 500);
+        this.showToast('Info', 'Creating game...', 'info');
+
+        try {
+            // Call the CreateGame API
+            const result = await this.callCreateGameAPI();
+
+            // Redirect to the newly created game
+            const gameViewerUrl = `/games/${result.gameId}/view`;
+            this.showToast('Success', 'Game created! Redirecting...', 'success');
+
+            // Small delay to show the toast
+            setTimeout(() => {
+                window.location.href = gameViewerUrl;
+            }, 500);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to create game';
+            this.showToast('Error', errorMessage, 'error');
+        }
     }
 
     // Call CreateGame API via gRPC gateway
@@ -451,7 +488,11 @@ class StartGamePage extends BasePage implements LCMComponent {
         const gameNameInput = document.getElementById('game-name-title') as HTMLInputElement;
         const gameName = gameNameInput?.value?.trim() || 'New Game';
 
-        const gameRequest = {
+        // Get optional custom game ID
+        const customGameIdInput = document.getElementById('custom-game-id') as HTMLInputElement;
+        const customGameId = customGameIdInput?.value?.trim() || '';
+
+        const gameRequest: Record<string, any> = {
             game: {
                 world_id: this.currentWorldId,
                 name: gameName,
@@ -480,6 +521,11 @@ class StartGamePage extends BasePage implements LCMComponent {
             }
         };
 
+        // Add custom game ID if provided
+        if (customGameId) {
+            gameRequest.game.id = customGameId;
+        }
+
         // Make the gRPC gateway call
         const response = await fetch('/api/v1/games', {
             method: 'POST',
@@ -490,8 +536,21 @@ class StartGamePage extends BasePage implements LCMComponent {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API call failed: ${response.status} - ${errorText}`);
+            let errorMessage = `Server error (${response.status})`;
+            try {
+                const errorData = await response.json();
+                // gRPC gateway returns errors in { message: "...", code: N } format
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+            } catch {
+                // If not JSON, try plain text
+                const errorText = await response.text();
+                if (errorText) {
+                    errorMessage = errorText;
+                }
+            }
+            throw new Error(errorMessage);
         }
 
         const result = await response.json();
@@ -541,14 +600,4 @@ interface PlayerLocal {
 
 type PlayerType = 'human' | 'ai' | 'open' | 'none';
 
-// Initialize page when DOM is ready using LifecycleController
-document.addEventListener('DOMContentLoaded', async () => {
-    // Create page instance (just basic setup)
-    const page = new StartGamePage("StartGamePage");
-    
-    // Create lifecycle controller with debug logging
-    const lifecycleController = new LifecycleController(page.eventBus, LifecycleController.DefaultConfig)
-    
-    // Start breadth-first initialization
-    await lifecycleController.initializeFromRoot(page);
-});
+StartGamePage.loadAfterPageLoaded("StartGamePage", StartGamePage, "StartGamePage")

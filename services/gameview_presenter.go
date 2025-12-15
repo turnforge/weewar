@@ -216,6 +216,13 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 			return nil, err
 		}
 	case "base-map":
+		// Toggle behavior: if clicking the same position that's already selected, deselect
+		if s.selectedQ != nil && s.selectedR != nil && *s.selectedQ == q && *s.selectedR == r {
+			s.clearHighlightsAndSelection(ctx)
+			s.TurnOptionsPanel.SetCurrentUnit(ctx, nil, nil)
+			return
+		}
+
 		wd := rg.World
 		if err != nil {
 			panic(err)

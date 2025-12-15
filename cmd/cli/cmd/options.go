@@ -12,14 +12,24 @@ import (
 
 // optionsCmd represents the options command
 var optionsCmd = &cobra.Command{
-	Use:   "options <unit>",
-	Short: "Show available options for a unit",
-	Long: `Display available actions for a unit at the specified position.
-The position can be a unit ID (like A1, B2) or coordinates (like 3,4).
+	Use:   "options <position>",
+	Short: "Show available options for a unit or tile",
+	Long: `Display available actions for a unit or tile at the specified position.
+
+For units: Shows movement, attack, and other unit actions.
+For tiles: Shows build options (if the tile is a base/harbor owned by current player).
+
+Position formats:
+  A1, B2      Unit shortcut (PlayerLetter + UnitNumber)
+  3,4         Q,R coordinates
+  r4,5        Row,Col coordinates
+  t:A1        Force tile lookup (use for build options)
+  t:3,4       Force tile lookup by coordinates
 
 Examples:
   ww options A1        Show options for unit A1
   ww options 3,4       Show options for position 3,4
+  ww options t:A1      Show build options for tile A1
   ww options A1 --json Show options as JSON`,
 	Args: cobra.ExactArgs(1),
 	RunE: runOptions,

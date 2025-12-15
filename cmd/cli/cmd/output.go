@@ -89,6 +89,9 @@ func FormatOptions(pc *PresenterContext, position string) string {
 		sb.WriteString(fmt.Sprintf("Unit %s at %s:\n", position, coord.String()))
 		sb.WriteString(fmt.Sprintf("  Type: %d, HP: %d, Moves: %f\n\n",
 			unit.UnitType, unit.AvailableHealth, unit.DistanceLeft))
+	} else {
+		// No unit - show position for tile options
+		sb.WriteString(fmt.Sprintf("Tile %s:\n\n", position))
 	}
 
 	// Get options

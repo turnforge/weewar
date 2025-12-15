@@ -131,6 +131,22 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 		return fmt.Errorf("tile at %v cannot build unit type %d", coord, action.UnitType)
 	}
 
+	// Check if unit type is allowed by game settings
+	allowedUnits := g.Config.Settings.GetAllowedUnits()
+	if allowedUnits != nil {
+		// If allowedUnits is set (even if empty), enforce the restriction
+		isAllowed := false
+		for _, allowedID := range allowedUnits {
+			if allowedID == action.UnitType {
+				isAllowed = true
+				break
+			}
+		}
+		if !isAllowed {
+			return fmt.Errorf("unit type %d is not allowed in this game", action.UnitType)
+		}
+	}
+
 	// Check if tile has already built this turn (one build per turn per tile)
 	if tile.LastActedTurn == g.TurnCounter {
 		return fmt.Errorf("tile at %v has already built a unit this turn", coord)

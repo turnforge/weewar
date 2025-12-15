@@ -311,22 +311,39 @@ class StartGamePage extends BasePage implements LCMComponent {
     private bindUnitRestrictionEvents(): void {
         const unitButtons = document.querySelectorAll('.unit-restriction-button');
         unitButtons.forEach(button => {
+            const checkbox = button.querySelector('input[type="checkbox"]') as HTMLInputElement;
+            const mask = button.querySelector('.unit-mask') as HTMLElement;
+
+            // Set initial mask state based on checkbox
+            if (mask) {
+                mask.style.opacity = checkbox?.checked ? '0' : '0.6';
+            }
+
+            // Handle button click (for clicks outside the checkbox)
             button.addEventListener('click', (e) => {
+                // If user clicked directly on checkbox, let native behavior handle it
+                // The checkbox's change event will handle the update
+                if (e.target === checkbox) {
+                    return;
+                }
+
                 e.preventDefault();
-                const checkbox = button.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                const mask = button.querySelector('.unit-mask') as HTMLElement;
-                
-                checkbox.checked = !checkbox.checked;
-                mask.style.opacity = checkbox.checked ? '0' : '0.6';
-                
-                // Trigger the restriction change handler
-                const syntheticEvent = new Event('change');
-                Object.defineProperty(syntheticEvent, 'target', {
-                    writable: false,
-                    value: checkbox
-                });
-                this.handleUnitRestrictionChange(syntheticEvent);
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    // Dispatch change event to trigger our handler
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             });
+
+            // Handle checkbox change (works for both direct clicks and button-triggered changes)
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    if (mask) {
+                        mask.style.opacity = checkbox.checked ? '0' : '0.6';
+                    }
+                    this.handleUnitRestrictionChange({ target: checkbox } as any);
+                });
+            }
         });
     }
     

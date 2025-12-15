@@ -181,9 +181,14 @@ func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsA
 			// Get terrain definition for tile-specific actions
 			terrainDef, err := rtGame.RulesEngine.GetTerrainData(tile.TileType)
 			if err == nil {
-				// Get current player's coins (default to 100 for now, will be from game config later)
-				// TODO: Get actual player coins from rtGame.Game.Config.Players[currentPlayer].Coins
-				playerCoins := int32(100)
+				// Get current player's coins
+				playerCoins := int32(0)
+				for _, player := range rtGame.Config.Players {
+					if player.PlayerId == rtGame.CurrentPlayer {
+						playerCoins = player.Coins
+						break
+					}
+				}
 
 				// Get allowed actions for this tile
 				tileActions := rtGame.RulesEngine.GetAllowedActionsForTile(tile, terrainDef, playerCoins)

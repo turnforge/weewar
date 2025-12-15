@@ -39,8 +39,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     protected tileSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
     protected unitSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
     protected unitLabels: Map<string, {
-        shortcutText?: Phaser.GameObjects.Text,
-        shortcutBg?: Phaser.GameObjects.Graphics,
         healthText: Phaser.GameObjects.Text,
         healthBg?: Phaser.GameObjects.Graphics,
         distanceText?: Phaser.GameObjects.Text
@@ -236,9 +234,16 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
                 tiles.forEach(tile => this.setTile(tile));
             }
 
+            // Only create units that don't already have sprites
+            // (units may have been created by handleUnitsChanged with richer data like shortcuts)
             const units = this.world.getAllUnits();
             if (units.length > 0) {
-                units.forEach(unit => this.setUnit(unit));
+                units.forEach(unit => {
+                    const key = `${unit.q},${unit.r}`;
+                    if (!this.unitSprites.has(key)) {
+                        this.setUnit(unit);
+                    }
+                });
             }
 
             // Load crossings from World (using raw crossings map)
@@ -962,6 +967,14 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             const key = `${q},${r}`;
             const position = hexToPixel(q, r);
 
+            // Preserve shortcut from World if incoming unit doesn't have one
+            if (!unit.shortcut && this.world) {
+                const existingUnit = this.world.getUnitAt(q, r);
+                if (existingUnit?.shortcut) {
+                    (unit as any).shortcut = existingUnit.shortcut;
+                }
+            }
+
             // Remove existing unit and labels if they exist
             if (this.unitSprites.has(key)) {
                 this.unitSprites.get(key)?.destroy();
@@ -1278,8 +1291,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private createUnitLabels(unit: Unit, position: { x: number, y: number }): void {
         const key = `${unit.q},${unit.r}`;
         const labels: {
-            shortcutText?: Phaser.GameObjects.Text,
-            shortcutBg?: Phaser.GameObjects.Graphics,
             healthText: Phaser.GameObjects.Text,
             healthBg?: Phaser.GameObjects.Graphics,
             distanceText?: Phaser.GameObjects.Text
@@ -1292,43 +1303,15 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         const bgAlpha = 0.7;
         const padding = 3;
 
-        // Create shortcut label above the unit (if unit has a shortcut)
-        if (unit.shortcut) {
-            const shortcutY = position.y - (displaySize.height / 2) + 8; // Just inside top edge of tile
-
-            const shortcutText = this.add.text(position.x, shortcutY, unit.shortcut, {
-                fontSize: '11px',
-                color: '#ffffff',
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
-            });
-            shortcutText.setOrigin(0.5, 0.5);
-            shortcutText.setDepth(16); // Above background
-
-            // Create background for shortcut label
-            const shortcutBg = this.add.graphics();
-            shortcutBg.fillStyle(bgColor, bgAlpha);
-            const shortcutBounds = shortcutText.getBounds();
-            shortcutBg.fillRoundedRect(
-                shortcutBounds.x - padding,
-                shortcutBounds.y - padding,
-                shortcutBounds.width + padding * 2,
-                shortcutBounds.height + padding * 2,
-                4
-            );
-            shortcutBg.setDepth(15); // Below text
-
-            labels.shortcutText = shortcutText;
-            labels.shortcutBg = shortcutBg;
-        }
-
         // Create combined label if enabled
         if (this.showUnitHealth) {
             const health = unit.availableHealth || 10;
             const movementPoints = unit.distanceLeft || 0;
 
-            // Format: "Movement/Health" (e.g., "3/85")
-            const labelText = `${movementPoints}/${health}`;
+            // Format: "Shortcut: MP/Health" (e.g., "B1: 3/10") or "MP/Health" if no shortcut
+            const labelText = unit.shortcut
+                ? `${unit.shortcut}:${movementPoints}/${health}`
+                : `${movementPoints}/${health}`;
 
             // Position label below the unit, aligned with bottom of tile
             const labelY = position.y + (displaySize.height / 2) - 8; // Just inside bottom edge of tile
@@ -1389,12 +1372,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private removeUnitLabels(key: string): void {
         const labels = this.unitLabels.get(key);
         if (labels) {
-            if (labels.shortcutText) {
-                labels.shortcutText.destroy();
-            }
-            if (labels.shortcutBg) {
-                labels.shortcutBg.destroy();
-            }
             if (labels.healthText) {
                 labels.healthText.destroy();
             }
@@ -1414,13 +1391,35 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     private updateUnitLabels(unit: Unit): void {
         const key = `${unit.q},${unit.r}`;
         const labels = this.unitLabels.get(key);
-        
+
         if (labels && labels.healthText && this.showUnitHealth) {
             const health = unit.availableHealth || 10;
             const movementPoints = unit.distanceLeft || 0;
-            const labelText = `${movementPoints}/${health}`;
-            
+
+            // Format: "Shortcut: MP/Health" (e.g., "B1: 3/10") or "MP/Health" if no shortcut
+            const labelText = unit.shortcut
+                ? `${unit.shortcut}: ${movementPoints}/${health}`
+                : `${movementPoints}/${health}`;
+
             labels.healthText.setText(labelText);
+
+            // Update background size to match new text
+            if (labels.healthBg) {
+                const bgColor = 0x3d2817;
+                const bgAlpha = 0.7;
+                const padding = 3;
+
+                labels.healthBg.clear();
+                labels.healthBg.fillStyle(bgColor, bgAlpha);
+                const healthBounds = labels.healthText.getBounds();
+                labels.healthBg.fillRoundedRect(
+                    healthBounds.x - padding,
+                    healthBounds.y - padding,
+                    healthBounds.width + padding * 2,
+                    healthBounds.height + padding * 2,
+                    4
+                );
+            }
         }
     }
     
@@ -1452,8 +1451,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
 
         // Clear all unit labels
         this.unitLabels.forEach(labels => {
-            if (labels.shortcutText) labels.shortcutText.destroy();
-            if (labels.shortcutBg) labels.shortcutBg.destroy();
             if (labels.healthText) labels.healthText.destroy();
             if (labels.healthBg) labels.healthBg.destroy();
             if (labels.distanceText) labels.distanceText.destroy();

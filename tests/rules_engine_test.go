@@ -282,7 +282,7 @@ func TestRulesEngineDijkstraMovement(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		allPaths, err := rulesEngine.GetMovementOptions(world, unit, tc.movement)
+		allPaths, err := rulesEngine.GetMovementOptions(world, unit, tc.movement, false)
 		if err != nil {
 			t.Fatalf("Failed to get movement options for %s: %v", tc.desc, err)
 		}
@@ -358,7 +358,7 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 		Player:   0,
 	}
 
-	allPaths, err := rulesEngine.GetMovementOptions(world, unit, 3)
+	allPaths, err := rulesEngine.GetMovementOptions(world, unit, 3, false)
 	if err != nil {
 		t.Fatalf("Failed to get movement options: %v", err)
 	}
@@ -373,4 +373,81 @@ func TestRulesEngineDijkstraTerrainCosts(t *testing.T) {
 	if len(allPaths.Edges) == 0 {
 		t.Error("Expected some movement options")
 	}
+}
+
+// TestPassThroughMovement tests that units can pass through occupied tiles when preventPassThrough=false
+// Scenario: A -> B -> C where B is occupied
+// With preventPassThrough=false: unit on A can reach C (passing through B)
+// With preventPassThrough=true: unit on A cannot reach C (B blocks)
+func TestPassThroughMovement(t *testing.T) {
+	rulesEngine, err := LoadRulesEngineFromFile(RULES_DATA_FILE, DAMAGE_DATA_FILE)
+	if err != nil {
+		t.Fatalf("Failed to load rules engine: %v", err)
+	}
+
+	// Create a simple world with 3 tiles in a line: (0,0) -> (1,0) -> (2,0)
+	protoWorld := &v1.WorldData{}
+	world := NewWorld("test", protoWorld)
+
+	// Add grass tiles (terrain type 1) at positions (0,0), (1,0), (2,0)
+	world.AddTile(&v1.Tile{Q: 0, R: 0, TileType: 1})
+	world.AddTile(&v1.Tile{Q: 1, R: 0, TileType: 1})
+	world.AddTile(&v1.Tile{Q: 2, R: 0, TileType: 1})
+
+	// Unit at (0,0) - the one we're testing movement for
+	movingUnit := &v1.Unit{
+		UnitType:     1, // Soldier
+		Q:            0,
+		R:            0,
+		Player:       1,
+		DistanceLeft: 3,
+	}
+	world.AddUnit(movingUnit)
+
+	// Blocking unit at (1,0)
+	blockingUnit := &v1.Unit{
+		UnitType: 1,
+		Q:        1,
+		R:        0,
+		Player:   2,
+	}
+	world.AddUnit(blockingUnit)
+
+	// Test 1: With preventPassThrough=false, unit should reach (2,0)
+	allPathsPassThrough, err := rulesEngine.GetMovementOptions(world, movingUnit, 3, false)
+	if err != nil {
+		t.Fatalf("Failed to get movement options with pass-through: %v", err)
+	}
+
+	// Check if (2,0) is reachable
+	key20 := "2,0"
+	if _, exists := allPathsPassThrough.Edges[key20]; !exists {
+		t.Errorf("With preventPassThrough=false, expected (2,0) to be reachable but it wasn't")
+	} else {
+		t.Logf("With preventPassThrough=false, (2,0) is reachable as expected")
+	}
+
+	// Check that (1,0) is NOT in destinations (can pass through but not land)
+	key10 := "1,0"
+	if _, exists := allPathsPassThrough.Edges[key10]; exists {
+		t.Errorf("With preventPassThrough=false, expected (1,0) to NOT be a valid destination (occupied)")
+	} else {
+		t.Logf("With preventPassThrough=false, (1,0) correctly excluded from destinations")
+	}
+
+	// Test 2: With preventPassThrough=true, unit should NOT reach (2,0)
+	allPathsNoPassThrough, err := rulesEngine.GetMovementOptions(world, movingUnit, 3, true)
+	if err != nil {
+		t.Fatalf("Failed to get movement options without pass-through: %v", err)
+	}
+
+	// Check that (2,0) is NOT reachable
+	if _, exists := allPathsNoPassThrough.Edges[key20]; exists {
+		t.Errorf("With preventPassThrough=true, expected (2,0) to NOT be reachable but it was")
+	} else {
+		t.Logf("With preventPassThrough=true, (2,0) correctly not reachable")
+	}
+
+	t.Logf("Pass-through test: with pass-through=%d destinations, without=%d destinations",
+		len(allPathsPassThrough.Edges), len(allPathsNoPassThrough.Edges))
 }

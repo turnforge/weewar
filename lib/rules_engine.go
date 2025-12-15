@@ -282,9 +282,10 @@ func ParseActionAlternatives(stepActions string) []string {
 // Movement Options
 // =============================================================================
 
-// GetMovementOptions returns all EMPTY tiles a unit can move to using Dijkstra's algorithm
+// GetMovementOptions returns all tiles a unit can move to using Dijkstra's algorithm
 // Returns AllPaths structure containing all reachable tiles and path information
-func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remainingMovement int) (*v1.AllPaths, error) {
+// When preventPassThrough is false (default), units can traverse through occupied tiles but cannot land on them
+func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remainingMovement int, preventPassThrough bool) (*v1.AllPaths, error) {
 	if unit == nil {
 		return nil, fmt.Errorf("unit is nil")
 	}
@@ -295,13 +296,13 @@ func (re *RulesEngine) GetMovementOptions(world *World, unit *v1.Unit, remaining
 	}
 
 	unitCoord := UnitGetCoord(unit)
-	allPaths := re.dijkstraMovement(world, unit.UnitType, unitCoord, float64(remainingMovement))
+	allPaths := re.dijkstraMovement(world, unit.UnitType, unitCoord, float64(remainingMovement), preventPassThrough)
 	return allPaths, nil
 }
 
 // GetMovementCost calculates movement cost for a unit to move to a specific destination
 // Uses dijkstraMovement for accurate pathfinding costs
-func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoord) (float64, error) {
+func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoord, preventPassThrough bool) (float64, error) {
 	if unit == nil {
 		return 0, fmt.Errorf("unit is nil")
 	}
@@ -312,7 +313,7 @@ func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoor
 	}
 
 	// Use dijkstraMovement to get accurate costs
-	allPaths := re.dijkstraMovement(world, unit.UnitType, from, float64(unit.DistanceLeft))
+	allPaths := re.dijkstraMovement(world, unit.UnitType, from, float64(unit.DistanceLeft), preventPassThrough)
 
 	// Look up the destination in AllPaths
 	key := fmt.Sprintf("%d,%d", to.Q, to.R)
@@ -325,7 +326,7 @@ func (re *RulesEngine) GetMovementCost(world *World, unit *v1.Unit, to AxialCoor
 }
 
 // calculatePathCost uses dijkstraMovement to find minimum cost path
-func (re *RulesEngine) calculatePathCost(world *World, unitType int32, from, to AxialCoord) (float64, error) {
+func (re *RulesEngine) calculatePathCost(world *World, unitType int32, from, to AxialCoord, preventPassThrough bool) (float64, error) {
 	// Get unit data to determine movement points
 	unitData, err := re.GetUnitData(unitType)
 	if err != nil {
@@ -335,7 +336,7 @@ func (re *RulesEngine) calculatePathCost(world *World, unitType int32, from, to 
 	// Use the unit's maximum movement points as limit
 	maxMovement := float64(unitData.MovementPoints)
 
-	allPaths := re.dijkstraMovement(world, unitType, from, maxMovement)
+	allPaths := re.dijkstraMovement(world, unitType, from, maxMovement, preventPassThrough)
 
 	// Look up the destination in AllPaths
 	key := fmt.Sprintf("%d,%d", to.Q, to.R)
@@ -454,8 +455,9 @@ func (re *RulesEngine) ValidateRules() error {
 // Spatial Query Methods for UI/Gameplay
 // =============================================================================
 
-// dijkstraMovement implements Dijkstra's algorithm to find all reachable EMPTY tiles with minimum cost
-func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord AxialCoord, maxMovement float64) *v1.AllPaths {
+// dijkstraMovement implements Dijkstra's algorithm to find all reachable tiles with minimum cost
+// When preventPassThrough is false (default), units can traverse through occupied tiles but cannot land on them
+func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord AxialCoord, maxMovement float64, preventPassThrough bool) *v1.AllPaths {
 	// Initialize AllPaths
 	allPaths := &v1.AllPaths{
 		SourceQ: int32(startCoord.Q),
@@ -504,9 +506,12 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 
 		// Explore neighbors
 		for neighborCoord, _ := range world.Neighbors(current.coord) {
-			// Skip if occupied by another unit (movement rule: only empty tiles)
-			if world.UnitAt(neighborCoord) != nil {
-				continue // Occupied tile
+			// Check if tile is occupied by another unit
+			isOccupied := world.UnitAt(neighborCoord) != nil
+
+			// If preventPassThrough is true, skip occupied tiles entirely
+			if preventPassThrough && isOccupied {
+				continue // Occupied tile blocks traversal
 			}
 
 			// Get effective tile type (considers crossings like roads/bridges)
@@ -525,34 +530,38 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 				if existingCost, exists := visited[neighborCoord]; !exists || newCost < existingCost {
 					visited[neighborCoord] = newCost
 
-					// Get terrain data for explanation (use effective type for display)
-					terrainData, _ := re.GetTerrainData(effectiveTileType)
-					terrainName := "unknown"
-					if terrainData != nil {
-						terrainName = terrainData.Name
-					}
-
-					// Create explanation
-					unitName := "Unit"
-					if unitData != nil {
-						unitName = unitData.Name
-					}
-					explanation := fmt.Sprintf("%s costs %s %.0f movement points", terrainName, unitName, moveCost)
-
-					// Create PathEdge and add to AllPaths
-					key := fmt.Sprintf("%d,%d", neighborCoord.Q, neighborCoord.R)
-					allPaths.Edges[key] = &v1.PathEdge{
-						FromQ:        int32(current.coord.Q),
-						FromR:        int32(current.coord.R),
-						ToQ:          int32(neighborCoord.Q),
-						ToR:          int32(neighborCoord.R),
-						MovementCost: moveCost,
-						TotalCost:    newCost,
-						TerrainType:  terrainName,
-						Explanation:  explanation,
-					}
-
+					// Always add to queue for further exploration (pass-through)
 					queue = append(queue, queueItem{coord: neighborCoord, cost: newCost})
+
+					// Only add to allPaths.Edges if tile is NOT occupied (can't land on occupied tiles)
+					if !isOccupied {
+						// Get terrain data for explanation (use effective type for display)
+						terrainData, _ := re.GetTerrainData(effectiveTileType)
+						terrainName := "unknown"
+						if terrainData != nil {
+							terrainName = terrainData.Name
+						}
+
+						// Create explanation
+						unitName := "Unit"
+						if unitData != nil {
+							unitName = unitData.Name
+						}
+						explanation := fmt.Sprintf("%s costs %s %.0f movement points", terrainName, unitName, moveCost)
+
+						// Create PathEdge and add to AllPaths
+						key := fmt.Sprintf("%d,%d", neighborCoord.Q, neighborCoord.R)
+						allPaths.Edges[key] = &v1.PathEdge{
+							FromQ:        int32(current.coord.Q),
+							FromR:        int32(current.coord.R),
+							ToQ:          int32(neighborCoord.Q),
+							ToR:          int32(neighborCoord.R),
+							MovementCost: moveCost,
+							TotalCost:    newCost,
+							TerrainType:  terrainName,
+							Explanation:  explanation,
+						}
+					}
 				}
 			}
 		}

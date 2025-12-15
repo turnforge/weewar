@@ -6,22 +6,6 @@
 
 package weewar
 
-import (
-
-	// "github.com/panyam/protoc-gen-go-wasmjs/pkg/wasm"
-
-	wasm "github.com/panyam/protoc-gen-go-wasmjs/pkg/wasm"
-)
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-// createJSResponse creates a JavaScript response object
-func createJSResponse(success bool, message string, data any) any {
-	return wasm.CreateJSResponse(success, message, data)
-}
-
 // =============================================================================
 // Server Stream Wrappers
 // =============================================================================

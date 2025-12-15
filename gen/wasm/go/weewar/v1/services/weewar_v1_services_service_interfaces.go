@@ -142,3 +142,5 @@ type WorldsServiceServer interface {
 	/** GetWorld returns a specific world with metadata */
 	UpdateWorld(context.Context, *v1models.UpdateWorldRequest) (*v1models.UpdateWorldResponse, error)
 }
+
+// Server stream interfaces for streaming methods

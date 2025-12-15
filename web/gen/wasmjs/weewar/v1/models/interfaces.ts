@@ -755,6 +755,7 @@ export interface PathEdge {
   totalCost: number;
   terrainType: string;
   explanation: string;
+  isOccupied: boolean;
 }
 
 

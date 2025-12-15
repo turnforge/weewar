@@ -3128,6 +3128,10 @@
         "explanation": {
           "type": "string",
           "title": "e.g., \"Mountain costs Soldier 4 movement points\""
+        },
+        "isOccupied": {
+          "type": "boolean",
+          "title": "True if destination tile has a friendly unit (pass-through only, cannot land)"
         }
       },
       "title": "A single edge in a path with movement details"

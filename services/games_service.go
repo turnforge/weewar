@@ -247,6 +247,11 @@ func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsA
 
 				// Create move options from AllPaths
 				for key, edge := range allPaths.Edges {
+					// Skip occupied tiles - can pass through but not land on them
+					if edge.IsOccupied {
+						continue
+					}
+
 					path, err := ReconstructPath(allPaths, edge.ToQ, edge.ToR)
 					if err != nil {
 						panic(err)

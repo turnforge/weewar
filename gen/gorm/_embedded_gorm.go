@@ -13,18 +13,6 @@ type UnitsMapEntry struct {
 	Value UnitGORM
 }
 
-// Any
-type Any struct {
-	TypeUrl string
-	Value   []byte
-}
-
-// CrossingsEntry
-type CrossingsEntry struct {
-	Key   string
-	Value CrossingGORM
-}
-
 // CrossingsEntry
 type CrossingsEntry struct {
 	Key   string
@@ -41,4 +29,16 @@ type TilesMapEntry struct {
 type UnitsMapEntry struct {
 	Key   string
 	Value UnitGORM
+}
+
+// CrossingsEntry
+type CrossingsEntry struct {
+	Key   string
+	Value CrossingGORM
+}
+
+// Any
+type Any struct {
+	TypeUrl string
+	Value   []byte
 }

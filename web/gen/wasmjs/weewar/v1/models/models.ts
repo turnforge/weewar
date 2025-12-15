@@ -1016,6 +1016,7 @@ export class PathEdge implements PathEdgeInterface {
   totalCost: number = 0;
   terrainType: string = "";
   explanation: string = "";
+  isOccupied: boolean = false;
 
   
 }

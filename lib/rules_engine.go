@@ -533,34 +533,34 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 					// Always add to queue for further exploration (pass-through)
 					queue = append(queue, queueItem{coord: neighborCoord, cost: newCost})
 
-					// Only add to allPaths.Edges if tile is NOT occupied (can't land on occupied tiles)
-					if !isOccupied {
-						// Get terrain data for explanation (use effective type for display)
-						terrainData, _ := re.GetTerrainData(effectiveTileType)
-						terrainName := "unknown"
-						if terrainData != nil {
-							terrainName = terrainData.Name
-						}
+					// Get terrain data for explanation (use effective type for display)
+					terrainData, _ := re.GetTerrainData(effectiveTileType)
+					terrainName := "unknown"
+					if terrainData != nil {
+						terrainName = terrainData.Name
+					}
 
-						// Create explanation
-						unitName := "Unit"
-						if unitData != nil {
-							unitName = unitData.Name
-						}
-						explanation := fmt.Sprintf("%s costs %s %.0f movement points", terrainName, unitName, moveCost)
+					// Create explanation
+					unitName := "Unit"
+					if unitData != nil {
+						unitName = unitData.Name
+					}
+					explanation := fmt.Sprintf("%s costs %s %.0f movement points", terrainName, unitName, moveCost)
 
-						// Create PathEdge and add to AllPaths
-						key := fmt.Sprintf("%d,%d", neighborCoord.Q, neighborCoord.R)
-						allPaths.Edges[key] = &v1.PathEdge{
-							FromQ:        int32(current.coord.Q),
-							FromR:        int32(current.coord.R),
-							ToQ:          int32(neighborCoord.Q),
-							ToR:          int32(neighborCoord.R),
-							MovementCost: moveCost,
-							TotalCost:    newCost,
-							TerrainType:  terrainName,
-							Explanation:  explanation,
-						}
+					// Always add edges to AllPaths for path reconstruction
+					// Mark occupied tiles with IsOccupied=true to indicate pass-through only
+					// (GetOptionsAt will filter these out as invalid landing spots)
+					key := fmt.Sprintf("%d,%d", neighborCoord.Q, neighborCoord.R)
+					allPaths.Edges[key] = &v1.PathEdge{
+						FromQ:        int32(current.coord.Q),
+						FromR:        int32(current.coord.R),
+						ToQ:          int32(neighborCoord.Q),
+						ToR:          int32(neighborCoord.R),
+						MovementCost: moveCost,
+						TotalCost:    newCost,
+						TerrainType:  terrainName,
+						Explanation:  explanation,
+						IsOccupied:   isOccupied,
 					}
 				}
 			}

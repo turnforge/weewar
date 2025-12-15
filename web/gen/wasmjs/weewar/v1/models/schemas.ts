@@ -1707,6 +1707,11 @@ export const PathEdgeSchema: MessageSchema = {
       type: FieldType.STRING,
       id: 8,
     },
+    {
+      name: "isOccupied",
+      type: FieldType.BOOLEAN,
+      id: 9,
+    },
   ],
 };
 

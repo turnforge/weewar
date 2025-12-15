@@ -427,12 +427,16 @@ func TestPassThroughMovement(t *testing.T) {
 		t.Logf("With preventPassThrough=false, (2,0) is reachable as expected")
 	}
 
-	// Check that (1,0) is NOT in destinations (can pass through but not land)
+	// Check that (1,0) is marked as occupied (can pass through but not land)
 	key10 := "1,0"
-	if _, exists := allPathsPassThrough.Edges[key10]; exists {
-		t.Errorf("With preventPassThrough=false, expected (1,0) to NOT be a valid destination (occupied)")
+	if edge, exists := allPathsPassThrough.Edges[key10]; exists {
+		if !edge.IsOccupied {
+			t.Errorf("With preventPassThrough=false, expected (1,0) to be marked as occupied but IsOccupied=false")
+		} else {
+			t.Logf("With preventPassThrough=false, (1,0) correctly marked as occupied (pass-through only)")
+		}
 	} else {
-		t.Logf("With preventPassThrough=false, (1,0) correctly excluded from destinations")
+		t.Errorf("With preventPassThrough=false, expected (1,0) to have an edge for path reconstruction")
 	}
 
 	// Test 2: With preventPassThrough=true, unit should NOT reach (2,0)

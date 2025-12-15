@@ -180,16 +180,16 @@ func (exports *Weewar_v1ServicesExports) RegisterAPI() {
 // fileStoreServicePutFile handles the PutFile method for FileStoreService
 func (exports *Weewar_v1ServicesExports) fileStoreServicePutFile(this js.Value, args []js.Value) any {
 	if exports.FileStoreService == nil {
-		return createJSResponse(false, "FileStoreService not initialized", nil)
+		return wasm.CreateJSResponse(false, "FileStoreService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -199,7 +199,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServicePutFile(this js.Value, 
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -209,7 +209,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServicePutFile(this js.Value, 
 	// Call service method
 	resp, err := exports.FileStoreService.PutFile(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -219,25 +219,25 @@ func (exports *Weewar_v1ServicesExports) fileStoreServicePutFile(this js.Value, 
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // fileStoreServiceGetFile handles the GetFile method for FileStoreService
 func (exports *Weewar_v1ServicesExports) fileStoreServiceGetFile(this js.Value, args []js.Value) any {
 	if exports.FileStoreService == nil {
-		return createJSResponse(false, "FileStoreService not initialized", nil)
+		return wasm.CreateJSResponse(false, "FileStoreService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -247,7 +247,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceGetFile(this js.Value, 
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -257,7 +257,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceGetFile(this js.Value, 
 	// Call service method
 	resp, err := exports.FileStoreService.GetFile(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -267,25 +267,25 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceGetFile(this js.Value, 
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // fileStoreServiceDeleteFile handles the DeleteFile method for FileStoreService
 func (exports *Weewar_v1ServicesExports) fileStoreServiceDeleteFile(this js.Value, args []js.Value) any {
 	if exports.FileStoreService == nil {
-		return createJSResponse(false, "FileStoreService not initialized", nil)
+		return wasm.CreateJSResponse(false, "FileStoreService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -295,7 +295,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceDeleteFile(this js.Valu
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -305,7 +305,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceDeleteFile(this js.Valu
 	// Call service method
 	resp, err := exports.FileStoreService.DeleteFile(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -315,25 +315,25 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceDeleteFile(this js.Valu
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // fileStoreServiceListFiles handles the ListFiles method for FileStoreService
 func (exports *Weewar_v1ServicesExports) fileStoreServiceListFiles(this js.Value, args []js.Value) any {
 	if exports.FileStoreService == nil {
-		return createJSResponse(false, "FileStoreService not initialized", nil)
+		return wasm.CreateJSResponse(false, "FileStoreService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -343,7 +343,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceListFiles(this js.Value
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -353,7 +353,7 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceListFiles(this js.Value
 	// Call service method
 	resp, err := exports.FileStoreService.ListFiles(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -363,25 +363,25 @@ func (exports *Weewar_v1ServicesExports) fileStoreServiceListFiles(this js.Value
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceCreateGame handles the CreateGame method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceCreateGame(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -391,7 +391,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceCreateGame(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -401,7 +401,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceCreateGame(this js.Value, a
 	// Call service method
 	resp, err := exports.GamesService.CreateGame(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -411,25 +411,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceCreateGame(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceGetGames handles the GetGames method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceGetGames(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -439,7 +439,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGames(this js.Value, arg
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -449,7 +449,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGames(this js.Value, arg
 	// Call service method
 	resp, err := exports.GamesService.GetGames(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -459,25 +459,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGames(this js.Value, arg
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceListGames handles the ListGames method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceListGames(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -487,7 +487,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceListGames(this js.Value, ar
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -497,7 +497,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceListGames(this js.Value, ar
 	// Call service method
 	resp, err := exports.GamesService.ListGames(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -507,25 +507,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceListGames(this js.Value, ar
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceGetGame handles the GetGame method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceGetGame(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -535,7 +535,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGame(this js.Value, args
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -545,7 +545,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGame(this js.Value, args
 	// Call service method
 	resp, err := exports.GamesService.GetGame(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -555,25 +555,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGame(this js.Value, args
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceDeleteGame handles the DeleteGame method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceDeleteGame(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -583,7 +583,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceDeleteGame(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -593,7 +593,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceDeleteGame(this js.Value, a
 	// Call service method
 	resp, err := exports.GamesService.DeleteGame(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -603,25 +603,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceDeleteGame(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceUpdateGame handles the UpdateGame method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceUpdateGame(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -631,7 +631,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceUpdateGame(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -641,7 +641,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceUpdateGame(this js.Value, a
 	// Call service method
 	resp, err := exports.GamesService.UpdateGame(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -651,25 +651,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceUpdateGame(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceGetGameState handles the GetGameState method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceGetGameState(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -679,7 +679,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGameState(this js.Value,
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -689,7 +689,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGameState(this js.Value,
 	// Call service method
 	resp, err := exports.GamesService.GetGameState(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -699,25 +699,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetGameState(this js.Value,
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceListMoves handles the ListMoves method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceListMoves(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -727,7 +727,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceListMoves(this js.Value, ar
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -737,7 +737,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceListMoves(this js.Value, ar
 	// Call service method
 	resp, err := exports.GamesService.ListMoves(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -747,25 +747,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceListMoves(this js.Value, ar
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceProcessMoves handles the ProcessMoves method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceProcessMoves(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -775,7 +775,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceProcessMoves(this js.Value,
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -785,7 +785,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceProcessMoves(this js.Value,
 	// Call service method
 	resp, err := exports.GamesService.ProcessMoves(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -795,25 +795,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceProcessMoves(this js.Value,
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceGetOptionsAt handles the GetOptionsAt method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceGetOptionsAt(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -823,7 +823,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetOptionsAt(this js.Value,
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -833,7 +833,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetOptionsAt(this js.Value,
 	// Call service method
 	resp, err := exports.GamesService.GetOptionsAt(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -843,25 +843,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceGetOptionsAt(this js.Value,
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gamesServiceSimulateAttack handles the SimulateAttack method for GamesService
 func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Value, args []js.Value) any {
 	if exports.GamesService == nil {
-		return createJSResponse(false, "GamesService not initialized", nil)
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -871,7 +871,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Valu
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -881,7 +881,7 @@ func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Valu
 	// Call service method
 	resp, err := exports.GamesService.SimulateAttack(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -891,25 +891,25 @@ func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Valu
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // indexerServiceEnsureIndexState handles the EnsureIndexState method for IndexerService
 func (exports *Weewar_v1ServicesExports) indexerServiceEnsureIndexState(this js.Value, args []js.Value) any {
 	if exports.IndexerService == nil {
-		return createJSResponse(false, "IndexerService not initialized", nil)
+		return wasm.CreateJSResponse(false, "IndexerService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -919,7 +919,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceEnsureIndexState(this js.
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -929,7 +929,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceEnsureIndexState(this js.
 	// Call service method
 	resp, err := exports.IndexerService.EnsureIndexState(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -939,25 +939,25 @@ func (exports *Weewar_v1ServicesExports) indexerServiceEnsureIndexState(this js.
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // indexerServiceGetIndexStates handles the GetIndexStates method for IndexerService
 func (exports *Weewar_v1ServicesExports) indexerServiceGetIndexStates(this js.Value, args []js.Value) any {
 	if exports.IndexerService == nil {
-		return createJSResponse(false, "IndexerService not initialized", nil)
+		return wasm.CreateJSResponse(false, "IndexerService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -967,7 +967,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceGetIndexStates(this js.Va
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -977,7 +977,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceGetIndexStates(this js.Va
 	// Call service method
 	resp, err := exports.IndexerService.GetIndexStates(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -987,25 +987,25 @@ func (exports *Weewar_v1ServicesExports) indexerServiceGetIndexStates(this js.Va
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // indexerServiceListIndexStates handles the ListIndexStates method for IndexerService
 func (exports *Weewar_v1ServicesExports) indexerServiceListIndexStates(this js.Value, args []js.Value) any {
 	if exports.IndexerService == nil {
-		return createJSResponse(false, "IndexerService not initialized", nil)
+		return wasm.CreateJSResponse(false, "IndexerService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1015,7 +1015,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceListIndexStates(this js.V
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1025,7 +1025,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceListIndexStates(this js.V
 	// Call service method
 	resp, err := exports.IndexerService.ListIndexStates(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1035,25 +1035,25 @@ func (exports *Weewar_v1ServicesExports) indexerServiceListIndexStates(this js.V
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // indexerServiceDeleteIndexStates handles the DeleteIndexStates method for IndexerService
 func (exports *Weewar_v1ServicesExports) indexerServiceDeleteIndexStates(this js.Value, args []js.Value) any {
 	if exports.IndexerService == nil {
-		return createJSResponse(false, "IndexerService not initialized", nil)
+		return wasm.CreateJSResponse(false, "IndexerService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1063,7 +1063,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceDeleteIndexStates(this js
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1073,7 +1073,7 @@ func (exports *Weewar_v1ServicesExports) indexerServiceDeleteIndexStates(this js
 	// Call service method
 	resp, err := exports.IndexerService.DeleteIndexStates(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1083,25 +1083,25 @@ func (exports *Weewar_v1ServicesExports) indexerServiceDeleteIndexStates(this js
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // singletonInitializerServiceInitializeSingleton handles the InitializeSingleton method for SingletonInitializerService
 func (exports *Weewar_v1ServicesExports) singletonInitializerServiceInitializeSingleton(this js.Value, args []js.Value) any {
 	if exports.SingletonInitializerService == nil {
-		return createJSResponse(false, "SingletonInitializerService not initialized", nil)
+		return wasm.CreateJSResponse(false, "SingletonInitializerService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1111,7 +1111,7 @@ func (exports *Weewar_v1ServicesExports) singletonInitializerServiceInitializeSi
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1121,7 +1121,7 @@ func (exports *Weewar_v1ServicesExports) singletonInitializerServiceInitializeSi
 	// Call service method
 	resp, err := exports.SingletonInitializerService.InitializeSingleton(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1131,25 +1131,25 @@ func (exports *Weewar_v1ServicesExports) singletonInitializerServiceInitializeSi
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gameViewPresenterInitializeGame handles the InitializeGame method for GameViewPresenter
 func (exports *Weewar_v1ServicesExports) gameViewPresenterInitializeGame(this js.Value, args []js.Value) any {
 	if exports.GameViewPresenter == nil {
-		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+		return wasm.CreateJSResponse(false, "GameViewPresenter not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1159,7 +1159,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterInitializeGame(this js
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1169,7 +1169,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterInitializeGame(this js
 	// Call service method
 	resp, err := exports.GameViewPresenter.InitializeGame(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1179,25 +1179,25 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterInitializeGame(this js
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gameViewPresenterClientReady handles the ClientReady method for GameViewPresenter
 func (exports *Weewar_v1ServicesExports) gameViewPresenterClientReady(this js.Value, args []js.Value) any {
 	if exports.GameViewPresenter == nil {
-		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+		return wasm.CreateJSResponse(false, "GameViewPresenter not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1207,7 +1207,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterClientReady(this js.Va
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1217,7 +1217,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterClientReady(this js.Va
 	// Call service method
 	resp, err := exports.GameViewPresenter.ClientReady(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1227,25 +1227,25 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterClientReady(this js.Va
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gameViewPresenterSceneClicked handles the SceneClicked method for GameViewPresenter
 func (exports *Weewar_v1ServicesExports) gameViewPresenterSceneClicked(this js.Value, args []js.Value) any {
 	if exports.GameViewPresenter == nil {
-		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+		return wasm.CreateJSResponse(false, "GameViewPresenter not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1255,7 +1255,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterSceneClicked(this js.V
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1265,7 +1265,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterSceneClicked(this js.V
 	// Call service method
 	resp, err := exports.GameViewPresenter.SceneClicked(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1275,25 +1275,25 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterSceneClicked(this js.V
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gameViewPresenterTurnOptionClicked handles the TurnOptionClicked method for GameViewPresenter
 func (exports *Weewar_v1ServicesExports) gameViewPresenterTurnOptionClicked(this js.Value, args []js.Value) any {
 	if exports.GameViewPresenter == nil {
-		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+		return wasm.CreateJSResponse(false, "GameViewPresenter not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1303,7 +1303,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterTurnOptionClicked(this
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1313,7 +1313,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterTurnOptionClicked(this
 	// Call service method
 	resp, err := exports.GameViewPresenter.TurnOptionClicked(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1323,25 +1323,25 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterTurnOptionClicked(this
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gameViewPresenterEndTurnButtonClicked handles the EndTurnButtonClicked method for GameViewPresenter
 func (exports *Weewar_v1ServicesExports) gameViewPresenterEndTurnButtonClicked(this js.Value, args []js.Value) any {
 	if exports.GameViewPresenter == nil {
-		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+		return wasm.CreateJSResponse(false, "GameViewPresenter not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1351,7 +1351,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterEndTurnButtonClicked(t
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1361,7 +1361,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterEndTurnButtonClicked(t
 	// Call service method
 	resp, err := exports.GameViewPresenter.EndTurnButtonClicked(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1371,25 +1371,25 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterEndTurnButtonClicked(t
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // gameViewPresenterBuildOptionClicked handles the BuildOptionClicked method for GameViewPresenter
 func (exports *Weewar_v1ServicesExports) gameViewPresenterBuildOptionClicked(this js.Value, args []js.Value) any {
 	if exports.GameViewPresenter == nil {
-		return createJSResponse(false, "GameViewPresenter not initialized", nil)
+		return wasm.CreateJSResponse(false, "GameViewPresenter not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1399,7 +1399,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterBuildOptionClicked(thi
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1409,7 +1409,7 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterBuildOptionClicked(thi
 	// Call service method
 	resp, err := exports.GameViewPresenter.BuildOptionClicked(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1419,25 +1419,25 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterBuildOptionClicked(thi
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // usersServiceCreateUser handles the CreateUser method for UsersService
 func (exports *Weewar_v1ServicesExports) usersServiceCreateUser(this js.Value, args []js.Value) any {
 	if exports.UsersService == nil {
-		return createJSResponse(false, "UsersService not initialized", nil)
+		return wasm.CreateJSResponse(false, "UsersService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1447,7 +1447,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceCreateUser(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1457,7 +1457,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceCreateUser(this js.Value, a
 	// Call service method
 	resp, err := exports.UsersService.CreateUser(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1467,25 +1467,25 @@ func (exports *Weewar_v1ServicesExports) usersServiceCreateUser(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // usersServiceGetUsers handles the GetUsers method for UsersService
 func (exports *Weewar_v1ServicesExports) usersServiceGetUsers(this js.Value, args []js.Value) any {
 	if exports.UsersService == nil {
-		return createJSResponse(false, "UsersService not initialized", nil)
+		return wasm.CreateJSResponse(false, "UsersService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1495,7 +1495,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceGetUsers(this js.Value, arg
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1505,7 +1505,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceGetUsers(this js.Value, arg
 	// Call service method
 	resp, err := exports.UsersService.GetUsers(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1515,25 +1515,25 @@ func (exports *Weewar_v1ServicesExports) usersServiceGetUsers(this js.Value, arg
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // usersServiceListUsers handles the ListUsers method for UsersService
 func (exports *Weewar_v1ServicesExports) usersServiceListUsers(this js.Value, args []js.Value) any {
 	if exports.UsersService == nil {
-		return createJSResponse(false, "UsersService not initialized", nil)
+		return wasm.CreateJSResponse(false, "UsersService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1543,7 +1543,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceListUsers(this js.Value, ar
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1553,7 +1553,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceListUsers(this js.Value, ar
 	// Call service method
 	resp, err := exports.UsersService.ListUsers(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1563,25 +1563,25 @@ func (exports *Weewar_v1ServicesExports) usersServiceListUsers(this js.Value, ar
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // usersServiceGetUser handles the GetUser method for UsersService
 func (exports *Weewar_v1ServicesExports) usersServiceGetUser(this js.Value, args []js.Value) any {
 	if exports.UsersService == nil {
-		return createJSResponse(false, "UsersService not initialized", nil)
+		return wasm.CreateJSResponse(false, "UsersService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1591,7 +1591,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceGetUser(this js.Value, args
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1601,7 +1601,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceGetUser(this js.Value, args
 	// Call service method
 	resp, err := exports.UsersService.GetUser(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1611,25 +1611,25 @@ func (exports *Weewar_v1ServicesExports) usersServiceGetUser(this js.Value, args
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // usersServiceDeleteUser handles the DeleteUser method for UsersService
 func (exports *Weewar_v1ServicesExports) usersServiceDeleteUser(this js.Value, args []js.Value) any {
 	if exports.UsersService == nil {
-		return createJSResponse(false, "UsersService not initialized", nil)
+		return wasm.CreateJSResponse(false, "UsersService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1639,7 +1639,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceDeleteUser(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1649,7 +1649,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceDeleteUser(this js.Value, a
 	// Call service method
 	resp, err := exports.UsersService.DeleteUser(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1659,25 +1659,25 @@ func (exports *Weewar_v1ServicesExports) usersServiceDeleteUser(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // usersServiceUpdateUser handles the UpdateUser method for UsersService
 func (exports *Weewar_v1ServicesExports) usersServiceUpdateUser(this js.Value, args []js.Value) any {
 	if exports.UsersService == nil {
-		return createJSResponse(false, "UsersService not initialized", nil)
+		return wasm.CreateJSResponse(false, "UsersService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1687,7 +1687,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceUpdateUser(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1697,7 +1697,7 @@ func (exports *Weewar_v1ServicesExports) usersServiceUpdateUser(this js.Value, a
 	// Call service method
 	resp, err := exports.UsersService.UpdateUser(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1707,25 +1707,25 @@ func (exports *Weewar_v1ServicesExports) usersServiceUpdateUser(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // worldsServiceCreateWorld handles the CreateWorld method for WorldsService
 func (exports *Weewar_v1ServicesExports) worldsServiceCreateWorld(this js.Value, args []js.Value) any {
 	if exports.WorldsService == nil {
-		return createJSResponse(false, "WorldsService not initialized", nil)
+		return wasm.CreateJSResponse(false, "WorldsService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1735,7 +1735,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceCreateWorld(this js.Value,
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1745,7 +1745,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceCreateWorld(this js.Value,
 	// Call service method
 	resp, err := exports.WorldsService.CreateWorld(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1755,25 +1755,25 @@ func (exports *Weewar_v1ServicesExports) worldsServiceCreateWorld(this js.Value,
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // worldsServiceGetWorlds handles the GetWorlds method for WorldsService
 func (exports *Weewar_v1ServicesExports) worldsServiceGetWorlds(this js.Value, args []js.Value) any {
 	if exports.WorldsService == nil {
-		return createJSResponse(false, "WorldsService not initialized", nil)
+		return wasm.CreateJSResponse(false, "WorldsService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1783,7 +1783,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceGetWorlds(this js.Value, a
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1793,7 +1793,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceGetWorlds(this js.Value, a
 	// Call service method
 	resp, err := exports.WorldsService.GetWorlds(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1803,25 +1803,25 @@ func (exports *Weewar_v1ServicesExports) worldsServiceGetWorlds(this js.Value, a
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // worldsServiceListWorlds handles the ListWorlds method for WorldsService
 func (exports *Weewar_v1ServicesExports) worldsServiceListWorlds(this js.Value, args []js.Value) any {
 	if exports.WorldsService == nil {
-		return createJSResponse(false, "WorldsService not initialized", nil)
+		return wasm.CreateJSResponse(false, "WorldsService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1831,7 +1831,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceListWorlds(this js.Value, 
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1841,7 +1841,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceListWorlds(this js.Value, 
 	// Call service method
 	resp, err := exports.WorldsService.ListWorlds(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1851,25 +1851,25 @@ func (exports *Weewar_v1ServicesExports) worldsServiceListWorlds(this js.Value, 
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // worldsServiceGetWorld handles the GetWorld method for WorldsService
 func (exports *Weewar_v1ServicesExports) worldsServiceGetWorld(this js.Value, args []js.Value) any {
 	if exports.WorldsService == nil {
-		return createJSResponse(false, "WorldsService not initialized", nil)
+		return wasm.CreateJSResponse(false, "WorldsService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1879,7 +1879,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceGetWorld(this js.Value, ar
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1889,7 +1889,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceGetWorld(this js.Value, ar
 	// Call service method
 	resp, err := exports.WorldsService.GetWorld(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1899,25 +1899,25 @@ func (exports *Weewar_v1ServicesExports) worldsServiceGetWorld(this js.Value, ar
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // worldsServiceDeleteWorld handles the DeleteWorld method for WorldsService
 func (exports *Weewar_v1ServicesExports) worldsServiceDeleteWorld(this js.Value, args []js.Value) any {
 	if exports.WorldsService == nil {
-		return createJSResponse(false, "WorldsService not initialized", nil)
+		return wasm.CreateJSResponse(false, "WorldsService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1927,7 +1927,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceDeleteWorld(this js.Value,
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1937,7 +1937,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceDeleteWorld(this js.Value,
 	// Call service method
 	resp, err := exports.WorldsService.DeleteWorld(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1947,25 +1947,25 @@ func (exports *Weewar_v1ServicesExports) worldsServiceDeleteWorld(this js.Value,
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }
 
 // worldsServiceUpdateWorld handles the UpdateWorld method for WorldsService
 func (exports *Weewar_v1ServicesExports) worldsServiceUpdateWorld(this js.Value, args []js.Value) any {
 	if exports.WorldsService == nil {
-		return createJSResponse(false, "WorldsService not initialized", nil)
+		return wasm.CreateJSResponse(false, "WorldsService not initialized", nil)
 	}
 	// Synchronous method
 	if len(args) < 1 {
-		return createJSResponse(false, "Request JSON required", nil)
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
 	}
 
 	requestJSON := args[0].String()
 	if requestJSON == "" {
-		return createJSResponse(false, "Request JSON is empty", nil)
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
 	}
 
 	// Parse request
@@ -1975,7 +1975,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceUpdateWorld(this js.Value,
 		DiscardUnknown: true,
 		AllowPartial:   true, // Allow partial messages for better compatibility
 	}); err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
 	}
 
 	// Create context with timeout
@@ -1985,7 +1985,7 @@ func (exports *Weewar_v1ServicesExports) worldsServiceUpdateWorld(this js.Value,
 	// Call service method
 	resp, err := exports.WorldsService.UpdateWorld(ctx, req)
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}
 
 	// Marshal response with options for better TypeScript compatibility
@@ -1995,8 +1995,8 @@ func (exports *Weewar_v1ServicesExports) worldsServiceUpdateWorld(this js.Value,
 		UseEnumNumbers:  false, // Use enum string values
 	})
 	if err != nil {
-		return createJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
 	}
 
-	return createJSResponse(true, "Success", json.RawMessage(responseJSON))
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
 }

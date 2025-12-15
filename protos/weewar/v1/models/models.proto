@@ -750,6 +750,7 @@ message PathEdge {
   double total_cost = 6;        // Total cumulative cost from source to 'to'
   string terrain_type = 7;     // e.g., "mountain", "plains", "forest"
   string explanation = 8;      // e.g., "Mountain costs Soldier 4 movement points"
+  bool is_occupied = 9;        // True if destination tile has a friendly unit (pass-through only, cannot land)
 }
 
 // Full path from source to destination (constructed on-demand from AllPaths)

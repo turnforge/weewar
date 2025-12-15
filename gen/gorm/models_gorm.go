@@ -410,8 +410,8 @@ type GameMoveGORM struct {
 	Player      int32
 	GroupNumber int64 `gorm:"primaryKey"`
 	MoveNumber  int64 `gorm:"primaryKey"`
-	Version     int64
 	Timestamp   time.Time
+	Version     int64
 	MoveType    []byte `gorm:"serializer:json"`
 	SequenceNum int64
 	IsPermanent bool

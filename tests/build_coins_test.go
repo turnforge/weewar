@@ -231,7 +231,7 @@ func TestBuildUnit_CoinsPersistence(t *testing.T) {
 	}
 
 	// Copy all files from testgame-template
-	templateDir := "testgame-template"
+	templateDir := "testgame"
 	for _, filename := range []string{"metadata.json", "state.json", "history.json"} {
 		srcPath := filepath.Join(templateDir, filename)
 		dstPath := filepath.Join(gameDir, filename)

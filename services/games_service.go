@@ -119,7 +119,7 @@ func (s *BaseGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMove
 }
 
 // GetOptionsAt returns all available options at a specific position
-func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsAtRequest) (*v1.GetOptionsAtResponse, error) {
+func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsAtRequest) (out *v1.GetOptionsAtResponse, err error) {
 	// Load game data using the service implementation
 	gameresp, err := s.Self.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
 	if err != nil || gameresp.Game == nil {
@@ -153,206 +153,42 @@ func (s *BaseGamesService) GetOptionsAt(ctx context.Context, req *v1.GetOptionsA
 	// Check what's at this position
 	unit := rtGame.World.UnitAt(AxialCoord{Q: int(req.Q), R: int(req.R)})
 
+	out = &v1.GetOptionsAtResponse{
+		Options:         []*v1.GameOption{},
+		CurrentPlayer:   gameresp.State.CurrentPlayer,
+		GameInitialized: false,
+	}
+
 	// Lazy top-up: If this is a unit, ensure it's refreshed for the current turn
 	if unit != nil {
 		if err := rtGame.TopUpUnitIfNeeded(unit); err != nil {
-			return &v1.GetOptionsAtResponse{
-				Options:         []*v1.GameOption{},
-				CurrentPlayer:   gameresp.State.CurrentPlayer,
-				GameInitialized: false,
-			}, fmt.Errorf("failed to top-up unit: %w", err)
+			return out, fmt.Errorf("failed to top-up unit: %w", err)
 		}
 	}
 
 	// Check if there's a tile at this position and get its actions
 	tile := rtGame.World.TileAt(AxialCoord{Q: int(req.Q), R: int(req.R)})
-	if tile != nil {
-		// Lazy top-up: Ensure tile is refreshed for the current turn
-		if err := rtGame.TopUpTileIfNeeded(tile); err != nil {
-			return &v1.GetOptionsAtResponse{
-				Options:         []*v1.GameOption{},
-				CurrentPlayer:   gameresp.State.CurrentPlayer,
-				GameInitialized: false,
-			}, fmt.Errorf("failed to top-up tile: %w", err)
-		}
-
-		// Only check tile actions if tile belongs to current player AND no unit is on the tile
-		if tile.Player == rtGame.CurrentPlayer && unit == nil {
-			// Get terrain definition for tile-specific actions
-			terrainDef, err := rtGame.RulesEngine.GetTerrainData(tile.TileType)
-			if err == nil {
-				// Get current player's coins (from GameState.PlayerStates)
-				playerCoins := int32(0)
-				if playerState := rtGame.GameState.PlayerStates[rtGame.CurrentPlayer]; playerState != nil {
-					playerCoins = playerState.Coins
-				}
-
-				// Get allowed actions for this tile
-				tileActions := rtGame.RulesEngine.GetAllowedActionsForTile(tile, terrainDef, playerCoins)
-
-				// Generate options based on allowed tile actions
-				for _, action := range tileActions {
-					switch action {
-					case "build":
-						// Filter buildable units by game's allowed units setting
-						buildableUnits := FilterBuildOptionsByAllowedUnits(
-							terrainDef.BuildableUnitIds,
-							rtGame.Config.Settings.GetAllowedUnits(),
-						)
-
-						// Generate build unit options from filtered buildable units
-						for _, unitTypeID := range buildableUnits {
-							// Get unit definition to retrieve cost
-							unitDef, err := rtGame.RulesEngine.GetUnitData(unitTypeID)
-							if err != nil {
-								continue // Skip if we can't get unit definition
-							}
-
-							// Only show units the player can afford
-							if unitDef.Coins <= playerCoins {
-								options = append(options, &v1.GameOption{
-									OptionType: &v1.GameOption_Build{
-										Build: &v1.BuildUnitAction{
-											Q:        req.Q,
-											R:        req.R,
-											UnitType: unitTypeID,
-											Cost:     unitDef.Coins,
-										},
-									},
-								})
-							}
-						}
-					}
-				}
-			}
-		}
+	if unit == nil {
+		options, err = s.GetTileOptions(ctx, rtGame, tile)
+	} else {
+		options, allPaths, err = s.GetUnitOptions(ctx, rtGame, unit)
 	}
-
-	if unit != nil {
-		// Our unit - get available options based on action progression
-		var dmp lib.MoveProcessor
-
-		// Get unit definition for progression rules
-		unitDef, err := rtGame.RulesEngine.GetUnitData(unit.UnitType)
-		if err != nil {
-			// If we can't get unit def, default to all actions
-			unitDef = &v1.UnitDefinition{
-				ActionOrder: []string{"move", "attack|capture"},
-			}
-		}
-
-		// Get allowed actions based on progression state
-		allowedActions := rtGame.RulesEngine.GetAllowedActionsForUnit(unit, unitDef)
-
-		// Check if "move" is allowed at current progression step
-		moveAllowed := lib.ContainsAction(allowedActions, "move")
-
-		// Track how many move options we actually found
-		moveOptionCount := 0
-
-		// Get movement options if unit has movement left and move is allowed
-		if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 && moveAllowed {
-			pathsResult, err := dmp.GetMovementOptions(rtGame, req.Q, req.R, false)
-			if err == nil {
-				allPaths = pathsResult
-
-				// Create move options from AllPaths
-				for key, edge := range allPaths.Edges {
-					// Skip occupied tiles - can pass through but not land on them
-					if edge.IsOccupied {
-						continue
-					}
-
-					path, err := ReconstructPath(allPaths, edge.ToQ, edge.ToR)
-					if err != nil {
-						panic(err)
-					}
-
-					// Create ready-to-use MoveUnitAction
-					moveAction := &v1.MoveUnitAction{
-						FromQ:             req.Q,
-						FromR:             req.R,
-						ToQ:               edge.ToQ,
-						ToR:               edge.ToR,
-						MovementCost:      edge.TotalCost,
-						ReconstructedPath: path,
-					}
-
-					options = append(options, &v1.GameOption{
-						OptionType: &v1.GameOption_Move{Move: moveAction},
-					})
-					moveOptionCount++
-					_ = key // Using key just to avoid unused variable warning
-				}
-			}
-		}
-
-		// Check if "attack" is allowed at current progression step
-		attackAllowed := lib.ContainsAction(allowedActions, "attack")
-
-		// Auto-advance: If move was allowed but we got no move options (or no distance left),
-		// check if the next step allows attack. This handles cases where:
-		// 1. Unit has some DistanceLeft but no reachable tiles (surrounded)
-		// 2. Unit has no DistanceLeft but hasn't formally advanced progression yet
-		if !attackAllowed && moveAllowed && moveOptionCount == 0 {
-			// Temporarily check next progression step's allowed actions
-			nextStepUnit := &v1.Unit{
-				ProgressionStep:   unit.ProgressionStep + 1,
-				ChosenAlternative: "",
-				DistanceLeft:      0, // Doesn't matter for attack check
-			}
-			nextAllowedActions := rtGame.RulesEngine.GetAllowedActionsForUnit(nextStepUnit, unitDef)
-			attackAllowed = lib.ContainsAction(nextAllowedActions, "attack")
-		}
-
-		// Get attack options if unit can attack and attack is allowed
-		if unit.AvailableHealth > 0 && attackAllowed {
-			attackCoords, err := dmp.GetAttackOptions(rtGame, req.Q, req.R)
-			if err == nil {
-				for _, coord := range attackCoords {
-					// Get target unit info for rich attack option data
-					targetUnit := rtGame.World.UnitAt(coord)
-					if targetUnit != nil {
-						// Calculate estimated damage (simplified for now)
-						damageEstimate := int32(50) // TODO: Use proper damage calculation from rules engine
-
-						// Create ready-to-use AttackUnitAction
-						attackAction := &v1.AttackUnitAction{
-							AttackerQ:        req.Q,
-							AttackerR:        req.R,
-							DefenderQ:        int32(coord.Q),
-							DefenderR:        int32(coord.R),
-							TargetUnitType:   targetUnit.UnitType,
-							TargetUnitHealth: targetUnit.AvailableHealth,
-							CanAttack:        true,
-							DamageEstimate:   damageEstimate,
-						}
-
-						options = append(options, &v1.GameOption{
-							OptionType: &v1.GameOption_Attack{Attack: attackAction},
-						})
-					}
-				}
-			}
-		}
-
-		// TODO: Add capture building options if "capture" is allowed
-		// TODO: Add build unit options if "build" is allowed
+	if err != nil {
+		return out, err
 	}
-
-	// Note: End turn is always available as a global action, so we don't include it in tile-specific options
 
 	// Sort it for convinience too
 	sort.Slice(options, func(i, j int) bool {
 		return lib.GameOptionLess(options[i], options[j])
 	})
 
-	return &v1.GetOptionsAtResponse{
+	out = &v1.GetOptionsAtResponse{
 		Options:         options,
 		CurrentPlayer:   rtGame.CurrentPlayer,
 		GameInitialized: rtGame != nil && rtGame.World != nil,
 		AllPaths:        allPaths,
-	}, nil
+	}
+	return
 }
 
 func (b *BaseGamesService) ApplyChangeResults(changes []*v1.GameMove, rtGame *lib.Game, game *v1.Game, state *v1.GameState) error {
@@ -418,6 +254,8 @@ func (b *BaseGamesService) applyUnitMoved(change *v1.UnitMovedChange, rtGame *li
 	unit.DistanceLeft = change.UpdatedUnit.DistanceLeft
 	unit.LastActedTurn = change.UpdatedUnit.LastActedTurn
 	unit.LastToppedupTurn = change.UpdatedUnit.LastToppedupTurn
+	unit.ProgressionStep = change.UpdatedUnit.ProgressionStep
+	unit.ChosenAlternative = change.UpdatedUnit.ChosenAlternative
 
 	// Remove from old position and add to new position
 	return rtGame.World.MoveUnit(unit, toCoord)
@@ -441,6 +279,8 @@ func (b *BaseGamesService) applyUnitDamaged(change *v1.UnitDamagedChange, rtGame
 	unit.DistanceLeft = change.UpdatedUnit.DistanceLeft
 	unit.LastActedTurn = change.UpdatedUnit.LastActedTurn
 	unit.LastToppedupTurn = change.UpdatedUnit.LastToppedupTurn
+	unit.ProgressionStep = change.UpdatedUnit.ProgressionStep
+	unit.ChosenAlternative = change.UpdatedUnit.ChosenAlternative
 	return nil
 }
 
@@ -646,4 +486,190 @@ func (s *BaseGamesService) SimulateAttack(ctx context.Context, req *v1.SimulateA
 	resp.DefenderKillProbability = float64(defenderKillCount) / float64(numSims)
 
 	return resp, nil
+}
+
+func (s *BaseGamesService) GetUnitOptions(ctx context.Context, rtGame *lib.Game, unit *v1.Unit) (options []*v1.GameOption, allPaths *v1.AllPaths, err error) {
+
+	// Our unit - get available options based on action progression
+	var dmp lib.MoveProcessor
+
+	// Get unit definition for progression rules
+	unitDef, err := rtGame.RulesEngine.GetUnitData(unit.UnitType)
+	if err != nil {
+		// If we can't get unit def, default to all actions
+		unitDef = &v1.UnitDefinition{
+			ActionOrder: []string{"move", "attack|capture"},
+		}
+	}
+
+	// Get allowed actions based on progression state
+	allowedActions := rtGame.RulesEngine.GetAllowedActionsForUnit(unit, unitDef)
+
+	// Check if "move" or "retreat" is allowed at current progression step
+	// Both use movement/retreat points and generate movement options
+	moveAllowed := lib.ContainsAction(allowedActions, "move")
+	retreatAllowed := lib.ContainsAction(allowedActions, "retreat")
+
+	// Track how many move options we actually found
+	moveOptionCount := 0
+
+	// Get movement options if unit has movement/retreat left and move or retreat is allowed
+	if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 && (moveAllowed || retreatAllowed) {
+		pathsResult, err := dmp.GetMovementOptions(rtGame, unit.Q, unit.R, false)
+		if err == nil {
+			allPaths = pathsResult
+
+			// Create move options from AllPaths
+			for key, edge := range allPaths.Edges {
+				// Skip occupied tiles - can pass through but not land on them
+				if edge.IsOccupied {
+					continue
+				}
+
+				path, err := ReconstructPath(allPaths, edge.ToQ, edge.ToR)
+				if err != nil {
+					panic(err)
+				}
+
+				// Create ready-to-use MoveUnitAction
+				moveAction := &v1.MoveUnitAction{
+					FromQ:             unit.Q,
+					FromR:             unit.R,
+					ToQ:               edge.ToQ,
+					ToR:               edge.ToR,
+					MovementCost:      edge.TotalCost,
+					ReconstructedPath: path,
+				}
+
+				options = append(options, &v1.GameOption{
+					OptionType: &v1.GameOption_Move{Move: moveAction},
+				})
+				moveOptionCount++
+				_ = key // Using key just to avoid unused variable warning
+			}
+		}
+	}
+
+	// Check if "attack" is allowed at current progression step
+	attackAllowed := lib.ContainsAction(allowedActions, "attack")
+
+	// Look-ahead for point-based steps: "move" and "retreat" are steps that consume points
+	// but don't require exhausting ALL points before moving to the next step.
+	// When at a point-based step, also include the next step's actions so the user
+	// can choose to stop moving/retreating and do the next action (e.g., attack).
+	isPointBasedStep := moveAllowed || retreatAllowed
+	if isPointBasedStep && !attackAllowed {
+		// Check next progression step's allowed actions
+		nextStepUnit := &v1.Unit{
+			ProgressionStep:   unit.ProgressionStep + 1,
+			ChosenAlternative: "",
+			DistanceLeft:      0, // Doesn't matter for non-movement checks
+		}
+		nextAllowedActions := rtGame.RulesEngine.GetAllowedActionsForUnit(nextStepUnit, unitDef)
+		attackAllowed = lib.ContainsAction(nextAllowedActions, "attack")
+	}
+
+	// Get attack options if unit can attack and attack is allowed
+	if unit.AvailableHealth > 0 && attackAllowed {
+		attackCoords, err := dmp.GetAttackOptions(rtGame, unit.Q, unit.R)
+		if err == nil {
+			for _, coord := range attackCoords {
+				// Get target unit info for rich attack option data
+				targetUnit := rtGame.World.UnitAt(coord)
+				if targetUnit != nil {
+					// Calculate estimated damage (simplified for now)
+					damageEstimate := int32(50) // TODO: Use proper damage calculation from rules engine
+
+					// Create ready-to-use AttackUnitAction
+					attackAction := &v1.AttackUnitAction{
+						AttackerQ:        unit.Q,
+						AttackerR:        unit.R,
+						DefenderQ:        int32(coord.Q),
+						DefenderR:        int32(coord.R),
+						TargetUnitType:   targetUnit.UnitType,
+						TargetUnitHealth: targetUnit.AvailableHealth,
+						CanAttack:        true,
+						DamageEstimate:   damageEstimate,
+					}
+
+					options = append(options, &v1.GameOption{
+						OptionType: &v1.GameOption_Attack{Attack: attackAction},
+					})
+				}
+			}
+		}
+	}
+
+	// TODO: Add capture building options if "capture" is allowed
+	// TODO: Add build unit options if "build" is allowed
+	return
+}
+
+func (s *BaseGamesService) GetTileOptions(ctx context.Context, rtGame *lib.Game, tile *v1.Tile) (options []*v1.GameOption, err error) {
+	if tile == nil {
+		return nil, nil
+	}
+	// Lazy top-up: Ensure tile is refreshed for the current turn
+	if err := rtGame.TopUpTileIfNeeded(tile); err != nil {
+		return nil, fmt.Errorf("failed to top-up tile: %w", err)
+		/*
+			return &v1.GetOptionsAtResponse{
+				Options:         []*v1.GameOption{},
+				CurrentPlayer:   gameresp.State.CurrentPlayer,
+				GameInitialized: false,
+			},
+		*/
+	}
+
+	// Only check tile actions if tile belongs to current player AND no unit is on the tile
+	if tile.Player == rtGame.CurrentPlayer {
+		// Get terrain definition for tile-specific actions
+		terrainDef, err := rtGame.RulesEngine.GetTerrainData(tile.TileType)
+		if err == nil {
+			// Get current player's coins (from GameState.PlayerStates)
+			playerCoins := int32(0)
+			if playerState := rtGame.GameState.PlayerStates[rtGame.CurrentPlayer]; playerState != nil {
+				playerCoins = playerState.Coins
+			}
+
+			// Get allowed actions for this tile
+			tileActions := rtGame.RulesEngine.GetAllowedActionsForTile(tile, terrainDef, playerCoins)
+
+			// Generate options based on allowed tile actions
+			for _, action := range tileActions {
+				switch action {
+				case "build":
+					// Filter buildable units by game's allowed units setting
+					buildableUnits := FilterBuildOptionsByAllowedUnits(
+						terrainDef.BuildableUnitIds,
+						rtGame.Config.Settings.GetAllowedUnits(),
+					)
+
+					// Generate build unit options from filtered buildable units
+					for _, unitTypeID := range buildableUnits {
+						// Get unit definition to retrieve cost
+						unitDef, err := rtGame.RulesEngine.GetUnitData(unitTypeID)
+						if err != nil {
+							continue // Skip if we can't get unit definition
+						}
+
+						// Only show units the player can afford
+						if unitDef.Coins <= playerCoins {
+							options = append(options, &v1.GameOption{
+								OptionType: &v1.GameOption_Build{
+									Build: &v1.BuildUnitAction{
+										Q:        tile.Q,
+										R:        tile.R,
+										UnitType: unitTypeID,
+										Cost:     unitDef.Coins,
+									},
+								},
+							})
+						}
+					}
+				}
+			}
+		}
+	}
+	return
 }

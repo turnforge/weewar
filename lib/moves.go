@@ -553,6 +553,14 @@ func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1
 		// Since attack was performed, advance to next step
 		attacker.ProgressionStep++
 		attacker.ChosenAlternative = "" // Clear for next step
+
+		// If next step is "retreat", set DistanceLeft to retreat_points
+		if int(attacker.ProgressionStep) < len(actionOrder) {
+			nextStepAction := actionOrder[attacker.ProgressionStep]
+			if nextStepAction == "retreat" {
+				attacker.DistanceLeft = unitDef.RetreatPoints
+			}
+		}
 	}
 
 	// Record attack in defender's history for future wound bonus calculations

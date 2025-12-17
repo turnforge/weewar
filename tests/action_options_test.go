@@ -184,6 +184,106 @@ func TestGetOptionsAt_AfterFullMove(t *testing.T) {
 	t.Logf("Got %d total options, %d attack options", len(resp.Options), attackOptionCount)
 }
 
+// TestGetOptionsAt_PartialMoveShowsBothMoveAndAttack tests that after a partial move,
+// the unit should show BOTH remaining move options AND attack options.
+// This is the helicopter scenario: move TR,TR,TR then should be able to attack.
+func TestGetOptionsAt_PartialMoveShowsBothMoveAndAttack(t *testing.T) {
+	// Scenario: Helicopter (type 17) with action_order ["move", "attack", "retreat"]
+	// After partial move, still has DistanceLeft=2, progression_step=0
+	// Should show BOTH move options (can still move) AND attack options (enemy adjacent)
+
+	game := &v1.Game{
+		Id:   "test-game",
+		Name: "Test Game",
+		Config: &v1.GameConfiguration{
+			Settings: &v1.GameSettings{},
+		},
+	}
+
+	gameState := &v1.GameState{
+		CurrentPlayer: 1,
+		TurnCounter:   1,
+		PlayerStates: map[int32]*v1.PlayerState{
+			1: {Coins: 1000},
+			2: {Coins: 1000},
+		},
+		WorldData: &v1.WorldData{
+			TilesMap: map[string]*v1.Tile{
+				"0,0": {Q: 0, R: 0, TileType: 5},   // Grass
+				"1,0": {Q: 1, R: 0, TileType: 5},   // Grass - our helicopter here after partial move
+				"2,0": {Q: 2, R: 0, TileType: 5},   // Grass - enemy helicopter here
+				"-1,0": {Q: -1, R: 0, TileType: 5}, // Grass - can still move here
+				"0,-1": {Q: 0, R: -1, TileType: 5}, // Grass - can still move here
+			},
+			UnitsMap: map[string]*v1.Unit{
+				"1,0": {
+					Q:                1,
+					R:                0,
+					Player:           1,
+					UnitType:         17, // Helicopter - action_order: ["move", "attack", "retreat"]
+					AvailableHealth:  10,
+					DistanceLeft:     2,  // Still has movement left after partial move
+					ProgressionStep:  0,  // Still at move step
+					LastToppedupTurn: 1,
+					Shortcut:         "A5",
+				},
+				"2,0": {
+					Q:                2,
+					R:                0,
+					Player:           2,  // Enemy helicopter
+					UnitType:         17,
+					AvailableHealth:  10,
+					DistanceLeft:     5,
+					LastToppedupTurn: 1,
+					Shortcut:         "B3",
+				},
+			},
+		},
+	}
+
+	gamesService := singleton.NewSingletonGamesService()
+	gamesService.SingletonGame = game
+	gamesService.SingletonGameState = gameState
+	gamesService.SingletonGameMoveHistory = &v1.GameMoveHistory{}
+	gamesService.Self = gamesService
+
+	ctx := context.Background()
+
+	resp, err := gamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+		GameId: "test-game",
+		Q:      1,
+		R:      0,
+	})
+
+	if err != nil {
+		t.Fatalf("GetOptionsAt failed: %v", err)
+	}
+
+	moveOptionCount := 0
+	attackOptionCount := 0
+	for _, opt := range resp.Options {
+		if opt.GetMove() != nil {
+			moveOptionCount++
+		}
+		if opt.GetAttack() != nil {
+			attackOptionCount++
+			t.Logf("Found attack option: attack at (%d,%d)", opt.GetAttack().DefenderQ, opt.GetAttack().DefenderR)
+		}
+	}
+
+	t.Logf("Move options: %d, Attack options: %d, Total: %d", moveOptionCount, attackOptionCount, len(resp.Options))
+
+	// Should have BOTH move options (can still move with remaining MP)
+	// AND attack options (enemy adjacent and attack is next step)
+	if moveOptionCount == 0 {
+		t.Errorf("Expected move options (unit still has DistanceLeft), got 0")
+	}
+
+	if attackOptionCount == 0 {
+		t.Errorf("Expected attack options after partial move, got 0")
+	}
+}
+
 // TestGetOptionsAt_NoMoveOptionsAutoAdvance tests that when a unit has no valid move options
 // (even with some DistanceLeft), it should auto-advance to the next action in action_order.
 func TestGetOptionsAt_NoMoveOptionsAutoAdvance(t *testing.T) {
@@ -295,5 +395,232 @@ func TestGetOptionsAt_NoMoveOptionsAutoAdvance(t *testing.T) {
 
 	if attackOptionCount == 0 {
 		t.Errorf("Expected attack options when surrounded (no move options available), got 0")
+	}
+}
+
+// TestGetOptionsAt_AfterAttackOnlyRetreat tests that after a unit attacks,
+// the next action should be retreat (not attack again).
+// Helicopter action_order: ["move", "attack", "retreat"]
+// After attacking, progression_step=2, so only retreat (shown as move) should be available.
+func TestGetOptionsAt_AfterAttackOnlyRetreat(t *testing.T) {
+	game := &v1.Game{
+		Id:   "test-game",
+		Name: "Test Game",
+		Config: &v1.GameConfiguration{
+			Settings: &v1.GameSettings{},
+		},
+	}
+
+	gameState := &v1.GameState{
+		CurrentPlayer: 1,
+		TurnCounter:   1,
+		PlayerStates: map[int32]*v1.PlayerState{
+			1: {Coins: 1000},
+			2: {Coins: 1000},
+		},
+		WorldData: &v1.WorldData{
+			TilesMap: map[string]*v1.Tile{
+				// Unit at (1,0) - neighbors are: (0,0), (1,-1), (2,-1), (2,0), (1,1), (0,1)
+				"1,0": {Q: 1, R: 0, TileType: 5}, // Our helicopter here after attacking
+				"2,0": {Q: 2, R: 0, TileType: 5}, // Enemy still here (damaged)
+				"0,0": {Q: 0, R: 0, TileType: 5}, // Can retreat here (LEFT neighbor)
+				"0,1": {Q: 0, R: 1, TileType: 5}, // Can retreat here (BOTTOM_LEFT neighbor)
+			},
+			UnitsMap: map[string]*v1.Unit{
+				"1,0": {
+					Q:                1,
+					R:                0,
+					Player:           1,
+					UnitType:         17, // Helicopter - action_order: ["move", "attack", "retreat"]
+					AvailableHealth:  10,
+					DistanceLeft:     2,               // Has retreat points left
+					ProgressionStep:  2,               // At retreat step (after move=0, attack=1)
+					LastToppedupTurn: 1,
+					Shortcut:         "A5",
+				},
+				"2,0": {
+					Q:               2,
+					R:               0,
+					Player:          2,
+					UnitType:        17,
+					AvailableHealth: 5, // Damaged from attack
+					DistanceLeft:    5,
+					Shortcut:        "B3",
+				},
+			},
+		},
+	}
+
+	gamesService := singleton.NewSingletonGamesService()
+	gamesService.SingletonGame = game
+	gamesService.SingletonGameState = gameState
+	gamesService.SingletonGameMoveHistory = &v1.GameMoveHistory{}
+	gamesService.Self = gamesService
+
+	ctx := context.Background()
+
+	resp, err := gamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+		GameId: "test-game",
+		Q:      1,
+		R:      0,
+	})
+
+	if err != nil {
+		t.Fatalf("GetOptionsAt failed: %v", err)
+	}
+
+	moveOptionCount := 0
+	attackOptionCount := 0
+	for _, opt := range resp.Options {
+		if opt.GetMove() != nil {
+			moveOptionCount++
+			t.Logf("Found move/retreat option: move to (%d,%d)", opt.GetMove().ToQ, opt.GetMove().ToR)
+		}
+		if opt.GetAttack() != nil {
+			attackOptionCount++
+			t.Logf("Found attack option: attack at (%d,%d)", opt.GetAttack().DefenderQ, opt.GetAttack().DefenderR)
+		}
+	}
+
+	t.Logf("Move/Retreat options: %d, Attack options: %d, Total: %d",
+		moveOptionCount, attackOptionCount, len(resp.Options))
+
+	// After attacking (progression_step=2), should have NO attack options
+	if attackOptionCount > 0 {
+		t.Errorf("Expected 0 attack options after attacking (progression_step=2), got %d", attackOptionCount)
+	}
+
+	// Should have move options (retreat is shown as move options)
+	if moveOptionCount == 0 {
+		t.Errorf("Expected move/retreat options after attacking, got 0")
+	}
+}
+
+// TestApplyUnitDamaged_ProgressionStepPersisted tests that when applyUnitDamaged
+// is called (after an attack), the ProgressionStep is correctly persisted.
+// This is the actual bug: applyUnitDamaged wasn't copying ProgressionStep.
+func TestApplyUnitDamaged_ProgressionStepPersisted(t *testing.T) {
+	game := &v1.Game{
+		Id:   "test-game",
+		Name: "Test Game",
+		Config: &v1.GameConfiguration{
+			Settings: &v1.GameSettings{},
+		},
+	}
+
+	// Start with helicopter at ProgressionStep=1 (at attack step)
+	gameState := &v1.GameState{
+		CurrentPlayer: 1,
+		TurnCounter:   1,
+		PlayerStates: map[int32]*v1.PlayerState{
+			1: {Coins: 1000},
+			2: {Coins: 1000},
+		},
+		WorldData: &v1.WorldData{
+			TilesMap: map[string]*v1.Tile{
+				// Unit at (1,0) - neighbors are: (0,0), (1,-1), (2,-1), (2,0), (1,1), (0,1)
+				"1,0": {Q: 1, R: 0, TileType: 5}, // Our helicopter
+				"2,0": {Q: 2, R: 0, TileType: 5}, // Enemy here
+				"0,0": {Q: 0, R: 0, TileType: 5}, // Can retreat here (LEFT neighbor)
+				"0,1": {Q: 0, R: 1, TileType: 5}, // Can retreat here (BOTTOM_LEFT neighbor)
+			},
+			UnitsMap: map[string]*v1.Unit{
+				"1,0": {
+					Q:                1,
+					R:                0,
+					Player:           1,
+					UnitType:         17, // Helicopter
+					AvailableHealth:  10,
+					DistanceLeft:     2,
+					ProgressionStep:  1, // At attack step BEFORE attack
+					LastToppedupTurn: 1,
+					Shortcut:         "A5",
+				},
+				"2,0": {
+					Q:               2,
+					R:               0,
+					Player:          2,
+					UnitType:        17,
+					AvailableHealth: 10,
+					DistanceLeft:    5,
+					Shortcut:        "B3",
+				},
+			},
+		},
+	}
+
+	gamesService := singleton.NewSingletonGamesService()
+	gamesService.SingletonGame = game
+	gamesService.SingletonGameState = gameState
+	gamesService.SingletonGameMoveHistory = &v1.GameMoveHistory{}
+	gamesService.Self = gamesService
+
+	ctx := context.Background()
+
+	// Verify we start at progression step 1
+	unit := gameState.WorldData.UnitsMap["1,0"]
+	if unit.ProgressionStep != 1 {
+		t.Fatalf("Expected starting ProgressionStep=1, got %d", unit.ProgressionStep)
+	}
+
+	// Simulate processing an attack by calling ProcessMoves with an attack move
+	// This will generate WorldChanges including UnitDamaged with updated ProgressionStep
+	moveResp, err := gamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+		GameId: "test-game",
+		Moves: []*v1.GameMove{
+			{
+				MoveType: &v1.GameMove_AttackUnit{
+					AttackUnit: &v1.AttackUnitAction{
+						AttackerQ: 1,
+						AttackerR: 0,
+						DefenderQ: 2,
+						DefenderR: 0,
+					},
+				},
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("ProcessMoves failed: %v", err)
+	}
+
+	// The response should contain moves that were processed
+	if len(moveResp.Moves) != 1 {
+		t.Fatalf("Expected 1 move result, got %d", len(moveResp.Moves))
+	}
+
+	// Now check the unit's progression step - it should have advanced to 2
+	resp, err := gamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+		GameId: "test-game",
+		Q:      1,
+		R:      0,
+	})
+
+	if err != nil {
+		t.Fatalf("GetOptionsAt failed: %v", err)
+	}
+
+	attackOptionCount := 0
+	moveOptionCount := 0
+	for _, opt := range resp.Options {
+		if opt.GetAttack() != nil {
+			attackOptionCount++
+		}
+		if opt.GetMove() != nil {
+			moveOptionCount++
+		}
+	}
+
+	t.Logf("Attack options: %d, Move/Retreat options: %d", attackOptionCount, moveOptionCount)
+
+	// After attacking, should have NO attack options (already used attack)
+	if attackOptionCount > 0 {
+		t.Errorf("BUG: After attacking, still showing %d attack options. ProgressionStep not persisted!", attackOptionCount)
+	}
+
+	// Should have move options (retreat is shown as move)
+	if moveOptionCount == 0 {
+		t.Errorf("Expected move/retreat options after attacking, got 0")
 	}
 }

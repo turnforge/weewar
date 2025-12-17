@@ -248,6 +248,10 @@ func (re *RulesEngine) canPerformAction(unit *v1.Unit, unitDef *v1.UnitDefinitio
 		// TODO: Add canBuild flag to UnitDefinition or infer from unit type
 		return true
 
+	case "retreat":
+		// Can retreat if has retreat points remaining (DistanceLeft is set to retreat_points after attack)
+		return unit.DistanceLeft > 0
+
 	default:
 		return false
 	}

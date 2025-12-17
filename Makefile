@@ -148,3 +148,9 @@ ensurenetworks:
 
 dbdirs:
 	mkdir -p ./data/pgdata
+
+snap:
+	cp -r ~/dev-app-data/weewar/storage/games/testgame snapshotairport
+
+restore:
+	cp -r snapshotairport/*.json ~/dev-app-data/weewar/storage/games/testgame/

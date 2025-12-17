@@ -40,6 +40,12 @@ Syntax:
   # Set/capture values (use = without value)
   ww assert unit A1 [health=, distance_left=]
 
+  # Options checks (verify available actions)
+  ww assert options unit A1 [attack B3, move 0,5]
+  ww assert options unit A1 [attacks B1 B2 B3]  # can attack one of
+  ww assert options tile H1 [build trooper, build tank]
+  ww assert options unit A1 [capture L]         # capture tile at direction
+
 Operators:
   =     Set (capture current value, always passes)
   ==    Equals
@@ -107,6 +113,23 @@ type Assertion struct {
 	Operator Operator
 	Value    string   // For single value operators
 	Values   []string // For in/notin operators
+}
+
+// OptionAssertion represents an assertion about available options
+// Syntax: "attack B3" (singular) or "attacks B1 B2 B3" (plural = one of)
+type OptionAssertion struct {
+	OptionType string   // attack, move, build, capture, retreat
+	Targets    []string // Target positions/units/unit-types
+	IsPlural   bool     // True if using plural form (attacks, moves, etc.) - means "one of"
+}
+
+// Valid option types (singular -> plural mapping for parsing)
+var optionTypePlurals = map[string]string{
+	"attacks":  "attack",
+	"moves":    "move",
+	"builds":   "build",
+	"captures": "capture",
+	"retreats": "retreat",
 }
 
 // AssertionResult holds the result of evaluating an assertion
@@ -210,6 +233,11 @@ func parseAndEvaluate(args []string, pc *PresenterContext) ([]AssertionResult, e
 	// Check for exists/notexists first
 	if strings.HasPrefix(input, "exists ") || strings.HasPrefix(input, "notexists ") {
 		return parseExistsAssertions(input, pc)
+	}
+
+	// Check for options assertions
+	if strings.HasPrefix(input, "options ") {
+		return parseOptionsAssertions(input, pc)
 	}
 
 	// Parse entity assertions: entity id [assertions]
@@ -782,4 +810,349 @@ func contains(slice []string, val string) bool {
 		}
 	}
 	return false
+}
+
+// =============================================================================
+// Options Assertions
+// =============================================================================
+
+// parseOptionsAssertions parses "options unit A1 "attack B3" "move 0,5""
+func parseOptionsAssertions(input string, pc *PresenterContext) ([]AssertionResult, error) {
+	// Remove "options " prefix
+	input = strings.TrimPrefix(input, "options ")
+	input = strings.TrimSpace(input)
+
+	// Parse: (unit|tile) id "assertion1" "assertion2" ...
+	// First extract entity type and id
+	parts := strings.Fields(input)
+	if len(parts) < 3 {
+		return nil, fmt.Errorf("options requires: unit/tile id \"assertion\" ...")
+	}
+
+	entityType := parts[0]
+	if entityType != "unit" && entityType != "tile" {
+		return nil, fmt.Errorf("options requires 'unit' or 'tile', got %q", entityType)
+	}
+	entityID := parts[1]
+
+	// Rejoin remaining parts and extract quoted assertions
+	remaining := strings.Join(parts[2:], " ")
+	assertionsStr := extractQuotedStrings(remaining)
+
+	// Parse option assertions
+	var optionAssertions []OptionAssertion
+	for _, str := range assertionsStr {
+		oa, err := parseOptionAssertion(str)
+		if err != nil {
+			return nil, fmt.Errorf("parsing option assertion: %w", err)
+		}
+		optionAssertions = append(optionAssertions, oa)
+	}
+
+	// Get actual options for the entity
+	actualOptions, err := getOptionsForEntity(entityType, entityID, pc)
+	if err != nil {
+		return nil, err
+	}
+
+	// Evaluate each option assertion
+	var results []AssertionResult
+	for _, oa := range optionAssertions {
+		result := evaluateOptionAssertion(entityType, entityID, oa, actualOptions, pc)
+		results = append(results, result)
+	}
+
+	return results, nil
+}
+
+// parseOptionAssertions splits the bracket contents into individual option assertions
+func parseOptionAssertions(input string) ([]OptionAssertion, error) {
+	var assertions []OptionAssertion
+
+	// Split by comma, respecting quotes
+	parts := splitQuotedAssertions(input)
+
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+
+		oa, err := parseOptionAssertion(part)
+		if err != nil {
+			return nil, err
+		}
+		assertions = append(assertions, oa)
+	}
+
+	return assertions, nil
+}
+
+// splitQuotedAssertions splits by comma but respects quoted strings
+func splitQuotedAssertions(input string) []string {
+	var parts []string
+	var current strings.Builder
+	inQuote := false
+
+	for _, ch := range input {
+		switch ch {
+		case '"':
+			inQuote = !inQuote
+			current.WriteRune(ch)
+		case ',':
+			if inQuote {
+				current.WriteRune(ch)
+			} else {
+				parts = append(parts, current.String())
+				current.Reset()
+			}
+		default:
+			current.WriteRune(ch)
+		}
+	}
+	if current.Len() > 0 {
+		parts = append(parts, current.String())
+	}
+	return parts
+}
+
+// extractQuotedStrings extracts all quoted strings from input
+func extractQuotedStrings(input string) []string {
+	var results []string
+	re := regexp.MustCompile(`"([^"]*)"`)
+	matches := re.FindAllStringSubmatch(input, -1)
+	for _, match := range matches {
+		if len(match) > 1 {
+			results = append(results, match[1])
+		}
+	}
+	return results
+}
+
+// parseOptionAssertion parses a single quoted option like "attack B3" or "attacks B1 B2"
+func parseOptionAssertion(input string) (OptionAssertion, error) {
+	input = strings.TrimSpace(input)
+
+	// Remove surrounding quotes
+	if strings.HasPrefix(input, `"`) && strings.HasSuffix(input, `"`) {
+		input = input[1 : len(input)-1]
+	}
+
+	// Split into words
+	parts := strings.Fields(input)
+	if len(parts) < 2 {
+		return OptionAssertion{}, fmt.Errorf("option assertion must have type and target: %s", input)
+	}
+
+	verb := strings.ToLower(parts[0])
+	targets := parts[1:]
+
+	// Check if plural form
+	isPlural := false
+	optionType := verb
+
+	if singularForm, ok := optionTypePlurals[verb]; ok {
+		optionType = singularForm
+		isPlural = true
+	}
+
+	// Validate option type
+	validTypes := map[string]bool{"attack": true, "move": true, "build": true, "capture": true, "retreat": true}
+	if !validTypes[optionType] {
+		return OptionAssertion{}, fmt.Errorf("invalid option type: %s", verb)
+	}
+
+	return OptionAssertion{
+		OptionType: optionType,
+		Targets:    targets,
+		IsPlural:   isPlural,
+	}, nil
+}
+
+// getOptionsForEntity fetches available options for a unit or tile
+func getOptionsForEntity(entityType, entityID string, pc *PresenterContext) (*v1.GetOptionsAtResponse, error) {
+	// Find the coordinate
+	var coord lib.AxialCoord
+	var err error
+
+	switch entityType {
+	case "unit":
+		unit, exists, findErr := findUnit(entityID, pc)
+		if findErr != nil {
+			return nil, findErr
+		}
+		if !exists {
+			return nil, fmt.Errorf("unit %s not found", entityID)
+		}
+		coord = lib.AxialCoord{Q: int(unit.Q), R: int(unit.R)}
+	case "tile":
+		tile, exists, findErr := findTile(entityID, pc)
+		if findErr != nil {
+			return nil, findErr
+		}
+		if !exists {
+			return nil, fmt.Errorf("tile %s not found", entityID)
+		}
+		coord = lib.AxialCoord{Q: int(tile.Q), R: int(tile.R)}
+	default:
+		return nil, fmt.Errorf("options only supports 'unit' and 'tile', got %q", entityType)
+	}
+
+	// Simulate click to get options
+	_, err = pc.Presenter.SceneClicked(nil, &v1.SceneClickedRequest{
+		GameId: pc.GameID,
+		Q:      int32(coord.Q),
+		R:      int32(coord.R),
+		Layer:  "base-map",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get options: %w", err)
+	}
+
+	return pc.TurnOptions.Options, nil
+}
+
+// evaluateOptionAssertion checks if the option assertion is satisfied by actual options
+func evaluateOptionAssertion(entityType, entityID string, oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) AssertionResult {
+	result := AssertionResult{
+		EntityType: entityType,
+		EntityID:   entityID,
+		Field:      oa.OptionType,
+	}
+
+	// Build description
+	if oa.IsPlural {
+		result.Expected = fmt.Sprintf("%ss %s", oa.OptionType, strings.Join(oa.Targets, " "))
+	} else {
+		result.Expected = fmt.Sprintf("%s %s", oa.OptionType, oa.Targets[0])
+	}
+
+	if options == nil {
+		result.Actual = "no options"
+		result.Passed = false
+		return result
+	}
+
+	// Check based on option type
+	switch oa.OptionType {
+	case "attack":
+		result.Passed, result.Actual = checkAttackOptions(oa, options, pc)
+	case "move", "retreat":
+		result.Passed, result.Actual = checkMoveOptions(oa, options, pc)
+	case "build":
+		result.Passed, result.Actual = checkBuildOptions(oa, options, pc)
+	case "capture":
+		result.Passed, result.Actual = checkCaptureOptions(oa, options, pc)
+	}
+
+	return result
+}
+
+func checkAttackOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+	// Collect all attack targets from options
+	var attackTargets []string
+	for _, opt := range options.Options {
+		if attack, ok := opt.OptionType.(*v1.GameOption_Attack); ok {
+			key := lib.CoordKey(attack.Attack.DefenderQ, attack.Attack.DefenderR)
+			attackTargets = append(attackTargets, key)
+
+			// Also check by unit shortcut if there's a unit there
+			if unit := pc.GameState.State.WorldData.UnitsMap[key]; unit != nil && unit.Shortcut != "" {
+				attackTargets = append(attackTargets, unit.Shortcut)
+			}
+		}
+	}
+
+	return matchTargets(oa, attackTargets, pc)
+}
+
+func checkMoveOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+	// Collect all move targets from options
+	var moveTargets []string
+	for _, opt := range options.Options {
+		if move, ok := opt.OptionType.(*v1.GameOption_Move); ok {
+			key := lib.CoordKey(move.Move.ToQ, move.Move.ToR)
+			moveTargets = append(moveTargets, key)
+		}
+	}
+
+	return matchTargets(oa, moveTargets, pc)
+}
+
+func checkBuildOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+	// Collect all build unit types from options
+	var buildTypes []string
+	for _, opt := range options.Options {
+		if build, ok := opt.OptionType.(*v1.GameOption_Build); ok {
+			// Add unit type as string
+			buildTypes = append(buildTypes, fmt.Sprintf("%d", build.Build.UnitType))
+
+			// Also add unit name if we can resolve it
+			rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+			if unitDef, err := rulesEngine.GetUnitData(build.Build.UnitType); err == nil {
+				buildTypes = append(buildTypes, strings.ToLower(unitDef.Name))
+			}
+		}
+	}
+
+	return matchTargets(oa, buildTypes, pc)
+}
+
+func checkCaptureOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+	// Collect all capture targets from options
+	var captureTargets []string
+	for _, opt := range options.Options {
+		if capture, ok := opt.OptionType.(*v1.GameOption_Capture); ok {
+			key := lib.CoordKey(capture.Capture.Q, capture.Capture.R)
+			captureTargets = append(captureTargets, key)
+		}
+	}
+
+	return matchTargets(oa, captureTargets, pc)
+}
+
+// matchTargets checks if the assertion targets match actual targets
+func matchTargets(oa OptionAssertion, actualTargets []string, pc *PresenterContext) (bool, string) {
+	if len(actualTargets) == 0 {
+		return false, "none available"
+	}
+
+	actualStr := strings.Join(actualTargets, ", ")
+
+	if oa.IsPlural {
+		// Plural: need at least one target to match
+		for _, target := range oa.Targets {
+			normalizedTarget := normalizeTarget(target, pc)
+			for _, actual := range actualTargets {
+				if strings.EqualFold(normalizedTarget, actual) || strings.EqualFold(target, actual) {
+					return true, fmt.Sprintf("found %s in [%s]", target, actualStr)
+				}
+			}
+		}
+		return false, fmt.Sprintf("none of targets in [%s]", actualStr)
+	}
+
+	// Singular: the exact target must exist
+	target := oa.Targets[0]
+	normalizedTarget := normalizeTarget(target, pc)
+	for _, actual := range actualTargets {
+		if strings.EqualFold(normalizedTarget, actual) || strings.EqualFold(target, actual) {
+			return true, fmt.Sprintf("found in [%s]", actualStr)
+		}
+	}
+	return false, fmt.Sprintf("not in [%s]", actualStr)
+}
+
+// normalizeTarget converts a target to coordinate key format if possible
+func normalizeTarget(target string, pc *PresenterContext) string {
+	// Try to parse as coordinate
+	coord, err := parseCoordinate(target)
+	if err == nil {
+		return lib.CoordKey(int32(coord.Q), int32(coord.R))
+	}
+
+	// Try relative directions (for capture assertions)
+	// TODO: implement direction-based targets when baseCoord is available
+
+	return target
 }

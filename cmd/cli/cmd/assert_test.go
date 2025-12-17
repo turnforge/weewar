@@ -306,6 +306,76 @@ func TestAssertionResult_String(t *testing.T) {
 	}
 }
 
+func TestParseOptionAssertion(t *testing.T) {
+	tests := []struct {
+		input      string
+		optionType string
+		targets    []string
+		isPlural   bool
+	}{
+		// Singular - must have exactly this option
+		{`"attack B3"`, "attack", []string{"B3"}, false},
+		{`"move 0,5"`, "move", []string{"0,5"}, false},
+		{`"build trooper"`, "build", []string{"trooper"}, false},
+		{`"capture L"`, "capture", []string{"L"}, false},
+		{`"retreat 0,5"`, "retreat", []string{"0,5"}, false},
+		// Plural - can do one of these targets
+		{`"attacks A1 3,2 TR,TL,L r3,4"`, "attack", []string{"A1", "3,2", "TR,TL,L", "r3,4"}, true},
+		{`"moves 0,5 1,5"`, "move", []string{"0,5", "1,5"}, true},
+		{`"builds trooper tank"`, "build", []string{"trooper", "tank"}, true},
+		{`"captures L R"`, "capture", []string{"L", "R"}, true},
+		{`"retreats 0,5 1,5"`, "retreat", []string{"0,5", "1,5"}, true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.input, func(t *testing.T) {
+			oa, err := parseOptionAssertion(tc.input)
+			if err != nil {
+				t.Fatalf("parseOptionAssertion(%q) error: %v", tc.input, err)
+			}
+			if oa.OptionType != tc.optionType {
+				t.Errorf("optionType = %q, want %q", oa.OptionType, tc.optionType)
+			}
+			if oa.IsPlural != tc.isPlural {
+				t.Errorf("isPlural = %v, want %v", oa.IsPlural, tc.isPlural)
+			}
+			if len(oa.Targets) != len(tc.targets) {
+				t.Fatalf("targets length = %d, want %d: %v", len(oa.Targets), len(tc.targets), oa.Targets)
+			}
+			for i, target := range tc.targets {
+				if oa.Targets[i] != target {
+					t.Errorf("targets[%d] = %q, want %q", i, oa.Targets[i], target)
+				}
+			}
+		})
+	}
+}
+
+func TestExtractQuotedStrings(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{`"attack B3" "move 0,5"`, []string{"attack B3", "move 0,5"}},
+		{`"attacks B1 B2 B3"`, []string{"attacks B1 B2 B3"}},
+		{`"build trooper" "build tank"`, []string{"build trooper", "build tank"}},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.input, func(t *testing.T) {
+			result := extractQuotedStrings(tc.input)
+			if len(result) != len(tc.expected) {
+				t.Fatalf("got %d strings, want %d: %v", len(result), len(tc.expected), result)
+			}
+			for i, s := range tc.expected {
+				if result[i] != s {
+					t.Errorf("result[%d] = %q, want %q", i, result[i], s)
+				}
+			}
+		})
+	}
+}
+
 func TestParseCoordinate(t *testing.T) {
 	tests := []struct {
 		input string

@@ -223,7 +223,8 @@
       },
       "action_order": [
         "move",
-        "attack"
+        "attack",
+        "retreat"
       ]
     },
     "18": {

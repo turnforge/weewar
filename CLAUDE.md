@@ -138,9 +138,14 @@ folder):
 **Basic commands:**
 ```bash
 export WEEWAR_GAME_ID=c5380903  # Or use --game-id flag
+export WEEWAR_MAP_OUTPUT=map.png  # Default output file for ww map
 
 ww status                    # Show game state (players, coins, units, tiles)
 ww units                     # List all units
+ww tiles                     # List all player-owned tiles
+ww map                       # Display map as inline image (iTerm2)
+ww map --tile-labels         # Show tile labels on map
+ww map -o map.png            # Save map to file
 ww options B1                # Show available moves for unit B1
 ww options t:A1              # Show build options for tile A1
 ww move B1 0,-3             # Move unit by coordinates

@@ -375,9 +375,11 @@ const (
 
 // RenderOptions holds tile dimension parameters for pixel calculations
 type RenderOptions struct {
-	TileWidth  int // Width of each hex tile in pixels
-	TileHeight int // Height of each hex tile in pixels
-	YIncrement int // Vertical spacing between rows (typically 3/4 of TileHeight for pointy-top)
+	TileWidth      int  // Width of each hex tile in pixels
+	TileHeight     int  // Height of each hex tile in pixels
+	YIncrement     int  // Vertical spacing between rows (typically 3/4 of TileHeight for pointy-top)
+	ShowUnitLabels bool // Show unit labels (Shortcut:MP/Health) below units
+	ShowTileLabels bool // Show tile labels (Shortcut) below tile
 }
 
 // DefaultRenderOptions returns standard rendering options

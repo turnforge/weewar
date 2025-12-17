@@ -66,7 +66,14 @@
 - Both use `theme.GetEffectivePlayer()` for terrain color handling
 - Both use `theme.GetPlayerColor()` for color lookup
 
-### 8. Shared mapping.json Files
+### 8. Label Rendering (PNGWorldRenderer)
+The PNG renderer supports optional labels via `RenderOptions`:
+- **Unit Labels** (`ShowUnitLabels`): Displays `Shortcut:MP/Health` at bottom of unit with brown background (#3d2817)
+- **Tile Labels** (`ShowTileLabels`): Displays tile shortcut at top of tile with teal background (#173d3d)
+
+Used by `ww map` CLI command for terminal map display.
+
+### 9. Shared mapping.json Files
 ```
 web/static/assets/themes/
 ├── default/

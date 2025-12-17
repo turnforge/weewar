@@ -4,10 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"os"
 	"sync"
+
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	"github.com/turnforge/weewar/lib"
@@ -65,6 +70,20 @@ func (r *PNGWorldRenderer) Render(tiles map[string]*v1.Tile, units map[string]*v
 	for _, unit := range units {
 		if err := r.renderUnit(outputImg, unit, minX, minY, options); err != nil {
 			fmt.Printf("Warning: failed to render unit at (%d,%d): %v\n", unit.Q, unit.R, err)
+		}
+	}
+
+	// Render tile labels if enabled (below tiles, above units)
+	if options.ShowTileLabels {
+		for _, tile := range tiles {
+			r.renderTileLabel(outputImg, tile, minX, minY, options)
+		}
+	}
+
+	// Render unit labels if enabled (on top of everything)
+	if options.ShowUnitLabels {
+		for _, unit := range units {
+			r.renderUnitLabel(outputImg, unit, minX, minY, options)
 		}
 	}
 
@@ -244,4 +263,106 @@ func (r *PNGWorldRenderer) ClearCache() {
 	defer r.cacheMutex.Unlock()
 	r.tileCache = make(map[string]image.Image)
 	r.unitCache = make(map[string]image.Image)
+}
+
+// renderUnitLabel draws a label below the unit showing "Shortcut:MP/Health"
+func (r *PNGWorldRenderer) renderUnitLabel(output *image.RGBA, unit *v1.Unit, offsetX, offsetY int, options *lib.RenderOptions) {
+	// Calculate position (adjusted for offset)
+	x, y := lib.HexToPixelInt32(unit.Q, unit.R, options)
+	x -= offsetX
+	y -= offsetY
+
+	// Format label: "Shortcut:MP/Health" or "MP/Health" if no shortcut
+	health := unit.AvailableHealth
+	if health == 0 {
+		health = 10
+	}
+	mp := int(unit.DistanceLeft)
+
+	var labelText string
+	if unit.Shortcut != "" {
+		labelText = fmt.Sprintf("%s:%d/%d", unit.Shortcut, mp, health)
+	} else {
+		labelText = fmt.Sprintf("%d/%d", mp, health)
+	}
+
+	// Use basicfont (7x13 pixels per character)
+	face := basicfont.Face7x13
+
+	// Calculate text dimensions
+	textWidth := len(labelText) * 7
+	textHeight := 13
+
+	// Position: centered horizontally, near bottom of tile
+	labelX := x + (options.TileWidth-textWidth)/2
+	labelY := y + options.TileHeight - 4 // 4 pixels from bottom
+
+	// Background color: brown with alpha (0x3d2817 from web)
+	bgColor := color.RGBA{R: 0x3d, G: 0x28, B: 0x17, A: 0xB3} // ~70% opacity
+	padding := 2
+
+	// Draw background rectangle
+	bgRect := image.Rect(
+		labelX-padding,
+		labelY-textHeight-padding,
+		labelX+textWidth+padding,
+		labelY+padding,
+	)
+	draw.Draw(output, bgRect, &image.Uniform{bgColor}, image.Point{}, draw.Over)
+
+	// Draw text in white
+	r.drawText(output, labelText, labelX, labelY, color.White, face)
+}
+
+// renderTileLabel draws a label at the top of the tile showing tile shortcut
+func (r *PNGWorldRenderer) renderTileLabel(output *image.RGBA, tile *v1.Tile, offsetX, offsetY int, options *lib.RenderOptions) {
+	// Only render if tile has a shortcut
+	if tile.Shortcut == "" {
+		return
+	}
+
+	// Calculate position (adjusted for offset)
+	x, y := lib.HexToPixelInt32(tile.Q, tile.R, options)
+	x -= offsetX
+	y -= offsetY
+
+	labelText := tile.Shortcut
+
+	// Use basicfont (7x13 pixels per character)
+	face := basicfont.Face7x13
+
+	// Calculate text dimensions
+	textWidth := len(labelText) * 7
+	textHeight := 13
+
+	// Position: centered horizontally, near top of tile
+	labelX := x + (options.TileWidth-textWidth)/2
+	labelY := y + textHeight + 4 // 4 pixels from top
+
+	// Background color: dark teal with alpha (different from unit label brown)
+	bgColor := color.RGBA{R: 0x17, G: 0x3d, B: 0x3d, A: 0xB3} // ~70% opacity
+	padding := 2
+
+	// Draw background rectangle
+	bgRect := image.Rect(
+		labelX-padding,
+		labelY-textHeight-padding,
+		labelX+textWidth+padding,
+		labelY+padding,
+	)
+	draw.Draw(output, bgRect, &image.Uniform{bgColor}, image.Point{}, draw.Over)
+
+	// Draw text in white
+	r.drawText(output, labelText, labelX, labelY, color.White, face)
+}
+
+// drawText draws text at the given position
+func (r *PNGWorldRenderer) drawText(img *image.RGBA, text string, x, y int, col color.Color, face font.Face) {
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(col),
+		Face: face,
+		Dot:  fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)},
+	}
+	d.DrawString(text)
 }

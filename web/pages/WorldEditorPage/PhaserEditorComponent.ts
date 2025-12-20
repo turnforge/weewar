@@ -273,7 +273,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
 
         // Add coordinates
         parts.push(`Q/R: ${info.q},${info.r}`);
-        parts.push(`Col/Row: ${info.col},${info.row}`);
+        parts.push(`Row/Col: ${info.row},${info.col}`);
 
         // Add tile info if present
         if (info.tileType !== undefined) {

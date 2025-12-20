@@ -611,6 +611,59 @@ export class World {
 
         this.emitStateChange(WorldEventTypes.WORLD_CLEARED, {});
     }
+
+    /**
+     * Shift all world data (tiles, units, crossings) by the given delta.
+     * This re-keys everything without changing the visual appearance.
+     * Useful for normalizing world coordinates after placing tiles at arbitrary positions.
+     *
+     * @param dQ Delta to add to all Q coordinates
+     * @param dR Delta to add to all R coordinates
+     */
+    public shiftWorld(dQ: number, dR: number): void {
+        if (dQ === 0 && dR === 0) return;
+
+        // Shift tiles
+        const oldTiles = { ...this.tiles };
+        this.tiles = {};
+        for (const [key, tile] of Object.entries(oldTiles)) {
+            const newQ = tile.q + dQ;
+            const newR = tile.r + dR;
+            const newKey = `${newQ},${newR}`;
+            this.tiles[newKey] = { ...tile, q: newQ, r: newR };
+        }
+
+        // Shift units
+        const oldUnits = { ...this.units };
+        this.units = {};
+        for (const [key, unit] of Object.entries(oldUnits)) {
+            const newQ = unit.q + dQ;
+            const newR = unit.r + dR;
+            const newKey = `${newQ},${newR}`;
+            this.units[newKey] = { ...unit, q: newQ, r: newR };
+        }
+
+        // Shift crossings
+        const oldCrossings = { ...this.crossings };
+        this.crossings = {};
+        for (const [key, crossing] of Object.entries(oldCrossings)) {
+            const [q, r] = key.split(',').map(Number);
+            const newQ = q + dQ;
+            const newR = r + dR;
+            const newKey = `${newQ},${newR}`;
+            this.crossings[newKey] = crossing;
+        }
+
+        this.hasUnsavedChanges = true;
+
+        // Emit WORLD_LOADED to trigger a full redraw instead of incremental updates
+        this.emitStateChange(WorldEventTypes.WORLD_LOADED, {
+            worldId: this.worldId,
+            isNewWorld: this.isNewWorld,
+            tileCount: Object.keys(this.tiles).length,
+            unitCount: Object.keys(this.units).length
+        } as WorldLoadedEventData);
+    }
     
     public fillAllTerrain(tileType: number, player: number, viewport?: { minQ: number, maxQ: number, minR: number, maxR: number }): void {
         // If viewport is provided, only fill visible area, otherwise fill entire world bounds

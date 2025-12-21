@@ -117,13 +117,14 @@ message ShowHighlightsResponse {
 message HighlightSpec {
     int32 q = 1;
     int32 r = 2;
-    string type = 3; // "selection", "movement", "attack", "build", "exhausted"
+    string type = 3; // "selection", "movement", "attack", "build", "exhausted", "capturing"
     oneof action {
       MoveUnitAction move = 4;
       AttackUnitAction attack = 5;
       BuildUnitAction build = 6;
       CaptureBuildingAction capture = 7;
     }
+    int32 player = 8; // Player ID for player-colored highlights (e.g., capturing flag)
 }
 
 // Request to clear highlights

@@ -1031,7 +1031,7 @@ type HighlightSpec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Q     int32                  `protobuf:"varint,1,opt,name=q,proto3" json:"q,omitempty"`
 	R     int32                  `protobuf:"varint,2,opt,name=r,proto3" json:"r,omitempty"`
-	Type  string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // "selection", "movement", "attack", "build", "exhausted"
+	Type  string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // "selection", "movement", "attack", "build", "exhausted", "capturing"
 	// Types that are valid to be assigned to Action:
 	//
 	//	*HighlightSpec_Move
@@ -1039,6 +1039,7 @@ type HighlightSpec struct {
 	//	*HighlightSpec_Build
 	//	*HighlightSpec_Capture
 	Action        isHighlightSpec_Action `protobuf_oneof:"action"`
+	Player        int32                  `protobuf:"varint,8,opt,name=player,proto3" json:"player,omitempty"` // Player ID for player-colored highlights (e.g., capturing flag)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1135,6 +1136,13 @@ func (x *HighlightSpec) GetCapture() *CaptureBuildingAction {
 		}
 	}
 	return nil
+}
+
+func (x *HighlightSpec) GetPlayer() int32 {
+	if x != nil {
+		return x.Player
+	}
+	return 0
 }
 
 type isHighlightSpec_Action interface {
@@ -2061,7 +2069,7 @@ const file_weewar_v1_models_gameviewerpage_proto_rawDesc = "" +
 	"\n" +
 	"highlights\x18\x01 \x03(\v2\x18.weewar.v1.HighlightSpecR\n" +
 	"highlights\"\x18\n" +
-	"\x16ShowHighlightsResponse\"\xa3\x02\n" +
+	"\x16ShowHighlightsResponse\"\xbb\x02\n" +
 	"\rHighlightSpec\x12\f\n" +
 	"\x01q\x18\x01 \x01(\x05R\x01q\x12\f\n" +
 	"\x01r\x18\x02 \x01(\x05R\x01r\x12\x12\n" +
@@ -2069,7 +2077,8 @@ const file_weewar_v1_models_gameviewerpage_proto_rawDesc = "" +
 	"\x04move\x18\x04 \x01(\v2\x19.weewar.v1.MoveUnitActionH\x00R\x04move\x125\n" +
 	"\x06attack\x18\x05 \x01(\v2\x1b.weewar.v1.AttackUnitActionH\x00R\x06attack\x122\n" +
 	"\x05build\x18\x06 \x01(\v2\x1a.weewar.v1.BuildUnitActionH\x00R\x05build\x12<\n" +
-	"\acapture\x18\a \x01(\v2 .weewar.v1.CaptureBuildingActionH\x00R\acaptureB\b\n" +
+	"\acapture\x18\a \x01(\v2 .weewar.v1.CaptureBuildingActionH\x00R\acapture\x12\x16\n" +
+	"\x06player\x18\b \x01(\x05R\x06playerB\b\n" +
 	"\x06action\".\n" +
 	"\x16ClearHighlightsRequest\x12\x14\n" +
 	"\x05types\x18\x01 \x03(\tR\x05types\"\x19\n" +

@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 import { PhaserWorldScene } from '../common/PhaserWorldScene';
 import { hexToPixel } from '../common/hexUtils';
 import { World } from '../common/World';
-import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer } from '../common/HexHighlightLayer';
+import { SelectionHighlightLayer, MovementHighlightLayer, AttackHighlightLayer, CaptureHighlightLayer } from '../common/HexHighlightLayer';
 import { EventBus } from '@panyam/tsappkit';
 import { GameViewPresenterClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/services/gameViewPresenterClient';
 import { MoveUnitAction, AttackUnitAction, HighlightSpec } from '../../gen/wasmjs/weewar/v1/models/interfaces';
@@ -36,6 +36,7 @@ export class PhaserGameScene extends PhaserWorldScene {
     private _selectionHighlightLayer: SelectionHighlightLayer | null = null;
     private _movementHighlightLayer: MovementHighlightLayer | null = null;
     private _attackHighlightLayer: AttackHighlightLayer | null = null;
+    private _captureHighlightLayer: CaptureHighlightLayer | null = null;
     
     // Path preview graphics for movement/attack visualization
     private pathPreview: Phaser.GameObjects.Graphics | null = null;
@@ -86,6 +87,10 @@ export class PhaserGameScene extends PhaserWorldScene {
         // Create attack highlight layer
         this._attackHighlightLayer = new AttackHighlightLayer(this, this.tileWidth);
         layerManager.addLayer(this._attackHighlightLayer);
+
+        // Create capture highlight layer
+        this._captureHighlightLayer = new CaptureHighlightLayer(this, this.tileWidth);
+        layerManager.addLayer(this._captureHighlightLayer);
     }
 
     /**
@@ -228,7 +233,9 @@ export class PhaserGameScene extends PhaserWorldScene {
         const selections = highlights.filter(h => h.type === 'selection');
         const movements: MoveUnitAction[] = highlights.filter(h => h.type === 'movement').map(h => h.move!);
         const attacks = highlights.filter(h => h.type === 'attack').map(h => h.attack!);
+        const captures = highlights.filter(h => h.type === 'capture'); // Interactive capture highlight
         const exhausted = highlights.filter(h => h.type === 'exhausted');
+        const capturing = highlights.filter(h => h.type === 'capturing'); // Persistent flag indicator
 
         // Apply selection highlights (typically just one)
         if (this._selectionHighlightLayer && selections.length > 0) {
@@ -248,11 +255,26 @@ export class PhaserGameScene extends PhaserWorldScene {
             this._attackHighlightLayer.showAttackOptions(attacks);
         }
 
+        // Apply capture highlights (interactive - for clicking to execute capture)
+        if (this._captureHighlightLayer && captures.length > 0) {
+            captures.forEach(h => {
+                this._captureHighlightLayer!.showCaptureOption(h.q, h.r);
+            });
+        }
+
         // Apply exhausted highlights
         const exhaustedLayer = this.getExhaustedUnitsLayer();
         if (exhaustedLayer && exhausted.length > 0) {
             exhausted.forEach(h => {
                 exhaustedLayer.markExhausted(h.q, h.r);
+            });
+        }
+
+        // Apply capturing flag highlights
+        const capturingFlagLayer = this.getCapturingFlagLayer();
+        if (capturingFlagLayer && capturing.length > 0) {
+            capturing.forEach(h => {
+                capturingFlagLayer.showFlag(h.q, h.r, h.player);
             });
         }
     }
@@ -276,9 +298,18 @@ export class PhaserGameScene extends PhaserWorldScene {
             this._attackHighlightLayer.clearAttackOptions();
         }
 
+        if ((clearAll || types.includes('capture')) && this._captureHighlightLayer) {
+            this._captureHighlightLayer.clearCaptureOptions();
+        }
+
         const exhaustedLayer = this.getExhaustedUnitsLayer();
         if ((clearAll || types.includes('exhausted')) && exhaustedLayer) {
             exhaustedLayer.clearAllExhausted();
+        }
+
+        const capturingFlagLayer = this.getCapturingFlagLayer();
+        if ((clearAll || types.includes('capturing')) && capturingFlagLayer) {
+            capturingFlagLayer.clearAllFlags();
         }
     }
 

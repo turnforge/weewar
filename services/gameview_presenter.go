@@ -183,6 +183,7 @@ func (s *GameViewPresenter) ClientReady(ctx context.Context, req *v1.ClientReady
 
 	// Now that the scene is ready, apply visual state
 	s.refreshExhaustedHighlights(ctx, game, gameState)
+	s.refreshCapturingHighlights(ctx, game, gameState)
 
 	return &v1.ClientReadyResponse{Success: true}, nil
 }
@@ -414,37 +415,93 @@ func buildHighlightSpecs(optionsResp *v1.GetOptionsAtResponse, selectedQ, select
 func (s *GameViewPresenter) TurnOptionClicked(ctx context.Context, req *v1.TurnOptionClickedRequest) (resp *v1.TurnOptionClickedResponse, err error) {
 	resp = &v1.TurnOptionClickedResponse{}
 
-	// For now, just show path visualization for move options
-	// In the future, this could execute the actual move/attack
 	// Always clear previous paths first
 	s.GameScene.ClearPaths(ctx)
 
-	if req.OptionType == "move" && s.selectedQ != nil && s.selectedR != nil {
-		// Get the options again to extract the path for this specific move
-		optionsResp, err := s.GamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
-			GameId: req.GameId,
-			Q:      *s.selectedQ,
-			R:      *s.selectedR,
-		})
+	switch req.OptionType {
+	case "move":
+		// Show path visualization for move options
+		if s.selectedQ != nil && s.selectedR != nil {
+			optionsResp, err := s.GamesService.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+				GameId: req.GameId,
+				Q:      *s.selectedQ,
+				R:      *s.selectedR,
+			})
 
-		if err == nil && optionsResp != nil && int(req.OptionIndex) < len(optionsResp.Options) {
-			option := optionsResp.Options[req.OptionIndex]
-			if moveOpt := option.GetMove(); moveOpt != nil && moveOpt.ReconstructedPath != nil {
-				// Extract path coordinates from the reconstructed path
-				coords := ExtractPathCoords(moveOpt.ReconstructedPath)
-				if len(coords) >= 4 {
-					// Show green path for movement
-					s.GameScene.ShowPath(ctx, &v1.ShowPathRequest{
-						Coords:    coords,
-						Color:     0x00ff00, // Green for movement
-						Thickness: 4,
-					})
+			if err == nil && optionsResp != nil && int(req.OptionIndex) < len(optionsResp.Options) {
+				option := optionsResp.Options[req.OptionIndex]
+				if moveOpt := option.GetMove(); moveOpt != nil && moveOpt.ReconstructedPath != nil {
+					coords := ExtractPathCoords(moveOpt.ReconstructedPath)
+					if len(coords) >= 4 {
+						s.GameScene.ShowPath(ctx, &v1.ShowPathRequest{
+							Coords:    coords,
+							Color:     0x00ff00, // Green for movement
+							Thickness: 4,
+						})
+					}
 				}
 			}
+		}
+
+	case "capture":
+		// Execute capture action
+		if err = s.executeCaptureFromOption(ctx, req); err != nil {
+			fmt.Printf("[Presenter] Capture failed: %v\n", err)
 		}
 	}
 
 	return
+}
+
+// executeCaptureFromOption executes a capture action from TurnOptionClicked
+func (s *GameViewPresenter) executeCaptureFromOption(ctx context.Context, req *v1.TurnOptionClickedRequest) error {
+	// Get current game state
+	getGameResp, err := s.GetGame(ctx, req.GameId)
+	if err != nil {
+		return err
+	}
+	game := getGameResp.Game
+	gameState := getGameResp.State
+
+	// Get the capture option from the stored options
+	if s.TurnOptionsPanel == nil || s.TurnOptionsPanel.CurrentOptions() == nil {
+		return fmt.Errorf("no options available")
+	}
+
+	options := s.TurnOptionsPanel.CurrentOptions()
+	if int(req.OptionIndex) >= len(options.Options) {
+		return fmt.Errorf("invalid option index: %d", req.OptionIndex)
+	}
+
+	option := options.Options[req.OptionIndex]
+	captureOpt := option.GetCapture()
+	if captureOpt == nil {
+		return fmt.Errorf("option at index %d is not a capture option", req.OptionIndex)
+	}
+
+	// Create the capture move
+	gameMove := &v1.GameMove{
+		Player: gameState.CurrentPlayer,
+		MoveType: &v1.GameMove_CaptureBuilding{
+			CaptureBuilding: captureOpt,
+		},
+	}
+
+	// Process the move
+	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+		GameId: game.Id,
+		Moves:  []*v1.GameMove{gameMove},
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("[Presenter] Capture executed at (%d,%d)\n", captureOpt.Q, captureOpt.R)
+
+	// Apply incremental updates (uses original gameState, changes come from resp.Moves)
+	s.applyIncrementalChanges(ctx, game, gameState, resp.Moves, gameMove)
+
+	return nil
 }
 
 // BuildOptionClicked handles when user clicks a build option in the BuildOptionsModal
@@ -624,7 +681,7 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 						{Q: updatedUnit.Q, R: updatedUnit.R},
 					}
 					unitMoved := changeType.UnitMoved
-					if gameMove != nil {
+					if gameMove != nil && gameMove.GetMoveUnit() != nil {
 						moveAction := gameMove.GetMoveUnit()
 						coords := ExtractPathCoords(moveAction.ReconstructedPath)
 						path = []*v1.HexCoord{}
@@ -712,9 +769,10 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 				}
 
 			case *v1.WorldChange_PlayerChanged:
-				// Clear exhausted highlights for new turn (all units reset)
+				// Clear exhausted and capturing highlights for new turn
+				// (units reset, and some captures may have completed)
 				s.GameScene.ClearHighlights(ctx, &v1.ClearHighlightsRequest{
-					Types: []string{"exhausted"},
+					Types: []string{"exhausted", "capturing"},
 				})
 
 				// Reset all units for new turn (lazy top-up pattern)
@@ -742,12 +800,21 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 				})
 
 			case *v1.WorldChange_CaptureStarted:
-				// Show capture effect animation
+				// Show capture effect animation and capturing flag
 				captureStarted := changeType.CaptureStarted
 				if captureStarted != nil {
+					// One-shot pulse animation for immediate feedback
 					s.GameScene.ShowCaptureEffect(ctx, &v1.ShowCaptureEffectRequest{
 						Q: captureStarted.TileQ,
 						R: captureStarted.TileR,
+					})
+					// Persistent flag indicator for ongoing capture
+					s.GameScene.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
+						Highlights: []*v1.HighlightSpec{{
+							Q:    captureStarted.TileQ,
+							R:    captureStarted.TileR,
+							Type: "capturing",
+						}},
 					})
 					fmt.Printf("[Presenter] Capture started at (%d,%d) by player %d\n",
 						captureStarted.TileQ, captureStarted.TileR, captureStarted.CapturingUnit.Player)
@@ -769,8 +836,9 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 		}
 	}
 
-	// After applying all changes, refresh exhausted highlights and update game state panel
+	// After applying all changes, refresh exhausted and capturing highlights and update game state panel
 	s.refreshExhaustedHighlights(ctx, game, gameState)
+	s.refreshCapturingHighlights(ctx, game, gameState)
 	s.GameStatePanel.Update(ctx, game, gameState)
 }
 
@@ -797,6 +865,35 @@ func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, _ *v
 	if len(exhaustedHighlights) > 0 {
 		s.GameScene.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
 			Highlights: exhaustedHighlights,
+		})
+	}
+}
+
+// refreshCapturingHighlights updates the capturing flag indicators for all units currently capturing
+func (s *GameViewPresenter) refreshCapturingHighlights(ctx context.Context, _ *v1.Game, gameState *v1.GameState) {
+	// Build list of units currently capturing
+	var capturingHighlights []*v1.HighlightSpec
+
+	// Check all units for any that are currently capturing (using map-based storage)
+	for _, unit := range gameState.WorldData.UnitsMap {
+		// CaptureStartedTurn > 0 means capture is in progress
+		// TODO: When capture duration becomes configurable (N turns instead of 1),
+		// also check that CaptureStartedTurn <= CurrentTurn - N to ensure capture
+		// is still within the valid window
+		if unit.CaptureStartedTurn > 0 {
+			capturingHighlights = append(capturingHighlights, &v1.HighlightSpec{
+				Q:      unit.Q,
+				R:      unit.R,
+				Type:   "capturing",
+				Player: unit.Player,
+			})
+		}
+	}
+
+	// Send capturing highlights to browser
+	if len(capturingHighlights) > 0 {
+		s.GameScene.ShowHighlights(ctx, &v1.ShowHighlightsRequest{
+			Highlights: capturingHighlights,
 		})
 	}
 }

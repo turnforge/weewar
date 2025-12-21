@@ -14,7 +14,7 @@ import { ProjectileEffect } from './animations/effects/ProjectileEffect';
 import { ExplosionEffect } from './animations/effects/ExplosionEffect';
 import { HealBubblesEffect } from './animations/effects/HealBubblesEffect';
 import { CaptureEffect } from './animations/effects/CaptureEffect';
-import { ExhaustedUnitsHighlightLayer } from './HexHighlightLayer';
+import { ExhaustedUnitsHighlightLayer, CapturingFlagLayer } from './HexHighlightLayer';
 
 const UNIT_TILE_RATIO = 0.9
 
@@ -68,6 +68,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     protected baseMapLayer: BaseMapLayer | null = null;
     protected crossingLayer: CrossingLayer | null = null;
     protected exhaustedUnitsLayer: ExhaustedUnitsHighlightLayer | null = null;
+    protected capturingFlagLayer: CapturingFlagLayer | null = null;
 
     // Game interaction callback (unified, only used by GameViewerPage)
     public sceneClickedCallback: (context: ClickContext, layer: string, extra?: any) => void;
@@ -690,6 +691,10 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         // Create exhausted units highlight layer
         this.exhaustedUnitsLayer = new ExhaustedUnitsHighlightLayer(this, this.tileWidth);
         this.layerManager.addLayer(this.exhaustedUnitsLayer);
+
+        // Create capturing flag layer for units actively capturing buildings
+        this.capturingFlagLayer = new CapturingFlagLayer(this, this.tileWidth);
+        this.layerManager.addLayer(this.capturingFlagLayer);
     }
     
     private setupInputHandling() {
@@ -1821,6 +1826,13 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
      */
     public getExhaustedUnitsLayer(): ExhaustedUnitsHighlightLayer | null {
         return this.exhaustedUnitsLayer;
+    }
+
+    /**
+     * Get the capturing flag layer for showing active capture indicators
+     */
+    public getCapturingFlagLayer(): CapturingFlagLayer | null {
+        return this.capturingFlagLayer;
     }
 
     /**

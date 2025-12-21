@@ -35,6 +35,9 @@ export const AnimationConfig = {
 
   /** Duration of appear/fade-in effect (ms) */
   APPEAR_DURATION: 200,
+
+  /** Duration of one complete flag wave cycle (ms) */
+  FLAG_WAVE_DURATION: 600,
 };
 
 /**

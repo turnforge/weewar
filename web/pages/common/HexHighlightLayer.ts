@@ -9,6 +9,8 @@ import * as Phaser from 'phaser';
 import { BaseLayer, LayerConfig, ClickContext, LayerHitResult } from './LayerSystem';
 import { hexToPixel } from './hexUtils';
 import { MoveUnitAction, AttackUnitAction } from '../../gen/wasmjs/weewar/v1/models/interfaces';
+import { AnimationConfig } from './animations/AnimationConfig';
+import { DEFAULT_PLAYER_COLORS } from '../../assets/themes/BaseTheme';
 
 // =============================================================================
 // Hex Highlight Base Class
@@ -431,6 +433,52 @@ export class AttackHighlightLayer extends HexHighlightLayer {
 }
 
 // =============================================================================
+// Capture Highlight Layer
+// =============================================================================
+
+/**
+ * Shows purple highlights for valid capture targets (unit's own tile)
+ * This is the interactive highlight for clicking to execute capture
+ */
+export class CaptureHighlightLayer extends HexHighlightLayer {
+    constructor(scene: Phaser.Scene, tileWidth: number) {
+        super(scene, {
+            name: 'capture-highlight',
+            coordinateSpace: 'hex',
+            interactive: true, // Capture highlights consume clicks
+            depth: 11, // Same as movement/attack highlights
+            tileWidth
+        });
+    }
+
+    public hitTest(context: ClickContext): LayerHitResult | null {
+        if (!this.visible) return null;
+
+        // Only consume clicks if there's a capture highlight at this position
+        if (this.hasHighlight(context.hexQ, context.hexR)) {
+            return LayerHitResult.CONSUME;
+        }
+
+        return LayerHitResult.TRANSPARENT;
+    }
+
+    /**
+     * Show capture option at hex coordinate
+     */
+    public showCaptureOption(q: number, r: number): void {
+        // Purple highlight with border to indicate capture option
+        this.addHighlight(q, r, 0x9932CC, 0.3, 0x9932CC, 3);
+    }
+
+    /**
+     * Clear all capture highlights
+     */
+    public clearCaptureOptions(): void {
+        this.clearHighlights();
+    }
+}
+
+// =============================================================================
 // Exhausted Units Highlight Layer
 // =============================================================================
 
@@ -526,5 +574,141 @@ export class ShapeHighlightLayer extends HexHighlightLayer {
      */
     public clearPreview(): void {
         this.clearHighlights();
+    }
+}
+
+// =============================================================================
+// Capturing Flag Layer
+// =============================================================================
+
+/**
+ * Shows animated flag indicators on tiles being captured.
+ * Uses a flag sprite with wave animation to indicate capture in progress.
+ */
+export class CapturingFlagLayer extends BaseLayer {
+    private flags = new Map<string, {
+        sprite: Phaser.GameObjects.Graphics,
+        tween: Phaser.Tweens.Tween
+    }>();
+    private tileWidth: number;
+
+    constructor(scene: Phaser.Scene, tileWidth: number) {
+        super(scene, {
+            name: 'capturing-flag',
+            coordinateSpace: 'hex',
+            interactive: false, // Flags don't consume clicks
+            depth: 14 // Above exhausted layer (13) for visibility
+        });
+        this.tileWidth = tileWidth;
+    }
+
+    public hitTest(context: ClickContext): LayerHitResult | null {
+        // Flags are visual only, never intercept clicks
+        return LayerHitResult.TRANSPARENT;
+    }
+
+    /**
+     * Show a capturing flag at hex coordinate with player color
+     * @param q Hex Q coordinate
+     * @param r Hex R coordinate
+     * @param player Player ID for flag color (defaults to 1)
+     */
+    public showFlag(q: number, r: number, player: number = 1): void {
+        const key = `${q},${r}`;
+
+        // Remove existing flag if present
+        this.hideFlag(q, r);
+
+        // Get world position
+        const position = hexToPixel(q, r);
+
+        // Get player color
+        const playerColor = DEFAULT_PLAYER_COLORS[player] || DEFAULT_PLAYER_COLORS[1];
+        const primaryColor = parseInt(playerColor.primary.replace('#', ''), 16);
+        const secondaryColor = parseInt(playerColor.secondary.replace('#', ''), 16);
+
+        // Create flag using graphics (simple triangular pennant)
+        const flag = this.scene.add.graphics();
+        this.container.add(flag);
+
+        // Position flag at top-right of the tile
+        const flagX = position.x + this.tileWidth * 0.25;
+        const flagY = position.y - this.tileWidth * 0.25;
+        flag.setPosition(flagX, flagY);
+
+        // Draw flag pole
+        flag.lineStyle(2, 0x8B4513); // Brown pole
+        flag.moveTo(0, -15);
+        flag.lineTo(0, 15);
+        flag.strokePath();
+
+        // Draw flag pennant (triangle) with player color
+        flag.fillStyle(primaryColor, 1);
+        flag.beginPath();
+        flag.moveTo(0, -15);
+        flag.lineTo(20, -10);
+        flag.lineTo(0, -5);
+        flag.closePath();
+        flag.fillPath();
+
+        // Add border to pennant with secondary player color
+        flag.lineStyle(1, secondaryColor);
+        flag.beginPath();
+        flag.moveTo(0, -15);
+        flag.lineTo(20, -10);
+        flag.lineTo(0, -5);
+        flag.closePath();
+        flag.strokePath();
+
+        // Create wave animation by rotating the flag slightly
+        const tween = this.scene.tweens.add({
+            targets: flag,
+            angle: { from: -5, to: 5 },
+            duration: AnimationConfig.FLAG_WAVE_DURATION,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        // Store reference
+        this.flags.set(key, { sprite: flag, tween });
+    }
+
+    /**
+     * Hide a capturing flag at hex coordinate
+     */
+    public hideFlag(q: number, r: number): void {
+        const key = `${q},${r}`;
+        const flagData = this.flags.get(key);
+
+        if (flagData) {
+            flagData.tween.stop();
+            flagData.sprite.destroy();
+            this.flags.delete(key);
+        }
+    }
+
+    /**
+     * Clear all capturing flags
+     */
+    public clearAllFlags(): void {
+        for (const [key, flagData] of this.flags) {
+            flagData.tween.stop();
+            flagData.sprite.destroy();
+        }
+        this.flags.clear();
+    }
+
+    /**
+     * Check if there's a flag at the given hex coordinate
+     */
+    public hasFlag(q: number, r: number): boolean {
+        const key = `${q},${r}`;
+        return this.flags.has(key);
+    }
+
+    public destroy(): void {
+        this.clearAllFlags();
+        super.destroy();
     }
 }

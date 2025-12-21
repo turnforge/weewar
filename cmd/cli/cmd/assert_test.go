@@ -68,6 +68,40 @@ func TestParseAssertion_Comparisons(t *testing.T) {
 	}
 }
 
+func TestParseAssertion_TextOperators(t *testing.T) {
+	tests := []struct {
+		input    string
+		field    string
+		operator Operator
+		value    string
+	}{
+		{"health gte 5", "health", OpGe, "5"},
+		{"health lte 10", "health", OpLe, "10"},
+		{"health gt 0", "health", OpGt, "0"},
+		{"health lt 100", "health", OpLt, "100"},
+		{"player eq 1", "player", OpEq, "1"},
+		{"player ne 2", "player", OpNe, "2"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.input, func(t *testing.T) {
+			a, err := parseAssertion(tc.input)
+			if err != nil {
+				t.Fatalf("parseAssertion(%q) error: %v", tc.input, err)
+			}
+			if a.Field != tc.field {
+				t.Errorf("field = %q, want %q", a.Field, tc.field)
+			}
+			if a.Operator != tc.operator {
+				t.Errorf("operator = %v, want %v", a.Operator, tc.operator)
+			}
+			if a.Value != tc.value {
+				t.Errorf("value = %q, want %q", a.Value, tc.value)
+			}
+		})
+	}
+}
+
 func TestParseAssertion_Set(t *testing.T) {
 	a, err := parseAssertion("health=")
 	if err != nil {
@@ -276,7 +310,7 @@ func TestAssertionResult_String(t *testing.T) {
 		},
 		{
 			AssertionResult{EntityType: "unit", EntityID: "A1", Field: "player", Operator: OpEq, Expected: "1", Actual: "2", Passed: false},
-			"FAIL - unit.A1.player == 1",
+			"FAIL - unit.A1.player == 1 (actual: 2)",
 		},
 		{
 			AssertionResult{EntityType: "game", EntityID: "", Field: "turn", Operator: OpEq, Expected: "5", Actual: "5", Passed: true},

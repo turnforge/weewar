@@ -49,14 +49,16 @@ Syntax:
 
 Operators:
   =     Set (capture current value, always passes)
-  ==    Equals
-  !=    Not equals
-  >     Greater than
-  >=    Greater or equal
-  <     Less than
-  <=    Less or equal
+  ==    Equals (or: eq)
+  !=    Not equals (or: ne)
+  >     Greater than (or: gt)
+  >=    Greater or equal (or: gte)
+  <     Less than (or: lt)
+  <=    Less or equal (or: lte)
   in    Value in set: health in (5,8,10)
   notin Value not in set
+
+Note: Use text operators (lt, lte, gt, gte, eq, ne) to avoid shell escaping issues.
 
 Exit codes:
   0     All assertions passed
@@ -172,7 +174,8 @@ func (r AssertionResult) String() string {
 		return fmt.Sprintf("%s - %s.%s %s (%s) (actual: %s)", prefix, entityStr, r.Field, r.Operator, r.Expected, r.Actual)
 	}
 
-	if r.Passed && r.Expected != r.Actual {
+	// Show actual value when it differs from expected (for comparisons) or on failure
+	if r.Expected != r.Actual || !r.Passed {
 		return fmt.Sprintf("%s - %s.%s %s %s (actual: %s)", prefix, entityStr, r.Field, r.Operator, r.Expected, r.Actual)
 	}
 	return fmt.Sprintf("%s - %s.%s %s %s", prefix, entityStr, r.Field, r.Operator, r.Expected)
@@ -419,7 +422,29 @@ func parseAssertion(input string) (Assertion, error) {
 		return Assertion{Field: field, Operator: OpIn, Values: values}, nil
 	}
 
-	// Check for comparison operators (order matters: >= before >, etc.)
+	// Check for text-based comparison operators first (shell-safe alternatives)
+	// These use space-delimited format like "health lt 5"
+	textOperators := []struct {
+		str string
+		op  Operator
+	}{
+		{" lte ", OpLe},
+		{" gte ", OpGe},
+		{" lt ", OpLt},
+		{" gt ", OpGt},
+		{" eq ", OpEq},
+		{" ne ", OpNe},
+	}
+
+	for _, op := range textOperators {
+		if idx := strings.Index(input, op.str); idx > 0 {
+			field := strings.TrimSpace(input[:idx])
+			value := strings.TrimSpace(input[idx+len(op.str):])
+			return Assertion{Field: field, Operator: op.op, Value: value}, nil
+		}
+	}
+
+	// Check for symbol-based comparison operators (order matters: >= before >, etc.)
 	operators := []struct {
 		str string
 		op  Operator

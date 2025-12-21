@@ -3,6 +3,7 @@ import { EditorEventTypes } from '../common/events';
 import { PhaserEditorScene, HoverInfo } from './PhaserEditorScene';
 import { IWorldEditorPresenter } from './WorldEditorPresenter';
 import { Unit, Tile, World } from '../common/World';
+import { HexShiftControl } from './HexShiftControl';
 
 /**
  * PhaserEditorComponent - Manages the Phaser.js-based world editor interface using BaseComponent architecture
@@ -29,6 +30,9 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
     // Dependencies (injected in phase 2)
     private presenter: IWorldEditorPresenter | null = null;
     private world: World;
+
+    // Floating controls
+    private hexShiftControl: HexShiftControl | null = null;
     
     // =============================================================================
     // LCMComponent Interface Implementation
@@ -209,12 +213,48 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         // Apply current theme
         const isDarkMode = document.documentElement.classList.contains('dark');
         this.editorScene.setTheme(isDarkMode);
-        
+
+        // Create floating hex shift control
+        this.createHexShiftControl(containerElement);
+
         this.isInitialized = true;
         this.log('Phaser editor initialized successfully');
-        
+
         // Emit ready event for other components - now assets are actually ready
         this.emit(EditorEventTypes.PHASER_READY, {}, this, this);
+    }
+
+    /**
+     * Create the floating hex shift control on top of the phaser container
+     */
+    private createHexShiftControl(containerElement: HTMLElement): void {
+        // Create a floating container for the control
+        const controlContainer = document.createElement('div');
+        controlContainer.id = 'hex-shift-control-container';
+        controlContainer.style.cssText = `
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            z-index: 100;
+            pointer-events: auto;
+        `;
+
+        // Ensure the parent container has relative positioning for absolute children
+        containerElement.style.position = 'relative';
+        containerElement.appendChild(controlContainer);
+
+        // Create the hex shift control
+        this.hexShiftControl = new HexShiftControl({
+            rootElement: controlContainer,
+            size: 110,
+            initialStep: 1,
+            onShift: (dQ, dR) => {
+                this.presenter?.shiftWorld(dQ, dR);
+                this.log(`World shifted by dQ=${dQ}, dR=${dR}`);
+            }
+        });
+
+        this.log('Hex shift control created');
     }
     
     /**

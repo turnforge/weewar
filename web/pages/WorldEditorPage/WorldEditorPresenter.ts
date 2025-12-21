@@ -98,6 +98,7 @@ export interface IWorldEditorPresenter {
     saveWorld(): Promise<{ success: boolean; worldId?: string; error?: string }>;
     clearWorld(): void;
     fillAllGrass(): void;
+    shiftWorld(dQ: number, dR: number): void;
 
     // State Getters
     getToolState(): ToolState;
@@ -624,6 +625,13 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
         if (!this.world) return;
         this.world.fillAllTerrain(1, 0);
         this.onToast?.('Fill Complete', 'All visible tiles filled with grass', 'info');
+    }
+
+    public shiftWorld(dQ: number, dR: number): void {
+        if (!this.world) return;
+        if (dQ === 0 && dR === 0) return;
+        this.world.shiftWorld(dQ, dR);
+        this.workflowState.lastAction = `shift-world-${dQ}-${dR}`;
     }
 
     // =========================================================================

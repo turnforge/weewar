@@ -219,14 +219,21 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         if (this.debugMode) {
             console.log('[PhaserWorldScene] World loaded, waiting for assets before updating scene');
         }
-        
+
         // Wait for assets to be ready before trying to create sprites
         await this.waitForAssetsReady();
-        
+
         if (this.debugMode) {
             console.log('[PhaserWorldScene] Assets ready, updating scene display');
         }
-        
+
+        // Clear existing sprites first to ensure a clean redraw
+        this.clearAllTiles();
+        this.clearAllUnits();
+        if (this.crossingLayer) {
+            this.crossingLayer.clearAllCrossings();
+        }
+
         // Load tile data from World into scene
         if (this.world) {
             const tiles = this.world.getAllTiles();
@@ -234,16 +241,10 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
                 tiles.forEach(tile => this.setTile(tile));
             }
 
-            // Only create units that don't already have sprites
-            // (units may have been created by handleUnitsChanged with richer data like shortcuts)
+            // Create all units fresh
             const units = this.world.getAllUnits();
             if (units.length > 0) {
-                units.forEach(unit => {
-                    const key = `${unit.q},${unit.r}`;
-                    if (!this.unitSprites.has(key)) {
-                        this.setUnit(unit);
-                    }
-                });
+                units.forEach(unit => this.setUnit(unit));
             }
 
             // Load crossings from World (using raw crossings map)

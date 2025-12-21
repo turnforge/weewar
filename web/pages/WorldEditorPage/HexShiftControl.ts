@@ -55,7 +55,7 @@ function generateTemplate(size: number, step: number): string {
     const cx = size / 2;
     const cy = size / 2;
     const outerRadius = size / 2 - 2;
-    const innerRadius = outerRadius * 0.4;
+    const innerRadius = outerRadius * 0.55;
 
     // Calculate hex vertices (pointy-top, starting from top going clockwise)
     const hexPoints: [number, number][] = [];
@@ -92,7 +92,7 @@ function generateTemplate(size: number, step: number): string {
             <foreignObject x="${inputOffset}" y="${inputOffset}" width="${inputSize}" height="${inputSize}">
                 <input data-step-input="true" type="number" value="${step}" min="${MIN_STEP}" max="${MAX_STEP}"
                     style="width: 100%; height: 100%; border: none; background: transparent; color: #e2e8f0;
-                           font-size: ${size * 0.18}px; font-weight: bold; font-family: system-ui, sans-serif;
+                           font-size: ${size * 0.22}px; font-weight: bold; font-family: system-ui, sans-serif;
                            text-align: center; outline: none; -moz-appearance: textfield; appearance: textfield;"
                     title="Step size - type a number or use arrows" />
             </foreignObject>

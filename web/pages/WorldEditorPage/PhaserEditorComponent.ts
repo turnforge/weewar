@@ -246,7 +246,7 @@ export class PhaserEditorComponent extends BaseComponent implements LCMComponent
         // Create the hex shift control
         this.hexShiftControl = new HexShiftControl({
             rootElement: controlContainer,
-            size: 80,
+            size: 110,
             initialStep: 1,
             onShift: (dQ, dR) => {
                 this.presenter?.shiftWorld(dQ, dR);

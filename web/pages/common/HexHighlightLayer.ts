@@ -625,7 +625,6 @@ export class CapturingFlagLayer extends BaseLayer {
         // Get player color
         const playerColor = DEFAULT_PLAYER_COLORS[player] || DEFAULT_PLAYER_COLORS[1];
         const primaryColor = parseInt(playerColor.primary.replace('#', ''), 16);
-        const secondaryColor = parseInt(playerColor.secondary.replace('#', ''), 16);
 
         // Create flag using graphics (simple triangular pennant)
         const flag = this.scene.add.graphics();
@@ -642,22 +641,15 @@ export class CapturingFlagLayer extends BaseLayer {
         flag.lineTo(0, 15);
         flag.strokePath();
 
-        // Draw flag pennant (triangle) with player color
+        // Draw flag pennant (triangle) with player color fill and black stroke
         flag.fillStyle(primaryColor, 1);
+        flag.lineStyle(2, 0x000000); // Black stroke for prominence
         flag.beginPath();
         flag.moveTo(0, -15);
         flag.lineTo(20, -10);
         flag.lineTo(0, -5);
         flag.closePath();
         flag.fillPath();
-
-        // Add border to pennant with secondary player color
-        flag.lineStyle(1, secondaryColor);
-        flag.beginPath();
-        flag.moveTo(0, -15);
-        flag.lineTo(20, -10);
-        flag.lineTo(0, -5);
-        flag.closePath();
         flag.strokePath();
 
         // Create wave animation by rotating the flag slightly

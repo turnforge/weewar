@@ -225,6 +225,9 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
             const percentageStr = (probability * 100).toFixed(1);
             const tooltipText = `${percentageStr}% chance of ${damageValue} damage`;
             
+            if (maxProbability == 0) {
+              console.log("How did this happen?")
+            }
             svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
                          fill="${fillColor}" opacity="0.8" 
                          class="hover:opacity-100 transition-opacity cursor-help"

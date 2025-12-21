@@ -43,11 +43,11 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringVar(&gameName, "name", "", "name for the new game")
 	newCmd.Flags().StringVar(&gameDescription, "desc", "", "description for the new game")
-	newCmd.Flags().Int32Var(&startingCoins, "starting-coins", 100, "starting coins per player")
-	newCmd.Flags().Int32Var(&gameIncome, "game-income", 0, "base income per turn")
-	newCmd.Flags().Int32Var(&landbaseIncome, "landbase-income", 75, "income per landbase")
-	newCmd.Flags().Int32Var(&navalbaseIncome, "navalbase-income", 75, "income per navalbase")
-	newCmd.Flags().Int32Var(&airportbaseIncome, "airportbase-income", 75, "income per airport")
+	newCmd.Flags().Int32Var(&startingCoins, "starting-coins", 0, "starting coins per player")
+	newCmd.Flags().Int32Var(&gameIncome, "game-income", 300, "base income per turn")
+	newCmd.Flags().Int32Var(&landbaseIncome, "landbase-income", 150, "income per landbase")
+	newCmd.Flags().Int32Var(&navalbaseIncome, "navalbase-income", 150, "income per navalbase")
+	newCmd.Flags().Int32Var(&airportbaseIncome, "airportbase-income", 150, "income per airport")
 }
 
 func runNew(cmd *cobra.Command, args []string) error {

@@ -450,6 +450,15 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
         if (!this.world) return;
 
         if (this.toolState.brushSize === 0) {
+            // Toggle behavior for single tile: if same terrain type and player, remove it
+            const existingTile = this.world.getTileAt(q, r);
+            if (existingTile &&
+                existingTile.tileType === this.toolState.selectedTerrain &&
+                existingTile.player === playerId) {
+                this.world.removeTileAt(q, r);
+                this.world.removeUnitAt(q, r);
+                return;
+            }
             this.world.setTileAt(q, r, this.toolState.selectedTerrain, playerId);
         } else {
             const tiles = this.getTilesForBrush(q, r);
@@ -463,6 +472,14 @@ export class WorldEditorPresenter implements IWorldEditorPresenter, EventSubscri
         if (!this.world) return;
 
         if (this.toolState.brushSize === 0) {
+            // Toggle behavior for single unit: if same unit type and player, remove it
+            const existingUnit = this.world.getUnitAt(q, r);
+            if (existingUnit &&
+                existingUnit.unitType === this.toolState.selectedUnit &&
+                existingUnit.player === this.toolState.selectedPlayer) {
+                this.world.removeUnitAt(q, r);
+                return;
+            }
             this.world.setUnitAt(q, r, this.toolState.selectedUnit, this.toolState.selectedPlayer);
         } else {
             const tiles = this.getTilesForBrush(q, r);

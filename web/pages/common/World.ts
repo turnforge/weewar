@@ -365,16 +365,8 @@ export class World {
         if (!this.tileExistsAt(q, r)) {
             this.setTileAt(q, r, 1, 0); // Terrain type 1 = Grass, no player ownership
         }
-        
-        // Check if same unit type and player already exists - if so, remove it (toggle behavior)
-        const existingUnit = this.getUnitAt(q, r);
-        if (existingUnit && existingUnit.unitType === unitType && existingUnit.player === player) {
-            // Same unit type and player - remove the unit (toggle off)
-            this.removeUnitAt(q, r);
-            return;
-        }
-        
-        // Different unit type/player or no existing unit - place/replace the unit
+
+        // Place or replace the unit at this location
         const key = `${q},${r}`;
         const unit = WD.from(models.Unit,{ q, r, unitType, player });
         this.units[key] = unit;

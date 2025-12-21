@@ -600,7 +600,40 @@ func (s *BaseGamesService) GetUnitOptions(ctx context.Context, rtGame *lib.Game,
 		}
 	}
 
-	// TODO: Add capture building options if "capture" is allowed
+	// Check if "capture" is allowed at current progression step
+	captureAllowed := lib.ContainsAction(allowedActions, "capture")
+
+	// Look-ahead for capture if on a point-based step
+	if isPointBasedStep && !captureAllowed {
+		nextStepUnit := &v1.Unit{
+			ProgressionStep:   unit.ProgressionStep + 1,
+			ChosenAlternative: "",
+			DistanceLeft:      0,
+		}
+		nextAllowedActions := rtGame.RulesEngine.GetAllowedActionsForUnit(nextStepUnit, unitDef)
+		captureAllowed = lib.ContainsAction(nextAllowedActions, "capture")
+	}
+
+	// Get capture option if unit can capture and is on a capturable tile
+	if unit.AvailableHealth > 0 && captureAllowed && unit.CaptureStartedTurn == 0 {
+		coord := lib.CoordFromInt32(unit.Q, unit.R)
+		tile := rtGame.World.TileAt(coord)
+		if tile != nil && tile.Player != unit.Player {
+			// Check if this unit type can capture this tile type
+			terrainProps := rtGame.RulesEngine.GetTerrainUnitPropertiesForUnit(tile.TileType, unit.UnitType)
+			if terrainProps != nil && terrainProps.CanCapture {
+				captureAction := &v1.CaptureBuildingAction{
+					Q:        unit.Q,
+					R:        unit.R,
+					TileType: tile.TileType,
+				}
+				options = append(options, &v1.GameOption{
+					OptionType: &v1.GameOption_Capture{Capture: captureAction},
+				})
+			}
+		}
+	}
+
 	// TODO: Add build unit options if "build" is allowed
 	return
 }

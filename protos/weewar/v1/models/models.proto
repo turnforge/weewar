@@ -212,6 +212,11 @@ message Unit {
   // this tracks which alternative the user chose, preventing switching mid-step
   // Cleared when advancing to next step
   string chosen_alternative = 13;
+
+  // Turn when this unit started capturing a building (0 = not capturing)
+  // Capture completes at the start of the capturing player's next turn
+  // if the unit is still alive on the tile
+  int32 capture_started_turn = 14;
 }
 
 message AttackRecord {
@@ -580,6 +585,7 @@ message GameMove {
     AttackUnitAction attack_unit = 6;
     EndTurnAction end_turn = 7;
     BuildUnitAction build_unit = 8;
+    CaptureBuildingAction capture_building = 13;
   }
 
   // A monotonically increasing and unique (within the game) sequence number for the move
@@ -672,6 +678,8 @@ message WorldChange {
     PlayerChangedChange player_changed = 4;
     UnitBuiltChange unit_built = 5;
     CoinsChangedChange coins_changed = 6;
+    TileCapturedChange tile_captured = 7;
+    CaptureStartedChange capture_started = 8;
   }
 }
 
@@ -742,6 +750,38 @@ message CoinsChangedChange {
   int32 new_coins = 3;
   // Reason for change: "build", "income", "repair", etc.
   string reason = 4;
+}
+
+/**
+ * A tile was captured by a unit
+ */
+message TileCapturedChange {
+  // The unit that captured the tile
+  Unit capturing_unit = 1;
+  // Tile coordinates
+  int32 tile_q = 2;
+  int32 tile_r = 3;
+  // Tile type
+  int32 tile_type = 4;
+  // Previous owner (0 for neutral)
+  int32 previous_owner = 5;
+  // New owner
+  int32 new_owner = 6;
+}
+
+/**
+ * A unit started capturing a building (capture not yet complete)
+ */
+message CaptureStartedChange {
+  // The unit starting the capture
+  Unit capturing_unit = 1;
+  // Tile coordinates
+  int32 tile_q = 2;
+  int32 tile_r = 3;
+  // Tile type
+  int32 tile_type = 4;
+  // Current owner (0 for neutral)
+  int32 current_owner = 5;
 }
 
 // Compact representation of all reachable paths from a source

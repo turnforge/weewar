@@ -240,6 +240,7 @@ func UnitToUnitGORM(
 		AttacksReceivedThisTurn: src.AttacksReceivedThisTurn,
 		ProgressionStep:         src.ProgressionStep,
 		ChosenAlternative:       src.ChosenAlternative,
+		CaptureStartedTurn:      src.CaptureStartedTurn,
 	}
 	out = dest
 
@@ -291,6 +292,7 @@ func UnitFromUnitGORM(
 		AttacksReceivedThisTurn: src.AttacksReceivedThisTurn,
 		ProgressionStep:         src.ProgressionStep,
 		ChosenAlternative:       src.ChosenAlternative,
+		CaptureStartedTurn:      src.CaptureStartedTurn,
 	}
 	out = dest
 

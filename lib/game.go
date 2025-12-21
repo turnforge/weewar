@@ -169,6 +169,21 @@ func (g *Game) TopUpUnitIfNeeded(unit *v1.Unit) error {
 	unit.ProgressionStep = 0
 	unit.ChosenAlternative = ""
 
+	// Check for pending capture completion
+	// If unit started capturing in a previous turn and survived, complete the capture
+	if unit.CaptureStartedTurn > 0 && unit.CaptureStartedTurn < g.TurnCounter {
+		coord := AxialCoord{Q: int(unit.Q), R: int(unit.R)}
+		tile := g.World.TileAt(coord)
+		if tile != nil && tile.Player != unit.Player {
+			// Complete the capture - transfer ownership
+			tile.Player = unit.Player
+			fmt.Printf("Capture completed: tile at (%d,%d) now belongs to player %d\n",
+				tile.Q, tile.R, unit.Player)
+		}
+		// Clear capture state
+		unit.CaptureStartedTurn = 0
+	}
+
 	// Mark unit as topped-up for this turn
 	unit.LastToppedupTurn = g.TurnCounter
 

@@ -177,6 +177,22 @@ func FormatOptions(pc *PresenterContext, position string) string {
 			sb.WriteString(fmt.Sprintf("%d. build %s (cost: %d, type: %d)\n",
 				i+1, unitName, buildOpt.Cost, buildOpt.UnitType))
 
+		case *v1.GameOption_Capture:
+			captureOpt := opt.Capture
+			coord := lib.CoordFromInt32(captureOpt.Q, captureOpt.R)
+			terrainName := fmt.Sprintf("type %d", captureOpt.TileType)
+
+			// Try to get the actual terrain name from RulesEngine
+			if pc.Presenter != nil && pc.Presenter.RulesEngine != nil {
+				rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+				if terrainDef, err := rulesEngine.GetTerrainData(captureOpt.TileType); err == nil {
+					terrainName = terrainDef.Name
+				}
+			}
+
+			sb.WriteString(fmt.Sprintf("%d. capture %s at %s\n", i+1, terrainName, coord.String()))
+			sb.WriteString("   Capture completes next turn if unit survives\n")
+
 		case *v1.GameOption_EndTurn:
 			sb.WriteString(fmt.Sprintf("%d. end turn\n", i+1))
 		}

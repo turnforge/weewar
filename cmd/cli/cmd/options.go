@@ -105,6 +105,22 @@ func runOptions(cmd *cobra.Command, args []string) error {
 						"unit_name": unitName,
 						"cost":      buildOpt.Cost,
 					})
+				case *v1.GameOption_Capture:
+					captureOpt := opt.Capture
+					terrainName := fmt.Sprintf("type %d", captureOpt.TileType)
+
+					// Try to get actual terrain name
+					if terrainDef, err := rtGame.GetRulesEngine().GetTerrainData(captureOpt.TileType); err == nil {
+						terrainName = terrainDef.Name
+					}
+
+					options = append(options, map[string]any{
+						"type":         "capture",
+						"q":            captureOpt.Q,
+						"r":            captureOpt.R,
+						"tile_type":    captureOpt.TileType,
+						"terrain_name": terrainName,
+					})
 				case *v1.GameOption_EndTurn:
 					options = append(options, map[string]any{
 						"type": "endturn",

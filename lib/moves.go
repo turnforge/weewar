@@ -47,6 +47,7 @@ func copyUnit(unit *v1.Unit) *v1.Unit {
 		AttackHistory:           attackHistory,
 		ProgressionStep:         unit.ProgressionStep,
 		ChosenAlternative:       unit.ChosenAlternative,
+		CaptureStartedTurn:      unit.CaptureStartedTurn,
 	}
 }
 
@@ -86,6 +87,8 @@ func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (err error) {
 		return m.ProcessAttackUnit(game, move, a.AttackUnit)
 	case *v1.GameMove_BuildUnit:
 		return m.ProcessBuildUnit(game, move, a.BuildUnit)
+	case *v1.GameMove_CaptureBuilding:
+		return m.ProcessCaptureBuilding(game, move, a.CaptureBuilding)
 	case *v1.GameMove_EndTurn:
 		return m.ProcessEndTurn(game, move, a.EndTurn)
 	default:
@@ -230,6 +233,111 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 		},
 	}
 	move.Changes = append(move.Changes, coinsChange)
+
+	return nil
+}
+
+// ProcessCaptureBuilding starts capturing a building with a unit
+// The capture completes at the start of the capturing player's next turn
+// if the unit survives until then
+func (m *MoveProcessor) ProcessCaptureBuilding(g *Game, move *v1.GameMove, action *v1.CaptureBuildingAction) (err error) {
+	coord := CoordFromInt32(action.Q, action.R)
+
+	// Get the unit at the position
+	unit := g.World.UnitAt(coord)
+	if unit == nil {
+		return fmt.Errorf("no unit at position %v", coord)
+	}
+
+	// Check if it's the correct player's turn
+	if unit.Player != g.CurrentPlayer {
+		return fmt.Errorf("unit does not belong to current player %d", g.CurrentPlayer)
+	}
+
+	// Apply lazy top-up pattern
+	if err := g.TopUpUnitIfNeeded(unit); err != nil {
+		return fmt.Errorf("failed to top-up unit: %w", err)
+	}
+
+	// Get the tile at the position
+	tile := g.World.TileAt(coord)
+	if tile == nil {
+		return fmt.Errorf("no tile at position %v", coord)
+	}
+
+	// Check if tile is already owned by the capturing player
+	if tile.Player == g.CurrentPlayer {
+		return fmt.Errorf("tile at %v is already owned by player %d", coord, g.CurrentPlayer)
+	}
+
+	// Check if this unit type can capture
+	terrainProps := g.RulesEngine.GetTerrainUnitPropertiesForUnit(tile.TileType, unit.UnitType)
+	if terrainProps == nil || !terrainProps.CanCapture {
+		return fmt.Errorf("unit type %d cannot capture tile type %d", unit.UnitType, tile.TileType)
+	}
+
+	// Check if unit is already capturing
+	if unit.CaptureStartedTurn > 0 {
+		return fmt.Errorf("unit is already capturing a building")
+	}
+
+	// Capture previous unit state
+	previousUnit := copyUnit(unit)
+
+	// Start the capture
+	unit.CaptureStartedTurn = g.TurnCounter
+
+	// Update progression: record chosen alternative and advance step
+	unitDef, err := g.RulesEngine.GetUnitData(unit.UnitType)
+	if err == nil && unitDef != nil {
+		actionOrder := unitDef.ActionOrder
+		if len(actionOrder) == 0 {
+			actionOrder = []string{"move", "attack|capture"}
+		}
+
+		// If current step has pipe-separated alternatives, record the choice
+		if int(unit.ProgressionStep) < len(actionOrder) {
+			stepActions := actionOrder[unit.ProgressionStep]
+			if strings.Contains(stepActions, "|") {
+				unit.ChosenAlternative = "capture"
+			}
+		}
+
+		// Advance to next step (capture action consumed)
+		unit.ProgressionStep++
+		unit.ChosenAlternative = "" // Clear for next step
+	}
+
+	// Update timestamp
+	g.GameState.UpdatedAt = tspb.New(time.Now())
+
+	// Capture updated unit state
+	updatedUnit := copyUnit(unit)
+
+	// Record the capture start in world changes
+	captureChange := &v1.WorldChange{
+		ChangeType: &v1.WorldChange_CaptureStarted{
+			CaptureStarted: &v1.CaptureStartedChange{
+				CapturingUnit: updatedUnit,
+				TileQ:         tile.Q,
+				TileR:         tile.R,
+				TileType:      tile.TileType,
+				CurrentOwner:  tile.Player,
+			},
+		},
+	}
+	move.Changes = append(move.Changes, captureChange)
+
+	// Also record unit state change for UI updates
+	unitChange := &v1.WorldChange{
+		ChangeType: &v1.WorldChange_UnitMoved{
+			UnitMoved: &v1.UnitMovedChange{
+				PreviousUnit: previousUnit,
+				UpdatedUnit:  updatedUnit,
+			},
+		},
+	}
+	move.Changes = append(move.Changes, unitChange)
 
 	return nil
 }

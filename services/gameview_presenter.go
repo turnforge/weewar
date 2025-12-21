@@ -210,8 +210,8 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 
 	// Get tile and unit data from World using coordinates
 	switch req.Layer {
-	case "movement-highlight":
-		// User clicked on a movement highlight - execute the move
+	case "movement-highlight", "capture-highlight":
+		// User clicked on a movement/capture highlight - execute the action
 		if err := s.executeMovementAction(ctx, game, gameState, q, r); err != nil {
 			return nil, err
 		}
@@ -314,13 +314,13 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 	return
 }
 
-// clearHighlightsAndSelection clears interactive highlights (selection, movement, attack) but preserves exhausted highlights
+// clearHighlightsAndSelection clears interactive highlights (selection, movement, attack, capture) but preserves exhausted highlights
 func (s *GameViewPresenter) clearHighlightsAndSelection(ctx context.Context) {
 	s.GameScene.ClearPaths(ctx)
 	if s.hasHighlights {
 		// Clear only interactive highlights, not exhausted
 		s.GameScene.ClearHighlights(ctx, &v1.ClearHighlightsRequest{
-			Types: []string{"selection", "movement", "attack", "build"},
+			Types: []string{"selection", "movement", "attack", "build", "capture"},
 		})
 		s.hasHighlights = false
 		s.selectedQ = nil
@@ -395,6 +395,14 @@ func buildHighlightSpecs(optionsResp *v1.GetOptionsAtResponse, selectedQ, select
 				R:      buildOpt.R,
 				Type:   "build",
 				Action: &v1.HighlightSpec_Build{Build: buildOpt},
+			})
+		} else if captureOpt := option.GetCapture(); captureOpt != nil {
+			// Add capture highlight (same tile as unit)
+			highlights = append(highlights, &v1.HighlightSpec{
+				Q:      captureOpt.Q,
+				R:      captureOpt.R,
+				Type:   "capture",
+				Action: &v1.HighlightSpec_Capture{Capture: captureOpt},
 			})
 		}
 	}
@@ -519,11 +527,22 @@ func (s *GameViewPresenter) executeMovementAction(ctx context.Context, game *v1.
 					gameState.CurrentPlayer)
 				break
 			}
+		} else if opt := option.GetCapture(); opt != nil {
+			if opt.Q == targetQ && opt.R == targetR {
+				gameMove = &v1.GameMove{
+					Player:   gameState.CurrentPlayer,
+					MoveType: &v1.GameMove_CaptureBuilding{CaptureBuilding: opt},
+				}
+				fmt.Printf("[Presenter] Executing capture at (%d,%d) for player %d\n",
+					opt.Q, opt.R,
+					gameState.CurrentPlayer)
+				break
+			}
 		}
 	}
 
 	if gameMove == nil {
-		return fmt.Errorf("no valid move or attack option found for target position (%d,%d)", targetQ, targetR)
+		return fmt.Errorf("no valid move, attack, or capture option found for target position (%d,%d)", targetQ, targetR)
 	}
 
 	// Call ProcessMoves to execute the move
@@ -721,6 +740,28 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 					CurrentPlayer: gameState.CurrentPlayer,
 					TurnCounter:   gameState.TurnCounter,
 				})
+
+			case *v1.WorldChange_CaptureStarted:
+				// Show capture effect animation
+				captureStarted := changeType.CaptureStarted
+				if captureStarted != nil {
+					s.GameScene.ShowCaptureEffect(ctx, &v1.ShowCaptureEffectRequest{
+						Q: captureStarted.TileQ,
+						R: captureStarted.TileR,
+					})
+					fmt.Printf("[Presenter] Capture started at (%d,%d) by player %d\n",
+						captureStarted.TileQ, captureStarted.TileR, captureStarted.CapturingUnit.Player)
+				}
+
+			case *v1.WorldChange_TileCaptured:
+				// Tile ownership changed - update tile display
+				tileCaptured := changeType.TileCaptured
+				if tileCaptured != nil {
+					fmt.Printf("[Presenter] Tile captured at (%d,%d): player %d -> player %d\n",
+						tileCaptured.TileQ, tileCaptured.TileR,
+						tileCaptured.PreviousOwner, tileCaptured.NewOwner)
+					// The game state will be refreshed below
+				}
 
 			default:
 				fmt.Printf("[Presenter] Unknown world change type: %T\n", changeType)

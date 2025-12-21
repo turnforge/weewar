@@ -1934,6 +1934,35 @@
       },
       "title": "*\nA move where a unit can capture a building"
     },
+    "v1CaptureStartedChange": {
+      "type": "object",
+      "properties": {
+        "capturingUnit": {
+          "$ref": "#/definitions/v1Unit",
+          "title": "The unit starting the capture"
+        },
+        "tileQ": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Tile coordinates"
+        },
+        "tileR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tileType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Tile type"
+        },
+        "currentOwner": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Current owner (0 for neutral)"
+        }
+      },
+      "title": "*\nA unit started capturing a building (capture not yet complete)"
+    },
     "v1ClearHighlightsResponse": {
       "type": "object"
     },
@@ -2309,6 +2338,9 @@
         },
         "buildUnit": {
           "$ref": "#/definitions/v1BuildUnitAction"
+        },
+        "captureBuilding": {
+          "$ref": "#/definitions/v1CaptureBuildingAction"
         },
         "sequenceNum": {
           "type": "string",
@@ -3388,6 +3420,40 @@
         }
       }
     },
+    "v1TileCapturedChange": {
+      "type": "object",
+      "properties": {
+        "capturingUnit": {
+          "$ref": "#/definitions/v1Unit",
+          "title": "The unit that captured the tile"
+        },
+        "tileQ": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Tile coordinates"
+        },
+        "tileR": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tileType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Tile type"
+        },
+        "previousOwner": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Previous owner (0 for neutral)"
+        },
+        "newOwner": {
+          "type": "integer",
+          "format": "int32",
+          "title": "New owner"
+        }
+      },
+      "title": "*\nA tile was captured by a unit"
+    },
     "v1TurnOptionClickedResponse": {
       "type": "object",
       "properties": {
@@ -3465,6 +3531,11 @@
         "chosenAlternative": {
           "type": "string",
           "title": "When current step has pipe-separated alternatives (e.g., \"attack|capture\"),\nthis tracks which alternative the user chose, preventing switching mid-step\nCleared when advancing to next step"
+        },
+        "captureStartedTurn": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Turn when this unit started capturing a building (0 = not capturing)\nCapture completes at the start of the capturing player's next turn\nif the unit is still alive on the tile"
         }
       }
     },
@@ -3697,6 +3768,12 @@
         },
         "coinsChanged": {
           "$ref": "#/definitions/v1CoinsChangedChange"
+        },
+        "tileCaptured": {
+          "$ref": "#/definitions/v1TileCapturedChange"
+        },
+        "captureStarted": {
+          "$ref": "#/definitions/v1CaptureStartedChange"
         }
       },
       "title": "*\nRepresents a change to the game world"

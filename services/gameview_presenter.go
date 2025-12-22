@@ -530,8 +530,7 @@ func (s *GameViewPresenter) BuildOptionClicked(ctx context.Context, req *v1.Buil
 		req.UnitType, req.Q, req.R, getGameResp.State.CurrentPlayer)
 
 	// Execute the build move
-	s.executeBuildAction(ctx, getGameResp.Game, getGameResp.State, gameMove)
-
+	err = s.executeBuildAction(ctx, getGameResp.Game, getGameResp.State, gameMove)
 	return
 }
 
@@ -618,12 +617,12 @@ func (s *GameViewPresenter) executeMovementAction(ctx context.Context, game *v1.
 
 // executeEndTurnAction executes the end turn action
 // executeBuildAction processes a build unit action
-func (s *GameViewPresenter) executeBuildAction(ctx context.Context, game *v1.Game, gameState *v1.GameState, gameMove *v1.GameMove) {
+func (s *GameViewPresenter) executeBuildAction(ctx context.Context, game *v1.Game, gameState *v1.GameState, gameMove *v1.GameMove) error {
 	// Call ProcessMoves to execute the build
 	resp, err := s.GamesService.ProcessMoves(ctx, &v1.ProcessMovesRequest{GameId: game.Id, Moves: []*v1.GameMove{gameMove}})
 	if err != nil {
 		fmt.Printf("[Presenter] Build action failed: %v\n", err)
-		return
+		return err
 	}
 
 	fmt.Printf("[Presenter] Build action completed successfully\n")
@@ -633,6 +632,7 @@ func (s *GameViewPresenter) executeBuildAction(ctx context.Context, game *v1.Gam
 
 	// Apply incremental updates from the move results
 	s.applyIncrementalChanges(ctx, game, gameState, resp.Moves, gameMove)
+	return nil
 }
 
 func (s *GameViewPresenter) executeEndTurnAction(ctx context.Context, game *v1.Game, gameState *v1.GameState) {

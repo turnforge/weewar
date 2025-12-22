@@ -81,8 +81,7 @@ func (s *BaseGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMove
 	rtGame.World = originalWorld.Push() // Create transaction layer
 
 	// Validate and process moves in transaction layer
-	var dmp lib.MoveProcessor
-	err = dmp.ProcessMoves(rtGame, req.Moves)
+	err = rtGame.ProcessMoves(req.Moves)
 	if err != nil {
 		return nil, err
 	}
@@ -470,8 +469,6 @@ func (s *BaseGamesService) SimulateAttack(ctx context.Context, req *v1.SimulateA
 func (s *BaseGamesService) GetUnitOptions(ctx context.Context, rtGame *lib.Game, unit *v1.Unit) (options []*v1.GameOption, allPaths *v1.AllPaths, err error) {
 
 	// Our unit - get available options based on action progression
-	var dmp lib.MoveProcessor
-
 	// Get unit definition for progression rules
 	unitDef, err := rtGame.RulesEngine.GetUnitData(unit.UnitType)
 	if err != nil {
@@ -494,7 +491,7 @@ func (s *BaseGamesService) GetUnitOptions(ctx context.Context, rtGame *lib.Game,
 
 	// Get movement options if unit has movement/retreat left and move or retreat is allowed
 	if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 && (moveAllowed || retreatAllowed) {
-		pathsResult, err := dmp.GetMovementOptions(rtGame, unit.Q, unit.R, false)
+		pathsResult, err := rtGame.GetMovementOptions(unit.Q, unit.R, false)
 		if err == nil {
 			allPaths = pathsResult
 
@@ -548,7 +545,7 @@ func (s *BaseGamesService) GetUnitOptions(ctx context.Context, rtGame *lib.Game,
 
 	// Get attack options if unit can attack and attack is allowed
 	if unit.AvailableHealth > 0 && attackAllowed {
-		attackCoords, err := dmp.GetAttackOptions(rtGame, unit.Q, unit.R)
+		attackCoords, err := rtGame.GetAttackOptions(unit.Q, unit.R)
 		if err == nil {
 			for _, coord := range attackCoords {
 				// Get target unit info for rich attack option data

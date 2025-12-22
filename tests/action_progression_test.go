@@ -154,13 +154,12 @@ func TestProgressionStepAdvancement(t *testing.T) {
 	}
 
 	// Process a move that uses up all movement points
-	mp := &MoveProcessor{}
 	moveAction := &v1.MoveUnitAction{
 		From: &v1.Position{Q: 0, R: 0},
 		To:   &v1.Position{Q: 1, R: 0},
 	}
 
-	err := mp.ProcessMoveUnit(game, &v1.GameMove{Player: 1}, moveAction, false)
+	err := game.ProcessMoveUnit(&v1.GameMove{Player: 1}, moveAction, false)
 	if err != nil {
 		t.Fatalf("Failed to process move: %v", err)
 	}

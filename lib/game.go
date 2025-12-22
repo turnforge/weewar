@@ -427,8 +427,7 @@ func (g *Game) Move(unit, target string) ([]*v1.WorldChange, error) {
 	}
 
 	// Process move
-	var mp MoveProcessor
-	if err := mp.ProcessMoveUnit(g, move, action, false); err != nil {
+	if err := g.ProcessMoveUnit(move, action, false); err != nil {
 		return nil, err
 	}
 
@@ -467,8 +466,7 @@ func (g *Game) Attack(attacker, defender string) ([]*v1.WorldChange, error) {
 	}
 
 	// Process attack
-	var mp MoveProcessor
-	if err := mp.ProcessAttackUnit(g, move, action); err != nil {
+	if err := g.ProcessAttackUnit(move, action); err != nil {
 		return nil, err
 	}
 
@@ -501,8 +499,7 @@ func (g *Game) Build(tile string, unitType int32) ([]*v1.WorldChange, error) {
 	}
 
 	// Process build
-	var mp MoveProcessor
-	if err := mp.ProcessBuildUnit(g, move, action); err != nil {
+	if err := g.ProcessBuildUnit(move, action); err != nil {
 		return nil, err
 	}
 
@@ -533,8 +530,7 @@ func (g *Game) Capture(unit string) ([]*v1.WorldChange, error) {
 	}
 
 	// Process capture
-	var mp MoveProcessor
-	if err := mp.ProcessCaptureBuilding(g, move, action); err != nil {
+	if err := g.ProcessCaptureBuilding(move, action); err != nil {
 		return nil, err
 	}
 
@@ -552,8 +548,7 @@ func (g *Game) EndTurn() ([]*v1.WorldChange, error) {
 	}
 
 	// Process end turn
-	var mp MoveProcessor
-	if err := mp.ProcessEndTurn(g, move, action); err != nil {
+	if err := g.ProcessEndTurn(move, action); err != nil {
 		return nil, err
 	}
 
@@ -611,8 +606,6 @@ func (g *Game) GetOptionsAt(position string) (*v1.GetOptionsAtResponse, error) {
 
 // GetUnitOptions returns available options for a unit (move, attack, capture).
 func (g *Game) GetUnitOptions(unit *v1.Unit) (options []*v1.GameOption, allPaths *v1.AllPaths, err error) {
-	var mp MoveProcessor
-
 	// Get unit definition for progression rules
 	unitDef, err := g.RulesEngine.GetUnitData(unit.UnitType)
 	if err != nil {
@@ -629,7 +622,7 @@ func (g *Game) GetUnitOptions(unit *v1.Unit) (options []*v1.GameOption, allPaths
 
 	// Get movement options
 	if unit.AvailableHealth > 0 && unit.DistanceLeft > 0 && (moveAllowed || retreatAllowed) {
-		pathsResult, err := mp.GetMovementOptions(g, unit.Q, unit.R, false)
+		pathsResult, err := g.GetMovementOptions(unit.Q, unit.R, false)
 		if err == nil {
 			allPaths = pathsResult
 
@@ -672,7 +665,7 @@ func (g *Game) GetUnitOptions(unit *v1.Unit) (options []*v1.GameOption, allPaths
 
 	// Get attack options
 	if unit.AvailableHealth > 0 && attackAllowed {
-		attackCoords, err := mp.GetAttackOptions(g, unit.Q, unit.R)
+		attackCoords, err := g.GetAttackOptions(unit.Q, unit.R)
 		if err == nil {
 			for _, coord := range attackCoords {
 				targetUnit := g.World.UnitAt(coord)

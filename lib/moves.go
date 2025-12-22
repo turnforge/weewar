@@ -9,9 +9,6 @@ import (
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type MoveProcessor struct {
-}
-
 // copyUnit creates a deep copy of a unit with all fields
 // This is used when recording unit states in WorldChange objects
 func copyUnit(unit *v1.Unit) *v1.Unit {
@@ -51,10 +48,10 @@ func copyUnit(unit *v1.Unit) *v1.Unit {
 	}
 }
 
-// Process a set of moves in a transaction and returns a "log entry" of the changes as a result
-func (m *MoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (err error) {
+// ProcessMoves processes a set of moves in a transaction and returns a "log entry" of the changes as a result
+func (g *Game) ProcessMoves(moves []*v1.GameMove) (err error) {
 	for _, move := range moves {
-		err := m.ProcessMove(game, move)
+		err := g.ProcessMove(move)
 		if err != nil {
 			return err
 		}
@@ -62,17 +59,17 @@ func (m *MoveProcessor) ProcessMoves(game *Game, moves []*v1.GameMove) (err erro
 	return
 }
 
-// This is the dispatcher for a move
-// The moves work is we submit a move to the game, it calls the correct move handler
-// Moves in a game are "known" so we can have a simple static dispatcher here
+// ProcessMove is the dispatcher for a move.
+// The moves work is we submit a move to the game, it calls the correct move handler.
+// Moves in a game are "known" so we can have a simple static dispatcher here.
 // The move handler/processor update the Game state and also updates the action object
-// indicating changes that were incurred as part of running the move.  Note that
+// indicating changes that were incurred as part of running the move. Note that
 // since we are looking at "transactionality" in games we want to make sure all moves
 // are first valid and ATOMIC and only then finally commit the changes for all the moves.
 // For example we may have 3 moves where first two units are moved to a common location
-// and then they attack another unit.  Here If we treat it as a single unit attacking it
+// and then they attack another unit. Here if we treat it as a single unit attacking it
 // will have different outcomes than a "combined" attack.
-func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (err error) {
+func (g *Game) ProcessMove(move *v1.GameMove) (err error) {
 	if move.MoveType == nil {
 		return fmt.Errorf("move type is nil")
 	}
@@ -82,22 +79,22 @@ func (m *MoveProcessor) ProcessMove(game *Game, move *v1.GameMove) (err error) {
 
 	switch a := move.MoveType.(type) {
 	case *v1.GameMove_MoveUnit:
-		return m.ProcessMoveUnit(game, move, a.MoveUnit, false)
+		return g.ProcessMoveUnit(move, a.MoveUnit, false)
 	case *v1.GameMove_AttackUnit:
-		return m.ProcessAttackUnit(game, move, a.AttackUnit)
+		return g.ProcessAttackUnit(move, a.AttackUnit)
 	case *v1.GameMove_BuildUnit:
-		return m.ProcessBuildUnit(game, move, a.BuildUnit)
+		return g.ProcessBuildUnit(move, a.BuildUnit)
 	case *v1.GameMove_CaptureBuilding:
-		return m.ProcessCaptureBuilding(game, move, a.CaptureBuilding)
+		return g.ProcessCaptureBuilding(move, a.CaptureBuilding)
 	case *v1.GameMove_EndTurn:
-		return m.ProcessEndTurn(game, move, a.EndTurn)
+		return g.ProcessEndTurn(move, a.EndTurn)
 	default:
 		return fmt.Errorf("unknown move type: %T", move.MoveType)
 	}
 }
 
-// BuildUnit creates a new unit at the specified tile
-func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.BuildUnitAction) (err error) {
+// ProcessBuildUnit creates a new unit at the specified tile
+func (g *Game) ProcessBuildUnit(move *v1.GameMove, action *v1.BuildUnitAction) (err error) {
 	// Initialize the result object
 	move.IsPermanent = true // Builds are permanent
 
@@ -240,10 +237,10 @@ func (m *MoveProcessor) ProcessBuildUnit(g *Game, move *v1.GameMove, action *v1.
 	return nil
 }
 
-// ProcessCaptureBuilding starts capturing a building with a unit
+// ProcessCaptureBuilding starts capturing a building with a unit.
 // The capture completes at the start of the capturing player's next turn
-// if the unit survives until then
-func (m *MoveProcessor) ProcessCaptureBuilding(g *Game, move *v1.GameMove, action *v1.CaptureBuildingAction) (err error) {
+// if the unit survives until then.
+func (g *Game) ProcessCaptureBuilding(move *v1.GameMove, action *v1.CaptureBuildingAction) (err error) {
 	coord, err := g.FromPos(action.Pos)
 	if err != nil {
 		return fmt.Errorf("invalid capture position: %w", err)
@@ -348,10 +345,10 @@ func (m *MoveProcessor) ProcessCaptureBuilding(g *Game, move *v1.GameMove, actio
 	return nil
 }
 
-// EndTurn advances to next player's turn
+// ProcessEndTurn advances to next player's turn.
 // For now a player can just end turn but in other games there may be some mandatory
-// moves left
-func (m *MoveProcessor) ProcessEndTurn(g *Game, move *v1.GameMove, action *v1.EndTurnAction) (err error) {
+// moves left.
+func (g *Game) ProcessEndTurn(move *v1.GameMove, action *v1.EndTurnAction) (err error) {
 	// Store previous state for GameLog
 	// TODO - use a pushed world at ProcessMoves level instead of g.World each time
 	previousPlayer := g.CurrentPlayer
@@ -484,8 +481,8 @@ func (g *Game) IsValidMove(from, to AxialCoord) bool {
 	return valid
 }
 
-// MoveUnit executes unit movement using cube coordinates
-func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.MoveUnitAction, preventPassThrough bool) (err error) {
+// ProcessMoveUnit executes unit movement using cube coordinates
+func (g *Game) ProcessMoveUnit(move *v1.GameMove, action *v1.MoveUnitAction, preventPassThrough bool) (err error) {
 	// Initialize the result object
 
 	from, err := g.FromPos(action.From)
@@ -573,8 +570,8 @@ func (m *MoveProcessor) ProcessMoveUnit(g *Game, move *v1.GameMove, action *v1.M
 	return nil
 }
 
-// AttackUnit executes combat between units
-func (m *MoveProcessor) ProcessAttackUnit(g *Game, move *v1.GameMove, action *v1.AttackUnitAction) (err error) {
+// ProcessAttackUnit executes combat between units
+func (g *Game) ProcessAttackUnit(move *v1.GameMove, action *v1.AttackUnitAction) (err error) {
 	// Initialize the result object
 	move.IsPermanent = true // Attacks are permanent (cannot be undone)
 
@@ -932,13 +929,13 @@ func (g *Game) CanAttack(from, to AxialCoord) (bool, error) {
 }
 
 // GetMovementOptions returns movement options for unit at given coordinates with full validation
-func (m *MoveProcessor) GetMovementOptions(game *Game, q, r int32, preventPassThrough bool) (*v1.AllPaths, error) {
-	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
+func (g *Game) GetMovementOptions(q, r int32, preventPassThrough bool) (*v1.AllPaths, error) {
+	unit := g.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
 	}
-	if unit.Player != game.CurrentPlayer {
-		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+	if unit.Player != g.CurrentPlayer {
+		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, g.CurrentPlayer)
 	}
 	if unit.AvailableHealth <= 0 {
 		return nil, fmt.Errorf("unit has no health remaining")
@@ -946,32 +943,32 @@ func (m *MoveProcessor) GetMovementOptions(game *Game, q, r int32, preventPassTh
 	if unit.DistanceLeft <= 0 {
 		return nil, fmt.Errorf("unit has no movement points remaining")
 	}
-	return game.RulesEngine.GetMovementOptions(game.World, unit, int(unit.DistanceLeft), preventPassThrough)
+	return g.RulesEngine.GetMovementOptions(g.World, unit, int(unit.DistanceLeft), preventPassThrough)
 }
 
 // GetAttackOptions returns attack options for unit at given coordinates with full validation
-func (m *MoveProcessor) GetAttackOptions(game *Game, q, r int32) ([]AxialCoord, error) {
-	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
+func (g *Game) GetAttackOptions(q, r int32) ([]AxialCoord, error) {
+	unit := g.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return nil, fmt.Errorf("no unit found at position (%d, %d)", q, r)
 	}
-	if unit.Player != game.CurrentPlayer {
-		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+	if unit.Player != g.CurrentPlayer {
+		return nil, fmt.Errorf("unit belongs to player %d, but it's player %d's turn", unit.Player, g.CurrentPlayer)
 	}
 	if unit.AvailableHealth <= 0 {
 		return nil, fmt.Errorf("unit has no health remaining")
 	}
-	return game.RulesEngine.GetAttackOptions(game.World, unit)
+	return g.RulesEngine.GetAttackOptions(g.World, unit)
 }
 
 // CanSelectUnit validates if unit at given coordinates can be selected by current player
-func (m *MoveProcessor) CanSelectUnit(game *Game, q, r int32) (bool, string) {
-	unit := game.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
+func (g *Game) CanSelectUnit(q, r int32) (bool, string) {
+	unit := g.World.UnitAt(AxialCoord{Q: int(q), R: int(r)})
 	if unit == nil {
 		return false, fmt.Sprintf("no unit found at position (%d, %d)", q, r)
 	}
-	if unit.Player != game.CurrentPlayer {
-		return false, fmt.Sprintf("unit belongs to player %d, but it's player %d's turn", unit.Player, game.CurrentPlayer)
+	if unit.Player != g.CurrentPlayer {
+		return false, fmt.Sprintf("unit belongs to player %d, but it's player %d's turn", unit.Player, g.CurrentPlayer)
 	}
 	if unit.AvailableHealth <= 0 {
 		return false, "unit has no health remaining"

@@ -10,7 +10,6 @@ type AxialCoord = lib.AxialCoord
 type CombatContext = lib.CombatContext
 type Game = lib.Game
 type World = lib.World
-type MoveProcessor = lib.MoveProcessor
 type SingletonGamesService = singleton.SingletonGamesService
 
 var DevDataPath = fsbe.DevDataPath

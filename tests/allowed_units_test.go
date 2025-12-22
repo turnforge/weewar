@@ -149,14 +149,13 @@ func TestProcessBuildUnit_RejectsDisallowedUnits(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			game := createTestGameWithAllowedUnits(tt.allowedUnits)
 
-			mp := &lib.MoveProcessor{}
 			move := &v1.GameMove{}
 			action := &v1.BuildUnitAction{
 				Pos:      &v1.Position{Q: 0, R: 0},
 				UnitType: tt.buildUnit,
 			}
 
-			err := mp.ProcessBuildUnit(game, move, action)
+			err := game.ProcessBuildUnit(move, action)
 
 			if tt.expectError && err == nil {
 				t.Errorf("expected error for building unit %d with allowed units %v, got nil", tt.buildUnit, tt.allowedUnits)

@@ -52,7 +52,6 @@ func TestProcessCaptureBuilding(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Execute capture
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_CaptureBuilding{
@@ -63,7 +62,7 @@ func TestProcessCaptureBuilding(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessCaptureBuilding(rtGame, move, move.GetCaptureBuilding())
+	err = rtGame.ProcessCaptureBuilding(move, move.GetCaptureBuilding())
 	if err != nil {
 		t.Fatalf("ProcessCaptureBuilding failed: %v", err)
 	}
@@ -203,7 +202,6 @@ func TestCaptureFailsWhenAlreadyOwned(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Try to capture own tile - should fail
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_CaptureBuilding{
@@ -214,7 +212,7 @@ func TestCaptureFailsWhenAlreadyOwned(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessCaptureBuilding(rtGame, move, move.GetCaptureBuilding())
+	err = rtGame.ProcessCaptureBuilding(move, move.GetCaptureBuilding())
 	if err == nil {
 		t.Error("Expected error when capturing own tile, got nil")
 	}
@@ -255,7 +253,6 @@ func TestCaptureFailsWhenUnitCantCapture(t *testing.T) {
 
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_CaptureBuilding{
@@ -266,7 +263,7 @@ func TestCaptureFailsWhenUnitCantCapture(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessCaptureBuilding(rtGame, move, move.GetCaptureBuilding())
+	err = rtGame.ProcessCaptureBuilding(move, move.GetCaptureBuilding())
 	if err == nil {
 		t.Error("Expected error when unit cannot capture, got nil")
 	}
@@ -307,7 +304,6 @@ func TestCaptureFailsWhenAlreadyCapturing(t *testing.T) {
 
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_CaptureBuilding{
@@ -318,7 +314,7 @@ func TestCaptureFailsWhenAlreadyCapturing(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessCaptureBuilding(rtGame, move, move.GetCaptureBuilding())
+	err = rtGame.ProcessCaptureBuilding(move, move.GetCaptureBuilding())
 	if err == nil {
 		t.Error("Expected error when unit already capturing, got nil")
 	}
@@ -360,7 +356,6 @@ func TestCaptureEnemyBase(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Start capture
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_CaptureBuilding{
@@ -371,7 +366,7 @@ func TestCaptureEnemyBase(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessCaptureBuilding(rtGame, move, move.GetCaptureBuilding())
+	err = rtGame.ProcessCaptureBuilding(move, move.GetCaptureBuilding())
 	if err != nil {
 		t.Fatalf("ProcessCaptureBuilding failed: %v", err)
 	}

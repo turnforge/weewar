@@ -80,14 +80,13 @@ func TestProcessBuildUnit_DeductsCoins(t *testing.T) {
 			}
 
 			// Build the unit
-			mp := &lib.MoveProcessor{}
 			move := &v1.GameMove{}
 			action := &v1.BuildUnitAction{
 				Pos:      &v1.Position{Q: 0, R: 0},
 				UnitType: tt.unitType,
 			}
 
-			err := mp.ProcessBuildUnit(game, move, action)
+			err := game.ProcessBuildUnit(move, action)
 			if err != nil {
 				t.Fatalf("ProcessBuildUnit failed: %v", err)
 			}
@@ -147,14 +146,13 @@ func TestProcessBuildUnit_InsufficientCoins(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			game := createTestGameForBuildCoins(tt.initialCoins, lib.TileTypeLandBase)
 
-			mp := &lib.MoveProcessor{}
 			move := &v1.GameMove{}
 			action := &v1.BuildUnitAction{
 				Pos:      &v1.Position{Q: 0, R: 0},
 				UnitType: tt.unitType,
 			}
 
-			err := mp.ProcessBuildUnit(game, move, action)
+			err := game.ProcessBuildUnit(move, action)
 			if err == nil {
 				t.Errorf("expected error for insufficient coins (have %d, need %d), got nil",
 					tt.initialCoins, tt.unitCost)

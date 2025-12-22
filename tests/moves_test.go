@@ -264,7 +264,6 @@ func TestProcessEndTurnIncome(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Process end turn for player 1
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_EndTurn{
@@ -272,7 +271,7 @@ func TestProcessEndTurnIncome(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessEndTurn(rtGame, move, move.GetEndTurn())
+	err = rtGame.ProcessEndTurn(move, move.GetEndTurn())
 	if err != nil {
 		t.Fatalf("ProcessEndTurn failed: %v", err)
 	}
@@ -363,7 +362,6 @@ func TestProcessEndTurnNoIncome(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Process end turn for player 1
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_EndTurn{
@@ -371,7 +369,7 @@ func TestProcessEndTurnNoIncome(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessEndTurn(rtGame, move, move.GetEndTurn())
+	err = rtGame.ProcessEndTurn(move, move.GetEndTurn())
 	if err != nil {
 		t.Fatalf("ProcessEndTurn failed: %v", err)
 	}
@@ -436,7 +434,6 @@ func TestProcessEndTurnMultipleSameType(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Process end turn
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_EndTurn{
@@ -444,7 +441,7 @@ func TestProcessEndTurnMultipleSameType(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessEndTurn(rtGame, move, move.GetEndTurn())
+	err = rtGame.ProcessEndTurn(move, move.GetEndTurn())
 	if err != nil {
 		t.Fatalf("ProcessEndTurn failed: %v", err)
 	}
@@ -539,7 +536,6 @@ func TestProcessEndTurnCustomIncomeConfig(t *testing.T) {
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
 	// Process end turn for player 1
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_EndTurn{
@@ -547,7 +543,7 @@ func TestProcessEndTurnCustomIncomeConfig(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessEndTurn(rtGame, move, move.GetEndTurn())
+	err = rtGame.ProcessEndTurn(move, move.GetEndTurn())
 	if err != nil {
 		t.Fatalf("ProcessEndTurn failed: %v", err)
 	}
@@ -631,7 +627,6 @@ func TestProcessEndTurnMinesIncome(t *testing.T) {
 
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_EndTurn{
@@ -639,7 +634,7 @@ func TestProcessEndTurnMinesIncome(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessEndTurn(rtGame, move, move.GetEndTurn())
+	err = rtGame.ProcessEndTurn(move, move.GetEndTurn())
 	if err != nil {
 		t.Fatalf("ProcessEndTurn failed: %v", err)
 	}
@@ -701,7 +696,6 @@ func TestProcessEndTurnFallbackToDefaults(t *testing.T) {
 
 	rtGame := NewGame(game, gameState, world, rulesEngine, 12345)
 
-	processor := &MoveProcessor{}
 	move := &v1.GameMove{
 		Player: 1,
 		MoveType: &v1.GameMove_EndTurn{
@@ -709,7 +703,7 @@ func TestProcessEndTurnFallbackToDefaults(t *testing.T) {
 		},
 	}
 
-	err = processor.ProcessEndTurn(rtGame, move, move.GetEndTurn())
+	err = rtGame.ProcessEndTurn(move, move.GetEndTurn())
 	if err != nil {
 		t.Fatalf("ProcessEndTurn failed: %v", err)
 	}

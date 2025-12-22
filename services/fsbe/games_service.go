@@ -52,6 +52,7 @@ func NewFSGamesService(storageDir string, clientMgr *services.ClientMgr) *FSGame
 	service.Self = service
 	service.GameStateUpdater = service // Implement GameStateUpdater interface
 	service.InitializeScreenshotIndexer()
+	service.InitializeSyncBroadcast()
 
 	return service
 }

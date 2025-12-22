@@ -195,15 +195,40 @@ func (a *ConnectWorldsServiceAdapter) UpdateWorld(ctx context.Context, req *conn
 	return connect.NewResponse(resp), nil
 }
 
-/** If you had a streamer than you can use this to act as a bridge between websocket and grpc streams
-func (a *ConnectWorldServiceAdapter) StreamSomeThing(ctx context.Context, req *connect.Request[v1.StreamSomeThingRequest], stream *connect.ServerStream[v1.StreamSomeThingResponse]) error {
-	// Create a custom stream implementation that bridges to Connect
-	bridgeStream := &ConnectStreamBridge[v1.StreamSomeThingResponse]{
-		connectStream: stream,
-		ctx:           ctx,
+// ConnectGameSyncServiceAdapter adapts the gRPC GameSyncService to Connect's interface
+// This enables multiplayer sync via HTTP/Connect for frontend clients
+type ConnectGameSyncServiceAdapter struct {
+	client v1s.GameSyncServiceClient
+}
+
+func NewConnectGameSyncServiceAdapter(client v1s.GameSyncServiceClient) *ConnectGameSyncServiceAdapter {
+	return &ConnectGameSyncServiceAdapter{client: client}
+}
+
+func (a *ConnectGameSyncServiceAdapter) Subscribe(ctx context.Context, req *connect.Request[v1.SubscribeRequest], stream *connect.ServerStream[v1.GameUpdate]) error {
+	// Call the gRPC streaming method
+	grpcStream, err := a.client.Subscribe(ctx, req.Msg)
+	if err != nil {
+		return err
 	}
 
-	// Call your existing gRPC streaming method
-	return a.client.StreamSomeThing(req.Msg, bridgeStream)
+	// Forward messages from gRPC stream to Connect stream
+	for {
+		update, err := grpcStream.Recv()
+		if err != nil {
+			// Stream closed or error
+			return err
+		}
+		if err := stream.Send(update); err != nil {
+			return err
+		}
+	}
 }
-*/
+
+func (a *ConnectGameSyncServiceAdapter) Broadcast(ctx context.Context, req *connect.Request[v1.BroadcastRequest]) (*connect.Response[v1.BroadcastResponse], error) {
+	resp, err := a.client.Broadcast(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}

@@ -135,13 +135,16 @@ Key messages:
 ### Completed
 - [x] Phase 1: Define sync.proto (GameSync service)
 - [x] Phase 2: Create sync_service.go (using gocurrent FanOut)
+- [x] Phase 3: Add ApplyRemoteChanges RPC to presenter.proto
+- [x] Phase 4: Implement ApplyRemoteChanges in gameview_presenter.go
+- [x] Phase 5: Register GameSync service in grpcserver.go
+- [x] Phase 6: Integrate GamesService → SyncService.Broadcast (via OnMovesSaved callback)
+- [x] Phase 7a: Add GameSyncClient to ClientMgr
+- [x] Phase 7b: Create Connect adapter for GameSyncService
+- [x] Phase 7c: Register HTTP/Connect handlers for sync
 
 ### Pending
-- [ ] Phase 3: Add ApplyRemoteChanges RPC to presenter.proto
-- [ ] Phase 4: Implement ApplyRemoteChanges in gameview_presenter.go
-- [ ] Phase 5: Register GameSync service in grpcserver.go
-- [ ] Phase 6: Create GameSyncClient.ts for frontend
-- [ ] Phase 7: Integrate GamesService → SyncService.Broadcast
+- [ ] Phase 7d: Create GameSyncClient.ts for frontend
 
 ## Future: Commit-Reveal Protocol
 
@@ -199,6 +202,13 @@ Phase 3: COMPUTE (deterministic outcome)
 | `protos/weewar/v1/services/sync.proto` | Service definition |
 | `protos/weewar/v1/models/sync.proto` | Message definitions |
 | `services/sync_service.go` | Server implementation (pure pub/sub) |
+| `services/games_service.go` | BaseGamesService with OnMovesSaved callback |
+| `services/backend_games_service.go` | InitializeSyncBroadcast() sets up broadcast |
+| `services/clientmgr.go` | GetGameSyncSvcClient() for gRPC client |
+| `services/gameview_presenter.go` | ApplyRemoteChanges for viewer updates |
+| `web/server/connect.go` | ConnectGameSyncServiceAdapter |
+| `web/server/api.go` | GameSyncService HTTP handler registration |
+| `cmd/backend/main.go` | GameSyncService gRPC registration |
 | `lib/changes.go` | Existing ApplyChanges for WorldChange application |
 | `lib/rng.go` | RNG/seed management (TODO) |
 | `web/src/services/GameSyncClient.ts` | Frontend client (TODO) |

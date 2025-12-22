@@ -38,6 +38,40 @@ func (s *BackendGamesService) InitializeScreenshotIndexer() {
 	s.ScreenShotIndexer.OnComplete = s.handleScreenshotCompletion
 }
 
+// InitializeSyncBroadcast sets up the callback to broadcast moves to sync subscribers.
+// Called by backend game services (fsbe, gormbe) after initialization.
+func (s *BackendGamesService) InitializeSyncBroadcast() {
+	s.OnMovesSaved = func(ctx context.Context, gameId string, moves []*v1.GameMove, groupNumber int64) {
+		syncClient := s.ClientMgr.GetGameSyncSvcClient()
+		if syncClient == nil {
+			return
+		}
+
+		// Get current player from moves (all moves in a group are from same player)
+		var player int32
+		if len(moves) > 0 {
+			player = moves[0].Player
+		}
+
+		// Broadcast moves to all subscribers
+		_, err := syncClient.Broadcast(ctx, &v1.BroadcastRequest{
+			GameId: gameId,
+			Update: &v1.GameUpdate{
+				UpdateType: &v1.GameUpdate_MovesPublished{
+					MovesPublished: &v1.MovesPublished{
+						Player:      player,
+						Moves:       moves,
+						GroupNumber: groupNumber,
+					},
+				},
+			},
+		})
+		if err != nil {
+			log.Printf("Failed to broadcast moves for game %s: %v", gameId, err)
+		}
+	}
+}
+
 // ValidateCreateGameRequest validates a CreateGameRequest for common errors
 // that apply to all backend implementations (fsbe, gormbe, etc.)
 func (s *BackendGamesService) ValidateCreateGameRequest(game *v1.Game, worldData *v1.WorldData) error {

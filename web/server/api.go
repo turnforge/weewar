@@ -80,6 +80,14 @@ func (out *ApiHandler) setupConnectHandlers() error {
 		log.Printf("Registered Indexer Connect handler at: %s", indexerConnectPath)
 		*/
 	}
+
+	// Register GameSyncService for multiplayer real-time updates
+	gameSyncSvcClient := out.ClientMgr.GetGameSyncSvcClient()
+	gameSyncAdapter := NewConnectGameSyncServiceAdapter(gameSyncSvcClient)
+	gameSyncConnectPath, gameSyncConnectHandler := v1connect.NewGameSyncServiceHandler(gameSyncAdapter)
+	out.mux.Handle(gameSyncConnectPath, gameSyncConnectHandler)
+	log.Printf("Registered GameSync Connect handler at: %s", gameSyncConnectPath)
+
 	return nil
 }
 

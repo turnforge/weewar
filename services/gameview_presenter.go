@@ -853,3 +853,36 @@ func (s *GameViewPresenter) refreshCapturingHighlights(ctx context.Context, _ *v
 		})
 	}
 }
+
+// ApplyRemoteChanges applies WorldChanges from remote players (received via SyncService).
+// Updates local game state and triggers UI updates.
+func (s *GameViewPresenter) ApplyRemoteChanges(ctx context.Context, req *v1.ApplyRemoteChangesRequest) (*v1.ApplyRemoteChangesResponse, error) {
+	if len(req.Moves) == 0 {
+		return &v1.ApplyRemoteChangesResponse{Success: true}, nil
+	}
+
+	// Load current game state (server already applied changes)
+	getGameResp, err := s.GamesService.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
+	if err != nil {
+		return &v1.ApplyRemoteChangesResponse{
+			Success:        false,
+			Error:          fmt.Sprintf("failed to load game state: %v", err),
+			RequiresReload: true,
+		}, nil
+	}
+
+	game, gameState := getGameResp.Game, getGameResp.State
+
+	// Apply UI updates for each move
+	for _, move := range req.Moves {
+		s.applyIncrementalChanges(ctx, game, gameState, req.Moves, move)
+	}
+
+	// Update GameState with fresh data
+	s.GameState.SetGameState(ctx, &v1.SetGameStateRequest{
+		Game:  game,
+		State: gameState,
+	})
+
+	return &v1.ApplyRemoteChangesResponse{Success: true}, nil
+}

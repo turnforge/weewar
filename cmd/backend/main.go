@@ -147,9 +147,13 @@ func (b *Backend) SetupApp() *utils.App {
 			panic("Invalid filestore be: " + *filestore_be)
 		}
 
+		// Create sync service for multiplayer real-time updates
+		syncService := services.NewGameSyncService()
+
 		v1s.RegisterWorldsServiceServer(server, worldsService)
 		v1s.RegisterGamesServiceServer(server, gamesService)
 		v1s.RegisterFileStoreServiceServer(server, filestore)
+		v1s.RegisterGameSyncServiceServer(server, syncService)
 
 		// TODO - use diferent kinds of db based on setup
 		// v1s.RegisterIndexerServiceServer(server, gormbe.NewIndexerService(ensureDB()))

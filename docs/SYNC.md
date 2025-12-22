@@ -69,11 +69,75 @@ Uses `github.com/panyam/gocurrent` FanOut primitive:
 - Non-blocking sends via goroutines
 - Automatic cleanup on disconnect
 
-## RNG Security: Blinded Seed
+## RNG and Seed Management (lib/)
 
-To prevent cheating (cherry-picking favorable outcomes), we use a **blinded seed** approach.
+The lib package handles all RNG operations for deterministic, reproducible gameplay.
 
-**Note**: Seed management is in `lib/`, not SyncService.
+### Current Implementation
+
+**Location**: `lib/game.go`, `lib/combat.go`
+
+```go
+// Game struct holds the RNG state
+type Game struct {
+    Seed int64      `json:"seed"` // Random seed for deterministic gameplay
+    rng  *rand.Rand              // RNG instance seeded from Seed
+    // ...
+}
+
+// NewGame initializes RNG from seed
+func NewGame(..., seed int64) *Game {
+    return &Game{
+        Seed: seed,
+        rng:  rand.New(rand.NewSource(seed)),
+        // ...
+    }
+}
+```
+
+**How RNG is used**:
+1. Combat damage rolls: `RulesEngine.CalculateCombatDamage(attackerID, defenderID, game.rng)`
+2. Damage distribution sampling: `rollDamageFromDistribution(dist, rng)` uses `rng.Float64()`
+
+**Key files**:
+| File | Purpose |
+|------|---------|
+| `lib/game.go:27-30` | Game.Seed and Game.rng fields |
+| `lib/game.go:49` | RNG initialization from seed |
+| `lib/combat.go:12-24` | CalculateCombatDamage uses RNG |
+| `lib/combat.go:42-74` | rollDamageFromDistribution samples from probability ranges |
+
+### Client Usage
+
+**For local-first (WASM) clients**:
+```go
+// Create game with initial seed (from server or game creation)
+game := lib.NewGame(gameProto, stateProto, world, rulesEngine, initialSeed)
+
+// ProcessMoves uses game.rng internally for combat
+game.ProcessMoves(moves)
+
+// RNG state advances deterministically - same seed + same moves = same outcomes
+```
+
+**For multiplayer sync**:
+1. Server provides initial seed when game is created
+2. Both client and server use the same seed
+3. Same sequence of moves produces identical RNG draws
+4. If outcomes differ, server's result is authoritative (client reloads)
+
+### Current Limitations
+
+The current implementation uses a simple shared seed. This means:
+- All players know the seed (stored in game state)
+- A malicious client could pre-calculate outcomes to cherry-pick moves
+- Acceptable for trusted environments (same device, friends playing together)
+
+## RNG Security: Blinded Seed (Planned)
+
+To prevent cheating in competitive multiplayer, we plan to implement a **blinded seed** approach.
+
+**Note**: This is a future enhancement, not yet implemented.
 
 ### The Problem
 
@@ -81,7 +145,7 @@ If clients know the RNG seed before committing to an action, they can:
 - Pre-calculate outcomes for all possible actions
 - Choose the action with the most favorable result
 
-### The Solution
+### The Planned Solution
 
 ```
 1. Server has a game secret (never revealed)
@@ -209,8 +273,9 @@ Phase 3: COMPUTE (deterministic outcome)
 | `web/server/connect.go` | ConnectGameSyncServiceAdapter |
 | `web/server/api.go` | GameSyncService HTTP handler registration |
 | `cmd/backend/main.go` | GameSyncService gRPC registration |
+| `lib/game.go` | Game struct with Seed field, RNG initialization |
+| `lib/combat.go` | Combat damage using RNG for deterministic rolls |
 | `lib/changes.go` | Existing ApplyChanges for WorldChange application |
-| `lib/rng.go` | RNG/seed management (TODO) |
 | `web/src/services/GameSyncClient.ts` | Frontend client (TODO) |
 
 ## Integration Points

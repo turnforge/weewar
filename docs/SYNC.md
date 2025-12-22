@@ -1,0 +1,235 @@
+# Multiplayer Sync Architecture
+
+This document describes the real-time synchronization system for multiplayer games.
+
+**Issue**: https://github.com/turnforge/weewar/issues/41
+**Branch**: `feature/multiplayer-sync-41`
+
+## Overview
+
+The sync system enables multiplayer gameplay using a **local-first** architecture:
+
+1. **Originator** (active player): Processes moves locally for immediate feedback, calls GamesService.ProcessMoves
+2. **Server**: GamesService validates, persists, then calls SyncService.Broadcast
+3. **Viewer** (other players): Receives WorldChanges via Subscribe stream, applies via presenter
+
+```
+Frontend A (originator)                Server                         Frontend B (viewer)
+    │                                      │                               │
+    │ WASM Presenter                       │                               │ WASM Presenter
+    │      ↓                               │                               │
+    │ ProcessMoves (local)                 │                               │
+    │      ↓                               │                               │
+    │ Immediate UI update                  │                               │
+    │      ↓                               │                               │
+    │──── GamesService.ProcessMoves() ────→│ Validate + Persist            │
+    │                                      │      ↓                        │
+    │←─── Response ────────────────────────│ SyncService.Broadcast()       │
+    │                                      │      ↓                        │
+    │                                      │════ gRPC Stream ═════════════→│
+    │                                      │   (GameUpdate)                │
+    │                                      │                               │ ApplyRemoteChanges
+```
+
+## Key Design Decisions
+
+### 1. Service Separation
+
+| Service | Responsibilities |
+|---------|-----------------|
+| **GamesService** | Move validation, persistence, calls SyncService.Broadcast |
+| **SyncService** | Pure pub/sub: Subscribe, Broadcast, sequence numbers |
+| **lib/** | RNG/seed management (blinded seed for anti-cheat) |
+
+Services communicate via gRPC clients, allowing them to run on different hosts.
+
+### 2. Works Without Presenter
+
+The sync operates at the `ProcessMoves` level, not the presenter level:
+- `ProcessMoves` generates WorldChanges (the canonical diff)
+- `SyncService.Broadcast` fans out to all subscribers
+- Any client (presenter, CLI, API) can receive and apply them
+
+### 3. Two Paths: Verify vs Apply
+
+| Client Role | What Happens |
+|-------------|--------------|
+| **Originator** | Changes already applied locally → just verify server response matches |
+| **Viewer** | Receive WorldChanges → apply to local state + trigger UI updates |
+
+### 4. Sequence Numbers for Reconnection
+
+Each `GameUpdate` has a monotonic sequence number. Clients track the last seen sequence and can resume from that point on reconnect.
+
+### 5. gocurrent FanOut for Efficient Broadcasting
+
+Uses `github.com/panyam/gocurrent` FanOut primitive:
+- One FanOut per game
+- Subscribers get their own output channel
+- Non-blocking sends via goroutines
+- Automatic cleanup on disconnect
+
+## RNG Security: Blinded Seed
+
+To prevent cheating (cherry-picking favorable outcomes), we use a **blinded seed** approach.
+
+**Note**: Seed management is in `lib/`, not SyncService.
+
+### The Problem
+
+If clients know the RNG seed before committing to an action, they can:
+- Pre-calculate outcomes for all possible actions
+- Choose the action with the most favorable result
+
+### The Solution
+
+```
+1. Server has a game secret (never revealed)
+2. For each action: seed = SHA256(secret || game_id || group_number || move_index)
+3. Client computes RNG locally for immediate feedback
+4. Client reports RNG values consumed in ProcessMoves request
+5. Server recomputes with blinded seed and verifies values match
+```
+
+**Why it works:**
+- Client can't predict the seed because it depends on action metadata (group_number, move_index) that doesn't exist until they commit
+- Server can verify the client used the correct RNG sequence
+- Deterministic: same action always produces same outcome
+
+### Example Flow
+
+```
+1. Client commits: "Attack unit A1 → B2" (this becomes move_index=0 in group_42)
+                        ↓
+2. Server computes: seed = SHA256(secret || "game123" || 42 || 0)
+                        ↓
+3. Server validates: RNG(seed) produces [0.73, 0.21] → matches client's reported values?
+                        ↓
+4. If match: Accept. If not: Reject (cheating or bug)
+```
+
+## Proto Definitions
+
+### Service (`protos/weewar/v1/services/sync.proto`)
+
+```protobuf
+service GameSyncService {
+  // Subscribe to game updates (streaming)
+  rpc Subscribe(SubscribeRequest) returns (stream GameUpdate);
+
+  // Broadcast update to all subscribers (called by GamesService)
+  rpc Broadcast(BroadcastRequest) returns (BroadcastResponse);
+}
+```
+
+### Messages (`protos/weewar/v1/models/sync.proto`)
+
+Key messages:
+- `SubscribeRequest`: game_id, player_id, from_sequence
+- `GameUpdate`: sequence + oneof (MovesPublished, PlayerJoined, PlayerLeft, GameEnded, InitialState)
+- `BroadcastRequest`: game_id, update (GameUpdate)
+- `BroadcastResponse`: subscriber_count, sequence
+
+## Implementation Status
+
+### Completed
+- [x] Phase 1: Define sync.proto (GameSync service)
+- [x] Phase 2: Create sync_service.go (using gocurrent FanOut)
+
+### Pending
+- [ ] Phase 3: Add ApplyRemoteChanges RPC to presenter.proto
+- [ ] Phase 4: Implement ApplyRemoteChanges in gameview_presenter.go
+- [ ] Phase 5: Register GameSync service in grpcserver.go
+- [ ] Phase 6: Create GameSyncClient.ts for frontend
+- [ ] Phase 7: Integrate GamesService → SyncService.Broadcast
+
+## Future: Commit-Reveal Protocol
+
+For fully trustless/peer-to-peer scenarios (serverless/local-first vision), we may implement commit-reveal:
+
+### Why Commit-Reveal?
+
+Blinded seed trusts the server not to leak the secret. Commit-reveal is cryptographically trustless - useful for:
+- Peer-to-peer games without central server
+- Serverless architecture where all clients validate
+- High-stakes competitive play
+
+### How It Works
+
+```
+Phase 1: COMMIT (both sides lock in, hidden)
+┌─────────────────────────────────────────────────────────┐
+│ Client: hash(action + client_nonce) → sends commitment  │
+│ Server: hash(seed + server_nonce) → sends commitment    │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+Phase 2: REVEAL (both sides reveal, verify against commitment)
+┌─────────────────────────────────────────────────────────┐
+│ Client: reveals action + client_nonce                   │
+│ Server: reveals seed + server_nonce                     │
+│ Both verify: hash matches commitment? ✓                 │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+Phase 3: COMPUTE (deterministic outcome)
+┌─────────────────────────────────────────────────────────┐
+│ final_seed = hash(client_nonce || server_nonce)         │
+│ outcome = RNG(final_seed).apply(action)                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Security Guarantees
+- Client can't change action after seeing server's seed (already committed)
+- Server can't change seed after seeing client's action (already committed)
+- Final seed depends on BOTH nonces, so neither party controls it
+
+### Trade-offs vs Blinded Seed
+
+| | Blinded Seed | Commit-Reveal |
+|---|---|---|
+| **Round trips** | 1 | 2 |
+| **Complexity** | Simple | More complex |
+| **Trust model** | Trust server | Trustless (cryptographic) |
+| **Latency** | Lower | Higher |
+| **Use case** | Server-authoritative | Peer-to-peer / local-first |
+
+## Files Reference
+
+| File | Purpose |
+|------|---------|
+| `protos/weewar/v1/services/sync.proto` | Service definition |
+| `protos/weewar/v1/models/sync.proto` | Message definitions |
+| `services/sync_service.go` | Server implementation (pure pub/sub) |
+| `lib/changes.go` | Existing ApplyChanges for WorldChange application |
+| `lib/rng.go` | RNG/seed management (TODO) |
+| `web/src/services/GameSyncClient.ts` | Frontend client (TODO) |
+
+## Integration Points
+
+### GamesService Integration
+
+After ProcessMoves succeeds, GamesService should call SyncService.Broadcast:
+
+```go
+// In GamesService.ProcessMoves, after SaveMoveGroup succeeds:
+if s.syncClient != nil {
+    s.syncClient.Broadcast(ctx, &v1.BroadcastRequest{
+        GameId: req.GameId,
+        Update: &v1.GameUpdate{
+            UpdateType: &v1.GameUpdate_MovesPublished{
+                MovesPublished: &v1.MovesPublished{
+                    Player:      currentPlayer,
+                    Moves:       resp.Moves,
+                    GroupNumber: groupNumber,
+                },
+            },
+        },
+    })
+}
+```
+
+### Frontend Integration
+
+1. On game load: Subscribe to GameSyncService
+2. On local move: Call ProcessMoves, verify response matches local
+3. On remote update: ApplyRemoteChanges via presenter
+4. On disconnect: Reconnect with from_sequence

@@ -105,6 +105,17 @@ type GameViewPresenterServer interface {
 	BuildOptionClicked(context.Context, *v1models.BuildOptionClickedRequest) (*v1models.BuildOptionClickedResponse, error)
 }
 
+// GameSyncServiceServer is the server API for GameSyncService service (WASM version without gRPC embedding).
+type GameSyncServiceServer interface {
+	/** Subscribe to game changes. Server streams GameUpdate messages to clients
+	as other players make moves. Supports reconnection via from_sequence. */
+	Subscribe(*v1models.SubscribeRequest, Subscribe_ServerStream) error
+	/** Broadcast sends a GameUpdate to all subscribers of a game.
+	Called internally by GamesService after ProcessMoves succeeds.
+	Not intended for direct client use. */
+	Broadcast(context.Context, *v1models.BroadcastRequest) (*v1models.BroadcastResponse, error)
+}
+
 // UsersServiceServer is the server API for UsersService service (WASM version without gRPC embedding).
 type UsersServiceServer interface {
 	/** *
@@ -144,3 +155,9 @@ type WorldsServiceServer interface {
 }
 
 // Server stream interfaces for streaming methods
+
+// Subscribe_ServerStream is the server stream interface for Subscribe
+type Subscribe_ServerStream interface {
+	Send(*v1models.GameUpdate) error
+	Context() context.Context
+}

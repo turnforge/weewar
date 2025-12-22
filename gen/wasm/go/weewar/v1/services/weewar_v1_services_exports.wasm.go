@@ -24,6 +24,7 @@ type Weewar_v1ServicesExports struct {
 	IndexerService              IndexerServiceServer
 	SingletonInitializerService SingletonInitializerServiceServer
 	GameViewPresenter           GameViewPresenterServer
+	GameSyncService             GameSyncServiceServer
 	UsersService                UsersServiceServer
 	WorldsService               WorldsServiceServer
 
@@ -125,6 +126,14 @@ func (exports *Weewar_v1ServicesExports) RegisterAPI() {
 			}),
 			"buildOptionClicked": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gameViewPresenterBuildOptionClicked(this, args)
+			}),
+		},
+		"gameSyncService": map[string]interface{}{
+			"subscribe": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gameSyncServiceSubscribe(this, args)
+			}),
+			"broadcast": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gameSyncServiceBroadcast(this, args)
 			}),
 		},
 		"usersService": map[string]interface{}{
@@ -1408,6 +1417,111 @@ func (exports *Weewar_v1ServicesExports) gameViewPresenterBuildOptionClicked(thi
 
 	// Call service method
 	resp, err := exports.GameViewPresenter.BuildOptionClicked(ctx, req)
+	if err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	responseJSON, err := marshaller.Marshal(resp, wasm.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: true,  // Emit zero values to avoid undefined in JavaScript
+		UseEnumNumbers:  false, // Use enum string values
+	})
+	if err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// gameSyncServiceSubscribe handles the Subscribe method for GameSyncService
+func (exports *Weewar_v1ServicesExports) gameSyncServiceSubscribe(this js.Value, args []js.Value) any {
+	if exports.GameSyncService == nil {
+		return wasm.CreateJSResponse(false, "GameSyncService not initialized", nil)
+	}
+	// Server streaming method: expect request JSON and callback function
+	if len(args) < 2 {
+		return wasm.CreateJSResponse(false, "Request JSON and callback function required for streaming method", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	callback := args[1]
+	if callback.Type() != js.TypeFunction {
+		return wasm.CreateJSResponse(false, "Second argument must be a callback function", nil)
+	}
+
+	// Parse request
+	req := &v1models.SubscribeRequest{}
+	marshaller := wasm.GetGlobalMarshaller()
+	if err := marshaller.Unmarshal([]byte(requestJSON), req, wasm.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true,
+	}); err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Start streaming in goroutine to avoid blocking
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		// Create a stream wrapper that implements Subscribe_ServerStream
+		streamWrapper := &serverStreamWrapperSubscribe{
+			ctx:      ctx,
+			callback: callback,
+		}
+
+		// Call the server streaming method with the correct signature
+		err := exports.GameSyncService.Subscribe(req, streamWrapper)
+		if err != nil {
+			// Call callback with error and done=true
+			callback.Invoke(js.Null(), err.Error(), true)
+			return
+		}
+
+		// Signal completion
+		callback.Invoke(js.Null(), js.Null(), true)
+	}()
+
+	// Return immediately for streaming methods
+	return wasm.CreateJSResponse(true, "Server streaming started", nil)
+}
+
+// gameSyncServiceBroadcast handles the Broadcast method for GameSyncService
+func (exports *Weewar_v1ServicesExports) gameSyncServiceBroadcast(this js.Value, args []js.Value) any {
+	if exports.GameSyncService == nil {
+		return wasm.CreateJSResponse(false, "GameSyncService not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &v1models.BroadcastRequest{}
+	marshaller := wasm.GetGlobalMarshaller()
+	if err := marshaller.Unmarshal([]byte(requestJSON), req, wasm.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}); err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.GameSyncService.Broadcast(ctx, req)
 	if err != nil {
 		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

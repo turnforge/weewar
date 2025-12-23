@@ -123,6 +123,20 @@ func (g *Game) applyPlayerChanged(change *v1.PlayerChangedChange) error {
 	g.GameState.CurrentPlayer = change.NewPlayer
 	g.GameState.TurnCounter = change.NewTurn
 
+	// Apply reset units (for remote updates where units need topped-up values)
+	// The server has already calculated the new unit states; we apply them here
+	for _, resetUnit := range change.ResetUnits {
+		coord := AxialCoord{Q: int(resetUnit.Q), R: int(resetUnit.R)}
+		unit := g.World.UnitAt(coord)
+		if unit != nil {
+			// Update unit with topped-up values from the change
+			unit.DistanceLeft = resetUnit.DistanceLeft
+			unit.AvailableHealth = resetUnit.AvailableHealth
+			unit.LastToppedupTurn = resetUnit.LastToppedupTurn
+			unit.LastActedTurn = resetUnit.LastActedTurn
+		}
+	}
+
 	return nil
 }
 

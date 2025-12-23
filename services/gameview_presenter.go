@@ -799,23 +799,25 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 }
 
 // refreshExhaustedHighlights updates the exhausted highlights for all units with no movement points
-func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, _ *v1.Game, gameState *v1.GameState) {
-	// Build list of exhausted units/tiles
-	var exhaustedHighlights []*v1.HighlightSpec
+func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, game *v1.Game, gameState *v1.GameState) {
+	// Get runtime game to use lib's exhausted detection logic
+	rtGame, err := s.GamesService.GetRuntimeGame(game, gameState)
+	if err != nil {
+		fmt.Printf("[Presenter] Failed to get runtime game for exhausted highlights: %v\n", err)
+		return
+	}
 
-	// Check all units for the current player (using map-based storage)
-	for _, unit := range gameState.WorldData.UnitsMap {
-		if unit.Player == gameState.CurrentPlayer {
-			// Only mark as exhausted if unit has been topped up this turn AND has no movement left.
-			// If LastToppedupTurn < TurnCounter, the unit will be topped up on first access (lazy pattern).
-			if unit.LastToppedupTurn >= gameState.TurnCounter && unit.DistanceLeft <= 0 {
-				exhaustedHighlights = append(exhaustedHighlights, &v1.HighlightSpec{
-					Q:    unit.Q,
-					R:    unit.R,
-					Type: "exhausted",
-				})
-			}
-		}
+	// Use lib's GetExhaustedUnits which correctly handles the lazy top-up pattern
+	exhaustedUnits := rtGame.GetExhaustedUnits()
+
+	// Build highlight specs from exhausted units
+	var exhaustedHighlights []*v1.HighlightSpec
+	for _, unit := range exhaustedUnits {
+		exhaustedHighlights = append(exhaustedHighlights, &v1.HighlightSpec{
+			Q:    unit.Q,
+			R:    unit.R,
+			Type: "exhausted",
+		})
 	}
 
 	// Send exhausted highlights to browser
@@ -862,7 +864,7 @@ func (s *GameViewPresenter) ApplyRemoteChanges(ctx context.Context, req *v1.Appl
 		return &v1.ApplyRemoteChangesResponse{Success: true}, nil
 	}
 
-	// Load current game state (server already applied changes)
+	// Load current game state
 	getGameResp, err := s.GamesService.GetGame(ctx, &v1.GetGameRequest{Id: req.GameId})
 	if err != nil {
 		return &v1.ApplyRemoteChangesResponse{
@@ -874,12 +876,33 @@ func (s *GameViewPresenter) ApplyRemoteChanges(ctx context.Context, req *v1.Appl
 
 	game, gameState := getGameResp.Game, getGameResp.State
 
-	// Apply UI updates for each move
+	// Get runtime game and apply state changes via lib (authoritative state update)
+	// This ensures all state changes (CurrentPlayer, TurnCounter, unit resets, etc.)
+	// are applied correctly before we do UI updates
+	rtGame, err := s.GamesService.GetRuntimeGame(game, gameState)
+	if err != nil {
+		return &v1.ApplyRemoteChangesResponse{
+			Success:        false,
+			Error:          fmt.Sprintf("failed to get runtime game: %v", err),
+			RequiresReload: true,
+		}, nil
+	}
+
+	// Apply changes to local state via lib (handles PlayerChanged, unit resets, etc.)
+	if err := rtGame.ApplyChanges(req.Moves); err != nil {
+		return &v1.ApplyRemoteChangesResponse{
+			Success:        false,
+			Error:          fmt.Sprintf("failed to apply changes: %v", err),
+			RequiresReload: true,
+		}, nil
+	}
+
+	// Apply UI updates for each move (gameState is now updated via lib)
 	for _, move := range req.Moves {
 		s.applyIncrementalChanges(ctx, game, gameState, req.Moves, move)
 	}
 
-	// Update GameState with fresh data
+	// Update browser GameState with the updated data
 	s.GameState.SetGameState(ctx, &v1.SetGameStateRequest{
 		Game:  game,
 		State: gameState,

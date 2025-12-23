@@ -214,8 +214,8 @@ func (s *GameViewPresenter) SceneClicked(ctx context.Context, req *v1.SceneClick
 
 	// Get tile and unit data from World using coordinates
 	switch req.Layer {
-	case "movement-highlight", "capture-highlight":
-		// User clicked on a movement/capture highlight - execute the action
+	case "movement-highlight", "capture-highlight", "attack-highlight":
+		// User clicked on a movement/capture/attack highlight - execute the action
 		if err := s.executeMovementAction(ctx, game, gameState, q, r); err != nil {
 			return nil, err
 		}
@@ -665,22 +665,27 @@ func (s *GameViewPresenter) applyIncrementalChanges(ctx context.Context, game *v
 				prevUnit := changeType.UnitMoved.PreviousUnit
 				updatedUnit := changeType.UnitMoved.UpdatedUnit
 				if prevUnit != nil && updatedUnit != nil {
-					// Build path for animation (simple: previous -> new)
+					// Build default path for animation (simple: previous -> new)
 					path := []*v1.HexCoord{
 						{Q: prevUnit.Q, R: prevUnit.R},
 						{Q: updatedUnit.Q, R: updatedUnit.R},
 					}
 					unitMoved := changeType.UnitMoved
+
+					// If we have a full reconstructed path, use it instead
 					if gameMove != nil && gameMove.GetMoveUnit() != nil {
 						moveAction := gameMove.GetMoveUnit()
 						coords := ExtractPathCoords(moveAction.ReconstructedPath)
-						path = []*v1.HexCoord{}
-						for i := 0; i < len(coords); i += 2 {
-							path = append(path, &v1.HexCoord{Q: coords[i], R: coords[i+1]})
+						// Only replace path if we got valid coordinates (at least 2 points)
+						if len(coords) >= 4 {
+							path = []*v1.HexCoord{}
+							for i := 0; i < len(coords); i += 2 {
+								path = append(path, &v1.HexCoord{Q: coords[i], R: coords[i+1]})
+							}
 						}
 					}
 
-					// Animate the movement with full path
+					// Animate the movement with path
 					s.GameScene.MoveUnit(ctx, &v1.MoveUnitRequest{
 						Unit: unitMoved.UpdatedUnit,
 						Path: path,

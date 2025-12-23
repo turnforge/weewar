@@ -655,8 +655,18 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     }
 
     async moveUnit(request: MoveUnitRequest): Promise<MoveUnitResponse> {
-        if (request.unit && request.path) {
+        if (request.unit && request.path && request.path.length >= 2) {
+            // Animate the movement in scene first (needs sprite at old position)
             await this.gameScene.moveUnit(request.unit, request.path);
+
+            // Then update World data model: remove from old, set at new
+            const oldPos = request.path[0];
+            this.world.removeUnitAt(oldPos.q, oldPos.r);
+            this.world.setUnitDirect(request.unit);
+        } else if (request.unit) {
+            // Fallback: No valid path, just update unit at its current position
+            // This shouldn't happen with the Go-side fix, but handle gracefully
+            console.warn('[GameViewerPage] moveUnit called without valid path, unit:', request.unit);
             this.world.setUnitDirect(request.unit);
         }
         return {};

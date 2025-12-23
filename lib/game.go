@@ -391,6 +391,27 @@ func (g *Game) GetUnitsForPlayer(playerID int) []*v1.Unit {
 	return units
 }
 
+// IsUnitExhausted returns true if a unit should be shown as exhausted.
+// A unit is exhausted only if:
+// 1. It has been topped up this turn (LastToppedupTurn >= TurnCounter)
+// 2. AND it has no movement left (DistanceLeft <= 0)
+// If LastToppedupTurn < TurnCounter, the unit will be topped up when accessed (lazy pattern).
+func (g *Game) IsUnitExhausted(unit *v1.Unit) bool {
+	return unit.LastToppedupTurn >= g.TurnCounter && unit.DistanceLeft <= 0
+}
+
+// GetExhaustedUnits returns all units for the current player that are exhausted.
+// Uses the lazy top-up pattern: units not yet topped up this turn are NOT considered exhausted.
+func (g *Game) GetExhaustedUnits() []*v1.Unit {
+	var exhausted []*v1.Unit
+	for _, unit := range g.World.UnitsByCoord() {
+		if unit.Player == g.CurrentPlayer && g.IsUnitExhausted(unit) {
+			exhausted = append(exhausted, unit)
+		}
+	}
+	return exhausted
+}
+
 // =============================================================================
 // Controller Methods - High-level game actions
 // =============================================================================

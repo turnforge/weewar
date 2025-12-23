@@ -37,6 +37,7 @@ import { TurnOptionsPanel } from './TurnOptionsPanel';
 import { BuildOptionsModal } from './BuildOptionsModal';
 import { GameStatePanel } from './GameStatePanel';
 import { RulesTable, TerrainStats } from '../common/RulesTable';
+import { GameSyncManager, SyncState } from './GameSyncManager';
 
 /**
  * Panel type identifiers
@@ -63,7 +64,11 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     protected gameViewPresenterClient: GameViewPresenterClient;
     protected singletonInitializerClient: SingletonInitializerClient;
     protected currentGameId: string | null;
+    protected currentPlayerId: string = '1'; // TODO: Get from auth context
     private clientReadySent: boolean = false;
+
+    // Multiplayer sync
+    protected syncManager: GameSyncManager | null = null;
 
     // Core game components
     protected gameScene: PhaserGameScene;
@@ -221,10 +226,87 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         // Initialize the presenter by setting it game data now that all UI components are ready
         await this.initializePresenter();
 
+        // Initialize multiplayer sync if enabled
+        this.initializeMultiplayerSync();
+
         // Expose gameScene to console for testing animations
         (window as any).gameScene = this.gameScene;
         console.log("🎮 gameScene exposed to window for animation testing");
         console.log("Try: gameScene.moveUnit(unit, path) or gameScene.showAttackEffect({q:0,r:0}, {q:1,r:0}, 10)");
+    }
+
+    /**
+     * Initialize multiplayer sync manager
+     * Override in child classes or configure via game settings
+     */
+    protected initializeMultiplayerSync(): void {
+        // Check if multiplayer sync is enabled (e.g., via page config or game data)
+        const enableSync = this.isMultiplayerSyncEnabled();
+        if (!enableSync || !this.currentGameId) {
+            return;
+        }
+
+        console.log('[GameViewerPage] Initializing multiplayer sync');
+        this.syncManager = new GameSyncManager(
+            this.wasmBundle,
+            this.gameViewPresenterClient,
+            this.currentGameId,
+            this.currentPlayerId,
+            {
+                onStateChange: (state, error) => this.onSyncStateChange(state, error),
+                onRemoteUpdate: (update) => this.onRemoteUpdate(update),
+            }
+        );
+        this.syncManager.connect();
+    }
+
+    /**
+     * Check if multiplayer sync should be enabled for this game.
+     * Override in child classes to implement custom logic.
+     * @returns true if sync should be enabled
+     */
+    protected isMultiplayerSyncEnabled(): boolean {
+        // Check for sync=true query parameter (for testing)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('sync') === 'true') {
+            return true;
+        }
+        // TODO: Check game config for multiplayer mode
+        return false;
+    }
+
+    /**
+     * Handle sync state changes
+     */
+    protected onSyncStateChange(state: SyncState, error?: string): void {
+        console.log(`[GameViewerPage] Sync state: ${state}`, error || '');
+
+        // Update UI to show connection state
+        const syncIndicator = document.getElementById('sync-indicator');
+        if (syncIndicator) {
+            syncIndicator.className = `sync-state-${state}`;
+            syncIndicator.title = error || state;
+        }
+
+        // Log to game log
+        if (state === 'connected') {
+            this.gameLogPanel?.logGameEvent('Multiplayer sync connected', 'system');
+        } else if (state === 'error') {
+            this.gameLogPanel?.logGameEvent(`Sync error: ${error}`, 'system');
+        }
+    }
+
+    /**
+     * Handle remote game updates
+     */
+    protected onRemoteUpdate(update: any): void {
+        // Log significant updates to game log
+        if (update.movesPublished) {
+            this.gameLogPanel?.logGameEvent(
+                `Player ${update.movesPublished.player} made ${update.movesPublished.moves?.length || 0} move(s)`,
+                'moves'
+            );
+        }
     }
 
     // =========================================================================

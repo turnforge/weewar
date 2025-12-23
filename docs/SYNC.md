@@ -206,9 +206,11 @@ Key messages:
 - [x] Phase 7a: Add GameSyncClient to ClientMgr
 - [x] Phase 7b: Create Connect adapter for GameSyncService
 - [x] Phase 7c: Register HTTP/Connect handlers for sync
+- [x] Phase 7d: Create GameSyncManager.ts for frontend
 
 ### Pending
-- [ ] Phase 7d: Create GameSyncClient.ts for frontend
+- [ ] Integration testing with multiple browser tabs
+- [ ] Connection status UI indicator
 
 ## Future: Commit-Reveal Protocol
 
@@ -276,7 +278,9 @@ Phase 3: COMPUTE (deterministic outcome)
 | `lib/game.go` | Game struct with Seed field, RNG initialization |
 | `lib/combat.go` | Combat damage using RNG for deterministic rolls |
 | `lib/changes.go` | Existing ApplyChanges for WorldChange application |
-| `web/src/services/GameSyncClient.ts` | Frontend client (TODO) |
+| `web/pages/GameViewerPage/GameSyncManager.ts` | Frontend sync manager |
+| `web/pages/GameViewerPage/GameViewerPageBase.ts` | Base page with sync integration |
+| `web/gen/wasmjs/.../gameSyncServiceClient.ts` | Generated WASM service client |
 
 ## Integration Points
 
@@ -304,7 +308,24 @@ if s.syncClient != nil {
 
 ### Frontend Integration
 
-1. On game load: Subscribe to GameSyncService
-2. On local move: Call ProcessMoves, verify response matches local
-3. On remote update: ApplyRemoteChanges via presenter
-4. On disconnect: Reconnect with from_sequence
+The `GameSyncManager` class handles sync for multiplayer games:
+
+```typescript
+// GameSyncManager is integrated into GameViewerPageBase
+// Enable sync via URL parameter: ?sync=true
+
+// Or programmatically:
+protected isMultiplayerSyncEnabled(): boolean {
+    return true; // For multiplayer games
+}
+```
+
+**Flow:**
+1. On game load: `GameSyncManager.connect()` subscribes to GameSyncService
+2. On local move: ProcessMoves processes locally, server broadcasts to others
+3. On remote update: GameSyncManager calls `presenter.applyRemoteChanges()`
+4. On disconnect: Auto-reconnect with `from_sequence` for missed updates
+
+**Key files:**
+- `GameSyncManager.ts`: Handles subscription, reconnection, state tracking
+- `GameViewerPageBase.ts`: Integrates sync manager, provides callbacks

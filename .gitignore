@@ -1,4 +1,5 @@
 __pycache__
+coverage.out
 __debug*
 snapshot*
 .DS_Store

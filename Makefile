@@ -24,10 +24,16 @@ vars:
 
 test:
 	@echo "Running tests..."
-	go test -cover ./tests/...
-	go test -cover ./cmd/cli/...
+	go test -cover -coverprofile=coverage.out -coverpkg=./lib/...,./services/... ./tests/... ./cmd/cli/...
 	# cd lib && go test -v -cover ./...
 	# cd cmd/weewar-cli && go test ./...
+	@echo ""
+	@echo "Coverage report:"
+	go tool cover -func=coverage.out
+	@echo ""
+	@echo "HTML coverage report: /tmp/coverage.html"
+	go tool cover -html=coverage.out -o /tmp/coverage.html
+	@echo ""
 	@echo "✓ All tests passed"
 
 cli:

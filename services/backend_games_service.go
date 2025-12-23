@@ -42,6 +42,10 @@ func (s *BackendGamesService) InitializeScreenshotIndexer() {
 // Called by backend game services (fsbe, gormbe) after initialization.
 func (s *BackendGamesService) InitializeSyncBroadcast() {
 	s.OnMovesSaved = func(ctx context.Context, gameId string, moves []*v1.GameMove, groupNumber int64) {
+		// Skip if ClientMgr is not available (e.g., in tests)
+		if s.ClientMgr == nil {
+			return
+		}
 		syncClient := s.ClientMgr.GetGameSyncSvcClient()
 		if syncClient == nil {
 			return

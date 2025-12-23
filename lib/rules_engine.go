@@ -353,79 +353,158 @@ func (re *RulesEngine) calculatePathCost(world *World, unitType int32, from, to 
 }
 
 // =============================================================================
-// Path Validation Methods
+// Path Finding Methods
 // =============================================================================
 
-// IsValidPath validates if a unit can traverse a specific path
-// This method performs comprehensive validation of any path, including:
-// - Path structure (adjacent tiles, no jumps)
-// - Terrain traversability (unit type vs terrain rules)
-// - Movement cost feasibility (enough movement points)
-// - Game state validity (no units blocking, correct start position)
-func (re *RulesEngine) IsValidPath(unit *v1.Unit, path []AxialCoord, world *World) (bool, error) {
+// FindPathTo finds the shortest path from unit's position to destination using Dijkstra.
+// Stops as soon as destination is reached for efficiency.
+// Returns the path and total cost, or an error if destination is unreachable.
+func (re *RulesEngine) FindPathTo(unit *v1.Unit, dest AxialCoord, world *World, preventPassThrough bool) (*v1.Path, float64, error) {
 	if unit == nil {
-		return false, fmt.Errorf("unit is nil")
+		return nil, 0, fmt.Errorf("unit is nil")
 	}
 
-	if len(path) == 0 {
-		return false, fmt.Errorf("path is empty")
+	startCoord := UnitGetCoord(unit)
+
+	// Same position is always valid (no movement)
+	if startCoord == dest {
+		return &v1.Path{Edges: []*v1.PathEdge{}, TotalCost: 0}, 0, nil
 	}
 
-	// Path must start at unit's current position
-	unitCoord := UnitGetCoord(unit)
-	if path[0] != unitCoord {
-		return false, fmt.Errorf("path does not start at unit position: expected %v, got %v", unitCoord, path[0])
+	maxMovement := unit.DistanceLeft
+
+	// Track visited nodes, their costs, and parent info for path reconstruction
+	type nodeInfo struct {
+		cost       float64
+		parentQ    int32
+		parentR    int32
+		moveCost   float64
+		isOccupied bool
+	}
+	visited := make(map[AxialCoord]*nodeInfo)
+
+	// Priority queue for Dijkstra
+	type queueItem struct {
+		coord AxialCoord
+		cost  float64
 	}
 
-	// Empty movement (staying in place) is always valid
-	if len(path) == 1 {
-		return true, nil
+	queue := []queueItem{{coord: startCoord, cost: 0}}
+	visited[startCoord] = &nodeInfo{cost: 0, parentQ: int32(startCoord.Q), parentR: int32(startCoord.R)}
+
+	popMinCoord := func() queueItem {
+		minIdx := 0
+		for i := 1; i < len(queue); i++ {
+			if queue[i].cost < queue[minIdx].cost {
+				minIdx = i
+			}
+		}
+		current := queue[minIdx]
+		queue = append(queue[:minIdx], queue[minIdx+1:]...)
+		return current
 	}
 
-	totalCost := 0.0
+	// Dijkstra's algorithm with early exit
+	for len(queue) > 0 {
+		current := popMinCoord()
 
-	// Validate each step in the path
-	for i := 1; i < len(path); i++ {
-		fromCoord := path[i-1]
-		toCoord := path[i]
-
-		// 1. Check adjacency - tiles must be adjacent (no jumping)
-		distance := CubeDistance(fromCoord, toCoord)
-		if distance != 1 {
-			return false, fmt.Errorf("path step %d->%d: tiles are not adjacent (distance=%d)", i-1, i, distance)
+		// Early exit: reached destination
+		if current.coord == dest {
+			break
 		}
 
-		// 2. Check destination tile exists
-		toTile := world.TileAt(toCoord)
-		if toTile == nil {
-			return false, fmt.Errorf("path step %d: destination tile %v does not exist", i, toCoord)
+		// Skip if we've already processed this with lower cost
+		if info, exists := visited[current.coord]; exists && current.cost > info.cost {
+			continue
 		}
 
-		// 3. Check terrain traversability (use effective tile type for crossings)
-		effectiveTileType := re.GetEffectiveTileType(world, toCoord)
-		stepCost, err := re.GetUnitTerrainCost(unit.UnitType, effectiveTileType)
-		if err != nil {
-			return false, fmt.Errorf("path step %d: unit type %d cannot traverse terrain %d: %w",
-				i, unit.UnitType, effectiveTileType, err)
-		}
+		// Explore neighbors
+		for neighborCoord := range world.Neighbors(current.coord) {
+			isOccupied := world.UnitAt(neighborCoord) != nil
 
-		// 4. Check for blocking units
-		blockingUnit := world.UnitAt(toCoord)
-		if blockingUnit != nil && blockingUnit != unit {
-			return false, fmt.Errorf("path step %d: tile %v is blocked by unit", i, toCoord)
-		}
+			if preventPassThrough && isOccupied {
+				continue
+			}
 
-		// 5. Accumulate movement cost
-		totalCost += stepCost
+			effectiveTileType := re.GetEffectiveTileType(world, neighborCoord)
+			moveCost, err := re.GetUnitTerrainCost(unit.UnitType, effectiveTileType)
+			if err != nil {
+				continue
+			}
+
+			newCost := current.cost + moveCost
+
+			if newCost <= maxMovement {
+				if existingInfo, exists := visited[neighborCoord]; !exists || newCost < existingInfo.cost {
+					visited[neighborCoord] = &nodeInfo{
+						cost:       newCost,
+						parentQ:    int32(current.coord.Q),
+						parentR:    int32(current.coord.R),
+						moveCost:   moveCost,
+						isOccupied: isOccupied,
+					}
+					queue = append(queue, queueItem{coord: neighborCoord, cost: newCost})
+				}
+			}
+		}
 	}
 
-	// 6. Check total movement cost against unit's remaining movement
-	if totalCost > float64(unit.DistanceLeft) {
-		return false, fmt.Errorf("path requires %.2f movement points, unit has %f remaining",
-			totalCost, unit.DistanceLeft)
+	// Check if destination was reached
+	destInfo, reached := visited[dest]
+	if !reached {
+		return nil, 0, fmt.Errorf("destination (%d,%d) not reachable from (%d,%d)",
+			dest.Q, dest.R, startCoord.Q, startCoord.R)
 	}
 
-	return true, nil
+	// Cannot land on occupied tile
+	if destInfo.isOccupied {
+		return nil, 0, fmt.Errorf("destination (%d,%d) is occupied", dest.Q, dest.R)
+	}
+
+	// Reconstruct path by walking backwards from destination
+	var pathEdges []*v1.PathEdge
+	currentQ, currentR := int32(dest.Q), int32(dest.R)
+
+	for {
+		info := visited[AxialCoord{Q: int(currentQ), R: int(currentR)}]
+		if info == nil || (currentQ == int32(startCoord.Q) && currentR == int32(startCoord.R)) {
+			break
+		}
+
+		pathEdges = append(pathEdges, &v1.PathEdge{
+			FromQ:        info.parentQ,
+			FromR:        info.parentR,
+			ToQ:          currentQ,
+			ToR:          currentR,
+			MovementCost: info.moveCost,
+			TotalCost:    info.cost,
+		})
+
+		currentQ, currentR = info.parentQ, info.parentR
+	}
+
+	// Reverse to get source->destination order
+	for i := 0; i < len(pathEdges)/2; i++ {
+		j := len(pathEdges) - 1 - i
+		pathEdges[i], pathEdges[j] = pathEdges[j], pathEdges[i]
+	}
+
+	return &v1.Path{
+		Edges:     pathEdges,
+		TotalCost: destInfo.cost,
+	}, destInfo.cost, nil
+}
+
+// IsValidPath validates if a unit can traverse a specific path (legacy compatibility)
+// Prefer FindPathTo for new code as it finds the optimal path.
+func (re *RulesEngine) IsValidPath(unit *v1.Unit, path []AxialCoord, world *World) (bool, error) {
+	if len(path) < 2 {
+		return len(path) == 1, nil // Single position is valid (no movement)
+	}
+
+	dest := path[len(path)-1]
+	_, _, err := re.FindPathTo(unit, dest, world, false)
+	return err == nil, err
 }
 
 // =============================================================================

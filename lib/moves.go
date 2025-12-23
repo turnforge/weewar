@@ -458,29 +458,6 @@ func (g *Game) ProcessEndTurn(move *v1.GameMove, action *v1.EndTurnAction) (err 
 	return
 }
 
-// IsValidMove checks if movement is legal using cube coordinates
-func (g *Game) IsValidMove(from, to AxialCoord) bool {
-	// Get the unit at the starting position
-	unit := g.World.UnitAt(from)
-	if unit == nil {
-		return false
-	}
-
-	// Check if the unit belongs to the current player
-	if unit.Player != g.CurrentPlayer {
-		return false
-	}
-
-	// Create simple two-tile path and validate using RulesEngine
-	path := []AxialCoord{from, to}
-	valid, err := g.RulesEngine.IsValidPath(unit, path, g.World)
-	if err != nil {
-		return false
-	}
-
-	return valid
-}
-
 // ProcessMoveUnit executes unit movement using cube coordinates
 func (g *Game) ProcessMoveUnit(move *v1.GameMove, action *v1.MoveUnitAction, preventPassThrough bool) (err error) {
 	// Initialize the result object
@@ -509,20 +486,15 @@ func (g *Game) ProcessMoveUnit(move *v1.GameMove, action *v1.MoveUnitAction, pre
 		return fmt.Errorf("not player %d's turn", unit.Player)
 	}
 
-	// Check if move is valid
-	if !g.CanMoveUnit(unit, to, preventPassThrough) {
+	// Find path to destination (validates move and returns path for animation)
+	path, cost, err := g.RulesEngine.FindPathTo(unit, to, g.World, preventPassThrough)
+	if err != nil {
 		unitCoord := UnitGetCoord(unit)
-		return fmt.Errorf("invalid move from %v to %v", unitCoord, to)
+		return fmt.Errorf("invalid move from %v to %v: %w", unitCoord, to, err)
 	}
 
-	// Get movement cost using RulesEngine
-	cost, err := g.RulesEngine.GetMovementCost(g.World, unit, to, preventPassThrough)
-	if err != nil {
-		return fmt.Errorf("failed to calculate movement cost: %w", err)
-	}
-	if cost > unit.DistanceLeft {
-		return fmt.Errorf("insufficient movement points: need %f, have %f", cost, unit.DistanceLeft)
-	}
+	// Store the reconstructed path in the action for animation purposes
+	action.ReconstructedPath = path
 
 	// Capture unit state before move
 	previousUnit := copyUnit(unit)

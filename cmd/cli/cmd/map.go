@@ -43,30 +43,22 @@ func init() {
 }
 
 func runMap(cmd *cobra.Command, args []string) error {
-	// Get game ID
-	gameID, err := getGameID()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Create presenter to get game state
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
-	// Get state from panel
-	if pc.GameState.State == nil {
+	if gc.State == nil {
 		return fmt.Errorf("game state not initialized")
 	}
 
-	state := pc.GameState.State
+	state := gc.State
 	if state.WorldData == nil {
 		return fmt.Errorf("world data not available")
 	}
 
-	// Get theme from presenter (it already has the rules engine)
-	theme := pc.Presenter.Theme
+	// Create theme for rendering using cityTerrains from default rules engine
+	theme := themes.NewDefaultTheme(lib.DefaultRulesEngine().GetCityTerrains())
 	renderer, err := themes.NewPNGWorldRenderer(theme)
 	if err != nil {
 		return fmt.Errorf("failed to create renderer: %w", err)

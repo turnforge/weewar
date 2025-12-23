@@ -97,3 +97,24 @@ message ClientReadyRequest {
 message ClientReadyResponse {
   bool success = 1;
 }
+
+// Request to apply changes from remote players
+// Called when SyncService streams moves made by other players
+message ApplyRemoteChangesRequest {
+  string game_id = 1;
+
+  // The moves containing WorldChanges to apply
+  repeated GameMove moves = 2;
+}
+
+// Response after applying remote changes
+message ApplyRemoteChangesResponse {
+  // Whether the changes were successfully applied
+  bool success = 1;
+
+  // Error message if application failed (e.g., state desync)
+  string error = 2;
+
+  // If state desync detected, client should reload game
+  bool requires_reload = 3;
+}

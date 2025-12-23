@@ -78,16 +78,17 @@ func (f *OutputFormatter) PrintText(data any) error {
 	return nil
 }
 
-// FormatOptions formats available options as text
-func FormatOptions(pc *PresenterContext, position string) string {
+// FormatOptionsResponse formats GetOptionsAtResponse as text
+func FormatOptionsResponse(gc *GameContext, position string, opts *v1.GetOptionsAtResponse, unit *v1.Unit) string {
 	var sb strings.Builder
 
+	rulesEngine := gc.RTGame.GetRulesEngine()
+
 	// Get unit info
-	if pc.TurnOptions.Unit != nil {
-		unit := pc.TurnOptions.Unit
+	if unit != nil {
 		coord := lib.CoordFromInt32(unit.Q, unit.R)
 		sb.WriteString(fmt.Sprintf("Unit %s at %s:\n", position, coord.String()))
-		sb.WriteString(fmt.Sprintf("  Type: %d, HP: %d, Moves: %f\n\n",
+		sb.WriteString(fmt.Sprintf("  Type: %d, HP: %d, Moves: %.1f\n\n",
 			unit.UnitType, unit.AvailableHealth, unit.DistanceLeft))
 	} else {
 		// No unit - show position for tile options
@@ -95,19 +96,19 @@ func FormatOptions(pc *PresenterContext, position string) string {
 	}
 
 	// Get options
-	if pc.TurnOptions.Options == nil || len(pc.TurnOptions.Options.Options) == 0 {
+	if opts == nil || len(opts.Options) == 0 {
 		sb.WriteString("No options available at this position\n")
 		return sb.String()
 	}
 
 	sb.WriteString("Available options:\n")
 
-	for i, option := range pc.TurnOptions.Options.Options {
+	for i, option := range opts.Options {
 		switch opt := option.OptionType.(type) {
 		case *v1.GameOption_Move:
 			moveOpt := opt.Move
 			targetCoord := lib.CoordFromInt32(moveOpt.To.Q, moveOpt.To.R)
-			sb.WriteString(fmt.Sprintf("%d. move to %s (cost: %f)\n",
+			sb.WriteString(fmt.Sprintf("%d. move to %s (cost: %.1f)\n",
 				i+1, targetCoord.String(), moveOpt.MovementCost))
 
 			// Add path if available
@@ -127,8 +128,7 @@ func FormatOptions(pc *PresenterContext, position string) string {
 			unitName := fmt.Sprintf("type %d", buildOpt.UnitType) // fallback
 
 			// Try to get the actual unit details from RulesEngine
-			if pc.Presenter != nil && pc.Presenter.RulesEngine != nil {
-				rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+			if rulesEngine != nil {
 				if unitDef, err := rulesEngine.GetUnitData(buildOpt.UnitType); err == nil {
 					unitName = unitDef.Name
 
@@ -142,17 +142,17 @@ func FormatOptions(pc *PresenterContext, position string) string {
 
 					// Movement points
 					if unitDef.MovementPoints > 0 {
-						details = append(details, fmt.Sprintf("⚡%.0f", unitDef.MovementPoints))
+						details = append(details, fmt.Sprintf("Move:%.0f", unitDef.MovementPoints))
 					}
 
 					// Attack range
 					if unitDef.AttackRange > 0 {
-						details = append(details, fmt.Sprintf("🎯%d", unitDef.AttackRange))
+						details = append(details, fmt.Sprintf("Range:%d", unitDef.AttackRange))
 					}
 
 					// Defense
 					if unitDef.Defense > 0 {
-						details = append(details, fmt.Sprintf("🛡️%d", unitDef.Defense))
+						details = append(details, fmt.Sprintf("Def:%d", unitDef.Defense))
 					}
 
 					sb.WriteString(fmt.Sprintf("%d. build %s (cost: %d, type: %d)\n",
@@ -160,13 +160,13 @@ func FormatOptions(pc *PresenterContext, position string) string {
 
 					// Add details on next line
 					if len(details) > 0 {
-						sb.WriteString(fmt.Sprintf("   %s\n", strings.Join(details, " • ")))
+						sb.WriteString(fmt.Sprintf("   %s\n", strings.Join(details, " | ")))
 					}
 
 					// Add properties if available
 					if len(unitDef.Properties) > 0 {
 						for _, prop := range unitDef.Properties {
-							sb.WriteString(fmt.Sprintf("   • %s\n", prop))
+							sb.WriteString(fmt.Sprintf("   - %s\n", prop))
 						}
 					}
 					continue // Skip the default format line
@@ -183,8 +183,7 @@ func FormatOptions(pc *PresenterContext, position string) string {
 			terrainName := fmt.Sprintf("type %d", captureOpt.TileType)
 
 			// Try to get the actual terrain name from RulesEngine
-			if pc.Presenter != nil && pc.Presenter.RulesEngine != nil {
-				rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+			if rulesEngine != nil {
 				if terrainDef, err := rulesEngine.GetTerrainData(captureOpt.TileType); err == nil {
 					terrainName = terrainDef.Name
 				}
@@ -269,19 +268,14 @@ func FormatGameStatus(game *v1.Game, state *v1.GameState) string {
 	return sb.String()
 }
 
-// FormatUnits formats all units as text
-func FormatUnits(pc *PresenterContext, state *v1.GameState) string {
+// FormatUnitsWithContext formats all units as text using GameContext
+func FormatUnitsWithContext(gc *GameContext) string {
+	state := gc.State
 	if state.WorldData == nil || len(state.WorldData.UnitsMap) == 0 {
 		return "No units found\n"
 	}
 
-	pc, _, _, _, rtGame, err := GetGame()
-	if err != nil {
-		panic(err)
-	}
-
-	// Get rules engine for unit names
-	rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+	rulesEngine := gc.RTGame.GetRulesEngine()
 
 	// Group units by player
 	unitsByPlayer := make(map[int32][]*v1.Unit)
@@ -289,9 +283,7 @@ func FormatUnits(pc *PresenterContext, state *v1.GameState) string {
 
 	for _, unit := range state.WorldData.UnitsMap {
 		if unit != nil {
-			if err := rtGame.TopUpUnitIfNeeded(unit); err != nil {
-				panic(err)
-			}
+			gc.RTGame.TopUpUnitIfNeeded(unit)
 			unitsByPlayer[unit.Player] = append(unitsByPlayer[unit.Player], unit)
 			if unit.Player > numPlayers {
 				numPlayers = unit.Player
@@ -341,19 +333,14 @@ func FormatUnits(pc *PresenterContext, state *v1.GameState) string {
 	return sb.String()
 }
 
-// FormatTiles formats all tiles as text
-func FormatTiles(pc *PresenterContext, state *v1.GameState) string {
+// FormatTilesWithContext formats all tiles as text using GameContext
+func FormatTilesWithContext(gc *GameContext) string {
+	state := gc.State
 	if state.WorldData == nil || len(state.WorldData.TilesMap) == 0 {
 		return "No tiles found\n"
 	}
 
-	pc, _, _, _, rtGame, err := GetGame()
-	if err != nil {
-		panic(err)
-	}
-
-	// Get rules engine for terrain names
-	rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+	rulesEngine := gc.RTGame.GetRulesEngine()
 
 	// Group tiles by player
 	tilesByPlayer := make(map[int32][]*v1.Tile)
@@ -361,9 +348,7 @@ func FormatTiles(pc *PresenterContext, state *v1.GameState) string {
 
 	for _, tile := range state.WorldData.TilesMap {
 		if tile != nil && tile.Player > 0 {
-			if err := rtGame.TopUpTileIfNeeded(tile); err != nil {
-				panic(err)
-			}
+			gc.RTGame.TopUpTileIfNeeded(tile)
 			tilesByPlayer[tile.Player] = append(tilesByPlayer[tile.Player], tile)
 			if tile.Player > numPlayers {
 				numPlayers = tile.Player

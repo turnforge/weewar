@@ -4,15 +4,14 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/turnforge/weewar/lib"
 )
 
 // tilesCmd represents the tiles command
 var tilesCmd = &cobra.Command{
 	Use:   "tiles",
-	Short: "List all tiles in the game",
-	Long: `Display all tiles grouped by player, showing their position, health,
-and remaining movement points.
+	Short: "List all player-owned tiles in the game",
+	Long: `Display all player-owned tiles grouped by player, showing their position
+and terrain type.
 
 Examples:
   ww tiles
@@ -25,20 +24,12 @@ func init() {
 }
 
 func runTiles(cmd *cobra.Command, args []string) error {
-	// Get game ID
-	gameID, err := getGameID()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
-	// Get state from panel
-	if pc.GameState.State == nil {
+	if gc.State == nil {
 		return fmt.Errorf("game state not initialized")
 	}
 
@@ -47,10 +38,10 @@ func runTiles(cmd *cobra.Command, args []string) error {
 
 	if formatter.JSON {
 		// JSON output
-		rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+		rulesEngine := gc.RTGame.GetRulesEngine()
 		tiles := []map[string]any{}
-		if pc.GameState.State.WorldData != nil {
-			for _, tile := range pc.GameState.State.WorldData.TilesMap {
+		if gc.State.WorldData != nil {
+			for _, tile := range gc.State.WorldData.TilesMap {
 				if tile != nil {
 					tileName := ""
 					if terrainDef, err := rulesEngine.GetTerrainData(tile.TileType); err == nil {
@@ -69,13 +60,13 @@ func runTiles(cmd *cobra.Command, args []string) error {
 		}
 
 		data := map[string]any{
-			"game_id": gameID,
+			"game_id": gc.GameID,
 			"tiles":   tiles,
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
-	text := FormatTiles(pc, pc.GameState.State)
+	text := FormatTilesWithContext(gc)
 	return formatter.PrintText(text)
 }

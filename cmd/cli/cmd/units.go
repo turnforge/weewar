@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/turnforge/weewar/lib"
 )
 
 // unitsCmd represents the units command
@@ -25,20 +24,12 @@ func init() {
 }
 
 func runUnits(cmd *cobra.Command, args []string) error {
-	// Get game ID
-	gameID, err := getGameID()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
-	// Get state from panel
-	if pc.GameState.State == nil {
+	if gc.State == nil {
 		return fmt.Errorf("game state not initialized")
 	}
 
@@ -47,10 +38,10 @@ func runUnits(cmd *cobra.Command, args []string) error {
 
 	if formatter.JSON {
 		// JSON output
-		rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
+		rulesEngine := gc.RTGame.GetRulesEngine()
 		units := []map[string]any{}
-		if pc.GameState.State.WorldData != nil {
-			for _, unit := range pc.GameState.State.WorldData.UnitsMap {
+		if gc.State.WorldData != nil {
+			for _, unit := range gc.State.WorldData.UnitsMap {
 				if unit != nil {
 					unitName := ""
 					if unitDef, err := rulesEngine.GetUnitData(unit.UnitType); err == nil {
@@ -71,13 +62,13 @@ func runUnits(cmd *cobra.Command, args []string) error {
 		}
 
 		data := map[string]any{
-			"game_id": gameID,
+			"game_id": gc.GameID,
 			"units":   units,
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
-	text := FormatUnits(pc, pc.GameState.State)
+	text := FormatUnitsWithContext(gc)
 	return formatter.PrintText(text)
 }

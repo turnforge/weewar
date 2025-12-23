@@ -29,6 +29,7 @@ type ClientMgr struct {
 	worldsSvcClient    v1s.WorldsServiceClient
 	gamesSvcClient     v1s.GamesServiceClient
 	filestoreSvcClient v1s.FileStoreServiceClient
+	gameSyncSvcClient  v1s.GameSyncServiceClient
 	authSvc            *AuthService
 	// We may need an auth svc at some point
 }
@@ -113,4 +114,16 @@ func (c *ClientMgr) GetFileStoreSvcClient() (out v1s.FileStoreServiceClient) {
 		c.filestoreSvcClient = v1s.NewFileStoreServiceClient(filestoreSvcConn)
 	}
 	return c.filestoreSvcClient
+}
+
+func (c *ClientMgr) GetGameSyncSvcClient() (out v1s.GameSyncServiceClient) {
+	if c.gameSyncSvcClient == nil {
+		gameSyncSvcConn, err := grpc.NewClient(c.svcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			panic(fmt.Sprintf("cannot connect with server %v", err))
+		}
+
+		c.gameSyncSvcClient = v1s.NewGameSyncServiceClient(gameSyncSvcConn)
+	}
+	return c.gameSyncSvcClient
 }

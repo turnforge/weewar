@@ -186,24 +186,17 @@ func runAssert(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("no assertions provided")
 	}
 
-	// Get game ID
-	gameID, err := getGameID()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
-	if pc.GameState.State == nil {
+	if gc.State == nil {
 		return fmt.Errorf("game state not initialized")
 	}
 
 	// Parse and evaluate assertions
-	results, err := parseAndEvaluate(args, pc)
+	results, err := parseAndEvaluateWithContext(args, gc)
 	if err != nil {
 		return err
 	}
@@ -230,27 +223,27 @@ func runAssert(cmd *cobra.Command, args []string) error {
 	return fmt.Errorf("%d assertions failed", failed)
 }
 
-func parseAndEvaluate(args []string, pc *PresenterContext) ([]AssertionResult, error) {
+func parseAndEvaluateWithContext(args []string, gc *GameContext) ([]AssertionResult, error) {
 	// Join args and re-parse to handle spaces within brackets
 	input := strings.Join(args, " ")
 
 	// Check for exists/notexists first
 	if strings.HasPrefix(input, "exists ") || strings.HasPrefix(input, "notexists ") {
-		return parseExistsAssertions(input, pc)
+		return parseExistsAssertionsWithContext(input, gc)
 	}
 
 	// Check for options assertions
 	if strings.HasPrefix(input, "options ") {
-		return parseOptionsAssertionsFromArgs(args, pc)
+		return parseOptionsAssertionsWithContext(args, gc)
 	}
 
 	// Parse entity assertions: entity id [assertions]
 	// Regex to match: (unit|tile|player|game) (id)? [assertions]
 	// The brackets may contain spaces, so we need careful parsing
-	return parseEntityAssertions(input, pc)
+	return parseEntityAssertionsWithContext(input, gc)
 }
 
-func parseExistsAssertions(input string, pc *PresenterContext) ([]AssertionResult, error) {
+func parseExistsAssertionsWithContext(input string, gc *GameContext) ([]AssertionResult, error) {
 	var results []AssertionResult
 	expectExists := strings.HasPrefix(input, "exists ")
 
@@ -277,9 +270,9 @@ func parseExistsAssertions(input string, pc *PresenterContext) ([]AssertionResul
 
 		switch entityType {
 		case "unit":
-			_, exists, err = findUnit(id, pc)
+			_, exists, err = findUnitWithContext(id, gc)
 		case "tile":
-			_, exists, err = findTile(id, pc)
+			_, exists, err = findTileWithContext(id, gc)
 		default:
 			return nil, fmt.Errorf("exists only supports 'unit' and 'tile', got %q", entityType)
 		}
@@ -312,7 +305,7 @@ func parseExistsAssertions(input string, pc *PresenterContext) ([]AssertionResul
 	return results, nil
 }
 
-func parseEntityAssertions(input string, pc *PresenterContext) ([]AssertionResult, error) {
+func parseEntityAssertionsWithContext(input string, gc *GameContext) ([]AssertionResult, error) {
 	var results []AssertionResult
 
 	// Find all entity blocks: entity id [...] or game [...]
@@ -336,7 +329,7 @@ func parseEntityAssertions(input string, pc *PresenterContext) ([]AssertionResul
 		}
 
 		// Evaluate assertions
-		entityResults, err := evaluateAssertions(entityType, entityID, assertions, pc)
+		entityResults, err := evaluateAssertionsWithContext(entityType, entityID, assertions, gc)
 		if err != nil {
 			return nil, err
 		}
@@ -483,7 +476,7 @@ func parseValueSet(input string) ([]string, error) {
 	return values, nil
 }
 
-func evaluateAssertions(entityType, entityID string, assertions []Assertion, pc *PresenterContext) ([]AssertionResult, error) {
+func evaluateAssertionsWithContext(entityType, entityID string, assertions []Assertion, gc *GameContext) ([]AssertionResult, error) {
 	var results []AssertionResult
 
 	for _, a := range assertions {
@@ -492,13 +485,13 @@ func evaluateAssertions(entityType, entityID string, assertions []Assertion, pc 
 
 		switch entityType {
 		case "unit":
-			result, err = evaluateUnitAssertion(entityID, a, pc)
+			result, err = evaluateUnitAssertionWithContext(entityID, a, gc)
 		case "tile":
-			result, err = evaluateTileAssertion(entityID, a, pc)
+			result, err = evaluateTileAssertionWithContext(entityID, a, gc)
 		case "player":
-			result, err = evaluatePlayerAssertion(entityID, a, pc)
+			result, err = evaluatePlayerAssertionWithContext(entityID, a, gc)
 		case "game":
-			result, err = evaluateGameAssertion(a, pc)
+			result, err = evaluateGameAssertionWithContext(a, gc)
 		default:
 			return nil, fmt.Errorf("unknown entity type: %s", entityType)
 		}
@@ -549,13 +542,13 @@ func parseCoordinate(input string) (lib.AxialCoord, error) {
 	return lib.AxialCoord{Q: q, R: r}, nil
 }
 
-func findUnit(id string, pc *PresenterContext) (*v1.Unit, bool, error) {
-	if pc.GameState.State.WorldData == nil {
+func findUnitWithContext(id string, gc *GameContext) (*v1.Unit, bool, error) {
+	if gc.State.WorldData == nil {
 		return nil, false, nil
 	}
 
 	// Try shortcut lookup first
-	for _, unit := range pc.GameState.State.WorldData.UnitsMap {
+	for _, unit := range gc.State.WorldData.UnitsMap {
 		if unit != nil && unit.Shortcut == id {
 			return unit, true, nil
 		}
@@ -565,20 +558,20 @@ func findUnit(id string, pc *PresenterContext) (*v1.Unit, bool, error) {
 	coord, err := parseCoordinate(id)
 	if err == nil {
 		key := lib.CoordKey(int32(coord.Q), int32(coord.R))
-		unit := pc.GameState.State.WorldData.UnitsMap[key]
+		unit := gc.State.WorldData.UnitsMap[key]
 		return unit, unit != nil, nil
 	}
 
 	return nil, false, nil
 }
 
-func findTile(id string, pc *PresenterContext) (*v1.Tile, bool, error) {
-	if pc.GameState.State.WorldData == nil {
+func findTileWithContext(id string, gc *GameContext) (*v1.Tile, bool, error) {
+	if gc.State.WorldData == nil {
 		return nil, false, nil
 	}
 
 	// Try shortcut lookup first
-	for _, tile := range pc.GameState.State.WorldData.TilesMap {
+	for _, tile := range gc.State.WorldData.TilesMap {
 		if tile != nil && tile.Shortcut == id {
 			return tile, true, nil
 		}
@@ -588,15 +581,15 @@ func findTile(id string, pc *PresenterContext) (*v1.Tile, bool, error) {
 	coord, err := parseCoordinate(id)
 	if err == nil {
 		key := lib.CoordKey(int32(coord.Q), int32(coord.R))
-		tile := pc.GameState.State.WorldData.TilesMap[key]
+		tile := gc.State.WorldData.TilesMap[key]
 		return tile, tile != nil, nil
 	}
 
 	return nil, false, nil
 }
 
-func evaluateUnitAssertion(id string, a Assertion, pc *PresenterContext) (AssertionResult, error) {
-	unit, exists, err := findUnit(id, pc)
+func evaluateUnitAssertionWithContext(id string, a Assertion, gc *GameContext) (AssertionResult, error) {
+	unit, exists, err := findUnitWithContext(id, gc)
 	if err != nil {
 		return AssertionResult{}, err
 	}
@@ -638,8 +631,8 @@ func getUnitFieldValue(unit *v1.Unit, field string) (string, error) {
 	}
 }
 
-func evaluateTileAssertion(id string, a Assertion, pc *PresenterContext) (AssertionResult, error) {
-	tile, exists, err := findTile(id, pc)
+func evaluateTileAssertionWithContext(id string, a Assertion, gc *GameContext) (AssertionResult, error) {
+	tile, exists, err := findTileWithContext(id, gc)
 	if err != nil {
 		return AssertionResult{}, err
 	}
@@ -673,14 +666,14 @@ func getTileFieldValue(tile *v1.Tile, field string) (string, error) {
 	}
 }
 
-func evaluatePlayerAssertion(id string, a Assertion, pc *PresenterContext) (AssertionResult, error) {
+func evaluatePlayerAssertionWithContext(id string, a Assertion, gc *GameContext) (AssertionResult, error) {
 	playerID, err := strconv.Atoi(id)
 	if err != nil {
 		return AssertionResult{}, fmt.Errorf("invalid player ID: %s", id)
 	}
 
 	// Get field value
-	actual, err := getPlayerFieldValue(int32(playerID), a.Field, pc)
+	actual, err := getPlayerFieldValueWithContext(int32(playerID), a.Field, gc)
 	if err != nil {
 		return AssertionResult{}, err
 	}
@@ -688,17 +681,17 @@ func evaluatePlayerAssertion(id string, a Assertion, pc *PresenterContext) (Asse
 	return evaluateComparison("player", id, a, actual)
 }
 
-func getPlayerFieldValue(playerID int32, field string, pc *PresenterContext) (string, error) {
+func getPlayerFieldValueWithContext(playerID int32, field string, gc *GameContext) (string, error) {
 	switch field {
 	case "coins":
-		if ps := pc.GameState.State.PlayerStates[playerID]; ps != nil {
+		if ps := gc.State.PlayerStates[playerID]; ps != nil {
 			return fmt.Sprintf("%d", ps.Coins), nil
 		}
 		return "0", nil
 	case "unit_count":
 		count := 0
-		if pc.GameState.State.WorldData != nil {
-			for _, unit := range pc.GameState.State.WorldData.UnitsMap {
+		if gc.State.WorldData != nil {
+			for _, unit := range gc.State.WorldData.UnitsMap {
 				if unit != nil && unit.Player == playerID {
 					count++
 				}
@@ -707,8 +700,8 @@ func getPlayerFieldValue(playerID int32, field string, pc *PresenterContext) (st
 		return fmt.Sprintf("%d", count), nil
 	case "tile_count":
 		count := 0
-		if pc.GameState.State.WorldData != nil {
-			for _, tile := range pc.GameState.State.WorldData.TilesMap {
+		if gc.State.WorldData != nil {
+			for _, tile := range gc.State.WorldData.TilesMap {
 				if tile != nil && tile.Player == playerID {
 					count++
 				}
@@ -716,8 +709,8 @@ func getPlayerFieldValue(playerID int32, field string, pc *PresenterContext) (st
 		}
 		return fmt.Sprintf("%d", count), nil
 	case "is_active":
-		if pc.GameState.Game != nil && pc.GameState.Game.Config != nil {
-			for _, p := range pc.GameState.Game.Config.Players {
+		if gc.Game != nil && gc.Game.Config != nil {
+			for _, p := range gc.Game.Config.Players {
 				if p.PlayerId == playerID {
 					return fmt.Sprintf("%t", p.IsActive), nil
 				}
@@ -729,9 +722,9 @@ func getPlayerFieldValue(playerID int32, field string, pc *PresenterContext) (st
 	}
 }
 
-func evaluateGameAssertion(a Assertion, pc *PresenterContext) (AssertionResult, error) {
+func evaluateGameAssertionWithContext(a Assertion, gc *GameContext) (AssertionResult, error) {
 	// Get field value
-	actual, err := getGameFieldValue(a.Field, pc)
+	actual, err := getGameFieldValueWithContext(a.Field, gc)
 	if err != nil {
 		return AssertionResult{}, err
 	}
@@ -739,8 +732,8 @@ func evaluateGameAssertion(a Assertion, pc *PresenterContext) (AssertionResult, 
 	return evaluateComparison("game", "", a, actual)
 }
 
-func getGameFieldValue(field string, pc *PresenterContext) (string, error) {
-	state := pc.GameState.State
+func getGameFieldValueWithContext(field string, gc *GameContext) (string, error) {
+	state := gc.State
 	switch field {
 	case "turn", "turn_counter":
 		return fmt.Sprintf("%d", state.TurnCounter), nil
@@ -842,9 +835,8 @@ func contains(slice []string, val string) bool {
 // Options Assertions
 // =============================================================================
 
-// parseOptionsAssertionsFromArgs parses args like ["options", "unit", "A1", "attack B3", "move 0,5"]
-// Note: Shell removes quotes, so "attack B3" becomes a single arg without quotes
-func parseOptionsAssertionsFromArgs(args []string, pc *PresenterContext) ([]AssertionResult, error) {
+// parseOptionsAssertionsWithContext parses args like ["options", "unit", "A1", "attack B3", "move 0,5"]
+func parseOptionsAssertionsWithContext(args []string, gc *GameContext) ([]AssertionResult, error) {
 	// args[0] = "options"
 	// args[1] = entity type (unit/tile)
 	// args[2] = entity id
@@ -870,7 +862,7 @@ func parseOptionsAssertionsFromArgs(args []string, pc *PresenterContext) ([]Asse
 	}
 
 	// Get actual options for the entity
-	actualOptions, err := getOptionsForEntity(entityType, entityID, pc)
+	actualOptions, err := getOptionsForEntityWithContext(entityType, entityID, gc)
 	if err != nil {
 		return nil, err
 	}
@@ -878,75 +870,11 @@ func parseOptionsAssertionsFromArgs(args []string, pc *PresenterContext) ([]Asse
 	// Evaluate each option assertion
 	var results []AssertionResult
 	for _, oa := range optionAssertions {
-		result := evaluateOptionAssertion(entityType, entityID, oa, actualOptions, pc)
+		result := evaluateOptionAssertionWithContext(entityType, entityID, oa, actualOptions, gc)
 		results = append(results, result)
 	}
 
 	return results, nil
-}
-
-// parseOptionAssertions splits the bracket contents into individual option assertions
-func parseOptionAssertions(input string) ([]OptionAssertion, error) {
-	var assertions []OptionAssertion
-
-	// Split by comma, respecting quotes
-	parts := splitQuotedAssertions(input)
-
-	for _, part := range parts {
-		part = strings.TrimSpace(part)
-		if part == "" {
-			continue
-		}
-
-		oa, err := parseOptionAssertion(part)
-		if err != nil {
-			return nil, err
-		}
-		assertions = append(assertions, oa)
-	}
-
-	return assertions, nil
-}
-
-// splitQuotedAssertions splits by comma but respects quoted strings
-func splitQuotedAssertions(input string) []string {
-	var parts []string
-	var current strings.Builder
-	inQuote := false
-
-	for _, ch := range input {
-		switch ch {
-		case '"':
-			inQuote = !inQuote
-			current.WriteRune(ch)
-		case ',':
-			if inQuote {
-				current.WriteRune(ch)
-			} else {
-				parts = append(parts, current.String())
-				current.Reset()
-			}
-		default:
-			current.WriteRune(ch)
-		}
-	}
-	if current.Len() > 0 {
-		parts = append(parts, current.String())
-	}
-	return parts
-}
-
-// extractQuotedStrings extracts all quoted strings from input
-func extractQuotedStrings(input string) []string {
-	var results []string
-	re := regexp.MustCompile(`"([^"]*)"`)
-	matches := re.FindAllStringSubmatch(input, -1)
-	for _, match := range matches {
-		if len(match) > 1 {
-			results = append(results, match[1])
-		}
-	}
-	return results
 }
 
 // parseOptionAssertion parses a single quoted option like "attack B3" or "attacks B1 B2"
@@ -989,15 +917,14 @@ func parseOptionAssertion(input string) (OptionAssertion, error) {
 	}, nil
 }
 
-// getOptionsForEntity fetches available options for a unit or tile
-func getOptionsForEntity(entityType, entityID string, pc *PresenterContext) (*v1.GetOptionsAtResponse, error) {
+// getOptionsForEntityWithContext fetches available options for a unit or tile
+func getOptionsForEntityWithContext(entityType, entityID string, gc *GameContext) (*v1.GetOptionsAtResponse, error) {
 	// Find the coordinate
 	var coord lib.AxialCoord
-	var err error
 
 	switch entityType {
 	case "unit":
-		unit, exists, findErr := findUnit(entityID, pc)
+		unit, exists, findErr := findUnitWithContext(entityID, gc)
 		if findErr != nil {
 			return nil, findErr
 		}
@@ -1006,7 +933,7 @@ func getOptionsForEntity(entityType, entityID string, pc *PresenterContext) (*v1
 		}
 		coord = lib.AxialCoord{Q: int(unit.Q), R: int(unit.R)}
 	case "tile":
-		tile, exists, findErr := findTile(entityID, pc)
+		tile, exists, findErr := findTileWithContext(entityID, gc)
 		if findErr != nil {
 			return nil, findErr
 		}
@@ -1018,22 +945,21 @@ func getOptionsForEntity(entityType, entityID string, pc *PresenterContext) (*v1
 		return nil, fmt.Errorf("options only supports 'unit' and 'tile', got %q", entityType)
 	}
 
-	// Simulate click to get options
+	// Get options directly via API
 	ctx := context.Background()
-	_, err = pc.Presenter.SceneClicked(ctx, &v1.SceneClickedRequest{
-		GameId: pc.GameID,
+	opts, err := gc.Service.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+		GameId: gc.GameID,
 		Pos:    &v1.Position{Q: int32(coord.Q), R: int32(coord.R)},
-		Layer:  "base-map",
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get options: %w", err)
 	}
 
-	return pc.TurnOptions.Options, nil
+	return opts, nil
 }
 
-// evaluateOptionAssertion checks if the option assertion is satisfied by actual options
-func evaluateOptionAssertion(entityType, entityID string, oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) AssertionResult {
+// evaluateOptionAssertionWithContext checks if the option assertion is satisfied by actual options
+func evaluateOptionAssertionWithContext(entityType, entityID string, oa OptionAssertion, options *v1.GetOptionsAtResponse, gc *GameContext) AssertionResult {
 	result := AssertionResult{
 		EntityType: entityType,
 		EntityID:   entityID,
@@ -1056,19 +982,19 @@ func evaluateOptionAssertion(entityType, entityID string, oa OptionAssertion, op
 	// Check based on option type
 	switch oa.OptionType {
 	case "attack":
-		result.Passed, result.Actual = checkAttackOptions(oa, options, pc)
+		result.Passed, result.Actual = checkAttackOptionsWithContext(oa, options, gc)
 	case "move", "retreat":
-		result.Passed, result.Actual = checkMoveOptions(oa, options, pc)
+		result.Passed, result.Actual = checkMoveOptionsWithContext(oa, options)
 	case "build":
-		result.Passed, result.Actual = checkBuildOptions(oa, options, pc)
+		result.Passed, result.Actual = checkBuildOptionsWithContext(oa, options, gc)
 	case "capture":
-		result.Passed, result.Actual = checkCaptureOptions(oa, options, pc)
+		result.Passed, result.Actual = checkCaptureOptionsWithContext(oa, options)
 	}
 
 	return result
 }
 
-func checkAttackOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+func checkAttackOptionsWithContext(oa OptionAssertion, options *v1.GetOptionsAtResponse, gc *GameContext) (bool, string) {
 	// Collect all attack targets from options
 	var attackTargets []string
 	for _, opt := range options.Options {
@@ -1077,16 +1003,16 @@ func checkAttackOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc
 			attackTargets = append(attackTargets, key)
 
 			// Also check by unit shortcut if there's a unit there
-			if unit := pc.GameState.State.WorldData.UnitsMap[key]; unit != nil && unit.Shortcut != "" {
+			if unit := gc.State.WorldData.UnitsMap[key]; unit != nil && unit.Shortcut != "" {
 				attackTargets = append(attackTargets, unit.Shortcut)
 			}
 		}
 	}
 
-	return matchTargets(oa, attackTargets, pc)
+	return matchTargetsWithContext(oa, attackTargets)
 }
 
-func checkMoveOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+func checkMoveOptionsWithContext(oa OptionAssertion, options *v1.GetOptionsAtResponse) (bool, string) {
 	// Collect all move targets from options
 	var moveTargets []string
 	for _, opt := range options.Options {
@@ -1096,29 +1022,29 @@ func checkMoveOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *
 		}
 	}
 
-	return matchTargets(oa, moveTargets, pc)
+	return matchTargetsWithContext(oa, moveTargets)
 }
 
-func checkBuildOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+func checkBuildOptionsWithContext(oa OptionAssertion, options *v1.GetOptionsAtResponse, gc *GameContext) (bool, string) {
 	// Collect all build unit types from options
 	var buildTypes []string
+	rulesEngine := gc.RTGame.GetRulesEngine()
 	for _, opt := range options.Options {
 		if build, ok := opt.OptionType.(*v1.GameOption_Build); ok {
 			// Add unit type as string
 			buildTypes = append(buildTypes, fmt.Sprintf("%d", build.Build.UnitType))
 
 			// Also add unit name if we can resolve it
-			rulesEngine := &lib.RulesEngine{RulesEngine: pc.Presenter.RulesEngine}
 			if unitDef, err := rulesEngine.GetUnitData(build.Build.UnitType); err == nil {
 				buildTypes = append(buildTypes, strings.ToLower(unitDef.Name))
 			}
 		}
 	}
 
-	return matchTargets(oa, buildTypes, pc)
+	return matchTargetsWithContext(oa, buildTypes)
 }
 
-func checkCaptureOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, pc *PresenterContext) (bool, string) {
+func checkCaptureOptionsWithContext(oa OptionAssertion, options *v1.GetOptionsAtResponse) (bool, string) {
 	// Collect all capture targets from options
 	var captureTargets []string
 	for _, opt := range options.Options {
@@ -1128,11 +1054,11 @@ func checkCaptureOptions(oa OptionAssertion, options *v1.GetOptionsAtResponse, p
 		}
 	}
 
-	return matchTargets(oa, captureTargets, pc)
+	return matchTargetsWithContext(oa, captureTargets)
 }
 
-// matchTargets checks if the assertion targets match actual targets
-func matchTargets(oa OptionAssertion, actualTargets []string, pc *PresenterContext) (bool, string) {
+// matchTargetsWithContext checks if the assertion targets match actual targets
+func matchTargetsWithContext(oa OptionAssertion, actualTargets []string) (bool, string) {
 	if len(actualTargets) == 0 {
 		return false, "none available"
 	}
@@ -1142,7 +1068,7 @@ func matchTargets(oa OptionAssertion, actualTargets []string, pc *PresenterConte
 	if oa.IsPlural {
 		// Plural: need at least one target to match
 		for _, target := range oa.Targets {
-			normalizedTarget := normalizeTarget(target, pc)
+			normalizedTarget := normalizeTargetWithContext(target)
 			for _, actual := range actualTargets {
 				if strings.EqualFold(normalizedTarget, actual) || strings.EqualFold(target, actual) {
 					return true, fmt.Sprintf("found %s in [%s]", target, actualStr)
@@ -1154,7 +1080,7 @@ func matchTargets(oa OptionAssertion, actualTargets []string, pc *PresenterConte
 
 	// Singular: the exact target must exist
 	target := oa.Targets[0]
-	normalizedTarget := normalizeTarget(target, pc)
+	normalizedTarget := normalizeTargetWithContext(target)
 	for _, actual := range actualTargets {
 		if strings.EqualFold(normalizedTarget, actual) || strings.EqualFold(target, actual) {
 			return true, fmt.Sprintf("found in [%s]", actualStr)
@@ -1163,16 +1089,35 @@ func matchTargets(oa OptionAssertion, actualTargets []string, pc *PresenterConte
 	return false, fmt.Sprintf("not in [%s]", actualStr)
 }
 
-// normalizeTarget converts a target to coordinate key format if possible
-func normalizeTarget(target string, pc *PresenterContext) string {
+// normalizeTargetWithContext converts a target to coordinate key format if possible
+func normalizeTargetWithContext(target string) string {
 	// Try to parse as coordinate
 	coord, err := parseCoordinate(target)
 	if err == nil {
 		return lib.CoordKey(int32(coord.Q), int32(coord.R))
 	}
-
-	// Try relative directions (for capture assertions)
-	// TODO: implement direction-based targets when baseCoord is available
-
 	return target
+}
+
+// extractQuotedStrings extracts all quoted strings from input
+// e.g., `"attack B3" "move 0,5"` -> ["attack B3", "move 0,5"]
+func extractQuotedStrings(input string) []string {
+	var result []string
+	inQuote := false
+	var current strings.Builder
+
+	for _, r := range input {
+		if r == '"' {
+			if inQuote {
+				// End of quoted string
+				result = append(result, current.String())
+				current.Reset()
+			}
+			inQuote = !inQuote
+		} else if inQuote {
+			current.WriteRune(r)
+		}
+	}
+
+	return result
 }

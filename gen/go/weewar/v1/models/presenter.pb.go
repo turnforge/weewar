@@ -760,6 +760,125 @@ func (x *ClientReadyResponse) GetSuccess() bool {
 	return false
 }
 
+// Request to apply changes from remote players
+// Called when SyncService streams moves made by other players
+type ApplyRemoteChangesRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	GameId string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	// The moves containing WorldChanges to apply
+	Moves         []*GameMove `protobuf:"bytes,2,rep,name=moves,proto3" json:"moves,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApplyRemoteChangesRequest) Reset() {
+	*x = ApplyRemoteChangesRequest{}
+	mi := &file_weewar_v1_models_presenter_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplyRemoteChangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyRemoteChangesRequest) ProtoMessage() {}
+
+func (x *ApplyRemoteChangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_presenter_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyRemoteChangesRequest.ProtoReflect.Descriptor instead.
+func (*ApplyRemoteChangesRequest) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_presenter_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ApplyRemoteChangesRequest) GetGameId() string {
+	if x != nil {
+		return x.GameId
+	}
+	return ""
+}
+
+func (x *ApplyRemoteChangesRequest) GetMoves() []*GameMove {
+	if x != nil {
+		return x.Moves
+	}
+	return nil
+}
+
+// Response after applying remote changes
+type ApplyRemoteChangesResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Whether the changes were successfully applied
+	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	// Error message if application failed (e.g., state desync)
+	Error string `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+	// If state desync detected, client should reload game
+	RequiresReload bool `protobuf:"varint,3,opt,name=requires_reload,json=requiresReload,proto3" json:"requires_reload,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ApplyRemoteChangesResponse) Reset() {
+	*x = ApplyRemoteChangesResponse{}
+	mi := &file_weewar_v1_models_presenter_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplyRemoteChangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyRemoteChangesResponse) ProtoMessage() {}
+
+func (x *ApplyRemoteChangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_weewar_v1_models_presenter_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyRemoteChangesResponse.ProtoReflect.Descriptor instead.
+func (*ApplyRemoteChangesResponse) Descriptor() ([]byte, []int) {
+	return file_weewar_v1_models_presenter_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ApplyRemoteChangesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ApplyRemoteChangesResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+func (x *ApplyRemoteChangesResponse) GetRequiresReload() bool {
+	if x != nil {
+		return x.RequiresReload
+	}
+	return false
+}
+
 var File_weewar_v1_models_presenter_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_models_presenter_proto_rawDesc = "" +
@@ -807,7 +926,14 @@ const file_weewar_v1_models_presenter_proto_rawDesc = "" +
 	"\x12ClientReadyRequest\x12\x17\n" +
 	"\agame_id\x18\x01 \x01(\tR\x06gameId\"/\n" +
 	"\x13ClientReadyResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB\xa2\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"_\n" +
+	"\x19ApplyRemoteChangesRequest\x12\x17\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12)\n" +
+	"\x05moves\x18\x02 \x03(\v2\x13.weewar.v1.GameMoveR\x05moves\"u\n" +
+	"\x1aApplyRemoteChangesResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error\x12'\n" +
+	"\x0frequires_reload\x18\x03 \x01(\bR\x0erequiresReloadB\xa2\x01\n" +
 	"\rcom.weewar.v1B\x0ePresenterProtoP\x01Z<github.com/turnforge/weewar/gen/go/weewar/v1/models;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"
 
@@ -823,7 +949,7 @@ func file_weewar_v1_models_presenter_proto_rawDescGZIP() []byte {
 	return file_weewar_v1_models_presenter_proto_rawDescData
 }
 
-var file_weewar_v1_models_presenter_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_weewar_v1_models_presenter_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_weewar_v1_models_presenter_proto_goTypes = []any{
 	(*InitializeSingletonRequest)(nil),   // 0: weewar.v1.InitializeSingletonRequest
 	(*InitializeSingletonResponse)(nil),  // 1: weewar.v1.InitializeSingletonResponse
@@ -839,18 +965,22 @@ var file_weewar_v1_models_presenter_proto_goTypes = []any{
 	(*InitializeGameResponse)(nil),       // 11: weewar.v1.InitializeGameResponse
 	(*ClientReadyRequest)(nil),           // 12: weewar.v1.ClientReadyRequest
 	(*ClientReadyResponse)(nil),          // 13: weewar.v1.ClientReadyResponse
-	(*Position)(nil),                     // 14: weewar.v1.Position
+	(*ApplyRemoteChangesRequest)(nil),    // 14: weewar.v1.ApplyRemoteChangesRequest
+	(*ApplyRemoteChangesResponse)(nil),   // 15: weewar.v1.ApplyRemoteChangesResponse
+	(*Position)(nil),                     // 16: weewar.v1.Position
+	(*GameMove)(nil),                     // 17: weewar.v1.GameMove
 }
 var file_weewar_v1_models_presenter_proto_depIdxs = []int32{
 	11, // 0: weewar.v1.InitializeSingletonResponse.response:type_name -> weewar.v1.InitializeGameResponse
-	14, // 1: weewar.v1.TurnOptionClickedRequest.pos:type_name -> weewar.v1.Position
-	14, // 2: weewar.v1.SceneClickedRequest.pos:type_name -> weewar.v1.Position
-	14, // 3: weewar.v1.BuildOptionClickedRequest.pos:type_name -> weewar.v1.Position
-	4,  // [4:4] is the sub-list for method output_type
-	4,  // [4:4] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	16, // 1: weewar.v1.TurnOptionClickedRequest.pos:type_name -> weewar.v1.Position
+	16, // 2: weewar.v1.SceneClickedRequest.pos:type_name -> weewar.v1.Position
+	16, // 3: weewar.v1.BuildOptionClickedRequest.pos:type_name -> weewar.v1.Position
+	17, // 4: weewar.v1.ApplyRemoteChangesRequest.moves:type_name -> weewar.v1.GameMove
+	5,  // [5:5] is the sub-list for method output_type
+	5,  // [5:5] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_models_presenter_proto_init() }
@@ -865,7 +995,7 @@ func file_weewar_v1_models_presenter_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_weewar_v1_models_presenter_proto_rawDesc), len(file_weewar_v1_models_presenter_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

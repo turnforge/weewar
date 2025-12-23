@@ -43,27 +43,33 @@ func runOptions(cmd *cobra.Command, args []string) error {
 	position := args[0]
 
 	ctx := context.Background()
-	pc, _, _, _, rtGame, err := GetGame()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Parse position (could be coordinate or unit ID)
-	target, err := lib.ParsePositionOrUnit(rtGame, position)
-	if err != nil {
-		return fmt.Errorf("invalid position: %w", err)
+	if isVerbose() {
+		fmt.Printf("[VERBOSE] Getting options for %s\n", position)
 	}
 
-	coord := target.GetCoordinate()
-
-	// Simulate click on base-map layer to show options
-	_, err = pc.Presenter.SceneClicked(ctx, &v1.SceneClickedRequest{
-		GameId: gameID,
-		Pos:    &v1.Position{Q: int32(coord.Q), R: int32(coord.R)},
-		Layer:  "base-map",
+	// Call GetOptionsAt directly with label
+	opts, err := gc.Service.GetOptionsAt(ctx, &v1.GetOptionsAtRequest{
+		GameId: gc.GameID,
+		Pos:    &v1.Position{Label: position},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to get options: %w", err)
+	}
+
+	// Try to get unit at position for display purposes
+	var unit *v1.Unit
+	target, err := lib.ParsePositionOrUnit(gc.RTGame, position)
+	if err == nil {
+		coord := target.GetCoordinate()
+		unit = gc.RTGame.World.UnitAt(coord)
+		if unit != nil {
+			gc.RTGame.TopUpUnitIfNeeded(unit)
+		}
 	}
 
 	// Format output
@@ -72,73 +78,69 @@ func runOptions(cmd *cobra.Command, args []string) error {
 	if formatter.JSON {
 		// JSON output
 		options := []map[string]any{}
-		if pc.TurnOptions.Options != nil {
-			for _, option := range pc.TurnOptions.Options.Options {
-				switch opt := option.OptionType.(type) {
-				case *v1.GameOption_Move:
-					options = append(options, map[string]any{
-						"type":          "move",
-						"q":             opt.Move.To.Q,
-						"r":             opt.Move.To.R,
-						"movement_cost": opt.Move.MovementCost,
-					})
-				case *v1.GameOption_Attack:
-					options = append(options, map[string]any{
-						"type":            "attack",
-						"q":               opt.Attack.Defender.Q,
-						"r":               opt.Attack.Defender.R,
-						"damage_estimate": opt.Attack.DamageEstimate,
-					})
-				case *v1.GameOption_Build:
-					buildOpt := opt.Build
-					unitName := fmt.Sprintf("type %d", buildOpt.UnitType)
+		for _, option := range opts.Options {
+			switch opt := option.OptionType.(type) {
+			case *v1.GameOption_Move:
+				options = append(options, map[string]any{
+					"type":          "move",
+					"q":             opt.Move.To.Q,
+					"r":             opt.Move.To.R,
+					"movement_cost": opt.Move.MovementCost,
+				})
+			case *v1.GameOption_Attack:
+				options = append(options, map[string]any{
+					"type":            "attack",
+					"q":               opt.Attack.Defender.Q,
+					"r":               opt.Attack.Defender.R,
+					"damage_estimate": opt.Attack.DamageEstimate,
+				})
+			case *v1.GameOption_Build:
+				buildOpt := opt.Build
+				unitName := fmt.Sprintf("type %d", buildOpt.UnitType)
 
-					// Try to get actual unit name
-					if unitDef, err := rtGame.GetRulesEngine().GetUnitData(buildOpt.UnitType); err == nil {
-						unitName = unitDef.Name
-					}
-
-					options = append(options, map[string]any{
-						"type":      "build",
-						"unit_type": buildOpt.UnitType,
-						"unit_name": unitName,
-						"cost":      buildOpt.Cost,
-					})
-				case *v1.GameOption_Capture:
-					captureOpt := opt.Capture
-					terrainName := fmt.Sprintf("type %d", captureOpt.TileType)
-
-					// Try to get actual terrain name
-					if terrainDef, err := rtGame.GetRulesEngine().GetTerrainData(captureOpt.TileType); err == nil {
-						terrainName = terrainDef.Name
-					}
-
-					options = append(options, map[string]any{
-						"type":         "capture",
-						"q":            captureOpt.Pos.Q,
-						"r":            captureOpt.Pos.R,
-						"tile_type":    captureOpt.TileType,
-						"terrain_name": terrainName,
-					})
-				case *v1.GameOption_EndTurn:
-					options = append(options, map[string]any{
-						"type": "endturn",
-					})
+				// Try to get actual unit name
+				if unitDef, err := gc.RTGame.GetRulesEngine().GetUnitData(buildOpt.UnitType); err == nil {
+					unitName = unitDef.Name
 				}
+
+				options = append(options, map[string]any{
+					"type":      "build",
+					"unit_type": buildOpt.UnitType,
+					"unit_name": unitName,
+					"cost":      buildOpt.Cost,
+				})
+			case *v1.GameOption_Capture:
+				captureOpt := opt.Capture
+				terrainName := fmt.Sprintf("type %d", captureOpt.TileType)
+
+				// Try to get actual terrain name
+				if terrainDef, err := gc.RTGame.GetRulesEngine().GetTerrainData(captureOpt.TileType); err == nil {
+					terrainName = terrainDef.Name
+				}
+
+				options = append(options, map[string]any{
+					"type":         "capture",
+					"q":            captureOpt.Pos.Q,
+					"r":            captureOpt.Pos.R,
+					"tile_type":    captureOpt.TileType,
+					"terrain_name": terrainName,
+				})
+			case *v1.GameOption_EndTurn:
+				options = append(options, map[string]any{
+					"type": "endturn",
+				})
 			}
 		}
 
 		data := map[string]any{
-			"game_id":  gameID,
+			"game_id":  gc.GameID,
 			"position": position,
-			"q":        coord.Q,
-			"r":        coord.R,
 			"options":  options,
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
-	text := FormatOptions(pc, position)
+	text := FormatOptionsResponse(gc, position, opts, unit)
 	return formatter.PrintText(text)
 }

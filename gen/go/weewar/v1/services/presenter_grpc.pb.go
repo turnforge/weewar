@@ -127,6 +127,7 @@ const (
 	GameViewPresenter_TurnOptionClicked_FullMethodName    = "/weewar.v1.GameViewPresenter/TurnOptionClicked"
 	GameViewPresenter_EndTurnButtonClicked_FullMethodName = "/weewar.v1.GameViewPresenter/EndTurnButtonClicked"
 	GameViewPresenter_BuildOptionClicked_FullMethodName   = "/weewar.v1.GameViewPresenter/BuildOptionClicked"
+	GameViewPresenter_ApplyRemoteChanges_FullMethodName   = "/weewar.v1.GameViewPresenter/ApplyRemoteChanges"
 )
 
 // GameViewPresenterClient is the client API for GameViewPresenter service.
@@ -170,6 +171,11 @@ type GameViewPresenterClient interface {
 	// *
 	// Called when a build option is clicked in the BuildOptionsModal
 	BuildOptionClicked(ctx context.Context, in *models.BuildOptionClickedRequest, opts ...grpc.CallOption) (*models.BuildOptionClickedResponse, error)
+	// *
+	// Apply changes from remote players (received via SyncService subscription).
+	// This updates local game state and triggers UI updates for the received WorldChanges.
+	// Used by viewers to apply moves made by other players.
+	ApplyRemoteChanges(ctx context.Context, in *models.ApplyRemoteChangesRequest, opts ...grpc.CallOption) (*models.ApplyRemoteChangesResponse, error)
 }
 
 type gameViewPresenterClient struct {
@@ -240,6 +246,16 @@ func (c *gameViewPresenterClient) BuildOptionClicked(ctx context.Context, in *mo
 	return out, nil
 }
 
+func (c *gameViewPresenterClient) ApplyRemoteChanges(ctx context.Context, in *models.ApplyRemoteChangesRequest, opts ...grpc.CallOption) (*models.ApplyRemoteChangesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(models.ApplyRemoteChangesResponse)
+	err := c.cc.Invoke(ctx, GameViewPresenter_ApplyRemoteChanges_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameViewPresenterServer is the server API for GameViewPresenter service.
 // All implementations should embed UnimplementedGameViewPresenterServer
 // for forward compatibility.
@@ -281,6 +297,11 @@ type GameViewPresenterServer interface {
 	// *
 	// Called when a build option is clicked in the BuildOptionsModal
 	BuildOptionClicked(context.Context, *models.BuildOptionClickedRequest) (*models.BuildOptionClickedResponse, error)
+	// *
+	// Apply changes from remote players (received via SyncService subscription).
+	// This updates local game state and triggers UI updates for the received WorldChanges.
+	// Used by viewers to apply moves made by other players.
+	ApplyRemoteChanges(context.Context, *models.ApplyRemoteChangesRequest) (*models.ApplyRemoteChangesResponse, error)
 }
 
 // UnimplementedGameViewPresenterServer should be embedded to have
@@ -307,6 +328,9 @@ func (UnimplementedGameViewPresenterServer) EndTurnButtonClicked(context.Context
 }
 func (UnimplementedGameViewPresenterServer) BuildOptionClicked(context.Context, *models.BuildOptionClickedRequest) (*models.BuildOptionClickedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BuildOptionClicked not implemented")
+}
+func (UnimplementedGameViewPresenterServer) ApplyRemoteChanges(context.Context, *models.ApplyRemoteChangesRequest) (*models.ApplyRemoteChangesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApplyRemoteChanges not implemented")
 }
 func (UnimplementedGameViewPresenterServer) testEmbeddedByValue() {}
 
@@ -436,6 +460,24 @@ func _GameViewPresenter_BuildOptionClicked_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameViewPresenter_ApplyRemoteChanges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(models.ApplyRemoteChangesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameViewPresenterServer).ApplyRemoteChanges(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameViewPresenter_ApplyRemoteChanges_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameViewPresenterServer).ApplyRemoteChanges(ctx, req.(*models.ApplyRemoteChangesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameViewPresenter_ServiceDesc is the grpc.ServiceDesc for GameViewPresenter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -466,6 +508,10 @@ var GameViewPresenter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BuildOptionClicked",
 			Handler:    _GameViewPresenter_BuildOptionClicked_Handler,
+		},
+		{
+			MethodName: "ApplyRemoteChanges",
+			Handler:    _GameViewPresenter_ApplyRemoteChanges_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

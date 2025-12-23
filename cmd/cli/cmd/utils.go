@@ -6,30 +6,68 @@ import (
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	"github.com/turnforge/weewar/lib"
+	"github.com/turnforge/weewar/services"
+	"github.com/turnforge/weewar/services/connectclient"
+	"github.com/turnforge/weewar/services/fsbe"
 )
 
-func GetGame() (pc *PresenterContext, game *v1.Game, gameState *v1.GameState, gameHistory *v1.GameMoveHistory, rtGame *lib.Game, err error) {
-	// Get game ID
-	gameID, err = getGameID()
-	if err != nil {
-		return
-	}
+// GameContext holds the game service and loaded data for CLI operations
+type GameContext struct {
+	Service  services.GamesService
+	Game     *v1.Game
+	State    *v1.GameState
+	History  *v1.GameMoveHistory
+	RTGame   *lib.Game
+	GameID   string
+	IsRemote bool
+}
 
-	// Create presenter
-	pc, err = createPresenter(gameID)
+// GetGameContext loads game and creates context for CLI commands
+func GetGameContext() (*GameContext, error) {
+	id, err := getGameID()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	ctx := context.Background()
-	getGameResp, err := pc.Presenter.GetGame(ctx, gameID)
-	game, gameState, gameHistory = getGameResp.Game, getGameResp.State, getGameResp.History
+	serverURL := getServerURL()
 
-	// Get runtime game for parsing positions
-	rtGame, err = pc.Presenter.GamesService.GetRuntimeGame(getGameResp.Game, getGameResp.State)
-	if err != nil {
-		err = fmt.Errorf("failed to get runtime game: %w", err)
-		return
+	// Create the appropriate GamesService
+	var svc services.GamesService
+	var isRemote bool
+	if serverURL != "" {
+		svc = connectclient.NewConnectGamesClient(serverURL)
+		isRemote = true
+		if isVerbose() {
+			fmt.Printf("[VERBOSE] Connecting to server: %s\n", serverURL)
+		}
+	} else {
+		svc = fsbe.NewFSGamesService("", nil)
+		isRemote = false
+		if isVerbose() {
+			fmt.Println("[VERBOSE] Using local file storage")
+		}
 	}
-	return
+
+	// Load game
+	resp, err := svc.GetGame(ctx, &v1.GetGameRequest{Id: id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to load game %s: %w", id, err)
+	}
+
+	// Create runtime game for position parsing and rules access
+	rtGame, err := svc.GetRuntimeGame(resp.Game, resp.State)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get runtime game: %w", err)
+	}
+
+	return &GameContext{
+		Service:  svc,
+		Game:     resp.Game,
+		State:    resp.State,
+		History:  resp.History,
+		RTGame:   rtGame,
+		GameID:   id,
+		IsRemote: isRemote,
+	}, nil
 }

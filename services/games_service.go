@@ -46,8 +46,13 @@ type GamesService interface {
 	SaveMoveGroup(ctx context.Context, gameId string, state *v1.GameState, group *v1.GameMoveGroup) error
 }
 
+// MovesSavedCallback is called after moves are saved.
+// Used by BackendGamesService to broadcast to sync subscribers.
+type MovesSavedCallback func(ctx context.Context, gameId string, moves []*v1.GameMove, groupNumber int64)
+
 type BaseGamesService struct {
-	Self GamesService // The actual implementation
+	Self          GamesService // The actual implementation
+	OnMovesSaved  MovesSavedCallback
 }
 
 func (s *BaseGamesService) ListMoves(ctx context.Context, req *v1.ListMovesRequest) (resp *v1.ListMovesResponse, err error) {
@@ -108,10 +113,20 @@ func (s *BaseGamesService) ProcessMoves(ctx context.Context, req *v1.ProcessMove
 	// Update the end time after processing is complete
 	moveGroup.EndedAt = timestamppb.New(time.Now())
 
+	// Skip persistence in dry run mode
+	if req.DryRun {
+		return resp, nil
+	}
+
 	// Delegate persistence to SaveMoveGroup - backend handles atomicity
 	err = s.Self.SaveMoveGroup(ctx, req.GameId, gameresp.State, moveGroup)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save move group: %w", err)
+	}
+
+	// Broadcast to sync subscribers (multiplayer)
+	if s.OnMovesSaved != nil {
+		s.OnMovesSaved(ctx, req.GameId, req.Moves, nextGroupNumber)
 	}
 
 	return resp, err

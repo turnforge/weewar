@@ -80,6 +80,14 @@ func (out *ApiHandler) setupConnectHandlers() error {
 		log.Printf("Registered Indexer Connect handler at: %s", indexerConnectPath)
 		*/
 	}
+
+	// Register GameSyncService for multiplayer real-time updates
+	gameSyncSvcClient := out.ClientMgr.GetGameSyncSvcClient()
+	gameSyncAdapter := NewConnectGameSyncServiceAdapter(gameSyncSvcClient)
+	gameSyncConnectPath, gameSyncConnectHandler := v1connect.NewGameSyncServiceHandler(gameSyncAdapter)
+	out.mux.Handle(gameSyncConnectPath, gameSyncConnectHandler)
+	log.Printf("Registered GameSync Connect handler at: %s", gameSyncConnectPath)
+
 	return nil
 }
 
@@ -162,5 +170,13 @@ func (web *ApiHandler) createSvcMux(grpc_addr string) (*runtime.ServeMux, error)
 			return nil, err
 		}
 	}
+
+	// Register GameSyncService for multiplayer streaming (uses SSE for browser compatibility)
+	err = v1s.RegisterGameSyncServiceHandlerFromEndpoint(ctx, svcMux, grpc_addr, opts)
+	if err != nil {
+		log.Fatal("Unable to register game sync service: ", err)
+		return nil, err
+	}
+
 	return svcMux, nil // Return nil error on success
 }

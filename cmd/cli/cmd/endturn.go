@@ -28,74 +28,75 @@ func init() {
 }
 
 func runEndTurn(cmd *cobra.Command, args []string) error {
-	// Get game ID
-	gameID, err := getGameID()
-	if err != nil {
-		return err
-	}
-
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
 	ctx := context.Background()
+	gc, err := GetGameContext()
+	if err != nil {
+		return err
+	}
 
 	// Get current state before ending turn
-	previousPlayer := pc.GameState.State.CurrentPlayer
-	previousTurn := pc.GameState.State.TurnCounter
+	previousPlayer := gc.State.CurrentPlayer
+	previousTurn := gc.State.TurnCounter
 
 	if isVerbose() {
 		fmt.Printf("[VERBOSE] Ending turn for player %d (turn %d)\n", previousPlayer, previousTurn)
 	}
 
-	// Call EndTurnButtonClicked on presenter
-	_, err = pc.Presenter.EndTurnButtonClicked(ctx, &v1.EndTurnButtonClickedRequest{
-		GameId: gameID,
+	// Execute end turn directly via ProcessMoves
+	resp, err := gc.Service.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+		GameId: gc.GameID,
+		DryRun: isDryrun(),
+		Moves: []*v1.GameMove{{
+			Player: gc.State.CurrentPlayer,
+			MoveType: &v1.GameMove_EndTurn{
+				EndTurn: &v1.EndTurnAction{},
+			},
+		}},
 	})
 	if err != nil {
-		return fmt.Errorf("failed to end turn: %w", err)
+		return fmt.Errorf("end turn failed: %w", err)
 	}
 
-	// Get new state after ending turn
-	newPlayer := pc.GameState.State.CurrentPlayer
-	newTurn := pc.GameState.State.TurnCounter
-
-	if isVerbose() {
-		fmt.Printf("[VERBOSE] Turn ended. Now player %d's turn (turn %d)\n", newPlayer, newTurn)
-	}
-
-	// Save state unless in dryrun mode
-	if err := savePresenterState(pc, isDryrun()); err != nil {
-		return err
+	// Extract new player from changes
+	var newPlayer int32 = previousPlayer
+	var newTurn int32 = previousTurn
+	if len(resp.Moves) > 0 {
+		for _, change := range resp.Moves[0].Changes {
+			if pc, ok := change.ChangeType.(*v1.WorldChange_PlayerChanged); ok {
+				newPlayer = pc.PlayerChanged.NewPlayer
+				newTurn = pc.PlayerChanged.NewTurn
+				break
+			}
+		}
 	}
 
 	// Format output
 	formatter := NewOutputFormatter()
 
 	if formatter.JSON {
-		data := map[string]interface{}{
-			"game_id":         gameID,
+		data := map[string]any{
+			"game_id":         gc.GameID,
 			"action":          "endturn",
 			"previous_player": previousPlayer,
 			"previous_turn":   previousTurn,
 			"current_player":  newPlayer,
 			"current_turn":    newTurn,
+			"dryrun":          isDryrun(),
 			"success":         true,
+			"changes":         formatChangesForJSON(resp.Moves),
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
 	var sb strings.Builder
-	sb.WriteString("End Turn: Success\n")
+	if isDryrun() {
+		sb.WriteString("End Turn (dryrun): Would succeed\n")
+	} else {
+		sb.WriteString("End Turn: Success\n")
+	}
 	sb.WriteString(fmt.Sprintf("  Turn ended for player %d\n", previousPlayer))
 	sb.WriteString(fmt.Sprintf("  Now player %d's turn (turn %d)\n", newPlayer, newTurn))
-
-	if pc.GameState.State.WinningPlayer != 0 {
-		sb.WriteString(fmt.Sprintf("\nGame Over! Winner: Player %d\n", pc.GameState.State.WinningPlayer))
-	}
 
 	return formatter.PrintText(sb.String())
 }

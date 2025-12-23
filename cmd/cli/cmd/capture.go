@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
 )
 
 // captureCmd represents the capture command
@@ -36,72 +35,33 @@ func init() {
 }
 
 func runCapture(cmd *cobra.Command, args []string) error {
-	unitPos := args[0]
+	unitLabel := args[0]
 
 	ctx := context.Background()
-	pc, _, _, _, rtGame, err := GetGame()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Parse unit position
-	target, err := lib.ParsePositionOrUnit(rtGame, unitPos)
-	if err != nil {
-		return fmt.Errorf("invalid unit position: %w", err)
-	}
-	coord := target.GetCoordinate()
-
 	if isVerbose() {
-		fmt.Printf("[VERBOSE] Attempting capture at %s\n", coord.String())
+		fmt.Printf("[VERBOSE] Attempting capture at %s\n", unitLabel)
 	}
 
-	// Two-click pattern: Click unit to select, then click same position to capture
-	// Click 1: Select unit on base-map layer
-	_, err = pc.Presenter.SceneClicked(ctx, &v1.SceneClickedRequest{
-		GameId: gameID,
-		Pos:    &v1.Position{Q: int32(coord.Q), R: int32(coord.R)},
-		Layer:  "base-map",
+	// Execute capture directly via ProcessMoves - server parses labels
+	resp, err := gc.Service.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+		GameId: gc.GameID,
+		DryRun: isDryrun(),
+		Moves: []*v1.GameMove{{
+			Player: gc.State.CurrentPlayer,
+			MoveType: &v1.GameMove_CaptureBuilding{
+				CaptureBuilding: &v1.CaptureBuildingAction{
+					Pos: &v1.Position{Label: unitLabel},
+				},
+			},
+		}},
 	})
 	if err != nil {
-		return fmt.Errorf("failed to select unit: %w", err)
-	}
-
-	if isVerbose() {
-		fmt.Printf("[VERBOSE] Unit selected at %s\n", coord.String())
-	}
-
-	// Click 2: Click same position on capture-highlight layer to execute capture
-	_, err = pc.Presenter.SceneClicked(ctx, &v1.SceneClickedRequest{
-		GameId: gameID,
-		Pos:    &v1.Position{Q: int32(coord.Q), R: int32(coord.R)},
-		Layer:  "capture-highlight",
-	})
-	if err != nil {
-		return fmt.Errorf("failed to execute capture: %w", err)
-	}
-
-	if isVerbose() {
-		fmt.Printf("[VERBOSE] Capture started at %s\n", coord.String())
-	}
-
-	// Save state unless in dryrun mode
-	if err := savePresenterState(pc, isDryrun()); err != nil {
-		return err
-	}
-
-	// Get display info
-	unit := rtGame.World.UnitAt(coord)
-	unitShortcut := "?"
-	if unit != nil {
-		unitShortcut = unit.Shortcut
-	}
-
-	tile := rtGame.World.TileAt(coord)
-	terrainName := "unknown"
-	if tile != nil {
-		if terrainData, err := rtGame.GetRulesEngine().GetTerrainData(tile.TileType); err == nil && terrainData != nil {
-			terrainName = terrainData.Name
-		}
+		return fmt.Errorf("capture failed: %w", err)
 	}
 
 	// Format output
@@ -109,31 +69,33 @@ func runCapture(cmd *cobra.Command, args []string) error {
 
 	if formatter.JSON {
 		data := map[string]any{
-			"game_id": gameID,
+			"game_id": gc.GameID,
 			"action":  "capture",
-			"unit": map[string]any{
-				"shortcut": unitShortcut,
-				"q":        coord.Q,
-				"r":        coord.R,
-			},
-			"tile": map[string]any{
-				"q":            coord.Q,
-				"r":            coord.R,
-				"terrain_name": terrainName,
-			},
+			"unit":    unitLabel,
+			"dryrun":  isDryrun(),
 			"success": true,
+			"changes": formatChangesForJSON(resp.Moves),
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
 	var sb strings.Builder
-	sb.WriteString("Capture: Started\n")
-	sb.WriteString(fmt.Sprintf("  Unit %s is capturing %s at %s\n",
-		unitShortcut, terrainName, coord.String()))
+	if isDryrun() {
+		sb.WriteString("Capture (dryrun): Would succeed\n")
+	} else {
+		sb.WriteString("Capture: Started\n")
+	}
+	sb.WriteString(fmt.Sprintf("  Unit at %s is capturing\n", unitLabel))
 	sb.WriteString("  Capture will complete at the start of your next turn if the unit survives.\n")
-	sb.WriteString(fmt.Sprintf("\nCurrent player: %d, Turn: %d\n",
-		pc.GameState.State.CurrentPlayer, pc.GameState.State.TurnCounter))
+
+	// Show changes from response
+	if len(resp.Moves) > 0 && len(resp.Moves[0].Changes) > 0 {
+		sb.WriteString("  Changes:\n")
+		for _, change := range resp.Moves[0].Changes {
+			sb.WriteString(fmt.Sprintf("    - %s\n", formatChange(change)))
+		}
+	}
 
 	return formatter.PrintText(sb.String())
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
 )
 
 // buildCmd represents the build command
@@ -34,42 +33,34 @@ func init() {
 }
 
 func runBuild(cmd *cobra.Command, args []string) error {
-	tilePos := args[0]
+	tileLabel := args[0]
 	unitTypeArg := args[1]
 
-	// Get game ID
 	ctx := context.Background()
-	pc, _, _, _, rtGame, err := GetGame()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Parse tile position
-	target, err := lib.ParsePositionOrUnit(rtGame, tilePos)
-	if err != nil {
-		return fmt.Errorf("invalid tile position: %w", err)
-	}
-	coord := target.GetCoordinate()
-
 	// Parse unit type (can be numeric ID or name)
-	unitType, err := parseUnitType(rtGame, unitTypeArg)
+	unitType, err := parseUnitType(gc, unitTypeArg)
 	if err != nil {
 		return fmt.Errorf("invalid unit type: %w", err)
 	}
 
 	// Get unit information for confirmation
-	unitData, err := rtGame.GetRulesEngine().GetUnitData(unitType)
+	unitData, err := gc.RTGame.GetRulesEngine().GetUnitData(unitType)
 	if err != nil || unitData == nil {
 		return fmt.Errorf("unit type %d not found", unitType)
 	}
 
 	if isVerbose() {
-		fmt.Printf("[VERBOSE] Building %s (type %d) at %s\n", unitData.Name, unitType, coord.String())
+		fmt.Printf("[VERBOSE] Building %s (type %d) at %s\n", unitData.Name, unitType, tileLabel)
 	}
 
 	// Confirmation prompt (unless in dryrun or disabled with --confirm=false)
 	if !isDryrun() && shouldConfirm() {
-		fmt.Printf("You will build a %s costing %d coins. Are you sure? (y/n): ", unitData.Name, unitData.Coins)
+		fmt.Printf("Build %s for %d coins? (y/n): ", unitData.Name, unitData.Coins)
 		var response string
 		fmt.Scanln(&response)
 		if strings.ToLower(strings.TrimSpace(response)) != "y" {
@@ -77,23 +68,22 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Call BuildOptionClicked through the presenter
-	_, err = pc.Presenter.BuildOptionClicked(ctx, &v1.BuildOptionClickedRequest{
-		GameId:   gameID,
-		Pos:      &v1.Position{Q: int32(coord.Q), R: int32(coord.R)},
-		UnitType: unitType,
+	// Execute build directly via ProcessMoves - server parses labels
+	resp, err := gc.Service.ProcessMoves(ctx, &v1.ProcessMovesRequest{
+		GameId: gc.GameID,
+		DryRun: isDryrun(),
+		Moves: []*v1.GameMove{{
+			Player: gc.State.CurrentPlayer,
+			MoveType: &v1.GameMove_BuildUnit{
+				BuildUnit: &v1.BuildUnitAction{
+					Pos:      &v1.Position{Label: tileLabel},
+					UnitType: unitType,
+				},
+			},
+		}},
 	})
 	if err != nil {
-		return fmt.Errorf("failed to build unit: %w", err)
-	}
-
-	if isVerbose() {
-		fmt.Printf("[VERBOSE] Build executed successfully\n")
-	}
-
-	// Save state unless in dryrun mode
-	if err := savePresenterState(pc, isDryrun()); err != nil {
-		return err
+		return fmt.Errorf("build failed: %w", err)
 	}
 
 	// Format output
@@ -101,34 +91,34 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	if formatter.JSON {
 		data := map[string]any{
-			"game_id":   gameID,
+			"game_id":   gc.GameID,
 			"action":    "build",
+			"tile":      tileLabel,
 			"unit_type": unitType,
 			"unit_name": unitData.Name,
-			"tile": map[string]int{
-				"q": coord.Q,
-				"r": coord.R,
-			},
-			"success": true,
+			"dryrun":    isDryrun(),
+			"success":   true,
+			"changes":   formatChangesForJSON(resp.Moves),
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
 	var sb strings.Builder
-
-	sb.WriteString("Build: Success\n")
-	sb.WriteString(fmt.Sprintf("  Built %s at %s\n", unitData.Name, coord.String()))
-
-	// Show the newly created unit
-	newUnit := rtGame.World.UnitAt(coord)
-	if newUnit != nil {
-		sb.WriteString(fmt.Sprintf("  New unit: %s (Player %d, Health: %d)\n",
-			newUnit.Shortcut, newUnit.Player, newUnit.AvailableHealth))
+	if isDryrun() {
+		sb.WriteString("Build (dryrun): Would succeed\n")
+	} else {
+		sb.WriteString("Build: Success\n")
 	}
+	sb.WriteString(fmt.Sprintf("  Built %s at %s\n", unitData.Name, tileLabel))
 
-	sb.WriteString(fmt.Sprintf("\nCurrent player: %d, Turn: %d\n",
-		pc.GameState.State.CurrentPlayer, pc.GameState.State.TurnCounter))
+	// Show changes from response
+	if len(resp.Moves) > 0 && len(resp.Moves[0].Changes) > 0 {
+		sb.WriteString("  Changes:\n")
+		for _, change := range resp.Moves[0].Changes {
+			sb.WriteString(fmt.Sprintf("    - %s\n", formatChange(change)))
+		}
+	}
 
 	return formatter.PrintText(sb.String())
 }
@@ -136,14 +126,14 @@ func runBuild(cmd *cobra.Command, args []string) error {
 // parseUnitType parses a unit type argument which can be:
 // - A numeric unit type ID (e.g., "5")
 // - A unit name (e.g., "trooper", "tank")
-func parseUnitType(rtGame *lib.Game, unitTypeArg string) (int32, error) {
+func parseUnitType(gc *GameContext, unitTypeArg string) (int32, error) {
 	// Try parsing as numeric ID first
 	if id, err := strconv.ParseInt(unitTypeArg, 10, 32); err == nil {
 		return int32(id), nil
 	}
 
 	// Otherwise, search by name
-	rulesEngine := rtGame.GetRulesEngine()
+	rulesEngine := gc.RTGame.GetRulesEngine()
 	if rulesEngine == nil {
 		return 0, fmt.Errorf("rules engine not available")
 	}

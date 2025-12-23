@@ -86,5 +86,17 @@ service GameViewPresenter {
       body: "*",
     };
   }
+
+  /**
+   * Apply changes from remote players (received via SyncService subscription).
+   * This updates local game state and triggers UI updates for the received WorldChanges.
+   * Used by viewers to apply moves made by other players.
+   */
+  rpc ApplyRemoteChanges(ApplyRemoteChangesRequest) returns (ApplyRemoteChangesResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:applyRemoteChanges/{game_id}",
+      body: "*",
+    };
+  }
 }
 

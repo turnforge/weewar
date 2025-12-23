@@ -59,6 +59,9 @@ const (
 	// GameViewPresenterBuildOptionClickedProcedure is the fully-qualified name of the
 	// GameViewPresenter's BuildOptionClicked RPC.
 	GameViewPresenterBuildOptionClickedProcedure = "/weewar.v1.GameViewPresenter/BuildOptionClicked"
+	// GameViewPresenterApplyRemoteChangesProcedure is the fully-qualified name of the
+	// GameViewPresenter's ApplyRemoteChanges RPC.
+	GameViewPresenterApplyRemoteChangesProcedure = "/weewar.v1.GameViewPresenter/ApplyRemoteChanges"
 )
 
 // SingletonInitializerServiceClient is a client for the weewar.v1.SingletonInitializerService
@@ -158,6 +161,11 @@ type GameViewPresenterClient interface {
 	// *
 	// Called when a build option is clicked in the BuildOptionsModal
 	BuildOptionClicked(context.Context, *connect.Request[models.BuildOptionClickedRequest]) (*connect.Response[models.BuildOptionClickedResponse], error)
+	// *
+	// Apply changes from remote players (received via SyncService subscription).
+	// This updates local game state and triggers UI updates for the received WorldChanges.
+	// Used by viewers to apply moves made by other players.
+	ApplyRemoteChanges(context.Context, *connect.Request[models.ApplyRemoteChangesRequest]) (*connect.Response[models.ApplyRemoteChangesResponse], error)
 }
 
 // NewGameViewPresenterClient constructs a client for the weewar.v1.GameViewPresenter service. By
@@ -207,6 +215,12 @@ func NewGameViewPresenterClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(gameViewPresenterMethods.ByName("BuildOptionClicked")),
 			connect.WithClientOptions(opts...),
 		),
+		applyRemoteChanges: connect.NewClient[models.ApplyRemoteChangesRequest, models.ApplyRemoteChangesResponse](
+			httpClient,
+			baseURL+GameViewPresenterApplyRemoteChangesProcedure,
+			connect.WithSchema(gameViewPresenterMethods.ByName("ApplyRemoteChanges")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -218,6 +232,7 @@ type gameViewPresenterClient struct {
 	turnOptionClicked    *connect.Client[models.TurnOptionClickedRequest, models.TurnOptionClickedResponse]
 	endTurnButtonClicked *connect.Client[models.EndTurnButtonClickedRequest, models.EndTurnButtonClickedResponse]
 	buildOptionClicked   *connect.Client[models.BuildOptionClickedRequest, models.BuildOptionClickedResponse]
+	applyRemoteChanges   *connect.Client[models.ApplyRemoteChangesRequest, models.ApplyRemoteChangesResponse]
 }
 
 // InitializeGame calls weewar.v1.GameViewPresenter.InitializeGame.
@@ -250,6 +265,11 @@ func (c *gameViewPresenterClient) BuildOptionClicked(ctx context.Context, req *c
 	return c.buildOptionClicked.CallUnary(ctx, req)
 }
 
+// ApplyRemoteChanges calls weewar.v1.GameViewPresenter.ApplyRemoteChanges.
+func (c *gameViewPresenterClient) ApplyRemoteChanges(ctx context.Context, req *connect.Request[models.ApplyRemoteChangesRequest]) (*connect.Response[models.ApplyRemoteChangesResponse], error) {
+	return c.applyRemoteChanges.CallUnary(ctx, req)
+}
+
 // GameViewPresenterHandler is an implementation of the weewar.v1.GameViewPresenter service.
 type GameViewPresenterHandler interface {
 	// *
@@ -275,6 +295,11 @@ type GameViewPresenterHandler interface {
 	// *
 	// Called when a build option is clicked in the BuildOptionsModal
 	BuildOptionClicked(context.Context, *connect.Request[models.BuildOptionClickedRequest]) (*connect.Response[models.BuildOptionClickedResponse], error)
+	// *
+	// Apply changes from remote players (received via SyncService subscription).
+	// This updates local game state and triggers UI updates for the received WorldChanges.
+	// Used by viewers to apply moves made by other players.
+	ApplyRemoteChanges(context.Context, *connect.Request[models.ApplyRemoteChangesRequest]) (*connect.Response[models.ApplyRemoteChangesResponse], error)
 }
 
 // NewGameViewPresenterHandler builds an HTTP handler from the service implementation. It returns
@@ -320,6 +345,12 @@ func NewGameViewPresenterHandler(svc GameViewPresenterHandler, opts ...connect.H
 		connect.WithSchema(gameViewPresenterMethods.ByName("BuildOptionClicked")),
 		connect.WithHandlerOptions(opts...),
 	)
+	gameViewPresenterApplyRemoteChangesHandler := connect.NewUnaryHandler(
+		GameViewPresenterApplyRemoteChangesProcedure,
+		svc.ApplyRemoteChanges,
+		connect.WithSchema(gameViewPresenterMethods.ByName("ApplyRemoteChanges")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/weewar.v1.GameViewPresenter/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case GameViewPresenterInitializeGameProcedure:
@@ -334,6 +365,8 @@ func NewGameViewPresenterHandler(svc GameViewPresenterHandler, opts ...connect.H
 			gameViewPresenterEndTurnButtonClickedHandler.ServeHTTP(w, r)
 		case GameViewPresenterBuildOptionClickedProcedure:
 			gameViewPresenterBuildOptionClickedHandler.ServeHTTP(w, r)
+		case GameViewPresenterApplyRemoteChangesProcedure:
+			gameViewPresenterApplyRemoteChangesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -365,4 +398,8 @@ func (UnimplementedGameViewPresenterHandler) EndTurnButtonClicked(context.Contex
 
 func (UnimplementedGameViewPresenterHandler) BuildOptionClicked(context.Context, *connect.Request[models.BuildOptionClickedRequest]) (*connect.Response[models.BuildOptionClickedResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewPresenter.BuildOptionClicked is not implemented"))
+}
+
+func (UnimplementedGameViewPresenterHandler) ApplyRemoteChanges(context.Context, *connect.Request[models.ApplyRemoteChangesRequest]) (*connect.Response[models.ApplyRemoteChangesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GameViewPresenter.ApplyRemoteChanges is not implemented"))
 }

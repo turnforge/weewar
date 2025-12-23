@@ -24,6 +24,9 @@
       "name": "GameViewPresenter"
     },
     {
+      "name": "GameSyncService"
+    },
+    {
       "name": "UsersService"
     },
     {
@@ -1037,6 +1040,56 @@
         ]
       }
     },
+    "/v1/presenters/gameview/action:applyRemoteChanges/{game_id}": {
+      "post": {
+        "summary": "*\nApply changes from remote players (received via SyncService subscription).\nThis updates local game state and triggers UI updates for the received WorldChanges.\nUsed by viewers to apply moves made by other players.",
+        "operationId": "GameViewPresenter_ApplyRemoteChanges",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ApplyRemoteChangesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "moves": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1GameMove"
+                  },
+                  "title": "The moves containing WorldChanges to apply"
+                }
+              },
+              "title": "Request to apply changes from remote players\nCalled when SyncService streams moves made by other players"
+            }
+          }
+        ],
+        "tags": [
+          "GameViewPresenter"
+        ]
+      }
+    },
     "/v1/presenters/gameview/action:clicked:buildOption/{game_id}": {
       "post": {
         "summary": "*\nCalled when a build option is clicked in the BuildOptionsModal",
@@ -1226,6 +1279,109 @@
         ],
         "tags": [
           "GameViewPresenter"
+        ]
+      }
+    },
+    "/v1/sync/games/{gameId}/broadcast": {
+      "post": {
+        "summary": "Broadcast sends a GameUpdate to all subscribers of a game.\nCalled internally by GamesService after ProcessMoves succeeds.\nNot intended for direct client use.",
+        "operationId": "GameSyncService_Broadcast",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1BroadcastResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game ID to broadcast to",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "update": {
+                  "$ref": "#/definitions/v1GameUpdate",
+                  "title": "The update to broadcast"
+                }
+              },
+              "title": "BroadcastRequest to send a GameUpdate to all subscribers\nCalled internally by GamesService after ProcessMoves succeeds"
+            }
+          }
+        ],
+        "tags": [
+          "GameSyncService"
+        ]
+      }
+    },
+    "/v1/sync/games/{gameId}/subscribe": {
+      "get": {
+        "summary": "Subscribe to game changes. Server streams GameUpdate messages to clients\nas other players make moves. Supports reconnection via from_sequence.",
+        "operationId": "GameSyncService_Subscribe",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1GameUpdate"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of v1GameUpdate"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game ID to subscribe to",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "playerId",
+            "description": "Player ID this client represents (for filtering own moves)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fromSequence",
+            "description": "Resume from this sequence number (for reconnection).\nServer will send any missed updates since this sequence.\nUse 0 to start from current state.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "GameSyncService"
         ]
       }
     },
@@ -1864,6 +2020,24 @@
       },
       "title": "Compact representation of all reachable paths from a source"
     },
+    "v1ApplyRemoteChangesResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Whether the changes were successfully applied"
+        },
+        "error": {
+          "type": "string",
+          "title": "Error message if application failed (e.g., state desync)"
+        },
+        "requiresReload": {
+          "type": "boolean",
+          "title": "If state desync detected, client should reload game"
+        }
+      },
+      "title": "Response after applying remote changes"
+    },
     "v1AttackRecord": {
       "type": "object",
       "properties": {
@@ -1916,6 +2090,22 @@
         }
       },
       "title": "*\nAttack with one unit against another"
+    },
+    "v1BroadcastResponse": {
+      "type": "object",
+      "properties": {
+        "subscriberCount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Number of subscribers that received the update"
+        },
+        "sequence": {
+          "type": "string",
+          "format": "int64",
+          "title": "The sequence number assigned to this update"
+        }
+      },
+      "title": "BroadcastResponse after broadcasting"
     },
     "v1BuildOptionClickedResponse": {
       "type": "object",
@@ -2322,6 +2512,21 @@
         }
       }
     },
+    "v1GameEnded": {
+      "type": "object",
+      "properties": {
+        "winner": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Winning player (0 if draw or N/A)"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason for game ending"
+        }
+      },
+      "title": "GameEnded indicates the game has concluded"
+    },
     "v1GameMove": {
       "type": "object",
       "properties": {
@@ -2608,6 +2813,37 @@
           "title": "Whether team has active players - can also be inferred"
         }
       }
+    },
+    "v1GameUpdate": {
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "string",
+          "format": "int64",
+          "description": "Monotonically increasing sequence number for ordering and reconnection.\nClients should track this to resume from correct position."
+        },
+        "movesPublished": {
+          "$ref": "#/definitions/v1MovesPublished",
+          "title": "Moves were published by a player (contains WorldChanges)"
+        },
+        "playerJoined": {
+          "$ref": "#/definitions/v1PlayerJoined",
+          "title": "A player connected to the game"
+        },
+        "playerLeft": {
+          "$ref": "#/definitions/v1PlayerLeft",
+          "title": "A player disconnected from the game"
+        },
+        "gameEnded": {
+          "$ref": "#/definitions/v1GameEnded",
+          "title": "Game has ended (victory, surrender, etc.)"
+        },
+        "initialState": {
+          "$ref": "#/definitions/v1SubscribeResponse",
+          "title": "Initial state sent at subscription start"
+        }
+      },
+      "title": "GameUpdate is streamed to subscribers when game state changes"
     },
     "v1GetFileResponse": {
       "type": "object",
@@ -3053,6 +3289,30 @@
     "v1MoveUnitResponse": {
       "type": "object"
     },
+    "v1MovesPublished": {
+      "type": "object",
+      "properties": {
+        "player": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Which player made these moves"
+        },
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GameMove"
+          },
+          "title": "The moves with their WorldChanges populated"
+        },
+        "groupNumber": {
+          "type": "string",
+          "format": "int64",
+          "title": "Group number for this batch of moves"
+        }
+      },
+      "title": "MovesPublished indicates a player made moves"
+    },
     "v1Pagination": {
       "type": "object",
       "properties": {
@@ -3211,6 +3471,32 @@
         }
       },
       "title": "*\nActive player changed"
+    },
+    "v1PlayerJoined": {
+      "type": "object",
+      "properties": {
+        "playerId": {
+          "type": "string"
+        },
+        "playerNumber": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PlayerJoined indicates a player connected"
+    },
+    "v1PlayerLeft": {
+      "type": "object",
+      "properties": {
+        "playerId": {
+          "type": "string"
+        },
+        "playerNumber": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PlayerLeft indicates a player disconnected"
     },
     "v1PlayerState": {
       "type": "object",
@@ -3409,6 +3695,25 @@
           "format": "int32"
         }
       }
+    },
+    "v1SubscribeResponse": {
+      "type": "object",
+      "properties": {
+        "currentSequence": {
+          "type": "string",
+          "format": "int64",
+          "title": "Current sequence number at time of subscription"
+        },
+        "gameState": {
+          "$ref": "#/definitions/v1GameState",
+          "title": "Current game state (for initial load or catchup)"
+        },
+        "game": {
+          "$ref": "#/definitions/v1Game",
+          "title": "Game metadata"
+        }
+      },
+      "title": "SubscribeResponse sent once at the start of the subscription"
     },
     "v1Tile": {
       "type": "object",

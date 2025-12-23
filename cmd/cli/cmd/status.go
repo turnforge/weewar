@@ -24,23 +24,15 @@ func init() {
 }
 
 func runStatus(cmd *cobra.Command, args []string) error {
-	// Get game ID
-	gameID, err := getGameID()
+	gc, err := GetGameContext()
 	if err != nil {
 		return err
 	}
 
-	// Create presenter
-	pc, err := createPresenter(gameID)
-	if err != nil {
-		return err
-	}
-
-	// Get state from panel
-	if pc.GameState.State == nil {
+	if gc.State == nil {
 		return fmt.Errorf("game state not initialized")
 	}
-	if pc.GameState.Game == nil {
+	if gc.Game == nil {
 		return fmt.Errorf("game metadata not initialized")
 	}
 
@@ -49,12 +41,12 @@ func runStatus(cmd *cobra.Command, args []string) error {
 
 	if formatter.JSON {
 		// Build player info for JSON output
-		players := []map[string]interface{}{}
+		players := []map[string]any{}
 
 		// Count units per player
 		unitCounts := make(map[int32]int)
-		if pc.GameState.State.WorldData != nil {
-			for _, unit := range pc.GameState.State.WorldData.UnitsMap {
+		if gc.State.WorldData != nil {
+			for _, unit := range gc.State.WorldData.UnitsMap {
 				if unit != nil {
 					unitCounts[unit.Player]++
 				}
@@ -63,22 +55,22 @@ func runStatus(cmd *cobra.Command, args []string) error {
 
 		// Count tiles per player
 		tileCounts := make(map[int32]int)
-		if pc.GameState.State.WorldData != nil {
-			for _, tile := range pc.GameState.State.WorldData.TilesMap {
+		if gc.State.WorldData != nil {
+			for _, tile := range gc.State.WorldData.TilesMap {
 				if tile != nil && tile.Player > 0 {
 					tileCounts[tile.Player]++
 				}
 			}
 		}
 
-		if pc.GameState.Game.Config != nil {
-			for _, player := range pc.GameState.Game.Config.Players {
+		if gc.Game.Config != nil {
+			for _, player := range gc.Game.Config.Players {
 				// Get coins from GameState.PlayerStates
 				coins := int32(0)
-				if playerState := pc.GameState.State.PlayerStates[player.PlayerId]; playerState != nil {
+				if playerState := gc.State.PlayerStates[player.PlayerId]; playerState != nil {
 					coins = playerState.Coins
 				}
-				players = append(players, map[string]interface{}{
+				players = append(players, map[string]any{
 					"player_id":   player.PlayerId,
 					"player_type": player.PlayerType,
 					"name":        player.Name,
@@ -92,20 +84,20 @@ func runStatus(cmd *cobra.Command, args []string) error {
 		}
 
 		// JSON output
-		data := map[string]interface{}{
-			"game_id":        gameID,
-			"game_name":      pc.GameState.Game.Name,
-			"description":    pc.GameState.Game.Description,
-			"turn":           pc.GameState.State.TurnCounter,
-			"current_player": pc.GameState.State.CurrentPlayer,
-			"status":         pc.GameState.State.Status.String(),
-			"winning_player": pc.GameState.State.WinningPlayer,
+		data := map[string]any{
+			"game_id":        gc.GameID,
+			"game_name":      gc.Game.Name,
+			"description":    gc.Game.Description,
+			"turn":           gc.State.TurnCounter,
+			"current_player": gc.State.CurrentPlayer,
+			"status":         gc.State.Status.String(),
+			"winning_player": gc.State.WinningPlayer,
 			"players":        players,
 		}
 		return formatter.PrintJSON(data)
 	}
 
 	// Text output
-	text := FormatGameStatus(pc.GameState.Game, pc.GameState.State)
+	text := FormatGameStatus(gc.Game, gc.State)
 	return formatter.PrintText(text)
 }

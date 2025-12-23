@@ -53,6 +53,7 @@ func NewGamesService(db *gorm.DB, clientMgr *services.ClientMgr) *GamesService {
 	service.Self = service
 	service.GameStateUpdater = service // Implement GameStateUpdater interface
 	service.InitializeScreenshotIndexer()
+	service.InitializeSyncBroadcast()
 
 	return service
 }

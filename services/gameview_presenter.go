@@ -806,8 +806,9 @@ func (s *GameViewPresenter) refreshExhaustedHighlights(ctx context.Context, _ *v
 	// Check all units for the current player (using map-based storage)
 	for _, unit := range gameState.WorldData.UnitsMap {
 		if unit.Player == gameState.CurrentPlayer {
-			// Mark as exhausted if no movement points left
-			if unit.DistanceLeft <= 0 {
+			// Only mark as exhausted if unit has been topped up this turn AND has no movement left.
+			// If LastToppedupTurn < TurnCounter, the unit will be topped up on first access (lazy pattern).
+			if unit.LastToppedupTurn >= gameState.TurnCounter && unit.DistanceLeft <= 0 {
 				exhaustedHighlights = append(exhaustedHighlights, &v1.HighlightSpec{
 					Q:    unit.Q,
 					R:    unit.R,

@@ -38,6 +38,7 @@ import { BuildOptionsModal } from './BuildOptionsModal';
 import { GameStatePanel } from './GameStatePanel';
 import { RulesTable, TerrainStats } from '../common/RulesTable';
 import { GameSyncManager, SyncState } from './GameSyncManager';
+import { AnimationQueue } from '../common/animations/AnimationQueue';
 
 /**
  * Panel type identifiers
@@ -73,6 +74,7 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     protected gameScene: PhaserGameScene;
     protected world: World;
     protected rulesTable: RulesTable = new RulesTable();
+    protected animationQueue: AnimationQueue = new AnimationQueue();
 
     // UI Panels
     protected terrainStatsPanel: TerrainStatsPanel;
@@ -228,10 +230,11 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         // Initialize multiplayer sync if enabled
         this.initializeMultiplayerSync();
 
-        // Expose gameScene to console for testing animations
+        // Expose gameScene and animationQueue to console for testing
         (window as any).gameScene = this.gameScene;
-        console.log("🎮 gameScene exposed to window for animation testing");
-        console.log("Try: gameScene.moveUnit(unit, path) or gameScene.showAttackEffect({q:0,r:0}, {q:1,r:0}, 10)");
+        (window as any).animationQueue = this.animationQueue;
+        console.log("🎮 gameScene and animationQueue exposed to window for testing");
+        console.log("Try: animationQueue.enqueue(() => gameScene.moveUnit(unit, path))");
     }
 
     /**
@@ -637,8 +640,17 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
 
     async setUnitAt(request: SetUnitAtRequest): Promise<SetUnitAtResponse> {
         if (request.unit) {
-            await this.gameScene.setUnit(request.unit, { flash: request.flash, appear: request.appear });
-            this.world.setUnitDirect(request.unit);
+            const unit = request.unit;
+            const options = { flash: request.flash, appear: request.appear };
+
+            // Queue animation, update world data AFTER animation completes
+            this.animationQueue.enqueue(
+                () => this.gameScene.setUnit(unit, options),
+                () => {
+                    this.world.setUnitDirect(unit);
+                    return true;
+                }
+            );
         }
         return {};
     }
@@ -649,23 +661,42 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     }
 
     async removeUnitAt(request: RemoveUnitAtRequest): Promise<RemoveUnitAtResponse> {
-        await this.gameScene.removeUnit(request.q, request.r, { animate: request.animate });
-        this.world.removeUnitAt(request.q, request.r);
+        const { q, r, animate } = request;
+
+        // Queue animation, update world data AFTER animation completes
+        this.animationQueue.enqueue(
+            () => this.gameScene.removeUnit(q, r, { animate }),
+            () => {
+                this.world.removeUnitAt(q, r);
+                return true;
+            }
+        );
         return {};
     }
 
     async moveUnit(request: MoveUnitRequest): Promise<MoveUnitResponse> {
         if (request.unit && request.path && request.path.length >= 2) {
-            // Animate the movement in scene first (needs sprite at old position)
-            await this.gameScene.moveUnit(request.unit, request.path);
-
-            // Then update World data model: remove from old, set at new
+            const unit = request.unit;
+            const path = request.path;
             const oldPos = request.path[0];
-            this.world.removeUnitAt(oldPos.q, oldPos.r);
-            this.world.setUnitDirect(request.unit);
+
+            console.log(`[GameViewerPage] Queueing moveUnit: ${unit.shortcut} from (${oldPos.q},${oldPos.r}) to (${path[path.length-1].q},${path[path.length-1].r}), path length: ${path.length}`);
+
+            // Queue animation, update world data AFTER animation completes
+            this.animationQueue.enqueue(
+                () => {
+                    console.log(`[GameViewerPage] Executing moveUnit animation for ${unit.shortcut}`);
+                    return this.gameScene.moveUnit(unit, path);
+                },
+                () => {
+                    // Update World data model after animation
+                    this.world.removeUnitAt(oldPos.q, oldPos.r);
+                    this.world.setUnitDirect(unit);
+                    return true; // Continue with next animation
+                }
+            );
         } else if (request.unit) {
             // Fallback: No valid path, just update unit at its current position
-            // This shouldn't happen with the Go-side fix, but handle gracefully
             console.warn('[GameViewerPage] moveUnit called without valid path, unit:', request.unit);
             this.world.setUnitDirect(request.unit);
         }
@@ -673,22 +704,23 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     }
 
     async showAttackEffect(request: ShowAttackEffectRequest): Promise<ShowAttackEffectResponse> {
-        await this.gameScene.showAttackEffect(
-            { q: request.fromQ, r: request.fromR },
-            { q: request.toQ, r: request.toR },
-            request.damage,
-            request.splashTargets
-        );
+        const from = { q: request.fromQ, r: request.fromR };
+        const to = { q: request.toQ, r: request.toR };
+        const damage = request.damage;
+        const splashTargets = request.splashTargets;
+        this.animationQueue.enqueue(() => this.gameScene.showAttackEffect(from, to, damage, splashTargets));
         return {};
     }
 
     async showHealEffect(request: ShowHealEffectRequest): Promise<ShowHealEffectResponse> {
-        await this.gameScene.showHealEffect(request.q, request.r, request.amount);
+        const { q, r, amount } = request;
+        this.animationQueue.enqueue(() => this.gameScene.showHealEffect(q, r, amount));
         return {};
     }
 
     async showCaptureEffect(request: ShowCaptureEffectRequest): Promise<ShowCaptureEffectResponse> {
-        await this.gameScene.showCaptureEffect(request.q, request.r);
+        const { q, r } = request;
+        this.animationQueue.enqueue(() => this.gameScene.showCaptureEffect(q, r));
         return {};
     }
 

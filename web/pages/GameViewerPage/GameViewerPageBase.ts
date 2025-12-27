@@ -512,9 +512,8 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     // GameViewerPageMethods Interface - Browser RPC Methods
     // =========================================================================
 
-    async setTurnOptionsContent(request: SetContentRequest) {
+    setTurnOptionsContent(request: SetContentRequest) {
         this.turnOptionsPanel.innerHTML = request.innerHtml;
-        await this.turnOptionsPanel.hydrateThemeImages();
         return {};
     }
 
@@ -529,34 +528,30 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         return {};
     }
 
-    async setUnitStatsContent(request: SetContentRequest) {
+    setUnitStatsContent(request: SetContentRequest) {
         this.unitStatsPanel.innerHTML = request.innerHtml;
-        await this.unitStatsPanel.hydrateThemeImages();
         return {};
     }
 
-    async setDamageDistributionContent(request: SetContentRequest) {
+    setDamageDistributionContent(request: SetContentRequest) {
         this.damageDistributionPanel.innerHTML = request.innerHtml;
-        await this.damageDistributionPanel.hydrateThemeImages();
         return {};
     }
 
-    async setTerrainStatsContent(request: SetContentRequest) {
+    setTerrainStatsContent(request: SetContentRequest) {
         this.terrainStatsPanel.innerHTML = request.innerHtml;
-        await this.terrainStatsPanel.hydrateThemeImages();
         return {};
     }
 
-    async setGameStatePanelContent(request: SetContentRequest): Promise<SetContentResponse> {
+    setGameStatePanelContent(request: SetContentRequest): SetContentResponse {
         this.gameStatePanel.innerHTML = request.innerHtml;
-        await this.gameStatePanel.hydrateThemeImages();
         return {};
     }
 
     /**
      * Set compact summary card content (mobile-specific, no-op for desktop/grid)
      */
-    async setCompactSummaryCard(request: SetContentRequest): Promise<SetContentResponse> {
+    setCompactSummaryCard(request: SetContentRequest): SetContentResponse {
         // Default implementation: no-op for desktop and grid layouts
         // Mobile layout overrides this to show compact card
         return {};
@@ -565,13 +560,13 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     /**
      * Set allowed panels and their order (mobile-specific, no-op for desktop/grid)
      */
-    async setAllowedPanels(request: SetAllowedPanelsRequest): Promise<SetAllowedPanelsResponse> {
+    setAllowedPanels(request: SetAllowedPanelsRequest): SetAllowedPanelsResponse {
         // Default implementation: no-op for desktop and grid layouts
         // Mobile layout overrides this to update bottom bar buttons
         return {};
     }
 
-    async showHighlights(request: ShowHighlightsRequest) {
+    showHighlights(request: ShowHighlightsRequest) {
         console.log("showHighlights called:", request);
         if (request.highlights) {
             this.gameScene.showHighlights(request.highlights);
@@ -579,13 +574,13 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         return {};
     }
 
-    async clearHighlights(request: ClearHighlightsRequest) {
+    clearHighlights(request: ClearHighlightsRequest) {
         console.log("clearHighlights called:", request);
         this.gameScene.clearHighlights(request.types || []);
         return {};
     }
 
-    async showPath(request: ShowPathRequest) {
+    showPath(request: ShowPathRequest) {
         console.log("showPath called:", request);
         if (request.coords) {
             this.gameScene.showPath(request.coords, request.color, request.thickness);
@@ -593,13 +588,13 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         return {};
     }
 
-    async clearPaths(request: ClearPathsRequest) {
+    clearPaths(request: ClearPathsRequest) {
         console.log("clearPaths called:", request);
         this.gameScene.clearPaths();
         return {};
     }
 
-    async logMessage(request: LogMessageRequest) {
+    logMessage(request: LogMessageRequest) {
         return {};
     }
 

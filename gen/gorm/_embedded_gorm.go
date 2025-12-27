@@ -19,10 +19,22 @@ type CrossingsEntry struct {
 	Value CrossingGORM
 }
 
+// TilesMapEntry
+type TilesMapEntry struct {
+	Key   string
+	Value TileGORM
+}
+
 // UnitsMapEntry
 type UnitsMapEntry struct {
 	Key   string
 	Value UnitGORM
+}
+
+// PlayerStatesEntry
+type PlayerStatesEntry struct {
+	Key   int32
+	Value PlayerStateGORM
 }
 
 // CrossingsEntry
@@ -35,16 +47,4 @@ type CrossingsEntry struct {
 type UnitsMapEntry struct {
 	Key   string
 	Value UnitGORM
-}
-
-// TilesMapEntry
-type TilesMapEntry struct {
-	Key   string
-	Value TileGORM
-}
-
-// PlayerStatesEntry
-type PlayerStatesEntry struct {
-	Key   int32
-	Value PlayerStateGORM
 }

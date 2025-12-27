@@ -27,7 +27,9 @@ service GameViewerPage {
 
     rpc SetGameStatePanelContent(SetContentRequest) returns (SetContentResponse);
 
-    rpc SetGameState(SetGameStateRequest) returns (SetGameStateResponse);
+    rpc SetGameState(SetGameStateRequest) returns (SetGameStateResponse) {
+      option (wasmjs.v1.invocation_style) = INVOCATION_STYLE_PROMISE;
+    }
 
     // Update game UI metadata (current player, turn counter)
     rpc UpdateGameStatus(UpdateGameStatusRequest) returns (UpdateGameStatusResponse);

@@ -283,4 +283,8 @@ export class TerrainStatsPanel extends BaseComponent implements LCMComponent {
     protected destroyComponent(): void {
         this.deactivate();
     }
+
+    htmlUpdated(html: string) {
+        this.hydrateThemeImages()
+    }
 }

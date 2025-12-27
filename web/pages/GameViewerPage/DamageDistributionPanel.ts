@@ -281,4 +281,8 @@ export class DamageDistributionPanel extends BaseComponent implements LCMCompone
     protected destroyComponent(): void {
         this.deactivate();
     }
+
+    htmlUpdated(html: string) {
+        this.hydrateThemeImages()
+    }
 }

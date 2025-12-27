@@ -219,4 +219,8 @@ export class UnitStatsPanel extends BaseComponent implements LCMComponent {
         propertiesList.innerHTML = propertiesHTML ||
             '<div class="text-sm text-gray-500 dark:text-gray-400 italic">No unit properties available</div>';
     }
+
+    htmlUpdated(html: string) {
+        this.hydrateThemeImages()
+    }
 }

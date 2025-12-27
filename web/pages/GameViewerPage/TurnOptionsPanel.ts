@@ -74,4 +74,8 @@ export class TurnOptionsPanel extends BaseComponent implements LCMComponent {
             });
         });
     }
+
+    htmlUpdated(html: string) {
+        this.hydrateThemeImages()
+    }
 }

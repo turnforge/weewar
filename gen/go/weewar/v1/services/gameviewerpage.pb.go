@@ -27,7 +27,7 @@ var File_weewar_v1_services_gameviewerpage_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_services_gameviewerpage_proto_rawDesc = "" +
 	"\n" +
-	"'weewar/v1/services/gameviewerpage.proto\x12\tweewar.v1\x1a\x1bwasmjs/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a%weewar/v1/models/gameviewerpage.proto2\xa2\x0f\n" +
+	"'weewar/v1/services/gameviewerpage.proto\x12\tweewar.v1\x1a\x1bwasmjs/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a%weewar/v1/models/gameviewerpage.proto2\xa8\x0f\n" +
 	"\x0eGameViewerPage\x12T\n" +
 	"\x15SetTurnOptionsContent\x12\x1c.weewar.v1.SetContentRequest\x1a\x1d.weewar.v1.SetContentResponse\x12[\n" +
 	"\x10ShowBuildOptions\x12\".weewar.v1.ShowBuildOptionsRequest\x1a#.weewar.v1.ShowBuildOptionsResponse\x12R\n" +
@@ -35,8 +35,8 @@ const file_weewar_v1_services_gameviewerpage_proto_rawDesc = "" +
 	"\x1cSetDamageDistributionContent\x12\x1c.weewar.v1.SetContentRequest\x1a\x1d.weewar.v1.SetContentResponse\x12U\n" +
 	"\x16SetTerrainStatsContent\x12\x1c.weewar.v1.SetContentRequest\x1a\x1d.weewar.v1.SetContentResponse\x12T\n" +
 	"\x15SetCompactSummaryCard\x12\x1c.weewar.v1.SetContentRequest\x1a\x1d.weewar.v1.SetContentResponse\x12W\n" +
-	"\x18SetGameStatePanelContent\x12\x1c.weewar.v1.SetContentRequest\x1a\x1d.weewar.v1.SetContentResponse\x12O\n" +
-	"\fSetGameState\x12\x1e.weewar.v1.SetGameStateRequest\x1a\x1f.weewar.v1.SetGameStateResponse\x12[\n" +
+	"\x18SetGameStatePanelContent\x12\x1c.weewar.v1.SetContentRequest\x1a\x1d.weewar.v1.SetContentResponse\x12U\n" +
+	"\fSetGameState\x12\x1e.weewar.v1.SetGameStateRequest\x1a\x1f.weewar.v1.SetGameStateResponse\"\x04е\x18\x01\x12[\n" +
 	"\x10UpdateGameStatus\x12\".weewar.v1.UpdateGameStatusRequest\x1a#.weewar.v1.UpdateGameStatusResponse\x12F\n" +
 	"\tSetTileAt\x12\x1b.weewar.v1.SetTileAtRequest\x1a\x1c.weewar.v1.SetTileAtResponse\x12F\n" +
 	"\tSetUnitAt\x12\x1b.weewar.v1.SetUnitAtRequest\x1a\x1c.weewar.v1.SetUnitAtResponse\x12O\n" +

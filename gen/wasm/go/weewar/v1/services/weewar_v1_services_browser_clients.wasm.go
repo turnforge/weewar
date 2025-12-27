@@ -92,11 +92,12 @@ func (c *GameViewerPageClient) SetGameStatePanelContent(ctx context.Context, req
 	)
 }
 
-// SetGameState calls the browser-provided SetGameState method synchronously.
-// The JavaScript implementation returns the result directly (SYNC invocation style).
-func (c *GameViewerPageClient) SetGameState(ctx context.Context, req *v1models.SetGameStateRequest) (*v1models.SetGameStateResponse, error) {
-	// SYNC invocation style: browser method returns immediately
-	return wasm.CallBrowserService[*v1models.SetGameStateRequest, *v1models.SetGameStateResponse](
+// SetGameState calls the browser-provided SetGameState method asynchronously.
+// Returns a Future that can be used to retrieve the result when ready.
+// The JavaScript implementation returns a Promise, which is handled via the Future pattern.
+func (c *GameViewerPageClient) SetGameState(ctx context.Context, req *v1models.SetGameStateRequest) *wasm.Future[*v1models.SetGameStateResponse] {
+	// PROMISE invocation style: browser method returns a Promise
+	return wasm.CallBrowserServiceAsync[*v1models.SetGameStateRequest, *v1models.SetGameStateResponse](
 		c.channel, ctx, "GameViewerPage", "setGameState", req,
 	)
 }

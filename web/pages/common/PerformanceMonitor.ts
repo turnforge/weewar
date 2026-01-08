@@ -1,3 +1,5 @@
+import * as Phaser from 'phaser';
+
 /**
  * Performance monitoring utility for measuring frame times, FPS, and function execution.
  * Use this to establish baselines before optimization and verify improvements after.
@@ -19,9 +21,19 @@ export class PerformanceMonitor {
     // Display element
     private displayElement: HTMLDivElement | null = null;
 
+    // Phaser scene reference for object counting
+    private phaserScene: Phaser.Scene | null = null;
+
     constructor() {
         this.lastFpsTime = performance.now();
         this.lastFrameTime = performance.now();
+    }
+
+    /**
+     * Register a Phaser scene to monitor its GameObjects
+     */
+    setScene(scene: Phaser.Scene): void {
+        this.phaserScene = scene;
     }
 
     enable(): void {
@@ -207,6 +219,43 @@ export class PerformanceMonitor {
         }
     }
 
+    /**
+     * Get counts of various Phaser GameObject types
+     */
+    private getPhaserObjectCounts(): { sprites: number; texts: number; graphics: number; total: number; poolSize: number } | null {
+        if (!this.phaserScene) return null;
+
+        const children = this.phaserScene.children.list;
+        let sprites = 0;
+        let texts = 0;
+        let graphics = 0;
+
+        for (const child of children) {
+            if (child instanceof Phaser.GameObjects.Sprite) {
+                sprites++;
+            } else if (child instanceof Phaser.GameObjects.Text) {
+                texts++;
+            } else if (child instanceof Phaser.GameObjects.Graphics) {
+                graphics++;
+            }
+        }
+
+        // Try to get pool size from scene if available
+        let poolSize = 0;
+        const scene = this.phaserScene as any;
+        if (scene.coordinateTextPool) {
+            poolSize = scene.coordinateTextPool.length;
+        }
+
+        return {
+            sprites,
+            texts,
+            graphics,
+            total: children.length,
+            poolSize
+        };
+    }
+
     private updateDisplay(): void {
         if (!this.displayElement) return;
 
@@ -241,6 +290,21 @@ export class PerformanceMonitor {
             display += `\n-- Objects/sec --\n`;
             display += `Created: ${totalCreated}\n`;
             display += `Destroyed: ${totalDestroyed}\n`;
+        }
+
+        // Show Phaser GameObject counts
+        if (this.phaserScene) {
+            const phaserCounts = this.getPhaserObjectCounts();
+            if (phaserCounts) {
+                display += `\n-- Phaser Objects --\n`;
+                display += `Sprites: ${phaserCounts.sprites}\n`;
+                display += `Texts: ${phaserCounts.texts}\n`;
+                display += `Graphics: ${phaserCounts.graphics}\n`;
+                display += `Total: ${phaserCounts.total}\n`;
+                if (phaserCounts.poolSize > 0) {
+                    display += `Pool: ${phaserCounts.poolSize}\n`;
+                }
+            }
         }
 
         this.displayElement.textContent = display;

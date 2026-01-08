@@ -46,7 +46,14 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }> = new Map();
     protected gridGraphics: Phaser.GameObjects.Graphics | null = null;
     protected coordinateTexts: Map<string, Phaser.GameObjects.Text> = new Map();
-    
+
+    // Optimization: Track previous visible bounds to avoid unnecessary updates
+    private lastVisibleBounds: { minQ: number; maxQ: number; minR: number; maxR: number } | null = null;
+    private lastCameraState: { scrollX: number; scrollY: number; zoom: number } | null = null;
+
+    // Optimization: Object pool for coordinate texts to avoid GC pressure
+    private coordinateTextPool: Phaser.GameObjects.Text[] = [];
+
     protected showGrid: boolean = false;
     protected showCoordinates: boolean = false;
     
@@ -552,6 +559,9 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }
     
     create() {
+        // Register with performance monitor for Phaser object tracking
+        perfMon.setScene(this);
+
         // Initialize graphics for grid
         this.gridGraphics = this.add.graphics();
 
@@ -941,7 +951,7 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         
         // Update coordinate text if enabled
         if (this.showCoordinates) {
-            this.updateCoordinateText(q, r);
+            this.createOrReuseCoordinateText(q, r);
         }
     }
     
@@ -953,19 +963,26 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
             this.tileSprites.delete(key);
         }
         
-        // Remove coordinate text
+        // Remove coordinate text (return to pool)
         if (this.coordinateTexts.has(key)) {
-            this.coordinateTexts.get(key)?.destroy();
+            const text = this.coordinateTexts.get(key)!;
+            text.setVisible(false);
+            this.coordinateTextPool.push(text);
             this.coordinateTexts.delete(key);
         }
     }
-    
+
     public clearAllTiles() {
         this.tileSprites.forEach(tile => tile.destroy());
         this.tileSprites.clear();
-        
-        this.coordinateTexts.forEach(text => text.destroy());
+
+        // Return coordinate texts to pool
+        this.coordinateTexts.forEach(text => {
+            text.setVisible(false);
+            this.coordinateTextPool.push(text);
+        });
         this.coordinateTexts.clear();
+        this.lastVisibleBounds = null;
     }
     
     // Unit management methods
@@ -1532,42 +1549,130 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
     }
     
     private updateCoordinatesDisplay() {
-        // Clear existing coordinate texts
-        const destroyCount = this.coordinateTexts.size;
-        this.coordinateTexts.forEach(text => text.destroy());
-        this.coordinateTexts.clear();
-        perfMon.trackDestroy('coordinateText', destroyCount);
-        
-        if (!this.showCoordinates) return;
-        
-        // Get camera bounds (same logic as grid)
+        // If coordinates are disabled, clear everything and return
+        if (!this.showCoordinates) {
+            if (this.coordinateTexts.size > 0) {
+                // Return texts to pool instead of destroying
+                this.coordinateTexts.forEach(text => {
+                    text.setVisible(false);
+                    this.coordinateTextPool.push(text);
+                });
+                perfMon.trackDestroy('coordinateText', this.coordinateTexts.size);
+                this.coordinateTexts.clear();
+                this.lastVisibleBounds = null;
+            }
+            return;
+        }
+
         const camera = this.cameras.main;
+
+        // OPTIMIZATION 1: Skip if camera hasn't changed
+        if (this.lastCameraState &&
+            this.lastCameraState.scrollX === camera.scrollX &&
+            this.lastCameraState.scrollY === camera.scrollY &&
+            this.lastCameraState.zoom === camera.zoom) {
+            return; // Nothing changed, skip update entirely
+        }
+
+        // Update camera state tracking
+        this.lastCameraState = {
+            scrollX: camera.scrollX,
+            scrollY: camera.scrollY,
+            zoom: camera.zoom
+        };
+
+        // Calculate visible bounds
         const worldView = camera.worldView;
-        
         const padding = Math.max(this.tileWidth, this.tileHeight) * 2;
         const minX = worldView.x - padding;
         const maxX = worldView.x + worldView.width + padding;
         const minY = worldView.y - padding;
         const maxY = worldView.y + worldView.height + padding;
-        
-        // Convert bounds to hex coordinates
+
         const topLeft = pixelToHex(minX, minY);
         const topRight = pixelToHex(maxX, minY);
         const bottomLeft = pixelToHex(minX, maxY);
         const bottomRight = pixelToHex(maxX, maxY);
-        
-        // Find the bounding box in hex coordinates
-        const minQ = Math.min(topLeft.q, topRight.q, bottomLeft.q, bottomRight.q) - 1;
-        const maxQ = Math.max(topLeft.q, topRight.q, bottomLeft.q, bottomRight.q) + 1;
-        const minR = Math.min(topLeft.r, topRight.r, bottomLeft.r, bottomRight.r) - 1;
-        const maxR = Math.max(topLeft.r, topRight.r, bottomLeft.r, bottomRight.r) + 1;
-        
-        // Show coordinates for all visible hexes
-        for (let q = minQ; q <= maxQ; q++) {
-            for (let r = minR; r <= maxR; r++) {
-                this.updateCoordinateText(q, r);
+
+        const newBounds = {
+            minQ: Math.min(topLeft.q, topRight.q, bottomLeft.q, bottomRight.q) - 1,
+            maxQ: Math.max(topLeft.q, topRight.q, bottomLeft.q, bottomRight.q) + 1,
+            minR: Math.min(topLeft.r, topRight.r, bottomLeft.r, bottomRight.r) - 1,
+            maxR: Math.max(topLeft.r, topRight.r, bottomLeft.r, bottomRight.r) + 1
+        };
+
+        // OPTIMIZATION 2: Diff-based updates - only update what changed
+        const oldBounds = this.lastVisibleBounds;
+
+        if (oldBounds) {
+            // Remove texts that are no longer visible (return to pool)
+            const keysToRemove: string[] = [];
+            this.coordinateTexts.forEach((text, key) => {
+                const [q, r] = key.split(',').map(Number);
+                if (q < newBounds.minQ || q > newBounds.maxQ ||
+                    r < newBounds.minR || r > newBounds.maxR) {
+                    text.setVisible(false);
+                    this.coordinateTextPool.push(text);
+                    keysToRemove.push(key);
+                }
+            });
+            keysToRemove.forEach(key => this.coordinateTexts.delete(key));
+            perfMon.trackDestroy('coordinateText', keysToRemove.length);
+
+            // Only add texts for newly visible hexes
+            for (let q = newBounds.minQ; q <= newBounds.maxQ; q++) {
+                for (let r = newBounds.minR; r <= newBounds.maxR; r++) {
+                    const key = `${q},${r}`;
+                    if (!this.coordinateTexts.has(key)) {
+                        // This hex wasn't visible before, create/reuse text
+                        this.createOrReuseCoordinateText(q, r);
+                    }
+                }
+            }
+        } else {
+            // First time or after clearing - create all visible texts
+            for (let q = newBounds.minQ; q <= newBounds.maxQ; q++) {
+                for (let r = newBounds.minR; r <= newBounds.maxR; r++) {
+                    this.createOrReuseCoordinateText(q, r);
+                }
             }
         }
+
+        this.lastVisibleBounds = newBounds;
+    }
+
+    // OPTIMIZATION 3: Object pooling - reuse text objects
+    private createOrReuseCoordinateText(q: number, r: number) {
+        const key = `${q},${r}`;
+        const position = hexToPixel(q, r);
+        const { row, col } = hexToRowCol(q, r);
+        const coordText = `QR:${q}, ${r}\nRC:${row}, ${col}`;
+        const textColor = this.isDarkTheme ? '#ffffff' : '#000000';
+        const strokeColor = this.isDarkTheme ? '#000000' : '#ffffff';
+
+        let text: Phaser.GameObjects.Text;
+
+        if (this.coordinateTextPool.length > 0) {
+            // Reuse from pool
+            text = this.coordinateTextPool.pop()!;
+            text.setPosition(position.x, position.y);
+            text.setText(coordText);
+            text.setStyle({ color: textColor, stroke: strokeColor });
+            text.setVisible(true);
+        } else {
+            // Create new text
+            text = this.add.text(position.x, position.y, coordText, {
+                fontSize: '10px',
+                color: textColor,
+                stroke: strokeColor,
+                strokeThickness: 1,
+                align: 'center'
+            });
+            text.setOrigin(0.5, 0.5);
+            perfMon.trackCreate('coordinateText');
+        }
+
+        this.coordinateTexts.set(key, text);
     }
     
     private updateGridDisplay() {
@@ -1658,38 +1763,6 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         graphics.strokePoints(points, true);
     }
     
-    private updateCoordinateText(q: number, r: number) {
-        if (!this.showCoordinates) return;
-        
-        const key = `${q},${r}`;
-        const position = hexToPixel(q, r);
-        
-        // Remove existing text
-        if (this.coordinateTexts.has(key)) {
-            this.coordinateTexts.get(key)?.destroy();
-        }
-        
-        // Create coordinate text with both Q/R and row/col using proper conversion
-        const { row, col } = hexToRowCol(q, r);
-        
-        const coordText = `QR:${q}, ${r}\nRC:${row}, ${col}`;
-        
-        const textColor = this.isDarkTheme ? '#ffffff' : '#000000';
-        const strokeColor = this.isDarkTheme ? '#000000' : '#ffffff';
-        
-        const text = this.add.text(position.x, position.y, coordText, {
-            fontSize: '10px',
-            color: textColor,
-            stroke: strokeColor,
-            strokeThickness: 1,
-            align: 'center'
-        });
-        
-        text.setOrigin(0.5, 0.5);
-        this.coordinateTexts.set(key, text);
-        perfMon.trackCreate('coordinateText');
-    }
-
     /**
      * Load world data into the scene
      */

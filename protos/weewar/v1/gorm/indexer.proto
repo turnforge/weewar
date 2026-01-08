@@ -3,6 +3,7 @@ syntax = "proto3";
 package weewar.v1;
 
 import "dal/v1/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "weewar/v1/models/indexer.proto";
 
 option go_package = "github.com/turnforge/weewar/gen/gorm;weewargorm";
@@ -13,6 +14,26 @@ message IndexStateGORM {
     source: "weewar.v1.IndexState"
     table: "index_states"
   };
+
+  // Composite index for entity lookups: WHERE entity_type = ? AND entity_id = ?
+  string entity_type = 1 [(dal.v1.column) = {
+    gorm_tags: ["index:idx_index_states_entity,priority:1"]
+  }];
+  string entity_id = 2 [(dal.v1.column) = {
+    gorm_tags: ["index:idx_index_states_entity,priority:2"]
+  }];
+
+  // Index for range queries: WHERE indexed_at <= ?
+  // Used by indexer to find stale records
+  google.protobuf.Timestamp indexed_at = 3 [(dal.v1.column) = {
+    gorm_tags: ["index:idx_index_states_indexed_at"]
+  }];
+
+  // Partial index for finding records that need indexing
+  // Only indexes rows where needs_indexing = true (much smaller index)
+  bool needs_indexing = 4 [(dal.v1.column) = {
+    gorm_tags: ["index:idx_index_states_needs_indexing,where:needs_indexing"]
+  }];
 }
 
 // IndexRecord represents a single record within an LRO (stored as JSONB)

@@ -91,6 +91,11 @@ message GameGORM {
     gorm_tags: ["primaryKey"]
   }];
 
+  // world_id indexed for queries filtering games by world
+  string world_id = 3 [(dal.v1.column) = {
+    gorm_tags: ["index:idx_games_world_id"]
+  }];
+
   // Tags as JSON for cross-DB compatibility
   repeated string tags = 7 [(dal.v1.column) = {
     gorm_tags: ["serializer:json"]
@@ -194,8 +199,11 @@ message GameMoveGroupGORM {
 message GameMoveGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.GameMove", table: "game_moves" };
 
-  string game_id = 1 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
-  int64 group_number = 2 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
+  // game_id is indexed for queries like WHERE game_id = ? ORDER BY group_number
+  // Also part of composite index idx_game_moves_lookup for range queries
+  string game_id = 1 [(dal.v1.column) = { gorm_tags: ["primaryKey", "index:idx_game_moves_game_id", "index:idx_game_moves_lookup,priority:1"] }];
+  // group_number is part of composite index for queries like WHERE game_id = ? AND group_number >= ?
+  int64 group_number = 2 [(dal.v1.column) = { gorm_tags: ["primaryKey", "index:idx_game_moves_lookup,priority:2"] }];
   int64 move_number = 3 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
 
   // Version number for optimistic locking

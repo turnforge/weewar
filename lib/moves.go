@@ -496,8 +496,8 @@ func (g *Game) ProcessEndTurn(move *v1.GameMove, action *v1.EndTurnAction) (err 
 
 	// Top-up the INCOMING player's units and capture them as ResetUnits
 	// This ensures remote clients receive the refreshed values
-	var resetUnits []*v1.Unit
 	incomingPlayerUnits := g.World.GetPlayerUnits(int(g.CurrentPlayer))
+	resetUnits := make([]*v1.Unit, 0, len(incomingPlayerUnits))
 
 	for _, unit := range incomingPlayerUnits {
 		// Top-up the unit (restores movement, applies healing, resets progression)
@@ -842,7 +842,7 @@ func (g *Game) ProcessAttackUnit(move *v1.GameMove, action *v1.AttackUnitAction)
 		var adjacentCoords [6]AxialCoord
 		defenderCoord.Neighbors(&adjacentCoords)
 
-		var adjacentUnits []*v1.Unit
+		adjacentUnits := make([]*v1.Unit, 0, 6) // Pre-allocate for max 6 neighbors
 		for _, coord := range adjacentCoords {
 			if unit := g.World.UnitAt(coord); unit != nil {
 				// Include all units (friendly and enemy), air units will be filtered by CalculateSplashDamage

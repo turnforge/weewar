@@ -25,12 +25,6 @@ var GAMES_STORAGE_DIR = ""
 type FSGamesService struct {
 	services.BackendGamesService
 	storage *storage.FileStorage // Storage area for all files
-
-	// Simple caches - maps with game ID as key
-	gameCache    map[string]*v1.Game
-	stateCache   map[string]*v1.GameState
-	historyCache map[string]*v1.GameMoveHistory
-	runtimeCache map[string]*lib.Game
 }
 
 // NewGamesService creates a new GamesService implementation for server mode
@@ -42,19 +36,83 @@ func NewFSGamesService(storageDir string, clientMgr *services.ClientMgr) *FSGame
 		storageDir = GAMES_STORAGE_DIR
 	}
 	service := &FSGamesService{
-		storage:      storage.NewFileStorage(storageDir),
-		gameCache:    make(map[string]*v1.Game),
-		stateCache:   make(map[string]*v1.GameState),
-		historyCache: make(map[string]*v1.GameMoveHistory),
-		runtimeCache: make(map[string]*lib.Game),
+		storage: storage.NewFileStorage(storageDir),
 	}
 	service.ClientMgr = clientMgr
 	service.Self = service
-	service.GameStateUpdater = service // Implement GameStateUpdater interface
+	service.StorageProvider = service // FSGamesService implements GameStorageProvider
+	service.GameStateUpdater = service
+	service.InitializeCache() // Initialize cache at BackendGamesService level
 	service.InitializeScreenshotIndexer()
 	service.InitializeSyncBroadcast()
 
 	return service
+}
+
+// LoadGame implements GameStorageProvider - loads game directly from file storage
+func (s *FSGamesService) LoadGame(ctx context.Context, id string) (*v1.Game, error) {
+	game, err := storage.LoadFSArtifact[*v1.Game](s.storage, id, "metadata")
+	if err != nil {
+		return nil, fmt.Errorf("game metadata not found: %w", err)
+	}
+	// Populate screenshot URL if not set
+	if len(game.PreviewUrls) == 0 {
+		game.PreviewUrls = []string{fmt.Sprintf("/screenshots/games/%s/default.png", game.Id)}
+	}
+	return game, nil
+}
+
+// LoadGameState implements GameStorageProvider - loads game state directly from file storage
+func (s *FSGamesService) LoadGameState(ctx context.Context, id string) (*v1.GameState, error) {
+	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, id, "state")
+	if err != nil {
+		return nil, fmt.Errorf("game state not found: %w", err)
+	}
+	return gameState, nil
+}
+
+// LoadGameHistory implements GameStorageProvider - loads game history directly from file storage
+func (s *FSGamesService) LoadGameHistory(ctx context.Context, id string) (*v1.GameMoveHistory, error) {
+	gameHistory, err := storage.LoadFSArtifact[*v1.GameMoveHistory](s.storage, id, "history")
+	if err != nil {
+		return nil, fmt.Errorf("game history not found: %w", err)
+	}
+	return gameHistory, nil
+}
+
+// SaveGame implements GameStorageProvider - saves game metadata to file storage
+func (s *FSGamesService) SaveGame(ctx context.Context, id string, game *v1.Game) error {
+	return s.storage.SaveArtifact(id, "metadata", game)
+}
+
+// SaveGameState implements GameStorageProvider - saves game state to file storage
+func (s *FSGamesService) SaveGameState(ctx context.Context, id string, state *v1.GameState) error {
+	return s.storage.SaveArtifact(id, "state", state)
+}
+
+// SaveGameHistory implements GameStorageProvider - saves game history to file storage
+func (s *FSGamesService) SaveGameHistory(ctx context.Context, id string, history *v1.GameMoveHistory) error {
+	return s.storage.SaveArtifact(id, "history", history)
+}
+
+// DeleteFromStorage implements GameStorageProvider - deletes game from file storage
+func (s *FSGamesService) DeleteFromStorage(ctx context.Context, id string) error {
+	return s.storage.DeleteEntity(id)
+}
+
+// SaveMoves implements GameStorageProvider - appends moves to history file
+func (s *FSGamesService) SaveMoves(ctx context.Context, gameId string, group *v1.GameMoveGroup, currentGroupNumber int64) error {
+	// Load current history (or create empty)
+	history, _ := storage.LoadFSArtifact[*v1.GameMoveHistory](s.storage, gameId, "history")
+	if history == nil {
+		history = &v1.GameMoveHistory{GameId: gameId}
+	}
+
+	// Append group to history
+	history.Groups = append(history.Groups, group)
+
+	// Save history
+	return s.storage.SaveArtifact(gameId, "history", history)
 }
 
 // GetGameStateVersion implements GameStateUpdater interface
@@ -118,74 +176,6 @@ func (s *FSGamesService) ListGames(ctx context.Context, req *v1.ListGamesRequest
 	return resp, nil
 }
 
-// DeleteGame deletes a game
-func (s *FSGamesService) DeleteGame(ctx context.Context, req *v1.DeleteGameRequest) (resp *v1.DeleteGameResponse, err error) {
-	resp = &v1.DeleteGameResponse{}
-	err = s.storage.DeleteEntity(req.Id)
-	return
-}
-
-// GetGame returns a specific game with complete data including tiles and units
-func (s *FSGamesService) GetGame(ctx context.Context, req *v1.GetGameRequest) (resp *v1.GetGameResponse, err error) {
-	if req.Id == "" {
-		return nil, fmt.Errorf("game ID is required")
-	}
-
-	// Check cache first
-	if false {
-		if game, ok := s.gameCache[req.Id]; ok {
-			if state, ok := s.stateCache[req.Id]; ok {
-				if history, ok := s.historyCache[req.Id]; ok {
-					return &v1.GetGameResponse{
-						Game:    game,
-						State:   state,
-						History: history,
-					}, nil
-				}
-			}
-		}
-	}
-
-	// Load from disk
-	game, err := storage.LoadFSArtifact[*v1.Game](s.storage, req.Id, "metadata")
-	if err != nil {
-		return nil, fmt.Errorf("game metadata not found: %w", err)
-	}
-
-	// Populate screenshot URL if not set
-	if len(game.PreviewUrls) == 0 {
-		game.PreviewUrls = []string{fmt.Sprintf("/screenshots/games/%s/default.png", game.Id)}
-	}
-
-	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, req.Id, "state")
-	if err != nil {
-		return nil, fmt.Errorf("game state not found: %w", err)
-	}
-
-	gameHistory, err := storage.LoadFSArtifact[*v1.GameMoveHistory](s.storage, req.Id, "history")
-	if err != nil {
-		return nil, fmt.Errorf("game state not found: %w", err)
-	}
-
-	// Auto-migrate WorldData from old list-based format to new map-based format
-	// This does not persist the migration - subsequent writes will save the new format
-	if gameState.WorldData != nil {
-		lib.MigrateWorldData(gameState.WorldData)
-	}
-
-	// Cache everything
-	s.gameCache[req.Id] = game
-	s.stateCache[req.Id] = gameState
-	s.historyCache[req.Id] = gameHistory
-
-	resp = &v1.GetGameResponse{
-		Game:    game,
-		State:   gameState,
-		History: gameHistory,
-	}
-
-	return resp, nil
-}
 
 // CreateGame creates a new game
 func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest) (resp *v1.CreateGameResponse, err error) {
@@ -251,162 +241,6 @@ func (s *FSGamesService) CreateGame(ctx context.Context, req *v1.CreateGameReque
 	}
 
 	return resp, nil
-}
-
-// UpdateGame updates an existing game
-func (s *FSGamesService) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest) (resp *v1.UpdateGameResponse, err error) {
-	if req.GameId == "" {
-		return nil, fmt.Errorf("game ID is required")
-	}
-
-	resp = &v1.UpdateGameResponse{}
-	game, err := storage.LoadFSArtifact[*v1.Game](s.storage, req.GameId, "metadata")
-	if err != nil {
-		return nil, fmt.Errorf("game not found: %w", err)
-	}
-
-	// Load existing metadata if updating
-	if req.NewGame != nil {
-		// Update metadata fields
-		if req.NewGame.Name != "" {
-			game.Name = req.NewGame.Name
-		}
-		if req.NewGame.Description != "" {
-			game.Description = req.NewGame.Description
-		}
-		if req.NewGame.Tags != nil {
-			game.Tags = req.NewGame.Tags
-		}
-		if req.NewGame.Difficulty != "" {
-			game.Difficulty = req.NewGame.Difficulty
-		}
-		if req.NewGame.Config != nil {
-			game.Config = req.NewGame.Config
-		}
-		game.UpdatedAt = tspb.New(time.Now())
-
-		if err := s.storage.SaveArtifact(req.GameId, "metadata", game); err != nil {
-			return nil, fmt.Errorf("failed to update game metadata: %w", err)
-		}
-
-		// Update cache
-		s.gameCache[req.GameId] = game
-		resp.Game = game
-	}
-
-	if req.NewState != nil {
-		// Load current game state to get version
-		gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, req.GameId, "state")
-		if err != nil {
-			return nil, fmt.Errorf("failed to load game state: %w", err)
-		}
-
-		// Auto-migrate WorldData from old list-based format to new map-based format
-		if req.NewState.WorldData != nil {
-			lib.MigrateWorldData(req.NewState.WorldData)
-		}
-
-		// Make sure to topup units
-		if req.NewState.WorldData != nil {
-			rg, err := s.GetRuntimeGame(game, req.NewState)
-			if err != nil {
-				panic(err)
-			}
-			for _, unit := range req.NewState.WorldData.UnitsMap {
-				rg.TopUpUnitIfNeeded(unit)
-			}
-		}
-
-		oldVersion := gameState.Version
-		if req.NewState.WorldData.ScreenshotIndexInfo == nil {
-			req.NewState.WorldData.ScreenshotIndexInfo = &v1.IndexInfo{}
-		}
-		req.NewState.WorldData.ScreenshotIndexInfo.LastUpdatedAt = tspb.New(time.Now())
-		req.NewState.WorldData.ScreenshotIndexInfo.NeedsIndexing = true
-		req.NewState.Version = oldVersion + 1
-
-		if err := s.storage.SaveArtifact(req.GameId, "state", req.NewState); err != nil {
-			return nil, fmt.Errorf("failed to update game state: %w", err)
-		}
-
-		// Update cache and invalidate runtime game
-		s.stateCache[req.GameId] = req.NewState
-		delete(s.runtimeCache, req.GameId)
-
-		// Queue it for being screenshotted
-		s.ScreenShotIndexer.Send("games", req.GameId, req.NewState.Version, req.NewState.WorldData)
-	}
-
-	if req.NewHistory != nil {
-		if err := s.storage.SaveArtifact(req.GameId, "history", req.NewHistory); err != nil {
-			return nil, fmt.Errorf("failed to update game history: %w", err)
-		}
-
-		// Update cache
-		s.historyCache[req.GameId] = req.NewHistory
-	}
-
-	return resp, err
-}
-
-// GetRuntimeGame implements the interface method (for compatibility)
-func (s *FSGamesService) GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*lib.Game, error) {
-	return lib.ProtoToRuntimeGame(game, gameState), nil
-}
-
-// SaveMoveGroup saves a move group atomically with the game state.
-// For FS backend, this appends to history file then saves state (pseudo-atomic).
-func (s *FSGamesService) SaveMoveGroup(ctx context.Context, gameId string, state *v1.GameState, group *v1.GameMoveGroup) error {
-	// Load current history (or create empty)
-	history, _ := storage.LoadFSArtifact[*v1.GameMoveHistory](s.storage, gameId, "history")
-	if history == nil {
-		history = &v1.GameMoveHistory{GameId: gameId}
-	}
-
-	// Append group to history
-	history.Groups = append(history.Groups, group)
-
-	// Save history first (moves are the "uncommitted" data)
-	if err := s.storage.SaveArtifact(gameId, "history", history); err != nil {
-		return fmt.Errorf("failed to save history: %w", err)
-	}
-
-	// Save state (this is the "commit point")
-	if err := s.storage.SaveArtifact(gameId, "state", state); err != nil {
-		return fmt.Errorf("failed to save state: %w", err)
-	}
-
-	// Update caches
-	s.historyCache[gameId] = history
-	s.stateCache[gameId] = state
-	delete(s.runtimeCache, gameId)
-
-	// Queue for screenshot
-	s.ScreenShotIndexer.Send("games", gameId, state.Version, state.WorldData)
-
-	return nil
-}
-
-// GetRuntimeGameByID returns a cached runtime game instance for the given game ID
-func (s *FSGamesService) GetRuntimeGameByID(ctx context.Context, gameID string) (*lib.Game, error) {
-	// Check runtime cache first
-	if rtGame, ok := s.runtimeCache[gameID]; ok {
-		return rtGame, nil
-	}
-
-	// Load proto data (will use cache if available)
-	resp, err := s.GetGame(ctx, &v1.GetGameRequest{Id: gameID})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get game: %w", err)
-	}
-
-	// Convert to runtime game
-	rtGame := lib.ProtoToRuntimeGame(resp.Game, resp.State)
-
-	// Cache it
-	s.runtimeCache[gameID] = rtGame
-
-	return rtGame, nil
 }
 
 // Helper functions for serialization

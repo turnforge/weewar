@@ -16,8 +16,6 @@ import (
 	v1dal "github.com/turnforge/weewar/gen/gorm/dal"
 	"github.com/turnforge/weewar/lib"
 	"github.com/turnforge/weewar/services"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
@@ -51,11 +49,153 @@ func NewGamesService(db *gorm.DB, clientMgr *services.ClientMgr) *GamesService {
 		return nil
 	}
 	service.Self = service
-	service.GameStateUpdater = service // Implement GameStateUpdater interface
+	service.StorageProvider = service // GamesService implements GameStorageProvider
+	service.GameStateUpdater = service
+	service.InitializeCache() // Enable caching (optional - can be disabled via CacheEnabled = false)
 	service.InitializeScreenshotIndexer()
 	service.InitializeSyncBroadcast()
 
 	return service
+}
+
+// LoadGame implements GameStorageProvider - loads game directly from database
+func (s *GamesService) LoadGame(ctx context.Context, id string) (*v1.Game, error) {
+	gameGorm, err := s.GameDAL.Get(ctx, s.storage, id)
+	if err != nil {
+		return nil, fmt.Errorf("game not found: %w", err)
+	}
+	game, err := v1gorm.GameFromGameGORM(nil, gameGorm, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert game: %w", err)
+	}
+	// Populate screenshot URL if not set
+	if len(game.PreviewUrls) == 0 {
+		game.PreviewUrls = []string{fmt.Sprintf("/screenshots/games/%s/default.png", game.Id)}
+	}
+	return game, nil
+}
+
+// LoadGameState implements GameStorageProvider - loads game state directly from database
+func (s *GamesService) LoadGameState(ctx context.Context, id string) (*v1.GameState, error) {
+	stateGorm, err := s.GameStateDAL.Get(ctx, s.storage, id)
+	if err != nil {
+		return nil, fmt.Errorf("game state not found: %w", err)
+	}
+	state, err := v1gorm.GameStateFromGameStateGORM(nil, stateGorm, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert game state: %w", err)
+	}
+	return state, nil
+}
+
+// LoadGameHistory implements GameStorageProvider - loads game history directly from database
+func (s *GamesService) LoadGameHistory(ctx context.Context, id string) (*v1.GameMoveHistory, error) {
+	// Load moves and convert to history format
+	moves, err := s.GameMoveDAL.List(ctx, s.storage.Where("game_id = ?", id).Order("group_number asc").Order("timestamp asc"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load moves: %w", err)
+	}
+
+	// Group moves into GameMoveHistory
+	history := &v1.GameMoveHistory{GameId: id}
+	groupMap := make(map[int64]*v1.GameMoveGroup)
+
+	for _, moveGorm := range moves {
+		move, err := v1gorm.GameMoveFromGameMoveGORM(nil, moveGorm, nil)
+		if err != nil {
+			continue
+		}
+		groupNum := move.GroupNumber
+		if _, exists := groupMap[groupNum]; !exists {
+			groupMap[groupNum] = &v1.GameMoveGroup{
+				GroupNumber: groupNum,
+				Moves:       []*v1.GameMove{},
+			}
+		}
+		groupMap[groupNum].Moves = append(groupMap[groupNum].Moves, move)
+	}
+
+	// Convert map to sorted slice
+	for _, group := range groupMap {
+		history.Groups = append(history.Groups, group)
+	}
+
+	return history, nil
+}
+
+// SaveGame implements GameStorageProvider - saves game metadata to database
+func (s *GamesService) SaveGame(ctx context.Context, id string, game *v1.Game) error {
+	gameGorm, err := v1gorm.GameToGameGORM(game, nil, nil)
+	if err != nil {
+		return fmt.Errorf("failed to convert game: %w", err)
+	}
+	gameGorm.Id = id
+	return s.GameDAL.Save(ctx, s.storage, gameGorm)
+}
+
+// SaveGameState implements GameStorageProvider - saves game state to database
+func (s *GamesService) SaveGameState(ctx context.Context, id string, state *v1.GameState) error {
+	stateGorm, err := v1gorm.GameStateToGameStateGORM(state, nil, nil)
+	if err != nil {
+		return fmt.Errorf("failed to convert game state: %w", err)
+	}
+	stateGorm.GameId = id
+	return s.GameStateDAL.Save(ctx, s.storage, stateGorm)
+}
+
+// SaveGameHistory implements GameStorageProvider - saves game history to database
+// For GORM backend, this saves individual moves (history is virtual, built from moves)
+func (s *GamesService) SaveGameHistory(ctx context.Context, id string, history *v1.GameMoveHistory) error {
+	// For GORM, we save individual moves - the history is built from moves on read
+	// This is called after SaveMoveGroup has already saved the moves, so it's a no-op
+	// unless we need to rebuild the entire history
+	return nil
+}
+
+// DeleteFromStorage implements GameStorageProvider - deletes game from database
+func (s *GamesService) DeleteFromStorage(ctx context.Context, id string) error {
+	err := s.GameDAL.Delete(ctx, s.storage, id)
+	err = errors.Join(err, s.GameStateDAL.Delete(ctx, s.storage, id))
+	err = errors.Join(err, s.storage.Where("game_id = ?", id).Delete(&v1gorm.GameMoveGORM{}).Error)
+	return err
+}
+
+// SaveMoves implements GameStorageProvider - saves moves as individual rows with orphan cleanup
+func (s *GamesService) SaveMoves(ctx context.Context, gameId string, group *v1.GameMoveGroup, currentGroupNumber int64) error {
+	// Delete any orphan moves from previous failed ProcessMoves calls
+	// (moves with group_number > current_group_number are orphans)
+	if err := s.storage.Where("game_id = ? AND group_number > ?", gameId, currentGroupNumber-1).
+		Delete(&v1gorm.GameMoveGORM{}).Error; err != nil {
+		return fmt.Errorf("failed to delete orphan moves: %w", err)
+	}
+
+	// Save each move in the group as individual rows
+	for i, move := range group.Moves {
+		move.GroupNumber = group.GroupNumber
+		move.MoveNumber = int64(i)
+
+		moveGorm, err := v1gorm.GameMoveToGameMoveGORM(move, nil, func(src *v1.GameMove, dest *v1gorm.GameMoveGORM) error {
+			dest.GameId = gameId
+			// Handle oneof move_type by serializing to JSON bytes
+			if src.GetMoveType() != nil {
+				moveTypeBytes, err := protojson.Marshal(src)
+				if err != nil {
+					return fmt.Errorf("failed to serialize move_type: %w", err)
+				}
+				dest.MoveType = moveTypeBytes
+			}
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("failed to convert move %d: %w", i, err)
+		}
+
+		if err := s.storage.Create(moveGorm).Error; err != nil {
+			return fmt.Errorf("failed to save move %d: %w", i, err)
+		}
+	}
+
+	return nil
 }
 
 // GetGameStateVersion implements GameStateUpdater interface
@@ -121,53 +261,6 @@ func (s *GamesService) ListGames(ctx context.Context, req *v1.ListGamesRequest) 
 	return resp, nil
 }
 
-// GetGame returns a specific game with complete data including tiles and units
-func (s *GamesService) GetGame(ctx context.Context, req *v1.GetGameRequest) (resp *v1.GetGameResponse, err error) {
-	if req.Id == "" {
-		return nil, fmt.Errorf("game ID is required")
-	}
-
-	resp = &v1.GetGameResponse{}
-	ctx, span := Tracer.Start(ctx, "GetGame")
-	defer span.End()
-
-	// Load from disk
-	game, state, _ /*moves*/, err := s.getGameStateAndMoves(ctx, req.Id)
-	if err != nil {
-		return
-	} else if game == nil {
-		err = status.Error(codes.NotFound, fmt.Sprintf("Game with id '%s' not found", req.Id))
-		return
-	}
-
-	// Populate screenshot URL if not set
-	if len(game.PreviewUrls) == 0 {
-		game.PreviewUrls = []string{fmt.Sprintf("/screenshots/games/%s/default.png", game.Id)}
-	}
-
-	// Cache everything
-	resp.Game, _ = v1gorm.GameFromGameGORM(nil, game, nil)
-	resp.State, _ = v1gorm.GameStateFromGameStateGORM(nil, state, nil)
-	// TODO - convert move list to groups of moves and GroupMoveHistory
-	// resp.History, _ = v1gorm.GameStateFromGameStateGORM(nil, state, nil)
-
-	// Auto-migrate WorldData from old list-based format to new map-based format
-	// This does not persist the migration - subsequent writes will save the new format
-	if resp.State != nil && resp.State.WorldData != nil {
-		lib.MigrateWorldData(resp.State.WorldData)
-	}
-
-	return resp, nil
-}
-
-// DeleteGame deletes a game
-func (s *GamesService) DeleteGame(ctx context.Context, req *v1.DeleteGameRequest) (resp *v1.DeleteGameResponse, err error) {
-	err = s.GameDAL.Delete(ctx, s.storage, req.Id)
-	err = errors.Join(err, s.GameStateDAL.Delete(ctx, s.storage, req.Id))
-	err = errors.Join(s.storage.Where("game_id = ?", req.Id).Delete(&v1gorm.GameMoveGORM{}).Error)
-	resp = &v1.DeleteGameResponse{}
-	return resp, err
-}
 
 // CreateGame creates a new game
 func (s *GamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest) (resp *v1.CreateGameResponse, err error) {
@@ -246,208 +339,6 @@ func (s *GamesService) CreateGame(ctx context.Context, req *v1.CreateGameRequest
 	return resp, nil
 }
 
-// UpdateGame updates an existing game
-func (s *GamesService) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest) (resp *v1.UpdateGameResponse, err error) {
-	if req.GameId == "" {
-		return nil, fmt.Errorf("game ID is required")
-	}
-	resp = &v1.UpdateGameResponse{}
-	ctx, span := Tracer.Start(ctx, "UpdateGame")
-	defer span.End()
-
-	gameGORM, _ /*state*/, _ /*moves*/, err := s.getGameStateAndMoves(ctx, req.GameId)
-	if err != nil {
-		return
-	} else if gameGORM == nil {
-		err = status.Error(codes.NotFound, fmt.Sprintf("Game with id '%s' not found", req.GameId))
-		return
-	}
-	currGame, _ := v1gorm.GameFromGameGORM(nil, gameGORM, nil)
-
-	// Load existing metadata if updating
-	if req.NewGame != nil {
-		// Update metadata fields
-		if req.NewGame.Name != "" {
-			currGame.Name = req.NewGame.Name
-		}
-		if req.NewGame.Description != "" {
-			currGame.Description = req.NewGame.Description
-		}
-		if req.NewGame.Tags != nil {
-			currGame.Tags = req.NewGame.Tags
-		}
-		if req.NewGame.Difficulty != "" {
-			currGame.Difficulty = req.NewGame.Difficulty
-		}
-		if req.NewGame.Config != nil {
-			currGame.Config = req.NewGame.Config
-		}
-		currGame.UpdatedAt = tspb.New(time.Now())
-		gameGORM, _ = v1gorm.GameToGameGORM(currGame, nil, nil)
-
-		if err = s.GameDAL.Save(ctx, s.storage, gameGORM); err != nil {
-			return
-		}
-
-		resp.Game = currGame
-	}
-
-	if req.NewState != nil {
-		// Load current game state to get version
-		gameStateGorm, err := s.GameStateDAL.Get(ctx, s.storage, req.GameId)
-		if err != nil {
-			return resp, fmt.Errorf("failed to get game state: %w", err)
-		}
-
-		// Auto-migrate WorldData from old list-based format to new map-based format
-		if req.NewState.WorldData != nil {
-			lib.MigrateWorldData(req.NewState.WorldData)
-		}
-
-		// Make sure to topup units
-		if req.NewState.WorldData != nil {
-			rg, err := s.GetRuntimeGame(currGame, req.NewState)
-			if err != nil {
-				panic(err)
-			}
-			for _, unit := range req.NewState.WorldData.UnitsMap {
-				rg.TopUpUnitIfNeeded(unit)
-			}
-		}
-
-		oldVersion := gameStateGorm.Version
-
-		// Server controls version - don't trust client
-		req.NewState.Version = oldVersion
-
-		// Update the gameStateGorm with new state data
-		newGameStateGorm, _ := v1gorm.GameStateToGameStateGORM(req.NewState, nil, nil)
-		newGameStateGorm.GameId = req.GameId
-		newGameStateGorm.WorldData.ScreenshotIndexInfo.LastUpdatedAt = time.Now()
-		newGameStateGorm.WorldData.ScreenshotIndexInfo.NeedsIndexing = true
-		newGameStateGorm.Version = oldVersion + 1
-
-		// Optimistic lock: update GameState with version check
-		result := s.storage.Model(&v1gorm.GameStateGORM{}).
-			Where("game_id = ? AND version = ?", req.GameId, oldVersion).
-			Updates(newGameStateGorm)
-
-		if result.Error != nil {
-			return resp, fmt.Errorf("failed to update GameState: %w", result.Error)
-		}
-		if result.RowsAffected == 0 {
-			return resp, fmt.Errorf("optimistic lock failed: GameState was modified by another request")
-		}
-
-		// Queue it for being screenshotted
-		s.ScreenShotIndexer.Send("games", req.GameId, newGameStateGorm.Version, req.NewState.WorldData)
-	}
-
-	// Ignore history for now
-	if req.NewHistory != nil {
-		/*
-			if err := s.storage.SaveArtifact(req.GameId, "history", req.NewHistory); err != nil {
-				return nil, fmt.Errorf("failed to update game history: %w", err)
-			}
-		*/
-	}
-
-	return resp, err
-}
-
-// GetRuntimeGame implements the interface method (for compatibility)
-func (s *GamesService) GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*lib.Game, error) {
-	return lib.ProtoToRuntimeGame(game, gameState), nil
-}
-
-// GetRuntimeGameByID returns a cached runtime game instance for the given game ID
-func (s *GamesService) GetRuntimeGameByID(ctx context.Context, gameID string) (*lib.Game, error) {
-	// Load proto data (will use cache if available)
-	resp, err := s.GetGame(ctx, &v1.GetGameRequest{Id: gameID})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get game: %w", err)
-	}
-
-	// Convert to runtime game
-	rtGame := lib.ProtoToRuntimeGame(resp.Game, resp.State)
-
-	return rtGame, nil
-}
-
-func (s *GamesService) getGameStateAndMoves(ctx context.Context, gameId string) (game *v1gorm.GameGORM, state *v1gorm.GameStateGORM, moves []*v1gorm.GameMoveGORM, err error) {
-	game, err = s.GameDAL.Get(ctx, s.storage, gameId)
-	if err == nil {
-		state, err = s.GameStateDAL.Get(ctx, s.storage, gameId)
-	}
-	if err == nil {
-		moves, err = s.GameMoveDAL.List(ctx, s.storage.Where("game_id = ?", gameId).Order("group_number asc").Order("timestamp asc"))
-	}
-	// get the moves
-	return
-}
-
-// SaveMoveGroup saves a move group atomically with the game state using checkpoint pattern.
-// Moves are written first (orphans OK), then GameState is updated as the "commit point".
-// Only moves with groupNumber <= currentGroupNumber are considered valid.
-func (s *GamesService) SaveMoveGroup(ctx context.Context, gameId string, state *v1.GameState, group *v1.GameMoveGroup) error {
-	ctx, span := Tracer.Start(ctx, "SaveMoveGroup")
-	defer span.End()
-
-	// 0. Delete any orphan moves from previous failed ProcessMoves calls
-	// (moves with group_number > current_group_number are orphans)
-	if err := s.storage.Where("game_id = ? AND group_number > ?", gameId, state.CurrentGroupNumber-1).
-		Delete(&v1gorm.GameMoveGORM{}).Error; err != nil {
-		return fmt.Errorf("failed to delete orphan moves: %w", err)
-	}
-
-	// 1. Convert all moves to GORM format for batch insert
-	movesGorm := make([]*v1gorm.GameMoveGORM, 0, len(group.Moves))
-	for i, move := range group.Moves {
-		move.GroupNumber = group.GroupNumber
-		move.MoveNumber = int64(i)
-
-		moveGorm, err := v1gorm.GameMoveToGameMoveGORM(move, nil, func(src *v1.GameMove, dest *v1gorm.GameMoveGORM) error {
-			dest.GameId = gameId
-			// Handle oneof move_type by serializing to JSON bytes
-			if src.GetMoveType() != nil {
-				moveTypeBytes, err := protojson.Marshal(src)
-				if err != nil {
-					return fmt.Errorf("failed to serialize move_type: %w", err)
-				}
-				dest.MoveType = moveTypeBytes
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("failed to convert move %d: %w", i, err)
-		}
-		movesGorm = append(movesGorm, moveGorm)
-	}
-
-	// Batch insert all moves (single DB round trip instead of N)
-	if len(movesGorm) > 0 {
-		if err := s.storage.CreateInBatches(movesGorm, 100).Error; err != nil {
-			return fmt.Errorf("failed to save moves: %w", err)
-		}
-	}
-
-	// 2. Save GameState as the "commit point" - this makes the moves valid
-	stateGorm, err := v1gorm.GameStateToGameStateGORM(state, nil, nil)
-	if err != nil {
-		return fmt.Errorf("failed to convert game state: %w", err)
-	}
-	stateGorm.GameId = gameId
-	stateGorm.Version = state.Version + 1
-
-	if err := s.GameStateDAL.Save(ctx, s.storage, stateGorm); err != nil {
-		return fmt.Errorf("failed to save game state: %w", err)
-	}
-
-	// Queue for screenshot indexing
-	s.ScreenShotIndexer.Send("games", gameId, stateGorm.Version, state.WorldData)
-
-	return nil
-}
 
 // ListMoves returns moves from game history, optionally filtered by group range
 func (s *GamesService) ListMoves(ctx context.Context, req *v1.ListMovesRequest) (*v1.ListMovesResponse, error) {

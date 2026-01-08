@@ -9,13 +9,13 @@ import (
 
 // IndexStateGORM is the GORM model for weewar.v1.IndexState
 type IndexStateGORM struct {
-	EntityType     string
-	EntityId       string
+	EntityType     string `gorm:"index:idx_index_states_entity,priority:1"`
+	EntityId       string `gorm:"index:idx_index_states_entity,priority:2"`
 	IndexType      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	IndexedAt      time.Time
-	NeedsIndexing  bool
+	IndexedAt      time.Time `gorm:"index:idx_index_states_indexed_at"`
+	NeedsIndexing  bool      `gorm:"index:idx_index_states_needs_indexing,where:needs_indexing"`
 	Status         models.IndexStatus
 	LastError      string
 	IdempotencyKey string

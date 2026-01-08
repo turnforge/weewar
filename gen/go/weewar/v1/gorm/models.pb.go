@@ -361,6 +361,8 @@ func (x *WorldDataGORM) GetUnitsMap() map[string]*UnitGORM {
 type GameGORM struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// world_id indexed for queries filtering games by world
+	WorldId string `protobuf:"bytes,3,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	// Tags as JSON for cross-DB compatibility
 	Tags []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
 	// PreviewUrls as JSON for cross-DB compatibility
@@ -404,6 +406,13 @@ func (*GameGORM) Descriptor() ([]byte, []int) {
 func (x *GameGORM) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *GameGORM) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
 	}
 	return ""
 }
@@ -886,10 +895,13 @@ func (*GameMoveGroupGORM) Descriptor() ([]byte, []int) {
 // *
 // Represents a single move which can be one of many actions in the game
 type GameMoveGORM struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	GameId      string                 `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
-	GroupNumber int64                  `protobuf:"varint,2,opt,name=group_number,json=groupNumber,proto3" json:"group_number,omitempty"`
-	MoveNumber  int64                  `protobuf:"varint,3,opt,name=move_number,json=moveNumber,proto3" json:"move_number,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// game_id is indexed for queries like WHERE game_id = ? ORDER BY group_number
+	// Also part of composite index idx_game_moves_lookup for range queries
+	GameId string `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	// group_number is part of composite index for queries like WHERE game_id = ? AND group_number >= ?
+	GroupNumber int64 `protobuf:"varint,2,opt,name=group_number,json=groupNumber,proto3" json:"group_number,omitempty"`
+	MoveNumber  int64 `protobuf:"varint,3,opt,name=move_number,json=moveNumber,proto3" json:"move_number,omitempty"`
 	// Version number for optimistic locking
 	Version int64 `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
 	// Field named "move_type" matches the oneof name in source
@@ -1011,10 +1023,11 @@ const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12)\n" +
 	"\x05value\x18\x02 \x01(\v2\x13.weewar.v1.UnitGORMR\x05value:\x028\x01:'ʦ\x1d#\n" +
 	"\x13weewar.v1.WorldData\x12\n" +
-	"world_data \x01\"\xa2\x02\n" +
+	"world_data \x01\"\xdd\x02\n" +
 	"\bGameGORM\x12 \n" +
 	"\x02id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
-	"primaryKeyR\x02id\x12)\n" +
+	"primaryKeyR\x02id\x129\n" +
+	"\bworld_id\x18\x03 \x01(\tB\x1e\x92\xa6\x1d\x1aR\x18index:idx_games_world_idR\aworldId\x12)\n" +
 	"\x04tags\x18\a \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\x04tags\x128\n" +
 	"\fpreview_urls\x18\v \x03(\tB\x15\x92\xa6\x1d\x11R\x0fserializer:jsonR\vpreviewUrls\x12r\n" +
 	"\x11search_index_info\x18\r \x01(\v2\x18.weewar.v1.IndexInfoGORMB,\x92\xa6\x1d(R\bembeddedR\x1cembeddedPrefix:search_index_R\x0fsearchIndexInfo:\x1bʦ\x1d\x17\n" +
@@ -1064,12 +1077,12 @@ const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\x13GameMoveHistoryGORM:\x1fʦ\x1d\x1b\n" +
 	"\x19weewar.v1.GameMoveHistory\"2\n" +
 	"\x11GameMoveGroupGORM:\x1dʦ\x1d\x19\n" +
-	"\x17weewar.v1.GameMoveGroup\"\xf2\x02\n" +
-	"\fGameMoveGORM\x12)\n" +
-	"\agame_id\x18\x01 \x01(\tB\x10\x92\xa6\x1d\fR\n" +
-	"primaryKeyR\x06gameId\x123\n" +
-	"\fgroup_number\x18\x02 \x01(\x03B\x10\x92\xa6\x1d\fR\n" +
-	"primaryKeyR\vgroupNumber\x121\n" +
+	"\x17weewar.v1.GameMoveGroup\"\xe0\x03\n" +
+	"\fGameMoveGORM\x12o\n" +
+	"\agame_id\x18\x01 \x01(\tBV\x92\xa6\x1dRR\n" +
+	"primaryKeyR\x1cindex:idx_game_moves_game_idR&index:idx_game_moves_lookup,priority:1R\x06gameId\x12[\n" +
+	"\fgroup_number\x18\x02 \x01(\x03B8\x92\xa6\x1d4R\n" +
+	"primaryKeyR&index:idx_game_moves_lookup,priority:2R\vgroupNumber\x121\n" +
 	"\vmove_number\x18\x03 \x01(\x03B\x10\x92\xa6\x1d\fR\n" +
 	"primaryKeyR\n" +
 	"moveNumber\x12\x18\n" +

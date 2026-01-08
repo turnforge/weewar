@@ -23,10 +23,11 @@ _sym_db = _symbol_database.Default()
 
 
 from dal.v1 import annotations_pb2 as dal_dot_v1_dot_annotations__pb2
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 from weewar.v1.models import indexer_pb2 as weewar_dot_v1_dot_models_dot_indexer__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto\":\n\x0eIndexStateGORM:(\xca\xa6\x1d$\n\x14weewar.v1.IndexState\x12\x0cindex_states\"\x15\n\x13IndexRecordsLROGORMB\x9e\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eweewar/v1/models/indexer.proto\"\xa5\x03\n\x0eIndexStateGORM\x12O\n\x0b\x65ntity_type\x18\x01 \x01(\tB.\x92\xa6\x1d*R(index:idx_index_states_entity,priority:1R\nentityType\x12K\n\tentity_id\x18\x02 \x01(\tB.\x92\xa6\x1d*R(index:idx_index_states_entity,priority:2R\x08\x65ntityId\x12\x62\n\nindexed_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\'\x92\xa6\x1d#R!index:idx_index_states_indexed_atR\tindexedAt\x12g\n\x0eneeds_indexing\x18\x04 \x01(\x08\x42@\x92\xa6\x1d<R:index:idx_index_states_needs_indexing,where:needs_indexingR\rneedsIndexing:(\xca\xa6\x1d$\n\x14weewar.v1.IndexState\x12\x0cindex_states\"\x15\n\x13IndexRecordsLROGORMB\x9e\x01\n\rcom.weewar.v1B\x0cIndexerProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,10 +35,18 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'weewar.v1.gorm.indexer_pb2'
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\rcom.weewar.v1B\014IndexerProtoP\001Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\242\002\003WXX\252\002\tWeewar.V1\312\002\tWeewar\\V1\342\002\025Weewar\\V1\\GPBMetadata\352\002\nWeewar::V1'
+  _globals['_INDEXSTATEGORM'].fields_by_name['entity_type']._loaded_options = None
+  _globals['_INDEXSTATEGORM'].fields_by_name['entity_type']._serialized_options = b'\222\246\035*R(index:idx_index_states_entity,priority:1'
+  _globals['_INDEXSTATEGORM'].fields_by_name['entity_id']._loaded_options = None
+  _globals['_INDEXSTATEGORM'].fields_by_name['entity_id']._serialized_options = b'\222\246\035*R(index:idx_index_states_entity,priority:2'
+  _globals['_INDEXSTATEGORM'].fields_by_name['indexed_at']._loaded_options = None
+  _globals['_INDEXSTATEGORM'].fields_by_name['indexed_at']._serialized_options = b'\222\246\035#R!index:idx_index_states_indexed_at'
+  _globals['_INDEXSTATEGORM'].fields_by_name['needs_indexing']._loaded_options = None
+  _globals['_INDEXSTATEGORM'].fields_by_name['needs_indexing']._serialized_options = b'\222\246\035<R:index:idx_index_states_needs_indexing,where:needs_indexing'
   _globals['_INDEXSTATEGORM']._loaded_options = None
   _globals['_INDEXSTATEGORM']._serialized_options = b'\312\246\035$\n\024weewar.v1.IndexState\022\014index_states'
-  _globals['_INDEXSTATEGORM']._serialized_start=101
-  _globals['_INDEXSTATEGORM']._serialized_end=159
-  _globals['_INDEXRECORDSLROGORM']._serialized_start=161
-  _globals['_INDEXRECORDSLROGORM']._serialized_end=182
+  _globals['_INDEXSTATEGORM']._serialized_start=135
+  _globals['_INDEXSTATEGORM']._serialized_end=556
+  _globals['_INDEXRECORDSLROGORM']._serialized_start=558
+  _globals['_INDEXRECORDSLROGORM']._serialized_end=579
 # @@protoc_insertion_point(module_scope)

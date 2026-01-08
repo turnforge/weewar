@@ -292,6 +292,10 @@ func (re *RulesEngine) canPerformAction(unit *v1.Unit, unitDef *v1.UnitDefinitio
 		// Can retreat if has retreat points remaining (DistanceLeft is set to retreat_points after attack)
 		return unit.DistanceLeft > 0
 
+	case "fix":
+		// Can fix if unit has fix_value > 0 (unit is a repair unit)
+		return unitDef.FixValue > 0
+
 	default:
 		return false
 	}

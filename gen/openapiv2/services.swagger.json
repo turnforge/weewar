@@ -2359,6 +2359,25 @@
         }
       }
     },
+    "v1FixUnitAction": {
+      "type": "object",
+      "properties": {
+        "fixer": {
+          "$ref": "#/definitions/v1Position",
+          "title": "Position of the unit doing the fixing"
+        },
+        "target": {
+          "$ref": "#/definitions/v1Position",
+          "title": "Position of the friendly unit being fixed"
+        },
+        "fixAmount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Amount of health to restore (optional, server calculates if not provided)"
+        }
+      },
+      "title": "*\nFix (repair) another friendly unit - used by Medic, Engineer, Stratotanker, Tugboat, Aircraft Carrier\nThe fixer must be adjacent to the target unit"
+    },
     "v1Game": {
       "type": "object",
       "properties": {
@@ -2510,6 +2529,9 @@
         },
         "healUnit": {
           "$ref": "#/definitions/v1HealUnitAction"
+        },
+        "fixUnit": {
+          "$ref": "#/definitions/v1FixUnitAction"
         },
         "sequenceNum": {
           "type": "string",
@@ -3881,6 +3903,29 @@
       },
       "title": "*\nA unit took damage"
     },
+    "v1UnitFixedChange": {
+      "type": "object",
+      "properties": {
+        "fixerUnit": {
+          "$ref": "#/definitions/v1Unit",
+          "title": "Unit that performed the fix"
+        },
+        "previousTarget": {
+          "$ref": "#/definitions/v1Unit",
+          "title": "Target unit state before fix"
+        },
+        "updatedTarget": {
+          "$ref": "#/definitions/v1Unit",
+          "title": "Target unit state after fix"
+        },
+        "fixAmount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Amount of health restored"
+        }
+      },
+      "title": "*\nA unit was fixed (repaired) by another unit"
+    },
     "v1UnitHealedChange": {
       "type": "object",
       "properties": {
@@ -4095,6 +4140,9 @@
         },
         "unitHealed": {
           "$ref": "#/definitions/v1UnitHealedChange"
+        },
+        "unitFixed": {
+          "$ref": "#/definitions/v1UnitFixedChange"
         }
       },
       "title": "*\nRepresents a change to the game world"

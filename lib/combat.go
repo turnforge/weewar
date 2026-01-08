@@ -148,3 +148,104 @@ func (re *RulesEngine) CanUnitAttackTarget(attacker *v1.Unit, target *v1.Unit) (
 
 	return distance <= int(unitData.AttackRange), nil
 }
+
+// GetFixOptions returns all adjacent friendly units that can be fixed by this unit
+func (re *RulesEngine) GetFixOptions(world *World, fixer *v1.Unit) ([]AxialCoord, error) {
+	if fixer == nil {
+		return nil, fmt.Errorf("fixer unit is nil")
+	}
+
+	// Check if this unit can fix
+	fixerData, err := re.GetUnitData(fixer.UnitType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get fixer data: %w", err)
+	}
+
+	if fixerData.FixValue <= 0 {
+		return nil, nil // Unit cannot fix
+	}
+
+	var fixPositions []AxialCoord
+	fixerCoord := UnitGetCoord(fixer)
+
+	// Get all adjacent hexes (distance 1)
+	var neighbors [6]AxialCoord
+	fixerCoord.Neighbors(&neighbors)
+
+	for _, neighborCoord := range neighbors {
+		// Check if there's a friendly unit at this position
+		targetUnit := world.UnitAt(neighborCoord)
+		if targetUnit == nil {
+			continue // No unit to fix
+		}
+
+		// Check if it's a friendly unit (same player)
+		if targetUnit.Player != fixer.Player {
+			continue // Enemy unit, can't fix
+		}
+
+		// Check if target is damaged
+		targetData, err := re.GetUnitData(targetUnit.UnitType)
+		if err != nil {
+			continue // Can't get target data
+		}
+		if targetUnit.AvailableHealth >= targetData.Health {
+			continue // Already at max health
+		}
+
+		// Check if fixer can fix this target type (terrain compatibility)
+		canFix, _ := re.CanUnitFixTarget(fixer, targetUnit)
+		if canFix {
+			fixPositions = append(fixPositions, neighborCoord)
+		}
+	}
+
+	return fixPositions, nil
+}
+
+// CanUnitFixTarget checks if a fixer unit can fix a specific target unit
+// based on unit terrain type compatibility
+func (re *RulesEngine) CanUnitFixTarget(fixer *v1.Unit, target *v1.Unit) (bool, error) {
+	if fixer == nil || target == nil {
+		return false, fmt.Errorf("fixer or target is nil")
+	}
+
+	// Check if fixer has fix ability
+	fixerData, err := re.GetUnitData(fixer.UnitType)
+	if err != nil {
+		return false, err
+	}
+	if fixerData.FixValue <= 0 {
+		return false, nil // Cannot fix
+	}
+
+	// Check if they are on the same team
+	if fixer.Player != target.Player {
+		return false, nil // Can only fix friendly units
+	}
+
+	// Check terrain compatibility using DefaultFixTargets
+	allowedTerrains, hasRestriction := DefaultFixTargets[fixer.UnitType]
+	if !hasRestriction {
+		// No specific restriction, check if fixer terrain matches target terrain
+		targetData, err := re.GetUnitData(target.UnitType)
+		if err != nil {
+			return false, err
+		}
+		return fixerData.UnitTerrain == targetData.UnitTerrain, nil
+	}
+
+	// Check if target's terrain is in the allowed list
+	targetData, err := re.GetUnitData(target.UnitType)
+	if err != nil {
+		return false, err
+	}
+
+	for _, terrain := range allowedTerrains {
+		if targetData.UnitTerrain == terrain {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}

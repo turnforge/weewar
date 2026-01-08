@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
@@ -158,6 +159,15 @@ func newActionSequenceTestRunner(t *testing.T, tc ActionSequenceTestCase) *actio
 	unitDef, _ := game.RulesEngine.GetUnitData(testUnitTypeSoldier)
 	unitDef.ActionOrder = tc.ActionOrder
 
+	// If pattern contains "fix", enable fix capability on the unit
+	for _, step := range tc.ActionOrder {
+		if strings.Contains(step, "fix") {
+			unitDef.FixValue = 10        // Enable fix ability
+			unitDef.UnitTerrain = "Land" // Set terrain type for compatibility
+			break
+		}
+	}
+
 	runner := &actionSequenceTestRunner{
 		t:           t,
 		game:        game,
@@ -185,6 +195,8 @@ func newActionSequenceTestRunner(t *testing.T, tc ActionSequenceTestCase) *actio
 	}
 
 	// Add damaged friendly unit if needed (for fix tests)
+	// Place at (2, 0) so it's adjacent to (1, 0) where unit moves to in "move then fix" tests
+	// For tests without move, it's also adjacent to (0, 0) where unit starts
 	if setup.DamagedFriendly {
 		friendly := &v1.Unit{
 			Q: -1, R: 0, Player: 1, UnitType: testUnitTypeSoldier,
@@ -266,8 +278,18 @@ func (r *actionSequenceTestRunner) executeAction(action string) error {
 		}
 
 	case "fix":
-		// Fix is not yet implemented - return special error for skip detection
-		return fmt.Errorf("SKIP: fix action not yet implemented")
+		// Fix requires a damaged friendly unit adjacent to the fixer
+		if r.friendly == nil {
+			return fmt.Errorf("no friendly unit available for fix")
+		}
+		move = &v1.GameMove{
+			MoveType: &v1.GameMove_FixUnit{
+				FixUnit: &v1.FixUnitAction{
+					Fixer:  &v1.Position{Q: unit.Q, R: unit.R},
+					Target: &v1.Position{Q: r.friendly.Q, R: r.friendly.R},
+				},
+			},
+		}
 
 	case "heal":
 		move = &v1.GameMove{
@@ -291,6 +313,13 @@ func (r *actionSequenceTestRunner) executeAction(action string) error {
 }
 
 func (r *actionSequenceTestRunner) findPlayerUnit(player int32) *v1.Unit {
+	// Find the main test unit (shortcut "A1"), not the friendly unit ("A2")
+	for _, u := range r.game.World.GetPlayerUnits(int(player)) {
+		if u.Shortcut == "A1" {
+			return u
+		}
+	}
+	// Fallback to any player unit if A1 not found
 	for _, u := range r.game.World.GetPlayerUnits(int(player)) {
 		return u
 	}
@@ -955,64 +984,54 @@ func TestGetAllowedActionsForUnit_AllPatterns(t *testing.T) {
 			dontWant:        []string{"retreat"},
 		},
 
-		// Pattern 7: Engineer (3-way)
-		// NOTE: "fix" not yet recognized by GetAllowedActionsForUnit until ProcessFixUnit implemented
+		// Pattern 7: Engineer (3-way choice after move)
 		{
-			name:            "engineer_step_1_allows_attack_capture",
+			name:            "engineer_step_1_allows_attack_capture_fix",
 			pattern:         PatternEngineer,
 			progressionStep: 1,
 			distanceLeft:    0,
-			wantActions:     []string{"attack", "capture"},
-			// TODO: Add "fix" to wantActions when ProcessFixUnit is implemented
+			wantActions:     []string{"attack", "capture", "fix"},
 		},
 
-		// Pattern 8: Support
-		// NOTE: "fix" not yet recognized until ProcessFixUnit implemented
+		// Pattern 8: Support (move then attack|fix)
 		{
-			name:            "support_step_1_allows_attack",
+			name:            "support_step_1_allows_attack_fix",
 			pattern:         PatternSupport,
 			progressionStep: 1,
 			distanceLeft:    0,
-			wantActions:     []string{"attack"},
-			// TODO: Add "fix" to wantActions when ProcessFixUnit is implemented
+			wantActions:     []string{"attack", "fix"},
 		},
 
-		// Pattern 9: Medic
-		// NOTE: "fix" not yet recognized until ProcessFixUnit implemented
+		// Pattern 9: Medic (move|fix at step 0, then 3-way at step 1)
 		{
-			name:            "medic_step_0_allows_move",
+			name:            "medic_step_0_allows_move_fix",
 			pattern:         PatternMedic,
 			progressionStep: 0,
 			distanceLeft:    3,
-			wantActions:     []string{"move"},
-			// TODO: Add "fix" to wantActions when ProcessFixUnit is implemented
+			wantActions:     []string{"move", "fix"},
 		},
 		{
-			name:            "medic_step_1_allows_attack_capture",
+			name:            "medic_step_1_allows_attack_capture_fix",
 			pattern:         PatternMedic,
 			progressionStep: 1,
 			distanceLeft:    0,
-			wantActions:     []string{"attack", "capture"},
-			// TODO: Add "fix" to wantActions when ProcessFixUnit is implemented
+			wantActions:     []string{"attack", "capture", "fix"},
 		},
 
-		// Pattern 10: Carrier
-		// NOTE: "fix" not yet recognized until ProcessFixUnit implemented
+		// Pattern 10: Carrier (move|fix at step 0, then attack|fix at step 1)
 		{
-			name:            "carrier_step_0_allows_move",
+			name:            "carrier_step_0_allows_move_fix",
 			pattern:         PatternCarrier,
 			progressionStep: 0,
 			distanceLeft:    3,
-			wantActions:     []string{"move"},
-			// TODO: Add "fix" to wantActions when ProcessFixUnit is implemented
+			wantActions:     []string{"move", "fix"},
 		},
 		{
-			name:            "carrier_step_1_allows_attack",
+			name:            "carrier_step_1_allows_attack_fix",
 			pattern:         PatternCarrier,
 			progressionStep: 1,
 			distanceLeft:    0,
-			wantActions:     []string{"attack"},
-			// TODO: Add "fix" to wantActions when ProcessFixUnit is implemented
+			wantActions:     []string{"attack", "fix"},
 		},
 	}
 
@@ -1026,6 +1045,14 @@ func TestGetAllowedActionsForUnit_AllPatterns(t *testing.T) {
 
 			unitDef := &v1.UnitDefinition{
 				ActionOrder: tt.pattern,
+			}
+
+			// If pattern contains "fix", enable fix capability
+			for _, step := range tt.pattern {
+				if strings.Contains(step, "fix") {
+					unitDef.FixValue = 10
+					break
+				}
 			}
 
 			allowed := rulesEngine.GetAllowedActionsForUnit(unit, unitDef)

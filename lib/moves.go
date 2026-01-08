@@ -88,6 +88,8 @@ func (g *Game) ProcessMove(move *v1.GameMove) (err error) {
 		return g.ProcessCaptureBuilding(move, a.CaptureBuilding)
 	case *v1.GameMove_HealUnit:
 		return g.ProcessHealUnit(move, a.HealUnit)
+	case *v1.GameMove_FixUnit:
+		return g.ProcessFixUnit(move, a.FixUnit)
 	case *v1.GameMove_EndTurn:
 		return g.ProcessEndTurn(move, a.EndTurn)
 	default:
@@ -419,6 +421,187 @@ func (g *Game) ProcessHealUnit(move *v1.GameMove, action *v1.HealUnitAction) (er
 	move.Changes = append(move.Changes, healChange)
 
 	return nil
+}
+
+// ProcessFixUnit executes the fix (repair) action where one unit repairs another friendly unit.
+// Fix calculation: p = 0.05 * fix_value, for each health unit of fixer roll 3 random numbers,
+// count where r < p, divide by 3 for health restored.
+func (g *Game) ProcessFixUnit(move *v1.GameMove, action *v1.FixUnitAction) (err error) {
+	// Parse fixer position
+	fixerCoord, err := g.FromPos(action.Fixer)
+	if err != nil {
+		return fmt.Errorf("invalid fixer position: %w", err)
+	}
+
+	// Parse target position relative to fixer
+	targetCoord, err := g.FromPosWithBase(action.Target, &fixerCoord)
+	if err != nil {
+		return fmt.Errorf("invalid target position: %w", err)
+	}
+
+	// Get the fixer unit
+	fixer := g.World.UnitAt(fixerCoord)
+	if fixer == nil {
+		return fmt.Errorf("no unit at fixer position %v", fixerCoord)
+	}
+
+	// Verify fixer belongs to current player
+	if fixer.Player != g.CurrentPlayer {
+		return fmt.Errorf("fixer unit belongs to player %d, not current player %d", fixer.Player, g.CurrentPlayer)
+	}
+
+	// Apply lazy top-up pattern
+	if err := g.TopUpUnitIfNeeded(fixer); err != nil {
+		return fmt.Errorf("failed to top-up fixer: %w", err)
+	}
+
+	// Get the target unit
+	target := g.World.UnitAt(targetCoord)
+	if target == nil {
+		return fmt.Errorf("no unit at target position %v", targetCoord)
+	}
+
+	// Verify target is a friendly unit (same player)
+	if target.Player != fixer.Player {
+		return fmt.Errorf("can only fix friendly units")
+	}
+
+	// Verify fixer is adjacent to target
+	distance := CubeDistance(fixerCoord, targetCoord)
+	if distance != 1 {
+		return fmt.Errorf("fixer must be adjacent to target (distance is %d)", distance)
+	}
+
+	// Get fixer unit definition to check fix_value
+	fixerData, err := g.RulesEngine.GetUnitData(fixer.UnitType)
+	if err != nil {
+		return fmt.Errorf("failed to get fixer unit data: %w", err)
+	}
+
+	// Verify unit can fix (has fix_value > 0)
+	if fixerData.FixValue <= 0 {
+		return fmt.Errorf("unit type %s cannot fix other units", fixerData.Name)
+	}
+
+	// Verify fixer can fix this target type (terrain compatibility)
+	canFix, err := g.RulesEngine.CanUnitFixTarget(fixer, target)
+	if err != nil {
+		return fmt.Errorf("failed to check fix compatibility: %w", err)
+	}
+	if !canFix {
+		targetData, _ := g.RulesEngine.GetUnitData(target.UnitType)
+		targetTerrain := "unknown"
+		if targetData != nil {
+			targetTerrain = targetData.UnitTerrain
+		}
+		return fmt.Errorf("unit type %s cannot fix %s units", fixerData.Name, targetTerrain)
+	}
+
+	// Get target unit definition to check max health
+	targetData, err := g.RulesEngine.GetUnitData(target.UnitType)
+	if err != nil {
+		return fmt.Errorf("failed to get target unit data: %w", err)
+	}
+
+	// Check if target is already at max health
+	if target.AvailableHealth >= targetData.Health {
+		return fmt.Errorf("target unit already at max health")
+	}
+
+	// Calculate fix amount
+	fixAmount := action.FixAmount
+	if fixAmount <= 0 {
+		// Server calculates fix amount if not provided
+		fixAmount = g.calculateFixAmount(fixer, fixerData)
+	}
+
+	// Cap fix amount so target doesn't exceed max health
+	maxHeal := targetData.Health - target.AvailableHealth
+	if fixAmount > maxHeal {
+		fixAmount = maxHeal
+	}
+
+	// Capture previous target state (fixer state captured after progression update)
+	previousTarget := copyUnit(target)
+
+	// Apply the fix
+	target.AvailableHealth += fixAmount
+
+	// Update progression: record chosen alternative and advance step
+	actionOrder := fixerData.ActionOrder
+	if len(actionOrder) == 0 {
+		actionOrder = []string{"move", "attack|capture"}
+	}
+
+	// If current step has pipe-separated alternatives, record the choice
+	if int(fixer.ProgressionStep) < len(actionOrder) {
+		stepActions := actionOrder[fixer.ProgressionStep]
+		if strings.Contains(stepActions, "|") {
+			fixer.ChosenAlternative = "fix"
+		}
+	}
+
+	// Advance to next step (fix action consumed)
+	fixer.ProgressionStep++
+	fixer.ChosenAlternative = "" // Clear for next step
+
+	// Mark fixer as having acted this turn
+	fixer.LastActedTurn = g.TurnCounter
+
+	// Capture updated states
+	updatedFixer := copyUnit(fixer)
+	updatedTarget := copyUnit(target)
+
+	// Update timestamp
+	g.GameState.UpdatedAt = tspb.New(time.Now())
+
+	// Record the fix change
+	fixChange := &v1.WorldChange{
+		ChangeType: &v1.WorldChange_UnitFixed{
+			UnitFixed: &v1.UnitFixedChange{
+				FixerUnit:      updatedFixer,
+				PreviousTarget: previousTarget,
+				UpdatedTarget:  updatedTarget,
+				FixAmount:      fixAmount,
+			},
+		},
+	}
+	move.Changes = append(move.Changes, fixChange)
+
+	return nil
+}
+
+// calculateFixAmount determines how much health is restored using the fix formula.
+// Formula: p = 0.05 * fix_value
+// For each health unit of fixer, roll 3 random numbers between 0 and 1.
+// Each r < p counts as a fix. Total fixes / 3 = health units restored.
+func (g *Game) calculateFixAmount(fixer *v1.Unit, fixerData *v1.UnitDefinition) int32 {
+	fixValue := fixerData.FixValue
+	if fixValue <= 0 {
+		return 0
+	}
+
+	// Calculate probability p = 0.05 * fix_value
+	p := 0.05 * float64(fixValue)
+	if p > 1.0 {
+		p = 1.0
+	}
+
+	// For each health unit of fixer, roll 3 random numbers
+	fixCount := int32(0)
+	healthUnits := fixer.AvailableHealth
+
+	for h := int32(0); h < healthUnits; h++ {
+		for roll := 0; roll < 3; roll++ {
+			r := g.rng.Float64()
+			if r < p {
+				fixCount++
+			}
+		}
+	}
+
+	// Total fixes divided by 3 = health units restored
+	return fixCount / 3
 }
 
 // ProcessEndTurn advances to next player's turn.

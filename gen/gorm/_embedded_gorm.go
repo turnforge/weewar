@@ -7,28 +7,16 @@ type UnitsMapEntry struct {
 	Value UnitGORM
 }
 
-// TilesMapEntry
-type TilesMapEntry struct {
-	Key   string
-	Value TileGORM
-}
-
-// Timestamp
-type Timestamp struct {
-	Seconds int64
-	Nanos   int32
-}
-
 // CrossingsEntry
 type CrossingsEntry struct {
 	Key   string
 	Value CrossingGORM
 }
 
-// UnitsMapEntry
-type UnitsMapEntry struct {
+// TilesMapEntry
+type TilesMapEntry struct {
 	Key   string
-	Value UnitGORM
+	Value TileGORM
 }
 
 // Any
@@ -41,16 +29,4 @@ type Any struct {
 type PlayerStatesEntry struct {
 	Key   int32
 	Value PlayerStateGORM
-}
-
-// CrossingsEntry
-type CrossingsEntry struct {
-	Key   string
-	Value CrossingGORM
-}
-
-// TilesMapEntry
-type TilesMapEntry struct {
-	Key   string
-	Value TileGORM
 }

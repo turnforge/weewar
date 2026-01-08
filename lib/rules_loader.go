@@ -31,8 +31,39 @@ const (
 
 // Unit type constants
 const (
-	UnitTypeSoldier = 1 // Infantry/Trooper - can capture bases
+	UnitTypeSoldier         = 1  // Infantry/Trooper - can capture bases
+	UnitTypeMedic           = 27 // Medic - can fix friendly units
+	UnitTypeStratotanker    = 28 // Stratotanker - can fix air units
+	UnitTypeEngineer        = 29 // Engineer - can capture and fix
+	UnitTypeTugboat         = 31 // Tugboat - can fix naval units
+	UnitTypeAircraftCarrier = 39 // Aircraft Carrier - can fix air units
 )
+
+// Default fix values for units that can repair other units
+// These are used if fix_value is not specified in the rules JSON
+// Formula: p = 0.05 * fix_value, giving probability of each roll succeeding
+var DefaultFixValues = map[int32]int32{
+	UnitTypeMedic:           10, // p=0.5: Expected ~5 health per fix action
+	UnitTypeStratotanker:    10, // p=0.5: Expected ~5 health per fix action
+	UnitTypeEngineer:        10, // p=0.5: Expected ~5 health per fix action
+	UnitTypeTugboat:         10, // p=0.5: Expected ~5 health per fix action
+	UnitTypeAircraftCarrier: 10, // p=0.5: Expected ~5 health per fix action
+}
+
+// DefaultFixTargets maps fixer unit ID -> list of target unit_terrain types it can fix
+// Based on game rules:
+// - Medic (27): Land unit, fixes Land units
+// - Stratotanker (28): Air unit, fixes Air units
+// - Engineer (29): Land unit, fixes Land units
+// - Tugboat (31): Water unit, fixes Water units
+// - Aircraft Carrier (39): Water unit, fixes Air units (special case)
+var DefaultFixTargets = map[int32][]string{
+	UnitTypeMedic:           {"Land"},
+	UnitTypeStratotanker:    {"Air"},
+	UnitTypeEngineer:        {"Land"},
+	UnitTypeTugboat:         {"Water"},
+	UnitTypeAircraftCarrier: {"Air"},
+}
 
 // Default Income available from various tile types if this is not already in our rules data json
 // All other tiles do not generate income
@@ -256,6 +287,9 @@ func LoadRulesEngineFromJSON(rulesJSON []byte, damageJSON []byte) (*RulesEngine,
 	// Set default income values for terrains
 	SetDefaultIncomeValues(rulesEngine)
 
+	// Set default fix values for repair units
+	SetDefaultFixValues(rulesEngine)
+
 	// Populate reference maps from centralized properties for fast lookup
 	rulesEngine.PopulateReferenceMaps()
 
@@ -347,6 +381,19 @@ func SetDefaultIncomeValues(re *RulesEngine) {
 		// Check if this tile ID has a default income value
 		if income, ok := DefaultIncomeMap[tileID]; ok {
 			terrain.IncomePerTurn = income
+		}
+	}
+}
+
+// SetDefaultFixValues sets default fix_value for units that can repair other units
+// Only sets the value if it's not already specified in the loaded data
+func SetDefaultFixValues(re *RulesEngine) {
+	for unitID, unit := range re.Units {
+		// Only set if fix_value is not already defined (0 means unset)
+		if unit.FixValue == 0 {
+			if fixValue, ok := DefaultFixValues[unitID]; ok {
+				unit.FixValue = fixValue
+			}
 		}
 	}
 }

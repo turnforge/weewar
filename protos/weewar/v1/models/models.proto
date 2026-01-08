@@ -294,6 +294,11 @@ message UnitDefinition {
   // Example: {"attack": 2} means can attack twice
   // Default if not specified: 1 per action type
   map<string, int32> action_limits = 18;
+
+  // Fix value for units that can repair other units (Medic, Engineer, etc.)
+  // Used in fix calculation: p = 0.05 * fix_value
+  // Default 0 means unit cannot fix
+  int32 fix_value = 19;
 }
 
 // Properties that are specific to unit on a particular terrain
@@ -587,6 +592,7 @@ message GameMove {
     BuildUnitAction build_unit = 8;
     CaptureBuildingAction capture_building = 13;
     HealUnitAction heal_unit = 14;
+    FixUnitAction fix_unit = 15;
   }
 
   // A monotonically increasing and unique (within the game) sequence number for the move
@@ -682,6 +688,16 @@ message HealUnitAction {
 }
 
 /**
+ * Fix (repair) another friendly unit - used by Medic, Engineer, Stratotanker, Tugboat, Aircraft Carrier
+ * The fixer must be adjacent to the target unit
+ */
+message FixUnitAction {
+  Position fixer = 1;         // Position of the unit doing the fixing
+  Position target = 2;        // Position of the friendly unit being fixed
+  int32 fix_amount = 3;       // Amount of health to restore (optional, server calculates if not provided)
+}
+
+/**
  * Represents a change to the game world
  */
 message WorldChange {
@@ -696,6 +712,7 @@ message WorldChange {
     TileCapturedChange tile_captured = 7;
     CaptureStartedChange capture_started = 8;
     UnitHealedChange unit_healed = 9;
+    UnitFixedChange unit_fixed = 10;
   }
 }
 
@@ -706,6 +723,16 @@ message UnitHealedChange {
   Unit previous_unit = 1;   // Unit state before healing
   Unit updated_unit = 2;    // Unit state after healing
   int32 heal_amount = 3;    // Amount healed
+}
+
+/**
+ * A unit was fixed (repaired) by another unit
+ */
+message UnitFixedChange {
+  Unit fixer_unit = 1;      // Unit that performed the fix
+  Unit previous_target = 2; // Target unit state before fix
+  Unit updated_target = 3;  // Target unit state after fix
+  int32 fix_amount = 4;     // Amount of health restored
 }
 
 /**

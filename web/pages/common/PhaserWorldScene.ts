@@ -1655,10 +1655,25 @@ export class PhaserWorldScene extends Phaser.Scene implements LCMComponent {
         if (this.coordinateTextPool.length > 0) {
             // Reuse from pool
             text = this.coordinateTextPool.pop()!;
-            text.setPosition(position.x, position.y);
-            text.setText(coordText);
-            text.setStyle({ color: textColor, stroke: strokeColor });
-            text.setVisible(true);
+            // Check if text is still valid (not destroyed)
+            if (text.scene) {
+                text.setPosition(position.x, position.y);
+                text.setText(coordText);
+                text.setColor(textColor);
+                text.setStroke(strokeColor, 1);
+                text.setVisible(true);
+            } else {
+                // Text was destroyed, create new one
+                text = this.add.text(position.x, position.y, coordText, {
+                    fontSize: '10px',
+                    color: textColor,
+                    stroke: strokeColor,
+                    strokeThickness: 1,
+                    align: 'center'
+                });
+                text.setOrigin(0.5, 0.5);
+                perfMon.trackCreate('coordinateText');
+            }
         } else {
             // Create new text
             text = this.add.text(position.x, position.y, coordText, {

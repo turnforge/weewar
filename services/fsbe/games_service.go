@@ -122,6 +122,13 @@ func (s *FSGamesService) ListGames(ctx context.Context, req *v1.ListGamesRequest
 func (s *FSGamesService) DeleteGame(ctx context.Context, req *v1.DeleteGameRequest) (resp *v1.DeleteGameResponse, err error) {
 	resp = &v1.DeleteGameResponse{}
 	err = s.storage.DeleteEntity(req.Id)
+	if err == nil {
+		// Invalidate caches
+		delete(s.gameCache, req.Id)
+		delete(s.stateCache, req.Id)
+		delete(s.historyCache, req.Id)
+		delete(s.runtimeCache, req.Id)
+	}
 	return
 }
 
@@ -131,17 +138,16 @@ func (s *FSGamesService) GetGame(ctx context.Context, req *v1.GetGameRequest) (r
 		return nil, fmt.Errorf("game ID is required")
 	}
 
-	// Check cache first
-	if false {
-		if game, ok := s.gameCache[req.Id]; ok {
-			if state, ok := s.stateCache[req.Id]; ok {
-				if history, ok := s.historyCache[req.Id]; ok {
-					return &v1.GetGameResponse{
-						Game:    game,
-						State:   state,
-						History: history,
-					}, nil
-				}
+	// Check cache first - all three must be present for cache hit
+	// Note: Cache invalidation happens in UpdateGame() and SaveMoveGroup()
+	if game, ok := s.gameCache[req.Id]; ok {
+		if state, ok := s.stateCache[req.Id]; ok {
+			if history, ok := s.historyCache[req.Id]; ok {
+				return &v1.GetGameResponse{
+					Game:    game,
+					State:   state,
+					History: history,
+				}, nil
 			}
 		}
 	}

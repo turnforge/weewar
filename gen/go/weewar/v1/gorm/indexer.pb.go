@@ -15,6 +15,7 @@ import (
 	_ "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -26,7 +27,16 @@ const (
 
 // IndexStateGORM is the GORM representation for IndexState
 type IndexStateGORM struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Composite index for entity lookups: WHERE entity_type = ? AND entity_id = ?
+	EntityType string `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	EntityId   string `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	// Index for range queries: WHERE indexed_at <= ?
+	// Used by indexer to find stale records
+	IndexedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=indexed_at,json=indexedAt,proto3" json:"indexed_at,omitempty"`
+	// Partial index for finding records that need indexing
+	// Only indexes rows where needs_indexing = true (much smaller index)
+	NeedsIndexing bool `protobuf:"varint,4,opt,name=needs_indexing,json=needsIndexing,proto3" json:"needs_indexing,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -59,6 +69,34 @@ func (x *IndexStateGORM) ProtoReflect() protoreflect.Message {
 // Deprecated: Use IndexStateGORM.ProtoReflect.Descriptor instead.
 func (*IndexStateGORM) Descriptor() ([]byte, []int) {
 	return file_weewar_v1_gorm_indexer_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *IndexStateGORM) GetEntityType() string {
+	if x != nil {
+		return x.EntityType
+	}
+	return ""
+}
+
+func (x *IndexStateGORM) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+func (x *IndexStateGORM) GetIndexedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.IndexedAt
+	}
+	return nil
+}
+
+func (x *IndexStateGORM) GetNeedsIndexing() bool {
+	if x != nil {
+		return x.NeedsIndexing
+	}
+	return false
 }
 
 // IndexRecordsLROGORM is the GORM representation for IndexRecordsLRO
@@ -102,8 +140,14 @@ var File_weewar_v1_gorm_indexer_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_gorm_indexer_proto_rawDesc = "" +
 	"\n" +
-	"\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1eweewar/v1/models/indexer.proto\":\n" +
-	"\x0eIndexStateGORM:(ʦ\x1d$\n" +
+	"\x1cweewar/v1/gorm/indexer.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eweewar/v1/models/indexer.proto\"\xa5\x03\n" +
+	"\x0eIndexStateGORM\x12O\n" +
+	"\ventity_type\x18\x01 \x01(\tB.\x92\xa6\x1d*R(index:idx_index_states_entity,priority:1R\n" +
+	"entityType\x12K\n" +
+	"\tentity_id\x18\x02 \x01(\tB.\x92\xa6\x1d*R(index:idx_index_states_entity,priority:2R\bentityId\x12b\n" +
+	"\n" +
+	"indexed_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB'\x92\xa6\x1d#R!index:idx_index_states_indexed_atR\tindexedAt\x12g\n" +
+	"\x0eneeds_indexing\x18\x04 \x01(\bB@\x92\xa6\x1d<R:index:idx_index_states_needs_indexing,where:needs_indexingR\rneedsIndexing:(ʦ\x1d$\n" +
 	"\x14weewar.v1.IndexState\x12\findex_states\"\x15\n" +
 	"\x13IndexRecordsLROGORMB\x9e\x01\n" +
 	"\rcom.weewar.v1B\fIndexerProtoP\x01Z:github.com/turnforge/weewar/gen/go/weewar/v1/gorm;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
@@ -123,15 +167,17 @@ func file_weewar_v1_gorm_indexer_proto_rawDescGZIP() []byte {
 
 var file_weewar_v1_gorm_indexer_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_weewar_v1_gorm_indexer_proto_goTypes = []any{
-	(*IndexStateGORM)(nil),      // 0: weewar.v1.IndexStateGORM
-	(*IndexRecordsLROGORM)(nil), // 1: weewar.v1.IndexRecordsLROGORM
+	(*IndexStateGORM)(nil),        // 0: weewar.v1.IndexStateGORM
+	(*IndexRecordsLROGORM)(nil),   // 1: weewar.v1.IndexRecordsLROGORM
+	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
 }
 var file_weewar_v1_gorm_indexer_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: weewar.v1.IndexStateGORM.indexed_at:type_name -> google.protobuf.Timestamp
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_weewar_v1_gorm_indexer_proto_init() }

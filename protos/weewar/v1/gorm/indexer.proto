@@ -29,9 +29,10 @@ message IndexStateGORM {
     gorm_tags: ["index:idx_index_states_indexed_at"]
   }];
 
-  // Index for finding records that need indexing
+  // Partial index for finding records that need indexing
+  // Only indexes rows where needs_indexing = true (much smaller index)
   bool needs_indexing = 4 [(dal.v1.column) = {
-    gorm_tags: ["index:idx_index_states_needs_indexing"]
+    gorm_tags: ["index:idx_index_states_needs_indexing,where:needs_indexing"]
   }];
 }
 

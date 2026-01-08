@@ -400,7 +400,8 @@ func (s *GamesService) SaveMoveGroup(ctx context.Context, gameId string, state *
 		return fmt.Errorf("failed to delete orphan moves: %w", err)
 	}
 
-	// 1. Save each move in the group as individual rows (orphans OK if state save fails)
+	// 1. Convert all moves to GORM format for batch insert
+	movesGorm := make([]*v1gorm.GameMoveGORM, 0, len(group.Moves))
 	for i, move := range group.Moves {
 		move.GroupNumber = group.GroupNumber
 		move.MoveNumber = int64(i)
@@ -420,9 +421,13 @@ func (s *GamesService) SaveMoveGroup(ctx context.Context, gameId string, state *
 		if err != nil {
 			return fmt.Errorf("failed to convert move %d: %w", i, err)
 		}
+		movesGorm = append(movesGorm, moveGorm)
+	}
 
-		if err := s.storage.Create(moveGorm).Error; err != nil {
-			return fmt.Errorf("failed to save move %d: %w", i, err)
+	// Batch insert all moves (single DB round trip instead of N)
+	if len(movesGorm) > 0 {
+		if err := s.storage.CreateInBatches(movesGorm, 100).Error; err != nil {
+			return fmt.Errorf("failed to save moves: %w", err)
 		}
 	}
 

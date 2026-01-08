@@ -23,7 +23,8 @@ const (
 	TileTypeLandBase    = 1
 	TileTypeNavalBase   = 2
 	TileTypeAirport     = 3
-	TileTypeGrass       = 4  // Basic traversable terrain
+	TileTypeDesert      = 4  // Desert terrain (cost 1.75 for infantry)
+	TileTypeGrass       = 5  // Basic traversable terrain (cost 1.0 for infantry)
 	TileTypeMissileSilo = 16
 	TileTypeMines       = 20
 )

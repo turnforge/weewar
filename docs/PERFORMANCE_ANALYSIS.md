@@ -11,11 +11,21 @@ This document catalogs performance anti-patterns, N+1 queries, unnecessary re-re
 | Database/Storage | 4 | 2 | 2 | 0 |
 | **Total** | **9** | **8** | **11** | **4** |
 
+### Fixed Issues
+
+- [x] **#1 Dijkstra Priority Queue** - PR #51: Replaced O(n²) array with heap-based O(n log n)
+- [x] **#2 Grid/Coordinate Display** - PR #57: Camera tracking, diff-based updates, object pooling
+- [x] **#3 Disabled File Cache** - PR #56: Refactored caching to BackendGamesService level
+- [x] **#4 N+1 Database Inserts** - PR #54: Batch insert for game moves
+- [x] **#6 Missing Database Indexes** - Added GORM tags for indexes on game_moves and index_states
+- [x] **#12 Multiple Filter Passes** - PR #53: Single-pass categorization
+- [x] **#24 Unbounded Slice Growth** - PR #52: Pre-allocate slices in hot paths
+
 ---
 
 ## Critical Issues
 
-### 1. O(n^2) Dijkstra Priority Queue
+### 1. ~~O(n^2) Dijkstra Priority Queue~~ [FIXED - PR #51]
 **File:** `lib/rules_engine.go:566-578`
 
 The pathfinding algorithm uses a linear array for the priority queue, resulting in O(n) extraction per iteration instead of O(log n).
@@ -40,7 +50,7 @@ popMinCoord := func() queueItem {
 
 ---
 
-### 2. Grid/Coordinate Display Rebuilt Every Frame
+### 2. ~~Grid/Coordinate Display Rebuilt Every Frame~~ [FIXED - PR #57]
 **File:** `web/pages/common/PhaserWorldScene.ts:1529-1564`
 
 `updateCoordinatesDisplay()` is called every frame and destroys/recreates ALL coordinate texts:
@@ -64,7 +74,7 @@ private updateCoordinatesDisplay() {
 
 ---
 
-### 3. Disabled File Cache
+### 3. ~~Disabled File Cache~~ [FIXED - PR #56]
 **File:** `services/fsbe/games_service.go:134-147`
 
 The cache is explicitly disabled with `if false`:
@@ -83,7 +93,7 @@ if false {  // CACHE DISABLED!
 
 ---
 
-### 4. N+1 Individual Database Inserts
+### 4. ~~N+1 Individual Database Inserts~~ [FIXED - PR #54]
 **File:** `services/gormbe/genid.go:66-80` and `services/gormbe/games_service.go:403-427`
 
 ID generation and move saving use individual inserts in loops:
@@ -129,8 +139,8 @@ for i := int32(0); i < attackerDef.SplashDamage; i++ {
 
 ---
 
-### 6. Missing Database Indexes
-**File:** `services/gormbe/indexer.go` and `services/gormbe/games_service.go`
+### 6. ~~Missing Database Indexes~~ [FIXED - In Progress]
+**File:** `protos/weewar/v1/gorm/models.proto` and `protos/weewar/v1/gorm/indexer.proto`
 
 Multiple queries on unindexed columns:
 
@@ -242,7 +252,7 @@ s.Client.GetPresignedURL(ctx, file.Path, 24*time.Hour)
 
 ---
 
-### 12. Multiple Filter/Map Array Passes
+### 12. ~~Multiple Filter/Map Array Passes~~ [FIXED - PR #53]
 **File:** `web/pages/GameViewerPage/PhaserGameScene.ts:233-238`
 
 Six separate filter operations on same array:
@@ -412,7 +422,7 @@ points.push(new Phaser.Geom.Point(...));  // 6 allocations per highlight
 
 ## Low Priority Issues
 
-### 24. Unbounded Slice Growth
+### 24. ~~Unbounded Slice Growth~~ [FIXED - PR #52]
 **File:** `lib/moves.go:841-851`
 
 ```go

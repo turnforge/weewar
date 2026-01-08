@@ -1,11 +1,51 @@
 package lib
 
 import (
+	"container/heap"
 	"fmt"
 
 	"github.com/turnforge/weewar/assets"
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 )
+
+// =============================================================================
+// Priority Queue for Dijkstra's Algorithm (heap-based, O(log n) operations)
+// =============================================================================
+
+// dijkstraItem represents a coordinate with its movement cost for the priority queue
+type dijkstraItem struct {
+	coord AxialCoord
+	cost  float64
+	index int // index in the heap, maintained by heap.Interface
+}
+
+// dijkstraHeap implements heap.Interface for efficient min-cost extraction
+type dijkstraHeap []*dijkstraItem
+
+func (h dijkstraHeap) Len() int           { return len(h) }
+func (h dijkstraHeap) Less(i, j int) bool { return h[i].cost < h[j].cost }
+func (h dijkstraHeap) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+	h[i].index = i
+	h[j].index = j
+}
+
+func (h *dijkstraHeap) Push(x any) {
+	n := len(*h)
+	item := x.(*dijkstraItem)
+	item.index = n
+	*h = append(*h, item)
+}
+
+func (h *dijkstraHeap) Pop() any {
+	old := *h
+	n := len(old)
+	item := old[n-1]
+	old[n-1] = nil  // avoid memory leak
+	item.index = -1 // for safety
+	*h = old[0 : n-1]
+	return item
+}
 
 // =============================================================================
 // Rules Engine - Extends existing types with data-driven rules
@@ -554,33 +594,16 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 	// Get unit data for explanations
 	unitData, _ := re.GetUnitData(unitType)
 
-	// Priority queue for Dijkstra (simple implementation)
-	type queueItem struct {
-		coord AxialCoord
-		cost  float64
-	}
-
-	queue := []queueItem{{coord: startCoord, cost: 0}}
+	// Priority queue using heap for O(log n) operations instead of O(n)
+	pq := &dijkstraHeap{}
+	heap.Init(pq)
+	heap.Push(pq, &dijkstraItem{coord: startCoord, cost: 0})
 	visited[startCoord] = 0
 
-	popMinCoord := func() queueItem {
-		minIdx := 0
-		for i := 1; i < len(queue); i++ {
-			if queue[i].cost < queue[minIdx].cost {
-				minIdx = i
-			}
-		}
-
-		current := queue[minIdx]
-		// Remove from queue
-		queue = append(queue[:minIdx], queue[minIdx+1:]...)
-		return current
-	}
-
 	// Dijkstra's algorithm
-	for len(queue) > 0 {
-		// Find minimum cost item (simple O(n) for now, could use heap)
-		current := popMinCoord()
+	for pq.Len() > 0 {
+		// Extract minimum cost item in O(log n)
+		current := heap.Pop(pq).(*dijkstraItem)
 
 		// Skip if we've already processed this with lower cost
 		if cost, exists := visited[current.coord]; exists && current.cost > cost {
@@ -588,7 +611,7 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 		}
 
 		// Explore neighbors
-		for neighborCoord, _ := range world.Neighbors(current.coord) {
+		for neighborCoord := range world.Neighbors(current.coord) {
 			// Check if tile is occupied by another unit
 			isOccupied := world.UnitAt(neighborCoord) != nil
 
@@ -613,8 +636,8 @@ func (re *RulesEngine) dijkstraMovement(world *World, unitType int32, startCoord
 				if existingCost, exists := visited[neighborCoord]; !exists || newCost < existingCost {
 					visited[neighborCoord] = newCost
 
-					// Always add to queue for further exploration (pass-through)
-					queue = append(queue, queueItem{coord: neighborCoord, cost: newCost})
+					// Add to heap for further exploration (pass-through)
+					heap.Push(pq, &dijkstraItem{coord: neighborCoord, cost: newCost})
 
 					// Get terrain data for explanation (use effective type for display)
 					terrainData, _ := re.GetTerrainData(effectiveTileType)

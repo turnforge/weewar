@@ -113,7 +113,9 @@ type GameViewPresenterServer interface {
 // GameSyncServiceServer is the server API for GameSyncService service (WASM version without gRPC embedding).
 type GameSyncServiceServer interface {
 	/** Subscribe to game changes. Server streams GameUpdate messages to clients
-	as other players make moves. Supports reconnection via from_sequence. */
+	as other players make moves. Supports reconnection via from_sequence.
+	NOTE: No HTTP annotation - Subscribe uses WebSocket via servicekit grpcws
+	at /ws/v1/sync/games/{game_id}/subscribe */
 	Subscribe(*v1models.SubscribeRequest, Subscribe_ServerStream) error
 	/** Broadcast sends a GameUpdate to all subscribers of a game.
 	Called internally by GamesService after ProcessMoves succeeds.

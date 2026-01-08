@@ -68,6 +68,8 @@ class GameSyncServiceServicer(object):
     def Subscribe(self, request, context):
         """Subscribe to game changes. Server streams GameUpdate messages to clients
         as other players make moves. Supports reconnection via from_sequence.
+        NOTE: No HTTP annotation - Subscribe uses WebSocket via servicekit grpcws
+        at /ws/v1/sync/games/{game_id}/subscribe
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')

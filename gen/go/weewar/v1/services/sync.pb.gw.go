@@ -36,43 +36,6 @@ var (
 	_ = metadata.Join
 )
 
-var filter_GameSyncService_Subscribe_0 = &utilities.DoubleArray{Encoding: map[string]int{"game_id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-
-func request_GameSyncService_Subscribe_0(ctx context.Context, marshaler runtime.Marshaler, client GameSyncServiceClient, req *http.Request, pathParams map[string]string) (GameSyncService_SubscribeClient, runtime.ServerMetadata, error) {
-	var (
-		protoReq weewarv1.SubscribeRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	if req.Body != nil {
-		_, _ = io.Copy(io.Discard, req.Body)
-	}
-	val, ok := pathParams["game_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "game_id")
-	}
-	protoReq.GameId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "game_id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_GameSyncService_Subscribe_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	stream, err := client.Subscribe(ctx, &protoReq)
-	if err != nil {
-		return nil, metadata, err
-	}
-	header, err := stream.Header()
-	if err != nil {
-		return nil, metadata, err
-	}
-	metadata.HeaderMD = header
-	return stream, metadata, nil
-}
-
 func request_GameSyncService_Broadcast_0(ctx context.Context, marshaler runtime.Marshaler, client GameSyncServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq weewarv1.BroadcastRequest
@@ -124,12 +87,6 @@ func local_request_GameSyncService_Broadcast_0(ctx context.Context, marshaler ru
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterGameSyncServiceHandlerFromEndpoint instead.
 // GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
 func RegisterGameSyncServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server GameSyncServiceServer) error {
-	mux.Handle(http.MethodGet, pattern_GameSyncService_Subscribe_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
-		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-		return
-	})
 	mux.Handle(http.MethodPost, pattern_GameSyncService_Broadcast_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -190,23 +147,6 @@ func RegisterGameSyncServiceHandler(ctx context.Context, mux *runtime.ServeMux, 
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
 // "GameSyncServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
 func RegisterGameSyncServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client GameSyncServiceClient) error {
-	mux.Handle(http.MethodGet, pattern_GameSyncService_Subscribe_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/weewar.v1.GameSyncService/Subscribe", runtime.WithHTTPPathPattern("/v1/sync/games/{game_id}/subscribe"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_GameSyncService_Subscribe_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_GameSyncService_Subscribe_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodPost, pattern_GameSyncService_Broadcast_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -228,11 +168,9 @@ func RegisterGameSyncServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 }
 
 var (
-	pattern_GameSyncService_Subscribe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "sync", "games", "game_id", "subscribe"}, ""))
 	pattern_GameSyncService_Broadcast_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "sync", "games", "game_id", "broadcast"}, ""))
 )
 
 var (
-	forward_GameSyncService_Subscribe_0 = runtime.ForwardResponseStream
 	forward_GameSyncService_Broadcast_0 = runtime.ForwardResponseMessage
 )

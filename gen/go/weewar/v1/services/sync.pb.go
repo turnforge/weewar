@@ -27,9 +27,9 @@ var File_weewar_v1_services_sync_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_services_sync_proto_rawDesc = "" +
 	"\n" +
-	"\x1dweewar/v1/services/sync.proto\x12\tweewar.v1\x1a\x1bweewar/v1/models/sync.proto\x1a\x1cgoogle/api/annotations.proto2\xf7\x01\n" +
-	"\x0fGameSyncService\x12m\n" +
-	"\tSubscribe\x12\x1b.weewar.v1.SubscribeRequest\x1a\x15.weewar.v1.GameUpdate\"*\x82\xd3\xe4\x93\x02$\x12\"/v1/sync/games/{game_id}/subscribe0\x01\x12u\n" +
+	"\x1dweewar/v1/services/sync.proto\x12\tweewar.v1\x1a\x1bweewar/v1/models/sync.proto\x1a\x1cgoogle/api/annotations.proto2\xcb\x01\n" +
+	"\x0fGameSyncService\x12A\n" +
+	"\tSubscribe\x12\x1b.weewar.v1.SubscribeRequest\x1a\x15.weewar.v1.GameUpdate0\x01\x12u\n" +
 	"\tBroadcast\x12\x1b.weewar.v1.BroadcastRequest\x1a\x1c.weewar.v1.BroadcastResponse\"-\x82\xd3\xe4\x93\x02':\x01*\"\"/v1/sync/games/{game_id}/broadcastB\x9f\x01\n" +
 	"\rcom.weewar.v1B\tSyncProtoP\x01Z>github.com/turnforge/weewar/gen/go/weewar/v1/services;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"

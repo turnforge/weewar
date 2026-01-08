@@ -47,6 +47,8 @@ const (
 type GameSyncServiceClient interface {
 	// Subscribe to game changes. Server streams GameUpdate messages to clients
 	// as other players make moves. Supports reconnection via from_sequence.
+	// NOTE: No HTTP annotation - Subscribe uses WebSocket via servicekit grpcws
+	// at /ws/v1/sync/games/{game_id}/subscribe
 	Subscribe(context.Context, *connect.Request[models.SubscribeRequest]) (*connect.ServerStreamForClient[models.GameUpdate], error)
 	// Broadcast sends a GameUpdate to all subscribers of a game.
 	// Called internally by GamesService after ProcessMoves succeeds.
@@ -100,6 +102,8 @@ func (c *gameSyncServiceClient) Broadcast(ctx context.Context, req *connect.Requ
 type GameSyncServiceHandler interface {
 	// Subscribe to game changes. Server streams GameUpdate messages to clients
 	// as other players make moves. Supports reconnection via from_sequence.
+	// NOTE: No HTTP annotation - Subscribe uses WebSocket via servicekit grpcws
+	// at /ws/v1/sync/games/{game_id}/subscribe
 	Subscribe(context.Context, *connect.Request[models.SubscribeRequest], *connect.ServerStream[models.GameUpdate]) error
 	// Broadcast sends a GameUpdate to all subscribers of a game.
 	// Called internally by GamesService after ProcessMoves succeeds.

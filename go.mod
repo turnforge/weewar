@@ -21,6 +21,7 @@ require (
 	github.com/panyam/oneauth v0.0.15
 	github.com/panyam/protoc-gen-dal v0.0.2
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
+	github.com/panyam/servicekit v0.0.4
 	github.com/panyam/templar v0.0.27
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
@@ -74,7 +75,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/panyam/servicekit v0.0.4 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
@@ -112,3 +112,5 @@ replace github.com/panyam/goutils v0.1.11 => ./locallinks/goutils
 replace github.com/panyam/goapplib v0.0.4 => ./locallinks/goapplib
 
 replace github.com/panyam/templar v0.0.27 => ./locallinks/templar
+
+replace github.com/panyam/servicekit v0.0.4 => ./locallinks/servicekit

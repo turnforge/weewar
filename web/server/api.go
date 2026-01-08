@@ -4,10 +4,14 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	gfn "github.com/panyam/goutils/fn"
 	oa "github.com/panyam/oneauth"
+	"github.com/panyam/servicekit/grpcws"
+	gohttp "github.com/panyam/servicekit/http"
+	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 	v1connect "github.com/turnforge/weewar/gen/go/weewar/v1/services/weewarv1connect"
 	"github.com/turnforge/weewar/services"
@@ -44,6 +48,28 @@ func (a *ApiHandler) Init() error {
 	}
 	a.mux.Handle("/v1/", gwmux)
 	log.Println("Registered gRPC-gateway at /v1/")
+
+	// WebSocket endpoint for GameSyncService Subscribe using servicekit grpcws
+	wsHandler := grpcws.NewServerStreamHandler(
+		func(ctx context.Context, req *models.SubscribeRequest) (grpc.ServerStreamingClient[models.GameUpdate], error) {
+			return a.ClientMgr.GetGameSyncSvcClient().Subscribe(ctx, req)
+		},
+		func(r *http.Request) (*models.SubscribeRequest, error) {
+			gameId := r.PathValue("game_id")
+			playerId := r.URL.Query().Get("player_id")
+			fromSeq := int64(0)
+			if fs := r.URL.Query().Get("from_sequence"); fs != "" {
+				fromSeq, _ = strconv.ParseInt(fs, 10, 64)
+			}
+			return &models.SubscribeRequest{
+				GameId:       gameId,
+				PlayerId:     playerId,
+				FromSequence: fromSeq,
+			}, nil
+		},
+	)
+	a.mux.HandleFunc("/ws/v1/sync/games/{game_id}/subscribe", gohttp.WSServe(wsHandler, nil))
+	log.Println("Registered GameSync WebSocket handler at /ws/v1/sync/games/{game_id}/subscribe")
 
 	return a.setupConnectHandlers()
 }
@@ -171,7 +197,8 @@ func (web *ApiHandler) createSvcMux(grpc_addr string) (*runtime.ServeMux, error)
 		}
 	}
 
-	// Register GameSyncService for multiplayer streaming (uses SSE for browser compatibility)
+	// Register GameSyncService via grpc-gateway for Broadcast endpoint
+	// (Subscribe streaming is also available via SSE at /v1/..., but prefer WebSocket at /ws/...)
 	err = v1s.RegisterGameSyncServiceHandlerFromEndpoint(ctx, svcMux, grpc_addr, opts)
 	if err != nil {
 		log.Fatal("Unable to register game sync service: ", err)

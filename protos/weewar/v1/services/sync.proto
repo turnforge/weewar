@@ -28,11 +28,9 @@ option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/services";
 service GameSyncService {
   // Subscribe to game changes. Server streams GameUpdate messages to clients
   // as other players make moves. Supports reconnection via from_sequence.
-  rpc Subscribe(SubscribeRequest) returns (stream GameUpdate) {
-    option (google.api.http) = {
-      get: "/v1/sync/games/{game_id}/subscribe"
-    };
-  }
+  // NOTE: No HTTP annotation - Subscribe uses WebSocket via servicekit grpcws
+  // at /ws/v1/sync/games/{game_id}/subscribe
+  rpc Subscribe(SubscribeRequest) returns (stream GameUpdate);
 
   // Broadcast sends a GameUpdate to all subscribers of a game.
   // Called internally by GamesService after ProcessMoves succeeds.

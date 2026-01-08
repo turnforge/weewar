@@ -103,9 +103,11 @@ func TestProcessMoveUnit_ExceedsMovementPoints(t *testing.T) {
 		build()
 
 	// Add unit with only 1 movement point
+	// Set LastToppedupTurn to match TurnCounter to prevent TopUpUnitIfNeeded from resetting DistanceLeft
 	game.World.AddUnit(&v1.Unit{
 		Q: 0, R: 0, Player: 1, UnitType: testUnitTypeSoldier,
 		Shortcut: "A1", AvailableHealth: 10, DistanceLeft: 1,
+		LastToppedupTurn: 1,
 	})
 
 	move := &v1.GameMove{

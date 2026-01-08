@@ -54,7 +54,17 @@ func (b *testGameBuilder) tile(q, r int, tileType int32, player int32) *testGame
 func (b *testGameBuilder) grassTiles(radius int) *testGameBuilder {
 	for q := -radius; q <= radius; q++ {
 		for r := -radius; r <= radius; r++ {
-			b.tiles = append(b.tiles, &testTileSpec{q: q, r: r, tileType: TileTypeGrass, player: 0})
+			// Don't overwrite explicitly defined tiles
+			exists := false
+			for _, t := range b.tiles {
+				if t.q == q && t.r == r {
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				b.tiles = append(b.tiles, &testTileSpec{q: q, r: r, tileType: TileTypeGrass, player: 0})
+			}
 		}
 	}
 	return b

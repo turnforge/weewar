@@ -1,24 +1,15 @@
 # Google Cloud Datastore Composite Indexes for WeeWar
 # Deploy with: gcloud datastore indexes create index.yaml --project=YOUR_PROJECT_ID
+#
+# Note: Single-property indexes are automatic in Datastore.
+# Only composite indexes (2+ properties) need to be defined here.
 
 indexes:
 
-# Games sorted by update time (for listing)
-- kind: Game
-  properties:
-  - name: updated_at
-    direction: desc
-
-# Games filtered by world
+# Games filtered by world, sorted by update time
 - kind: Game
   properties:
   - name: world_id
-  - name: updated_at
-    direction: desc
-
-# Worlds sorted by update time (for listing)
-- kind: World
-  properties:
   - name: updated_at
     direction: desc
 
@@ -39,14 +30,4 @@ indexes:
 - kind: IndexState
   properties:
   - name: entity_type
-  - name: needs_indexing
-
-# Game states that need indexing
-- kind: GameState
-  properties:
-  - name: needs_indexing
-
-# World data that needs indexing
-- kind: WorldData
-  properties:
   - name: needs_indexing

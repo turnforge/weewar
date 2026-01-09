@@ -1,0 +1,42 @@
+{{# include "./BasePage.html" #}}
+
+{{ define "BodySection" }}
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-gray-600 dark:text-gray-300">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">About {{.Header.AppName}}</h1>
+
+    <div class="space-y-6">
+        <section>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">What is {{.Header.AppName}}?</h2>
+            <p class="mt-2">{{.Header.AppName}} is a turn-based strategy game inspired by classic hex-based wargames. Command your forces across varied terrain, capture bases, and outmaneuver your opponents in tactical battles.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-6">Features</h2>
+            <ul class="mt-2 list-disc list-inside space-y-2 ml-4">
+                <li><strong>Turn-based combat</strong> - Plan your moves carefully and execute your strategy</li>
+                <li><strong>Multiple unit types</strong> - Infantry, tanks, aircraft, naval vessels, and more</li>
+                <li><strong>Terrain matters</strong> - Use mountains for defense, roads for speed, and bases for production</li>
+                <li><strong>Multiplayer support</strong> - Challenge friends or play solo</li>
+                <li><strong>Custom maps</strong> - Create and share your own battlefields</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-6">How to Play</h2>
+            <p class="mt-2">Each turn, you can move your units, attack enemies, capture neutral or enemy bases, and build new units at bases you control. The goal is to eliminate all enemy units or capture their headquarters.</p>
+            <p class="mt-2">New to the game? Start by exploring the <a href="/worlds/" class="text-blue-600 dark:text-blue-400 hover:underline">available maps</a> or jump into a <a href="/games/" class="text-blue-600 dark:text-blue-400 hover:underline">game</a>.</p>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-6">Open Source</h2>
+            <p class="mt-2">{{.Header.AppName}} is an open source project. You can view the source code, report issues, or contribute on <a href="https://github.com/turnforge/weewar" class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+    </div>
+</main>
+{{ end }}
+
+{{ define "PostBodySection" }}{{ end }}
+
+{{ define "AboutPage" }}
+{{ template "BasePage" . }}
+{{ end }}

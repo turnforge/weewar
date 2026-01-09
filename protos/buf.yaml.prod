@@ -4,8 +4,8 @@ deps:
   - buf.build/googleapis/googleapis
   - buf.build/grpc-ecosystem/grpc-gateway
   - buf.build/panyam/protoc-gen-go-wasmjs
-  - buf.build/prototools/protoc-gen-dal
   - buf.build/turnforge/turnengine
+  - buf.build/prototools/protoc-gen-dal
 lint:
   use:
     - STANDARD

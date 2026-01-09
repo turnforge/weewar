@@ -228,6 +228,7 @@ buf generate
 ## Documentation
 
 - **[Architecture](./docs/ARCHITECTURE.md)** - Detailed technical architecture
+- **[Authentication](./docs/AUTH.md)** - OAuth and local login setup
 - **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Development workflows and patterns
 - **[Roadmap](./docs/ROADMAP.md)** - Development phases and planned features
 - **[Project Summary](./PROJECT.md)** - Current status and recent achievements

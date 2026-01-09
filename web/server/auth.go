@@ -26,14 +26,37 @@ func setupAuthService(session *scs.SessionManager) (*services.AuthService, *oa.O
 	}
 	oneauth.UserStore = authService
 
-	// OAuth providers
-	oneauth.AddAuth("/google", oa2.NewGoogleOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
-	oneauth.AddAuth("/github", oa2.NewGithubOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
-
-	// Get base URL for verification/reset links
+	// Get base URL for OAuth callbacks and verification/reset links
 	baseURL := os.Getenv("WEEWAR_BASE_URL")
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
+	}
+
+	// OAuth providers - uses oneauth's environment variable naming convention:
+	// OAUTH2_GOOGLE_CLIENT_ID, OAUTH2_GOOGLE_CLIENT_SECRET
+	// OAUTH2_GITHUB_CLIENT_ID, OAUTH2_GITHUB_CLIENT_SECRET
+	// The callback URLs are constructed from WEEWAR_BASE_URL
+	googleClientID := os.Getenv("OAUTH2_GOOGLE_CLIENT_ID")
+	googleClientSecret := os.Getenv("OAUTH2_GOOGLE_CLIENT_SECRET")
+	githubClientID := os.Getenv("OAUTH2_GITHUB_CLIENT_ID")
+	githubClientSecret := os.Getenv("OAUTH2_GITHUB_CLIENT_SECRET")
+
+	// Google OAuth2
+	if googleClientID != "" && googleClientSecret != "" {
+		googleRedirectURL := baseURL + "/auth/google/callback"
+		oneauth.AddAuth("/google", oa2.NewGoogleOAuth2(googleClientID, googleClientSecret, googleRedirectURL, oneauth.SaveUserAndRedirect).Handler())
+		log.Printf("Google OAuth2 enabled (callback: %s)", googleRedirectURL)
+	} else {
+		log.Printf("Google OAuth2 disabled: OAUTH2_GOOGLE_CLIENT_ID and OAUTH2_GOOGLE_CLIENT_SECRET not set")
+	}
+
+	// GitHub OAuth2
+	if githubClientID != "" && githubClientSecret != "" {
+		githubRedirectURL := baseURL + "/auth/github/callback"
+		oneauth.AddAuth("/github", oa2.NewGithubOAuth2(githubClientID, githubClientSecret, githubRedirectURL, oneauth.SaveUserAndRedirect).Handler())
+		log.Printf("GitHub OAuth2 enabled (callback: %s)", githubRedirectURL)
+	} else {
+		log.Printf("GitHub OAuth2 disabled: OAUTH2_GITHUB_CLIENT_ID and OAUTH2_GITHUB_CLIENT_SECRET not set")
 	}
 
 	// Local authentication

@@ -666,6 +666,11 @@ const response = await client.gamesService.createGame(request);
 - [x] **Terms of Service Template**: Fixed template inheritance and section numbering
 - [x] **Footer Component**: Reusable footer with Privacy/Terms links for listing pages
 
-### Production Considerations
-- [ ] **GAE/Datastore Backend**: Implement datastore backend for persistent storage (future)
-- [x] **Local Backend Deployment**: Initial deployment uses local/file-based storage
+### Production Storage ✅
+- [x] **GAE/Datastore Backend**: Complete Datastore backend implementation (gaebe package)
+  - Proto definitions with datastore_tags annotations (`protos/weewar/v1/datastore/models.proto`)
+  - Generated entity types and converters via protoc-gen-dal (`gen/datastore/`)
+  - Composite indexes for needs_indexing queries (`index.yaml`)
+  - Cross-entity transactions for game move atomicity
+  - Backend selection via env vars: `WORLDS_SERVICE_BE=gae`, `GAMES_SERVICE_BE=gae`
+- [x] **Local Backend Deployment**: File-based storage for development/testing

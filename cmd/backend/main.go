@@ -8,11 +8,13 @@ import (
 	"log/slog"
 	"os"
 
+	"cloud.google.com/go/datastore"
 	"github.com/joho/godotenv"
 	goal "github.com/panyam/goapplib"
 	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 	"github.com/turnforge/weewar/services"
 	"github.com/turnforge/weewar/services/fsbe"
+	"github.com/turnforge/weewar/services/gaebe"
 	"github.com/turnforge/weewar/services/gormbe"
 	"github.com/turnforge/weewar/services/r2"
 	"github.com/turnforge/weewar/services/server"
@@ -31,6 +33,8 @@ var (
 	worlds_service_be = flag.String("worlds_service_be", "", "Storage for worlds service - 'local', 'pg', 'gae'. Env: WORLDS_SERVICE_BE. Default: pg")
 	games_service_be  = flag.String("games_service_be", "", "Storage for games service - 'local', 'pg', 'gae'. Env: GAMES_SERVICE_BE. Default: pg")
 	filestore_be      = flag.String("filestore_be", "", "Storage for filestore - 'local', 'r2', 'gae'. Env: FILESTORE_BE. Default: local")
+	gae_project       = flag.String("gae_project", "", "Google Cloud project ID for GAE/Datastore. Env: GAE_PROJECT")
+	gae_namespace     = flag.String("gae_namespace", "", "Datastore namespace (optional, for multi-tenancy). Env: GAE_NAMESPACE")
 )
 
 // getBackendConfig returns the backend configuration value with priority:
@@ -135,6 +139,29 @@ func (b *Backend) SetupApp() *utils.App {
 			}
 			return db
 		}
+
+		var dsClient *datastore.Client = nil
+		ensureDatastore := func() *datastore.Client {
+			if dsClient == nil {
+				// Check GAE_PROJECT first, then GOOGLE_CLOUD_PROJECT (set by App Engine)
+				projectID := getBackendConfig(gae_project, "GAE_PROJECT", "")
+				if projectID == "" {
+					projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+				}
+				if projectID == "" {
+					panic("GAE_PROJECT or GOOGLE_CLOUD_PROJECT environment variable (or --gae_project flag) is required for GAE backend")
+				}
+				var err error
+				dsClient, err = datastore.NewClient(context.Background(), projectID)
+				if err != nil {
+					panic(fmt.Sprintf("Failed to create Datastore client: %v", err))
+				}
+				log.Printf("Datastore client initialized for project: %s", projectID)
+			}
+			return dsClient
+		}
+		dsNamespace := getBackendConfig(gae_namespace, "GAE_NAMESPACE", "")
+
 		// v1s.RegisterWorldsServiceServer(server, fsbe.NewFSWorldsService(""))
 		switch worldsBE {
 		case "pg":
@@ -142,7 +169,7 @@ func (b *Backend) SetupApp() *utils.App {
 		case "local":
 			worldsService = fsbe.NewFSWorldsService("", clientMgr)
 		case "gae":
-			panic("GAE/Datastore backend not yet implemented for worlds service")
+			worldsService = gaebe.NewWorldsService(ensureDatastore(), dsNamespace, clientMgr)
 		default:
 			panic("Invalid worlds_service_be: " + worldsBE + ". Valid options: local, pg, gae")
 		}
@@ -153,7 +180,7 @@ func (b *Backend) SetupApp() *utils.App {
 		case "pg":
 			gamesService = gormbe.NewGamesService(ensureDB(), clientMgr)
 		case "gae":
-			panic("GAE/Datastore backend not yet implemented for games service")
+			gamesService = gaebe.NewGamesService(ensureDatastore(), dsNamespace, clientMgr)
 		default:
 			panic("Invalid games_service_be: " + gamesBE + ". Valid options: local, pg, gae")
 		}

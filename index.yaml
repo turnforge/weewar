@@ -1,0 +1,52 @@
+# Google Cloud Datastore Composite Indexes for WeeWar
+# Deploy with: gcloud datastore indexes create index.yaml --project=YOUR_PROJECT_ID
+
+indexes:
+
+# Games sorted by update time (for listing)
+- kind: Game
+  properties:
+  - name: updated_at
+    direction: desc
+
+# Games filtered by world
+- kind: Game
+  properties:
+  - name: world_id
+  - name: updated_at
+    direction: desc
+
+# Worlds sorted by update time (for listing)
+- kind: World
+  properties:
+  - name: updated_at
+    direction: desc
+
+# Game moves lookup by game and group (for history loading)
+- kind: GameMove
+  properties:
+  - name: game_id
+  - name: group_number
+  - name: move_number
+
+# Game moves filtered by group range
+- kind: GameMove
+  properties:
+  - name: game_id
+  - name: group_number
+
+# Index states that need indexing (for screenshot worker)
+- kind: IndexState
+  properties:
+  - name: entity_type
+  - name: needs_indexing
+
+# Game states that need indexing
+- kind: GameState
+  properties:
+  - name: needs_indexing
+
+# World data that needs indexing
+- kind: WorldData
+  properties:
+  - name: needs_indexing

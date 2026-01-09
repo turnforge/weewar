@@ -19,7 +19,7 @@ require (
 	github.com/panyam/gocurrent v0.0.10
 	github.com/panyam/goutils v0.1.11
 	github.com/panyam/oneauth v0.0.15
-	github.com/panyam/protoc-gen-dal v0.0.8
+	github.com/panyam/protoc-gen-dal v0.0.9
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
 	github.com/panyam/servicekit v0.0.4
 	github.com/panyam/templar v0.0.27

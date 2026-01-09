@@ -5,12 +5,12 @@ env_variables:
   WEEWAR_ENV: production
   WEEWAR_BASE_URL: https://weewar.appspot.com
   # Backend storage configuration
-  # Options: local, pg, gae (gae not yet implemented)
-  # Using local for initial deployment - data won't persist across deployments
-  # TODO: Implement GAE/Datastore backend for persistence
-  WORLDS_SERVICE_BE: local
-  GAMES_SERVICE_BE: local
+  # Options: local, pg, gae
+  WORLDS_SERVICE_BE: gae
+  GAMES_SERVICE_BE: gae
   FILESTORE_BE: local
+  # GAE_PROJECT is automatically set by App Engine (GOOGLE_CLOUD_PROJECT)
+  # GAE_NAMESPACE can be set for multi-tenancy (optional)
 
 handlers:
 # Static files (JS, CSS, images, WASM)

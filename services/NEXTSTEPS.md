@@ -7,6 +7,11 @@
 - ✅ Optimistic locking for WorldData updates
 - ✅ BackendWorldsService abstraction for GORM and FS implementations
 - ✅ WorldDataUpdater interface for storage-agnostic operations
+- ✅ Google Cloud Datastore backend (gaebe package) for App Engine deployment
+  - Uses protoc-gen-dal generated entities with proper datastore_tags
+  - Supports composite indexes for needs_indexing queries
+  - Cross-entity transactions for SaveMoveGroup atomicity
+  - Backend selectable at runtime via WORLDS_SERVICE_BE/GAMES_SERVICE_BE=gae
 
 ## TODO
 

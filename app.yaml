@@ -1,23 +1,5 @@
 runtime: go124
 
-skip_files:
-- ^locallinks/
-- ^\.attic/
-- ^\.claude/
-- ^\.data/
-- ^\.venv/
-- ^\.git/
-- ^\.github/
-- ^bin/
-- ^logs/
-- ^tests/
-- ^data/
-- ^docs/
-- ^snapshotairport/
-- node_modules/
-- _test\.go$
-- \.md$
-
 env_variables:
   # Production environment (triggers loading configs/.env)
   WEEWAR_ENV: production

@@ -16,13 +16,13 @@ deploy: checklinks ui cli wasm
 	gcloud app deploy --project weewar --verbosity=info
 
 servepg:
-	go run cmd/backend/*.go -games_service_be=pg-worlds_service_be=pg
+	go run main.go -games_service_be=pg-worlds_service_be=pg
 
 servelocal:
-	go run cmd/backend/*.go -games_service_be=local -worlds_service_be=local
+	go run main.go -games_service_be=local -worlds_service_be=local
 
 servegae:
-	go run cmd/backend/*.go -games_service_be=gae -worlds_service_be=gae
+	go run main.go -games_service_be=gae -worlds_service_be=gae
 
 vars:
 	@echo "GO_ROOT=$(GO_ROOT)"

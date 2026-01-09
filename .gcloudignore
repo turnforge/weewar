@@ -5,7 +5,6 @@
 .gitignore
 .vscode
 .devloop.yaml
-.env.dev
 .attic
 .claude
 .data
@@ -44,4 +43,3 @@ data/
 # Docker files
 docker-compose.yml
 db-docker-compose.yml
-configs/

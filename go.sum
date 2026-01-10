@@ -131,8 +131,8 @@ github.com/panyam/goapplib v0.0.6 h1:Vb4iHdP2fKWLD4wr82en6Jz5cd3/ljJkQ565bTn+daA
 github.com/panyam/goapplib v0.0.6/go.mod h1:MVhdhIvRqw4N8/HLdlFScDYK9FYODlfzytUYc4x+cSU=
 github.com/panyam/gocurrent v0.0.10 h1:9eLgFyRUfZITOpkCz4g1yp9iRGd3T3w9AkUaZf0YjTc=
 github.com/panyam/gocurrent v0.0.10/go.mod h1:jIIhcNfNnnIe2JXH8aY2+ba+/5G1fzwCWoZXdcMNw6o=
-github.com/panyam/goutils v0.1.11 h1:5z3WNKq6XUScQrU9V6ZY9UjZauBRhcNCPZSixwgrQ4U=
-github.com/panyam/goutils v0.1.11/go.mod h1:ntucs8GJOHQ0LmlRGRjeup3aDC2t7xPMudrRwUHrJNM=
+github.com/panyam/goutils v0.1.12 h1:milKMl5akDU4KAJ1h1QktnZ/9GpPHqj845qspftKfpU=
+github.com/panyam/goutils v0.1.12/go.mod h1:Vw6mcB4rabZVrB46kYVcKczNK4NlPPAdv49fx/w9w38=
 github.com/panyam/oneauth v0.0.16 h1:JHcsBPsOARXFMhqaajhrFjxbS/MFQhU1ahqZpWmJM9Q=
 github.com/panyam/oneauth v0.0.16/go.mod h1:ZqFjVT338FHA3YVHrq4dZnJkY3Mrv+15XDTUEak6opc=
 github.com/panyam/protoc-gen-dal v0.0.9 h1:ULmguZC9IvL8jF716Zcr7nDu9NREJWD2NLdxOPb4HOY=
@@ -174,8 +174,6 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
-github.com/turnforge/turnengine v0.0.2 h1:El5F63wU0h5Tn6xmtpNmLhZg1MTMIpFp8xhr4Vc58Pg=
-github.com/turnforge/turnengine v0.0.2/go.mod h1:6ku3i2vzrM3530acLV3I54j/AqMUWkPa29MnswE0OzM=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/contrib/bridges/otelslog v0.13.0 h1:bwnLpizECbPr1RrQ27waeY2SPIPeccCx/xLuoYADZ9s=

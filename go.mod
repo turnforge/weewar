@@ -17,7 +17,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/panyam/goapplib v0.0.6
 	github.com/panyam/gocurrent v0.0.10
-	github.com/panyam/goutils v0.1.11
+	github.com/panyam/goutils v0.1.12
 	github.com/panyam/oneauth v0.0.16
 	github.com/panyam/protoc-gen-dal v0.0.9
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
@@ -25,7 +25,6 @@ require (
 	github.com/panyam/templar v0.0.27
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
-	github.com/turnforge/turnengine v0.0.2
 	go.opentelemetry.io/contrib/bridges/otelslog v0.13.0
 	go.opentelemetry.io/otel v1.38.0
 	golang.org/x/image v0.34.0
@@ -101,13 +100,13 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/turnforge/turnengine v0.0.2 => ./locallinks/turnengine/
+// replace github.com/turnforge/turnengine v0.0.3 => ./locallinks/turnengine/
 
 // replace github.com/panyam/protoc-gen-dal v0.0.2 => ./locallinks/protoc-gen-dal
 
 // replace github.com/panyam/gocurrent v0.0.10 => ./locallinks/gocurrent
 
-// replace github.com/panyam/goutils v0.1.11 => ./locallinks/goutils
+// replace github.com/panyam/goutils v0.1.12 => ./locallinks/goutils
 
 // replace github.com/panyam/templar v0.0.27 => ./locallinks/templar
 

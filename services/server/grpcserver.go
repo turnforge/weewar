@@ -15,7 +15,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/turnforge/weewar/services/authctx"
+	oagrpc "github.com/panyam/oneauth/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -28,21 +28,26 @@ type Server struct {
 func (s *Server) Start(ctx context.Context, srvErr chan error, srvChan chan bool) error {
 	// Configure auth interceptor
 	// Use DISABLE_API_AUTH=true to skip authentication (for local development)
-	var authConfig *authctx.AuthInterceptorConfig
+	var authConfig *oagrpc.InterceptorConfig
 	if os.Getenv("DISABLE_API_AUTH") == "true" {
 		// Optional auth: extract user if present, but don't reject unauthenticated requests
-		authConfig = authctx.OptionalAuthConfig()
+		authConfig = oagrpc.OptionalAuthConfig()
 	} else {
 		// Default: require authentication on all API calls
-		authConfig = authctx.DefaultAuthInterceptorConfig()
+		authConfig = oagrpc.DefaultInterceptorConfig()
+	}
+
+	// Enable switch auth for testing if configured
+	if os.Getenv("ENABLE_SWITCH_AUTH") == "true" && authConfig.Config != nil {
+		authConfig.Config.EnableSwitchAuth = true
 	}
 
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			authctx.UnaryAuthInterceptor(authConfig),
+			oagrpc.UnaryAuthInterceptor(authConfig),
 		),
 		grpc.ChainStreamInterceptor(
-			authctx.StreamAuthInterceptor(authConfig),
+			oagrpc.StreamAuthInterceptor(authConfig),
 		),
 	)
 

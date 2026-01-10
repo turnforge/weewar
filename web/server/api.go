@@ -15,8 +15,8 @@ import (
 	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 	v1connect "github.com/turnforge/weewar/gen/go/weewar/v1/services/weewarv1connect"
+	oagrpc "github.com/panyam/oneauth/grpc"
 	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/authctx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -128,14 +128,14 @@ func (web *ApiHandler) createSvcMux(grpc_addr string) (*runtime.ServeMux, error)
 			if web.AuthMiddleware != nil {
 				userID := web.AuthMiddleware.GetLoggedInUserId(request)
 				if userID != "" {
-					md.Set(authctx.MetadataKeyUserID, userID)
+					md.Set(oagrpc.DefaultMetadataKeyUserID, userID)
 				}
 			}
 
 			// Support user switching for testing (only if ENABLE_SWITCH_AUTH is set)
 			if os.Getenv("ENABLE_SWITCH_AUTH") == "true" {
 				if switchUser := request.Header.Get("X-Switch-User"); switchUser != "" {
-					md.Set(authctx.MetadataKeySwitchUser, switchUser)
+					md.Set(oagrpc.DefaultMetadataKeySwitchUser, switchUser)
 				}
 			}
 

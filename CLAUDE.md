@@ -316,7 +316,22 @@ previousUnit := &v1.Unit{Q: unit.Q, R: unit.R, ...} // May forget Shortcut!
 - Persists across user interactions (selection, movement, attack)
 - Automatically refreshes after any unit action or state change
 
-### Authentication Configuration
+### Authentication and Rate Limiting
+
+**Shared Libraries**: Authentication and rate limiting use shared libraries:
+- `github.com/panyam/oneauth`: OAuth providers, HTTP auth middleware, gRPC auth context utilities
+- `github.com/panyam/goapplib`: Rate limiting middleware, template helpers
+
+**gRPC Auth Context** (from oneauth/grpc):
+- `oagrpc.UserIDFromContext(ctx)`: Extract user ID from gRPC metadata
+- `oagrpc.UnaryAuthInterceptor(config)`: gRPC unary interceptor for auth enforcement
+- `oagrpc.StreamAuthInterceptor(config)`: gRPC stream interceptor for auth enforcement
+- Environment: `DISABLE_API_AUTH=true` skips auth, `ENABLE_SWITCH_AUTH=true` allows X-Switch-User header
+
+**Rate Limiting** (from goapplib):
+- `goal.NewRateLimitMiddleware(config)`: Creates middleware with auth/API rate limiters
+- `rateLimiter.WrapAuth(handler)`: Stricter limits for auth endpoints (10/15min)
+- `rateLimiter.WrapAPI(handler)`: Standard API limits (100/min)
 
 **OAuth Providers**: The app supports multiple social login providers configured via environment variables.
 

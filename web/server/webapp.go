@@ -108,8 +108,8 @@ func NewWeewarApp(clientMgr *services.ClientMgr) (weewarApp *WeewarApp, goalApp 
 func (a *WeewarApp) Handler() http.Handler {
 	r := http.NewServeMux()
 
-	// Rate limiting middleware
-	rateLimiter := NewRateLimitMiddleware(DefaultRateLimitConfig())
+	// Rate limiting middleware (from goapplib)
+	rateLimiter := goal.NewRateLimitMiddleware(goal.DefaultRateLimitConfig())
 
 	// Auth routes (with stricter rate limiting)
 	r.Handle("/auth/", rateLimiter.WrapAuth(http.StripPrefix("/auth", a.Auth.Handler())))

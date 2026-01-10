@@ -14,8 +14,6 @@ message IndexInfoGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.IndexInfo" };
 }
 
-// UserGORM is now provided by goapplib - use github.com/panyam/goapplib/gen/gorm
-
 message TileGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.Tile", implement_scanner: true  };
 }

@@ -15,8 +15,6 @@ message IndexInfoDatastore {
   option (dal.v1.datastore_options) = { source: "weewar.v1.IndexInfo" };
 }
 
-// UserDatastore is now provided by goapplib - use github.com/panyam/goapplib/gen/datastore
-
 message TileDatastore {
   option (dal.v1.datastore_options) = { source: "weewar.v1.Tile" };
 }

@@ -28,7 +28,6 @@ type WeewarApp struct {
 	Auth           *oa.OneAuth
 	AuthMiddleware *oa.Middleware
 	AuthService    *goalservices.AuthService
-	AuthHandler    http.Handler // Combined auth handler with OAuth routing fixes
 	Session        *scs.SessionManager
 
 	// Services
@@ -50,14 +49,13 @@ type WeewarApp struct {
 // Returns the WeewarApp and the goal.App wrapper.
 func NewWeewarApp(clientMgr *services.ClientMgr) (weewarApp *WeewarApp, goalApp *goal.App[*WeewarApp], err error) {
 	session := scs.New()
-	authService, oneauth, authHandler := setupAuthService(session)
+	authService, oneauth := setupAuthService(session)
 
 	// Create WeewarApp (pure app context)
 	weewarApp = &WeewarApp{
 		Auth:           oneauth,
 		AuthMiddleware: &oneauth.Middleware,
 		AuthService:    authService,
-		AuthHandler:    authHandler,
 		Session:        session,
 		ClientMgr:      clientMgr,
 		HideGames:      os.Getenv("WEEWAR_HIDE_GAMES") == "true",
@@ -118,8 +116,7 @@ func (a *WeewarApp) Handler() http.Handler {
 	securityHeaders := NewSecurityHeadersMiddleware()
 
 	// Auth routes (with stricter rate limiting)
-	// Uses AuthHandler which has proper OAuth routing (fixes trailing slash issues)
-	r.Handle("/auth/", rateLimiter.WrapAuth(http.StripPrefix("/auth", a.AuthHandler)))
+	r.Handle("/auth/", rateLimiter.WrapAuth(http.StripPrefix("/auth", a.Auth.Handler())))
 
 	// API routes (with API rate limiting)
 	r.Handle("/api/", rateLimiter.WrapAPI(http.StripPrefix("/api", a.Api.Handler())))

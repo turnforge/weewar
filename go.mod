@@ -112,6 +112,6 @@ require (
 
 // replace github.com/panyam/servicekit v0.0.4 => ./locallinks/servicekit
 
-// replace github.com/panyam/oneauth v0.0.16 => ./locallinks/oneauth
+replace github.com/panyam/oneauth v0.0.16 => ./locallinks/oneauth
 
 // replace github.com/panyam/goapplib v0.0.7 => ./locallinks/goapplib

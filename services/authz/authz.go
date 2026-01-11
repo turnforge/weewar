@@ -19,6 +19,7 @@ var (
 	ErrForbidden       = fmt.Errorf("access denied")
 	ErrNotOwner        = fmt.Errorf("you are not the owner of this resource")
 	ErrNotPlayer       = fmt.Errorf("you are not a player in this game")
+	ErrNotYourTurn     = fmt.Errorf("it is not your turn")
 )
 
 // GetUserIDFromContext extracts the authenticated user ID from gRPC context.
@@ -62,14 +63,45 @@ func CanModifyWorld(ctx context.Context, world *v1.World) error {
 	return RequireOwnership(ctx, world.CreatorId)
 }
 
+// RequireGamePlayer checks if the authenticated user is a player in the game.
+// Returns the player's ID (1-based) if they are a player.
+func RequireGamePlayer(ctx context.Context, game *v1.Game) (int32, error) {
+	userID, err := RequireAuthenticated(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	if game.Config == nil {
+		return 0, ErrNotPlayer
+	}
+
+	for _, player := range game.Config.Players {
+		if player.UserId == userID {
+			return player.PlayerId, nil
+		}
+	}
+
+	return 0, ErrNotPlayer
+}
+
+// RequireCurrentPlayer checks if it's the authenticated user's turn.
+// Returns the player's ID if it's their turn.
+func RequireCurrentPlayer(ctx context.Context, game *v1.Game, currentPlayer int32) (int32, error) {
+	playerID, err := RequireGamePlayer(ctx, game)
+	if err != nil {
+		return 0, err
+	}
+
+	if playerID != currentPlayer {
+		return playerID, ErrNotYourTurn
+	}
+
+	return playerID, nil
+}
+
 // CanSubmitMoves checks if user can submit moves to a game.
-// Currently checks if user is the game creator since GamePlayer doesn't
-// have a user_id field yet. This works for:
-// - Single player games (creator is the only player)
-// - Hotseat games (all players share the same session)
-//
-// TODO: Add user_id to GamePlayer proto for proper multiplayer support
-// where different users control different players.
-func CanSubmitMoves(ctx context.Context, game *v1.Game) error {
-	return RequireOwnership(ctx, game.CreatorId)
+// User must be a player in the game AND it must be their turn.
+func CanSubmitMoves(ctx context.Context, game *v1.Game, currentPlayer int32) error {
+	_, err := RequireCurrentPlayer(ctx, game, currentPlayer)
+	return err
 }

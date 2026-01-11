@@ -5,8 +5,10 @@ package fsbe
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/panyam/goutils/storage"
@@ -14,6 +16,8 @@ import (
 	"github.com/turnforge/weewar/lib"
 	"github.com/turnforge/weewar/services"
 	"github.com/turnforge/weewar/services/authz"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -110,7 +114,10 @@ func (s *FSWorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest)
 
 	world, err := storage.LoadFSArtifact[*v1.World](s.storage, req.Id, "metadata")
 	if err != nil {
-		return nil, fmt.Errorf("world metadata not found: %w", err)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, status.Errorf(codes.NotFound, "world %s not found", req.Id)
+		}
+		return nil, fmt.Errorf("failed to load world metadata: %w", err)
 	}
 
 	// Populate screenshot URL if not set
@@ -120,7 +127,10 @@ func (s *FSWorldsService) GetWorld(ctx context.Context, req *v1.GetWorldRequest)
 
 	worldData, err := storage.LoadFSArtifact[*v1.WorldData](s.storage, req.Id, "data")
 	if err != nil {
-		return nil, fmt.Errorf("world data not found: %w", err)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, status.Errorf(codes.NotFound, "world data for %s not found", req.Id)
+		}
+		return nil, fmt.Errorf("failed to load world data: %w", err)
 	}
 
 	// Auto-migrate from old list-based format to new map-based format

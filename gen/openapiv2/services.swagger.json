@@ -2325,6 +2325,10 @@
           "format": "int32",
           "title": "Player ID (1-based)"
         },
+        "userId": {
+          "type": "string",
+          "title": "ID of the system user that is assigned to this game player.  This is the \"auth\" user"
+        },
         "playerType": {
           "type": "string",
           "description": "\"human\", \"ai\", \"open\"",

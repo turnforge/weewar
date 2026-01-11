@@ -1292,6 +1292,7 @@ func GamePlayerToGamePlayerDatastore(
 	// Initialize struct with inline values
 	*dest = GamePlayerDatastore{
 		PlayerId:      src.PlayerId,
+		UserId:        src.UserId,
 		PlayerType:    src.PlayerType,
 		Color:         src.Color,
 		TeamId:        src.TeamId,
@@ -1338,6 +1339,7 @@ func GamePlayerFromGamePlayerDatastore(
 	// Initialize struct with inline values
 	*dest = models.GamePlayer{
 		PlayerId:      src.PlayerId,
+		UserId:        src.UserId,
 		PlayerType:    src.PlayerType,
 		Color:         src.Color,
 		TeamId:        src.TeamId,

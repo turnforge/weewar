@@ -259,8 +259,8 @@ func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, app *goal
 	slog.Info("Loading composer for world with ID: ", "nid", v.WorldId)
 
 	if v.WorldId == "" {
-		if false && loggedInUserId == "" {
-			// For now enforce login even on new
+		// Require login to create new worlds
+		if loggedInUserId == "" {
 			qs := r.URL.RawQuery
 			if len(qs) > 0 {
 				qs = "?" + qs
@@ -288,11 +288,13 @@ func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, app *goal
 		v.IsOwner = loggedInUserId == resp.World.CreatorId
 		log.Println("LoggedUser: ", loggedInUserId, resp.World.CreatorId)
 
-		if false && !v.IsOwner {
-			log.Println("Composer is NOT the owner.  Redirecting to view page...")
+		// Require login and ownership to edit existing worlds
+		if !v.IsOwner {
+			log.Println("Composer is NOT the owner. Redirecting...")
 			if loggedInUserId == "" {
-				http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/worlds/%s/compose", v.WorldId)), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/worlds/%s/edit", v.WorldId)), http.StatusSeeOther)
 			} else {
+				// User is logged in but not the owner - redirect to view page
 				http.Redirect(w, r, fmt.Sprintf("/worlds/%s/view", v.WorldId), http.StatusSeeOther)
 			}
 			return nil, true

@@ -7,14 +7,18 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/panyam/goutils/storage"
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
 	"github.com/turnforge/weewar/lib"
 	"github.com/turnforge/weewar/services"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -53,7 +57,10 @@ func NewFSGamesService(storageDir string, clientMgr *services.ClientMgr) *FSGame
 func (s *FSGamesService) LoadGame(ctx context.Context, id string) (*v1.Game, error) {
 	game, err := storage.LoadFSArtifact[*v1.Game](s.storage, id, "metadata")
 	if err != nil {
-		return nil, fmt.Errorf("game metadata not found: %w", err)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, status.Errorf(codes.NotFound, "game %s not found", id)
+		}
+		return nil, fmt.Errorf("failed to load game metadata: %w", err)
 	}
 	// Populate screenshot URL if not set
 	if len(game.PreviewUrls) == 0 {
@@ -66,7 +73,10 @@ func (s *FSGamesService) LoadGame(ctx context.Context, id string) (*v1.Game, err
 func (s *FSGamesService) LoadGameState(ctx context.Context, id string) (*v1.GameState, error) {
 	gameState, err := storage.LoadFSArtifact[*v1.GameState](s.storage, id, "state")
 	if err != nil {
-		return nil, fmt.Errorf("game state not found: %w", err)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, status.Errorf(codes.NotFound, "game state for %s not found", id)
+		}
+		return nil, fmt.Errorf("failed to load game state: %w", err)
 	}
 	return gameState, nil
 }
@@ -75,7 +85,10 @@ func (s *FSGamesService) LoadGameState(ctx context.Context, id string) (*v1.Game
 func (s *FSGamesService) LoadGameHistory(ctx context.Context, id string) (*v1.GameMoveHistory, error) {
 	gameHistory, err := storage.LoadFSArtifact[*v1.GameMoveHistory](s.storage, id, "history")
 	if err != nil {
-		return nil, fmt.Errorf("game history not found: %w", err)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, status.Errorf(codes.NotFound, "game history for %s not found", id)
+		}
+		return nil, fmt.Errorf("failed to load game history: %w", err)
 	}
 	return gameHistory, nil
 }

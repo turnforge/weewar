@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/alexedwards/scs/v2"
 	goalservices "github.com/panyam/goapplib/services"
@@ -12,7 +13,32 @@ import (
 	oa2 "github.com/panyam/oneauth/oauth2"
 )
 
-func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth) {
+// registerOAuthProvider registers an OAuth provider with proper trailing slash handling.
+// The oneauth library registers routes without trailing slashes, which causes issues
+// when the path is stripped completely (empty path redirects to /).
+// This function registers both:
+// 1. A redirect from /provider to /auth/provider/ (with trailing slash)
+// 2. The actual handler at /provider/ for subtree matching
+func registerOAuthProvider(mux *http.ServeMux, name string, handler http.Handler) {
+	name = strings.TrimPrefix(name, "/")
+	noSlashPattern := "/" + name
+	withSlashPattern := "/" + name + "/"
+	fullPath := "/auth/" + name + "/"
+
+	// Handle requests without trailing slash by redirecting to the full path
+	mux.HandleFunc(noSlashPattern, func(w http.ResponseWriter, r *http.Request) {
+		target := fullPath
+		if r.URL.RawQuery != "" {
+			target += "?" + r.URL.RawQuery
+		}
+		http.Redirect(w, r, target, http.StatusMovedPermanently)
+	})
+
+	// Handle requests with trailing slash (and subtree) using the actual handler
+	mux.Handle(withSlashPattern, http.StripPrefix("/"+name, handler))
+}
+
+func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth, http.Handler) {
 	// Initialize authentication
 	storagePath := os.Getenv("WEEWAR_USER_STORAGE_PATH")
 	if storagePath == "" {
@@ -26,10 +52,13 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 	}
 	oneauth.UserStore = authService
 
-	// OAuth providers
-	oneauth.AddAuth("/google", oa2.NewGoogleOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
-	oneauth.AddAuth("/github", oa2.NewGithubOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
-	oneauth.AddAuth("/twitter", NewTwitterOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
+	// Create a custom mux for all auth routes with proper OAuth routing
+	authMux := http.NewServeMux()
+
+	// OAuth providers - use our helper to fix trailing slash routing issues
+	registerOAuthProvider(authMux, "google", oa2.NewGoogleOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
+	registerOAuthProvider(authMux, "github", oa2.NewGithubOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
+	registerOAuthProvider(authMux, "twitter", NewTwitterOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
 
 	// Get base URL for verification/reset links
 	baseURL := os.Getenv("WEEWAR_BASE_URL")
@@ -188,5 +217,13 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"success": true}`))
 	}))
-	return authService, oneauth
+
+	// Add logout handler
+	authMux.HandleFunc("/logout", oneauth.Handler().ServeHTTP)
+
+	// Add fallback to oneauth's handler for all non-OAuth routes (login, signup, etc.)
+	// The authMux has specific patterns for OAuth providers; anything else goes to oneauth
+	authMux.Handle("/", oneauth.Handler())
+
+	return authService, oneauth, authMux
 }

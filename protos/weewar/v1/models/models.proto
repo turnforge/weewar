@@ -430,26 +430,29 @@ message GamePlayer {
   // Player ID (1-based)
   int32 player_id = 1;
 
+  // ID of the system user that is assigned to this game player.  This is the "auth" user
+  string user_id = 2;
+
   // Player type
-  string player_type = 2; // "human", "ai", "open"
+  string player_type = 3; // "human", "ai", "open"
 
   // Player color
-  string color = 3;
+  string color = 4;
 
   // Team ID (0 = no team, 1+ = team number)
-  int32 team_id = 4;
+  int32 team_id = 5;
 
   // Nickname for the player in this game
-  string name = 5;
+  string name = 6;
 
   // Whether play is still in the game - can this just be inferred?
-  bool is_active = 6;
+  bool is_active = 7;
 
   // How many coins the player started off with
-  int32 starting_coins = 7;
+  int32 starting_coins = 8;
 
   // Player's current money/coins balance for building units
-  // int32 coins = 8;
+  // int32 coins = 9;
 }
 
 message GameTeam {

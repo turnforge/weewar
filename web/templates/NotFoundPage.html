@@ -1,11 +1,71 @@
 {{# include "./BasePage.html" #}}
 
 {{ define "BodySection" }}
-<main class="min-h-[60vh] flex items-center justify-center px-4">
-    <div class="text-center">
-        <div class="relative inline-block mb-8">
-            <div class="text-9xl font-bold text-gray-300 dark:text-gray-700" style="animation: float 3s ease-in-out infinite;">404</div>
+<main class="min-h-[60vh] flex items-center justify-center px-4 relative overflow-hidden">
+    <!-- Hex Grid Background -->
+    <div class="absolute inset-0 opacity-10 dark:opacity-5 pointer-events-none">
+        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="hexPattern" width="56" height="100" patternUnits="userSpaceOnUse">
+                    <path d="M28 2 L50 15 L50 41 L28 54 L6 41 L6 15 Z" fill="none" stroke="currentColor" stroke-width="1" class="text-gray-500"/>
+                    <path d="M28 48 L50 61 L50 87 L28 100 L6 87 L6 61 Z" fill="none" stroke="currentColor" stroke-width="1" class="text-gray-500"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hexPattern)" />
+        </svg>
+    </div>
+
+    <!-- Fog overlay -->
+    <div class="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-gray-100 dark:to-gray-900 pointer-events-none"></div>
+
+    <div class="text-center relative z-10">
+        <!-- Lost Map Section -->
+        <div class="relative inline-block mb-6">
+            <svg viewBox="0 0 280 160" class="w-72 h-40 mx-auto" xmlns="http://www.w3.org/2000/svg">
+                <!-- Fog/Unknown tiles -->
+                <g class="text-gray-300 dark:text-gray-700">
+                    <!-- Row 1 -->
+                    <path d="M70 10 L90 20 L90 40 L70 50 L50 40 L50 20 Z" fill="currentColor" opacity="0.5"/>
+                    <path d="M110 10 L130 20 L130 40 L110 50 L90 40 L90 20 Z" fill="currentColor" opacity="0.3"/>
+                    <path d="M150 10 L170 20 L170 40 L150 50 L130 40 L130 20 Z" fill="currentColor" opacity="0.6"/>
+                    <path d="M190 10 L210 20 L210 40 L190 50 L170 40 L170 20 Z" fill="currentColor" opacity="0.4"/>
+                    <!-- Row 2 -->
+                    <path d="M50 45 L70 55 L70 75 L50 85 L30 75 L30 55 Z" fill="currentColor" opacity="0.4"/>
+                    <path d="M90 45 L110 55 L110 75 L90 85 L70 75 L70 55 Z" fill="currentColor" opacity="0.7"/>
+                    <path d="M130 45 L150 55 L150 75 L130 85 L110 75 L110 55 Z" fill="currentColor" opacity="0.5"/>
+                    <path d="M170 45 L190 55 L190 75 L170 85 L150 75 L150 55 Z" fill="currentColor" opacity="0.3"/>
+                    <path d="M210 45 L230 55 L230 75 L210 85 L190 75 L190 55 Z" fill="currentColor" opacity="0.5"/>
+                    <!-- Row 3 -->
+                    <path d="M70 80 L90 90 L90 110 L70 120 L50 110 L50 90 Z" fill="currentColor" opacity="0.3"/>
+                    <path d="M110 80 L130 90 L130 110 L110 120 L90 110 L90 90 Z" fill="currentColor" opacity="0.5"/>
+                    <path d="M150 80 L170 90 L170 110 L150 120 L130 110 L130 90 Z" fill="currentColor" opacity="0.4"/>
+                    <path d="M190 80 L210 90 L210 110 L190 120 L170 110 L170 90 Z" fill="currentColor" opacity="0.6"/>
+                </g>
+
+                <!-- Question marks on tiles -->
+                <g class="text-gray-400 dark:text-gray-600 font-bold" font-size="16" text-anchor="middle">
+                    <text x="110" y="35">?</text>
+                    <text x="170" y="70">?</text>
+                    <text x="90" y="70">?</text>
+                    <text x="150" y="105">?</text>
+                </g>
+
+                <!-- Lost unit (tank) wandering -->
+                <g class="lost-unit">
+                    <circle cx="130" cy="65" r="12" fill="#ef4444" opacity="0.8"/>
+                    <text x="130" y="69" text-anchor="middle" font-size="10" fill="white" font-weight="bold">?</text>
+                </g>
+
+                <!-- Compass rose -->
+                <g transform="translate(245, 130)" class="text-gray-400 dark:text-gray-600">
+                    <circle cx="0" cy="0" r="15" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <path d="M0 -12 L3 0 L0 12 L-3 0 Z" fill="currentColor"/>
+                    <text x="0" y="-18" text-anchor="middle" font-size="8" fill="currentColor">N</text>
+                </g>
+            </svg>
         </div>
+
+        <div class="text-8xl font-bold text-gray-300 dark:text-gray-700 mb-4 floating-404">404</div>
 
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Lost in the Fog of War</h1>
         <p class="text-gray-600 dark:text-gray-400 mb-2">Your recon unit couldn't locate:</p>
@@ -33,7 +93,22 @@
 <style>
     @keyframes float {
         0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
+        50% { transform: translateY(-10px); }
+    }
+    .floating-404 {
+        animation: float 3s ease-in-out infinite;
+    }
+    @keyframes wander {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(10px, -5px); }
+        50% { transform: translate(5px, 8px); }
+        75% { transform: translate(-8px, 3px); }
+    }
+    .lost-unit {
+        animation: wander 4s ease-in-out infinite;
+    }
+    .bg-gradient-radial {
+        background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, var(--tw-gradient-to) 100%);
     }
 </style>
 {{ end }}

@@ -1058,6 +1058,7 @@ func GamePlayerToGamePlayerGORM(
 	// Initialize struct with inline values
 	*dest = GamePlayerGORM{
 		PlayerId:      src.PlayerId,
+		UserId:        src.UserId,
 		PlayerType:    src.PlayerType,
 		Color:         src.Color,
 		TeamId:        src.TeamId,
@@ -1094,6 +1095,7 @@ func GamePlayerFromGamePlayerGORM(
 	// Initialize struct with inline values
 	*dest = models.GamePlayer{
 		PlayerId:      src.PlayerId,
+		UserId:        src.UserId,
 		PlayerType:    src.PlayerType,
 		Color:         src.Color,
 		TeamId:        src.TeamId,

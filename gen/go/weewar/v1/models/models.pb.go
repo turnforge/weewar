@@ -2134,18 +2134,20 @@ type GamePlayer struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Player ID (1-based)
 	PlayerId int32 `protobuf:"varint,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	// ID of the system user that is assigned to this game player.  This is the "auth" user
+	UserId string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	// Player type
-	PlayerType string `protobuf:"bytes,2,opt,name=player_type,json=playerType,proto3" json:"player_type,omitempty"` // "human", "ai", "open"
+	PlayerType string `protobuf:"bytes,3,opt,name=player_type,json=playerType,proto3" json:"player_type,omitempty"` // "human", "ai", "open"
 	// Player color
-	Color string `protobuf:"bytes,3,opt,name=color,proto3" json:"color,omitempty"`
+	Color string `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"`
 	// Team ID (0 = no team, 1+ = team number)
-	TeamId int32 `protobuf:"varint,4,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
+	TeamId int32 `protobuf:"varint,5,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
 	// Nickname for the player in this game
-	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
 	// Whether play is still in the game - can this just be inferred?
-	IsActive bool `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	IsActive bool `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	// How many coins the player started off with
-	StartingCoins int32 `protobuf:"varint,7,opt,name=starting_coins,json=startingCoins,proto3" json:"starting_coins,omitempty"`
+	StartingCoins int32 `protobuf:"varint,8,opt,name=starting_coins,json=startingCoins,proto3" json:"starting_coins,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2185,6 +2187,13 @@ func (x *GamePlayer) GetPlayerId() int32 {
 		return x.PlayerId
 	}
 	return 0
+}
+
+func (x *GamePlayer) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 func (x *GamePlayer) GetPlayerType() string {
@@ -4816,17 +4825,18 @@ const file_weewar_v1_models_models_proto_rawDesc = "" +
 	"\x10navalbase_income\x18\x04 \x01(\x05R\x0fnavalbaseIncome\x12-\n" +
 	"\x12airportbase_income\x18\x05 \x01(\x05R\x11airportbaseIncome\x12-\n" +
 	"\x12missilesilo_income\x18\x06 \x01(\x05R\x11missilesiloIncome\x12!\n" +
-	"\fmines_income\x18\a \x01(\x05R\vminesIncome\"\xd1\x01\n" +
+	"\fmines_income\x18\a \x01(\x05R\vminesIncome\"\xea\x01\n" +
 	"\n" +
 	"GamePlayer\x12\x1b\n" +
-	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId\x12\x1f\n" +
-	"\vplayer_type\x18\x02 \x01(\tR\n" +
+	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1f\n" +
+	"\vplayer_type\x18\x03 \x01(\tR\n" +
 	"playerType\x12\x14\n" +
-	"\x05color\x18\x03 \x01(\tR\x05color\x12\x17\n" +
-	"\ateam_id\x18\x04 \x01(\x05R\x06teamId\x12\x12\n" +
-	"\x04name\x18\x05 \x01(\tR\x04name\x12\x1b\n" +
-	"\tis_active\x18\x06 \x01(\bR\bisActive\x12%\n" +
-	"\x0estarting_coins\x18\a \x01(\x05R\rstartingCoins\"j\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\x12\x17\n" +
+	"\ateam_id\x18\x05 \x01(\x05R\x06teamId\x12\x12\n" +
+	"\x04name\x18\x06 \x01(\tR\x04name\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x12%\n" +
+	"\x0estarting_coins\x18\b \x01(\x05R\rstartingCoins\"j\n" +
 	"\bGameTeam\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\x05R\x06teamId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +

@@ -15,11 +15,11 @@ require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/joho/godotenv v1.5.1
-	github.com/panyam/goapplib v0.0.6
+	github.com/panyam/goapplib v0.0.7
 	github.com/panyam/gocurrent v0.0.10
-	github.com/panyam/goutils v0.1.12
+	github.com/panyam/goutils v0.1.13
 	github.com/panyam/oneauth v0.0.16
-	github.com/panyam/protoc-gen-dal v0.0.9
+	github.com/panyam/protoc-gen-dal v0.0.10
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
 	github.com/panyam/servicekit v0.0.4
 	github.com/panyam/templar v0.0.27
@@ -102,7 +102,7 @@ require (
 
 // replace github.com/turnforge/turnengine v0.0.3 => ./locallinks/turnengine/
 
-// replace github.com/panyam/protoc-gen-dal v0.0.2 => ./locallinks/protoc-gen-dal
+// replace github.com/panyam/protoc-gen-dal v0.0.10 => ./locallinks/protoc-gen-dal
 
 // replace github.com/panyam/gocurrent v0.0.10 => ./locallinks/gocurrent
 
@@ -114,4 +114,4 @@ require (
 
 // replace github.com/panyam/oneauth v0.0.16 => ./locallinks/oneauth
 
-// replace github.com/panyam/goapplib v0.0.6 => ./locallinks/goapplib
+// replace github.com/panyam/goapplib v0.0.7 => ./locallinks/goapplib

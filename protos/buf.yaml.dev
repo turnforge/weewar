@@ -6,6 +6,7 @@ deps:
   - buf.build/panyam/protoc-gen-go-wasmjs
   - buf.build/turnforge/turnengine
   - buf.build/prototools/protoc-gen-dal
+  - buf.build/goal/goapplib
 lint:
   use:
     - STANDARD

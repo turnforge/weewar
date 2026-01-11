@@ -133,9 +133,9 @@ func (*WorldDatastore) Kind() string {
 type WorldDataDatastore struct {
 	Key *datastore.Key `datastore:"-"`
 
-	WorldId string `datastore:"-"`
-
 	TilesMap map[string]TileDatastore `datastore:"tiles_map,noindex"`
+
+	WorldId string `datastore:"-"`
 
 	UnitsMap map[string]UnitDatastore `datastore:"units_map,noindex"`
 

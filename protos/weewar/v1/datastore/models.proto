@@ -15,31 +15,7 @@ message IndexInfoDatastore {
   option (dal.v1.datastore_options) = { source: "weewar.v1.IndexInfo" };
 }
 
-// UserDatastore is the Datastore representation for User
-message UserDatastore {
-  option (dal.v1.datastore_options) = {
-    source: "weewar.v1.User"
-    kind: "User"
-  };
-
-  // ID - used for key, not stored as property
-  string id = 1 [(dal.v1.column) = {
-    datastore_tags: ["-"]
-  }];
-
-  // Email - indexed for lookup by email
-  string email = 2;
-
-  // Tags as noindex (not queryable)
-  repeated string tags = 3 [(dal.v1.column) = {
-    datastore_tags: ["noindex"]
-  }];
-
-  // Extras as noindex (large nested struct)
-  google.protobuf.Struct extras = 4 [(dal.v1.column) = {
-    datastore_tags: ["noindex"]
-  }];
-}
+// UserDatastore is now provided by goapplib - use github.com/panyam/goapplib/gen/datastore
 
 message TileDatastore {
   option (dal.v1.datastore_options) = { source: "weewar.v1.Tile" };

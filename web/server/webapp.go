@@ -8,6 +8,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	goal "github.com/panyam/goapplib"
+	goalservices "github.com/panyam/goapplib/services"
 	gotl "github.com/panyam/goutils/template"
 	oa "github.com/panyam/oneauth"
 	"github.com/turnforge/weewar/services"
@@ -26,7 +27,7 @@ type WeewarApp struct {
 	// Auth
 	Auth           *oa.OneAuth
 	AuthMiddleware *oa.Middleware
-	AuthService    *services.AuthService
+	AuthService    *goalservices.AuthService
 	Session        *scs.SessionManager
 
 	// Services

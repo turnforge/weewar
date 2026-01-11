@@ -16,6 +16,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"
+	_ "google.golang.org/protobuf/types/known/structpb"
 )
 
 const (
@@ -988,7 +989,7 @@ var File_weewar_v1_gorm_models_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_gorm_models_proto_rawDesc = "" +
 	"\n" +
-	"\x1bweewar/v1/gorm/models.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\"*\n" +
+	"\x1bweewar/v1/gorm/models.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\x1a\x1cgoogle/protobuf/struct.proto\"*\n" +
 	"\rIndexInfoGORM:\x19ʦ\x1d\x15\n" +
 	"\x13weewar.v1.IndexInfo\"\"\n" +
 	"\bTileGORM:\x16ʦ\x1d\x12\n" +

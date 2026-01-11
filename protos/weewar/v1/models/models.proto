@@ -6,6 +6,9 @@ import "google/protobuf/struct.proto";
 
 option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
 
+// User and UsersService are now provided by goapplib.v1
+// Import from github.com/panyam/goapplib/gen/go/goapplib/v1
+
 message IndexInfo {
   // We maintain an IndexInfo for each type of "indexing" operation needed
   // For example one update may change the keywords (so we need to update indexes for search)
@@ -14,33 +17,6 @@ message IndexInfo {
   google.protobuf.Timestamp last_updated_at = 1;
   google.protobuf.Timestamp last_indexed_at = 2;
   bool needs_indexing = 3;
-}
-
-message User {
-  google.protobuf.Timestamp created_at = 1;
-  google.protobuf.Timestamp updated_at = 2;
-
-  // Unique ID for the user (links to AuthService user)
-  string id = 3;
-
-  // Display name
-  string name = 4;
-
-  // User bio/description
-  string description = 5;
-
-  // User tags/interests
-  repeated string tags = 6;
-
-  // Avatar/profile image URL
-  string image_url = 7;
-
-  // Primary email (from identity, for display)
-  string email = 8;
-
-  // App-specific extra data - use this for custom fields
-  // Apps can store any structured data here without modifying the proto
-  google.protobuf.Struct extras = 20;
 }
 
 message Pagination {

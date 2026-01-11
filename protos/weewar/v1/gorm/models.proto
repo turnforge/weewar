@@ -14,23 +14,7 @@ message IndexInfoGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.IndexInfo" };
 }
 
-// User profile stored in database
-message UserGORM {
-  option (dal.v1.gorm) = { source: "weewar.v1.User", table: "users" };
-  string id = 1 [(dal.v1.column) = {
-    gorm_tags: ["primaryKey"]
-  }];
-
-  // Tags as JSON for cross-DB compatibility
-  repeated string tags = 6 [(dal.v1.column) = {
-    gorm_tags: ["serializer:json"]
-  }];
-
-  // Extras as JSON for app-specific data
-  google.protobuf.Struct extras = 20 [(dal.v1.column) = {
-    gorm_tags: ["serializer:json"]
-  }];
-}
+// UserGORM is now provided by goapplib - use github.com/panyam/goapplib/gen/gorm
 
 message TileGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.Tile", implement_scanner: true  };

@@ -16,6 +16,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"
+	_ "google.golang.org/protobuf/types/known/structpb"
 )
 
 const (
@@ -881,7 +882,7 @@ var File_weewar_v1_datastore_models_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_datastore_models_proto_rawDesc = "" +
 	"\n" +
-	" weewar/v1/datastore/models.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\"/\n" +
+	" weewar/v1/datastore/models.proto\x12\tweewar.v1\x1a\x18dal/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\x1a\x1cgoogle/protobuf/struct.proto\"/\n" +
 	"\x12IndexInfoDatastore:\x19Ҧ\x1d\x15*\x13weewar.v1.IndexInfo\"%\n" +
 	"\rTileDatastore:\x14Ҧ\x1d\x10*\x0eweewar.v1.Tile\"-\n" +
 	"\x11CrossingDatastore:\x18Ҧ\x1d\x14*\x12weewar.v1.Crossing\"}\n" +

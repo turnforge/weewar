@@ -25,9 +25,10 @@ _sym_db = _symbol_database.Default()
 from dal.v1 import annotations_pb2 as dal_dot_v1_dot_annotations__pb2
 from weewar.v1.models import models_pb2 as weewar_dot_v1_dot_models_dot_models__pb2
 from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
+from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n weewar/v1/datastore/models.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\"/\n\x12IndexInfoDatastore:\x19\xd2\xa6\x1d\x15*\x13weewar.v1.IndexInfo\"%\n\rTileDatastore:\x14\xd2\xa6\x1d\x10*\x0eweewar.v1.Tile\"-\n\x11\x43rossingDatastore:\x18\xd2\xa6\x1d\x14*\x12weewar.v1.Crossing\"}\n\rUnitDatastore\x12V\n\x0e\x61ttack_history\x18\x01 \x03(\x0b\x32 .weewar.v1.AttackRecordDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\rattackHistory:\x14\xd2\xa6\x1d\x10*\x0eweewar.v1.Unit\"5\n\x15\x41ttackRecordDatastore:\x1c\xd2\xa6\x1d\x18*\x16weewar.v1.AttackRecord\"\xdc\x02\n\x0eWorldDatastore\x12\x17\n\x02id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x02id\x12!\n\x04tags\x18\x02 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x04tags\x12\x30\n\x0cpreview_urls\x18\x03 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x0bpreviewUrls\x12\x64\n\x13\x64\x65\x66\x61ult_game_config\x18\x04 \x01(\x0b\x32%.weewar.v1.GameConfigurationDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x11\x64\x65\x66\x61ultGameConfig\x12X\n\x11search_index_info\x18\x05 \x01(\x0b\x32\x1d.weewar.v1.IndexInfoDatastoreB\r\x92\xa6\x1d\tr\x07\x66lattenR\x0fsearchIndexInfo:\x1c\xd2\xa6\x1d\x18\n\x05World*\x0fweewar.v1.World\"\xd7\x05\n\x12WorldDataDatastore\x12\"\n\x08world_id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x07worldId\x12W\n\ttiles_map\x18\x02 \x03(\x0b\x32+.weewar.v1.WorldDataDatastore.TilesMapEntryB\r\x92\xa6\x1d\tr\x07noindexR\x08tilesMap\x12W\n\tunits_map\x18\x03 \x03(\x0b\x32+.weewar.v1.WorldDataDatastore.UnitsMapEntryB\r\x92\xa6\x1d\tr\x07noindexR\x08unitsMap\x12Y\n\tcrossings\x18\x04 \x03(\x0b\x32,.weewar.v1.WorldDataDatastore.CrossingsEntryB\r\x92\xa6\x1d\tr\x07noindexR\tcrossings\x12`\n\x15screenshot_index_info\x18\x05 \x01(\x0b\x32\x1d.weewar.v1.IndexInfoDatastoreB\r\x92\xa6\x1d\tr\x07\x66lattenR\x13screenshotIndexInfo\x1aU\n\rTilesMapEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x18.weewar.v1.TileDatastoreR\x05value:\x02\x38\x01\x1aU\n\rUnitsMapEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x18.weewar.v1.UnitDatastoreR\x05value:\x02\x38\x01\x1aZ\n\x0e\x43rossingsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x32\n\x05value\x18\x02 \x01(\x0b\x32\x1c.weewar.v1.CrossingDatastoreR\x05value:\x02\x38\x01:$\xd2\xa6\x1d \n\tWorldData*\x13weewar.v1.WorldData\"\xdc\x02\n\rGameDatastore\x12\x17\n\x02id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x02id\x12\x19\n\x08world_id\x18\x02 \x01(\tR\x07worldId\x12!\n\x04tags\x18\x03 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x04tags\x12\x30\n\x0cpreview_urls\x18\x04 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x0bpreviewUrls\x12L\n\x06\x63onfig\x18\x05 \x01(\x0b\x32%.weewar.v1.GameConfigurationDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x06\x63onfig\x12X\n\x11search_index_info\x18\x06 \x01(\x0b\x32\x1d.weewar.v1.IndexInfoDatastoreB\r\x92\xa6\x1d\tr\x07\x66lattenR\x0fsearchIndexInfo:\x1a\xd2\xa6\x1d\x16\n\x04Game*\x0eweewar.v1.Game\"\xf0\x02\n\x12GameStateDatastore\x12 \n\x07game_id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x06gameId\x12K\n\nworld_data\x18\x02 \x01(\x0b\x32\x1d.weewar.v1.WorldDataDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\tworldData\x12\x63\n\rplayer_states\x18\x03 \x03(\x0b\x32/.weewar.v1.GameStateDatastore.PlayerStatesEntryB\r\x92\xa6\x1d\tr\x07noindexR\x0cplayerStates\x1a`\n\x11PlayerStatesEntry\x12\x10\n\x03key\x18\x01 \x01(\x05R\x03key\x12\x35\n\x05value\x18\x02 \x01(\x0b\x32\x1f.weewar.v1.PlayerStateDatastoreR\x05value:\x02\x38\x01:$\xd2\xa6\x1d \n\tGameState*\x13weewar.v1.GameState\"\xd2\x02\n\x1aGameConfigurationDatastore\x12G\n\x07players\x18\x01 \x03(\x0b\x32\x1e.weewar.v1.GamePlayerDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x07players\x12\x41\n\x05teams\x18\x02 \x03(\x0b\x32\x1c.weewar.v1.GameTeamDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x05teams\x12G\n\x0eincome_configs\x18\x03 \x01(\x0b\x32 .weewar.v1.IncomeConfigDatastoreR\rincomeConfigs\x12<\n\x08settings\x18\x04 \x01(\x0b\x32 .weewar.v1.GameSettingsDatastoreR\x08settings:!\xd2\xa6\x1d\x1d*\x1bweewar.v1.GameConfiguration\"5\n\x15IncomeConfigDatastore:\x1c\xd2\xa6\x1d\x18*\x16weewar.v1.IncomeConfig\"1\n\x13GamePlayerDatastore:\x1a\xd2\xa6\x1d\x16*\x14weewar.v1.GamePlayer\"-\n\x11GameTeamDatastore:\x18\xd2\xa6\x1d\x14*\x12weewar.v1.GameTeam\"i\n\x15GameSettingsDatastore\x12\x32\n\rallowed_units\x18\x01 \x03(\x05\x42\r\x92\xa6\x1d\tr\x07noindexR\x0c\x61llowedUnits:\x1c\xd2\xa6\x1d\x18*\x16weewar.v1.GameSettings\"3\n\x14PlayerStateDatastore:\x1b\xd2\xa6\x1d\x17*\x15weewar.v1.PlayerState\"\x95\x02\n\x11GameMoveDatastore\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12!\n\x0cgroup_number\x18\x02 \x01(\x03R\x0bgroupNumber\x12\x1f\n\x0bmove_number\x18\x03 \x01(\x03R\nmoveNumber\x12@\n\tmove_type\x18\x04 \x01(\x0b\x32\x14.google.protobuf.AnyB\r\x92\xa6\x1d\tr\x07noindexR\x08moveType\x12=\n\x07\x63hanges\x18\x05 \x03(\x0b\x32\x14.google.protobuf.AnyB\r\x92\xa6\x1d\tr\x07noindexR\x07\x63hanges:\"\xd2\xa6\x1d\x1e\n\x08GameMove*\x12weewar.v1.GameMoveB\xa2\x01\n\rcom.weewar.v1B\x0bModelsProtoP\x01Z?github.com/turnforge/weewar/gen/go/weewar/v1/datastore;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n weewar/v1/datastore/models.proto\x12\tweewar.v1\x1a\x18\x64\x61l/v1/annotations.proto\x1a\x1dweewar/v1/models/models.proto\x1a\x19google/protobuf/any.proto\x1a\x1cgoogle/protobuf/struct.proto\"/\n\x12IndexInfoDatastore:\x19\xd2\xa6\x1d\x15*\x13weewar.v1.IndexInfo\"%\n\rTileDatastore:\x14\xd2\xa6\x1d\x10*\x0eweewar.v1.Tile\"-\n\x11\x43rossingDatastore:\x18\xd2\xa6\x1d\x14*\x12weewar.v1.Crossing\"}\n\rUnitDatastore\x12V\n\x0e\x61ttack_history\x18\x01 \x03(\x0b\x32 .weewar.v1.AttackRecordDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\rattackHistory:\x14\xd2\xa6\x1d\x10*\x0eweewar.v1.Unit\"5\n\x15\x41ttackRecordDatastore:\x1c\xd2\xa6\x1d\x18*\x16weewar.v1.AttackRecord\"\xdc\x02\n\x0eWorldDatastore\x12\x17\n\x02id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x02id\x12!\n\x04tags\x18\x02 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x04tags\x12\x30\n\x0cpreview_urls\x18\x03 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x0bpreviewUrls\x12\x64\n\x13\x64\x65\x66\x61ult_game_config\x18\x04 \x01(\x0b\x32%.weewar.v1.GameConfigurationDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x11\x64\x65\x66\x61ultGameConfig\x12X\n\x11search_index_info\x18\x05 \x01(\x0b\x32\x1d.weewar.v1.IndexInfoDatastoreB\r\x92\xa6\x1d\tr\x07\x66lattenR\x0fsearchIndexInfo:\x1c\xd2\xa6\x1d\x18\n\x05World*\x0fweewar.v1.World\"\xd7\x05\n\x12WorldDataDatastore\x12\"\n\x08world_id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x07worldId\x12W\n\ttiles_map\x18\x02 \x03(\x0b\x32+.weewar.v1.WorldDataDatastore.TilesMapEntryB\r\x92\xa6\x1d\tr\x07noindexR\x08tilesMap\x12W\n\tunits_map\x18\x03 \x03(\x0b\x32+.weewar.v1.WorldDataDatastore.UnitsMapEntryB\r\x92\xa6\x1d\tr\x07noindexR\x08unitsMap\x12Y\n\tcrossings\x18\x04 \x03(\x0b\x32,.weewar.v1.WorldDataDatastore.CrossingsEntryB\r\x92\xa6\x1d\tr\x07noindexR\tcrossings\x12`\n\x15screenshot_index_info\x18\x05 \x01(\x0b\x32\x1d.weewar.v1.IndexInfoDatastoreB\r\x92\xa6\x1d\tr\x07\x66lattenR\x13screenshotIndexInfo\x1aU\n\rTilesMapEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x18.weewar.v1.TileDatastoreR\x05value:\x02\x38\x01\x1aU\n\rUnitsMapEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x18.weewar.v1.UnitDatastoreR\x05value:\x02\x38\x01\x1aZ\n\x0e\x43rossingsEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x32\n\x05value\x18\x02 \x01(\x0b\x32\x1c.weewar.v1.CrossingDatastoreR\x05value:\x02\x38\x01:$\xd2\xa6\x1d \n\tWorldData*\x13weewar.v1.WorldData\"\xdc\x02\n\rGameDatastore\x12\x17\n\x02id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x02id\x12\x19\n\x08world_id\x18\x02 \x01(\tR\x07worldId\x12!\n\x04tags\x18\x03 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x04tags\x12\x30\n\x0cpreview_urls\x18\x04 \x03(\tB\r\x92\xa6\x1d\tr\x07noindexR\x0bpreviewUrls\x12L\n\x06\x63onfig\x18\x05 \x01(\x0b\x32%.weewar.v1.GameConfigurationDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x06\x63onfig\x12X\n\x11search_index_info\x18\x06 \x01(\x0b\x32\x1d.weewar.v1.IndexInfoDatastoreB\r\x92\xa6\x1d\tr\x07\x66lattenR\x0fsearchIndexInfo:\x1a\xd2\xa6\x1d\x16\n\x04Game*\x0eweewar.v1.Game\"\xf0\x02\n\x12GameStateDatastore\x12 \n\x07game_id\x18\x01 \x01(\tB\x07\x92\xa6\x1d\x03r\x01-R\x06gameId\x12K\n\nworld_data\x18\x02 \x01(\x0b\x32\x1d.weewar.v1.WorldDataDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\tworldData\x12\x63\n\rplayer_states\x18\x03 \x03(\x0b\x32/.weewar.v1.GameStateDatastore.PlayerStatesEntryB\r\x92\xa6\x1d\tr\x07noindexR\x0cplayerStates\x1a`\n\x11PlayerStatesEntry\x12\x10\n\x03key\x18\x01 \x01(\x05R\x03key\x12\x35\n\x05value\x18\x02 \x01(\x0b\x32\x1f.weewar.v1.PlayerStateDatastoreR\x05value:\x02\x38\x01:$\xd2\xa6\x1d \n\tGameState*\x13weewar.v1.GameState\"\xd2\x02\n\x1aGameConfigurationDatastore\x12G\n\x07players\x18\x01 \x03(\x0b\x32\x1e.weewar.v1.GamePlayerDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x07players\x12\x41\n\x05teams\x18\x02 \x03(\x0b\x32\x1c.weewar.v1.GameTeamDatastoreB\r\x92\xa6\x1d\tr\x07noindexR\x05teams\x12G\n\x0eincome_configs\x18\x03 \x01(\x0b\x32 .weewar.v1.IncomeConfigDatastoreR\rincomeConfigs\x12<\n\x08settings\x18\x04 \x01(\x0b\x32 .weewar.v1.GameSettingsDatastoreR\x08settings:!\xd2\xa6\x1d\x1d*\x1bweewar.v1.GameConfiguration\"5\n\x15IncomeConfigDatastore:\x1c\xd2\xa6\x1d\x18*\x16weewar.v1.IncomeConfig\"1\n\x13GamePlayerDatastore:\x1a\xd2\xa6\x1d\x16*\x14weewar.v1.GamePlayer\"-\n\x11GameTeamDatastore:\x18\xd2\xa6\x1d\x14*\x12weewar.v1.GameTeam\"i\n\x15GameSettingsDatastore\x12\x32\n\rallowed_units\x18\x01 \x03(\x05\x42\r\x92\xa6\x1d\tr\x07noindexR\x0c\x61llowedUnits:\x1c\xd2\xa6\x1d\x18*\x16weewar.v1.GameSettings\"3\n\x14PlayerStateDatastore:\x1b\xd2\xa6\x1d\x17*\x15weewar.v1.PlayerState\"\x95\x02\n\x11GameMoveDatastore\x12\x17\n\x07game_id\x18\x01 \x01(\tR\x06gameId\x12!\n\x0cgroup_number\x18\x02 \x01(\x03R\x0bgroupNumber\x12\x1f\n\x0bmove_number\x18\x03 \x01(\x03R\nmoveNumber\x12@\n\tmove_type\x18\x04 \x01(\x0b\x32\x14.google.protobuf.AnyB\r\x92\xa6\x1d\tr\x07noindexR\x08moveType\x12=\n\x07\x63hanges\x18\x05 \x03(\x0b\x32\x14.google.protobuf.AnyB\r\x92\xa6\x1d\tr\x07noindexR\x07\x63hanges:\"\xd2\xa6\x1d\x1e\n\x08GameMove*\x12weewar.v1.GameMoveB\xa2\x01\n\rcom.weewar.v1B\x0bModelsProtoP\x01Z?github.com/turnforge/weewar/gen/go/weewar/v1/datastore;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -123,44 +124,44 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GAMEMOVEDATASTORE'].fields_by_name['changes']._serialized_options = b'\222\246\035\tr\007noindex'
   _globals['_GAMEMOVEDATASTORE']._loaded_options = None
   _globals['_GAMEMOVEDATASTORE']._serialized_options = b'\322\246\035\036\n\010GameMove*\022weewar.v1.GameMove'
-  _globals['_INDEXINFODATASTORE']._serialized_start=131
-  _globals['_INDEXINFODATASTORE']._serialized_end=178
-  _globals['_TILEDATASTORE']._serialized_start=180
-  _globals['_TILEDATASTORE']._serialized_end=217
-  _globals['_CROSSINGDATASTORE']._serialized_start=219
-  _globals['_CROSSINGDATASTORE']._serialized_end=264
-  _globals['_UNITDATASTORE']._serialized_start=266
-  _globals['_UNITDATASTORE']._serialized_end=391
-  _globals['_ATTACKRECORDDATASTORE']._serialized_start=393
-  _globals['_ATTACKRECORDDATASTORE']._serialized_end=446
-  _globals['_WORLDDATASTORE']._serialized_start=449
-  _globals['_WORLDDATASTORE']._serialized_end=797
-  _globals['_WORLDDATADATASTORE']._serialized_start=800
-  _globals['_WORLDDATADATASTORE']._serialized_end=1527
-  _globals['_WORLDDATADATASTORE_TILESMAPENTRY']._serialized_start=1225
-  _globals['_WORLDDATADATASTORE_TILESMAPENTRY']._serialized_end=1310
-  _globals['_WORLDDATADATASTORE_UNITSMAPENTRY']._serialized_start=1312
-  _globals['_WORLDDATADATASTORE_UNITSMAPENTRY']._serialized_end=1397
-  _globals['_WORLDDATADATASTORE_CROSSINGSENTRY']._serialized_start=1399
-  _globals['_WORLDDATADATASTORE_CROSSINGSENTRY']._serialized_end=1489
-  _globals['_GAMEDATASTORE']._serialized_start=1530
-  _globals['_GAMEDATASTORE']._serialized_end=1878
-  _globals['_GAMESTATEDATASTORE']._serialized_start=1881
-  _globals['_GAMESTATEDATASTORE']._serialized_end=2249
-  _globals['_GAMESTATEDATASTORE_PLAYERSTATESENTRY']._serialized_start=2115
-  _globals['_GAMESTATEDATASTORE_PLAYERSTATESENTRY']._serialized_end=2211
-  _globals['_GAMECONFIGURATIONDATASTORE']._serialized_start=2252
-  _globals['_GAMECONFIGURATIONDATASTORE']._serialized_end=2590
-  _globals['_INCOMECONFIGDATASTORE']._serialized_start=2592
-  _globals['_INCOMECONFIGDATASTORE']._serialized_end=2645
-  _globals['_GAMEPLAYERDATASTORE']._serialized_start=2647
-  _globals['_GAMEPLAYERDATASTORE']._serialized_end=2696
-  _globals['_GAMETEAMDATASTORE']._serialized_start=2698
-  _globals['_GAMETEAMDATASTORE']._serialized_end=2743
-  _globals['_GAMESETTINGSDATASTORE']._serialized_start=2745
-  _globals['_GAMESETTINGSDATASTORE']._serialized_end=2850
-  _globals['_PLAYERSTATEDATASTORE']._serialized_start=2852
-  _globals['_PLAYERSTATEDATASTORE']._serialized_end=2903
-  _globals['_GAMEMOVEDATASTORE']._serialized_start=2906
-  _globals['_GAMEMOVEDATASTORE']._serialized_end=3183
+  _globals['_INDEXINFODATASTORE']._serialized_start=161
+  _globals['_INDEXINFODATASTORE']._serialized_end=208
+  _globals['_TILEDATASTORE']._serialized_start=210
+  _globals['_TILEDATASTORE']._serialized_end=247
+  _globals['_CROSSINGDATASTORE']._serialized_start=249
+  _globals['_CROSSINGDATASTORE']._serialized_end=294
+  _globals['_UNITDATASTORE']._serialized_start=296
+  _globals['_UNITDATASTORE']._serialized_end=421
+  _globals['_ATTACKRECORDDATASTORE']._serialized_start=423
+  _globals['_ATTACKRECORDDATASTORE']._serialized_end=476
+  _globals['_WORLDDATASTORE']._serialized_start=479
+  _globals['_WORLDDATASTORE']._serialized_end=827
+  _globals['_WORLDDATADATASTORE']._serialized_start=830
+  _globals['_WORLDDATADATASTORE']._serialized_end=1557
+  _globals['_WORLDDATADATASTORE_TILESMAPENTRY']._serialized_start=1255
+  _globals['_WORLDDATADATASTORE_TILESMAPENTRY']._serialized_end=1340
+  _globals['_WORLDDATADATASTORE_UNITSMAPENTRY']._serialized_start=1342
+  _globals['_WORLDDATADATASTORE_UNITSMAPENTRY']._serialized_end=1427
+  _globals['_WORLDDATADATASTORE_CROSSINGSENTRY']._serialized_start=1429
+  _globals['_WORLDDATADATASTORE_CROSSINGSENTRY']._serialized_end=1519
+  _globals['_GAMEDATASTORE']._serialized_start=1560
+  _globals['_GAMEDATASTORE']._serialized_end=1908
+  _globals['_GAMESTATEDATASTORE']._serialized_start=1911
+  _globals['_GAMESTATEDATASTORE']._serialized_end=2279
+  _globals['_GAMESTATEDATASTORE_PLAYERSTATESENTRY']._serialized_start=2145
+  _globals['_GAMESTATEDATASTORE_PLAYERSTATESENTRY']._serialized_end=2241
+  _globals['_GAMECONFIGURATIONDATASTORE']._serialized_start=2282
+  _globals['_GAMECONFIGURATIONDATASTORE']._serialized_end=2620
+  _globals['_INCOMECONFIGDATASTORE']._serialized_start=2622
+  _globals['_INCOMECONFIGDATASTORE']._serialized_end=2675
+  _globals['_GAMEPLAYERDATASTORE']._serialized_start=2677
+  _globals['_GAMEPLAYERDATASTORE']._serialized_end=2726
+  _globals['_GAMETEAMDATASTORE']._serialized_start=2728
+  _globals['_GAMETEAMDATASTORE']._serialized_end=2773
+  _globals['_GAMESETTINGSDATASTORE']._serialized_start=2775
+  _globals['_GAMESETTINGSDATASTORE']._serialized_end=2880
+  _globals['_PLAYERSTATEDATASTORE']._serialized_start=2882
+  _globals['_PLAYERSTATEDATASTORE']._serialized_end=2933
+  _globals['_GAMEMOVEDATASTORE']._serialized_start=2936
+  _globals['_GAMEMOVEDATASTORE']._serialized_end=3213
 # @@protoc_insertion_point(module_scope)

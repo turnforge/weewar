@@ -27,9 +27,6 @@
       "name": "GameSyncService"
     },
     {
-      "name": "UsersService"
-    },
-    {
       "name": "WorldsService"
     }
   ],
@@ -1329,282 +1326,6 @@
         ]
       }
     },
-    "/v1/users": {
-      "get": {
-        "summary": "ListUsers returns all available users",
-        "operationId": "UsersService_ListUsers",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1ListUsersResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "pagination.pageKey",
-            "description": "*\nInstead of an offset an abstract  \"page\" key is provided that offers\nan opaque \"pointer\" into some offset in a result set.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "pagination.pageOffset",
-            "description": "*\nIf a pagekey is not supported we can also support a direct integer offset\nfor cases where it makes sense.",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "pagination.pageSize",
-            "description": "*\nNumber of results to return.",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "ownerId",
-            "description": "May be filter by owner id",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      },
-      "post": {
-        "summary": "*\nCreate a new user",
-        "operationId": "UsersService_CreateUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1CreateUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/v1CreateUserRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/v1/users/{id}": {
-      "get": {
-        "summary": "GetUser returns a specific user with metadata",
-        "operationId": "UsersService_GetUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "version",
-            "description": "Optional, defaults to default_version",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      },
-      "delete": {
-        "summary": "*\nDelete a particular user",
-        "operationId": "UsersService_DeleteUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1DeleteUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "*\nID of the user to be deleted.",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "pattern": "[^/]+"
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/v1/users/{user.id}": {
-      "patch": {
-        "summary": "GetUser returns a specific user with metadata",
-        "operationId": "UsersService_UpdateUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "user.id",
-            "description": "Unique ID for the user",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "pattern": "[^/]+"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "user": {
-                  "type": "object",
-                  "properties": {
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "name": {
-                      "type": "string",
-                      "title": "Name if items have names"
-                    },
-                    "description": {
-                      "type": "string",
-                      "title": "Description if user has a description"
-                    },
-                    "tags": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "title": "Some tags"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "title": "A possible image url"
-                    },
-                    "difficulty": {
-                      "type": "string",
-                      "title": "Difficulty - example attribute"
-                    }
-                  },
-                  "title": "*\nUser being updated"
-                },
-                "updateMask": {
-                  "type": "string",
-                  "description": "*\nMask of fields being updated in this User to make partial changes."
-                }
-              },
-              "title": "UpdateUserRequest"
-            }
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
-    "/v1/users:batchGet": {
-      "get": {
-        "summary": "*\nBatch get multiple users by ID",
-        "operationId": "UsersService_GetUsers",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1GetUsersResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "ids",
-            "description": "*\nIDs of the user to be fetched",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          }
-        ],
-        "tags": [
-          "UsersService"
-        ]
-      }
-    },
     "/v1/worlds": {
       "get": {
         "summary": "ListWorlds returns all available worlds",
@@ -2185,33 +1906,6 @@
       },
       "description": "*\nResponse of an game creation."
     },
-    "v1CreateUserRequest": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/v1User",
-          "title": "*\nUser being updated"
-        }
-      },
-      "title": "*\nUser creation request object"
-    },
-    "v1CreateUserResponse": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/v1User",
-          "title": "*\nUser being created"
-        },
-        "fieldErrors": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "*\nError specific to a field if there are any errors."
-        }
-      },
-      "description": "*\nResponse of an user creation."
-    },
     "v1CreateWorldRequest": {
       "type": "object",
       "properties": {
@@ -2286,10 +1980,6 @@
     },
     "v1DeleteIndexStatesResponse": {
       "type": "object"
-    },
-    "v1DeleteUserResponse": {
-      "type": "object",
-      "title": "*\nUser deletion response"
     },
     "v1DeleteWorldResponse": {
       "type": "object",
@@ -2897,26 +2587,6 @@
       },
       "title": "*\nResponse with all available options at a position"
     },
-    "v1GetUserResponse": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/v1User"
-        }
-      }
-    },
-    "v1GetUsersResponse": {
-      "type": "object",
-      "properties": {
-        "users": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/v1User"
-          }
-        }
-      },
-      "title": "*\nUser batch-get response"
-    },
     "v1GetWorldResponse": {
       "type": "object",
       "properties": {
@@ -3217,21 +2887,6 @@
         }
       },
       "description": "*\nResponse after adding moves to game."
-    },
-    "v1ListUsersResponse": {
-      "type": "object",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1User"
-          }
-        },
-        "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
-        }
-      }
     },
     "v1ListWorldsResponse": {
       "type": "object",
@@ -3983,17 +3638,6 @@
     "v1UpdateGameStatusResponse": {
       "type": "object"
     },
-    "v1UpdateUserResponse": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/v1User",
-          "title": "*\nUser being updated"
-        }
-      },
-      "description": "*\nThe request for (partially) updating an User.",
-      "title": "UpdateUserResponse"
-    },
     "v1UpdateWorldResponse": {
       "type": "object",
       "properties": {
@@ -4007,46 +3651,6 @@
       },
       "description": "*\nThe request for (partially) updating an World.",
       "title": "UpdateWorldResponse"
-    },
-    "v1User": {
-      "type": "object",
-      "properties": {
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "id": {
-          "type": "string",
-          "title": "Unique ID for the user"
-        },
-        "name": {
-          "type": "string",
-          "title": "Name if items have names"
-        },
-        "description": {
-          "type": "string",
-          "title": "Description if user has a description"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "title": "Some tags"
-        },
-        "imageUrl": {
-          "type": "string",
-          "title": "A possible image url"
-        },
-        "difficulty": {
-          "type": "string",
-          "title": "Difficulty - example attribute"
-        }
-      }
     },
     "v1World": {
       "type": "object",

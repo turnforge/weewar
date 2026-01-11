@@ -28,13 +28,12 @@ from weewar.v1.models import world_service_pb2 as weewar_dot_v1_dot_models_dot_w
 from weewar.v1.models import games_service_pb2 as weewar_dot_v1_dot_models_dot_games__service__pb2
 from weewar.v1.models import presenter_pb2 as weewar_dot_v1_dot_models_dot_presenter__pb2
 from weewar.v1.models import gameviewerpage_pb2 as weewar_dot_v1_dot_models_dot_gameviewerpage__pb2
-from weewar.v1.models import user_service_pb2 as weewar_dot_v1_dot_models_dot_user__service__pb2
 from weewar.v1.models import jobs_pb2 as weewar_dot_v1_dot_models_dot_jobs__pb2
 from weewar.v1.models import themes_pb2 as weewar_dot_v1_dot_models_dot_themes__pb2
 from wasmjs.v1 import annotations_pb2 as wasmjs_dot_v1_dot_annotations__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17weewar/v1/factory.proto\x12\tweewar.v1\x1a\x1dweewar/v1/models/models.proto\x1a\x1eweewar/v1/models/indexer.proto\x1a$weewar/v1/models/world_service.proto\x1a$weewar/v1/models/games_service.proto\x1a weewar/v1/models/presenter.proto\x1a%weewar/v1/models/gameviewerpage.proto\x1a#weewar/v1/models/user_service.proto\x1a\x1bweewar/v1/models/jobs.proto\x1a\x1dweewar/v1/models/themes.proto\x1a\x1bwasmjs/v1/annotations.protoB\x9d\x01\n\rcom.weewar.v1B\x0c\x46\x61\x63toryProtoP\x01Z5github.com/turnforge/weewar/gen/go/weewar/v1;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1\xc8\xb5\x18\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17weewar/v1/factory.proto\x12\tweewar.v1\x1a\x1dweewar/v1/models/models.proto\x1a\x1eweewar/v1/models/indexer.proto\x1a$weewar/v1/models/world_service.proto\x1a$weewar/v1/models/games_service.proto\x1a weewar/v1/models/presenter.proto\x1a%weewar/v1/models/gameviewerpage.proto\x1a\x1bweewar/v1/models/jobs.proto\x1a\x1dweewar/v1/models/themes.proto\x1a\x1bwasmjs/v1/annotations.protoB\x9d\x01\n\rcom.weewar.v1B\x0c\x46\x61\x63toryProtoP\x01Z5github.com/turnforge/weewar/gen/go/weewar/v1;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\nWeewar::V1\xc8\xb5\x18\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)

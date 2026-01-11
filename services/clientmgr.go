@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 
+	goalservices "github.com/panyam/goapplib/services"
 	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -30,8 +31,7 @@ type ClientMgr struct {
 	gamesSvcClient     v1s.GamesServiceClient
 	filestoreSvcClient v1s.FileStoreServiceClient
 	gameSyncSvcClient  v1s.GameSyncServiceClient
-	authSvc            *AuthService
-	// We may need an auth svc at some point
+	authSvc *goalservices.AuthService
 }
 
 func NewClientMgr(svc_addr string) *ClientMgr {
@@ -53,9 +53,9 @@ func (c *ClientMgr) ClientContext(ctx context.Context, loggedInUserId string) co
 	return metadata.AppendToOutgoingContext(context.Background(), "LoggedInUserId", loggedInUserId)
 }
 
-func (c *ClientMgr) GetAuthService() *AuthService {
+func (c *ClientMgr) GetAuthService() *goalservices.AuthService {
 	if c.authSvc == nil {
-		c.authSvc = &AuthService{
+		c.authSvc = &goalservices.AuthService{
 			// clients: c
 		}
 	}

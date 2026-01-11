@@ -7,18 +7,18 @@ import (
 	"path/filepath"
 
 	"github.com/alexedwards/scs/v2"
+	goalservices "github.com/panyam/goapplib/services"
 	oa "github.com/panyam/oneauth"
 	oa2 "github.com/panyam/oneauth/oauth2"
-	"github.com/turnforge/weewar/services"
 )
 
-func setupAuthService(session *scs.SessionManager) (*services.AuthService, *oa.OneAuth) {
+func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth) {
 	// Initialize authentication
 	storagePath := os.Getenv("WEEWAR_USER_STORAGE_PATH")
 	if storagePath == "" {
 		storagePath = filepath.Join(os.Getenv("HOME"), "dev-app-data", "weewar", "storage")
 	}
-	authService := services.NewAuthService(storagePath)
+	authService := goalservices.NewAuthService(storagePath)
 	oneauth := oa.New("weewar")
 	oneauth.Session = session
 	oneauth.Middleware.SessionGetter = func(r *http.Request, key string) any {

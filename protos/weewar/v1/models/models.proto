@@ -2,8 +2,12 @@ syntax = "proto3";
 
 package weewar.v1;
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
+
+// User and UsersService are now provided by goapplib.v1
+// Import from github.com/panyam/goapplib/gen/go/goapplib/v1
 
 message IndexInfo {
   // We maintain an IndexInfo for each type of "indexing" operation needed
@@ -13,29 +17,6 @@ message IndexInfo {
   google.protobuf.Timestamp last_updated_at = 1;
   google.protobuf.Timestamp last_indexed_at = 2;
   bool needs_indexing = 3;
-}
-
-message User {
-  google.protobuf.Timestamp created_at = 1;
-  google.protobuf.Timestamp updated_at = 2;
-
-  // Unique ID for the user
-  string id = 3;
-
-  // Name if items have names
-  string name = 4;
-
-  // Description if user has a description
-  string description = 5;
-
-  // Some tags
-  repeated string tags = 6;
-
-  // A possible image url
-  string image_url = 7;
-
-  // Difficulty - example attribute
-  string difficulty = 8;
 }
 
 message Pagination {

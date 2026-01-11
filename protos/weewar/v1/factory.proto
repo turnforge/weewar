@@ -10,7 +10,6 @@ import "weewar/v1/models/world_service.proto";
 import "weewar/v1/models/games_service.proto";
 import "weewar/v1/models/presenter.proto";
 import "weewar/v1/models/gameviewerpage.proto";
-import "weewar/v1/models/user_service.proto";
 import "weewar/v1/models/jobs.proto";
 import "weewar/v1/models/themes.proto";
 

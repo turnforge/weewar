@@ -5,6 +5,7 @@ package weewar.v1;
 import "dal/v1/annotations.proto";
 import "weewar/v1/models/models.proto";
 import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
 
 option go_package = "github.com/turnforge/weewar/gen/gorm;weewargorm";
 
@@ -12,6 +13,8 @@ option go_package = "github.com/turnforge/weewar/gen/gorm;weewargorm";
 message IndexInfoGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.IndexInfo" };
 }
+
+// UserGORM is now provided by goapplib - use github.com/panyam/goapplib/gen/gorm
 
 message TileGORM {
   option (dal.v1.gorm) = { source: "weewar.v1.Tile", implement_scanner: true  };

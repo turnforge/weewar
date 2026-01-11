@@ -123,25 +123,6 @@ type GameSyncServiceServer interface {
 	Broadcast(context.Context, *v1models.BroadcastRequest) (*v1models.BroadcastResponse, error)
 }
 
-// UsersServiceServer is the server API for UsersService service (WASM version without gRPC embedding).
-type UsersServiceServer interface {
-	/** *
-	Create a new user */
-	CreateUser(context.Context, *v1models.CreateUserRequest) (*v1models.CreateUserResponse, error)
-	/** *
-	Batch get multiple users by ID */
-	GetUsers(context.Context, *v1models.GetUsersRequest) (*v1models.GetUsersResponse, error)
-	/** ListUsers returns all available users */
-	ListUsers(context.Context, *v1models.ListUsersRequest) (*v1models.ListUsersResponse, error)
-	/** GetUser returns a specific user with metadata */
-	GetUser(context.Context, *v1models.GetUserRequest) (*v1models.GetUserResponse, error)
-	/** *
-	Delete a particular user */
-	DeleteUser(context.Context, *v1models.DeleteUserRequest) (*v1models.DeleteUserResponse, error)
-	/** GetUser returns a specific user with metadata */
-	UpdateUser(context.Context, *v1models.UpdateUserRequest) (*v1models.UpdateUserResponse, error)
-}
-
 // WorldsServiceServer is the server API for WorldsService service (WASM version without gRPC embedding).
 type WorldsServiceServer interface {
 	/** *

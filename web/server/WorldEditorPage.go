@@ -286,10 +286,10 @@ func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, app *goal
 		}
 
 		v.IsOwner = loggedInUserId == resp.World.CreatorId
-		log.Println("LoggedUser: ", loggedInUserId, resp.World.CreatorId)
+		log.Println("LoggedUser: ", loggedInUserId, resp.World.CreatorId, v.IsOwner)
 
 		// Require login and ownership to edit existing worlds
-		if !v.IsOwner {
+		if !v.IsOwner || loggedInUserId == "" {
 			log.Println("Composer is NOT the owner. Redirecting...")
 			if loggedInUserId == "" {
 				http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/worlds/%s/edit", v.WorldId)), http.StatusSeeOther)

@@ -41,6 +41,13 @@ type WeewarApp struct {
 	HideGames  bool
 	HideWorlds bool
 
+	// Ad config - all default to enabled, can be disabled per-placement
+	AdsEnabled        bool   // Master switch: WEEWAR_ADS_ENABLED (default: true)
+	AdsFooterEnabled  bool   // Footer banner: WEEWAR_ADS_FOOTER (default: true)
+	AdsHomeEnabled    bool   // Homepage mid-section: WEEWAR_ADS_HOME (default: true)
+	AdsListingEnabled bool   // Listing pages: WEEWAR_ADS_LISTING (default: true)
+	AdNetworkId       string // Google AdSense publisher ID: WEEWAR_AD_NETWORK_ID
+
 	mux     *http.ServeMux
 	BaseUrl string
 }
@@ -60,6 +67,12 @@ func NewWeewarApp(clientMgr *services.ClientMgr) (weewarApp *WeewarApp, goalApp 
 		ClientMgr:      clientMgr,
 		HideGames:      os.Getenv("WEEWAR_HIDE_GAMES") == "true",
 		HideWorlds:     os.Getenv("WEEWAR_HIDE_WORLDS") == "true",
+		// Ads default to enabled, can be disabled per-placement
+		AdsEnabled:        os.Getenv("WEEWAR_ADS_ENABLED") != "false",
+		AdsFooterEnabled:  os.Getenv("WEEWAR_ADS_FOOTER") != "false",
+		AdsHomeEnabled:    os.Getenv("WEEWAR_ADS_HOME") != "false",
+		AdsListingEnabled: os.Getenv("WEEWAR_ADS_LISTING") != "false",
+		AdNetworkId:       os.Getenv("WEEWAR_AD_NETWORK_ID"),
 	}
 
 	// Setup templates with app-specific FuncMap additions

@@ -1,0 +1,16 @@
+{{/*
+  AdScript - Google AdSense script loader
+
+  Include this once in the <head> section of pages that show ads.
+  Only loads the script when ads are enabled AND a network ID is configured.
+
+  Usage in BasePage or page-specific ExtraHeadSection:
+    {{ template "AdScript" }}
+*/}}
+
+{{ define "AdScript" }}
+{{ if and (Ctx).AdsEnabled (Ctx).AdNetworkId }}
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ (Ctx).AdNetworkId }}"
+        crossorigin="anonymous"></script>
+{{ end }}
+{{ end }}

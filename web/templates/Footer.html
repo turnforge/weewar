@@ -1,6 +1,25 @@
 <!-- templates/Footer.html -->
+{{# include "components/AdSlot.html" #}}
+
 {{ define "Footer" }}
 <footer class="border-t border-gray-200 dark:border-gray-700 mt-auto">
+    <!-- Footer Ad Slot (respects AdsEnabled and AdsFooterEnabled flags) -->
+    {{ if and (Ctx).AdsEnabled (Ctx).AdsFooterEnabled }}
+    <div class="ad-footer-wrapper">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+            <!-- Desktop: Leaderboard (728x90) -->
+            <div class="hidden md:block">
+                {{ template "AdSlot" (dict "SlotId" "footer-leaderboard" "Size" "leaderboard" "Position" "footer") }}
+            </div>
+            <!-- Mobile: Banner (320x50) -->
+            <div class="md:hidden">
+                {{ template "AdSlot" (dict "SlotId" "footer-mobile" "Size" "mobile-banner" "Position" "footer") }}
+            </div>
+        </div>
+    </div>
+    {{ end }}
+
+    <!-- Footer Links -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
             <div>

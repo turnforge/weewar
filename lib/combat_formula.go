@@ -265,8 +265,8 @@ type SplashDamageTarget struct {
 // FixContext contains all information needed to calculate fix (repair) results
 type FixContext struct {
 	FixingUnit       *v1.Unit
-	FixingUnitHealth int32  // Health of the unit performing the fix (Hf)
-	FixValue         int32  // Fix value (F) of the fixing unit type
+	FixingUnitHealth int32 // Health of the unit performing the fix (Hf)
+	FixValue         int32 // Fix value (F) of the fixing unit type
 	InjuredUnit      *v1.Unit
 }
 

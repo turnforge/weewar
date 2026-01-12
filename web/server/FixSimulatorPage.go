@@ -33,9 +33,9 @@ func (p *FixSimulatorPage) Load(r *http.Request, w http.ResponseWriter, app *goa
 
 	// Read URL parameters for pre-populating form
 	query := r.URL.Query()
-	p.FixingUnit = getQueryOrDefault(query, "fixingUnit", "39")       // Default: Aircraft Carrier (has fix ability)
+	p.FixingUnit = getQueryOrDefault(query, "fixingUnit", "39") // Default: Aircraft Carrier (has fix ability)
 	p.FixingUnitHealth = getQueryOrDefault(query, "fixingUnitHealth", "10")
-	p.InjuredUnit = getQueryOrDefault(query, "injuredUnit", "17")     // Default: Bomber
+	p.InjuredUnit = getQueryOrDefault(query, "injuredUnit", "17") // Default: Bomber
 	p.NumSimulations = getQueryOrDefault(query, "numSims", "1000")
 	p.Theme = getQueryOrDefaultStr(query, "theme", "default")
 

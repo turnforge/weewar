@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/alexedwards/scs/v2"
 	goalservices "github.com/panyam/goapplib/services"
@@ -26,28 +25,10 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 		return session.GetString(r.Context(), key)
 	}
 	oneauth.UserStore = authService
-
-	// OAuth providers - explicitly trim whitespace from callback URLs to prevent
-	// redirect_uri_mismatch errors caused by trailing spaces in env vars
-	oneauth.AddAuth("/google", oa2.NewGoogleOAuth2(
-		strings.TrimSpace(os.Getenv("OAUTH2_GOOGLE_CLIENT_ID")),
-		strings.TrimSpace(os.Getenv("OAUTH2_GOOGLE_CLIENT_SECRET")),
-		strings.TrimSpace(os.Getenv("OAUTH2_GOOGLE_CALLBACK_URL")),
-		oneauth.SaveUserAndRedirect,
-	).Handler())
-	oneauth.AddAuth("/github", oa2.NewGithubOAuth2(
-		strings.TrimSpace(os.Getenv("OAUTH2_GITHUB_CLIENT_ID")),
-		strings.TrimSpace(os.Getenv("OAUTH2_GITHUB_CLIENT_SECRET")),
-		strings.TrimSpace(os.Getenv("OAUTH2_GITHUB_CALLBACK_URL")),
-		oneauth.SaveUserAndRedirect,
-	).Handler())
-	oneauth.AddAuth("/twitter", NewTwitterOAuth2(
-		strings.TrimSpace(os.Getenv("OAUTH2_TWITTER_CLIENT_ID")),
-		strings.TrimSpace(os.Getenv("OAUTH2_TWITTER_CLIENT_SECRET")),
-		strings.TrimSpace(os.Getenv("OAUTH2_TWITTER_CALLBACK_URL")),
-		oneauth.SaveUserAndRedirect,
-	).Handler())
-
+	// OAuth providers
+	oneauth.AddAuth("/google", oa2.NewGoogleOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
+	oneauth.AddAuth("/github", oa2.NewGithubOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
+	oneauth.AddAuth("/twitter", NewTwitterOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
 	// Get base URL for verification/reset links
 	baseURL := os.Getenv("WEEWAR_BASE_URL")
 	if baseURL == "" {

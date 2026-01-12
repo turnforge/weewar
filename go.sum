@@ -127,8 +127,8 @@ github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovk
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/panyam/goapplib v0.0.7 h1:VQ+KBk4170EesLNrqFfEdHIDDdTerAeMqq6hAvjtkUw=
-github.com/panyam/goapplib v0.0.7/go.mod h1:uz4Vep2Q5fJ2Q44e6oYHPnwcn/AIUmTGZSoPNkfxBBs=
+github.com/panyam/goapplib v0.0.9 h1:ht/soVSUdcwA/fYCkYk14NcQSIvsfTsflCFruIo7Zkc=
+github.com/panyam/goapplib v0.0.9/go.mod h1:uz4Vep2Q5fJ2Q44e6oYHPnwcn/AIUmTGZSoPNkfxBBs=
 github.com/panyam/gocurrent v0.0.10 h1:9eLgFyRUfZITOpkCz4g1yp9iRGd3T3w9AkUaZf0YjTc=
 github.com/panyam/gocurrent v0.0.10/go.mod h1:jIIhcNfNnnIe2JXH8aY2+ba+/5G1fzwCWoZXdcMNw6o=
 github.com/panyam/goutils v0.1.13 h1:V819IdZTEJ3rpu33ZqohC6O9ou7KOu6cxfigoYT12OQ=

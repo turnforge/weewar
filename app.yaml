@@ -3,7 +3,7 @@ runtime: go124
 env_variables:
   # Production environment (triggers loading configs/.env)
   LILBATTLE_ENV: production
-  LILBATTLE_BASE_URL: https://lilbattle.appspot.com
+  LILBATTLE_BASE_URL: https://lilbattle.com
   # Backend storage configuration
   # Options: local, pg, gae
   WORLDS_SERVICE_BE: gae

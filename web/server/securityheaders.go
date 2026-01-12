@@ -50,26 +50,28 @@ func (m *SecurityHeadersMiddleware) Wrap(next http.Handler) http.Handler {
 		// - googleads.g.doubleclick.net: Ad delivery iframes
 		// - tpc.googlesyndication.com: Syndication iframes
 		// - www.google.com: Various Google services
+		// - ep1.adtrafficquality.google: Ad traffic quality verification
 		if m.IsDevelopment {
 			// Development: Allow inline scripts/styles for hot reloading
 			w.Header().Set("Content-Security-Policy",
 				"default-src 'self'; "+
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com; "+
+					"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://*.google.com; "+
 					"style-src 'self' 'unsafe-inline'; "+
-					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com; "+
+					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com https://*.googleusercontent.com; "+
 					"font-src 'self'; "+
-					"connect-src 'self' ws: wss: https://pagead2.googlesyndication.com; "+
+					"connect-src 'self' ws: wss: https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://*.google.com; "+
 					"frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; "+
 					"frame-ancestors 'none'")
 		} else {
-			// Production: Stricter CSP
+			// Production: CSP with Google Ads support
+			// Note: 'unsafe-inline' required because Google Ads dynamically injects inline scripts
 			w.Header().Set("Content-Security-Policy",
 				"default-src 'self'; "+
-					"script-src 'self' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com; "+
-					"style-src 'self' 'unsafe-inline'; "+ // inline styles needed for Tailwind
-					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com; "+
+					"script-src 'self' 'unsafe-inline' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://*.google.com; "+
+					"style-src 'self' 'unsafe-inline'; "+
+					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com https://*.googleusercontent.com; "+
 					"font-src 'self'; "+
-					"connect-src 'self' wss: https://pagead2.googlesyndication.com; "+
+					"connect-src 'self' wss: https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://*.google.com; "+
 					"frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; "+
 					"frame-ancestors 'none'")
 		}

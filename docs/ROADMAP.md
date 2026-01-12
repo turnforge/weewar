@@ -676,8 +676,8 @@ const response = await client.gamesService.createGame(request);
   - Backend selection via env vars: `WORLDS_SERVICE_BE=gae`, `GAMES_SERVICE_BE=gae`
 - [x] **Local Backend Deployment**: File-based storage for development/testing
 
-## 🎯 Phase 15: Monetization (Planning)
-**Status**: Strategy Complete, Implementation Pending
+## ✅ Phase 15: Monetization (In Progress)
+**Status**: Phase 1 Complete
 **Timeline**: January 2026+
 
 ### Monetization Strategy ✅
@@ -686,13 +686,16 @@ const response = await client.gamesService.createGame(request);
 - [x] **Revenue Projections**: Estimated $420-$6,600/month based on DAU
 - [x] **Technical Requirements**: Identified CSP, component, and integration needs
 
-### Phase 1: Foundation Ads (Ready to Implement)
-- [ ] **AdSlot Component**: Reusable ad container with size variants
-- [ ] **Footer Banner Ads**: 728x90 leaderboard on all pages
-- [ ] **Homepage Interstitial**: 300x250 between content sections
-- [ ] **Listing Page Native Ads**: Styled like game/world cards
-- [ ] **Google AdSense Setup**: Account and script integration
-- [ ] **CSP Updates**: Add ad network domains to Content-Security-Policy
+### Phase 1: Foundation Ads ✅
+- [x] **Feature Flags**: WEEWAR_ADS_ENABLED, WEEWAR_ADS_FOOTER, WEEWAR_ADS_HOME, WEEWAR_ADS_LISTING, WEEWAR_AD_NETWORK_ID
+- [x] **AdSlot Component**: Reusable ad container with size variants (leaderboard, mrec, skyscraper, mobile-banner)
+- [x] **AdScript Component**: AdSense script loader in BasePage head
+- [x] **Footer Banner Ads**: 728x90 leaderboard (desktop), 320x50 banner (mobile)
+- [x] **Homepage Mid-Section Ad**: 300x250 between quick actions and recent activity
+- [x] **CSS Styles**: Responsive ad containers with dark mode and placeholder support
+- [x] **CSP Updates**: Added Google AdSense domains to Content-Security-Policy
+- [ ] **Listing Page Native Ads**: Styled like game/world cards (requires EntityListing changes)
+- [ ] **Google AdSense Account Setup**: Account creation and publisher ID configuration
 
 ### Phase 2: Game Integration (Post-Launch)
 - [ ] **Game End Screen**: Victory/defeat modal with interstitial ad

@@ -5,6 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enable dark color scheme for native form elements (select dropdowns, etc.) */
+html.dark {
+  color-scheme: dark;
+}
+
 /* Ensure full height for dockview */
 html, body {
   margin: 0;

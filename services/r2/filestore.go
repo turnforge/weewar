@@ -11,18 +11,23 @@ import (
 	"time"
 
 	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	"github.com/turnforge/weewar/services"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // R2FileStoreService implements a Cloudflare R2-backed file storage service
 type R2FileStoreService struct {
-	Client *R2Client
+	Client    *R2Client
+	ClientMgr *services.ClientMgr
+	Validator *services.FileStoreValidator
 }
 
 // NewR2FileStoreService creates a new R2FileStoreService
-func NewR2FileStoreService(client *R2Client) *R2FileStoreService {
+func NewR2FileStoreService(client *R2Client, clientMgr *services.ClientMgr) *R2FileStoreService {
 	return &R2FileStoreService{
-		Client: client,
+		Client:    client,
+		ClientMgr: clientMgr,
+		Validator: services.NewFileStoreValidator(clientMgr),
 	}
 }
 
@@ -68,17 +73,16 @@ func (s *R2FileStoreService) populateSignedURLs(ctx context.Context, file *v1.Fi
 
 // PutFile uploads a file to R2
 func (s *R2FileStoreService) PutFile(ctx context.Context, req *v1.PutFileRequest) (*v1.PutFileResponse, error) {
-	if req.File == nil {
-		return nil, fmt.Errorf("file is required")
+	// Validate request including authorization, content type, and file size
+	if err := s.Validator.ValidatePutFile(ctx, req); err != nil {
+		return nil, err
 	}
+
 	if err := validatePath(req.File.Path); err != nil {
 		return nil, err
 	}
 
 	contentType := req.File.ContentType
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
 
 	_, err := s.Client.Upload(ctx, req.File.Path, req.Content, contentType)
 	if err != nil {
@@ -148,6 +152,11 @@ func (s *R2FileStoreService) GetFile(ctx context.Context, req *v1.GetFileRequest
 
 // DeleteFile removes a file from R2
 func (s *R2FileStoreService) DeleteFile(ctx context.Context, req *v1.DeleteFileRequest) (*v1.DeleteFileResponse, error) {
+	// Validate request including authorization
+	if err := s.Validator.ValidateDeleteFile(ctx, req); err != nil {
+		return nil, err
+	}
+
 	if err := validatePath(req.Path); err != nil {
 		return nil, err
 	}

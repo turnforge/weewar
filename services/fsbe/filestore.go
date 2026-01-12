@@ -21,6 +21,7 @@ var FILES_STORAGE_DIR = ""
 type FileStoreService struct {
 	BasePath  string
 	ClientMgr *services.ClientMgr
+	Validator *services.FileStoreValidator
 }
 
 // NewFileStoreService creates a new FileStoreService implementation for server mode
@@ -34,6 +35,7 @@ func NewFileStoreService(storageDir string, clientMgr *services.ClientMgr) *File
 	service := &FileStoreService{
 		ClientMgr: clientMgr,
 		BasePath:  storageDir,
+		Validator: services.NewFileStoreValidator(clientMgr),
 	}
 
 	return service
@@ -92,11 +94,9 @@ func (s *FileStoreService) resolvePathOrRoot(relativePath string) (string, error
 
 // PutFile stores a file at the specified path
 func (s *FileStoreService) PutFile(ctx context.Context, req *v1.PutFileRequest) (resp *v1.PutFileResponse, err error) {
-	if req.File == nil {
-		return nil, fmt.Errorf("file is required")
-	}
-	if req.File.Path == "" {
-		return nil, fmt.Errorf("file path is required")
+	// Validate request including authorization, content type, and file size
+	if err := s.Validator.ValidatePutFile(ctx, req); err != nil {
+		return nil, err
 	}
 
 	fullPath, err := s.resolvePath(req.File.Path)
@@ -137,8 +137,9 @@ func (s *FileStoreService) PutFile(ctx context.Context, req *v1.PutFileRequest) 
 
 // DeleteFile deletes a file at the specified path
 func (s *FileStoreService) DeleteFile(ctx context.Context, req *v1.DeleteFileRequest) (resp *v1.DeleteFileResponse, err error) {
-	if req.Path == "" {
-		return nil, fmt.Errorf("path is required")
+	// Validate request including authorization
+	if err := s.Validator.ValidateDeleteFile(ctx, req); err != nil {
+		return nil, err
 	}
 
 	fullPath, err := s.resolvePath(req.Path)

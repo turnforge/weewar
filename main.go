@@ -217,7 +217,7 @@ func (b *Backend) SetupApp() *utils.App {
 			if err != nil {
 				panic(fmt.Sprintf("Could not instantiate r2 client: %v", err))
 			}
-			filestore = r2.NewR2FileStoreService(r2Client)
+			filestore = r2.NewR2FileStoreService(r2Client, clientMgr)
 		case "gae":
 			panic("GAE/Datastore backend not yet implemented for filestore")
 		default:

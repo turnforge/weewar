@@ -279,19 +279,6 @@ class FixSimulatorPage extends BasePage {
         this.fixingUnitNameEl.textContent = fixingUnitName;
         this.injuredUnitNameEl.textContent = injuredUnitName;
     }
-
-    private isDarkMode(): boolean {
-        return document.documentElement.classList.contains('dark');
-    }
 }
 
-// Initialize the page when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-    const page = new FixSimulatorPage();
-
-    // Create lifecycle controller with debug logging
-    const lifecycleController = new LifecycleController(page.eventBus, LifecycleController.DefaultConfig);
-
-    // Start breadth-first initialization
-    await lifecycleController.initializeFromRoot(page);
-});
+FixSimulatorPage.loadAfterPageLoaded("FixSimulatorPage", FixSimulatorPage, "FixSimulatorPage")

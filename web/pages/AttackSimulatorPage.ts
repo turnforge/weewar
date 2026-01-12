@@ -303,13 +303,4 @@ class AttackSimulatorPage extends BasePage {
     }
 }
 
-// Initialize the page when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-    const page  = new AttackSimulatorPage();
-    
-    // Create lifecycle controller with debug logging
-    const lifecycleController = new LifecycleController(page.eventBus, LifecycleController.DefaultConfig)
-    
-    // Start breadth-first initialization
-    await lifecycleController.initializeFromRoot(page);
-});
+AttackSimulatorPage.loadAfterPageLoaded("AttackSimulatorPage", AttackSimulatorPage, "AttackSimulatorPage")

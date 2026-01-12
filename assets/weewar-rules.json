@@ -454,7 +454,8 @@
       "action_order": [
         "move|fix",
         "attack|capture|fix"
-      ]
+      ],
+      "fix_value": 6
     },
     "28": {
       "id": 28,
@@ -478,7 +479,8 @@
       "action_order": [
         "move",
         "attack|fix"
-      ]
+      ],
+      "fix_value": 6
     },
     "29": {
       "id": 29,
@@ -501,7 +503,8 @@
       "action_order": [
         "move",
         "attack|capture|fix"
-      ]
+      ],
+      "fix_value": 4
     },
     "3": {
       "id": 3,
@@ -569,7 +572,8 @@
       "action_order": [
         "move",
         "attack|fix"
-      ]
+      ],
+      "fix_value": 6
     },
     "32": {
       "id": 32,
@@ -685,7 +689,8 @@
       "action_order": [
         "move|fix",
         "attack|fix"
-      ]
+      ],
+      "fix_value": 10
     },
     "4": {
       "id": 4,

@@ -56,8 +56,8 @@ type GamesService interface {
 type MovesSavedCallback func(ctx context.Context, gameId string, moves []*v1.GameMove, groupNumber int64)
 
 type BaseGamesService struct {
-	Self          GamesService // The actual implementation
-	OnMovesSaved  MovesSavedCallback
+	Self         GamesService // The actual implementation
+	OnMovesSaved MovesSavedCallback
 }
 
 func (s *BaseGamesService) ListMoves(ctx context.Context, req *v1.ListMovesRequest) (resp *v1.ListMovesResponse, err error) {
@@ -353,10 +353,10 @@ func (s *BaseGamesService) SimulateFix(ctx context.Context, req *v1.SimulateFixR
 		AvailableHealth: req.FixingUnitHealth,
 	}
 	injuredUnit := &v1.Unit{
-		Q:               1,
-		R:               0,
-		Player:          1,
-		UnitType:        req.InjuredUnitType,
+		Q:        1,
+		R:        0,
+		Player:   1,
+		UnitType: req.InjuredUnitType,
 	}
 
 	// Create fix context

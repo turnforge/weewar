@@ -108,7 +108,7 @@ require (
 
 // replace github.com/panyam/goutils v0.1.12 => ./locallinks/goutils
 
-replace github.com/panyam/templar v0.0.28 => ./locallinks/templar
+// replace github.com/panyam/templar v0.0.28 => ./locallinks/templar
 
 // replace github.com/panyam/servicekit v0.0.4 => ./locallinks/servicekit
 

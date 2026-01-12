@@ -5,6 +5,18 @@ import (
 	"os"
 )
 
+// Google AdSense CSP domains (shared between dev and prod)
+const (
+	// Scripts: ad serving, tag management, ad service, traffic quality
+	cspScriptSrc = "https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://*.google.com https://*.adtrafficquality.google"
+	// Images: ad images, Google services, traffic quality
+	cspImgSrc = "https://pagead2.googlesyndication.com https://www.google.com https://*.googleusercontent.com https://*.adtrafficquality.google"
+	// Connections: ad syndication, traffic quality
+	cspConnectSrc = "https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://*.google.com"
+	// Frames: ad delivery iframes, traffic quality
+	cspFrameSrc = "https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://*.adtrafficquality.google"
+)
+
 // SecurityHeadersMiddleware adds security headers to all responses.
 // These headers help protect against common web vulnerabilities.
 type SecurityHeadersMiddleware struct {
@@ -40,41 +52,21 @@ func (m *SecurityHeadersMiddleware) Wrap(next http.Handler) http.Handler {
 		w.Header().Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
 		// Content-Security-Policy: Controls which resources can be loaded
-		// In development, we allow unsafe-inline for easier debugging
-		// In production, we use stricter policies
-		//
-		// Google AdSense domains:
-		// - pagead2.googlesyndication.com: Ad serving scripts
-		// - www.googletagservices.com: Tag management
-		// - adservice.google.com: Ad service
-		// - googleads.g.doubleclick.net: Ad delivery iframes
-		// - tpc.googlesyndication.com: Syndication iframes
-		// - www.google.com: Various Google services
-		// - ep1.adtrafficquality.google: Ad traffic quality verification
+		// Dev adds 'unsafe-eval' for hot reloading and ws: for plain websockets
+		var scriptExtra, connectExtra string
 		if m.IsDevelopment {
-			// Development: Allow inline scripts/styles for hot reloading
-			w.Header().Set("Content-Security-Policy",
-				"default-src 'self'; "+
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://*.google.com https://*.adtrafficquality.google; "+
-					"style-src 'self' 'unsafe-inline'; "+
-					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com https://*.googleusercontent.com; "+
-					"font-src 'self'; "+
-					"connect-src 'self' ws: wss: https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://*.google.com; "+
-					"frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; "+
-					"frame-ancestors 'none'")
-		} else {
-			// Production: CSP with Google Ads support
-			// Note: 'unsafe-inline' required because Google Ads dynamically injects inline scripts
-			w.Header().Set("Content-Security-Policy",
-				"default-src 'self'; "+
-					"script-src 'self' 'unsafe-inline' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://*.google.com https://*.adtrafficquality.google; "+
-					"style-src 'self' 'unsafe-inline'; "+
-					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com https://*.googleusercontent.com; "+
-					"font-src 'self'; "+
-					"connect-src 'self' wss: https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://*.google.com; "+
-					"frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; "+
-					"frame-ancestors 'none'")
+			scriptExtra = "'unsafe-eval' "
+			connectExtra = "ws: "
 		}
+		w.Header().Set("Content-Security-Policy",
+			"default-src 'self'; "+
+				"script-src 'self' 'unsafe-inline' "+scriptExtra+cspScriptSrc+"; "+
+				"style-src 'self' 'unsafe-inline'; "+
+				"img-src 'self' data: blob: "+cspImgSrc+"; "+
+				"font-src 'self'; "+
+				"connect-src 'self' "+connectExtra+"wss: "+cspConnectSrc+"; "+
+				"frame-src "+cspFrameSrc+"; "+
+				"frame-ancestors 'none'")
 
 		// Strict-Transport-Security: Force HTTPS (only in production)
 		if !m.IsDevelopment {

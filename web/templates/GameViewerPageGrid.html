@@ -182,6 +182,7 @@
         <pre id="game.data-json" style="display: none;">{{ if .Game }}{{ .Game | ToJson }}{{ else }}null{{ end }}</pre>
         <pre id="game-state-data-json" style="display: none;">{{ if .GameState }}{{ .GameState | ToJson }}{{ else }}null{{ end }}</pre>
         <pre id="game-history-data-json" style="display: none;">{{ if .GameHistory }}{{ .GameHistory | ToJson }}{{ else }}null{{ end }}</pre>
+        <pre id="viewer-user-id" style="display: none;">{{ .Header.LoggedInUserId }}</pre>
 
         <!-- Hidden Rules Engine Data for Frontend -->
         <pre id="terrain-data-json" style="display: none;">{{ .GetTerrainDataJSON }}</pre>

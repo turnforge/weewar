@@ -15,7 +15,7 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
 - ExtraHeaderButtons: Additional buttons (overridable by pages)
 -->
 
-{{# extend "GoalBase:HeaderActionsDrawer" "WeewarHeaderActionsDrawer" "GoalBase:NavigationTabs" "WeewarNavigationTabs" "GoalBase:HeaderActions" "WeewarHeaderActions" #}}
+{{# extend "GoalBase:HeaderActionsDrawer" "HeaderActionsDrawer" "GoalBase:NavigationTabs" "WeewarNavigationTabs" "GoalBase:HeaderActions" "WeewarHeaderActions" #}}
 
 <!-- Weewar-specific header actions - uses DisplayName for logged in users -->
 {{ define "WeewarHeaderActions" }}
@@ -58,7 +58,7 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
 {{ end }}
 
 <!-- Weewar Header Actions Drawer - Mobile view with DisplayName -->
-{{ define "WeewarHeaderActionsDrawer" }}
+{{ define "HeaderActionsDrawer" }}
 <div id="header-actions-drawer" class="print:hidden fixed z-[60] hidden">
     <!-- Backdrop (mobile only) -->
     <div class="header-drawer-backdrop absolute inset-0 transition-opacity duration-300 md:hidden"></div>

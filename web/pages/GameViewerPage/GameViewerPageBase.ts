@@ -362,12 +362,17 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
             throw new Error('No game data found in page elements');
         }
 
+        // Get viewer user ID from page data attribute
+        const viewerUserIdElement = document.getElementById('viewer-user-id');
+        const viewerUserId = viewerUserIdElement?.textContent?.trim() || '';
+
         // Call presenter to initialize
         const response = await this.singletonInitializerClient.initializeSingleton({
             gameId: this.currentGameId || "",
             gameData: gameElement!.textContent,
             gameState: gameStateElement?.textContent || '{}',
             moveHistory: historyElement?.textContent || '{"gameId":"","groups":[]}',
+            viewerUserId: viewerUserId,
         });
 
         if (!response.response!.success) {

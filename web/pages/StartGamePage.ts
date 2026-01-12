@@ -233,6 +233,7 @@ class StartGamePage extends BasePage implements LCMComponent {
             if (typeSelect && teamSelect && coinsInput) {
                 playerMap.set(playerId, {
                     playerId: playerId,
+                    userId: '', // Will be assigned by server when game starts
                     playerType: typeSelect.value,
                     color: '', // Color is handled by server rendering
                     teamId: parseInt(teamSelect.value),

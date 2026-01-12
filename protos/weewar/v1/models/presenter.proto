@@ -10,12 +10,14 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/turnforge/weewar/gen/go/weewar/v1/models";
 
-// Called when the end turn button was clicked
+// Called when the singleton presenter is initialized
 message InitializeSingletonRequest {
   string game_id = 1;
   string game_data = 2;
   string game_state = 3;
   string move_history = 4;
+  // User ID of the viewer (logged-in user viewing the game)
+  string viewer_user_id = 5;
 }
 
 // Response of a turn option click

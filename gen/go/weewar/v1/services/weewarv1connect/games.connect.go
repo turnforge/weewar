@@ -61,6 +61,9 @@ const (
 	// GamesServiceSimulateAttackProcedure is the fully-qualified name of the GamesService's
 	// SimulateAttack RPC.
 	GamesServiceSimulateAttackProcedure = "/weewar.v1.GamesService/SimulateAttack"
+	// GamesServiceSimulateFixProcedure is the fully-qualified name of the GamesService's SimulateFix
+	// RPC.
+	GamesServiceSimulateFixProcedure = "/weewar.v1.GamesService/SimulateFix"
 )
 
 // GamesServiceClient is a client for the weewar.v1.GamesService service.
@@ -90,6 +93,10 @@ type GamesServiceClient interface {
 	// Simulates combat between two units to generate damage distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateAttack(context.Context, *connect.Request[models.SimulateAttackRequest]) (*connect.Response[models.SimulateAttackResponse], error)
+	// *
+	// Simulates fix (repair) action to generate health restoration distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateFix(context.Context, *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error)
 }
 
 // NewGamesServiceClient constructs a client for the weewar.v1.GamesService service. By default, it
@@ -169,6 +176,12 @@ func NewGamesServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(gamesServiceMethods.ByName("SimulateAttack")),
 			connect.WithClientOptions(opts...),
 		),
+		simulateFix: connect.NewClient[models.SimulateFixRequest, models.SimulateFixResponse](
+			httpClient,
+			baseURL+GamesServiceSimulateFixProcedure,
+			connect.WithSchema(gamesServiceMethods.ByName("SimulateFix")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -185,6 +198,7 @@ type gamesServiceClient struct {
 	processMoves   *connect.Client[models.ProcessMovesRequest, models.ProcessMovesResponse]
 	getOptionsAt   *connect.Client[models.GetOptionsAtRequest, models.GetOptionsAtResponse]
 	simulateAttack *connect.Client[models.SimulateAttackRequest, models.SimulateAttackResponse]
+	simulateFix    *connect.Client[models.SimulateFixRequest, models.SimulateFixResponse]
 }
 
 // CreateGame calls weewar.v1.GamesService.CreateGame.
@@ -242,6 +256,11 @@ func (c *gamesServiceClient) SimulateAttack(ctx context.Context, req *connect.Re
 	return c.simulateAttack.CallUnary(ctx, req)
 }
 
+// SimulateFix calls weewar.v1.GamesService.SimulateFix.
+func (c *gamesServiceClient) SimulateFix(ctx context.Context, req *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error) {
+	return c.simulateFix.CallUnary(ctx, req)
+}
+
 // GamesServiceHandler is an implementation of the weewar.v1.GamesService service.
 type GamesServiceHandler interface {
 	// *
@@ -269,6 +288,10 @@ type GamesServiceHandler interface {
 	// Simulates combat between two units to generate damage distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateAttack(context.Context, *connect.Request[models.SimulateAttackRequest]) (*connect.Response[models.SimulateAttackResponse], error)
+	// *
+	// Simulates fix (repair) action to generate health restoration distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateFix(context.Context, *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error)
 }
 
 // NewGamesServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -344,6 +367,12 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(gamesServiceMethods.ByName("SimulateAttack")),
 		connect.WithHandlerOptions(opts...),
 	)
+	gamesServiceSimulateFixHandler := connect.NewUnaryHandler(
+		GamesServiceSimulateFixProcedure,
+		svc.SimulateFix,
+		connect.WithSchema(gamesServiceMethods.ByName("SimulateFix")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/weewar.v1.GamesService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case GamesServiceCreateGameProcedure:
@@ -368,6 +397,8 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 			gamesServiceGetOptionsAtHandler.ServeHTTP(w, r)
 		case GamesServiceSimulateAttackProcedure:
 			gamesServiceSimulateAttackHandler.ServeHTTP(w, r)
+		case GamesServiceSimulateFixProcedure:
+			gamesServiceSimulateFixHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -419,4 +450,8 @@ func (UnimplementedGamesServiceHandler) GetOptionsAt(context.Context, *connect.R
 
 func (UnimplementedGamesServiceHandler) SimulateAttack(context.Context, *connect.Request[models.SimulateAttackRequest]) (*connect.Response[models.SimulateAttackResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.SimulateAttack is not implemented"))
+}
+
+func (UnimplementedGamesServiceHandler) SimulateFix(context.Context, *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("weewar.v1.GamesService.SimulateFix is not implemented"))
 }

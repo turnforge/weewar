@@ -29,7 +29,8 @@ var File_weewar_v1_services_games_proto protoreflect.FileDescriptor
 
 const file_weewar_v1_services_games_proto_rawDesc = "" +
 	"\n" +
-	"\x1eweewar/v1/services/games.proto\x12\tweewar.v1\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a google/protobuf/field_mask.proto\x1a\x1dweewar/v1/models/models.proto\x1a$weewar/v1/models/games_service.proto2\xdc\t\n" +
+	"\x1eweewar/v1/services/games.proto\x12\tweewar.v1\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a google/protobuf/field_mask.proto\x1a\x1dweewar/v1/models/models.proto\x1a$weewar/v1/models/games_service.proto2\xcd\n" +
+	"\n" +
 	"\fGamesService\x12_\n" +
 	"\n" +
 	"CreateGame\x12\x1c.weewar.v1.CreateGameRequest\x1a\x1d.weewar.v1.CreateGameResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/games\x12_\n" +
@@ -44,7 +45,8 @@ const file_weewar_v1_services_games_proto_rawDesc = "" +
 	"\tListMoves\x12\x1b.weewar.v1.ListMovesRequest\x1a\x1c.weewar.v1.ListMovesResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/games/{game_id}/moves\x12u\n" +
 	"\fProcessMoves\x12\x1e.weewar.v1.ProcessMovesRequest\x1a\x1f.weewar.v1.ProcessMovesResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/games/{game_id}/moves\x12\xaf\x01\n" +
 	"\fGetOptionsAt\x12\x1e.weewar.v1.GetOptionsAtRequest\x1a\x1f.weewar.v1.GetOptionsAtResponse\"^\x82\xd3\xe4\x93\x02XZ)\x12'/v1/games/{game_id}/options/{pos.label}\x12+/v1/games/{game_id}/options/{pos.q}/{pos.r}\x12{\n" +
-	"\x0eSimulateAttack\x12 .weewar.v1.SimulateAttackRequest\x1a!.weewar.v1.SimulateAttackResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/games/simulate_attackB\xa0\x01\n" +
+	"\x0eSimulateAttack\x12 .weewar.v1.SimulateAttackRequest\x1a!.weewar.v1.SimulateAttackResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/games/simulate_attack\x12o\n" +
+	"\vSimulateFix\x12\x1d.weewar.v1.SimulateFixRequest\x1a\x1e.weewar.v1.SimulateFixResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/games/simulate_fixB\xa0\x01\n" +
 	"\rcom.weewar.v1B\n" +
 	"GamesProtoP\x01Z>github.com/turnforge/weewar/gen/go/weewar/v1/services;weewarv1\xa2\x02\x03WXX\xaa\x02\tWeewar.V1\xca\x02\tWeewar\\V1\xe2\x02\x15Weewar\\V1\\GPBMetadata\xea\x02\n" +
 	"Weewar::V1b\x06proto3"
@@ -61,17 +63,19 @@ var file_weewar_v1_services_games_proto_goTypes = []any{
 	(*models.ProcessMovesRequest)(nil),    // 8: weewar.v1.ProcessMovesRequest
 	(*models.GetOptionsAtRequest)(nil),    // 9: weewar.v1.GetOptionsAtRequest
 	(*models.SimulateAttackRequest)(nil),  // 10: weewar.v1.SimulateAttackRequest
-	(*models.CreateGameResponse)(nil),     // 11: weewar.v1.CreateGameResponse
-	(*models.GetGamesResponse)(nil),       // 12: weewar.v1.GetGamesResponse
-	(*models.ListGamesResponse)(nil),      // 13: weewar.v1.ListGamesResponse
-	(*models.GetGameResponse)(nil),        // 14: weewar.v1.GetGameResponse
-	(*models.DeleteGameResponse)(nil),     // 15: weewar.v1.DeleteGameResponse
-	(*models.UpdateGameResponse)(nil),     // 16: weewar.v1.UpdateGameResponse
-	(*models.GetGameStateResponse)(nil),   // 17: weewar.v1.GetGameStateResponse
-	(*models.ListMovesResponse)(nil),      // 18: weewar.v1.ListMovesResponse
-	(*models.ProcessMovesResponse)(nil),   // 19: weewar.v1.ProcessMovesResponse
-	(*models.GetOptionsAtResponse)(nil),   // 20: weewar.v1.GetOptionsAtResponse
-	(*models.SimulateAttackResponse)(nil), // 21: weewar.v1.SimulateAttackResponse
+	(*models.SimulateFixRequest)(nil),     // 11: weewar.v1.SimulateFixRequest
+	(*models.CreateGameResponse)(nil),     // 12: weewar.v1.CreateGameResponse
+	(*models.GetGamesResponse)(nil),       // 13: weewar.v1.GetGamesResponse
+	(*models.ListGamesResponse)(nil),      // 14: weewar.v1.ListGamesResponse
+	(*models.GetGameResponse)(nil),        // 15: weewar.v1.GetGameResponse
+	(*models.DeleteGameResponse)(nil),     // 16: weewar.v1.DeleteGameResponse
+	(*models.UpdateGameResponse)(nil),     // 17: weewar.v1.UpdateGameResponse
+	(*models.GetGameStateResponse)(nil),   // 18: weewar.v1.GetGameStateResponse
+	(*models.ListMovesResponse)(nil),      // 19: weewar.v1.ListMovesResponse
+	(*models.ProcessMovesResponse)(nil),   // 20: weewar.v1.ProcessMovesResponse
+	(*models.GetOptionsAtResponse)(nil),   // 21: weewar.v1.GetOptionsAtResponse
+	(*models.SimulateAttackResponse)(nil), // 22: weewar.v1.SimulateAttackResponse
+	(*models.SimulateFixResponse)(nil),    // 23: weewar.v1.SimulateFixResponse
 }
 var file_weewar_v1_services_games_proto_depIdxs = []int32{
 	0,  // 0: weewar.v1.GamesService.CreateGame:input_type -> weewar.v1.CreateGameRequest
@@ -85,19 +89,21 @@ var file_weewar_v1_services_games_proto_depIdxs = []int32{
 	8,  // 8: weewar.v1.GamesService.ProcessMoves:input_type -> weewar.v1.ProcessMovesRequest
 	9,  // 9: weewar.v1.GamesService.GetOptionsAt:input_type -> weewar.v1.GetOptionsAtRequest
 	10, // 10: weewar.v1.GamesService.SimulateAttack:input_type -> weewar.v1.SimulateAttackRequest
-	11, // 11: weewar.v1.GamesService.CreateGame:output_type -> weewar.v1.CreateGameResponse
-	12, // 12: weewar.v1.GamesService.GetGames:output_type -> weewar.v1.GetGamesResponse
-	13, // 13: weewar.v1.GamesService.ListGames:output_type -> weewar.v1.ListGamesResponse
-	14, // 14: weewar.v1.GamesService.GetGame:output_type -> weewar.v1.GetGameResponse
-	15, // 15: weewar.v1.GamesService.DeleteGame:output_type -> weewar.v1.DeleteGameResponse
-	16, // 16: weewar.v1.GamesService.UpdateGame:output_type -> weewar.v1.UpdateGameResponse
-	17, // 17: weewar.v1.GamesService.GetGameState:output_type -> weewar.v1.GetGameStateResponse
-	18, // 18: weewar.v1.GamesService.ListMoves:output_type -> weewar.v1.ListMovesResponse
-	19, // 19: weewar.v1.GamesService.ProcessMoves:output_type -> weewar.v1.ProcessMovesResponse
-	20, // 20: weewar.v1.GamesService.GetOptionsAt:output_type -> weewar.v1.GetOptionsAtResponse
-	21, // 21: weewar.v1.GamesService.SimulateAttack:output_type -> weewar.v1.SimulateAttackResponse
-	11, // [11:22] is the sub-list for method output_type
-	0,  // [0:11] is the sub-list for method input_type
+	11, // 11: weewar.v1.GamesService.SimulateFix:input_type -> weewar.v1.SimulateFixRequest
+	12, // 12: weewar.v1.GamesService.CreateGame:output_type -> weewar.v1.CreateGameResponse
+	13, // 13: weewar.v1.GamesService.GetGames:output_type -> weewar.v1.GetGamesResponse
+	14, // 14: weewar.v1.GamesService.ListGames:output_type -> weewar.v1.ListGamesResponse
+	15, // 15: weewar.v1.GamesService.GetGame:output_type -> weewar.v1.GetGameResponse
+	16, // 16: weewar.v1.GamesService.DeleteGame:output_type -> weewar.v1.DeleteGameResponse
+	17, // 17: weewar.v1.GamesService.UpdateGame:output_type -> weewar.v1.UpdateGameResponse
+	18, // 18: weewar.v1.GamesService.GetGameState:output_type -> weewar.v1.GetGameStateResponse
+	19, // 19: weewar.v1.GamesService.ListMoves:output_type -> weewar.v1.ListMovesResponse
+	20, // 20: weewar.v1.GamesService.ProcessMoves:output_type -> weewar.v1.ProcessMovesResponse
+	21, // 21: weewar.v1.GamesService.GetOptionsAt:output_type -> weewar.v1.GetOptionsAtResponse
+	22, // 22: weewar.v1.GamesService.SimulateAttack:output_type -> weewar.v1.SimulateAttackResponse
+	23, // 23: weewar.v1.GamesService.SimulateFix:output_type -> weewar.v1.SimulateFixResponse
+	12, // [12:24] is the sub-list for method output_type
+	0,  // [0:12] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

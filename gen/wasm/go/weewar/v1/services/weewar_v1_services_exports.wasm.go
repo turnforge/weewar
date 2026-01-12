@@ -87,6 +87,9 @@ func (exports *Weewar_v1ServicesExports) RegisterAPI() {
 			"simulateAttack": js.FuncOf(func(this js.Value, args []js.Value) any {
 				return exports.gamesServiceSimulateAttack(this, args)
 			}),
+			"simulateFix": js.FuncOf(func(this js.Value, args []js.Value) any {
+				return exports.gamesServiceSimulateFix(this, args)
+			}),
 		},
 		"indexerService": map[string]interface{}{
 			"ensureIndexState": js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -871,6 +874,54 @@ func (exports *Weewar_v1ServicesExports) gamesServiceSimulateAttack(this js.Valu
 
 	// Call service method
 	resp, err := exports.GamesService.SimulateAttack(ctx, req)
+	if err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
+	}
+
+	// Marshal response with options for better TypeScript compatibility
+	responseJSON, err := marshaller.Marshal(resp, wasm.MarshalOptions{
+		UseProtoNames:   false, // Use JSON names (camelCase) instead of proto names
+		EmitUnpopulated: true,  // Emit zero values to avoid undefined in JavaScript
+		UseEnumNumbers:  false, // Use enum string values
+	})
+	if err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to marshal response: %v", err), nil)
+	}
+
+	return wasm.CreateJSResponse(true, "Success", json.RawMessage(responseJSON))
+}
+
+// gamesServiceSimulateFix handles the SimulateFix method for GamesService
+func (exports *Weewar_v1ServicesExports) gamesServiceSimulateFix(this js.Value, args []js.Value) any {
+	if exports.GamesService == nil {
+		return wasm.CreateJSResponse(false, "GamesService not initialized", nil)
+	}
+	// Synchronous method
+	if len(args) < 1 {
+		return wasm.CreateJSResponse(false, "Request JSON required", nil)
+	}
+
+	requestJSON := args[0].String()
+	if requestJSON == "" {
+		return wasm.CreateJSResponse(false, "Request JSON is empty", nil)
+	}
+
+	// Parse request
+	req := &v1models.SimulateFixRequest{}
+	marshaller := wasm.GetGlobalMarshaller()
+	if err := marshaller.Unmarshal([]byte(requestJSON), req, wasm.UnmarshalOptions{
+		DiscardUnknown: true,
+		AllowPartial:   true, // Allow partial messages for better compatibility
+	}); err != nil {
+		return wasm.CreateJSResponse(false, fmt.Sprintf("Failed to parse request: %v", err), nil)
+	}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Call service method
+	resp, err := exports.GamesService.SimulateFix(ctx, req)
 	if err != nil {
 		return wasm.CreateJSResponse(false, fmt.Sprintf("Service call failed: %v", err), nil)
 	}

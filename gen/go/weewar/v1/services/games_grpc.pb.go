@@ -32,6 +32,7 @@ const (
 	GamesService_ProcessMoves_FullMethodName   = "/weewar.v1.GamesService/ProcessMoves"
 	GamesService_GetOptionsAt_FullMethodName   = "/weewar.v1.GamesService/GetOptionsAt"
 	GamesService_SimulateAttack_FullMethodName = "/weewar.v1.GamesService/SimulateAttack"
+	GamesService_SimulateFix_FullMethodName    = "/weewar.v1.GamesService/SimulateFix"
 )
 
 // GamesServiceClient is the client API for GamesService service.
@@ -65,6 +66,10 @@ type GamesServiceClient interface {
 	// Simulates combat between two units to generate damage distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateAttack(ctx context.Context, in *models.SimulateAttackRequest, opts ...grpc.CallOption) (*models.SimulateAttackResponse, error)
+	// *
+	// Simulates fix (repair) action to generate health restoration distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateFix(ctx context.Context, in *models.SimulateFixRequest, opts ...grpc.CallOption) (*models.SimulateFixResponse, error)
 }
 
 type gamesServiceClient struct {
@@ -185,6 +190,16 @@ func (c *gamesServiceClient) SimulateAttack(ctx context.Context, in *models.Simu
 	return out, nil
 }
 
+func (c *gamesServiceClient) SimulateFix(ctx context.Context, in *models.SimulateFixRequest, opts ...grpc.CallOption) (*models.SimulateFixResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(models.SimulateFixResponse)
+	err := c.cc.Invoke(ctx, GamesService_SimulateFix_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GamesServiceServer is the server API for GamesService service.
 // All implementations should embed UnimplementedGamesServiceServer
 // for forward compatibility.
@@ -216,6 +231,10 @@ type GamesServiceServer interface {
 	// Simulates combat between two units to generate damage distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateAttack(context.Context, *models.SimulateAttackRequest) (*models.SimulateAttackResponse, error)
+	// *
+	// Simulates fix (repair) action to generate health restoration distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateFix(context.Context, *models.SimulateFixRequest) (*models.SimulateFixResponse, error)
 }
 
 // UnimplementedGamesServiceServer should be embedded to have
@@ -257,6 +276,9 @@ func (UnimplementedGamesServiceServer) GetOptionsAt(context.Context, *models.Get
 }
 func (UnimplementedGamesServiceServer) SimulateAttack(context.Context, *models.SimulateAttackRequest) (*models.SimulateAttackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SimulateAttack not implemented")
+}
+func (UnimplementedGamesServiceServer) SimulateFix(context.Context, *models.SimulateFixRequest) (*models.SimulateFixResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SimulateFix not implemented")
 }
 func (UnimplementedGamesServiceServer) testEmbeddedByValue() {}
 
@@ -476,6 +498,24 @@ func _GamesService_SimulateAttack_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GamesService_SimulateFix_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(models.SimulateFixRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).SimulateFix(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_SimulateFix_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).SimulateFix(ctx, req.(*models.SimulateFixRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GamesService_ServiceDesc is the grpc.ServiceDesc for GamesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -526,6 +566,10 @@ var GamesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SimulateAttack",
 			Handler:    _GamesService_SimulateAttack_Handler,
+		},
+		{
+			MethodName: "SimulateFix",
+			Handler:    _GamesService_SimulateFix_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

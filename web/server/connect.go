@@ -117,6 +117,14 @@ func (a *ConnectGamesServiceAdapter) SimulateAttack(ctx context.Context, req *co
 	return connect.NewResponse(resp), nil
 }
 
+func (a *ConnectGamesServiceAdapter) SimulateFix(ctx context.Context, req *connect.Request[v1.SimulateFixRequest]) (*connect.Response[v1.SimulateFixResponse], error) {
+	resp, err := a.client.SimulateFix(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
 func (a *ConnectGamesServiceAdapter) GetGameState(ctx context.Context, req *connect.Request[v1.GetGameStateRequest]) (*connect.Response[v1.GetGameStateResponse], error) {
 	resp, err := a.client.GetGameState(ctx, req.Msg)
 	if err != nil {

@@ -70,6 +70,11 @@ class GamesServiceStub(object):
                 request_serializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateAttackRequest.SerializeToString,
                 response_deserializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateAttackResponse.FromString,
                 _registered_method=True)
+        self.SimulateFix = channel.unary_unary(
+                '/weewar.v1.GamesService/SimulateFix',
+                request_serializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateFixRequest.SerializeToString,
+                response_deserializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateFixResponse.FromString,
+                _registered_method=True)
 
 
 class GamesServiceServicer(object):
@@ -156,6 +161,15 @@ class GamesServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SimulateFix(self, request, context):
+        """*
+        Simulates fix (repair) action to generate health restoration distributions
+        This is a stateless utility method that doesn't require game state
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GamesServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -213,6 +227,11 @@ def add_GamesServiceServicer_to_server(servicer, server):
                     servicer.SimulateAttack,
                     request_deserializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateAttackRequest.FromString,
                     response_serializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateAttackResponse.SerializeToString,
+            ),
+            'SimulateFix': grpc.unary_unary_rpc_method_handler(
+                    servicer.SimulateFix,
+                    request_deserializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateFixRequest.FromString,
+                    response_serializer=weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateFixResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -513,6 +532,33 @@ class GamesService(object):
             '/weewar.v1.GamesService/SimulateAttack',
             weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateAttackRequest.SerializeToString,
             weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateAttackResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SimulateFix(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/weewar.v1.GamesService/SimulateFix',
+            weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateFixRequest.SerializeToString,
+            weewar_dot_v1_dot_models_dot_games__service__pb2.SimulateFixResponse.FromString,
             options,
             channel_credentials,
             insecure,

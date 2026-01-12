@@ -319,17 +319,17 @@ type PlayerStateDatastore struct {
 type GameMoveDatastore struct {
 	Key *datastore.Key `datastore:"-"`
 
-	GameId string `datastore:"game_id"`
-
 	Player int32 `datastore:"player"`
+
+	GameId string `datastore:"game_id"`
 
 	GroupNumber int64 `datastore:"group_number"`
 
 	MoveNumber int64 `datastore:"move_number"`
 
-	MoveType []byte `datastore:"move_type,noindex"`
-
 	Timestamp time.Time `datastore:"timestamp"`
+
+	MoveType []byte `datastore:"move_type,noindex"`
 
 	SequenceNum int64 `datastore:"sequence_num"`
 

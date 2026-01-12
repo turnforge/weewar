@@ -372,6 +372,39 @@
         ]
       }
     },
+    "/v1/games/simulate_fix": {
+      "post": {
+        "summary": "*\nSimulates fix (repair) action to generate health restoration distributions\nThis is a stateless utility method that doesn't require game state",
+        "operationId": "GamesService_SimulateFix",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SimulateFixResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SimulateFixRequest"
+            }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
     "/v1/games/{gameId}": {
       "patch": {
         "summary": "GetGame returns a specific game with metadata",
@@ -3324,6 +3357,56 @@
         }
       },
       "title": "*\nResponse containing damage distribution statistics"
+    },
+    "v1SimulateFixRequest": {
+      "type": "object",
+      "properties": {
+        "fixingUnitType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Unit type performing the fix"
+        },
+        "fixingUnitHealth": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Health of the fixing unit (Hf)"
+        },
+        "injuredUnitType": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Unit type being repaired (for display)"
+        },
+        "numSimulations": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Default: 1000"
+        }
+      },
+      "title": "*\nRequest for simulating fix (repair) between two units"
+    },
+    "v1SimulateFixResponse": {
+      "type": "object",
+      "properties": {
+        "healingDistribution": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": "Health restoration distribution: health_restored -\u003e number_of_occurrences"
+        },
+        "meanHealing": {
+          "type": "number",
+          "format": "double",
+          "title": "Statistical summary"
+        },
+        "fixValue": {
+          "type": "integer",
+          "format": "int32",
+          "title": "The fix value (F) of the fixing unit type"
+        }
+      },
+      "title": "*\nResponse containing health restoration distribution statistics"
     },
     "v1SplashTarget": {
       "type": "object",

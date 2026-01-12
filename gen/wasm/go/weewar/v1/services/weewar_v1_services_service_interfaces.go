@@ -57,6 +57,10 @@ type GamesServiceServer interface {
 	Simulates combat between two units to generate damage distributions
 	This is a stateless utility method that doesn't require game state */
 	SimulateAttack(context.Context, *v1models.SimulateAttackRequest) (*v1models.SimulateAttackResponse, error)
+	/** *
+	Simulates fix (repair) action to generate health restoration distributions
+	This is a stateless utility method that doesn't require game state */
+	SimulateFix(context.Context, *v1models.SimulateFixRequest) (*v1models.SimulateFixResponse, error)
 }
 
 // IndexerServiceServer is the server API for IndexerService service (WASM version without gRPC embedding).

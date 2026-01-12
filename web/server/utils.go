@@ -17,7 +17,7 @@ type NotFoundPage struct {
 	Path   string
 }
 
-func (p *NotFoundPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (error, bool) {
+func (p *NotFoundPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (error, bool) {
 	p.Title = "Not Found"
 	p.Header.Load(r, w, app)
 	p.Path = r.URL.Path
@@ -31,7 +31,7 @@ type ForbiddenPage struct {
 	Message string
 }
 
-func (p *ForbiddenPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (error, bool) {
+func (p *ForbiddenPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (error, bool) {
 	p.Title = "Forbidden"
 	p.Header.Load(r, w, app)
 	return nil, false
@@ -42,7 +42,7 @@ func (p *ForbiddenPage) Load(r *http.Request, w http.ResponseWriter, app *goal.A
 // For NotFound errors, it renders the 404 page.
 // For PermissionDenied errors, it renders the 403 page.
 // Returns (error, finished) - if finished is true, the response has been written.
-func HandleGRPCError(err error, w http.ResponseWriter, r *http.Request, app *goal.App[*WeewarApp]) (error, bool) {
+func HandleGRPCError(err error, w http.ResponseWriter, r *http.Request, app *goal.App[*LilBattleApp]) (error, bool) {
 	if err == nil {
 		return nil, false
 	}

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/connectclient"
-	"github.com/turnforge/weewar/services/fsbe"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services"
+	"github.com/turnforge/lilbattle/services/connectclient"
+	"github.com/turnforge/lilbattle/services/fsbe"
 )
 
 // GameContext holds the game service and loaded data for CLI operations

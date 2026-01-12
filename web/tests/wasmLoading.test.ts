@@ -11,7 +11,7 @@ const STATIC_BASE_PATH = "../static"
 describe('WASM Loading Debug', () => {
   
   test('should find WASM files', () => {
-    const wasmPath = path.join(__dirname, STATIC_BASE_PATH + '/wasm/weewar-cli.wasm');
+    const wasmPath = path.join(__dirname, STATIC_BASE_PATH + '/wasm/lilbattle-cli.wasm');
     const wasmExecPath = path.join(__dirname, STATIC_BASE_PATH + '/wasm/wasm_exec.js');
     
     console.log('WASM path:', wasmPath);
@@ -48,7 +48,7 @@ describe('WASM Loading Debug', () => {
   });
   
   test('should load WASM binary', async () => {
-    const wasmPath = path.join(__dirname, STATIC_BASE_PATH + '/wasm/weewar-cli.wasm');
+    const wasmPath = path.join(__dirname, STATIC_BASE_PATH + '/wasm/lilbattle-cli.wasm');
     const wasmExecPath = path.join(__dirname, STATIC_BASE_PATH + '/wasm/wasm_exec.js');
     
     // Load Go runtime
@@ -77,7 +77,7 @@ describe('WASM Loading Debug', () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     console.log('Available global functions:');
-    const globalKeys = Object.keys(global).filter(k => k.startsWith('weewar'));
+    const globalKeys = Object.keys(global).filter(k => k.startsWith('lilbattle'));
     console.log(globalKeys);
   }, 15000);
 });

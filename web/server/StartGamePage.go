@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 var AllowedUnitIDs = []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 37, 38, 39, 40, 41, 44}
@@ -28,7 +28,7 @@ type StartGamePage struct {
 	ErrorMessage string // Error message for ID conflicts etc.
 }
 
-func (p *StartGamePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *StartGamePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	// Require login to start a game
 	ctx := app.Context
 	loggedInUserId := ctx.AuthMiddleware.GetLoggedInUserId(r)

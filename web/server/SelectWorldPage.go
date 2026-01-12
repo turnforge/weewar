@@ -13,7 +13,7 @@ type SelectWorldPage struct {
 	WorldListView WorldListView
 }
 
-func (m *SelectWorldPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (m *SelectWorldPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	// Require login to select a world for game creation
 	ctx := app.Context
 	loggedInUserId := ctx.AuthMiddleware.GetLoggedInUserId(r)

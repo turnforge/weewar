@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // abs returns the absolute value of an integer

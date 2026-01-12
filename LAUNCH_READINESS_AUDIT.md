@@ -1,4 +1,4 @@
-# WeeWar Launch Readiness Audit
+# LilBattle Launch Readiness Audit
 
 **Audit Date**: January 9, 2026
 **Last Updated**: January 11, 2026
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-WeeWar has a solid technical foundation with production-ready core gameplay, multi-backend persistence, and clean architecture. Major security and legal blockers have been addressed. A few remaining items need attention before public announcement.
+LilBattle has a solid technical foundation with production-ready core gameplay, multi-backend persistence, and clean architecture. Major security and legal blockers have been addressed. A few remaining items need attention before public announcement.
 
 ### Critical Blockers Status
 
@@ -114,7 +114,7 @@ WeeWar has a solid technical foundation with production-ready core gameplay, mul
 - **Turn Management**: Player rotation, income generation, lazy top-up
 - **Persistence**: File, PostgreSQL, Datastore backends
 - **Replay/History**: Move groups, world changes, save/load
-- **Unit Balance**: 44 types with authentic WeeWar data
+- **Unit Balance**: 44 types with authentic LilBattle data
 - **Maps/Worlds**: Hex coords, 26 terrains, dynamic sizing
 - **Multiplayer Infrastructure**: Sync broadcasting, transactions
 
@@ -227,7 +227,7 @@ damageEstimate := int32(50) // TODO: Use proper damage calculation
 
 **Medium Priority:**
 4. **CONTRIBUTING.md** - No contribution guidelines
-5. **Customized Terms/Privacy** - Generic boilerplate needs WeeWar-specific practices
+5. **Customized Terms/Privacy** - Generic boilerplate needs LilBattle-specific practices
 6. **CHANGELOG.md** - No version tracking
 7. **CODE_OF_CONDUCT.md** - No community guidelines
 
@@ -239,7 +239,7 @@ damageEstimate := int32(50) // TODO: Use proper damage calculation
 | P0 | Create AboutPage.html | ✅ DONE |
 | P0 | Create ContactUsPage.html | ✅ DONE |
 | P1 | Create API documentation | 🟡 TODO |
-| P1 | Customize Terms/Privacy for WeeWar | TODO |
+| P1 | Customize Terms/Privacy for LilBattle | TODO |
 | P1 | Create Help/FAQ page | 🟡 TODO |
 | P2 | Create browser game tutorial | TODO |
 | P2 | Add CONTRIBUTING.md | TODO |
@@ -254,7 +254,7 @@ damageEstimate := int32(50) // TODO: Use proper damage calculation
 - **LoginPage**: Professional OAuth UI, multiple providers
 - **Favicons**: Multiple formats in /static/favicons/
 - **Dark Mode**: Full Tailwind CSS support
-- **Consistent Branding**: Lightning bolt icon, WeeWar name
+- **Consistent Branding**: Lightning bolt icon, LilBattle name
 
 #### Gaps ⚠️
 - No marketing copy explaining value proposition
@@ -307,8 +307,8 @@ damageEstimate := int32(50) // TODO: Use proper damage calculation
 
 - [ ] **Documentation**
   - [ ] Create API documentation (OpenAPI or README)
-  - [ ] Customize Terms of Service for WeeWar practices
-  - [ ] Customize Privacy Policy for WeeWar data handling
+  - [ ] Customize Terms of Service for LilBattle practices
+  - [ ] Customize Privacy Policy for LilBattle data handling
   - [ ] Create Help/FAQ page
 
 - [ ] **Gameplay**
@@ -366,7 +366,7 @@ damageEstimate := int32(50) // TODO: Use proper damage calculation
 
 ## Conclusion
 
-WeeWar is **READY for public launch**. All critical security and legal blockers have been addressed.
+LilBattle is **READY for public launch**. All critical security and legal blockers have been addressed.
 
 **Current Status**: 95% complete
 

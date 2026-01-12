@@ -11,25 +11,25 @@ import (
 	"cloud.google.com/go/datastore"
 	"github.com/joho/godotenv"
 	goal "github.com/panyam/goapplib"
-	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
-	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/fsbe"
-	"github.com/turnforge/weewar/services/gaebe"
-	"github.com/turnforge/weewar/services/gormbe"
-	"github.com/turnforge/weewar/services/r2"
-	"github.com/turnforge/weewar/services/server"
-	"github.com/turnforge/weewar/utils"
-	web "github.com/turnforge/weewar/web/server"
+	v1s "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services"
+	"github.com/turnforge/lilbattle/services"
+	"github.com/turnforge/lilbattle/services/fsbe"
+	"github.com/turnforge/lilbattle/services/gaebe"
+	"github.com/turnforge/lilbattle/services/gormbe"
+	"github.com/turnforge/lilbattle/services/r2"
+	"github.com/turnforge/lilbattle/services/server"
+	"github.com/turnforge/lilbattle/utils"
+	web "github.com/turnforge/lilbattle/web/server"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 )
 
-const DEFAULT_DB_ENDPOINT = "postgres://postgres:password@localhost:5432/weewardb"
+const DEFAULT_DB_ENDPOINT = "postgres://postgres:password@localhost:5432/lilbattledb"
 
 var (
 	grpcAddress       = flag.String("grpcAddress", DefaultServiceAddress(), "Address where the gRPC endpoint is running")
 	gatewayAddress    = flag.String("gatewayAddress", DefaultGatewayAddress(), "Address where the http grpc gateway endpoint is running")
-	db_endpoint       = flag.String("db_endpoint", "", fmt.Sprintf("Endpoint of DB where all data is persisted.  Default value: WEEWAR_DB_ENDPOINT environment variable or %s", DEFAULT_DB_ENDPOINT))
+	db_endpoint       = flag.String("db_endpoint", "", fmt.Sprintf("Endpoint of DB where all data is persisted.  Default value: LILBATTLE_DB_ENDPOINT environment variable or %s", DEFAULT_DB_ENDPOINT))
 	worlds_service_be = flag.String("worlds_service_be", "", "Storage for worlds service - 'local', 'pg', 'gae'. Env: WORLDS_SERVICE_BE. Default: pg")
 	games_service_be  = flag.String("games_service_be", "", "Storage for games service - 'local', 'pg', 'gae'. Env: GAMES_SERVICE_BE. Default: pg")
 	filestore_be      = flag.String("filestore_be", "", "Storage for filestore - 'local', 'r2', 'gae'. Env: FILESTORE_BE. Default: local")
@@ -69,7 +69,7 @@ func main() {
 }
 
 func DefaultGatewayAddress() string {
-	gateway_addr := os.Getenv("WEEWAR_WEB_PORT")
+	gateway_addr := os.Getenv("LILBATTLE_WEB_PORT")
 	if gateway_addr != "" {
 		return gateway_addr
 	}
@@ -77,7 +77,7 @@ func DefaultGatewayAddress() string {
 }
 
 func DefaultServiceAddress() string {
-	port := os.Getenv("WEEWAR_GRPC_PORT")
+	port := os.Getenv("LILBATTLE_GRPC_PORT")
 	if port != "" {
 		return port
 	}
@@ -85,11 +85,11 @@ func DefaultServiceAddress() string {
 }
 
 func parseFlags() {
-	// Default to dev mode, use WEEWAR_ENV=production for production
+	// Default to dev mode, use LILBATTLE_ENV=production for production
 	envfile := "configs/.env.dev"
-	weewarEnv := os.Getenv("WEEWAR_ENV")
-	log.Println("Environment: ", weewarEnv)
-	if weewarEnv == "production" {
+	lilbattleEnv := os.Getenv("LILBATTLE_ENV")
+	log.Println("Environment: ", lilbattleEnv)
+	if lilbattleEnv == "production" {
 		envfile = "configs/.env"
 	} else {
 		// Dev mode - enable debug logging
@@ -124,17 +124,17 @@ func (b *Backend) SetupApp() *utils.App {
 		// All other methods require a logged-in user
 		PublicMethods: []string{
 			// Worlds - allow browsing without login
-			"/weewar.v1.WorldsService/ListWorlds",
-			"/weewar.v1.WorldsService/GetWorld",
-			"/weewar.v1.WorldsService/GetWorlds",
+			"/lilbattle.v1.WorldsService/ListWorlds",
+			"/lilbattle.v1.WorldsService/GetWorld",
+			"/lilbattle.v1.WorldsService/GetWorlds",
 			// Games - allow browsing without login
-			"/weewar.v1.GamesService/ListGames",
-			"/weewar.v1.GamesService/GetGame",
-			"/weewar.v1.GamesService/GetGames",
-			"/weewar.v1.GamesService/SimulateAttack",
-			"/weewar.v1.GamesService/SimulateFix",
+			"/lilbattle.v1.GamesService/ListGames",
+			"/lilbattle.v1.GamesService/GetGame",
+			"/lilbattle.v1.GamesService/GetGames",
+			"/lilbattle.v1.GamesService/SimulateAttack",
+			"/lilbattle.v1.GamesService/SimulateFix",
 			// GameSync - allow spectating without login
-			"/weewar.v1.GameSyncService/Subscribe",
+			"/lilbattle.v1.GameSyncService/Subscribe",
 		},
 	}
 	clientMgr := services.NewClientMgr(b.GrpcAddress)
@@ -153,7 +153,7 @@ func (b *Backend) SetupApp() *utils.App {
 		var db *gorm.DB = nil
 		ensureDB := func() *gorm.DB {
 			if db == nil {
-				db = gormbe.OpenWeewarDB(*db_endpoint, DEFAULT_DB_ENDPOINT)
+				db = gormbe.OpenLilBattleDB(*db_endpoint, DEFAULT_DB_ENDPOINT)
 			}
 			return db
 		}
@@ -211,7 +211,7 @@ func (b *Backend) SetupApp() *utils.App {
 				AccountID:       os.Getenv("R2_ACCOUNT_ID"),
 				AccessKeyID:     os.Getenv("R2_ACCESS_KEY_ID"),
 				SecretAccessKey: os.Getenv("R2_SECRET_ACCESS_KEY"),
-				Bucket:          "weewar-assets",
+				Bucket:          "lilbattle-assets",
 				PublicURL:       "", // Leave empty for private bucket
 			})
 			if err != nil {
@@ -238,7 +238,7 @@ func (b *Backend) SetupApp() *utils.App {
 	}
 	app.AddServer(grpcServer)
 
-	isDevMode := os.Getenv("WEEWAR_ENV") == "dev"
+	isDevMode := os.Getenv("LILBATTLE_ENV") == "dev"
 	app.AddServer(&web.WebAppServer{
 		WebAppServer: goal.WebAppServer{
 			GrpcAddress:   b.GrpcAddress,

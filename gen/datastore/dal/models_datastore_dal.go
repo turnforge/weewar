@@ -5,7 +5,7 @@ import (
 	"context"
 
 	dslib "cloud.google.com/go/datastore"
-	datastore "github.com/turnforge/weewar/gen/datastore"
+	datastore "github.com/turnforge/lilbattle/gen/datastore"
 )
 
 // WorldDatastoreDAL provides database access helper methods for datastore.WorldDatastore.

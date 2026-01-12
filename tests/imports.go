@@ -1,9 +1,9 @@
 package tests
 
 import (
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services/fsbe"
-	"github.com/turnforge/weewar/services/singleton"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services/fsbe"
+	"github.com/turnforge/lilbattle/services/singleton"
 )
 
 type AxialCoord = lib.AxialCoord

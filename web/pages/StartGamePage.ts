@@ -1,4 +1,4 @@
-import type { GameConfiguration, GamePlayer, IncomeConfig } from '../gen/wasmjs/weewar/v1/models/interfaces';
+import type { GameConfiguration, GamePlayer, IncomeConfig } from '../gen/wasmjs/lilbattle/v1/models/interfaces';
 import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
 import { PhaserWorldScene } from './common/PhaserWorldScene';
 import { World } from './common/World';

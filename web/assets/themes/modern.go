@@ -3,8 +3,8 @@ package themes
 import (
 	"fmt"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/web/assets"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/web/assets"
 )
 
 // ModernTheme implements the Theme interface for the Modern Military theme

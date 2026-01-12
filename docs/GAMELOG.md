@@ -141,10 +141,10 @@ type SaveHandler interface {
 **Decision**: Expose save/load operations as WASM functions.
 
 **New WASM Functions**:
-- `weewarSaveGame(sessionName)` - Save current session
-- `weewarLoadGame(sessionId)` - Load and resume session
-- `weewarGetGameLog()` - Get current session log for debugging
-- `weewarListSavedGames()` - List available saved sessions
+- `lilbattleSaveGame(sessionName)` - Save current session
+- `lilbattleLoadGame(sessionId)` - Load and resume session
+- `lilbattleGetGameLog()` - Get current session log for debugging
+- `lilbattleListSavedGames()` - List available saved sessions
 
 **Rationale**:
 - ✅ Consistent with existing WASM API pattern

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	oa "github.com/panyam/oneauth"
-	svc "github.com/turnforge/weewar/services"
+	svc "github.com/turnforge/lilbattle/services"
 	"golang.org/x/oauth2"
 )
 
@@ -26,7 +26,7 @@ func testUser() *svc.User {
 	}
 }
 
-func (n *WeewarApp) GetUserByID(userId string) (oa.User, error) {
+func (n *LilBattleApp) GetUserByID(userId string) (oa.User, error) {
 	var err error
 	// Test user bypass - only if ENABLE_TEST_AUTH is set
 	if testAuthEnabled() && userId == "test1" {
@@ -36,7 +36,7 @@ func (n *WeewarApp) GetUserByID(userId string) (oa.User, error) {
 	return u.(*svc.User), err
 }
 
-func (n *WeewarApp) EnsureAuthUser(authtype string, provider string, token *oauth2.Token, userInfo map[string]any) (oa.User, error) {
+func (n *LilBattleApp) EnsureAuthUser(authtype string, provider string, token *oauth2.Token, userInfo map[string]any) (oa.User, error) {
 	var err error
 	// Test user bypass - only if ENABLE_TEST_AUTH is set
 	if testAuthEnabled() {
@@ -54,7 +54,7 @@ func (n *WeewarApp) EnsureAuthUser(authtype string, provider string, token *oaut
 	return user.(*svc.User), err
 }
 
-func (n *WeewarApp) ValidateUsernamePassword(username string, password string) (out oa.User, err error) {
+func (n *LilBattleApp) ValidateUsernamePassword(username string, password string) (out oa.User, err error) {
 	// Test user bypass - only if ENABLE_TEST_AUTH is set
 	if testAuthEnabled() && username == "test@gmail.com" {
 		out = testUser()

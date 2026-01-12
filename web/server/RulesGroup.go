@@ -10,7 +10,7 @@ import (
 type RulesGroup struct{}
 
 // RegisterRoutes registers all rules-related routes using goal.Register.
-func (g *RulesGroup) RegisterRoutes(app *goal.App[*WeewarApp]) *http.ServeMux {
+func (g *RulesGroup) RegisterRoutes(app *goal.App[*LilBattleApp]) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Attack simulator page

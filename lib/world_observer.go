@@ -1,6 +1,6 @@
 package lib
 
-import v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+import v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 
 // =============================================================================
 // Observer Pattern for World State Changes

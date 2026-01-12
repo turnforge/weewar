@@ -1,4 +1,4 @@
-# Google Cloud Datastore Composite Indexes for WeeWar
+# Google Cloud Datastore Composite Indexes for LilBattle
 # Deploy with: gcloud datastore indexes create index.yaml --project=YOUR_PROJECT_ID
 #
 # Note: Single-property indexes are automatic in Datastore.

@@ -44,20 +44,67 @@ This folder contains all the Go HTML template files (`*.html`) used for server-s
 The template system uses a custom `templar` engine which extends Go's standard `html/template` with composition features:
 
 **Key Directives:**
-- **Namespace:** `{{# namespace "weewar" #}}` - Defines template namespace for isolation
+- **Namespace:** `{{# namespace "lilbattle" #}}` - Defines template namespace for isolation
 - **Include:** `{{# include "path/to/template.html" #}}` - Includes another template inline
 - **Extend:** `{{# extend "goapplib/BasePage.html" #}}` - Inherits from a parent template
 - **Block Definitions:** `{{ define "BlockName" }}...{{ end }}` - Define/override blocks
 
 **goapplib Integration:**
-Templates extend shared components from the `goapplib` package:
-- `goapplib/BasePage.html` - Base page layout with header, body, scripts blocks
+Templates extend shared components from the `goapplib` package via templar vendoring:
+- `@goapplib/BasePage.html` - Base page layout with header, body, scripts blocks
+- `@goapplib/components/EntityListing.html` - Reusable entity listing with table/grid views
 - Pages override blocks like `Header`, `Body`, `ExtraHeaderButtons`
 - Shared components reduce duplication across projects
 
+**Templar Vendoring (2025-01-12):**
+Dependencies are managed via `templar.yaml` and fetched to `templar_modules/`:
+
+```yaml
+# templar.yaml
+sources:
+  goapplib:
+    url: github.com/panyam/goapplib
+    path: templates          # Only fetch templates/ subdirectory
+    ref: main
+    # include: ["**/*.html"] # Optional: glob patterns to include
+    # exclude: ["*_test.*"]  # Optional: glob patterns to exclude
+
+vendor_dir: ./templar_modules
+search_paths:
+  - .
+  - ./templar_modules
+```
+
+**Vendored Directory Structure (flat):**
+```
+web/templates/
+├── templar.yaml           # Configuration
+├── templar.lock           # Lock file (auto-generated, gitignored)
+├── templar_modules/       # Vendored dependencies
+│   └── goapplib/          # Flat: sourcename/files...
+│       ├── BasePage.html
+│       ├── Header.html
+│       └── components/
+│           ├── EntityListing.html
+│           └── ...
+├── BasePage.html          # Local override extending @goapplib/BasePage.html
+└── ...
+```
+
+**@source Syntax:**
+Use `@sourcename/path` to reference vendored templates:
+```html
+{{# namespace "GoalBase" "@goapplib/BasePage.html" #}}
+{{# namespace "EL" "@goapplib/components/EntityListing.html" #}}
+```
+
+**Commands:**
+- `templar get` - Fetch/update all dependencies
+- `TEMPLAR_DEBUG=1 templar get` - Debug mode showing extracted files
+
 **Template Hierarchy Example:**
 ```html
-{{# namespace "weewar" #}}
+{{# namespace "lilbattle" #}}
 {{# include "goapplib/BasePage.html" #}}
 {{# extend "goapplib/BasePage.html" #}}
 
@@ -526,7 +573,7 @@ Template for mobile compact card showing terrain and unit selection info.
 // services/gameview_presenter.go
 s.CompactSummaryCardPanel.SetCurrentData(ctx, tile, unit)
 
-// cmd/weewar-wasm/browser.go
+// cmd/lilbattle-wasm/browser.go
 content := renderPanelTemplate(ctx, "CompactSummaryCard.templar.html", map[string]any{
     "Tile":  tile,
     "Unit":  unit,

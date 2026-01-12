@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	v1s "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services"
 )
 
 // ConnectIndexerServiceAdapter adapts the gRPC IndexerService to Connect's interface

@@ -6,17 +6,17 @@ import (
 	"path/filepath"
 	"testing"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/singleton"
-	"github.com/turnforge/weewar/tests"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/services"
+	"github.com/turnforge/lilbattle/services/singleton"
+	"github.com/turnforge/lilbattle/tests"
 )
 
 // Test that we can load a game and get options for units
 func TestSingletonGamesService_GetOptionsAt(t *testing.T) {
 	// Load a real test world using the existing test utility
 	homeDir, _ := os.UserHomeDir()
-	worldsDir := filepath.Join(homeDir, "dev-app-data", "weewar", "storage", "worlds")
+	worldsDir := filepath.Join(homeDir, "dev-app-data", "lilbattle", "storage", "worlds")
 
 	world, gameState, err := tests.LoadTestWorldFromStorage(worldsDir, "32112070")
 	if err != nil {
@@ -99,7 +99,7 @@ func TestSingletonGamesService_GetOptionsAt(t *testing.T) {
 // Test getting options for empty tile returns empty
 func TestSingletonGamesService_GetOptionsAt_EmptyTile(t *testing.T) {
 	homeDir, _ := os.UserHomeDir()
-	worldsDir := filepath.Join(homeDir, "dev-app-data", "weewar", "storage", "worlds")
+	worldsDir := filepath.Join(homeDir, "dev-app-data", "lilbattle", "storage", "worlds")
 
 	_, gameState, err := tests.LoadTestWorldFromStorage(worldsDir, "32112070")
 	if err != nil {

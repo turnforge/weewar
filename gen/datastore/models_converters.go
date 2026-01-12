@@ -2,7 +2,7 @@
 package datastore
 
 import (
-	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	models "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 
 	"fmt"
 

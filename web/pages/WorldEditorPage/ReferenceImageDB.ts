@@ -13,7 +13,7 @@ export interface ReferenceImageRecord {
 }
 
 export class ReferenceImageDB {
-    private dbName = 'WeeWarReferenceImages';
+    private dbName = 'LilBattleReferenceImages';
     private storeName = 'images';
     private version = 1;
     private db: IDBDatabase | null = null;

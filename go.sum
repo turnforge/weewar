@@ -141,8 +141,8 @@ github.com/panyam/protoc-gen-go-wasmjs v0.0.33 h1:QNN11x4eAVHRxPSzkpmg0E5NwhN9iK
 github.com/panyam/protoc-gen-go-wasmjs v0.0.33/go.mod h1:IyWKtIY9dy8T99plUNxEwMGq1NKchwDS7eEV4cMKznI=
 github.com/panyam/servicekit v0.0.4 h1:OdvzGKlgm1rnVePb7gjCXGL8cxYqRtZ7Pu0fZF1Yus0=
 github.com/panyam/servicekit v0.0.4/go.mod h1:GOLBY1PRDWweAFIbmEPNo6NspAxHoednqcSP2cYFPzo=
-github.com/panyam/templar v0.0.27 h1:jJXllKJBrhS1glYiOxZh+IHguKfr09e6EvO5V7nJF9k=
-github.com/panyam/templar v0.0.27/go.mod h1:MMZb7+uv6B7mFNVJLx5PC7cFRzIn/baroBESBdNro20=
+github.com/panyam/templar v0.0.28 h1:+um//vi6iP1Y1TkpxuCbbGeX4I3GrG6GPKX6jHxIuKM=
+github.com/panyam/templar v0.0.28/go.mod h1:MMZb7+uv6B7mFNVJLx5PC7cFRzIn/baroBESBdNro20=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 h1:GFCKgmp0tecUJ0sJuv4pzYCqS9+RGSn52M3FUwPs+uo=

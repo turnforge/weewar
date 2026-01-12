@@ -26,7 +26,7 @@ func main() {
 
 	// Show version
 	if *version {
-		fmt.Printf("WeeWar CLI v%s (build %s) - Headless Game State Manipulator\n", Version, Build)
+		fmt.Printf("LilBattle CLI v%s (build %s) - Headless Game State Manipulator\n", Version, Build)
 		return
 	}
 
@@ -46,7 +46,7 @@ func main() {
 	}
 	defer cli.Close()
 
-	fmt.Printf("WeeWar CLI - Game %s loaded\n", gameID)
+	fmt.Printf("LilBattle CLI - Game %s loaded\n", gameID)
 	fmt.Println("Type 'help' for available commands, 'quit' to exit")
 	fmt.Println("Use ↑/↓ arrow keys to navigate command history")
 
@@ -68,10 +68,10 @@ func main() {
 
 // showHelp displays help information
 func showHelp() {
-	fmt.Printf("WeeWar CLI v%s - Headless Game State Manipulator\n\n", Version)
+	fmt.Printf("LilBattle CLI v%s - Headless Game State Manipulator\n\n", Version)
 
 	fmt.Println("USAGE:")
-	fmt.Println("  weewar-cli <gameid> [commands...]")
+	fmt.Println("  lilbattle-cli <gameid> [commands...]")
 	fmt.Println()
 
 	fmt.Println("ARGUMENTS:")
@@ -98,13 +98,13 @@ func showHelp() {
 
 	fmt.Println("EXAMPLES:")
 	fmt.Println("  # Load game and enter interactive mode")
-	fmt.Println("  weewar-cli game123")
+	fmt.Println("  lilbattle-cli game123")
 	fmt.Println()
 	fmt.Println("  # Load game and execute commands")
-	fmt.Println("  weewar-cli game123 \"move A1 3,4\" \"end\"")
+	fmt.Println("  lilbattle-cli game123 \"move A1 3,4\" \"end\"")
 	fmt.Println()
 	fmt.Println("  # Show game status")
-	fmt.Println("  weewar-cli game123 status")
+	fmt.Println("  lilbattle-cli game123 status")
 	fmt.Println()
 
 	fmt.Println("NOTES:")

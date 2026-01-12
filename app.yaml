@@ -2,8 +2,8 @@ runtime: go124
 
 env_variables:
   # Production environment (triggers loading configs/.env)
-  WEEWAR_ENV: production
-  WEEWAR_BASE_URL: https://weewar.appspot.com
+  LILBATTLE_ENV: production
+  LILBATTLE_BASE_URL: https://lilbattle.appspot.com
   # Backend storage configuration
   # Options: local, pg, gae
   WORLDS_SERVICE_BE: gae

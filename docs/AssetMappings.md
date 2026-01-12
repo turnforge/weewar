@@ -421,7 +421,7 @@ This framework provides a complete blueprint for creating cohesive themed asset 
 ```
 Read up Mappings.md first
 
-Ok let us create another Theme - the Modern Military theme with contemporary units similar to the style of the original Weewar game - do you remember this?  Tell me what your plan for this will be before proceeding
+Ok let us create another Theme - the Modern Military theme with contemporary units similar to the style of the original LilBattle game - do you remember this?  Tell me what your plan for this will be before proceeding
 
 Also make sure you track the progress in a TODO so we can resume on restarts.
 

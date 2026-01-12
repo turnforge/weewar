@@ -1,16 +1,16 @@
 import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
 import { ITheme } from '../assets/themes/BaseTheme';
 import DefaultTheme from '../assets/themes/default';
-import WeewarBundle from '../gen/wasmjs';
-import { GamesServiceClient } from '../gen/wasmjs/weewar/v1/services/gamesServiceClient';
-import { SimulateFixRequest, SimulateFixResponse } from '../gen/wasmjs/weewar/v1/models/interfaces';
+import LilbattleBundle from '../gen/wasmjs';
+import { GamesServiceClient } from '../gen/wasmjs/lilbattle/v1/services/gamesServiceClient';
+import { SimulateFixRequest, SimulateFixResponse } from '../gen/wasmjs/lilbattle/v1/models/interfaces';
 
 /**
  * Fix Simulator Page - Interactive repair simulator
  * Allows users to simulate fix (repair) outcomes between different units
  */
 class FixSimulatorPage extends BasePage {
-    private wasmBundle: WeewarBundle | null = null;
+    private wasmBundle: LilbattleBundle | null = null;
     private gamesClient: GamesServiceClient | null = null;
     private theme: ITheme;
 
@@ -91,9 +91,9 @@ class FixSimulatorPage extends BasePage {
     private async loadWASM(): Promise<void> {
         try {
             console.log('[FixSimulator] Loading WASM bundle...');
-            this.wasmBundle = new WeewarBundle();
+            this.wasmBundle = new LilbattleBundle();
             this.gamesClient = new GamesServiceClient(this.wasmBundle);
-            await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
+            await this.wasmBundle.loadWasm('/static/wasm/lilbattle-cli.wasm');
             await this.wasmBundle.waitUntilReady();
             console.log('[FixSimulator] WASM loaded successfully');
         } catch (error) {

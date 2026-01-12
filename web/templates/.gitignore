@@ -1,1 +1,5 @@
 gen
+
+# Templar vendored templates
+web/templates/templar_modules/
+web/templates/templar.lock cat .gitignore

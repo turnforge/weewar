@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	"github.com/turnforge/weewar/services/fsbe"
+	"github.com/turnforge/lilbattle/services/fsbe"
 )
 
 const TEMPLATES_FOLDER = "./web/templates"
@@ -20,17 +20,17 @@ const DIST_FOLDER = "./web/dist"
 const STATIC_FOLDER = "./web/static"
 
 // RootViewsHandler is a thin wrapper for page routing.
-// It references both the WeewarApp (pure context) and goal.App (templates/rendering).
+// It references both the LilBattleApp (pure context) and goal.App (templates/rendering).
 type RootViewsHandler struct {
-	WeewarApp *WeewarApp              // Pure app context
-	GoalApp   *goal.App[*WeewarApp]   // goal.App wrapper for templates/rendering
+	LilBattleApp *LilBattleApp              // Pure app context
+	GoalApp   *goal.App[*LilBattleApp]   // goal.App wrapper for templates/rendering
 	mux       *http.ServeMux
 }
 
 // NewRootViewsHandler creates a new RootViewsHandler.
-func NewRootViewsHandler(weewarApp *WeewarApp, goalApp *goal.App[*WeewarApp]) *RootViewsHandler {
+func NewRootViewsHandler(lilbattleApp *LilBattleApp, goalApp *goal.App[*LilBattleApp]) *RootViewsHandler {
 	out := &RootViewsHandler{
-		WeewarApp: weewarApp,
+		LilBattleApp: lilbattleApp,
 		GoalApp:   goalApp,
 		mux:       http.NewServeMux(),
 	}
@@ -99,12 +99,12 @@ func (n *RootViewsHandler) setupRoutes() {
 		n.mux.Handle("/screenshots/", http.StripPrefix("/screenshots", http.FileServer(http.Dir(screenshotsDir+"/screenshots"))))
 	}
 
-	// Resource-specific endpoints - pass WeewarApp and GoalApp to groups
-	gamesGroup := &GamesGroup{weewarApp: n.WeewarApp, goalApp: n.GoalApp}
+	// Resource-specific endpoints - pass LilBattleApp and GoalApp to groups
+	gamesGroup := &GamesGroup{lilbattleApp: n.LilBattleApp, goalApp: n.GoalApp}
 	gamesMux := gamesGroup.RegisterRoutes(n.GoalApp)
 	n.mux.Handle("/games/", http.StripPrefix("/games", gamesMux))
 
-	worldsGroup := &WorldsGroup{weewarApp: n.WeewarApp, goalApp: n.GoalApp}
+	worldsGroup := &WorldsGroup{lilbattleApp: n.LilBattleApp, goalApp: n.GoalApp}
 	worldsMux := worldsGroup.RegisterRoutes(n.GoalApp)
 	n.mux.Handle("/worlds/", http.StripPrefix("/worlds", worldsMux))
 

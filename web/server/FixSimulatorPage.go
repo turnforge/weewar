@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	goal "github.com/panyam/goapplib"
-	"github.com/turnforge/weewar/lib"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 type FixSimulatorPage struct {
@@ -26,7 +26,7 @@ type FixSimulatorPage struct {
 	Theme    string
 }
 
-func (p *FixSimulatorPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *FixSimulatorPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.DisableSplashScreen = true
 	p.Title = "Fix Simulator"
 	p.Header.Load(r, w, app)

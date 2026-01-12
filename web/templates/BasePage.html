@@ -1,8 +1,8 @@
-<!-- weewar/web/templates/BasePage.html -->
-{{# namespace "GoalBase" "goapplib/BasePage.html" #}}
+<!-- lilbattle/web/templates/BasePage.html -->
+{{# namespace "GoalBase" "@goapplib/BasePage.html" #}}
 {{# include "./Header.html" #}}
 
-{{ define "WeewarExtraHeadSection" }}
+{{ define "LilBattleExtraHeadSection" }}
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/static/favicons/favicon.svg">
     <link rel="icon" type="image/x-icon" href="/static/favicons/favicon.ico">
@@ -13,7 +13,7 @@
     <meta name="google-adsense-account" content="ca-pub-2973452493146773">
 {{ end }}
 
-{{ define "WeewarHeaderSection" }}
+{{ define "LilBattleHeaderSection" }}
     {{ if not .CustomHeader }}
     <!-- Header Block -->
     <div class="print:hidden sticky left-0 top-0 z-20 border-b border-gray-200 dark:border-gray-700">
@@ -25,7 +25,7 @@
 {{ end }}
 
 {{# extend "GoalBase:BasePage" "BasePage"
-           "GoalBase:ExtraHeadSection" "WeewarExtraHeadSection"
-           "GoalBase:HeaderSection" "WeewarHeaderSection"
+           "GoalBase:ExtraHeadSection" "LilBattleExtraHeadSection"
+           "GoalBase:HeaderSection" "LilBattleHeaderSection"
            "GoalBase:BodySection" "BodySection"
            "GoalBase:PostScriptsSection" "PostBodySection" #}}

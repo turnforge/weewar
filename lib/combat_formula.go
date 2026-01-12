@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // CombatContext contains all information needed to calculate combat damage using the formula
@@ -84,7 +84,7 @@ func (re *RulesEngine) CalculateHitProbability(ctx *CombatContext) (float64, err
 
 // SimulateCombatDamage simulates combat damage by rolling dice according to the formula
 // For each health unit (Ha) of the attacker, roll 6 dice
-// In WeeWar, each health unit = 10 HP, so 100 HP = 10 health units
+// In LilBattle, each health unit = 10 HP, so 100 HP = 10 health units
 // Each die roll that's < p counts as a hit
 // Total damage = hits / 6
 func (re *RulesEngine) SimulateCombatDamage(ctx *CombatContext, rng *rand.Rand) (int32, error) {

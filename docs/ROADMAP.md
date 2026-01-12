@@ -1,7 +1,7 @@
-# WeeWar Development Roadmap
+# LilBattle Development Roadmap
 
 ## Overview
-WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into a full-featured web application template. This roadmap outlines the progression from game engine to web platform.
+LilBattle is evolving from a comprehensive CLI-based turn-based strategy game into a full-featured web application template. This roadmap outlines the progression from game engine to web platform.
 
 ## ✅ Phase 1: Game Engine Foundation (Completed)
 **Status**: Production-ready  
@@ -28,7 +28,7 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 
 ### Backend Infrastructure ✅
 - [x] Complete gRPC service architecture (MapsService, GamesService, UsersService)
-- [x] File-based storage system with `<WEEWAR_DATA_ROOT>/storage/maps/<mapId>/` structure
+- [x] File-based storage system with `<LILBATTLE_DATA_ROOT>/storage/maps/<mapId>/` structure
 - [x] Enhanced protobuf models with hex coordinates (MapTile, MapUnit)
 - [x] Full CRUD operations for maps with metadata and game data separation
 - [x] Connect bindings for web API integration
@@ -326,14 +326,14 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 **Timeline**: January 2025
 
 ### Foundation Discovery ✅
-**Major Finding**: Comprehensive game engine already exists in lib/game.go and cmd/weewar-cli/
+**Major Finding**: Comprehensive game engine already exists in lib/game.go and cmd/lilbattle-cli/
 - **Complete Game Class**: Turn management, movement, combat, save/load, events
 - **Professional CLI**: Full command interface with 15+ game commands
 - **Coordinate System**: Proper AxialCoord (cube coordinates) throughout
 - **Multiplayer Ready**: Player validation, turn cycling, victory conditions
 
 ### Rules Engine Integration ✅ COMPLETED
-- [x] ~~Create RulesEngine struct to load weewar-data.json~~ ✅ COMPLETED
+- [x] ~~Create RulesEngine struct to load lilbattle-data.json~~ ✅ COMPLETED
 - [x] ~~Replace hardcoded movement costs with terrain-specific calculations~~ ✅ COMPLETED
 - [x] ~~Replace simple damage with probability-based combat from attack matrices~~ ✅ COMPLETED
 - [x] ~~Update CLI commands to work with data-driven rules~~ ✅ COMPLETED
@@ -345,11 +345,11 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [x] ~~Essential game commands: move, attack, select, end, status, units, player, help, quit~~ ✅ COMPLETED
 - [x] ~~Move recording system with serializable MoveList and JSON export~~ ✅ COMPLETED
 - [x] ~~REPL Interactive Mode for persistent gameplay without reloading~~ ✅ COMPLETED
-- [x] ~~World loading integration from <WEEWAR_DATA_ROOT>/storage/maps/ with JSON parsing~~ ✅ COMPLETED
+- [x] ~~World loading integration from <LILBATTLE_DATA_ROOT>/storage/maps/ with JSON parsing~~ ✅ COMPLETED
 - [x] ~~Complete USER_GUIDE.md with examples, troubleshooting, and command reference~~ ✅ COMPLETED
 
 ### Production Quality CLI Features ✅ COMPLETED
-- [x] ~~Real world integration: Successfully loads and plays with <WEEWAR_DATA_ROOT>/storage/maps/small-world~~ ✅ COMPLETED
+- [x] ~~Real world integration: Successfully loads and plays with <LILBATTLE_DATA_ROOT>/storage/maps/small-world~~ ✅ COMPLETED
 - [x] ~~Rules engine integration: Proper initialization with rules-data.json~~ ✅ COMPLETED
 - [x] ~~Game state persistence: Complete game state maintained across commands~~ ✅ COMPLETED
 - [x] ~~Position parser flexibility: Handles A1-Z99, Q/R coordinates, row/col formats~~ ✅ COMPLETED
@@ -409,8 +409,8 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 
 ### Generated WASM Architecture Discovery ✅
 - [x] **Buf Plugin Analysis**: Complete understanding of protoc-gen-go-wasmjs generated files
-- [x] **Generated Go WASM**: `gen/wasm/weewar_v1_services.wasm.go` with proper service injection pattern
-- [x] **Generated TypeScript Client**: `web/frontend/gen/wasm-clients/weewar_v1_servicesClient.client.ts` with type-safe APIs
+- [x] **Generated Go WASM**: `gen/wasm/lilbattle_v1_services.wasm.go` with proper service injection pattern
+- [x] **Generated TypeScript Client**: `web/frontend/gen/wasm-clients/lilbattle_v1_servicesClient.client.ts` with type-safe APIs
 - [x] **Migration Path Identification**: Clear path from 374-line manual WASM to ~20-line dependency injection
 - [x] **Service Integration Strategy**: Existing services can be directly injected into generated exports
 
@@ -430,7 +430,7 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 - [x] **Testability**: Service mocks enable proper unit testing
 
 ### Implementation Plan (Next Phase)
-- [ ] **Service Wiring**: Update `cmd/weewar-wasm/main.go` to use generated exports with service injection
+- [ ] **Service Wiring**: Update `cmd/lilbattle-wasm/main.go` to use generated exports with service injection
 - [ ] **Build Integration**: Update Makefile to build generated WASM instead of manual approach
 - [ ] **Frontend Migration**: Replace GameState.ts manual WASM calls with generated TypeScript client
 - [ ] **Legacy Cleanup**: Remove obsolete manual WASM binding code
@@ -439,7 +439,7 @@ WeeWar is evolving from a comprehensive CLI-based turn-based strategy game into 
 ```go
 // New main.go (~20 lines)
 func main() {
-    exports := &weewar_v1_services.Weewar_v1_servicesServicesExports{
+    exports := &lilbattle_v1_services.LilBattle_v1_servicesServicesExports{
         GamesService:  services.NewGamesService(store),
         UsersService:  services.NewUsersService(store), 
         WorldsService: services.NewWorldsService(store),
@@ -451,7 +451,7 @@ func main() {
 
 ```typescript
 // New frontend (~50 lines)
-const client = new Weewar_v1_servicesClient();
+const client = new LilBattle_v1_servicesClient();
 await client.loadWasm();
 const response = await client.gamesService.createGame(request);
 ```
@@ -652,12 +652,12 @@ const response = await client.gamesService.createGame(request);
 ### Deployment Infrastructure ✅
 - [x] **app.yaml Configuration**: Go 1.24 runtime with static file handlers
 - [x] **.gcloudignore Setup**: Proper exclusions for dev files, node_modules, tests
-- [x] **Environment Configuration**: WEEWAR_ENV-based config loading (dev/production)
+- [x] **Environment Configuration**: LILBATTLE_ENV-based config loading (dev/production)
 - [x] **Backend Selection**: Priority-based config resolution (CLI flag → env var → default)
 - [x] **Secrets Management**: Symlinked configs folder to external secrets directory
 
 ### Authentication Setup ✅
-- [x] **GCP Service Account**: weewar-cli-admin with App Engine and Datastore roles
+- [x] **GCP Service Account**: lilbattle-cli-admin with App Engine and Datastore roles
 - [x] **OAuth2 Configuration**: Google OAuth with proper callback URLs
 - [x] **Multi-environment OAuth**: Support for localhost and production callback URLs
 - [x] **X/Twitter OAuth 2.0**: Custom Twitter OAuth handler with PKCE support (required by Twitter API)
@@ -669,7 +669,7 @@ const response = await client.gamesService.createGame(request);
 
 ### Production Storage ✅
 - [x] **GAE/Datastore Backend**: Complete Datastore backend implementation (gaebe package)
-  - Proto definitions with datastore_tags annotations (`protos/weewar/v1/datastore/models.proto`)
+  - Proto definitions with datastore_tags annotations (`protos/lilbattle/v1/datastore/models.proto`)
   - Generated entity types and converters via protoc-gen-dal (`gen/datastore/`)
   - Composite indexes for needs_indexing queries (`index.yaml`)
   - Cross-entity transactions for game move atomicity

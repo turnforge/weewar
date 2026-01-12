@@ -46,9 +46,9 @@ func OpenDB(db_endpoint string) (db *gorm.DB, err error) {
 	return
 }
 
-func OpenWeewarDB(dbEndpoint string, defaultEndpoint string) *gorm.DB {
+func OpenLilBattleDB(dbEndpoint string, defaultEndpoint string) *gorm.DB {
 	if dbEndpoint == "" {
-		dbEndpoint = os.Getenv("WEEWAR_DB_ENDPOINT")
+		dbEndpoint = os.Getenv("LILBATTLE_DB_ENDPOINT")
 		if dbEndpoint == "" {
 			dbEndpoint = defaultEndpoint
 		}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // captureCmd represents the capture command

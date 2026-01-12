@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/panyam/protoc-gen-dal/pkg/converters"
-	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	models "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // IndexInfoToIndexInfoGORM converts a models.IndexInfo to IndexInfoGORM.

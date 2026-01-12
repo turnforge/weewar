@@ -2,10 +2,10 @@ package assets
 
 import _ "embed"
 
-//go:embed weewar-rules.json
+//go:embed lilbattle-rules.json
 var RulesDataJSON []byte
 
-//go:embed weewar-damage.json
+//go:embed lilbattle-damage.json
 var RulesDamageDataJSON []byte
 
 // =============================================================================

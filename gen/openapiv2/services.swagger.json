@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "weewar/v1/models/indexer.proto",
+    "title": "lilbattle/v1/models/indexer.proto",
     "version": "version not set"
   },
   "tags": [

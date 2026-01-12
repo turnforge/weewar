@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services/connectclient"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services/connectclient"
 )
 
 var (
@@ -28,7 +28,7 @@ var newCmd = &cobra.Command{
 	Short: "Create a new game from a world",
 	Long: `Create a new game from an existing world.
 Players are auto-detected from the world based on who owns units or tiles.
-Requires WEEWAR_SERVER to be set.
+Requires LILBATTLE_SERVER to be set.
 
 Examples:
   ww new 01bdc3ce                              Create game from world
@@ -56,7 +56,7 @@ func runNew(cmd *cobra.Command, args []string) error {
 
 	serverURL := getServerURL()
 	if serverURL == "" {
-		return fmt.Errorf("WEEWAR_SERVER is required for creating games (e.g., http://localhost:9080)")
+		return fmt.Errorf("LILBATTLE_SERVER is required for creating games (e.g., http://localhost:9080)")
 	}
 
 	// Create Connect clients
@@ -151,7 +151,7 @@ func runNew(cmd *cobra.Command, args []string) error {
 	if resp.Game.Description != "" {
 		sb.WriteString(fmt.Sprintf("  Description: %s\n", resp.Game.Description))
 	}
-	sb.WriteString(fmt.Sprintf("\nTo play: export WEEWAR_GAME_ID=%s\n", resp.Game.Id))
+	sb.WriteString(fmt.Sprintf("\nTo play: export LILBATTLE_GAME_ID=%s\n", resp.Game.Id))
 
 	return formatter.PrintText(sb.String())
 }

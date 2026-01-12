@@ -8,7 +8,7 @@
 import * as Phaser from 'phaser';
 import { BaseLayer, LayerConfig, ClickContext, LayerHitResult } from './LayerSystem';
 import { hexToPixel } from './hexUtils';
-import { MoveUnitAction, AttackUnitAction } from '../../gen/wasmjs/weewar/v1/models/interfaces';
+import { MoveUnitAction, AttackUnitAction } from '../../gen/wasmjs/lilbattle/v1/models/interfaces';
 import { AnimationConfig } from './animations/AnimationConfig';
 import { DEFAULT_PLAYER_COLORS } from '../../assets/themes/BaseTheme';
 

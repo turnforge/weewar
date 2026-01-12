@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 type GenericPage struct {
@@ -12,7 +12,7 @@ type GenericPage struct {
 	Header Header
 }
 
-func (v *GenericPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (v *GenericPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	return
 }
 
@@ -27,7 +27,7 @@ type HomePage struct {
 	TotalWorlds  int32
 }
 
-func (p *HomePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *HomePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	ctx := app.Context
 	// Redirect to the first visible tab
 	if !ctx.HideWorlds {
@@ -47,7 +47,7 @@ type PrivacyPolicy struct {
 	Header Header
 }
 
-func (p *PrivacyPolicy) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *PrivacyPolicy) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.DisableSplashScreen = true
 	return p.Header.Load(r, w, app)
 }
@@ -57,7 +57,7 @@ type TermsOfService struct {
 	Header Header
 }
 
-func (t *TermsOfService) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (t *TermsOfService) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	t.DisableSplashScreen = true
 	return t.Header.Load(r, w, app)
 }

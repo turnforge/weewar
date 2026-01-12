@@ -1,11 +1,11 @@
 networks:
-  weewarnetwork:
+  lilbattlenetwork:
     external: true
 
 services:
 #    pgadmin:
 #    networks:
-#      - weewarnetwork
+#      - lilbattlenetwork
 #      image: dpage/pgadmin4
 #      ports:
 #        - ${PGADMIN_LISTEN_PORT}:${PGADMIN_LISTEN_PORT}
@@ -18,7 +18,7 @@ services:
 
   postgres:
     networks:
-      - weewarnetwork
+      - lilbattlenetwork
     image: arm64v8/postgres:18.1
       # image: postgres:15.3
     environment:

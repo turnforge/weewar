@@ -1,6 +1,6 @@
-# WeeWar CLI User Guide
+# LilBattle CLI User Guide
 
-A comprehensive guide for playing WeeWar using the simplified command-line interface (CLI).
+A comprehensive guide for playing LilBattle using the simplified command-line interface (CLI).
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -16,22 +16,22 @@ A comprehensive guide for playing WeeWar using the simplified command-line inter
 ### Installation
 ```bash
 # Build the CLI executable
-go build -o weewar-cli ./cmd/weewar-cli
+go build -o lilbattle-cli ./cmd/lilbattle-cli
 
 # Make it executable 
-chmod +x weewar-cli
+chmod +x lilbattle-cli
 ```
 
 ### Quick Start
 ```bash
 # Start interactive game with a world from storage
-./weewar-cli -world $WEEWAR_DATA_ROOT/storage/maps/small-world -interactive
+./lilbattle-cli -world $LILBATTLE_DATA_ROOT/storage/maps/small-world -interactive
 
 # Load a saved game
-./weewar-cli -load my_game.json -interactive
+./lilbattle-cli -load my_game.json -interactive
 
 # Execute single commands
-./weewar-cli -world $WEEWAR_DATA_ROOT/storage/maps/small-world status units quit
+./lilbattle-cli -world $LILBATTLE_DATA_ROOT/storage/maps/small-world status units quit
 ```
 
 ## REPL Interface
@@ -80,7 +80,7 @@ The CLI uses a simple interactive prompt:
 ## Position System
 
 ### Flexible Position Formats
-WeeWar CLI supports three position formats:
+LilBattle CLI supports three position formats:
 
 #### 1. Unit IDs (Player + Unit Number)
 - `A1`, `A2`, `A3` - Player A's units 1, 2, 3
@@ -114,11 +114,11 @@ WeeWar CLI supports three position formats:
 ### Starting a Game
 ```bash
 # Start with a world from storage
-$ ./weewar-cli -world $WEEWAR_DATA_ROOT/storage/maps/small-world -interactive
-Loading world from $WEEWAR_DATA_ROOT/storage/maps/small-world...
+$ ./lilbattle-cli -world $LILBATTLE_DATA_ROOT/storage/maps/small-world -interactive
+Loading world from $LILBATTLE_DATA_ROOT/storage/maps/small-world...
 Loaded world: Small World
 World loaded successfully
-WeeWar CLI - Interactive Mode
+LilBattle CLI - Interactive Mode
 Type 'help' for available commands, 'quit' to exit
 
 > status
@@ -207,7 +207,7 @@ Move list JSON:
 echo -e "select A1\nmove A1 3,4\nend\nstatus" > moves.txt
 
 # Pipe commands to CLI
-cat moves.txt | ./weewar-cli -world $WEEWAR_DATA_ROOT/storage/maps/small-world -interactive
+cat moves.txt | ./lilbattle-cli -world $LILBATTLE_DATA_ROOT/storage/maps/small-world -interactive
 ```
 
 ### Game State Analysis
@@ -340,28 +340,28 @@ Solution: Use `select A1` to see valid movement options
 
 ```bash
 # Start with world from storage
-./weewar-cli -world $WEEWAR_DATA_ROOT/storage/maps/small-world -interactive
+./lilbattle-cli -world $LILBATTLE_DATA_ROOT/storage/maps/small-world -interactive
 
 # Load saved game  
-./weewar-cli -load my_game.json -interactive
+./lilbattle-cli -load my_game.json -interactive
 
 # Execute commands and save
-./weewar-cli -world map1 move A1 3,4 end -save game.json
+./lilbattle-cli -world map1 move A1 3,4 end -save game.json
 
 # Record session
-./weewar-cli -world map1 -record session.txt -interactive
+./lilbattle-cli -world map1 -record session.txt -interactive
 
 # Render game to PNG (when implemented)
-./weewar-cli -load game.json -render game.png -width 1024 -height 768
+./lilbattle-cli -load game.json -render game.png -width 1024 -height 768
 ```
 
 ## Example: Complete Game Session
 
 ```bash
-$ ./weewar-cli -world $WEEWAR_DATA_ROOT/storage/maps/small-world -interactive
-Loading world from $WEEWAR_DATA_ROOT/storage/maps/small-world...
+$ ./lilbattle-cli -world $LILBATTLE_DATA_ROOT/storage/maps/small-world -interactive
+Loading world from $LILBATTLE_DATA_ROOT/storage/maps/small-world...
 World loaded successfully
-WeeWar CLI - Interactive Mode
+LilBattle CLI - Interactive Mode
 Type 'help' for available commands, 'quit' to exit
 
 > record start
@@ -394,7 +394,7 @@ Recorded moves (3):
 Goodbye!
 ```
 
-The simplified WeeWar CLI provides a focused, efficient interface for turn-based strategy gaming with flexible position formats, move recording, and Unix-friendly batch processing capabilities.
+The simplified LilBattle CLI provides a focused, efficient interface for turn-based strategy gaming with flexible position formats, move recording, and Unix-friendly batch processing capabilities.
 
 ---
 

@@ -45,7 +45,7 @@ type Header struct {
 }
 
 func (h *Header) SetupDefaults() {
-	h.AppName = "WeeWar"
+	h.AppName = "LilBattle"
 	h.LogoTitle = h.AppName
 	h.HeaderStyleLink = "/static/css/Header.css"
 	h.MenuStyleLink = "/static/css/Menu.css"
@@ -74,7 +74,7 @@ func (h *Header) SetupDefaults() {
 	}
 }
 
-func (v *Header) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (v *Header) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	v.SetupDefaults()
 	ctx := app.Context
 	v.LoggedInUserId = ctx.AuthMiddleware.GetLoggedInUserId(r)

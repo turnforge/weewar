@@ -1,7 +1,7 @@
 //go:build !wasm
 // +build !wasm
 
-// Package authz provides authorization utilities for WeeWar services.
+// Package authz provides authorization utilities for LilBattle services.
 // It extracts user identity from gRPC context and validates access permissions.
 package authz
 
@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	oagrpc "github.com/panyam/oneauth/grpc"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // Common authorization errors

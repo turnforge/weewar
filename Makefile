@@ -6,14 +6,16 @@ TINYGO_ROOT=$(shell tinygo env TINYGOROOT 2>/dev/null || echo "")
 WASM_EXEC_PATH=$(shell find $(GO_ROOT)/lib/wasm $(GO_ROOT)/misc/wasm -name "wasm_exec.js" 2>/dev/null | head -1)
 NUM_LINKED_GOMODS=`cat go.mod | grep -v "^\/\/" | grep replace | wc -l | sed -e "s/ *//g"`
 
+all: ui cli wasm server
+
 ui:
 	cd web ; make build
 
 binlocal: 
-	go build -ldflags "$(LDFLAGS)" -o ./bin/weewar ./cmd/backend/*.go
+	go build -ldflags "$(LDFLAGS)" -o ./bin/lilbattle ./cmd/backend/*.go
 
 deploy: checklinks ui cli wasm 
-	gcloud app deploy --project weewar --verbosity=info
+	gcloud app deploy --project lilbattle --verbosity=info
 
 servepg:
 	go run main.go -games_service_be=pg-worlds_service_be=pg
@@ -24,6 +26,9 @@ servelocal:
 servegae:
 	go run main.go -games_service_be=gae -worlds_service_be=gae
 
+server:
+	go build ./web/server/...
+
 vars:
 	@echo "GO_ROOT=$(GO_ROOT)"
 	@echo "TINYGO_ROOT=$(TINYGO_ROOT)"
@@ -33,7 +38,7 @@ test:
 	@echo "Running tests..."
 	go test -cover -coverprofile=coverage.out -coverpkg=./lib/...,./services/... ./tests/... ./cmd/cli/...
 	# cd lib && go test -v -cover ./...
-	# cd cmd/weewar-cli && go test ./...
+	# cd cmd/lilbattle-cli && go test ./...
 	@echo ""
 	@echo "Coverage report:"
 	go tool cover -func=coverage.out
@@ -48,24 +53,24 @@ cli:
 	go build  -o ${GOBIN}/ww cmd/cli/*.go
 
 wasm: # test
-	echo "Building WeeWar WASM modules..."
+	echo "Building LilBattle WASM modules..."
 	mkdir -p web/static/wasm
-	echo "Building weewar-cli WASM..."
-	# GOOS=js GOARCH=wasm go build -o web/static/wasm/weewar-cli.wasm cmd/weewar-wasm/*.go
+	echo "Building lilbattle-cli WASM..."
+	# GOOS=js GOARCH=wasm go build -o web/static/wasm/lilbattle-cli.wasm cmd/wasm/*.go
 	echo "Building standard WASM Binary..."
-	GOOS=js GOARCH=wasm go build -ldflags="-s -w" -trimpath -o web/static/wasm/weewar-cli.wasm ./cmd/weewar-wasm
+	GOOS=js GOARCH=wasm go build -ldflags="-s -w" -trimpath -o web/static/wasm/lilbattle-cli.wasm ./cmd/wasm
 	echo "Compressing standard WASM Binary..."
-	gzip -9 -k -f web/static/wasm/weewar-cli.wasm
+	gzip -9 -k -f web/static/wasm/lilbattle-cli.wasm
 
 tinywasm:
 	echo "Building TinyGO WASM Binary..."
-	tinygo build -target wasm -o web/static/wasm/weewar-cli-tinygo.wasm ./cmd/weewar-wasm
+	tinygo build -target wasm -o web/static/wasm/lilbattle-cli-tinygo.wasm ./cmd/wasm
 	echo "Compressing standard WASM Binary..."
-	gzip -9 -k -f web/static/wasm/weewar-cli-tinygo.wasm
+	gzip -9 -k -f web/static/wasm/lilbattle-cli-tinygo.wasm
 	echo "Building TinyGO NoDebug WASM Binary..."
-	tinygo build -target wasm -no-debug -o web/static/wasm/weewar-cli-tinygo-nodebug.wasm ./cmd/weewar-wasm
+	tinygo build -target wasm -no-debug -o web/static/wasm/lilbattle-cli-tinygo-nodebug.wasm ./cmd/wasm
 	echo "Compressing TinyGo NoDebug WASM Binary..."
-	gzip -9 -k -f web/static/wasm/weewar-cli-tinygo-nodebug.wasm
+	gzip -9 -k -f web/static/wasm/lilbattle-cli-tinygo-nodebug.wasm
 
 wasmexecjs:
 	@echo "Copying wasm_exec.js files..."
@@ -163,13 +168,13 @@ dblogs:
 	docker compose --env-file .env.dev -f db-docker-compose.yml logs -f
 
 ensurenetworks:
-	-docker network create weewarnetwork
+	-docker network create lilbattlenetwork
 
 dbdirs:
 	mkdir -p ./data/pgdata
 
 snap:
-	cp -r ~/dev-app-data/weewar/storage/games/testgame snapshotairport
+	cp -r ~/dev-app-data/lilbattle/storage/games/testgame snapshotairport
 
 restore:
-	cp -r snapshotairport/*.json ~/dev-app-data/weewar/storage/games/testgame/
+	cp -r snapshotairport/*.json ~/dev-app-data/lilbattle/storage/games/testgame/

@@ -1,7 +1,7 @@
 package themes
 
 import (
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // Theme interface provides metadata about units and terrains in a theme

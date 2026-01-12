@@ -1,8 +1,8 @@
-# WeeWar Project Documentation
+# LilBattle Project Documentation
 
 ## Overview
 
-WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend, and WebAssembly for high-performance game logic. The project implements a local-first multiplayer architecture where game validation happens in WASM clients with server-side coordination for consensus.
+LilBattle is a turn-based strategy game built with Go backend, TypeScript frontend, and WebAssembly for high-performance game logic. The project implements a local-first multiplayer architecture where game validation happens in WASM clients with server-side coordination for consensus.
 
 ### Core Technologies
 - **Backend**: Go with protobuf for game logic and coordination
@@ -54,7 +54,7 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 
 **CLI Tools**: ✅ **PRODUCTION READY**
 - **ww**: Modern CLI with subcommands (status, units, options, move, attack, build, endturn)
-- **weewar-cli**: Headless REPL for game state manipulation
+- **lilbattle-cli**: Headless REPL for game state manipulation
 - Direction shortcuts, unit shortcuts, JSON output mode
 - Comprehensive diagnostics and debugging capabilities
 
@@ -82,7 +82,7 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 - Cleaner template organization with reduced duplication
 
 ### Feature Flags and Navigation System (2025-11-07)
-- Environment-based flags (WEEWAR_HIDE_GAMES, WEEWAR_HIDE_WORLDS) for UI visibility control
+- Environment-based flags (LILBATTLE_HIDE_GAMES, LILBATTLE_HIDE_WORLDS) for UI visibility control
 - Unified navigation tabs in floating drawer (Games | Worlds | Profile)
 - Consistent header pattern site-wide matching GameViewerPage architecture
 - Active tab highlighting with BasePage.ActiveTab field
@@ -256,7 +256,7 @@ WeeWar is a turn-based strategy game built with Go backend, TypeScript frontend,
 
 ### Check Unit Shortcuts
 ```bash
-jq '.world_data.units[] | {shortcut, q, r}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '.world_data.units[] | {shortcut, q, r}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 ### Check Unit Movement Points
@@ -267,12 +267,12 @@ jq '.world_data.units[] | {shortcut, distance_left, last_topped_up_turn}' state.
 
 ### View Recent Moves
 ```bash
-jq '.groups[-1]' ~/dev-app-data/weewar/storage/games/{gameId}/history.json
+jq '.groups[-1]' ~/dev-app-data/lilbattle/storage/games/{gameId}/history.json
 ```
 
 ### Check Game Status
 ```bash
-jq '{current_player, turn_counter, status}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '{current_player, turn_counter, status}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 ### List Units for Player
@@ -284,12 +284,12 @@ jq '.world_data.units[] | select(.player == 1) | {shortcut, q, r, moves: .distan
 
 ## Game Storage Structure
 
-**Games**: `~/dev-app-data/weewar/storage/games/{gameId}/`
+**Games**: `~/dev-app-data/lilbattle/storage/games/{gameId}/`
 - metadata.json: Game configuration (players, teams, settings, world_id)
 - state.json: Current game state (tiles, units, current_player, turn_counter)
 - history.json: Move history (groups of moves with results)
 
-**Worlds**: `~/dev-app-data/weewar/storage/worlds/{worldId}/`
+**Worlds**: `~/dev-app-data/lilbattle/storage/worlds/{worldId}/`
 - metadata.json: World metadata (name, description, creator)
 - world.json: Map data (tiles, starting units)
 
@@ -300,7 +300,7 @@ jq '.world_data.units[] | select(.player == 1) | {shortcut, q, r, moves: .distan
 ## CLI Command Reference
 
 ```bash
-export WEEWAR_GAME_ID=<gameId>  # Or use --game-id flag
+export LILBATTLE_GAME_ID=<gameId>  # Or use --game-id flag
 
 ww status                    # Show game state (players, coins, units, tiles)
 ww units                     # List all units
@@ -327,14 +327,14 @@ ww --json status            # Output as JSON
 ### Feature Flags (.env)
 ```bash
 # Hide games UI and navigation (APIs remain accessible)
-WEEWAR_HIDE_GAMES=true
+LILBATTLE_HIDE_GAMES=true
 
 # Hide worlds UI and navigation (APIs remain accessible)
-WEEWAR_HIDE_WORLDS=false
+LILBATTLE_HIDE_WORLDS=false
 ```
 
 ### Development (.env.dev)
 ```bash
-WEEWAR_BASE_URL=http://localhost:8080
+LILBATTLE_BASE_URL=http://localhost:8080
 ONEAUTH_JWT_SECRET_KEY=DevSecretKey123456789012345678901234567890
 ```

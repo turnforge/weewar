@@ -5,13 +5,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/alexedwards/scs/v2"
 	goal "github.com/panyam/goapplib"
 	goalservices "github.com/panyam/goapplib/services"
 	gotl "github.com/panyam/goutils/template"
 	oa "github.com/panyam/oneauth"
-	"github.com/turnforge/weewar/services"
+	tmplr "github.com/panyam/templar"
+	"github.com/turnforge/lilbattle/services"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -20,10 +22,10 @@ type BasePage struct {
 	goal.BasePage
 }
 
-// WeewarApp is the pure application context.
+// LilBattleApp is the pure application context.
 // It holds all app-specific state without knowing about goapplib.
-// Views access this via app.Context in goal.App[*WeewarApp].
-type WeewarApp struct {
+// Views access this via app.Context in goal.App[*LilBattleApp].
+type LilBattleApp struct {
 	// Auth
 	Auth           *oa.OneAuth
 	AuthMiddleware *oa.Middleware
@@ -45,30 +47,40 @@ type WeewarApp struct {
 	BaseUrl string
 }
 
-// NewWeewarApp creates a new WeewarApp and its associated goal.App.
-// Returns the WeewarApp and the goal.App wrapper.
-func NewWeewarApp(clientMgr *services.ClientMgr) (weewarApp *WeewarApp, goalApp *goal.App[*WeewarApp], err error) {
+// NewLilBattleApp creates a new LilBattleApp and its associated goal.App.
+// Returns the LilBattleApp and the goal.App wrapper.
+func NewLilBattleApp(clientMgr *services.ClientMgr) (lilbattleApp *LilBattleApp, goalApp *goal.App[*LilBattleApp], err error) {
 	session := scs.New()
 	authService, oneauth := setupAuthService(session)
 
-	// Create WeewarApp (pure app context)
-	weewarApp = &WeewarApp{
+	// Create LilBattleApp (pure app context)
+	lilbattleApp = &LilBattleApp{
 		Auth:           oneauth,
 		AuthMiddleware: &oneauth.Middleware,
 		AuthService:    authService,
 		Session:        session,
 		ClientMgr:      clientMgr,
-		HideGames:      os.Getenv("WEEWAR_HIDE_GAMES") == "true",
-		HideWorlds:     os.Getenv("WEEWAR_HIDE_WORLDS") == "true",
+		HideGames:      os.Getenv("LILBATTLE_HIDE_GAMES") == "true",
+		HideWorlds:     os.Getenv("LILBATTLE_HIDE_WORLDS") == "true",
 	}
 
-	// Setup templates with app-specific FuncMap additions
-	templates := goal.SetupTemplates(TEMPLATES_FOLDER)
+	// Setup templates with SourceLoader for @goapplib/ vendored dependencies
+	templates := tmplr.NewTemplateGroup()
+	configPath := filepath.Join(TEMPLATES_FOLDER, "templar.yaml")
+	sourceLoader, err := tmplr.NewSourceLoaderFromConfig(configPath)
+	if err != nil {
+		log.Printf("Warning: Could not load templar.yaml: %v. Falling back to basic loader.", err)
+		// Fall back to basic file system loader
+		templates.Loader = tmplr.NewFileSystemLoader(TEMPLATES_FOLDER)
+	} else {
+		templates.Loader = sourceLoader
+	}
+	templates.AddFuncs(goal.DefaultFuncMap())
 	// Add goutils template functions (Ago, etc.)
 	templates.AddFuncs(gotl.DefaultFuncMap())
 	templates.AddFuncs(template.FuncMap{
-		// Ctx provides access to the WeewarApp context in templates
-		"Ctx": func() *WeewarApp { return weewarApp },
+		// Ctx provides access to the LilBattleApp context in templates
+		"Ctx": func() *LilBattleApp { return lilbattleApp },
 		// Protobuf-aware ToJson (overrides the generic one from goapplib)
 		"ToJson": func(v any) template.JS {
 			if v == nil {
@@ -90,23 +102,23 @@ func NewWeewarApp(clientMgr *services.ClientMgr) (weewarApp *WeewarApp, goalApp 
 	})
 
 	// Create goal.App wrapper
-	goalApp = goal.NewApp(weewarApp, templates)
+	goalApp = goal.NewApp(lilbattleApp, templates)
 
 	// Initialize API
 	api := &ApiHandler{AuthMiddleware: &oneauth.Middleware, ClientMgr: clientMgr}
 	if err := api.Init(); err != nil {
 		return nil, nil, err
 	}
-	weewarApp.Api = api
+	lilbattleApp.Api = api
 
-	// Create ViewsRoot (now just a thin wrapper referencing weewarApp and goalApp)
-	weewarApp.ViewsRoot = NewRootViewsHandler(weewarApp, goalApp)
+	// Create ViewsRoot (now just a thin wrapper referencing lilbattleApp and goalApp)
+	lilbattleApp.ViewsRoot = NewRootViewsHandler(lilbattleApp, goalApp)
 
 	return
 }
 
 // Handler returns a configured HTTP handler with all routes.
-func (a *WeewarApp) Handler() http.Handler {
+func (a *LilBattleApp) Handler() http.Handler {
 	r := http.NewServeMux()
 
 	// Rate limiting middleware (from goapplib)

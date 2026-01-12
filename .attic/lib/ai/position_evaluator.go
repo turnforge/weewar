@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	v1 "github.com/panyam/turnengine/games/weewar/gen/go/weewar/v1"
+	v1 "github.com/panyam/turnengine/games/weewar/gen/go/lilbattle/v1"
 	weewar "github.com/panyam/turnengine/games/weewar/lib"
 )
 

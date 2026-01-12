@@ -1,4 +1,4 @@
-# WeeWar Architecture Overview
+# LilBattle Architecture Overview
 
 ## Current Architecture (Phaser-First v4.0 + ProcessMoves Integration v12.0)
 
@@ -25,7 +25,7 @@
 ```typescript
 abstract class GameViewerPageBase extends BasePage implements LCMComponent, GameViewerPageMethods {
     // Core game logic (all variants share this)
-    protected wasmBundle: WeewarBundle;
+    protected wasmBundle: LilBattleBundle;
     protected gameViewPresenterClient: GameViewPresenterClient;
     protected gameScene: PhaserGameScene;
     protected world: World;
@@ -374,8 +374,8 @@ type WorldEditor struct {
 **Discovery**: protoc-gen-go-wasmjs plugin generates clean service-based WASM bindings
 
 **Generated Files**:
-1. **`gen/wasm/weewar_v1_services.wasm.go`** - Service exports with dependency injection
-2. **`web/frontend/gen/wasm-clients/weewar_v1_servicesClient.client.ts`** - Type-safe TypeScript client
+1. **`gen/wasm/lilbattle_v1_services.wasm.go`** - Service exports with dependency injection
+2. **`web/frontend/gen/wasm-clients/lilbattle_v1_servicesClient.client.ts`** - Type-safe TypeScript client
 
 #### Consolidated Architecture (v5.0) - ProcessMoves Bidirectional Sync ✅
 **Major Breakthrough**: Unified ProcessMoves pattern with complete bidirectional sync between runtime game engine and protobuf data structures
@@ -396,7 +396,7 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
     rtGame, err := s.Self.GetRuntimeGame(req.GameId)
     
     // Process moves with rules engine (generates deltas only)
-    var dmp weewar.DefaultMoveProcessor
+    var dmp lilbattle.DefaultMoveProcessor
     results, err := dmp.ProcessMoves(rtGame, req.Moves)
     
     // Apply deltas to ALL data structures: runtime game, protobuf Game, GameState, GameMoveHistory
@@ -408,7 +408,7 @@ func (s *BaseGamesServiceImpl) ProcessMoves(ctx context.Context, req *v1.Process
 
 **2. ApplyChangeResults - Bidirectional Sync Implementation**
 ```go
-func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, rtGame *weewar.Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
+func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, rtGame *lilbattle.Game, game *v1.Game, state *v1.GameState, history *v1.GameMoveHistory) error {
     // Apply each change to both runtime game and protobuf data structures
     for _, moveResult := range changes {
         for _, change := range moveResult.Changes {
@@ -430,9 +430,9 @@ func (b *BaseGamesServiceImpl) ApplyChangeResults(changes []*v1.GameMoveResult, 
 **3. Individual Change Handlers - Transaction Safety**
 ```go
 // applyUnitMoved moves a unit in the runtime game
-func (b *BaseGamesServiceImpl) applyUnitMoved(change *v1.UnitMovedChange, rtGame *weewar.Game) error {
-    fromCoord := weewar.AxialCoord{Q: int(change.FromQ), R: int(change.FromR)}
-    toCoord := weewar.AxialCoord{Q: int(change.ToQ), R: int(change.ToR)}
+func (b *BaseGamesServiceImpl) applyUnitMoved(change *v1.UnitMovedChange, rtGame *lilbattle.Game) error {
+    fromCoord := lilbattle.AxialCoord{Q: int(change.FromQ), R: int(change.FromR)}
+    toCoord := lilbattle.AxialCoord{Q: int(change.ToQ), R: int(change.ToR)}
     
     // Move unit in runtime game
     unit := rtGame.World.UnitAt(fromCoord)
@@ -458,7 +458,7 @@ type WasmGamesServiceImpl struct {
     SingletonGameState *v1.GameState
     SingletonHistory   *v1.GameMoveHistory
     SingletonWorld     *v1.World
-    RuntimeGame        *weewar.Game // Cached runtime conversion
+    RuntimeGame        *lilbattle.Game // Cached runtime conversion
 }
 
 // Load method for dynamic data injection from browser
@@ -471,22 +471,22 @@ func (w *WasmGamesServiceImpl) Load(game *v1.Game, state *v1.GameState, history 
 }
 
 // GetRuntimeGame conversion from protobuf to runtime types
-func (w *WasmGamesServiceImpl) GetRuntimeGame(gameId string) (*weewar.Game, error) {
+func (w *WasmGamesServiceImpl) GetRuntimeGame(gameId string) (*lilbattle.Game, error) {
     if w.RuntimeGame == nil {
         // Create the runtime game from the protobuf data
-        world := weewar.NewWorld(w.SingletonWorld.Name)
+        world := lilbattle.NewWorld(w.SingletonWorld.Name)
         
         // Convert protobuf tiles to runtime tiles
         if w.SingletonGameState.WorldData != nil {
             for _, protoTile := range w.SingletonGameState.WorldData.Tiles {
-                coord := weewar.AxialCoord{Q: int(protoTile.Q), R: int(protoTile.R)}
+                coord := lilbattle.AxialCoord{Q: int(protoTile.Q), R: int(protoTile.R)}
                 world.SetTileType(coord, int(protoTile.TileType))
             }
             
             // Convert protobuf units to runtime units
             for _, protoUnit := range w.SingletonGameState.WorldData.Units {
-                coord := weewar.AxialCoord{Q: int(protoUnit.Q), R: int(protoUnit.R)}
-                unit := &weewar.Unit{
+                coord := lilbattle.AxialCoord{Q: int(protoUnit.Q), R: int(protoUnit.R)}
+                unit := &lilbattle.Unit{
                     UnitType:        int(protoUnit.UnitType),
                     Coord:          coord,
                     Player:         int(protoUnit.Player),
@@ -498,8 +498,8 @@ func (w *WasmGamesServiceImpl) GetRuntimeGame(gameId string) (*weewar.Game, erro
             }
         }
         
-        rulesEngine := &weewar.RulesEngine{}
-        game, err := weewar.NewGame(world, rulesEngine, 12345)
+        rulesEngine := &lilbattle.RulesEngine{}
+        game, err := lilbattle.NewGame(world, rulesEngine, 12345)
         w.RuntimeGame = game
         return game, err
     }
@@ -538,7 +538,7 @@ message GameMoveGroup {
 ```typescript
 // Simplified GameState component with ProcessMoves focus
 export class GameState extends BaseComponent {
-    private client: Weewar_v1_servicesClient | null = null;
+    private client: LilBattle_v1_servicesClient | null = null;
     
     // Core unified interface
     public async processMoves(moves: GameMove[]): Promise<GameMoveResult[]> {
@@ -594,7 +594,7 @@ func paintTerrain(this js.Value, args []js.Value) any {
 func paintTerrain(args []js.Value) (interface{}, error) {
     row := args[0].Int()
     col := args[1].Int()
-    coord := weewar.AxialCoord{Q: col, R: row}
+    coord := lilbattle.AxialCoord{Q: col, R: row}
     return nil, globalEditor.PaintTerrain(coord)
 }
 
@@ -608,13 +608,13 @@ js.Global().Set("editorPaintTerrain", createWrapper(2, 2, paintTerrain))
 ```go
 func main() {
     // Immediate initialization - no browser calls needed
-    globalWorld = &weewar.World{
-        Map:           weewar.NewMapWithBounds(0, 0, 0, 0),
-        UnitsByPlayer: make([][]*weewar.Unit, 2),
+    globalWorld = &lilbattle.World{
+        Map:           lilbattle.NewMapWithBounds(0, 0, 0, 0),
+        UnitsByPlayer: make([][]*lilbattle.Unit, 2),
         PlayerCount:   2,
     }
     
-    globalEditor = weewar.NewWorldEditor()
+    globalEditor = lilbattle.NewWorldEditor()
     globalEditor.NewWorld()
     
     globalAssetProvider = assets.NewEmbeddedAssetManager()
@@ -631,7 +631,7 @@ func main() {
 func paintTerrain(args []js.Value) (interface{}, error) {
     row := args[0].Int()
     col := args[1].Int()  
-    coord := weewar.AxialCoord{Q: col, R: row}
+    coord := lilbattle.AxialCoord{Q: col, R: row}
     return nil, globalEditor.PaintTerrain(coord)
 }
 
@@ -640,9 +640,9 @@ func pixelToCoords(args []js.Value) (interface{}, error) {
     y := args[1].Float()
     
     coord := globalWorld.Map.XYToQR(x, y, 
-        weewar.DefaultTileWidth, 
-        weewar.DefaultTileHeight, 
-        weewar.DefaultYIncrement)
+        lilbattle.DefaultTileWidth, 
+        lilbattle.DefaultTileHeight, 
+        lilbattle.DefaultYIncrement)
     
     return map[string]interface{}{
         "row":          coord.R,
@@ -730,7 +730,7 @@ type Layer interface {
 - **Editor**: `editor.go`
 
 #### Commands (`cmd/`)
-- **CLI**: `cmd/weewar-cli/` (proper separation)
+- **CLI**: `cmd/lilbattle-cli/` (proper separation)
 - **WASM**: `cmd/editor-wasm/` (clean, minimal)
 
 #### Backup Files
@@ -773,7 +773,7 @@ type Layer interface {
 - Clean separation from Game flow control
 
 #### ✅ File Organization
-- CLI components moved to cmd/weewar-cli/
+- CLI components moved to cmd/lilbattle-cli/
 - Clear separation between library and command implementations
 - Proper architectural boundaries maintained
 - Legacy implementations preserved as .bak files
@@ -1224,8 +1224,8 @@ export class MapEditorPage extends BasePage implements MapObserver {
 ### WASM Singleton Pattern Implementation ✅
 **LoadGameData JavaScript Function**: Direct data injection from frontend to WASM singletons
 ```go
-// cmd/weewar-wasm/main.go - Exposed to JavaScript
-js.Global().Get("weewar").Set("loadGameData", js.FuncOf(func(this js.Value, args []js.Value) any {
+// cmd/lilbattle-wasm/main.go - Exposed to JavaScript
+js.Global().Get("lilbattle").Set("loadGameData", js.FuncOf(func(this js.Value, args []js.Value) any {
     // Convert JavaScript Uint8Array to Go byte slices
     gameBytes := make([]byte, args[0].Get("length").Int())
     js.CopyBytesToGo(gameBytes, args[0])
@@ -1277,7 +1277,7 @@ export class GameState extends BaseComponent {
         const historyBytes = new TextEncoder().encode(historyElement.textContent);
         
         // Call WASM loadGameData function - populates singletons
-        const wasmResult = (window as any).weewar.loadGameData(gameBytes, gameStateBytes, historyBytes);
+        const wasmResult = (window as any).lilbattle.loadGameData(gameBytes, gameStateBytes, historyBytes);
         
         if (!wasmResult.success) {
             throw new Error(`WASM load failed: ${wasmResult.error}`);
@@ -1670,8 +1670,8 @@ func (re *RulesEngine) GetAttackOptions(world *World, unit *Unit) ([]AxialCoord,
 ```go
 // Fixed JSON deserialization in loadWorldFromStorageJSON
 for _, tileData := range storageData.Tiles {
-    coord := weewar.AxialCoord{Q: tileData.Q, R: tileData.R}
-    tile := weewar.NewTile(coord, tileData.TileType)
+    coord := lilbattle.AxialCoord{Q: tileData.Q, R: tileData.R}
+    tile := lilbattle.NewTile(coord, tileData.TileType)
     tile.Player = tileData.Player // CRITICAL FIX: Set the player ownership
     gameMap.AddTile(tile)
 }
@@ -1733,11 +1733,11 @@ func (g *Game) GetMovementCost(from, to AxialCoord) int
 func (g *Game) calculateDamage(attacker, defender *Unit) int
 ```
 
-#### Professional CLI Interface (cmd/weewar-cli/)
+#### Professional CLI Interface (cmd/lilbattle-cli/)
 **Purpose**: Complete command-line interface for gameplay and testing
 - **Game Commands**: move, attack, status, map, units, player, help, save, load
 - **Advanced Commands**: predict, attackoptions, moveoptions, autorender
-- **REPL Mode**: Interactive gameplay with dynamic prompts `weewar[T1:P0]>`
+- **REPL Mode**: Interactive gameplay with dynamic prompts `lilbattle[T1:P0]>`
 - **Batch Processing**: Execute commands from files for automated testing
 - **Session Recording**: Record and replay game sessions for analysis
 - **Multiple Display Modes**: compact, detailed, ASCII, JSON output formats
@@ -1753,7 +1753,7 @@ func (g *Game) calculateDamage(attacker, defender *Unit) int
 unit.DistanceLeft = 3 // TODO: Get from unit data
 baseDamage := 30      // TODO: Use attack matrices
 
-// Needed: Data-driven rules from weewar-data.json
+// Needed: Data-driven rules from lilbattle-data.json
 type RulesEngine struct {
     unitData map[int]UnitData
     terrainMovement map[string]map[string]float64
@@ -1774,12 +1774,12 @@ func (g *Game) RemovePlayer(playerID int) error
 
 **3. WASM Game Module**
 ```go
-// Current: cmd/weewar-wasm/main.go commented out
+// Current: cmd/lilbattle-wasm/main.go commented out
 // Needed: Active WASM APIs for web interface
-weewarCreateGameFromMap(mapData, playerCount)
-weewarSelectUnit(q, r) → validMoves, validAttacks
-weewarMoveUnit(fromQ, fromR, toQ, toR) → moveResult
-weewarAttackUnit(attackerQ, attackerR, defenderQ, defenderR) → combatResult
+lilbattleCreateGameFromMap(mapData, playerCount)
+lilbattleSelectUnit(q, r) → validMoves, validAttacks
+lilbattleMoveUnit(fromQ, fromR, toQ, toR) → moveResult
+lilbattleAttackUnit(attackerQ, attackerR, defenderQ, defenderR) → combatResult
 ```
 
 **4. Move Recording System**
@@ -1796,7 +1796,7 @@ type GameMove struct {
 ### v8.0 Game Mechanics Architecture Design
 
 #### Rules Engine Pattern
-**Design**: Pluggable rules system driven by weewar-data.json
+**Design**: Pluggable rules system driven by lilbattle-data.json
 ```go
 type RulesEngine struct {
     gameData *GameData
@@ -1824,19 +1824,19 @@ EventBus Notifications → Web UI Updates → Phaser Rendering
 **Design**: Multiplayer-first validation APIs for current player actions
 ```go
 // Game lifecycle management
-weewarCreateGameFromMap(mapData, playerCount) → gameId
-weewarGetGameState() → {currentPlayer, turn, units, status}
+lilbattleCreateGameFromMap(mapData, playerCount) → gameId
+lilbattleGetGameState() → {currentPlayer, turn, units, status}
 
 // Current player actions (validation-focused)
-weewarSelectUnit(q, r) → {unitInfo, validMoves, validAttacks}
-weewarMoveUnit(fromQ, fromR, toQ, toR) → {success, newPosition, movementLeft}
-weewarAttackUnit(attackerQ, attackerR, defenderQ, defenderR) → {damage, health, killed}
-weewarEndTurn() → {nextPlayer, turnNumber}
+lilbattleSelectUnit(q, r) → {unitInfo, validMoves, validAttacks}
+lilbattleMoveUnit(fromQ, fromR, toQ, toR) → {success, newPosition, movementLeft}
+lilbattleAttackUnit(attackerQ, attackerR, defenderQ, defenderR) → {damage, health, killed}
+lilbattleEndTurn() → {nextPlayer, turnNumber}
 
 // Query methods for UI updates
-weewarGetValidMoves(q, r) → [AxialCoord...]
-weewarGetValidAttacks(q, r) → [AxialCoord...]
-weewarGetUnitInfo(q, r) → {type, health, movement, canAct}
+lilbattleGetValidMoves(q, r) → [AxialCoord...]
+lilbattleGetValidAttacks(q, r) → [AxialCoord...]
+lilbattleGetUnitInfo(q, r) → {type, health, movement, canAct}
 ```
 
 #### Move Recording Architecture
@@ -1947,7 +1947,7 @@ export class GameState extends BaseComponent implements ComponentLifecycle {
 
 #### CLI-Driven Testing
 - **Recorded Sessions**: Complete games recorded via CLI for regression testing
-- **Rule Validation**: Compare with original WeeWar mechanics
+- **Rule Validation**: Compare with original LilBattle mechanics
 - **Performance Benchmarks**: Large maps with many units
 
 #### Integration Testing
@@ -1956,7 +1956,7 @@ export class GameState extends BaseComponent implements ComponentLifecycle {
 - **Cross-Platform**: Ensure CLI and web produce identical results
 
 #### Automated Testing
-- **Unit Tests**: Rules engine with weewar-data.json validation
+- **Unit Tests**: Rules engine with lilbattle-data.json validation
 - **Replay Tests**: Recorded sessions for regression detection
 - **Performance Tests**: Response time and memory usage validation
 

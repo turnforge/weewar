@@ -1,7 +1,7 @@
 settings:
   cycle_detection:
     enabled: false
-  project_id: "weewar"
+  project_id: "lilbattle"
   color_logs: true
   color_scheme: "dark"
   prefix_logs: true
@@ -18,7 +18,7 @@ rules:
           - "lib/**/*.go"
           - "services/**/*.go"
     commands:
-      - "echo '🔧 Running WeeWar Tests...'"
+      - "echo '🔧 Running LilBattle Tests...'"
       - "make test"
   - name: "backend"
     color: "blue"
@@ -40,7 +40,7 @@ rules:
           - "web/**/*"
           - "web"
     commands:
-      - "echo '🔧 Building and Serving WeeWar...'"
+      - "echo '🔧 Building and Serving LilBattle...'"
       - "make cli wasm servelocal"
 
   # Frontend Development & Testing

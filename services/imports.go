@@ -1,6 +1,6 @@
 package services
 
-import "github.com/turnforge/weewar/lib"
+import "github.com/turnforge/lilbattle/lib"
 
 type AxialCoord = lib.AxialCoord
 type Position = lib.Position

@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services/fsbe"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services/fsbe"
 )
 
 func CreateTestWorld(name string, nq, nr int, units []*v1.Unit) *lib.World {
@@ -80,7 +80,7 @@ func CreateTestUnit(q, r int, player, unitType int) *v1.Unit {
 	}
 }
 
-// LoadTestWorld loads a real world from the weewar data directory
+// LoadTestWorld loads a real world from the lilbattle data directory
 // This allows tests to use actual world data created in the editor
 func LoadTestWorld(worldId string) (*lib.World, error) {
 	// Default to user's dev-app-data directory
@@ -90,7 +90,7 @@ func LoadTestWorld(worldId string) (*lib.World, error) {
 	}
 
 	// Try both possible locations for world data
-	worldsDir := filepath.Join(homeDir, "dev-app-data", "weewar", "storage", "worlds")
+	worldsDir := filepath.Join(homeDir, "dev-app-data", "lilbattle", "storage", "worlds")
 	worldFile := filepath.Join(worldsDir, worldId, "world.json")
 	worldDataFile := filepath.Join(worldsDir, worldId, "worlddata.json")
 

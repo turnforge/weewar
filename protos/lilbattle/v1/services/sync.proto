@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "lilbattle/v1/models/sync.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services";
+
+// GameSyncService handles real-time synchronization of game state across
+// multiple connected clients. It enables multiplayer gameplay by:
+// 1. Broadcasting moves/changes to all subscribed viewers
+// 2. Validating moves submitted by clients (local-first model)
+// 3. Providing reconnection support via sequence numbers
+//
+// Architecture:
+// - Originator: Processes moves locally (optimistic) → publishes to server → verifies response
+// - Viewer: Subscribes to game → receives WorldChanges → applies via presenter
+//
+// RNG Security (Blinded Seed):
+// - Server has a game secret (never revealed to clients)
+// - For each action, seed = SHA256(secret || game_id || group || move_index)
+// - Client computes RNG locally for immediate feedback
+// - Client reports RNG values consumed in PublishMoves
+// - Server recomputes with blinded seed and verifies values match
+// - Prevents cherry-picking (can't predict outcomes before committing)
+// - Prevents re-rolling (seed is deterministic per action)
+service GameSyncService {
+  // Subscribe to game changes. Server streams GameUpdate messages to clients
+  // as other players make moves. Supports reconnection via from_sequence.
+  // NOTE: No HTTP annotation - Subscribe uses WebSocket via servicekit grpcws
+  // at /ws/v1/sync/games/{game_id}/subscribe
+  rpc Subscribe(SubscribeRequest) returns (stream GameUpdate);
+
+  // Broadcast sends a GameUpdate to all subscribers of a game.
+  // Called internally by GamesService after ProcessMoves succeeds.
+  // Not intended for direct client use.
+  rpc Broadcast(BroadcastRequest) returns (BroadcastResponse) {
+    option (google.api.http) = {
+      post: "/v1/sync/games/{game_id}/broadcast",
+      body: "*",
+    };
+  }
+}

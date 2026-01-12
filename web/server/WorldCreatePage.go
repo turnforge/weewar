@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 type WorldCreatePage struct {
@@ -19,7 +19,7 @@ type WorldCreatePage struct {
 	WorldName    string
 }
 
-func (p *WorldCreatePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *WorldCreatePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.Title = "Create World"
 	p.ActiveTab = "worlds"
 	p.Header.Load(r, w, app)

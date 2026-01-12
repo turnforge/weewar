@@ -1,0 +1,23 @@
+
+syntax = "proto3";
+
+package lilbattle.v1;
+
+// Import messages we want in the factory
+import "lilbattle/v1/models/models.proto";
+import "lilbattle/v1/models/indexer.proto";
+import "lilbattle/v1/models/world_service.proto";
+import "lilbattle/v1/models/games_service.proto";
+import "lilbattle/v1/models/presenter.proto";
+import "lilbattle/v1/models/gameviewerpage.proto";
+import "lilbattle/v1/models/jobs.proto";
+import "lilbattle/v1/models/themes.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1";
+
+// Import wasmjs annotations
+import "wasmjs/v1/annotations.proto";
+
+// Mark this file as a TypeScript factory definition
+option (wasmjs.v1.ts_factory) = true;
+

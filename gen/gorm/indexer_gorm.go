@@ -4,10 +4,10 @@ package gorm
 import (
 	"time"
 
-	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	models "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
-// IndexStateGORM is the GORM model for weewar.v1.IndexState
+// IndexStateGORM is the GORM model for lilbattle.v1.IndexState
 type IndexStateGORM struct {
 	EntityType     string `gorm:"index:idx_index_states_entity,priority:1"`
 	EntityId       string `gorm:"index:idx_index_states_entity,priority:2"`

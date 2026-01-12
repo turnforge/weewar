@@ -1,14 +1,14 @@
 {
-  "name": "weewar",
+  "name": "lilbattle",
   "version": "0.0.1",
   "author": "Sriram Panyam",
-  "description": "weewar web frontend",
-  "homepage": "https://github.com/turnforge/weewar#readme",
+  "description": "lilbattle web frontend",
+  "homepage": "https://github.com/turnforge/lilbattle#readme",
   "license": "ISC",
   "main": "./dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turnforge/weewar.git"
+    "url": "git+https://github.com/turnforge/lilbattle.git"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -28,18 +28,18 @@
     "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
   },
   "keywords": [
-    "weewar",
+    "lilbattle",
     "temlate apps"
   ],
   "bugs": {
-    "url": "https://github.com/turnforge/weewar/issues"
+    "url": "https://github.com/turnforge/lilbattle/issues"
   },
   "dependencies": {
-    "@panyam/tsappkit": "link:../../goapplib/tsappkit",
+    "@panyam/tsappkit": "link:~/newstack/goapplib/tsappkit",
     "@bufbuild/protobuf": "^2.6.2",
     "@excalidraw/excalidraw": "^0.17.6",
     "@panyam/tsutils": "*",
-    "@protoc-gen-go-wasmjs/runtime": "link:../../protoc-gen-go-wasmjs/runtime",
+    "@protoc-gen-go-wasmjs/runtime": "link:~/newstack/protoc-gen-go-wasmjs/runtime",
     "@toast-ui/editor": "^3.2.2",
     "@toast-ui/editor-plugin-code-syntax-highlight": "^3.1.0",
     "axios": "*",

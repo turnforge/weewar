@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/turnforge/weewar/cmd/cli/cmd"
+	"github.com/turnforge/lilbattle/cmd/cli/cmd"
 )
 
 func main() {

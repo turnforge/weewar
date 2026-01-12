@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 // Toolbar buttons on the editor page
@@ -243,7 +243,7 @@ func (v *WorldEditorPage) SetupDefaults() {
 	}
 }
 
-func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (v *WorldEditorPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	v.Header.Load(r, w, app)
 
 	// Read query parameters first (before SetupDefaults)

@@ -10,8 +10,8 @@ import (
 	goal "github.com/panyam/goapplib"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 type GameViewerPage struct {
@@ -33,13 +33,13 @@ type GameViewerPage struct {
 	WasmBundlePath string
 }
 
-func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.WasmExecJsPath = "/static/wasm/wasm_exec.js"
-	p.WasmBundlePath = "/static/wasm/weewar-cli.wasm"
+	p.WasmBundlePath = "/static/wasm/lilbattle-cli.wasm"
 	useTinyGo := getQueryOrDefaultStr(r.URL.Query(), "tinygo", "")
 	if useTinyGo == "true" { // true for TinyGo
 		p.WasmExecJsPath = "/static/wasm/wasm_exec_tiny.js"
-		p.WasmBundlePath = "/static/wasm/weewar-cli-tinygo.wasm"
+		p.WasmBundlePath = "/static/wasm/lilbattle-cli-tinygo.wasm"
 	}
 
 	p.GameId = r.PathValue("gameId") // gameId is actually worldId for now

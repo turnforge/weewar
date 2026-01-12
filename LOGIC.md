@@ -153,9 +153,9 @@ Key fixes during testing:
 ## Files Modified
 
 ### Proto Files
-- `protos/weewar/v1/models/models.proto` - Added Position message, updated action messages
-- `protos/weewar/v1/models/games_service.proto` - Updated GetOptionsAtRequest
-- `protos/weewar/v1/services/games.proto` - Updated HTTP bindings
+- `protos/lilbattle/v1/models/models.proto` - Added Position message, updated action messages
+- `protos/lilbattle/v1/models/games_service.proto` - Updated GetOptionsAtRequest
+- `protos/lilbattle/v1/services/games.proto` - Updated HTTP bindings
 
 ### Go Files
 - `lib/game.go` - Added FromPos, FromPosWithBase, Pos, NumPlayers, controller methods (Move, Attack, Build, Capture, EndTurn, GetOptionsAt)

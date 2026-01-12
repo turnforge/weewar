@@ -15,7 +15,7 @@ type SecurityHeadersMiddleware struct {
 // NewSecurityHeadersMiddleware creates a new security headers middleware.
 // Set isDevelopment=true to relax some policies for local development.
 func NewSecurityHeadersMiddleware() *SecurityHeadersMiddleware {
-	isDev := os.Getenv("WEEWAR_ENV") == "development" || os.Getenv("WEEWAR_ENV") == ""
+	isDev := os.Getenv("LILBATTLE_ENV") == "development" || os.Getenv("LILBATTLE_ENV") == ""
 	return &SecurityHeadersMiddleware{
 		IsDevelopment: isDev,
 	}

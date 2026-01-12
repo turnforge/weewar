@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/field_mask.proto";
+import "lilbattle/v1/models/models.proto";
+import "lilbattle/v1/models/games_service.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services";
+
+// GamesService manages the game examples catalog
+service GamesService {
+  /**
+   * Create a new game
+   */
+  rpc CreateGame(CreateGameRequest) returns (CreateGameResponse) {
+    option (google.api.http) = {
+      post: "/v1/games",
+      body: "*",
+    };
+  }
+
+  /**
+   * Batch get multiple games by ID
+   */
+  rpc GetGames(GetGamesRequest) returns (GetGamesResponse) { 
+    option (google.api.http) = {
+      get: "/v1/games:batchGet"
+    };
+  }
+
+  // ListGames returns all available games
+  rpc ListGames(ListGamesRequest) returns (ListGamesResponse) {
+    option (google.api.http) = {
+      get: "/v1/games"
+    };
+  }
+
+  // GetGame returns a specific game with metadata
+  rpc GetGame(GetGameRequest) returns (GetGameResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{id}"
+    };
+  }
+
+  /**
+   * Delete a particular game
+   */
+  rpc DeleteGame(DeleteGameRequest) returns (DeleteGameResponse) { 
+    option (google.api.http) = {
+      delete: "/v1/games/{id=*}"
+    };
+  }
+
+
+  // GetGame returns a specific game with metadata
+  rpc UpdateGame(UpdateGameRequest) returns (UpdateGameResponse) {
+    option (google.api.http) = {
+      patch: "/v1/games/{game_id=*}"
+      body: "*"
+    };
+  }
+
+  // Gets the latest game state
+  rpc GetGameState(GetGameStateRequest) returns (GetGameStateResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/state",
+    };
+  }
+
+  // List the moves for a game
+  rpc ListMoves(ListMovesRequest) returns (ListMovesResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/moves",
+    };
+  }
+
+  rpc ProcessMoves(ProcessMovesRequest) returns (ProcessMovesResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/{game_id}/moves",
+      body: "*",
+    };
+  }
+
+  rpc GetOptionsAt(GetOptionsAtRequest) returns (GetOptionsAtResponse) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}/options/{pos.q}/{pos.r}"
+      additional_bindings {
+        get: "/v1/games/{game_id}/options/{pos.label}"
+      }
+    };
+  }
+
+  /**
+   * Simulates combat between two units to generate damage distributions
+   * This is a stateless utility method that doesn't require game state
+   */
+  rpc SimulateAttack(SimulateAttackRequest) returns (SimulateAttackResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/simulate_attack",
+      body: "*",
+    };
+  }
+
+  /**
+   * Simulates fix (repair) action to generate health restoration distributions
+   * This is a stateless utility method that doesn't require game state
+   */
+  rpc SimulateFix(SimulateFixRequest) returns (SimulateFixResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/simulate_fix",
+      body: "*",
+    };
+  }
+}
+

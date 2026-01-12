@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 type GameDetailPage struct {
@@ -16,7 +16,7 @@ type GameDetailPage struct {
 	GameId string
 }
 
-func (p *GameDetailPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *GameDetailPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.GameId = r.PathValue("appItemId")
 	if p.GameId == "" {
 		http.Error(w, "Game ID is required", http.StatusBadRequest)

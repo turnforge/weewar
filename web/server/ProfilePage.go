@@ -12,7 +12,7 @@ import (
 
 // ProfilePage extends goapplib.SampleProfilePage with app-specific features.
 type ProfilePage struct {
-	goal.SampleProfilePage[*WeewarApp]
+	goal.SampleProfilePage[*LilBattleApp]
 	Header Header
 
 	// App-specific user information
@@ -23,7 +23,7 @@ type ProfilePage struct {
 	SuggestedNickname string // Random suggestion for nickname
 }
 
-func (p *ProfilePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *ProfilePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	// Handle POST requests for nickname updates
 	if r.Method == http.MethodPost {
 		return p.handlePost(r, w, app)
@@ -77,7 +77,7 @@ func (p *ProfilePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App
 }
 
 // handlePost handles POST requests for profile updates (e.g., nickname)
-func (p *ProfilePage) handlePost(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *ProfilePage) handlePost(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	ctx := app.Context
 	userID := ctx.AuthMiddleware.GetLoggedInUserId(r)
 

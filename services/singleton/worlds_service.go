@@ -1,9 +1,9 @@
 package singleton
 
 import (
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services"
 	pj "google.golang.org/protobuf/encoding/protojson"
 )
 

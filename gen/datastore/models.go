@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
-	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	models "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // IndexInfoDatastore is the Datastore entity for the source message.
@@ -319,17 +319,17 @@ type PlayerStateDatastore struct {
 type GameMoveDatastore struct {
 	Key *datastore.Key `datastore:"-"`
 
-	Player int32 `datastore:"player"`
-
 	GameId string `datastore:"game_id"`
+
+	Player int32 `datastore:"player"`
 
 	GroupNumber int64 `datastore:"group_number"`
 
 	MoveNumber int64 `datastore:"move_number"`
 
-	MoveType []byte `datastore:"move_type,noindex"`
-
 	Timestamp time.Time `datastore:"timestamp"`
+
+	MoveType []byte `datastore:"move_type,noindex"`
 
 	SequenceNum int64 `datastore:"sequence_num"`
 

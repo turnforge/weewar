@@ -1,4 +1,4 @@
-module github.com/turnforge/weewar
+module github.com/turnforge/lilbattle
 
 go 1.24.6
 
@@ -22,7 +22,7 @@ require (
 	github.com/panyam/protoc-gen-dal v0.0.10
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
 	github.com/panyam/servicekit v0.0.4
-	github.com/panyam/templar v0.0.27
+	github.com/panyam/templar v0.0.28
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.13.0
@@ -108,7 +108,7 @@ require (
 
 // replace github.com/panyam/goutils v0.1.12 => ./locallinks/goutils
 
-// replace github.com/panyam/templar v0.0.27 => ./locallinks/templar
+replace github.com/panyam/templar v0.0.28 => ./locallinks/templar
 
 // replace github.com/panyam/servicekit v0.0.4 => ./locallinks/servicekit
 

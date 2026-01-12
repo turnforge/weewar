@@ -1,10 +1,10 @@
-<!-- weewar/web/templates/Header.html -->
+<!-- lilbattle/web/templates/Header.html -->
 <!--
-This template extends goapplib's Header with weewar-specific navigation tabs.
+This template extends goapplib's Header with lilbattle-specific navigation tabs.
 Uses templar's extend to override NavigationTabs while keeping
 all other header functionality from goapplib.
 
-NOTE: This file is included by weewar/BasePage.html after it namespaces
+NOTE: This file is included by lilbattle/BasePage.html after it namespaces
 goapplib/BasePage.html as "GoalBase". Therefore, we extend the namespaced
 templates: GoalBase:HeaderActionsDrawer, GoalBase:NavigationTabs.
 
@@ -15,10 +15,10 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
 - ExtraHeaderButtons: Additional buttons (overridable by pages)
 -->
 
-{{# extend "GoalBase:HeaderActionsDrawer" "HeaderActionsDrawer" "GoalBase:NavigationTabs" "WeewarNavigationTabs" "GoalBase:HeaderActions" "WeewarHeaderActions" #}}
+{{# extend "GoalBase:HeaderActionsDrawer" "HeaderActionsDrawer" "GoalBase:NavigationTabs" "LilBattleNavigationTabs" "GoalBase:HeaderActions" "LilBattleHeaderActions" #}}
 
-<!-- Weewar-specific header actions - uses DisplayName for logged in users -->
-{{ define "WeewarHeaderActions" }}
+<!-- LilBattle-specific header actions - uses DisplayName for logged in users -->
+{{ define "LilBattleHeaderActions" }}
 {{ if .Header.IsLoggedIn }}
 <a href="/profile" class="hidden md:flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,8 +41,8 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
 {{ end }}
 {{ end }}
 
-<!-- Weewar-specific navigation tabs -->
-{{ define "WeewarNavigationTabs" }}
+<!-- LilBattle-specific navigation tabs -->
+{{ define "LilBattleNavigationTabs" }}
 <nav class="navigation-tabs-container md:mr-auto">
     {{ if not (Ctx).HideGames }}
     <a href="/games/" class="navigation-tab {{ if eq .ActiveTab "games" }}active{{ end }}">
@@ -57,7 +57,7 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
 </nav>
 {{ end }}
 
-<!-- Weewar Header Actions Drawer - Mobile view with DisplayName -->
+<!-- LilBattle Header Actions Drawer - Mobile view with DisplayName -->
 {{ define "HeaderActionsDrawer" }}
 <div id="header-actions-drawer" class="print:hidden fixed z-[60] hidden">
     <!-- Backdrop (mobile only) -->

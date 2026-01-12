@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/web/assets/themes"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/web/assets/themes"
 )
 
 // handleWorldScreenshotLive dynamically renders a world screenshot using the specified theme
@@ -25,7 +25,7 @@ func (r *RootViewsHandler) handleWorldScreenshotLive(w http.ResponseWriter, req 
 	}
 
 	// Get world data from service
-	client := r.WeewarApp.ClientMgr.GetWorldsSvcClient()
+	client := r.LilBattleApp.ClientMgr.GetWorldsSvcClient()
 	resp, err := client.GetWorld(context.Background(), &protos.GetWorldRequest{Id: worldId})
 	if err != nil {
 		log.Printf("Failed to get world %s: %v", worldId, err)
@@ -57,7 +57,7 @@ func (r *RootViewsHandler) handleGameScreenshotLive(w http.ResponseWriter, req *
 	}
 
 	// Get game data from service
-	client := r.WeewarApp.ClientMgr.GetGamesSvcClient()
+	client := r.LilBattleApp.ClientMgr.GetGamesSvcClient()
 	resp, err := client.GetGame(context.Background(), &protos.GetGameRequest{Id: gameId})
 	if err != nil {
 		log.Printf("Failed to get game %s: %v", gameId, err)

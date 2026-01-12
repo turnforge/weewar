@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	goal "github.com/panyam/goapplib"
-	"github.com/turnforge/weewar/lib"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 type AttackSimulatorPage struct {
@@ -29,7 +29,7 @@ type AttackSimulatorPage struct {
 	Theme       string
 }
 
-func (p *AttackSimulatorPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *AttackSimulatorPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.DisableSplashScreen = true
 	p.Title = "Attack Simulator"
 	p.Header.Load(r, w, app)

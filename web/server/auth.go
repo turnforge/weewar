@@ -14,12 +14,12 @@ import (
 
 func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth) {
 	// Initialize authentication
-	storagePath := os.Getenv("WEEWAR_USER_STORAGE_PATH")
+	storagePath := os.Getenv("LILBATTLE_USER_STORAGE_PATH")
 	if storagePath == "" {
-		storagePath = filepath.Join(os.Getenv("HOME"), "dev-app-data", "weewar", "storage")
+		storagePath = filepath.Join(os.Getenv("HOME"), "dev-app-data", "lilbattle", "storage")
 	}
 	authService := goalservices.NewAuthService(storagePath)
-	oneauth := oa.New("weewar")
+	oneauth := oa.New("lilbattle")
 	oneauth.Session = session
 	oneauth.Middleware.SessionGetter = func(r *http.Request, key string) any {
 		return session.GetString(r.Context(), key)
@@ -30,7 +30,7 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 	oneauth.AddAuth("/github", oa2.NewGithubOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
 	oneauth.AddAuth("/twitter", NewTwitterOAuth2("", "", "", oneauth.SaveUserAndRedirect).Handler())
 	// Get base URL for verification/reset links
-	baseURL := os.Getenv("WEEWAR_BASE_URL")
+	baseURL := os.Getenv("LILBATTLE_BASE_URL")
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
 	}

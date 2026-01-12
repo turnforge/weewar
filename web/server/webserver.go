@@ -4,7 +4,7 @@ import (
 	"context"
 
 	goal "github.com/panyam/goapplib"
-	"github.com/turnforge/weewar/services"
+	"github.com/turnforge/lilbattle/services"
 )
 
 type WebAppServer struct {
@@ -13,8 +13,8 @@ type WebAppServer struct {
 
 func (s *WebAppServer) Start(ctx context.Context, srvErr chan error, stopChan chan bool) error {
 	cm := services.NewClientMgr(s.GrpcAddress)
-	weewarApp, _, _ := NewWeewarApp(cm)
-	return s.StartWithHandler(ctx, weewarApp.Handler(), srvErr, stopChan)
+	lilbattleApp, _, _ := NewLilBattleApp(cm)
+	return s.StartWithHandler(ctx, lilbattleApp.Handler(), srvErr, stopChan)
 }
 
 type IndexerAppServer struct {

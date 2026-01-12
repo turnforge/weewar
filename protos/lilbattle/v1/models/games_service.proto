@@ -1,0 +1,328 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/field_mask.proto";
+import "lilbattle/v1/models/models.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models";
+
+// Request messages
+message ListGamesRequest {
+  // Pagination info
+  Pagination pagination = 1;
+
+  // May be filter by owner id
+  string owner_id = 2;
+}
+
+message ListGamesResponse {
+  repeated Game items = 1;
+
+  PaginationResponse pagination = 2;
+}
+
+message GetGameRequest {
+  string id = 1;
+  string version = 2; // Optional, defaults to default_version
+}
+
+message GetGameResponse {
+  Game game = 1;
+  GameState state = 2;
+  GameMoveHistory history = 3;
+}
+
+message GetGameContentRequest {
+  string id = 1;
+  string version = 2; // Optional, defaults to default_version
+}
+
+message GetGameContentResponse {
+  string lilbattle_content = 1;
+  string recipe_content = 2;
+  string readme_content = 3;
+}
+
+message UpdateGameRequest {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "UpdateGameRequest"
+    }
+  };
+
+  // Game id to modify
+  string game_id = 1;
+
+  /**
+   * Game being updated
+   */
+  Game new_game = 2;
+
+  // New world state to save
+  GameState new_state = 3;
+
+  // History to save
+  GameMoveHistory new_history = 4;
+
+  /**
+   * Mask of fields being updated in this Game to make partial changes.
+   */
+  google.protobuf.FieldMask update_mask = 5;
+}
+
+/**
+ * The request for (partially) updating an Game.
+ */
+message UpdateGameResponse {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "UpdateGameResponse"
+    }
+  };
+
+  /**
+   * Game being updated
+   */
+  Game game = 1;
+}
+
+/**
+ * Request to delete an game.
+ */
+message DeleteGameRequest {
+  /**
+   * ID of the game to be deleted.
+   */
+  string id = 1;
+}
+
+/**
+ * Game deletion response
+ */
+message DeleteGameResponse {
+}
+
+/**
+ * Request to batch get games
+ */
+message GetGamesRequest {
+  /**
+   * IDs of the game to be fetched
+   */
+  repeated string ids = 1;
+}
+
+/**
+ * Game batch-get response
+ */
+message GetGamesResponse {
+  map<string, Game> games = 1;
+}
+
+/**
+ * Game creation request object
+ */
+message CreateGameRequest {
+  /**
+   * Game being updated
+   */
+  Game game = 1;
+}
+
+/**
+ * Response of an game creation.
+ */
+message CreateGameResponse {
+  /**
+   * Game being created
+   */
+  Game game = 1;
+
+  // The starting game state
+  GameState game_state = 2;
+
+  /**
+   * Error specific to a field if there are any errors.
+   */
+  map<string, string> field_errors = 3;
+}
+
+/**
+ * Request to add moves to a game
+ * The model is that a game in each "tick" can handle multiple moves (by possibly various players).
+ * It is upto the move manager/processor in the game to ensure the "transaction" of moves is handled
+ * atomically.
+ *
+ * For example we may have 3 moves where first two units are moved to a common location
+ * and then they attack another unit.  Here If we treat it as a single unit attacking it
+ * will have different outcomes than a "combined" attack.
+ */
+message ProcessMovesRequest {
+  /**
+   * Game ID to add moves to
+   */
+  string game_id = 1;
+
+  /**
+   * List of moves to add
+   */
+  repeated GameMove moves = 2;
+
+  /**
+   * The player can submit a list of "Expected" changes when in local-first mode
+   * If this is list provided the server will validate it - either via the coordinator
+   * or by itself.  If it is not provided then the server will validate it and return
+   * the changes.
+   */
+  ProcessMovesResponse expected_response = 3;
+
+  // Whether to only perform a dryrun and return results instead of comitting it
+  bool dry_run = 4;
+}
+
+/**
+ * Response after adding moves to game.
+ */
+message ProcessMovesResponse {
+  /**
+   * Returns the moves that were passed in along wth changes and other data filled in.
+   */
+  repeated GameMove moves = 3;
+}
+
+/**
+ * Request to get the game's latest state
+ */
+message GetGameStateRequest {
+  /**
+   * Game ID to add moves to
+   */
+  string game_id = 1;
+}
+
+/**
+ * Response holding latest game state
+ */
+message GetGameStateResponse {
+  GameState state = 1;
+}
+
+/**
+ * Request to list moves for a game
+ */
+message ListMovesRequest {
+  /**
+   * Game ID to add moves to
+   */
+  string game_id = 1;
+
+  // Gets moves >= from_group
+  int64 from_group = 2;
+
+  // Gets moves <= to_group
+  int64 to_group = 3;
+}
+
+/**
+ * Response after adding moves to game.
+ */
+message ListMovesResponse {
+  // Whether there are more moves before this
+  bool has_more = 1;
+
+  repeated GameMoveGroup move_groups = 2;
+}
+
+// =============================================================================
+// UI Interaction Methods - Request/Response messages
+// =============================================================================
+
+/**
+ * Request to get all available options at a position
+ */
+message GetOptionsAtRequest {
+  string game_id = 1;
+  Position pos = 2;
+}
+
+/**
+ * Response with all available options at a position
+ */
+message GetOptionsAtResponse {
+  repeated GameOption options = 1;
+  int32 current_player = 2; // debug: current player in game
+  bool game_initialized = 3; // debug: whether game is properly initialized
+
+  // A Path from source to dest along with cost on each tile for tracking
+  AllPaths all_paths = 5;
+}
+
+/**
+ * A single game option available at a position
+ */
+message GameOption {
+  oneof option_type {
+    MoveUnitAction move = 1;
+    AttackUnitAction attack = 2;
+    BuildUnitAction build = 3;
+    CaptureBuildingAction capture = 4;
+    EndTurnAction end_turn = 5;
+    HealUnitAction heal = 6;
+  }
+}
+
+/**
+ * Request for simulating combat between two units
+ */
+message SimulateAttackRequest {
+  int32 attacker_unit_type = 1;
+  int32 attacker_terrain = 2;
+  int32 attacker_health = 3;
+  int32 defender_unit_type = 4;
+  int32 defender_terrain = 5;
+  int32 defender_health = 6;
+  int32 wound_bonus = 7;
+  int32 num_simulations = 8; // Default: 1000
+}
+
+/**
+ * Response containing damage distribution statistics
+ */
+message SimulateAttackResponse {
+  // Damage distributions: damage_value -> number_of_occurrences
+  map<int32, int32> attacker_damage_distribution = 1;
+  map<int32, int32> defender_damage_distribution = 2;
+
+  // Statistical summary
+  double attacker_mean_damage = 3;
+  double defender_mean_damage = 4;
+  double attacker_kill_probability = 5;
+  double defender_kill_probability = 6;
+}
+
+/**
+ * Request for simulating fix (repair) between two units
+ */
+message SimulateFixRequest {
+  int32 fixing_unit_type = 1;    // Unit type performing the fix
+  int32 fixing_unit_health = 2;  // Health of the fixing unit (Hf)
+  int32 injured_unit_type = 3;   // Unit type being repaired (for display)
+  int32 num_simulations = 4;     // Default: 1000
+}
+
+/**
+ * Response containing health restoration distribution statistics
+ */
+message SimulateFixResponse {
+  // Health restoration distribution: health_restored -> number_of_occurrences
+  map<int32, int32> healing_distribution = 1;
+
+  // Statistical summary
+  double mean_healing = 2;
+
+  // The fix value (F) of the fixing unit type
+  int32 fix_value = 3;
+}

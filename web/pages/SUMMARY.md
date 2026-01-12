@@ -228,7 +228,7 @@ func (s *GameViewPresenter) renderCompactSummaryCard(tile, unit) string {
 // services/gameview_presenter.go - Clean interface call
 s.CompactSummaryCardPanel.SetCurrentData(ctx, tile, unit)
 
-// cmd/weewar-wasm/browser.go - Template rendering
+// cmd/lilbattle-wasm/browser.go - Template rendering
 content := renderPanelTemplate(ctx, "CompactSummaryCard.templar.html", map[string]any{
     "Tile":  tile,
     "Unit":  unit,
@@ -244,7 +244,7 @@ content := renderPanelTemplate(ctx, "CompactSummaryCard.templar.html", map[strin
 2. **Base Implementation** (services/panels.go):
    - `BaseCompactSummaryCardPanel` for CLI/non-browser (stores data only)
 
-3. **Browser Implementation** (cmd/weewar-wasm/browser.go):
+3. **Browser Implementation** (cmd/lilbattle-wasm/browser.go):
    - `BrowserCompactSummaryCardPanel` renders template and calls RPC
 
 4. **Template File** (web/templates/CompactSummaryCard.templar.html):
@@ -371,7 +371,7 @@ Complete redesign of the crossing system to use explicit connectivity instead of
 - Placing a crossing uses the preset `connectsTo` configuration from ToolsPanel
 
 **Files Changed:**
-- `protos/weewar/v1/game.proto`: Changed `Crossing` from enum to message with connectsTo array
+- `protos/lilbattle/v1/game.proto`: Changed `Crossing` from enum to message with connectsTo array
 - `common/hexUtils.ts`: Added `getOppositeDirection()` helper
 - `common/World.ts`: Added `deleteCrossing()` method, updated crossing APIs
 - `common/CrossingLayer.ts`: Render connections based on explicit `connectsTo` array

@@ -43,6 +43,13 @@ type LilBattleApp struct {
 	HideGames  bool
 	HideWorlds bool
 
+	// Ad config - all default to enabled, can be disabled per-placement
+	AdsEnabled        bool   // Master switch: WEEWAR_ADS_ENABLED (default: true)
+	AdsFooterEnabled  bool   // Footer banner: WEEWAR_ADS_FOOTER (default: true)
+	AdsHomeEnabled    bool   // Homepage mid-section: WEEWAR_ADS_HOME (default: true)
+	AdsListingEnabled bool   // Listing pages: WEEWAR_ADS_LISTING (default: true)
+	AdNetworkId       string // Google AdSense publisher ID: WEEWAR_AD_NETWORK_ID
+
 	mux     *http.ServeMux
 	BaseUrl string
 }
@@ -62,6 +69,12 @@ func NewLilBattleApp(clientMgr *services.ClientMgr) (lilbattleApp *LilBattleApp,
 		ClientMgr:      clientMgr,
 		HideGames:      os.Getenv("LILBATTLE_HIDE_GAMES") == "true",
 		HideWorlds:     os.Getenv("LILBATTLE_HIDE_WORLDS") == "true",
+		// Ads default to enabled, can be disabled per-placement
+		AdsEnabled:        os.Getenv("LILBATTLE_ADS_ENABLED") != "false",
+		AdsFooterEnabled:  os.Getenv("LILBATTLE_ADS_FOOTER") != "false",
+		AdsHomeEnabled:    os.Getenv("LILBATTLE_ADS_HOME") != "false",
+		AdsListingEnabled: os.Getenv("LILBATTLE_ADS_LISTING") != "false",
+		AdNetworkId:       os.Getenv("LILBATTLE_AD_NETWORK_ID"),
 	}
 
 	// Setup templates with SourceLoader for @goapplib/ vendored dependencies

@@ -388,3 +388,51 @@ LilBattle is **READY for public launch**. All critical security and legal blocke
 4. 🟡 Browser-based game tutorial
 
 The core game mechanics are production-ready and well-tested. All critical security, legal, and infrastructure requirements have been met. The remaining items (tutorials, AI integration, API docs) can be addressed incrementally post-launch based on user feedback.
+
+---
+
+## 6. Monetization Strategy
+
+**Reference Document**: See [MONETIZATION.md](./MONETIZATION.md) for full strategy.
+
+### Summary
+
+WeeWar will launch with ad-based monetization before implementing subscriptions. The turn-based nature of the game provides natural pause points for non-intrusive ad placement.
+
+### Competitive Position
+
+| Competitor | Model | WeeWar Opportunity |
+|------------|-------|-------------------|
+| Board Game Arena | Subscription ($5/mo) | Free + ads alternative |
+| BoardGameGeek | Heavy ads, no gameplay | Actual playable games |
+| Tabletopia | Freemium tiers | Simpler, cleaner UX |
+
+### Phased Implementation
+
+| Phase | Scope | Status |
+|-------|-------|--------|
+| Phase 1 | Footer banners, homepage ads | 🟡 Ready to implement |
+| Phase 2 | Game end screen, turn transitions | 📋 Planned |
+| Phase 3 | Rewarded video ads | 📋 Planned |
+| Phase 4 | Premium ad-free tier | 📋 Planned |
+
+### Launch Checklist (Phase 1)
+
+- [ ] Create `AdSlot` component with size variants
+- [ ] Add footer ad container
+- [ ] Add homepage mid-section ad
+- [ ] Set up Google AdSense account
+- [ ] Update CSP headers for ad domains
+- [ ] Test dark mode compatibility
+- [ ] Test mobile responsiveness
+
+### Revenue Projections
+
+| DAU | Monthly Ad Revenue | With 2% Premium |
+|-----|-------------------|-----------------|
+| 1,000 | ~$420 | ~$520 |
+| 10,000 | ~$6,600 | ~$7,600 |
+
+### Recommendation
+
+Launch with **Phase 1 only** (footer + homepage ads). Measure user impact for 2-4 weeks before expanding. This minimizes risk while establishing baseline revenue.

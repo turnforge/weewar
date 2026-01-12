@@ -42,25 +42,35 @@ func (m *SecurityHeadersMiddleware) Wrap(next http.Handler) http.Handler {
 		// Content-Security-Policy: Controls which resources can be loaded
 		// In development, we allow unsafe-inline for easier debugging
 		// In production, we use stricter policies
+		//
+		// Google AdSense domains:
+		// - pagead2.googlesyndication.com: Ad serving scripts
+		// - www.googletagservices.com: Tag management
+		// - adservice.google.com: Ad service
+		// - googleads.g.doubleclick.net: Ad delivery iframes
+		// - tpc.googlesyndication.com: Syndication iframes
+		// - www.google.com: Various Google services
 		if m.IsDevelopment {
 			// Development: Allow inline scripts/styles for hot reloading
 			w.Header().Set("Content-Security-Policy",
 				"default-src 'self'; "+
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; "+
+					"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com; "+
 					"style-src 'self' 'unsafe-inline'; "+
-					"img-src 'self' data: blob:; "+
+					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com; "+
 					"font-src 'self'; "+
-					"connect-src 'self' ws: wss:; "+
+					"connect-src 'self' ws: wss: https://pagead2.googlesyndication.com; "+
+					"frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; "+
 					"frame-ancestors 'none'")
 		} else {
 			// Production: Stricter CSP
 			w.Header().Set("Content-Security-Policy",
 				"default-src 'self'; "+
-					"script-src 'self' https://unpkg.com; "+
+					"script-src 'self' https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com; "+
 					"style-src 'self' 'unsafe-inline'; "+ // inline styles needed for Tailwind
-					"img-src 'self' data: blob:; "+
+					"img-src 'self' data: blob: https://pagead2.googlesyndication.com https://www.google.com; "+
 					"font-src 'self'; "+
-					"connect-src 'self' wss:; "+
+					"connect-src 'self' wss: https://pagead2.googlesyndication.com; "+
+					"frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; "+
 					"frame-ancestors 'none'")
 		}
 

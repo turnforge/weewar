@@ -1,6 +1,7 @@
 <!-- lilbattle/web/templates/BasePage.html -->
 {{# namespace "GoalBase" "@goapplib/BasePage.html" #}}
 {{# include "./Header.html" #}}
+{{# include "./components/AdScript.html" #}}
 
 {{ define "LilBattleExtraHeadSection" }}
     <!-- Favicons -->
@@ -10,6 +11,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon.png">
     <link rel="manifest" href="/static/favicons/site.webmanifest">
+    <!-- Ad Network Script (only loads when ads enabled and network ID configured) -->
+    {{ template "AdScript" }}
     <meta name="google-adsense-account" content="ca-pub-2973452493146773">
 {{ end }}
 

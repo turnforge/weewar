@@ -632,9 +632,9 @@ const response = await client.gamesService.createGame(request);
 - **User Experience**: Faster, more intuitive CLI with hex neighbor shortcuts
 - **Clean Architecture**: Presenter drives all UI updates through well-defined methods
 
-**Last Updated**: 2025-01-09
-**Current Focus**: Google App Engine deployment and production readiness
-**Recent Milestone**: GAE deployment configuration complete
+**Last Updated**: 2026-01-12
+**Current Focus**: Monetization strategy and ad integration
+**Recent Milestone**: Monetization strategy document complete
 
 **Recent Achievements**:
 - Google App Engine deployment configuration (app.yaml, .gcloudignore)
@@ -675,3 +675,39 @@ const response = await client.gamesService.createGame(request);
   - Cross-entity transactions for game move atomicity
   - Backend selection via env vars: `WORLDS_SERVICE_BE=gae`, `GAMES_SERVICE_BE=gae`
 - [x] **Local Backend Deployment**: File-based storage for development/testing
+
+## ✅ Phase 15: Monetization (In Progress)
+**Status**: Phase 1 Complete
+**Timeline**: January 2026+
+
+### Monetization Strategy ✅
+- [x] **Competitive Analysis**: Analyzed BGA, Tabletopia, BGG, Yucata models
+- [x] **Strategy Document**: Created MONETIZATION.md with phased approach
+- [x] **Revenue Projections**: Estimated $420-$6,600/month based on DAU
+- [x] **Technical Requirements**: Identified CSP, component, and integration needs
+
+### Phase 1: Foundation Ads ✅
+- [x] **Feature Flags**: WEEWAR_ADS_ENABLED, WEEWAR_ADS_FOOTER, WEEWAR_ADS_HOME, WEEWAR_ADS_LISTING, WEEWAR_AD_NETWORK_ID
+- [x] **AdSlot Component**: Reusable ad container with size variants (leaderboard, mrec, skyscraper, mobile-banner)
+- [x] **AdScript Component**: AdSense script loader in BasePage head
+- [x] **Footer Banner Ads**: 728x90 leaderboard (desktop), 320x50 banner (mobile)
+- [x] **Homepage Mid-Section Ad**: 300x250 between quick actions and recent activity
+- [x] **CSS Styles**: Responsive ad containers with dark mode and placeholder support
+- [x] **CSP Updates**: Added Google AdSense domains to Content-Security-Policy
+- [ ] **Listing Page Native Ads**: Styled like game/world cards (requires EntityListing changes)
+- [ ] **Google AdSense Account Setup**: Account creation and publisher ID configuration
+
+### Phase 2: Game Integration (Post-Launch)
+- [ ] **Game End Screen**: Victory/defeat modal with interstitial ad
+- [ ] **Turn Transition Ads**: Brief interstitial every 3-5 turns
+- [ ] **Right Panel Ads**: Desktop sidebar placement
+
+### Phase 3: Rewarded Ads (Future)
+- [ ] **Bonus Coins**: Watch ad for +100 coins
+- [ ] **Undo Move**: Watch ad to undo last action
+- [ ] **Rewarded Video SDK**: IronSource or Unity Ads integration
+
+### Phase 4: Premium Tier (Future)
+- [ ] **Ad-Free Subscription**: $3-5/month to remove ads
+- [ ] **Stripe Integration**: Payment processing
+- [ ] **Premium Status**: User model and UI badges

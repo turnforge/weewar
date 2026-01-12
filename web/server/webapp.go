@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/alexedwards/scs/v2"
 	goal "github.com/panyam/goapplib"
 	goalservices "github.com/panyam/goapplib/services"
 	gotl "github.com/panyam/goutils/template"
 	oa "github.com/panyam/oneauth"
+	tmplr "github.com/panyam/templar"
 	"github.com/turnforge/lilbattle/services"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -62,8 +64,18 @@ func NewLilBattleApp(clientMgr *services.ClientMgr) (lilbattleApp *LilBattleApp,
 		HideWorlds:     os.Getenv("LILBATTLE_HIDE_WORLDS") == "true",
 	}
 
-	// Setup templates with app-specific FuncMap additions
-	templates := goal.SetupTemplates(TEMPLATES_FOLDER)
+	// Setup templates with SourceLoader for @goapplib/ vendored dependencies
+	templates := tmplr.NewTemplateGroup()
+	configPath := filepath.Join(TEMPLATES_FOLDER, "templar.yaml")
+	sourceLoader, err := tmplr.NewSourceLoaderFromConfig(configPath)
+	if err != nil {
+		log.Printf("Warning: Could not load templar.yaml: %v. Falling back to basic loader.", err)
+		// Fall back to basic file system loader
+		templates.Loader = tmplr.NewFileSystemLoader(TEMPLATES_FOLDER)
+	} else {
+		templates.Loader = sourceLoader
+	}
+	templates.AddFuncs(goal.DefaultFuncMap())
 	// Add goutils template functions (Ago, etc.)
 	templates.AddFuncs(gotl.DefaultFuncMap())
 	templates.AddFuncs(template.FuncMap{

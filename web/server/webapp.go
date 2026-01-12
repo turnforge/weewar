@@ -44,11 +44,11 @@ type LilBattleApp struct {
 	HideWorlds bool
 
 	// Ad config - all default to enabled, can be disabled per-placement
-	AdsEnabled        bool   // Master switch: WEEWAR_ADS_ENABLED (default: true)
-	AdsFooterEnabled  bool   // Footer banner: WEEWAR_ADS_FOOTER (default: true)
-	AdsHomeEnabled    bool   // Homepage mid-section: WEEWAR_ADS_HOME (default: true)
-	AdsListingEnabled bool   // Listing pages: WEEWAR_ADS_LISTING (default: true)
-	AdNetworkId       string // Google AdSense publisher ID: WEEWAR_AD_NETWORK_ID
+	AdsEnabled        bool   // Master switch: LILBATTLE_ADS_ENABLED (default: true)
+	AdsFooterEnabled  bool   // Footer banner: LILBATTLE_ADS_FOOTER (default: true)
+	AdsHomeEnabled    bool   // Homepage mid-section: LILBATTLE_ADS_HOME (default: true)
+	AdsListingEnabled bool   // Listing pages: LILBATTLE_ADS_LISTING (default: true)
+	AdNetworkId       string // Google AdSense publisher ID: LILBATTLE_AD_NETWORK_ID
 
 	mux     *http.ServeMux
 	BaseUrl string

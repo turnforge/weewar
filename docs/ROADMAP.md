@@ -687,7 +687,7 @@ const response = await client.gamesService.createGame(request);
 - [x] **Technical Requirements**: Identified CSP, component, and integration needs
 
 ### Phase 1: Foundation Ads ✅
-- [x] **Feature Flags**: WEEWAR_ADS_ENABLED, WEEWAR_ADS_FOOTER, WEEWAR_ADS_HOME, WEEWAR_ADS_LISTING, WEEWAR_AD_NETWORK_ID
+- [x] **Feature Flags**: LILBATTLE_ADS_ENABLED, LILBATTLE_ADS_FOOTER, LILBATTLE_ADS_HOME, LILBATTLE_ADS_LISTING, LILBATTLE_AD_NETWORK_ID
 - [x] **AdSlot Component**: Reusable ad container with size variants (leaderboard, mrec, skyscraper, mobile-banner)
 - [x] **AdScript Component**: AdSense script loader in BasePage head
 - [x] **Footer Banner Ads**: 728x90 leaderboard (desktop), 320x50 banner (mobile)

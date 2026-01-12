@@ -25,10 +25,10 @@ type LilBattleApp struct {
     HideWorlds bool
 
     // Ad config (NEW)
-    AdsEnabled        bool   // Master switch: WEEWAR_ADS_ENABLED (default: true)
-    AdsFooterEnabled  bool   // Footer banner: WEEWAR_ADS_FOOTER (default: true)
-    AdsHomeEnabled    bool   // Homepage mid-section: WEEWAR_ADS_HOME (default: true)
-    AdsListingEnabled bool   // Listing pages: WEEWAR_ADS_LISTING (default: true)
+    AdsEnabled        bool   // Master switch: LILBATTLE_ADS_ENABLED (default: true)
+    AdsFooterEnabled  bool   // Footer banner: LILBATTLE_ADS_FOOTER (default: true)
+    AdsHomeEnabled    bool   // Homepage mid-section: LILBATTLE_ADS_HOME (default: true)
+    AdsListingEnabled bool   // Listing pages: LILBATTLE_ADS_LISTING (default: true)
     AdNetworkId       string // Google AdSense publisher ID
 }
 ```
@@ -41,11 +41,11 @@ lilbattleApp = &LilBattleApp{
     // ... existing ...
 
     // Ads default to enabled, can be disabled per-placement
-    AdsEnabled:        os.Getenv("WEEWAR_ADS_ENABLED") != "false",
-    AdsFooterEnabled:  os.Getenv("WEEWAR_ADS_FOOTER") != "false",
-    AdsHomeEnabled:    os.Getenv("WEEWAR_ADS_HOME") != "false",
-    AdsListingEnabled: os.Getenv("WEEWAR_ADS_LISTING") != "false",
-    AdNetworkId:       os.Getenv("WEEWAR_AD_NETWORK_ID"),
+    AdsEnabled:        os.Getenv("LILBATTLE_ADS_ENABLED") != "false",
+    AdsFooterEnabled:  os.Getenv("LILBATTLE_ADS_FOOTER") != "false",
+    AdsHomeEnabled:    os.Getenv("LILBATTLE_ADS_HOME") != "false",
+    AdsListingEnabled: os.Getenv("LILBATTLE_ADS_LISTING") != "false",
+    AdNetworkId:       os.Getenv("LILBATTLE_AD_NETWORK_ID"),
 }
 ```
 
@@ -53,11 +53,11 @@ lilbattleApp = &LilBattleApp{
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WEEWAR_ADS_ENABLED` | `true` | Master switch for all ads |
-| `WEEWAR_ADS_FOOTER` | `true` | Footer banner ads |
-| `WEEWAR_ADS_HOME` | `true` | Homepage mid-section ads |
-| `WEEWAR_ADS_LISTING` | `true` | Game/World listing page ads |
-| `WEEWAR_AD_NETWORK_ID` | (empty) | Google AdSense publisher ID (ca-pub-XXXXX) |
+| `LILBATTLE_ADS_ENABLED` | `true` | Master switch for all ads |
+| `LILBATTLE_ADS_FOOTER` | `true` | Footer banner ads |
+| `LILBATTLE_ADS_HOME` | `true` | Homepage mid-section ads |
+| `LILBATTLE_ADS_LISTING` | `true` | Game/World listing page ads |
+| `LILBATTLE_AD_NETWORK_ID` | (empty) | Google AdSense publisher ID (ca-pub-XXXXX) |
 
 ---
 
@@ -345,11 +345,11 @@ AdsListingEnabled bool
 AdNetworkId       string
 
 // Add to NewLilBattleApp initialization
-AdsEnabled:        os.Getenv("WEEWAR_ADS_ENABLED") != "false",
-AdsFooterEnabled:  os.Getenv("WEEWAR_ADS_FOOTER") != "false",
-AdsHomeEnabled:    os.Getenv("WEEWAR_ADS_HOME") != "false",
-AdsListingEnabled: os.Getenv("WEEWAR_ADS_LISTING") != "false",
-AdNetworkId:       os.Getenv("WEEWAR_AD_NETWORK_ID"),
+AdsEnabled:        os.Getenv("LILBATTLE_ADS_ENABLED") != "false",
+AdsFooterEnabled:  os.Getenv("LILBATTLE_ADS_FOOTER") != "false",
+AdsHomeEnabled:    os.Getenv("LILBATTLE_ADS_HOME") != "false",
+AdsListingEnabled: os.Getenv("LILBATTLE_ADS_LISTING") != "false",
+AdNetworkId:       os.Getenv("LILBATTLE_AD_NETWORK_ID"),
 ```
 
 ### Step 2: Create Ad Component Templates
@@ -374,8 +374,8 @@ AdNetworkId:       os.Getenv("WEEWAR_AD_NETWORK_ID"),
 
 ### Step 6: Test
 
-1. Test with `WEEWAR_ADS_ENABLED=false` (ads hidden)
-2. Test with no `WEEWAR_AD_NETWORK_ID` (placeholder shown)
+1. Test with `LILBATTLE_ADS_ENABLED=false` (ads hidden)
+2. Test with no `LILBATTLE_AD_NETWORK_ID` (placeholder shown)
 3. Test with valid network ID (ads load)
 4. Test dark mode compatibility
 5. Test mobile responsiveness
@@ -386,10 +386,10 @@ AdNetworkId:       os.Getenv("WEEWAR_AD_NETWORK_ID"),
 
 ### Feature Flag Tests
 
-- [ ] `WEEWAR_ADS_ENABLED=false` hides all ads
-- [ ] `WEEWAR_ADS_FOOTER=false` hides only footer ads
-- [ ] `WEEWAR_ADS_HOME=false` hides only homepage ads
-- [ ] `WEEWAR_ADS_LISTING=false` hides only listing page ads
+- [ ] `LILBATTLE_ADS_ENABLED=false` hides all ads
+- [ ] `LILBATTLE_ADS_FOOTER=false` hides only footer ads
+- [ ] `LILBATTLE_ADS_HOME=false` hides only homepage ads
+- [ ] `LILBATTLE_ADS_LISTING=false` hides only listing page ads
 - [ ] Default (no env vars) shows all ads
 
 ### Visual Tests
@@ -466,25 +466,25 @@ Requires:
 
 ```bash
 # Ads disabled in development by default
-WEEWAR_ADS_ENABLED=false
-WEEWAR_AD_NETWORK_ID=
+LILBATTLE_ADS_ENABLED=false
+LILBATTLE_AD_NETWORK_ID=
 ```
 
 ### Staging (.env.staging)
 
 ```bash
 # Ads enabled with test network ID
-WEEWAR_ADS_ENABLED=true
-WEEWAR_AD_NETWORK_ID=ca-pub-0000000000000000  # Test ID
+LILBATTLE_ADS_ENABLED=true
+LILBATTLE_AD_NETWORK_ID=ca-pub-0000000000000000  # Test ID
 ```
 
 ### Production (.env.prod)
 
 ```bash
 # Full ad configuration
-WEEWAR_ADS_ENABLED=true
-WEEWAR_ADS_FOOTER=true
-WEEWAR_ADS_HOME=true
-WEEWAR_ADS_LISTING=true
-WEEWAR_AD_NETWORK_ID=ca-pub-XXXXXXXXXXXXXXXX  # Real AdSense ID
+LILBATTLE_ADS_ENABLED=true
+LILBATTLE_ADS_FOOTER=true
+LILBATTLE_ADS_HOME=true
+LILBATTLE_ADS_LISTING=true
+LILBATTLE_AD_NETWORK_ID=ca-pub-XXXXXXXXXXXXXXXX  # Real AdSense ID
 ```

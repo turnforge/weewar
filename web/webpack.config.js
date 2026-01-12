@@ -31,6 +31,7 @@ const components = [
   ["GameViewerPage/index_Grid", 0, "ts"],
   ["GameViewerPage/index_Mobile", 0, "ts"],
   ["AttackSimulatorPage", 0, "ts"],
+  ["FixSimulatorPage", 0, "ts"],
 ];
 
 module.exports = (_env, options) => {

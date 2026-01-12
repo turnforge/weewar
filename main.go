@@ -132,6 +132,7 @@ func (b *Backend) SetupApp() *utils.App {
 			"/weewar.v1.GamesService/GetGame",
 			"/weewar.v1.GamesService/GetGames",
 			"/weewar.v1.GamesService/SimulateAttack",
+			"/weewar.v1.GamesService/SimulateFix",
 			// GameSync - allow spectating without login
 			"/weewar.v1.GameSyncService/Subscribe",
 		},

@@ -302,3 +302,27 @@ message SimulateAttackResponse {
   double attacker_kill_probability = 5;
   double defender_kill_probability = 6;
 }
+
+/**
+ * Request for simulating fix (repair) between two units
+ */
+message SimulateFixRequest {
+  int32 fixing_unit_type = 1;    // Unit type performing the fix
+  int32 fixing_unit_health = 2;  // Health of the fixing unit (Hf)
+  int32 injured_unit_type = 3;   // Unit type being repaired (for display)
+  int32 num_simulations = 4;     // Default: 1000
+}
+
+/**
+ * Response containing health restoration distribution statistics
+ */
+message SimulateFixResponse {
+  // Health restoration distribution: health_restored -> number_of_occurrences
+  map<int32, int32> healing_distribution = 1;
+
+  // Statistical summary
+  double mean_healing = 2;
+
+  // The fix value (F) of the fixing unit type
+  int32 fix_value = 3;
+}

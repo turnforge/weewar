@@ -103,5 +103,16 @@ service GamesService {
       body: "*",
     };
   }
+
+  /**
+   * Simulates fix (repair) action to generate health restoration distributions
+   * This is a stateless utility method that doesn't require game state
+   */
+  rpc SimulateFix(SimulateFixRequest) returns (SimulateFixResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/simulate_fix",
+      body: "*",
+    };
+  }
 }
 

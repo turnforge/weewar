@@ -16,5 +16,8 @@ func (g *RulesGroup) RegisterRoutes(app *goal.App[*WeewarApp]) *http.ServeMux {
 	// Attack simulator page
 	goal.Register[*AttackSimulatorPage](app, mux, "/attacksim")
 
+	// Fix (repair) simulator page
+	goal.Register[*FixSimulatorPage](app, mux, "/fixsim")
+
 	return mux
 }

@@ -37,6 +37,10 @@ type GamesService interface {
 	// Simulates combat between two units to generate damage distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateAttack(context.Context, *v1.SimulateAttackRequest) (*v1.SimulateAttackResponse, error)
+	// *
+	// Simulates fix (repair) action to generate health restoration distributions
+	// This is a stateless utility method that doesn't require game state
+	SimulateFix(context.Context, *v1.SimulateFixRequest) (*v1.SimulateFixResponse, error)
 	GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*lib.Game, error)
 
 	// SaveMoveGroup saves a move group atomically with the game state.
@@ -308,6 +312,80 @@ func (s *BaseGamesService) SimulateAttack(ctx context.Context, req *v1.SimulateA
 	resp.DefenderMeanDamage = defenderMeanDamage
 	resp.AttackerKillProbability = float64(attackerKillCount) / float64(numSims)
 	resp.DefenderKillProbability = float64(defenderKillCount) / float64(numSims)
+
+	return resp, nil
+}
+
+// SimulateFix simulates fix (repair) action and returns health restoration distribution
+func (s *BaseGamesService) SimulateFix(ctx context.Context, req *v1.SimulateFixRequest) (resp *v1.SimulateFixResponse, err error) {
+	resp = &v1.SimulateFixResponse{}
+
+	// Set default number of simulations if not provided
+	numSims := req.NumSimulations
+	if numSims <= 0 {
+		numSims = 1000
+	}
+
+	// Get rules engine
+	rulesEngine := lib.DefaultRulesEngine()
+
+	// Get the fixing unit's fix_value from unit definition
+	fixingUnitDef, err := rulesEngine.GetUnitData(req.FixingUnitType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get fixing unit data: %w", err)
+	}
+
+	fixValue := fixingUnitDef.FixValue
+	if fixValue <= 0 {
+		// Unit cannot fix, return empty distribution
+		resp.HealingDistribution = make(map[int32]int32)
+		resp.MeanHealing = 0
+		resp.FixValue = 0
+		return resp, nil
+	}
+
+	// Create mock units for simulation
+	fixingUnit := &v1.Unit{
+		Q:               0,
+		R:               0,
+		Player:          1,
+		UnitType:        req.FixingUnitType,
+		AvailableHealth: req.FixingUnitHealth,
+	}
+	injuredUnit := &v1.Unit{
+		Q:               1,
+		R:               0,
+		Player:          1,
+		UnitType:        req.InjuredUnitType,
+	}
+
+	// Create fix context
+	fixCtx := &lib.FixContext{
+		FixingUnit:       fixingUnit,
+		FixingUnitHealth: req.FixingUnitHealth,
+		FixValue:         fixValue,
+		InjuredUnit:      injuredUnit,
+	}
+
+	// Generate fix distribution
+	fixDist, err := rulesEngine.GenerateFixDistribution(fixCtx, int(numSims))
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate fix distribution: %w", err)
+	}
+
+	// Convert distribution to map
+	healingMap := make(map[int32]int32)
+	meanHealing := 0.0
+	for _, healRange := range fixDist.Ranges {
+		healing := int32(healRange.MinValue)
+		count := int32(float64(numSims) * healRange.Probability)
+		healingMap[healing] = count
+		meanHealing += healRange.MinValue * healRange.Probability
+	}
+
+	resp.HealingDistribution = healingMap
+	resp.MeanHealing = meanHealing
+	resp.FixValue = fixValue
 
 	return resp, nil
 }

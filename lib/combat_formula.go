@@ -258,6 +258,116 @@ type SplashDamageTarget struct {
 	Damage int32
 }
 
+// =============================================================================
+// Fix (Repair) Mechanics
+// =============================================================================
+
+// FixContext contains all information needed to calculate fix (repair) results
+type FixContext struct {
+	FixingUnit       *v1.Unit
+	FixingUnitHealth int32  // Health of the unit performing the fix (Hf)
+	FixValue         int32  // Fix value (F) of the fixing unit type
+	InjuredUnit      *v1.Unit
+}
+
+// CalculateFixProbability calculates the fix probability (p) using the fix formula
+// Formula: p = 0.05 * F
+// Where F = fix value of the fixing unit
+// The result is clamped to [0, 1]
+func (re *RulesEngine) CalculateFixProbability(fixValue int32) float64 {
+	p := 0.05 * float64(fixValue)
+
+	// Clamp p to [0, 1]
+	if p < 0 {
+		p = 0
+	}
+	if p > 1 {
+		p = 1
+	}
+
+	return p
+}
+
+// SimulateFixHealing simulates the fix action and returns health restored
+// For each health unit (Hf) of the fixing unit, 3 random numbers between 0 and 1 are generated
+// Each time r < p, a fix is counted
+// Total health restored = fixes / 3
+func (re *RulesEngine) SimulateFixHealing(ctx *FixContext, rng *rand.Rand) int32 {
+	p := re.CalculateFixProbability(ctx.FixValue)
+
+	// Roll 3 dice for each health unit of the fixing unit
+	fixes := 0.0
+
+	for range ctx.FixingUnitHealth {
+		for range 3 {
+			roll := rng.Float64()
+			if roll < p {
+				fixes++
+			}
+		}
+	}
+
+	// Health restored = fixes / 3
+	healthRestored := fixes / 3
+
+	return int32(healthRestored)
+}
+
+// GenerateFixDistribution generates a distribution of possible healing outcomes
+// by running many simulations
+func (re *RulesEngine) GenerateFixDistribution(ctx *FixContext, numSimulations int) (*v1.DamageDistribution, error) {
+	if numSimulations <= 0 {
+		numSimulations = 10000 // Default number of simulations
+	}
+
+	// Run simulations
+	simRng := rand.New(rand.NewSource(12345)) // Use fixed seed for reproducibility
+	healingCounts := make(map[int32]int)
+	totalHealing := float64(0)
+
+	for range numSimulations {
+		healing := re.SimulateFixHealing(ctx, simRng)
+		healingCounts[healing]++
+		totalHealing += float64(healing)
+	}
+
+	// Calculate expected healing
+	expectedHealing := totalHealing / float64(numSimulations)
+
+	// Calculate min and max healing observed
+	var minHealing int32 = math.MaxInt32
+	var maxHealing int32 = 0
+	for healing := range healingCounts {
+		if healing < minHealing {
+			minHealing = healing
+		}
+		if healing > maxHealing {
+			maxHealing = healing
+		}
+	}
+
+	// Build healing ranges (reusing DamageDistribution/DamageRange structs)
+	var ranges []*v1.DamageRange
+	for healing := minHealing; healing <= maxHealing; healing++ {
+		count := healingCounts[healing]
+		if count > 0 {
+			probability := float64(count) / float64(numSimulations)
+			ranges = append(ranges, &v1.DamageRange{
+				MinValue:    float64(healing),
+				MaxValue:    float64(healing),
+				Probability: probability,
+			})
+		}
+	}
+
+	return &v1.DamageDistribution{
+		MinDamage:      float64(minHealing),
+		MaxDamage:      float64(maxHealing),
+		ExpectedDamage: expectedHealing,
+		Ranges:         ranges,
+	}, nil
+}
+
 // CalculateSplashDamage calculates splash damage for adjacent units
 // Returns a list of units and the damage they receive
 // Splash damage uses the same formula but without wound bonus (B = 0)

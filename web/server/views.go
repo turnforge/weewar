@@ -124,7 +124,7 @@ func (n *RootViewsHandler) setupRoutes() {
 	goal.Register[*GenericPage](n.GoalApp, n.mux, "/about", goal.WithTemplate("AboutPage"))
 	goal.Register[*GenericPage](n.GoalApp, n.mux, "/contact", goal.WithTemplate("ContactUsPage"))
 	goal.Register[*LoginPage](n.GoalApp, n.mux, "/login")
-	goal.Register[*ProfilePage](n.GoalApp, n.mux, "/profile/")
+	goal.Register[*ProfilePage](n.GoalApp, n.mux, "/profile")
 	goal.Register[*PrivacyPolicy](n.GoalApp, n.mux, "/privacy/")
 	goal.Register[*TermsOfService](n.GoalApp, n.mux, "/terms/")
 	goal.Register[*HomePage](n.GoalApp, n.mux, "/")

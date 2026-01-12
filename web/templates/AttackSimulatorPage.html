@@ -125,7 +125,7 @@
             <div class="space-y-3">
                 <div>
                     <label for="attacker-unit" class="form-label">Unit Type</label>
-                    <select id="attacker-unit" class="form-select">
+                    <select id="attacker-unit" class="form-select bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                         {{range .AllUnits}}
                         <option value="{{.Id}}" {{if eq .Id (Int $.AttackerUnit)}}selected{{end}} data-icon="{{.IconDataURL}}">{{.Name}} - {{.Id}} </option>
                         {{end}}
@@ -134,7 +134,7 @@
 
                 <div>
                     <label for="attacker-terrain" class="form-label">Terrain</label>
-                    <select id="attacker-terrain" class="form-select">
+                    <select id="attacker-terrain" class="form-select bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                         {{range .AllTerrains}}
                         <option value="{{.ID}}" {{if eq .ID (Int $.AttackerTerrain)}}selected{{end}} data-icon="{{.IconDataURL}}">{{.Name}}</option>
                         {{end}}
@@ -155,7 +155,7 @@
             <div class="space-y-3">
                 <div>
                     <label for="defender-unit" class="form-label">Unit Type</label>
-                    <select id="defender-unit" class="form-select">
+                    <select id="defender-unit" class="form-select bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                         {{range .AllUnits}}
                         <option value="{{.Id}}" {{if eq .Id (Int $.DefenderUnit)}}selected{{end}} data-icon="{{.IconDataURL}}">{{.Name}}</option>
                         {{end}}
@@ -164,7 +164,7 @@
 
                 <div>
                     <label for="defender-terrain" class="form-label">Terrain</label>
-                    <select id="defender-terrain" class="form-select">
+                    <select id="defender-terrain" class="form-select bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                         {{range .AllTerrains}}
                         <option value="{{.ID}}" {{if eq .ID (Int $.DefenderTerrain)}}selected{{end}} data-icon="{{.IconDataURL}}">{{.Name}}</option>
                         {{end}}

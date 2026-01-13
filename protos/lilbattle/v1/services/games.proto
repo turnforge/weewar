@@ -114,5 +114,16 @@ service GamesService {
       body: "*",
     };
   }
+
+  /**
+   * Join a game as an open player slot
+   * User must be authenticated. The player slot must be "open" to be joinable.
+   */
+  rpc JoinGame(JoinGameRequest) returns (JoinGameResponse) {
+    option (google.api.http) = {
+      post: "/v1/games/{game_id}/join",
+      body: "*",
+    };
+  }
 }
 

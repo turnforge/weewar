@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -11,6 +12,9 @@ import (
 	"github.com/turnforge/lilbattle/services/authz"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+// ErrNotImplemented is returned when an operation is not supported in the current context
+var ErrNotImplemented = errors.New("operation not implemented")
 
 type GamesService interface {
 	// Create a new game
@@ -41,6 +45,8 @@ type GamesService interface {
 	// Simulates fix (repair) action to generate health restoration distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateFix(context.Context, *v1.SimulateFixRequest) (*v1.SimulateFixResponse, error)
+	// Join a game as an open player slot
+	JoinGame(context.Context, *v1.JoinGameRequest) (*v1.JoinGameResponse, error)
 	GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*lib.Game, error)
 
 	// SaveMoveGroup saves a move group atomically with the game state.

@@ -34,6 +34,9 @@
     {{ $stats := index $.PlayerStats .PlayerId }}
     {{ $playerState := index $.State.PlayerStates .PlayerId }}
     {{ $playerColor := $.GetPlayerColorHex .PlayerId }}
+    {{ $isOpen := eq .PlayerType "open" }}
+    {{ $isAI := eq .PlayerType "ai" }}
+    {{ $isJoinable := $.IsPlayerJoinable . }}
     <div class="player-row flex items-center rounded-lg p-2 {{ if $isCurrentPlayer }}bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700{{ else }}bg-gray-50 dark:bg-gray-700/50{{ end }}">
       <!-- Player Color Square -->
       <div class="w-8 h-8 rounded flex-shrink-0 mr-3" style="background-color: {{ $playerColor }};"></div>
@@ -44,6 +47,11 @@
           <span class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ if .Name }}{{ .Name }}{{ else }}Player {{ .PlayerId }}{{ end }}</span>
           {{ if $isCurrentPlayer }}
           <span class="text-yellow-600 dark:text-yellow-400 text-xs ml-1">&#x25C0;</span>
+          {{ end }}
+          {{ if $isOpen }}
+          <span class="ml-2 px-1.5 py-0.5 text-xs rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">Open</span>
+          {{ else if $isAI }}
+          <span class="ml-2 px-1.5 py-0.5 text-xs rounded bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">AI</span>
           {{ end }}
         </div>
         <!-- Player Stats Row -->
@@ -65,6 +73,15 @@
           </div>
         </div>
       </div>
+      <!-- Join Button (only for open slots when viewer can join) -->
+      {{ if $isJoinable }}
+      <button
+        class="join-game-btn ml-2 px-3 py-1.5 text-xs font-medium rounded bg-green-600 hover:bg-green-700 text-white transition-colors"
+        data-player-id="{{ .PlayerId }}"
+        title="Join as this player">
+        Join
+      </button>
+      {{ end }}
     </div>
     {{ end }}
   </div>

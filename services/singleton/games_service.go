@@ -131,3 +131,8 @@ func (w *SingletonGamesService) ListMoves(ctx context.Context, req *v1.ListMoves
 		HasMore:    hasMore,
 	}, nil
 }
+
+// JoinGame is not supported in WASM singleton context - it's a server-side operation
+func (w *SingletonGamesService) JoinGame(ctx context.Context, req *v1.JoinGameRequest) (*v1.JoinGameResponse, error) {
+	return nil, services.ErrNotImplemented
+}

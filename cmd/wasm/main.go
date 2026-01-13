@@ -29,6 +29,10 @@ type SingletonInitializerService struct {
 
 func (s *SingletonInitializerService) InitializeSingleton(ctx context.Context, req *v1.InitializeSingletonRequest) (resp *v1.InitializeSingletonResponse, err error) {
 	s.GamesService.Load([]byte(req.GameData), []byte(req.GameState), []byte(req.MoveHistory))
+	// Set ViewerUserId on the GameStatePanel so it can determine if Join buttons should be shown
+	if gsp, ok := s.GameViewPresenter.GameStatePanel.(*BrowserGameStatePanel); ok {
+		gsp.ViewerUserId = req.ViewerUserId
+	}
 	r1, err := s.GameViewPresenter.InitializeGame(ctx, &v1.InitializeGameRequest{GameId: req.GameId})
 	return &v1.InitializeSingletonResponse{Response: r1}, err
 }

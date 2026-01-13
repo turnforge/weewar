@@ -136,6 +136,15 @@ func (c *ConnectGamesClient) SimulateAttack(ctx context.Context, req *v1.Simulat
 	return resp.Msg, nil
 }
 
+// JoinGame joins an open player slot in a game via Connect
+func (c *ConnectGamesClient) JoinGame(ctx context.Context, req *v1.JoinGameRequest) (*v1.JoinGameResponse, error) {
+	resp, err := c.client.JoinGame(ctx, connect.NewRequest(req))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Msg, nil
+}
+
 // GetRuntimeGame converts proto game data to runtime game
 // This is a local operation that doesn't require the server
 func (c *ConnectGamesClient) GetRuntimeGame(game *v1.Game, gameState *v1.GameState) (*lib.Game, error) {

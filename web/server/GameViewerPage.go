@@ -31,6 +31,9 @@ type GameViewerPage struct {
 
 	WasmExecJsPath string
 	WasmBundlePath string
+
+	// Viewer context for Join functionality
+	ViewerUserId string
 }
 
 func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
@@ -77,8 +80,11 @@ func (p *GameViewerPage) Load(r *http.Request, w http.ResponseWriter, app *goal.
 		p.GameHistory = resp.History
 	}
 
-	log.Printf("GameViewerPage loaded - GameId: %s, Players: %d, MaxTurns: %d",
-		p.WorldId, p.PlayerCount, p.MaxTurns)
+	// Set ViewerUserId from Header for Join functionality
+	p.ViewerUserId = p.Header.LoggedInUserId
+
+	log.Printf("GameViewerPage loaded - GameId: %s, Players: %d, MaxTurns: %d, ViewerUserId: %s",
+		p.WorldId, p.PlayerCount, p.MaxTurns, p.ViewerUserId)
 
 	return nil, false
 }

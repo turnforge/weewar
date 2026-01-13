@@ -319,9 +319,9 @@ type PlayerStateDatastore struct {
 type GameMoveDatastore struct {
 	Key *datastore.Key `datastore:"-"`
 
-	GameId string `datastore:"game_id"`
-
 	Player int32 `datastore:"player"`
+
+	GameId string `datastore:"game_id"`
 
 	GroupNumber int64 `datastore:"group_number"`
 

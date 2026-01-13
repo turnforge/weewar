@@ -95,8 +95,8 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
                 {{ end }}
             </div>
 
-            <!-- Page-specific buttons -->
-            {{ template "ExtraHeaderButtons" . }}
+            <!-- Page-specific buttons (pages override by defining ExtraHeaderButtons) -->
+            {{ block "ExtraHeaderButtons" . }}{{ end }}
         </div>
     </div>
 </div>

@@ -3,6 +3,11 @@ import { ITheme } from '../../assets/themes/BaseTheme';
 import { ThemeUtils } from '../common/ThemeUtils';
 
 /**
+ * Callback for when a player clicks "Join" on an open player slot
+ */
+export type JoinGameCallback = (playerId: number) => void;
+
+/**
  * GameStatePanel displays game state information including:
  * - Players list with bases, units, and coins
  * - Current player indicator
@@ -16,9 +21,17 @@ export class GameStatePanel extends BaseComponent implements LCMComponent {
     private isUIBound = false;
     private isActivated = false;
     private theme: ITheme | null = null;
+    private onJoinGame: JoinGameCallback | null = null;
 
     constructor(rootElement: HTMLElement, eventBus: EventBus, debugMode: boolean = false) {
         super('game-state-panel', rootElement, eventBus, debugMode);
+    }
+
+    /**
+     * Set the callback to be called when user clicks a Join button
+     */
+    public setJoinGameCallback(callback: JoinGameCallback): void {
+        this.onJoinGame = callback;
     }
 
     // LCMComponent Phase 1: Initialize DOM structure
@@ -80,6 +93,23 @@ export class GameStatePanel extends BaseComponent implements LCMComponent {
     }
 
     htmlUpdated(html: string) {
-        this.hydrateThemeImages()
+        this.hydrateThemeImages();
+        this.bindJoinButtonEvents();
+    }
+
+    /**
+     * Bind click events to Join buttons
+     */
+    private bindJoinButtonEvents(): void {
+        const joinButtons = this.rootElement.querySelectorAll('.join-game-btn');
+        joinButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const playerId = parseInt((btn as HTMLElement).dataset.playerId || '0', 10);
+                if (playerId > 0 && this.onJoinGame) {
+                    this.onJoinGame(playerId);
+                }
+            });
+        });
     }
 }

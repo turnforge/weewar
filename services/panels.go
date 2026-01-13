@@ -217,6 +217,7 @@ type BaseGameStatePanel struct {
 	CurrentPlayerCoins  int32
 	CurrentPlayerIncome int32
 	IncomeBreakdown     string
+	ViewerUserId        string // The user ID of the viewer (for showing Join buttons)
 }
 
 // Update refreshes the panel with current game state
@@ -335,4 +336,45 @@ func (b *BaseGameStatePanel) buildIncomeBreakdown(baseCounts map[int32]int32, in
 		result += part
 	}
 	return result
+}
+
+// IsViewerLoggedIn returns true if the viewer is logged in
+func (b *BaseGameStatePanel) IsViewerLoggedIn() bool {
+	return b.ViewerUserId != ""
+}
+
+// IsPlayerJoinable returns true if the player slot can be joined by the current viewer
+// A slot is joinable if:
+// 1. The player type is "open"
+// 2. The viewer is logged in
+// 3. The viewer is not already a player in this game
+func (b *BaseGameStatePanel) IsPlayerJoinable(player *v1.GamePlayer) bool {
+	if player == nil || player.PlayerType != "open" {
+		return false
+	}
+	if !b.IsViewerLoggedIn() {
+		return false
+	}
+	// Check if viewer is already a player
+	if b.Game != nil && b.Game.Config != nil {
+		for _, p := range b.Game.Config.Players {
+			if p.UserId == b.ViewerUserId {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// IsViewerPlayer returns true if the viewer is an assigned player in this game
+func (b *BaseGameStatePanel) IsViewerPlayer() bool {
+	if !b.IsViewerLoggedIn() || b.Game == nil || b.Game.Config == nil {
+		return false
+	}
+	for _, p := range b.Game.Config.Players {
+		if p.UserId == b.ViewerUserId {
+			return true
+		}
+	}
+	return false
 }

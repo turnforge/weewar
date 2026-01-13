@@ -29,7 +29,7 @@ var File_lilbattle_v1_services_games_proto protoreflect.FileDescriptor
 
 const file_lilbattle_v1_services_games_proto_rawDesc = "" +
 	"\n" +
-	"!lilbattle/v1/services/games.proto\x12\flilbattle.v1\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a google/protobuf/field_mask.proto\x1a lilbattle/v1/models/models.proto\x1a'lilbattle/v1/models/games_service.proto2\x96\v\n" +
+	"!lilbattle/v1/services/games.proto\x12\flilbattle.v1\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a google/protobuf/field_mask.proto\x1a lilbattle/v1/models/models.proto\x1a'lilbattle/v1/models/games_service.proto2\x86\f\n" +
 	"\fGamesService\x12e\n" +
 	"\n" +
 	"CreateGame\x12\x1f.lilbattle.v1.CreateGameRequest\x1a .lilbattle.v1.CreateGameResponse\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/games\x12e\n" +
@@ -45,7 +45,8 @@ const file_lilbattle_v1_services_games_proto_rawDesc = "" +
 	"\fProcessMoves\x12!.lilbattle.v1.ProcessMovesRequest\x1a\".lilbattle.v1.ProcessMovesResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/games/{game_id}/moves\x12\xb5\x01\n" +
 	"\fGetOptionsAt\x12!.lilbattle.v1.GetOptionsAtRequest\x1a\".lilbattle.v1.GetOptionsAtResponse\"^\x82\xd3\xe4\x93\x02XZ)\x12'/v1/games/{game_id}/options/{pos.label}\x12+/v1/games/{game_id}/options/{pos.q}/{pos.r}\x12\x81\x01\n" +
 	"\x0eSimulateAttack\x12#.lilbattle.v1.SimulateAttackRequest\x1a$.lilbattle.v1.SimulateAttackResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/games/simulate_attack\x12u\n" +
-	"\vSimulateFix\x12 .lilbattle.v1.SimulateFixRequest\x1a!.lilbattle.v1.SimulateFixResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/games/simulate_fixB\xb8\x01\n" +
+	"\vSimulateFix\x12 .lilbattle.v1.SimulateFixRequest\x1a!.lilbattle.v1.SimulateFixResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/games/simulate_fix\x12n\n" +
+	"\bJoinGame\x12\x1d.lilbattle.v1.JoinGameRequest\x1a\x1e.lilbattle.v1.JoinGameResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/games/{game_id}/joinB\xb8\x01\n" +
 	"\x10com.lilbattle.v1B\n" +
 	"GamesProtoP\x01ZGgithub.com/turnforge/lilbattle/gen/go/lilbattle/v1/services;lilbattlev1\xa2\x02\x03LXX\xaa\x02\fLilbattle.V1\xca\x02\fLilbattle\\V1\xe2\x02\x18Lilbattle\\V1\\GPBMetadata\xea\x02\rLilbattle::V1b\x06proto3"
 
@@ -62,18 +63,20 @@ var file_lilbattle_v1_services_games_proto_goTypes = []any{
 	(*models.GetOptionsAtRequest)(nil),    // 9: lilbattle.v1.GetOptionsAtRequest
 	(*models.SimulateAttackRequest)(nil),  // 10: lilbattle.v1.SimulateAttackRequest
 	(*models.SimulateFixRequest)(nil),     // 11: lilbattle.v1.SimulateFixRequest
-	(*models.CreateGameResponse)(nil),     // 12: lilbattle.v1.CreateGameResponse
-	(*models.GetGamesResponse)(nil),       // 13: lilbattle.v1.GetGamesResponse
-	(*models.ListGamesResponse)(nil),      // 14: lilbattle.v1.ListGamesResponse
-	(*models.GetGameResponse)(nil),        // 15: lilbattle.v1.GetGameResponse
-	(*models.DeleteGameResponse)(nil),     // 16: lilbattle.v1.DeleteGameResponse
-	(*models.UpdateGameResponse)(nil),     // 17: lilbattle.v1.UpdateGameResponse
-	(*models.GetGameStateResponse)(nil),   // 18: lilbattle.v1.GetGameStateResponse
-	(*models.ListMovesResponse)(nil),      // 19: lilbattle.v1.ListMovesResponse
-	(*models.ProcessMovesResponse)(nil),   // 20: lilbattle.v1.ProcessMovesResponse
-	(*models.GetOptionsAtResponse)(nil),   // 21: lilbattle.v1.GetOptionsAtResponse
-	(*models.SimulateAttackResponse)(nil), // 22: lilbattle.v1.SimulateAttackResponse
-	(*models.SimulateFixResponse)(nil),    // 23: lilbattle.v1.SimulateFixResponse
+	(*models.JoinGameRequest)(nil),        // 12: lilbattle.v1.JoinGameRequest
+	(*models.CreateGameResponse)(nil),     // 13: lilbattle.v1.CreateGameResponse
+	(*models.GetGamesResponse)(nil),       // 14: lilbattle.v1.GetGamesResponse
+	(*models.ListGamesResponse)(nil),      // 15: lilbattle.v1.ListGamesResponse
+	(*models.GetGameResponse)(nil),        // 16: lilbattle.v1.GetGameResponse
+	(*models.DeleteGameResponse)(nil),     // 17: lilbattle.v1.DeleteGameResponse
+	(*models.UpdateGameResponse)(nil),     // 18: lilbattle.v1.UpdateGameResponse
+	(*models.GetGameStateResponse)(nil),   // 19: lilbattle.v1.GetGameStateResponse
+	(*models.ListMovesResponse)(nil),      // 20: lilbattle.v1.ListMovesResponse
+	(*models.ProcessMovesResponse)(nil),   // 21: lilbattle.v1.ProcessMovesResponse
+	(*models.GetOptionsAtResponse)(nil),   // 22: lilbattle.v1.GetOptionsAtResponse
+	(*models.SimulateAttackResponse)(nil), // 23: lilbattle.v1.SimulateAttackResponse
+	(*models.SimulateFixResponse)(nil),    // 24: lilbattle.v1.SimulateFixResponse
+	(*models.JoinGameResponse)(nil),       // 25: lilbattle.v1.JoinGameResponse
 }
 var file_lilbattle_v1_services_games_proto_depIdxs = []int32{
 	0,  // 0: lilbattle.v1.GamesService.CreateGame:input_type -> lilbattle.v1.CreateGameRequest
@@ -88,20 +91,22 @@ var file_lilbattle_v1_services_games_proto_depIdxs = []int32{
 	9,  // 9: lilbattle.v1.GamesService.GetOptionsAt:input_type -> lilbattle.v1.GetOptionsAtRequest
 	10, // 10: lilbattle.v1.GamesService.SimulateAttack:input_type -> lilbattle.v1.SimulateAttackRequest
 	11, // 11: lilbattle.v1.GamesService.SimulateFix:input_type -> lilbattle.v1.SimulateFixRequest
-	12, // 12: lilbattle.v1.GamesService.CreateGame:output_type -> lilbattle.v1.CreateGameResponse
-	13, // 13: lilbattle.v1.GamesService.GetGames:output_type -> lilbattle.v1.GetGamesResponse
-	14, // 14: lilbattle.v1.GamesService.ListGames:output_type -> lilbattle.v1.ListGamesResponse
-	15, // 15: lilbattle.v1.GamesService.GetGame:output_type -> lilbattle.v1.GetGameResponse
-	16, // 16: lilbattle.v1.GamesService.DeleteGame:output_type -> lilbattle.v1.DeleteGameResponse
-	17, // 17: lilbattle.v1.GamesService.UpdateGame:output_type -> lilbattle.v1.UpdateGameResponse
-	18, // 18: lilbattle.v1.GamesService.GetGameState:output_type -> lilbattle.v1.GetGameStateResponse
-	19, // 19: lilbattle.v1.GamesService.ListMoves:output_type -> lilbattle.v1.ListMovesResponse
-	20, // 20: lilbattle.v1.GamesService.ProcessMoves:output_type -> lilbattle.v1.ProcessMovesResponse
-	21, // 21: lilbattle.v1.GamesService.GetOptionsAt:output_type -> lilbattle.v1.GetOptionsAtResponse
-	22, // 22: lilbattle.v1.GamesService.SimulateAttack:output_type -> lilbattle.v1.SimulateAttackResponse
-	23, // 23: lilbattle.v1.GamesService.SimulateFix:output_type -> lilbattle.v1.SimulateFixResponse
-	12, // [12:24] is the sub-list for method output_type
-	0,  // [0:12] is the sub-list for method input_type
+	12, // 12: lilbattle.v1.GamesService.JoinGame:input_type -> lilbattle.v1.JoinGameRequest
+	13, // 13: lilbattle.v1.GamesService.CreateGame:output_type -> lilbattle.v1.CreateGameResponse
+	14, // 14: lilbattle.v1.GamesService.GetGames:output_type -> lilbattle.v1.GetGamesResponse
+	15, // 15: lilbattle.v1.GamesService.ListGames:output_type -> lilbattle.v1.ListGamesResponse
+	16, // 16: lilbattle.v1.GamesService.GetGame:output_type -> lilbattle.v1.GetGameResponse
+	17, // 17: lilbattle.v1.GamesService.DeleteGame:output_type -> lilbattle.v1.DeleteGameResponse
+	18, // 18: lilbattle.v1.GamesService.UpdateGame:output_type -> lilbattle.v1.UpdateGameResponse
+	19, // 19: lilbattle.v1.GamesService.GetGameState:output_type -> lilbattle.v1.GetGameStateResponse
+	20, // 20: lilbattle.v1.GamesService.ListMoves:output_type -> lilbattle.v1.ListMovesResponse
+	21, // 21: lilbattle.v1.GamesService.ProcessMoves:output_type -> lilbattle.v1.ProcessMovesResponse
+	22, // 22: lilbattle.v1.GamesService.GetOptionsAt:output_type -> lilbattle.v1.GetOptionsAtResponse
+	23, // 23: lilbattle.v1.GamesService.SimulateAttack:output_type -> lilbattle.v1.SimulateAttackResponse
+	24, // 24: lilbattle.v1.GamesService.SimulateFix:output_type -> lilbattle.v1.SimulateFixResponse
+	25, // 25: lilbattle.v1.GamesService.JoinGame:output_type -> lilbattle.v1.JoinGameResponse
+	13, // [13:26] is the sub-list for method output_type
+	0,  // [0:13] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

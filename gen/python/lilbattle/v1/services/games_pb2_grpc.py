@@ -75,6 +75,11 @@ class GamesServiceStub(object):
                 request_serializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.SimulateFixRequest.SerializeToString,
                 response_deserializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.SimulateFixResponse.FromString,
                 _registered_method=True)
+        self.JoinGame = channel.unary_unary(
+                '/lilbattle.v1.GamesService/JoinGame',
+                request_serializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.JoinGameRequest.SerializeToString,
+                response_deserializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.JoinGameResponse.FromString,
+                _registered_method=True)
 
 
 class GamesServiceServicer(object):
@@ -170,6 +175,15 @@ class GamesServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def JoinGame(self, request, context):
+        """*
+        Join a game as an open player slot
+        User must be authenticated. The player slot must be "open" to be joinable.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GamesServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -232,6 +246,11 @@ def add_GamesServiceServicer_to_server(servicer, server):
                     servicer.SimulateFix,
                     request_deserializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.SimulateFixRequest.FromString,
                     response_serializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.SimulateFixResponse.SerializeToString,
+            ),
+            'JoinGame': grpc.unary_unary_rpc_method_handler(
+                    servicer.JoinGame,
+                    request_deserializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.JoinGameRequest.FromString,
+                    response_serializer=lilbattle_dot_v1_dot_models_dot_games__service__pb2.JoinGameResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -559,6 +578,33 @@ class GamesService(object):
             '/lilbattle.v1.GamesService/SimulateFix',
             lilbattle_dot_v1_dot_models_dot_games__service__pb2.SimulateFixRequest.SerializeToString,
             lilbattle_dot_v1_dot_models_dot_games__service__pb2.SimulateFixResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def JoinGame(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/lilbattle.v1.GamesService/JoinGame',
+            lilbattle_dot_v1_dot_models_dot_games__service__pb2.JoinGameRequest.SerializeToString,
+            lilbattle_dot_v1_dot_models_dot_games__service__pb2.JoinGameResponse.FromString,
             options,
             channel_credentials,
             insecure,

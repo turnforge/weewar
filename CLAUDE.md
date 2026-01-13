@@ -10,7 +10,7 @@
 - When updating .md files and in commit messages use emojis and flowerly languages sparingly.  We dont want to be too grandios or overpromising.
 - Make sure the playwright tool is setup so you can inspect the browser when we are implementing and testing the Dashboard features.
 - Do not refer to claude or anthropic or gemini in your commit messages
-- Do not rebuild the server - it will be continuosly be rebuilt and run by the devloop.
+- Do not rebuild the server - it will be continuously rebuilt and run automatically.
 - Find the root cause of an issue before figuring out a solution.  Fix problems.
 - Do not create workarounds for issues without asking.  Always find the root cause of an issue and fix it.
 - The web module automatically builds when files are changed - DO NOT run npm build or npm run build commands.
@@ -28,14 +28,9 @@ When asked to fix a big or create a new features I want you to:
   * Write failing tests
   * Implement the fix and then create a PR with the fix.
 
-## Continuous Builds
+## Local Package References
 
-Builds for frontend, wasm, backend are all running continuously and can be queried using the `devloop` cli tool.   devloop is a command for watching and live reloading your projects.  It is like Air + Make on steroids.   You have the following devloop commands:
-- `devloop config` - Get configuration from running devloop server
-- `devloop paths` - List all file patterns being watched
-- `devloop trigger <rulename>` - Trigger execution of a specific rule
-- `devloop logs <rulename>`  - Stream logs from running devloop server
-- `devloop status <rulename>` - Get status of rules from running devloop server
+When looking up Go or Node.js packages authored by `panyam` (e.g., `github.com/panyam/oneauth`, `github.com/panyam/goapplib`), check the local source in `~/panyam/` instead of looking at pkg.go.dev or npm. The local repos have the most up-to-date code.
 
 ## Rules Data Extraction
 

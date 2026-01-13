@@ -552,3 +552,83 @@ func (s *BackendGamesService) handleScreenshotCompletion(items []ScreenShotItem)
 	}
 	return nil
 }
+
+// JoinGame allows an authenticated user to join an open player slot in a game.
+// The player slot must have player_type = "open" to be joinable.
+func (s *BackendGamesService) JoinGame(ctx context.Context, req *v1.JoinGameRequest) (*v1.JoinGameResponse, error) {
+	if req.GameId == "" {
+		return nil, fmt.Errorf("game ID is required")
+	}
+	if req.PlayerId <= 0 {
+		return nil, fmt.Errorf("player ID is required and must be positive")
+	}
+	if s.StorageProvider == nil {
+		return nil, fmt.Errorf("storage provider not configured")
+	}
+
+	// Require authentication
+	userID, err := authz.RequireAuthenticated(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load current game
+	game, err := s.StorageProvider.LoadGame(ctx, req.GameId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load game: %w", err)
+	}
+	if game == nil {
+		return nil, fmt.Errorf("game not found: %s", req.GameId)
+	}
+
+	if game.Config == nil || len(game.Config.Players) == 0 {
+		return nil, fmt.Errorf("game has no player configuration")
+	}
+
+	// Find the requested player slot
+	var targetPlayer *v1.GamePlayer
+	for _, player := range game.Config.Players {
+		if player.PlayerId == req.PlayerId {
+			targetPlayer = player
+			break
+		}
+	}
+
+	if targetPlayer == nil {
+		return nil, fmt.Errorf("player slot %d not found in game", req.PlayerId)
+	}
+
+	// Check if player slot is open
+	if targetPlayer.PlayerType != "open" {
+		return nil, fmt.Errorf("player slot %d is not open for joining (type: %s)", req.PlayerId, targetPlayer.PlayerType)
+	}
+
+	// Check if user is already a player in this game
+	for _, player := range game.Config.Players {
+		if player.UserId == userID {
+			return nil, fmt.Errorf("you are already a player in this game (player %d)", player.PlayerId)
+		}
+	}
+
+	// Assign the user to the player slot
+	targetPlayer.UserId = userID
+	targetPlayer.PlayerType = "human"
+
+	// Update timestamp
+	game.UpdatedAt = timestamppb.New(time.Now())
+
+	// Save the updated game
+	if err := s.StorageProvider.SaveGame(ctx, req.GameId, game); err != nil {
+		return nil, fmt.Errorf("failed to save game: %w", err)
+	}
+
+	// Update cache if enabled
+	s.updateCache(req.GameId, game, nil, nil)
+
+	log.Printf("User %s joined game %s as player %d", userID, req.GameId, req.PlayerId)
+
+	return &v1.JoinGameResponse{
+		Game:     game,
+		PlayerId: req.PlayerId,
+	}, nil
+}

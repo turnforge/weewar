@@ -133,6 +133,14 @@ func (a *ConnectGamesServiceAdapter) GetGameState(ctx context.Context, req *conn
 	return connect.NewResponse(resp), nil
 }
 
+func (a *ConnectGamesServiceAdapter) JoinGame(ctx context.Context, req *connect.Request[v1.JoinGameRequest]) (*connect.Response[v1.JoinGameResponse], error) {
+	resp, err := a.client.JoinGame(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
 /** If you had a streamer than you can use this to act as a bridge between websocket and grpc streams
 func (a *ConnectGameServiceAdapter) StreamSomeThing(ctx context.Context, req *connect.Request[v1.StreamSomeThingRequest], stream *connect.ServerStream[v1.StreamSomeThingResponse]) error {
 	// Create a custom stream implementation that bridges to Connect

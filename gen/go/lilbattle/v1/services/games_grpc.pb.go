@@ -33,6 +33,7 @@ const (
 	GamesService_GetOptionsAt_FullMethodName   = "/lilbattle.v1.GamesService/GetOptionsAt"
 	GamesService_SimulateAttack_FullMethodName = "/lilbattle.v1.GamesService/SimulateAttack"
 	GamesService_SimulateFix_FullMethodName    = "/lilbattle.v1.GamesService/SimulateFix"
+	GamesService_JoinGame_FullMethodName       = "/lilbattle.v1.GamesService/JoinGame"
 )
 
 // GamesServiceClient is the client API for GamesService service.
@@ -70,6 +71,10 @@ type GamesServiceClient interface {
 	// Simulates fix (repair) action to generate health restoration distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateFix(ctx context.Context, in *models.SimulateFixRequest, opts ...grpc.CallOption) (*models.SimulateFixResponse, error)
+	// *
+	// Join a game as an open player slot
+	// User must be authenticated. The player slot must be "open" to be joinable.
+	JoinGame(ctx context.Context, in *models.JoinGameRequest, opts ...grpc.CallOption) (*models.JoinGameResponse, error)
 }
 
 type gamesServiceClient struct {
@@ -200,6 +205,16 @@ func (c *gamesServiceClient) SimulateFix(ctx context.Context, in *models.Simulat
 	return out, nil
 }
 
+func (c *gamesServiceClient) JoinGame(ctx context.Context, in *models.JoinGameRequest, opts ...grpc.CallOption) (*models.JoinGameResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(models.JoinGameResponse)
+	err := c.cc.Invoke(ctx, GamesService_JoinGame_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GamesServiceServer is the server API for GamesService service.
 // All implementations should embed UnimplementedGamesServiceServer
 // for forward compatibility.
@@ -235,6 +250,10 @@ type GamesServiceServer interface {
 	// Simulates fix (repair) action to generate health restoration distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateFix(context.Context, *models.SimulateFixRequest) (*models.SimulateFixResponse, error)
+	// *
+	// Join a game as an open player slot
+	// User must be authenticated. The player slot must be "open" to be joinable.
+	JoinGame(context.Context, *models.JoinGameRequest) (*models.JoinGameResponse, error)
 }
 
 // UnimplementedGamesServiceServer should be embedded to have
@@ -279,6 +298,9 @@ func (UnimplementedGamesServiceServer) SimulateAttack(context.Context, *models.S
 }
 func (UnimplementedGamesServiceServer) SimulateFix(context.Context, *models.SimulateFixRequest) (*models.SimulateFixResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SimulateFix not implemented")
+}
+func (UnimplementedGamesServiceServer) JoinGame(context.Context, *models.JoinGameRequest) (*models.JoinGameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinGame not implemented")
 }
 func (UnimplementedGamesServiceServer) testEmbeddedByValue() {}
 
@@ -516,6 +538,24 @@ func _GamesService_SimulateFix_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GamesService_JoinGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(models.JoinGameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GamesServiceServer).JoinGame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GamesService_JoinGame_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GamesServiceServer).JoinGame(ctx, req.(*models.JoinGameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GamesService_ServiceDesc is the grpc.ServiceDesc for GamesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -570,6 +610,10 @@ var GamesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SimulateFix",
 			Handler:    _GamesService_SimulateFix_Handler,
+		},
+		{
+			MethodName: "JoinGame",
+			Handler:    _GamesService_JoinGame_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

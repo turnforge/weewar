@@ -32,7 +32,7 @@ type InitializeSingletonRequest struct {
 	GameData    string                 `protobuf:"bytes,2,opt,name=game_data,json=gameData,proto3" json:"game_data,omitempty"`
 	GameState   string                 `protobuf:"bytes,3,opt,name=game_state,json=gameState,proto3" json:"game_state,omitempty"`
 	MoveHistory string                 `protobuf:"bytes,4,opt,name=move_history,json=moveHistory,proto3" json:"move_history,omitempty"`
-	// User ID of the viewer (logged-in user viewing the game)
+	// User ID of the viewer (logged-in user viewing the game, for Join button visibility)
 	ViewerUserId  string `protobuf:"bytes,5,opt,name=viewer_user_id,json=viewerUserId,proto3" json:"viewer_user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

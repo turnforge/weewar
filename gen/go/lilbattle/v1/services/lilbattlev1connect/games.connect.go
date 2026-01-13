@@ -64,6 +64,8 @@ const (
 	// GamesServiceSimulateFixProcedure is the fully-qualified name of the GamesService's SimulateFix
 	// RPC.
 	GamesServiceSimulateFixProcedure = "/lilbattle.v1.GamesService/SimulateFix"
+	// GamesServiceJoinGameProcedure is the fully-qualified name of the GamesService's JoinGame RPC.
+	GamesServiceJoinGameProcedure = "/lilbattle.v1.GamesService/JoinGame"
 )
 
 // GamesServiceClient is a client for the lilbattle.v1.GamesService service.
@@ -97,6 +99,10 @@ type GamesServiceClient interface {
 	// Simulates fix (repair) action to generate health restoration distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateFix(context.Context, *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error)
+	// *
+	// Join a game as an open player slot
+	// User must be authenticated. The player slot must be "open" to be joinable.
+	JoinGame(context.Context, *connect.Request[models.JoinGameRequest]) (*connect.Response[models.JoinGameResponse], error)
 }
 
 // NewGamesServiceClient constructs a client for the lilbattle.v1.GamesService service. By default,
@@ -182,6 +188,12 @@ func NewGamesServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(gamesServiceMethods.ByName("SimulateFix")),
 			connect.WithClientOptions(opts...),
 		),
+		joinGame: connect.NewClient[models.JoinGameRequest, models.JoinGameResponse](
+			httpClient,
+			baseURL+GamesServiceJoinGameProcedure,
+			connect.WithSchema(gamesServiceMethods.ByName("JoinGame")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -199,6 +211,7 @@ type gamesServiceClient struct {
 	getOptionsAt   *connect.Client[models.GetOptionsAtRequest, models.GetOptionsAtResponse]
 	simulateAttack *connect.Client[models.SimulateAttackRequest, models.SimulateAttackResponse]
 	simulateFix    *connect.Client[models.SimulateFixRequest, models.SimulateFixResponse]
+	joinGame       *connect.Client[models.JoinGameRequest, models.JoinGameResponse]
 }
 
 // CreateGame calls lilbattle.v1.GamesService.CreateGame.
@@ -261,6 +274,11 @@ func (c *gamesServiceClient) SimulateFix(ctx context.Context, req *connect.Reque
 	return c.simulateFix.CallUnary(ctx, req)
 }
 
+// JoinGame calls lilbattle.v1.GamesService.JoinGame.
+func (c *gamesServiceClient) JoinGame(ctx context.Context, req *connect.Request[models.JoinGameRequest]) (*connect.Response[models.JoinGameResponse], error) {
+	return c.joinGame.CallUnary(ctx, req)
+}
+
 // GamesServiceHandler is an implementation of the lilbattle.v1.GamesService service.
 type GamesServiceHandler interface {
 	// *
@@ -292,6 +310,10 @@ type GamesServiceHandler interface {
 	// Simulates fix (repair) action to generate health restoration distributions
 	// This is a stateless utility method that doesn't require game state
 	SimulateFix(context.Context, *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error)
+	// *
+	// Join a game as an open player slot
+	// User must be authenticated. The player slot must be "open" to be joinable.
+	JoinGame(context.Context, *connect.Request[models.JoinGameRequest]) (*connect.Response[models.JoinGameResponse], error)
 }
 
 // NewGamesServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -373,6 +395,12 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(gamesServiceMethods.ByName("SimulateFix")),
 		connect.WithHandlerOptions(opts...),
 	)
+	gamesServiceJoinGameHandler := connect.NewUnaryHandler(
+		GamesServiceJoinGameProcedure,
+		svc.JoinGame,
+		connect.WithSchema(gamesServiceMethods.ByName("JoinGame")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/lilbattle.v1.GamesService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case GamesServiceCreateGameProcedure:
@@ -399,6 +427,8 @@ func NewGamesServiceHandler(svc GamesServiceHandler, opts ...connect.HandlerOpti
 			gamesServiceSimulateAttackHandler.ServeHTTP(w, r)
 		case GamesServiceSimulateFixProcedure:
 			gamesServiceSimulateFixHandler.ServeHTTP(w, r)
+		case GamesServiceJoinGameProcedure:
+			gamesServiceJoinGameHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -454,4 +484,8 @@ func (UnimplementedGamesServiceHandler) SimulateAttack(context.Context, *connect
 
 func (UnimplementedGamesServiceHandler) SimulateFix(context.Context, *connect.Request[models.SimulateFixRequest]) (*connect.Response[models.SimulateFixResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lilbattle.v1.GamesService.SimulateFix is not implemented"))
+}
+
+func (UnimplementedGamesServiceHandler) JoinGame(context.Context, *connect.Request[models.JoinGameRequest]) (*connect.Response[models.JoinGameResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("lilbattle.v1.GamesService.JoinGame is not implemented"))
 }

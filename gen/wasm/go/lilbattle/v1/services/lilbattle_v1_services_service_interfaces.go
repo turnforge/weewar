@@ -61,6 +61,10 @@ type GamesServiceServer interface {
 	Simulates fix (repair) action to generate health restoration distributions
 	This is a stateless utility method that doesn't require game state */
 	SimulateFix(context.Context, *v1models.SimulateFixRequest) (*v1models.SimulateFixResponse, error)
+	/** *
+	Join a game as an open player slot
+	User must be authenticated. The player slot must be "open" to be joinable. */
+	JoinGame(context.Context, *v1models.JoinGameRequest) (*v1models.JoinGameResponse, error)
 }
 
 // IndexerServiceServer is the server API for IndexerService service (WASM version without gRPC embedding).

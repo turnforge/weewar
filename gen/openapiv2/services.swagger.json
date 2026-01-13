@@ -465,6 +465,54 @@
         ]
       }
     },
+    "/v1/games/{gameId}/join": {
+      "post": {
+        "summary": "*\nJoin a game as an open player slot\nUser must be authenticated. The player slot must be \"open\" to be joinable.",
+        "operationId": "GamesService_JoinGame",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1JoinGameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "ID of the game to join",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "playerId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "title": "The player ID (slot) to join as (1-based)\nMust be an open slot (player_type = \"open\")"
+                }
+              },
+              "description": "*\nRequest to join a game as a player\nUser must be authenticated to join a game.\nThe player slot must be \"open\" (player_type = \"open\") to be joinable."
+            }
+          }
+        ],
+        "tags": [
+          "GamesService"
+        ]
+      }
+    },
     "/v1/games/{gameId}/moves": {
       "get": {
         "summary": "List the moves for a game",
@@ -2861,6 +2909,21 @@
         }
       },
       "title": "Response of a turn option click"
+    },
+    "v1JoinGameResponse": {
+      "type": "object",
+      "properties": {
+        "game": {
+          "$ref": "#/definitions/v1Game",
+          "title": "The updated game with the user assigned to the player slot"
+        },
+        "playerId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "The player ID that was joined"
+        }
+      },
+      "title": "*\nResponse after joining a game"
     },
     "v1ListFilesResponse": {
       "type": "object",

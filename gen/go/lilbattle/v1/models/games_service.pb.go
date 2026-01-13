@@ -1730,6 +1730,121 @@ func (x *SimulateFixResponse) GetFixValue() int32 {
 	return 0
 }
 
+// *
+// Request to join a game as a player
+// User must be authenticated to join a game.
+// The player slot must be "open" (player_type = "open") to be joinable.
+type JoinGameRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID of the game to join
+	GameId string `protobuf:"bytes,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	// The player ID (slot) to join as (1-based)
+	// Must be an open slot (player_type = "open")
+	PlayerId      int32 `protobuf:"varint,2,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinGameRequest) Reset() {
+	*x = JoinGameRequest{}
+	mi := &file_lilbattle_v1_models_games_service_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinGameRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinGameRequest) ProtoMessage() {}
+
+func (x *JoinGameRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_lilbattle_v1_models_games_service_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinGameRequest.ProtoReflect.Descriptor instead.
+func (*JoinGameRequest) Descriptor() ([]byte, []int) {
+	return file_lilbattle_v1_models_games_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *JoinGameRequest) GetGameId() string {
+	if x != nil {
+		return x.GameId
+	}
+	return ""
+}
+
+func (x *JoinGameRequest) GetPlayerId() int32 {
+	if x != nil {
+		return x.PlayerId
+	}
+	return 0
+}
+
+// *
+// Response after joining a game
+type JoinGameResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The updated game with the user assigned to the player slot
+	Game *Game `protobuf:"bytes,1,opt,name=game,proto3" json:"game,omitempty"`
+	// The player ID that was joined
+	PlayerId      int32 `protobuf:"varint,2,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinGameResponse) Reset() {
+	*x = JoinGameResponse{}
+	mi := &file_lilbattle_v1_models_games_service_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinGameResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinGameResponse) ProtoMessage() {}
+
+func (x *JoinGameResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_lilbattle_v1_models_games_service_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinGameResponse.ProtoReflect.Descriptor instead.
+func (*JoinGameResponse) Descriptor() ([]byte, []int) {
+	return file_lilbattle_v1_models_games_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *JoinGameResponse) GetGame() *Game {
+	if x != nil {
+		return x.Game
+	}
+	return nil
+}
+
+func (x *JoinGameResponse) GetPlayerId() int32 {
+	if x != nil {
+		return x.PlayerId
+	}
+	return 0
+}
+
 var File_lilbattle_v1_models_games_service_proto protoreflect.FileDescriptor
 
 const file_lilbattle_v1_models_games_service_proto_rawDesc = "" +
@@ -1863,7 +1978,13 @@ const file_lilbattle_v1_models_games_service_proto_rawDesc = "" +
 	"\tfix_value\x18\x03 \x01(\x05R\bfixValue\x1aF\n" +
 	"\x18HealingDistributionEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01B\xbd\x01\n" +
+	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"G\n" +
+	"\x0fJoinGameRequest\x12\x17\n" +
+	"\agame_id\x18\x01 \x01(\tR\x06gameId\x12\x1b\n" +
+	"\tplayer_id\x18\x02 \x01(\x05R\bplayerId\"W\n" +
+	"\x10JoinGameResponse\x12&\n" +
+	"\x04game\x18\x01 \x01(\v2\x12.lilbattle.v1.GameR\x04game\x12\x1b\n" +
+	"\tplayer_id\x18\x02 \x01(\x05R\bplayerIdB\xbd\x01\n" +
 	"\x10com.lilbattle.v1B\x11GamesServiceProtoP\x01ZEgithub.com/turnforge/lilbattle/gen/go/lilbattle/v1/models;lilbattlev1\xa2\x02\x03LXX\xaa\x02\fLilbattle.V1\xca\x02\fLilbattle\\V1\xe2\x02\x18Lilbattle\\V1\\GPBMetadata\xea\x02\rLilbattle::V1b\x06proto3"
 
 var (
@@ -1878,7 +1999,7 @@ func file_lilbattle_v1_models_games_service_proto_rawDescGZIP() []byte {
 	return file_lilbattle_v1_models_games_service_proto_rawDescData
 }
 
-var file_lilbattle_v1_models_games_service_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_lilbattle_v1_models_games_service_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
 var file_lilbattle_v1_models_games_service_proto_goTypes = []any{
 	(*ListGamesRequest)(nil),       // 0: lilbattle.v1.ListGamesRequest
 	(*ListGamesResponse)(nil),      // 1: lilbattle.v1.ListGamesResponse
@@ -1907,68 +2028,71 @@ var file_lilbattle_v1_models_games_service_proto_goTypes = []any{
 	(*SimulateAttackResponse)(nil), // 24: lilbattle.v1.SimulateAttackResponse
 	(*SimulateFixRequest)(nil),     // 25: lilbattle.v1.SimulateFixRequest
 	(*SimulateFixResponse)(nil),    // 26: lilbattle.v1.SimulateFixResponse
-	nil,                            // 27: lilbattle.v1.GetGamesResponse.GamesEntry
-	nil,                            // 28: lilbattle.v1.CreateGameResponse.FieldErrorsEntry
-	nil,                            // 29: lilbattle.v1.SimulateAttackResponse.AttackerDamageDistributionEntry
-	nil,                            // 30: lilbattle.v1.SimulateAttackResponse.DefenderDamageDistributionEntry
-	nil,                            // 31: lilbattle.v1.SimulateFixResponse.HealingDistributionEntry
-	(*Pagination)(nil),             // 32: lilbattle.v1.Pagination
-	(*Game)(nil),                   // 33: lilbattle.v1.Game
-	(*PaginationResponse)(nil),     // 34: lilbattle.v1.PaginationResponse
-	(*GameState)(nil),              // 35: lilbattle.v1.GameState
-	(*GameMoveHistory)(nil),        // 36: lilbattle.v1.GameMoveHistory
-	(*fieldmaskpb.FieldMask)(nil),  // 37: google.protobuf.FieldMask
-	(*GameMove)(nil),               // 38: lilbattle.v1.GameMove
-	(*GameMoveGroup)(nil),          // 39: lilbattle.v1.GameMoveGroup
-	(*Position)(nil),               // 40: lilbattle.v1.Position
-	(*AllPaths)(nil),               // 41: lilbattle.v1.AllPaths
-	(*MoveUnitAction)(nil),         // 42: lilbattle.v1.MoveUnitAction
-	(*AttackUnitAction)(nil),       // 43: lilbattle.v1.AttackUnitAction
-	(*BuildUnitAction)(nil),        // 44: lilbattle.v1.BuildUnitAction
-	(*CaptureBuildingAction)(nil),  // 45: lilbattle.v1.CaptureBuildingAction
-	(*EndTurnAction)(nil),          // 46: lilbattle.v1.EndTurnAction
-	(*HealUnitAction)(nil),         // 47: lilbattle.v1.HealUnitAction
+	(*JoinGameRequest)(nil),        // 27: lilbattle.v1.JoinGameRequest
+	(*JoinGameResponse)(nil),       // 28: lilbattle.v1.JoinGameResponse
+	nil,                            // 29: lilbattle.v1.GetGamesResponse.GamesEntry
+	nil,                            // 30: lilbattle.v1.CreateGameResponse.FieldErrorsEntry
+	nil,                            // 31: lilbattle.v1.SimulateAttackResponse.AttackerDamageDistributionEntry
+	nil,                            // 32: lilbattle.v1.SimulateAttackResponse.DefenderDamageDistributionEntry
+	nil,                            // 33: lilbattle.v1.SimulateFixResponse.HealingDistributionEntry
+	(*Pagination)(nil),             // 34: lilbattle.v1.Pagination
+	(*Game)(nil),                   // 35: lilbattle.v1.Game
+	(*PaginationResponse)(nil),     // 36: lilbattle.v1.PaginationResponse
+	(*GameState)(nil),              // 37: lilbattle.v1.GameState
+	(*GameMoveHistory)(nil),        // 38: lilbattle.v1.GameMoveHistory
+	(*fieldmaskpb.FieldMask)(nil),  // 39: google.protobuf.FieldMask
+	(*GameMove)(nil),               // 40: lilbattle.v1.GameMove
+	(*GameMoveGroup)(nil),          // 41: lilbattle.v1.GameMoveGroup
+	(*Position)(nil),               // 42: lilbattle.v1.Position
+	(*AllPaths)(nil),               // 43: lilbattle.v1.AllPaths
+	(*MoveUnitAction)(nil),         // 44: lilbattle.v1.MoveUnitAction
+	(*AttackUnitAction)(nil),       // 45: lilbattle.v1.AttackUnitAction
+	(*BuildUnitAction)(nil),        // 46: lilbattle.v1.BuildUnitAction
+	(*CaptureBuildingAction)(nil),  // 47: lilbattle.v1.CaptureBuildingAction
+	(*EndTurnAction)(nil),          // 48: lilbattle.v1.EndTurnAction
+	(*HealUnitAction)(nil),         // 49: lilbattle.v1.HealUnitAction
 }
 var file_lilbattle_v1_models_games_service_proto_depIdxs = []int32{
-	32, // 0: lilbattle.v1.ListGamesRequest.pagination:type_name -> lilbattle.v1.Pagination
-	33, // 1: lilbattle.v1.ListGamesResponse.items:type_name -> lilbattle.v1.Game
-	34, // 2: lilbattle.v1.ListGamesResponse.pagination:type_name -> lilbattle.v1.PaginationResponse
-	33, // 3: lilbattle.v1.GetGameResponse.game:type_name -> lilbattle.v1.Game
-	35, // 4: lilbattle.v1.GetGameResponse.state:type_name -> lilbattle.v1.GameState
-	36, // 5: lilbattle.v1.GetGameResponse.history:type_name -> lilbattle.v1.GameMoveHistory
-	33, // 6: lilbattle.v1.UpdateGameRequest.new_game:type_name -> lilbattle.v1.Game
-	35, // 7: lilbattle.v1.UpdateGameRequest.new_state:type_name -> lilbattle.v1.GameState
-	36, // 8: lilbattle.v1.UpdateGameRequest.new_history:type_name -> lilbattle.v1.GameMoveHistory
-	37, // 9: lilbattle.v1.UpdateGameRequest.update_mask:type_name -> google.protobuf.FieldMask
-	33, // 10: lilbattle.v1.UpdateGameResponse.game:type_name -> lilbattle.v1.Game
-	27, // 11: lilbattle.v1.GetGamesResponse.games:type_name -> lilbattle.v1.GetGamesResponse.GamesEntry
-	33, // 12: lilbattle.v1.CreateGameRequest.game:type_name -> lilbattle.v1.Game
-	33, // 13: lilbattle.v1.CreateGameResponse.game:type_name -> lilbattle.v1.Game
-	35, // 14: lilbattle.v1.CreateGameResponse.game_state:type_name -> lilbattle.v1.GameState
-	28, // 15: lilbattle.v1.CreateGameResponse.field_errors:type_name -> lilbattle.v1.CreateGameResponse.FieldErrorsEntry
-	38, // 16: lilbattle.v1.ProcessMovesRequest.moves:type_name -> lilbattle.v1.GameMove
+	34, // 0: lilbattle.v1.ListGamesRequest.pagination:type_name -> lilbattle.v1.Pagination
+	35, // 1: lilbattle.v1.ListGamesResponse.items:type_name -> lilbattle.v1.Game
+	36, // 2: lilbattle.v1.ListGamesResponse.pagination:type_name -> lilbattle.v1.PaginationResponse
+	35, // 3: lilbattle.v1.GetGameResponse.game:type_name -> lilbattle.v1.Game
+	37, // 4: lilbattle.v1.GetGameResponse.state:type_name -> lilbattle.v1.GameState
+	38, // 5: lilbattle.v1.GetGameResponse.history:type_name -> lilbattle.v1.GameMoveHistory
+	35, // 6: lilbattle.v1.UpdateGameRequest.new_game:type_name -> lilbattle.v1.Game
+	37, // 7: lilbattle.v1.UpdateGameRequest.new_state:type_name -> lilbattle.v1.GameState
+	38, // 8: lilbattle.v1.UpdateGameRequest.new_history:type_name -> lilbattle.v1.GameMoveHistory
+	39, // 9: lilbattle.v1.UpdateGameRequest.update_mask:type_name -> google.protobuf.FieldMask
+	35, // 10: lilbattle.v1.UpdateGameResponse.game:type_name -> lilbattle.v1.Game
+	29, // 11: lilbattle.v1.GetGamesResponse.games:type_name -> lilbattle.v1.GetGamesResponse.GamesEntry
+	35, // 12: lilbattle.v1.CreateGameRequest.game:type_name -> lilbattle.v1.Game
+	35, // 13: lilbattle.v1.CreateGameResponse.game:type_name -> lilbattle.v1.Game
+	37, // 14: lilbattle.v1.CreateGameResponse.game_state:type_name -> lilbattle.v1.GameState
+	30, // 15: lilbattle.v1.CreateGameResponse.field_errors:type_name -> lilbattle.v1.CreateGameResponse.FieldErrorsEntry
+	40, // 16: lilbattle.v1.ProcessMovesRequest.moves:type_name -> lilbattle.v1.GameMove
 	15, // 17: lilbattle.v1.ProcessMovesRequest.expected_response:type_name -> lilbattle.v1.ProcessMovesResponse
-	38, // 18: lilbattle.v1.ProcessMovesResponse.moves:type_name -> lilbattle.v1.GameMove
-	35, // 19: lilbattle.v1.GetGameStateResponse.state:type_name -> lilbattle.v1.GameState
-	39, // 20: lilbattle.v1.ListMovesResponse.move_groups:type_name -> lilbattle.v1.GameMoveGroup
-	40, // 21: lilbattle.v1.GetOptionsAtRequest.pos:type_name -> lilbattle.v1.Position
+	40, // 18: lilbattle.v1.ProcessMovesResponse.moves:type_name -> lilbattle.v1.GameMove
+	37, // 19: lilbattle.v1.GetGameStateResponse.state:type_name -> lilbattle.v1.GameState
+	41, // 20: lilbattle.v1.ListMovesResponse.move_groups:type_name -> lilbattle.v1.GameMoveGroup
+	42, // 21: lilbattle.v1.GetOptionsAtRequest.pos:type_name -> lilbattle.v1.Position
 	22, // 22: lilbattle.v1.GetOptionsAtResponse.options:type_name -> lilbattle.v1.GameOption
-	41, // 23: lilbattle.v1.GetOptionsAtResponse.all_paths:type_name -> lilbattle.v1.AllPaths
-	42, // 24: lilbattle.v1.GameOption.move:type_name -> lilbattle.v1.MoveUnitAction
-	43, // 25: lilbattle.v1.GameOption.attack:type_name -> lilbattle.v1.AttackUnitAction
-	44, // 26: lilbattle.v1.GameOption.build:type_name -> lilbattle.v1.BuildUnitAction
-	45, // 27: lilbattle.v1.GameOption.capture:type_name -> lilbattle.v1.CaptureBuildingAction
-	46, // 28: lilbattle.v1.GameOption.end_turn:type_name -> lilbattle.v1.EndTurnAction
-	47, // 29: lilbattle.v1.GameOption.heal:type_name -> lilbattle.v1.HealUnitAction
-	29, // 30: lilbattle.v1.SimulateAttackResponse.attacker_damage_distribution:type_name -> lilbattle.v1.SimulateAttackResponse.AttackerDamageDistributionEntry
-	30, // 31: lilbattle.v1.SimulateAttackResponse.defender_damage_distribution:type_name -> lilbattle.v1.SimulateAttackResponse.DefenderDamageDistributionEntry
-	31, // 32: lilbattle.v1.SimulateFixResponse.healing_distribution:type_name -> lilbattle.v1.SimulateFixResponse.HealingDistributionEntry
-	33, // 33: lilbattle.v1.GetGamesResponse.GamesEntry.value:type_name -> lilbattle.v1.Game
-	34, // [34:34] is the sub-list for method output_type
-	34, // [34:34] is the sub-list for method input_type
-	34, // [34:34] is the sub-list for extension type_name
-	34, // [34:34] is the sub-list for extension extendee
-	0,  // [0:34] is the sub-list for field type_name
+	43, // 23: lilbattle.v1.GetOptionsAtResponse.all_paths:type_name -> lilbattle.v1.AllPaths
+	44, // 24: lilbattle.v1.GameOption.move:type_name -> lilbattle.v1.MoveUnitAction
+	45, // 25: lilbattle.v1.GameOption.attack:type_name -> lilbattle.v1.AttackUnitAction
+	46, // 26: lilbattle.v1.GameOption.build:type_name -> lilbattle.v1.BuildUnitAction
+	47, // 27: lilbattle.v1.GameOption.capture:type_name -> lilbattle.v1.CaptureBuildingAction
+	48, // 28: lilbattle.v1.GameOption.end_turn:type_name -> lilbattle.v1.EndTurnAction
+	49, // 29: lilbattle.v1.GameOption.heal:type_name -> lilbattle.v1.HealUnitAction
+	31, // 30: lilbattle.v1.SimulateAttackResponse.attacker_damage_distribution:type_name -> lilbattle.v1.SimulateAttackResponse.AttackerDamageDistributionEntry
+	32, // 31: lilbattle.v1.SimulateAttackResponse.defender_damage_distribution:type_name -> lilbattle.v1.SimulateAttackResponse.DefenderDamageDistributionEntry
+	33, // 32: lilbattle.v1.SimulateFixResponse.healing_distribution:type_name -> lilbattle.v1.SimulateFixResponse.HealingDistributionEntry
+	35, // 33: lilbattle.v1.JoinGameResponse.game:type_name -> lilbattle.v1.Game
+	35, // 34: lilbattle.v1.GetGamesResponse.GamesEntry.value:type_name -> lilbattle.v1.Game
+	35, // [35:35] is the sub-list for method output_type
+	35, // [35:35] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_lilbattle_v1_models_games_service_proto_init() }
@@ -1991,7 +2115,7 @@ func file_lilbattle_v1_models_games_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lilbattle_v1_models_games_service_proto_rawDesc), len(file_lilbattle_v1_models_games_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   32,
+			NumMessages:   34,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -176,7 +176,7 @@ CUSTOMIZABLE TEMPLATES (override via extend):
 
         {{ range .Items }}
         <div id="item-{{ .Id }}"
-             class="entity-card group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+             class="entity-card group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
              data-entity-id="{{ .Id }}">
 
             <!-- Preview Image/Placeholder -->
@@ -196,10 +196,15 @@ CUSTOMIZABLE TEMPLATES (override via extend):
                             {{ if .Name }}{{ .Name }}{{ else }}Untitled{{ end }}
                         </a>
                     </h3>
-                    <!-- Action Menu Button -->
+                    <!-- Action Menu Button - always visible on mobile, hover-reveal on desktop -->
                     {{ if $.ShowActions }}
-                    <button class="entity-actions-btn p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                    <button class="entity-actions-btn p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                             title="Actions"
+                            data-view-url="{{ $.ViewUrl .Id }}"
+                            data-edit-url="{{ $.EditUrl .Id }}"
+                            data-delete-url="{{ $.DeleteUrl .Id }}"
+                            data-entity-name="{{ .Name }}"
+                            data-entity-id="{{ .Id }}"
                             onclick="toggleEntityMenu(this, event)">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
@@ -222,44 +227,38 @@ CUSTOMIZABLE TEMPLATES (override via extend):
                        class="flex-1 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                         View
                     </a>
-                    {{ if $.EditUrl .Id }}
+                    {{/* Edit button - hidden on mobile (use dropdown instead), shown on desktop hover only */}}
+                    {{ if and $.ShowEditButton ($.EditUrl .Id) }}
                     <a href="{{ $.EditUrl .Id }}"
-                       class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                       class="hidden sm:hidden sm:group-hover:inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </a>
                     {{ end }}
                 </div>
-
-                <!-- Action Dropdown Menu -->
-                {{ if $.ShowActions }}
-                <div class="entity-action-menu hidden absolute right-4 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-20">
-                    <div class="py-1" role="menu">
-                        <a href="{{ $.ViewUrl .Id }}"
-                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            View
-                        </a>
-                        {{ if $.EditUrl .Id }}
-                        <a href="{{ $.EditUrl .Id }}"
-                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Edit
-                        </a>
-                        {{ end }}
-                        {{ if $.DeleteUrl .Id }}
-                        <hr class="my-1 border-gray-200 dark:border-gray-600">
-                        <button onclick="confirmEntityDelete('{{ $.DeleteUrl .Id }}', '{{ .Id }}', '{{ .Name }}')"
-                                class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Delete
-                        </button>
-                        {{ end }}
-                    </div>
-                </div>
-                {{ end }}
             </div>
         </div>
         {{ end }}
     </div>
+
+    <!-- Shared Action Dropdown Menu (positioned dynamically via JS) -->
+    {{ if .ShowActions }}
+    <div id="entity-action-menu" class="entity-action-menu hidden fixed w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+        <div class="py-1" role="menu">
+            <a id="entity-menu-view" href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                View
+            </a>
+            <a id="entity-menu-edit" href="#" class="hidden items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                Edit
+            </a>
+            <hr id="entity-menu-divider" class="hidden my-1 border-gray-200 dark:border-gray-600">
+            <button id="entity-menu-delete" class="hidden items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                Delete
+            </button>
+        </div>
+    </div>
+    {{ end }}
 </div>
 {{ end }}
 
@@ -299,7 +298,7 @@ CUSTOMIZABLE TEMPLATES (override via extend):
                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
                                 View
                             </a>
-                            {{ if $.EditUrl .Id }}
+                            {{ if and $.ShowEditButton ($.EditUrl .Id) }}
                             <a href="{{ $.EditUrl .Id }}"
                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                 Edit
@@ -393,27 +392,78 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Toggle action menu for grid cards
+// Toggle action menu for grid cards - uses shared dropdown positioned dynamically
 function toggleEntityMenu(button, event) {
     event.preventDefault();
     event.stopPropagation();
 
-    const card = button.closest('.entity-card');
-    const menu = card.querySelector('.entity-action-menu');
+    const menu = document.getElementById('entity-action-menu');
+    if (!menu) return;
 
-    if (menu) {
-        menu.classList.toggle('hidden');
-        // Close other menus
-        document.querySelectorAll('.entity-action-menu').forEach(otherMenu => {
-            if (otherMenu !== menu) otherMenu.classList.add('hidden');
-        });
+    const isCurrentlyOpen = !menu.classList.contains('hidden') && menu.dataset.activeButton === button.dataset.entityId;
+
+    // Close menu if clicking same button
+    if (isCurrentlyOpen) {
+        menu.classList.add('hidden');
+        return;
     }
+
+    // Get URLs from button data attributes
+    const viewUrl = button.dataset.viewUrl;
+    const editUrl = button.dataset.editUrl;
+    const deleteUrl = button.dataset.deleteUrl;
+    const entityName = button.dataset.entityName;
+    const entityId = button.dataset.entityId;
+
+    // Populate menu links
+    const viewLink = document.getElementById('entity-menu-view');
+    const editLink = document.getElementById('entity-menu-edit');
+    const deleteBtn = document.getElementById('entity-menu-delete');
+    const divider = document.getElementById('entity-menu-divider');
+
+    if (viewLink) viewLink.href = viewUrl;
+
+    // Show/hide Edit based on URL availability
+    if (editLink) {
+        editLink.href = editUrl || '#';
+        if (editUrl) {
+            editLink.classList.remove('hidden');
+            editLink.classList.add('flex');
+        } else {
+            editLink.classList.add('hidden');
+            editLink.classList.remove('flex');
+        }
+    }
+
+    // Show/hide Delete and divider based on URL availability
+    if (deleteBtn) {
+        deleteBtn.onclick = () => confirmEntityDelete(deleteUrl, entityId, entityName);
+        if (deleteUrl) {
+            deleteBtn.classList.remove('hidden');
+            deleteBtn.classList.add('flex');
+            if (divider) divider.classList.remove('hidden');
+        } else {
+            deleteBtn.classList.add('hidden');
+            deleteBtn.classList.remove('flex');
+            if (divider) divider.classList.add('hidden');
+        }
+    }
+
+    // Position menu near the button
+    const rect = button.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.style.left = Math.max(8, rect.right - 192) + 'px'; // 192 = w-48, min 8px from edge
+
+    // Track which button opened this menu
+    menu.dataset.activeButton = entityId;
+    menu.classList.remove('hidden');
 }
 
 // Close menus when clicking outside
 document.addEventListener('click', function(event) {
     if (!event.target.closest('.entity-actions-btn') && !event.target.closest('.entity-action-menu')) {
-        document.querySelectorAll('.entity-action-menu').forEach(menu => menu.classList.add('hidden'));
+        const menu = document.getElementById('entity-action-menu');
+        if (menu) menu.classList.add('hidden');
     }
 });
 

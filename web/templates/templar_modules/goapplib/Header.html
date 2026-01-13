@@ -104,9 +104,7 @@ CUSTOMIZABLE BLOCKS:
 </nav>
 {{ end }}
 
-<!-- Extra header buttons slot for page-specific actions -->
-{{ define "ExtraHeaderButtons" }}
-{{ end }}
+<!-- Extra header buttons slot - pages define ExtraHeaderButtons to add buttons here -->
 
 <!-- Header Actions Drawer - Responsive navigation drawer -->
 {{ define "HeaderActionsDrawer" }}
@@ -146,8 +144,8 @@ CUSTOMIZABLE BLOCKS:
                 {{ end }}
             </div>
 
-            <!-- Page-specific buttons -->
-            {{ template "ExtraHeaderButtons" . }}
+            <!-- Page-specific buttons (pages override by defining ExtraHeaderButtons) -->
+            {{ block "ExtraHeaderButtons" . }}{{ end }}
         </div>
     </div>
 </div>

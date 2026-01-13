@@ -96,20 +96,48 @@ ww migrate http://localhost:6060/api/v1/worlds/Desert \
 
 ## Credential Storage
 
+The CLI uses the `oneauth/client` package for credential management, which provides:
+- Unified credential storage interface
+- Automatic token refresh on 401 or before expiry
+- Thread-safe credential access
+
 Credentials are stored in `~/.config/lilbattle/credentials.json` with 0600 permissions:
 
 ```json
 {
   "servers": {
     "http://localhost:8080": {
-      "token": "eyJhbGc...",
-      "user_id": "",
+      "access_token": "eyJhbGc...",
+      "refresh_token": "abc123...",
+      "token_type": "Bearer",
+      "user_id": "user123",
       "user_email": "user@example.com",
+      "scope": "read write profile offline",
       "expires_at": "2025-03-01T00:00:00Z",
       "created_at": "2025-01-15T00:00:00Z"
     }
   }
 }
+```
+
+### oneauth/client Integration
+
+The CLI imports the oneauth/client package:
+
+```go
+import (
+    "github.com/panyam/oneauth/client"
+    "github.com/panyam/oneauth/client/stores/fs"
+)
+
+// Create credential store
+store, err := fs.NewFSCredentialStore("", "lilbattle")
+
+// Create auth client with auto-refresh
+authClient := client.NewAuthClient(serverURL, store)
+
+// Login via OAuth2 password grant
+cred, err := authClient.Login(email, password, "read write profile offline")
 ```
 
 ## Environment Variables

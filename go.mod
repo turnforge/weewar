@@ -18,7 +18,7 @@ require (
 	github.com/panyam/goapplib v0.0.13
 	github.com/panyam/gocurrent v0.0.10
 	github.com/panyam/goutils v0.1.13
-	github.com/panyam/oneauth v0.0.20
+	github.com/panyam/oneauth v0.0.21
 	github.com/panyam/protoc-gen-dal v0.0.10
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
 	github.com/panyam/servicekit v0.0.4
@@ -29,6 +29,7 @@ require (
 	go.opentelemetry.io/otel v1.38.0
 	golang.org/x/image v0.34.0
 	golang.org/x/oauth2 v0.34.0
+	golang.org/x/term v0.39.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
@@ -92,7 +93,6 @@ require (
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.259.0 // indirect
@@ -113,6 +113,6 @@ require (
 
 // replace github.com/panyam/servicekit v0.0.4 => ./locallinks/newstack/servicekit
 
-// replace github.com/panyam/oneauth v0.0.20 => ./locallinks/newstack/oneauth
+// replace github.com/panyam/oneauth v0.0.21 => ./locallinks/newstack/oneauth
 
 // replace github.com/panyam/goapplib v0.0.13 => ./locallinks/newstack/goapplib

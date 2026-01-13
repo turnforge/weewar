@@ -36,7 +36,12 @@ func runLogout(cmd *cobra.Command, args []string) error {
 
 	// If no server specified, list all servers
 	if len(args) == 0 {
-		if len(store.Servers) == 0 {
+		servers, err := store.ListServers()
+		if err != nil {
+			return fmt.Errorf("failed to list servers: %w", err)
+		}
+
+		if len(servers) == 0 {
 			if formatter.JSON {
 				return formatter.PrintJSON(map[string]any{
 					"servers": []any{},
@@ -47,22 +52,29 @@ func runLogout(cmd *cobra.Command, args []string) error {
 		}
 
 		if formatter.JSON {
-			servers := make([]map[string]any, 0, len(store.Servers))
-			for serverURL, cred := range store.Servers {
-				servers = append(servers, map[string]any{
-					"server":     serverURL,
-					"user_email": cred.UserEmail,
-					"expires_at": cred.ExpiresAt,
-					"expired":    cred.IsExpired(),
-				})
+			serverList := make([]map[string]any, 0, len(servers))
+			for _, serverURL := range servers {
+				cred, _ := store.GetCredential(serverURL)
+				if cred != nil {
+					serverList = append(serverList, map[string]any{
+						"server":     serverURL,
+						"user_email": cred.UserEmail,
+						"expires_at": cred.ExpiresAt,
+						"expired":    cred.IsExpired(),
+					})
+				}
 			}
 			return formatter.PrintJSON(map[string]any{
-				"servers": servers,
+				"servers": serverList,
 			})
 		}
 
 		fmt.Println("Logged in servers:")
-		for serverURL, cred := range store.Servers {
+		for _, serverURL := range servers {
+			cred, _ := store.GetCredential(serverURL)
+			if cred == nil {
+				continue
+			}
 			status := ""
 			if cred.IsExpired() {
 				status = " (expired)"

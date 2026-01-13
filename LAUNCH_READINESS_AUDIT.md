@@ -172,11 +172,26 @@ The registration system uses a **federated identity model** with three core enti
 
 | Priority | Task | Status |
 |----------|------|--------|
-| P1 | Normalize emails before storage (lowercase, trim) | TODO |
-| P1 | Return clear "email already registered" error on signup | TODO |
+| P1 | Normalize emails before storage (lowercase, trim) | DONE |
+| P1 | Return clear "email already registered" error on signup | TODO (in oneauth library) |
 | P2 | Add manual Twitter account linking flow | TODO |
-| P2 | Enforce username uniqueness if needed | TODO |
+| P2 | Enforce nickname uniqueness | DONE |
 | P2 | Audit email enumeration in all auth endpoints | TODO |
+
+#### Implementation Details
+
+**Email Normalization** (implemented in PR):
+- `web/server/user.go`: `normalizeEmail()` function normalizes in `EnsureAuthUser` for OAuth
+- `web/server/auth.go`: `normalizedSignupValidator()` normalizes in local signup flow
+- Normalization: lowercase + trim whitespace
+
+**Nickname Uniqueness** (implemented in PR):
+- Uses Identity store as secondary index (type="nickname", key=normalized_nickname)
+- Case-insensitive comparison (stored lowercase)
+- Original case preserved in user profile
+- Old nickname released when user changes nickname
+- New nickname registered during OAuth signup
+- Files: `web/server/ProfilePage.go`, `web/server/user.go`
 
 ---
 

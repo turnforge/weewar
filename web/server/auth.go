@@ -5,12 +5,24 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/alexedwards/scs/v2"
 	goalservices "github.com/panyam/goapplib/services"
 	oa "github.com/panyam/oneauth"
 	oa2 "github.com/panyam/oneauth/oauth2"
 )
+
+// normalizedSignupValidator normalizes email to lowercase before running default validation.
+func normalizedSignupValidator(creds *oa.Credentials) error {
+	// Normalize email for consistent storage
+	if creds.Email != nil && *creds.Email != "" {
+		normalized := strings.ToLower(strings.TrimSpace(*creds.Email))
+		creds.Email = &normalized
+	}
+	// Run default validation
+	return oa.DefaultSignupValidator(creds)
+}
 
 func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth) {
 	// Initialize authentication
@@ -39,7 +51,7 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 	localAuth := &oa.LocalAuth{
 		ValidateCredentials:      authService.ValidateLocalCredentials,
 		CreateUser:               authService.CreateLocalUser,
-		ValidateSignup:           nil, // Use default validator
+		ValidateSignup:           normalizedSignupValidator, // Normalize email before default validation
 		EmailSender:              &oa.ConsoleEmailSender{},
 		TokenStore:               authService.TokenStore,
 		BaseURL:                  baseURL,
@@ -73,7 +85,7 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 			return
 		}
 
-		email := r.FormValue("email")
+		email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 		if email == "" {
 			http.Redirect(w, r, "/profile?verification_error=Email is required", http.StatusFound)
 			return

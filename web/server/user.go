@@ -2,11 +2,17 @@ package server
 
 import (
 	"os"
+	"strings"
 
 	oa "github.com/panyam/oneauth"
 	svc "github.com/turnforge/lilbattle/services"
 	"golang.org/x/oauth2"
 )
+
+// normalizeEmail lowercases and trims an email address for consistent storage.
+func normalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
+}
 
 // testAuthEnabled returns true if test authentication is enabled via env var.
 // This should only be enabled in development/testing environments.
@@ -45,13 +51,35 @@ func (n *LilBattleApp) EnsureAuthUser(authtype string, provider string, token *o
 		}
 	}
 
-	// Assign a random nickname if not already set
-	if _, hasNickname := userInfo["nickname"]; !hasNickname {
-		userInfo["nickname"] = GenerateRandomNickname()
+	// Normalize email for consistent storage (prevents case-sensitivity issues)
+	if email, ok := userInfo["email"].(string); ok && email != "" {
+		userInfo["email"] = normalizeEmail(email)
 	}
 
-	user, err := n.ClientMgr.GetAuthService().EnsureAuthUser(authtype, provider, token, userInfo)
-	return user.(*svc.User), err
+	// Assign a random nickname if not already set
+	var generatedNickname string
+	if _, hasNickname := userInfo["nickname"]; !hasNickname {
+		generatedNickname = GenerateRandomNickname()
+		userInfo["nickname"] = generatedNickname
+	}
+
+	authService := n.ClientMgr.GetAuthService()
+	user, err := authService.EnsureAuthUser(authtype, provider, token, userInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	// Register nickname in identity store for uniqueness tracking
+	// Only do this for newly generated nicknames during signup
+	if generatedNickname != "" {
+		normalizedNickname := strings.ToLower(generatedNickname)
+		_, _, identErr := authService.GetIdentity("nickname", normalizedNickname, true)
+		if identErr == nil {
+			authService.SetUserForIdentity("nickname", normalizedNickname, user.Id())
+		}
+	}
+
+	return user.(*svc.User), nil
 }
 
 func (n *LilBattleApp) ValidateUsernamePassword(username string, password string) (out oa.User, err error) {

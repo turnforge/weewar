@@ -121,9 +121,37 @@ func (p *ProfilePage) handlePost(r *http.Request, w http.ResponseWriter, app *go
 		return nil, true
 	}
 
-	// Update the nickname in profile
-	// Profile() returns a reference to the user's internal profile map
+	// Check nickname uniqueness using Identity store as secondary index
+	// Normalize nickname for case-insensitive comparison
+	normalizedNickname := strings.ToLower(nickname)
+	existingIdentity, _, _ := ctx.AuthService.GetIdentity("nickname", normalizedNickname, false)
+	if existingIdentity != nil && existingIdentity.UserID != "" && existingIdentity.UserID != userID {
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]string{"error": "This nickname is already taken"})
+		return nil, true
+	}
+
+	// Get old nickname to release it
 	profile := user.Profile()
+	oldNickname, _ := profile["nickname"].(string)
+	oldNormalizedNickname := strings.ToLower(strings.TrimSpace(oldNickname))
+
+	// Release old nickname by clearing its user ID (allows others to claim it)
+	if oldNormalizedNickname != "" && oldNormalizedNickname != normalizedNickname {
+		if oldIdentity, _, _ := ctx.AuthService.GetIdentity("nickname", oldNormalizedNickname, false); oldIdentity != nil {
+			ctx.AuthService.SetUserForIdentity("nickname", oldNormalizedNickname, "")
+		}
+	}
+
+	// Claim the new nickname by setting/updating the identity
+	_, _, err = ctx.AuthService.GetIdentity("nickname", normalizedNickname, true)
+	if err != nil {
+		log.Printf("Error creating nickname identity for user %s: %v", userID, err)
+	} else {
+		ctx.AuthService.SetUserForIdentity("nickname", normalizedNickname, userID)
+	}
+
+	// Update the nickname in profile (store original case)
 	profile["nickname"] = nickname
 
 	// Save the user with updated profile

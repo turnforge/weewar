@@ -5,11 +5,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/alexedwards/scs/v2"
 	goalservices "github.com/panyam/goapplib/services"
 	oa "github.com/panyam/oneauth"
 	oa2 "github.com/panyam/oneauth/oauth2"
+	oafs "github.com/panyam/oneauth/stores/fs"
 )
 
 func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth) {
@@ -52,6 +54,23 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 
 	oneauth.AddAuth("/login", localAuth)
 	oneauth.AddAuth("/signup", http.HandlerFunc(localAuth.HandleSignup))
+
+	// API/CLI token-based authentication
+	jwtSecret := os.Getenv("JWT_CLI_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "lilbattle-dev-secret-change-in-production" // Dev fallback
+	}
+	refreshTokenStore := oafs.NewFSRefreshTokenStore(storagePath)
+	apiAuth := &oa.APIAuth{
+		RefreshTokenStore:   refreshTokenStore,
+		JWTSecretKey:        jwtSecret,
+		JWTIssuer:           "lilbattle",
+		JWTAudience:         "cli",
+		AccessTokenExpiry:   30 * 24 * time.Hour, // 30 days for CLI tokens
+		RefreshTokenExpiry:  90 * 24 * time.Hour, // 90 days
+		ValidateCredentials: authService.ValidateLocalCredentials,
+	}
+	oneauth.AddAuth("/cli/token", apiAuth)
 	oneauth.AddAuth("/verify-email", http.HandlerFunc(localAuth.HandleVerifyEmail))
 	oneauth.AddAuth("/forgot-password", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {

@@ -19,8 +19,22 @@ type ConnectGamesClient struct {
 
 // NewConnectGamesClient creates a new Connect client for the GamesService
 func NewConnectGamesClient(serverURL string) *ConnectGamesClient {
+	return NewConnectGamesClientWithAuth(serverURL, "")
+}
+
+// NewConnectGamesClientWithAuth creates a new Connect client with authentication
+func NewConnectGamesClientWithAuth(serverURL, token string) *ConnectGamesClient {
+	httpClient := http.DefaultClient
+	if token != "" {
+		httpClient = &http.Client{
+			Transport: &authTransport{
+				base:  http.DefaultTransport,
+				token: token,
+			},
+		}
+	}
 	client := lilbattlev1connect.NewGamesServiceClient(
-		http.DefaultClient,
+		httpClient,
 		serverURL,
 	)
 	gc := &ConnectGamesClient{

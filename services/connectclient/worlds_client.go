@@ -9,6 +9,19 @@ import (
 	"github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services/lilbattlev1connect"
 )
 
+// authTransport wraps an http.RoundTripper to add Authorization headers
+type authTransport struct {
+	base  http.RoundTripper
+	token string
+}
+
+func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.token != "" {
+		req.Header.Set("Authorization", "Bearer "+t.token)
+	}
+	return t.base.RoundTrip(req)
+}
+
 // ConnectWorldsClient wraps a Connect client for the WorldsService
 type ConnectWorldsClient struct {
 	client lilbattlev1connect.WorldsServiceClient
@@ -16,8 +29,22 @@ type ConnectWorldsClient struct {
 
 // NewConnectWorldsClient creates a new Connect client for the WorldsService
 func NewConnectWorldsClient(serverURL string) *ConnectWorldsClient {
+	return NewConnectWorldsClientWithAuth(serverURL, "")
+}
+
+// NewConnectWorldsClientWithAuth creates a new Connect client with authentication
+func NewConnectWorldsClientWithAuth(serverURL, token string) *ConnectWorldsClient {
+	httpClient := http.DefaultClient
+	if token != "" {
+		httpClient = &http.Client{
+			Transport: &authTransport{
+				base:  http.DefaultTransport,
+				token: token,
+			},
+		}
+	}
 	client := lilbattlev1connect.NewWorldsServiceClient(
-		http.DefaultClient,
+		httpClient,
 		serverURL,
 	)
 	return &ConnectWorldsClient{client: client}

@@ -36,10 +36,12 @@ func GetGameContext() (*GameContext, error) {
 	var svc services.GamesService
 	var isRemote bool
 	if serverURL != "" {
-		svc = connectclient.NewConnectGamesClient(serverURL)
+		// Get auth token for this server
+		token := GetTokenForServer(serverURL)
+		svc = connectclient.NewConnectGamesClientWithAuth(serverURL, token)
 		isRemote = true
 		if isVerbose() {
-			fmt.Printf("[VERBOSE] Connecting to server: %s\n", serverURL)
+			fmt.Printf("[VERBOSE] Connecting to server: %s (auth: %v)\n", serverURL, token != "")
 		}
 	} else {
 		svc = fsbe.NewFSGamesService("", nil)

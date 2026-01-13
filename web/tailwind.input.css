@@ -135,10 +135,27 @@ html, body {
   @apply text-xs text-gray-400 dark:text-gray-500 font-mono;
 }
 
-/* Wrapper styling for footer ads */
+/* Wrapper styling for footer ads - sticky at bottom */
 .ad-footer-wrapper {
   @apply bg-gray-50 dark:bg-gray-900/50 py-4;
   @apply border-t border-gray-200 dark:border-gray-700;
+  @apply fixed bottom-0 left-0 right-0 z-40;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dark .ad-footer-wrapper {
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Add padding to body when sticky footer ad is present */
+body:has(.ad-footer-wrapper) {
+  padding-bottom: 110px; /* 90px ad + 20px padding */
+}
+
+@media (max-width: 767px) {
+  body:has(.ad-footer-wrapper) {
+    padding-bottom: 70px; /* 50px mobile ad + 20px padding */
+  }
 }
 
 /* Responsive: Hide desktop ads on mobile, show mobile ads */

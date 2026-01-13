@@ -16,7 +16,7 @@ binlocal:
 
 deploy: checklinks ui cli wasm 
 	rm -Rf locallinks ; mkdir locallinks
-	rm -Rf /tmp/lbdeployments
+	rm -Rf /tmp/lbdeployments && mkdir /tmp/lbdeployments
 	mv web/node_modules /tmp/lbdeployments
 	mv web/pnpm-lock.yaml /tmp/lbdeployments
 	gcloud app deploy --project weewar --verbosity=info
@@ -149,6 +149,9 @@ resymlink:
 up: ensurenetworks
 	docker compose --env-file .env.dev -f docker-compose.yml down
 	BUILDKIT_PROGRESS=plain docker compose --env-file .env.dev -f docker-compose.yml up
+
+prodlogs:
+	gcloud app logs tail -s default
 
 logs:
 	docker compose --env-file .env.dev -f docker-compose.yml logs -f

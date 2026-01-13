@@ -43,7 +43,7 @@ Examples:
   ww login prod --token eyJhbGc...
   ww login prod --reset                    # Force re-authentication
 
-After login, use 'ww select <profile>' to set it as the active profile.`,
+The profile is automatically selected as active after successful login.`,
 	Args: cobra.ExactArgs(1),
 	RunE: runLogin,
 }
@@ -192,6 +192,11 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to save credentials: %w", err)
 	}
 
+	// Auto-select this profile as the current one
+	if err := store.SetCurrentProfile(profileNameArg); err != nil {
+		return fmt.Errorf("failed to set current profile: %w", err)
+	}
+
 	if formatter.JSON {
 		return formatter.PrintJSON(map[string]any{
 			"profile":    profileNameArg,
@@ -203,11 +208,10 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	fmt.Printf("Successfully logged in to profile '%s'\n", profileNameArg)
+	fmt.Printf("Successfully logged in to profile '%s' (now active)\n", profileNameArg)
 	fmt.Printf("  Host: %s\n", profile.Host)
 	fmt.Printf("  Email: %s\n", creds.UserEmail)
 	fmt.Printf("  Expires: %s\n", creds.ExpiresAt.Format(time.RFC3339))
-	fmt.Printf("\nUse 'ww select %s' to set this as your active profile.\n", profileNameArg)
 
 	return nil
 }

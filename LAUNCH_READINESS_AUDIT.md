@@ -1,7 +1,7 @@
 # LilBattle Launch Readiness Audit
 
 **Audit Date**: January 9, 2026
-**Last Updated**: January 11, 2026
+**Last Updated**: January 13, 2026
 **Overall Status**: READY for public launch
 **Estimated Completion**: 95%
 
@@ -100,6 +100,83 @@ LilBattle has a solid technical foundation with production-ready core gameplay, 
 | P1 | Add input validation framework | 🟡 TODO |
 | P2 | Add CSRF tokens to all forms | TODO |
 | P2 | Implement audit logging | TODO |
+
+---
+
+### 1.1 User Registration Flow Audit
+
+**Audit Date**: January 13, 2026
+
+#### Architecture Overview
+
+The registration system uses a **federated identity model** with three core entities:
+
+| Entity | Purpose | Storage |
+|--------|---------|---------|
+| User | Core profile (ID, ProfileInfo map) | users/{userId}/user.json |
+| Identity | Unique login key (`type:key` e.g., `email:alice@example.com`) | identities/ |
+| Channel | OAuth provider credentials (google, github, twitter) | channels/ |
+
+#### Email Uniqueness: ENFORCED
+
+- Email uniqueness is enforced through the Identity composite key (`identityType:identityKey`)
+- `GetIdentity("email", email, true)` returns existing identity or creates new one
+- Same email across multiple OAuth providers correctly links to the same user
+- **Status**: Working correctly
+
+#### Username Uniqueness: NOT ENFORCED
+
+- Username stored in `user.ProfileInfo.Properties["username"]`
+- No validation or uniqueness check exists
+- Multiple users can have identical usernames
+- **Risk: Low** - Username is display-only; email is used for authentication
+- **Recommendation**: Consider enforcing if usernames become user-facing identifiers
+
+#### OAuth Account Linking
+
+| Provider | Email Provided | Linking Behavior |
+|----------|---------------|------------------|
+| Google | Yes | Links to existing user with same email |
+| GitHub | Yes | Links to existing user with same email |
+| Twitter | No (synthetic) | Creates new account every time |
+
+**Twitter Issue**: Twitter doesn't provide email in basic scope. Uses `username@twitter.local` as synthetic email, meaning:
+- Twitter accounts are never linked to existing accounts
+- Same person logging in via Google AND Twitter creates two separate accounts
+- **Recommendation**: Add manual account linking flow or prompt during login
+
+#### Registration Edge Cases
+
+| Edge Case | Current Behavior | Recommendation |
+|-----------|-----------------|----------------|
+| Email case sensitivity | Not normalized | Normalize emails (lowercase, trim) |
+| Duplicate email signup | Generic "Failed to create user" | Return specific "email already registered" |
+| Provider email change | New account created | Document limitation |
+| Email enumeration | May reveal if email exists | Ensure consistent error messages |
+
+#### Local Registration Validation (DefaultSignupValidator)
+
+- Username: 3-20 chars, alphanumeric/underscore/hyphen
+- Email: Required, valid format
+- Password: Minimum 8 characters
+
+#### Files Reviewed
+
+- `web/server/auth.go` - Auth service setup
+- `web/server/user.go` - User retrieval and EnsureAuthUser
+- `web/server/twitter_oauth2.go` - Custom Twitter OAuth with PKCE
+- `services/models.go` - User, Identity, Channel models
+- External: `goapplib/services/auth_service.go`, `oneauth/` library
+
+#### Registration Recommendations
+
+| Priority | Task | Status |
+|----------|------|--------|
+| P1 | Normalize emails before storage (lowercase, trim) | TODO |
+| P1 | Return clear "email already registered" error on signup | TODO |
+| P2 | Add manual Twitter account linking flow | TODO |
+| P2 | Enforce username uniqueness if needed | TODO |
+| P2 | Audit email enumeration in all auth endpoints | TODO |
 
 ---
 

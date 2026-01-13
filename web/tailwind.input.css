@@ -157,16 +157,8 @@ html, body {
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Add padding to body when sticky footer ad is present */
-body:has(.ad-footer-wrapper) {
-  padding-bottom: 110px; /* 90px ad + 20px padding */
-}
-
-@media (max-width: 767px) {
-  body:has(.ad-footer-wrapper) {
-    padding-bottom: 70px; /* 50px mobile ad + 20px padding */
-  }
-}
+/* Note: Footer margin-bottom is handled in Footer.html template via Tailwind classes
+   mb-28 (112px mobile) and md:mb-[118px] (118px desktop) when ads are enabled */
 
 /* Listing page native ads - match card styling */
 .ad-listing-card {

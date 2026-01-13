@@ -2,23 +2,7 @@
 {{# include "components/AdSlot.html" #}}
 
 {{ define "Footer" }}
-<!-- Sticky Footer Ad (fixed at bottom, independent of footer scroll) -->
-{{ if and (Ctx).AdsEnabled (Ctx).AdsFooterEnabled }}
-<div class="ad-footer-wrapper">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-        <!-- Desktop: Leaderboard (728x90) -->
-        <div class="hidden md:block">
-            {{ template "AdSlot" (dict "SlotId" "footer-leaderboard" "Size" "leaderboard" "Position" "footer") }}
-        </div>
-        <!-- Mobile: Banner (320x50) -->
-        <div class="md:hidden">
-            {{ template "AdSlot" (dict "SlotId" "footer-mobile" "Size" "mobile-banner" "Position" "footer") }}
-        </div>
-    </div>
-</div>
-{{ end }}
-
-<footer class="border-t border-gray-200 dark:border-gray-700 mt-auto">
+<footer class="border-t border-gray-200 dark:border-gray-700 mt-auto {{ if and (Ctx).AdsEnabled (Ctx).AdsFooterEnabled }}mb-28 md:mb-[118px]{{ end }}">
     <!-- Footer Links -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
@@ -33,14 +17,14 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer Ad Slot (respects AdsEnabled and AdsFooterEnabled flags) -->
-    {{ if and (Ctx).AdsEnabled (Ctx).AdsFooterEnabled }}
-    <div class="ad-footer-wrapper">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-            {{ template "AdSlot" (dict "SlotId" "footer-ad" "Size" "leaderboard" "Position" "footer") }}
-        </div>
-    </div>
-    {{ end }}
 </footer>
+
+<!-- Sticky Footer Ad (fixed at bottom of viewport) -->
+{{ if and (Ctx).AdsEnabled (Ctx).AdsFooterEnabled }}
+<div class="ad-footer-wrapper">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+        {{ template "AdSlot" (dict "SlotId" "footer-ad" "Size" "leaderboard" "Position" "footer") }}
+    </div>
+</div>
+{{ end }}
 {{ end }}

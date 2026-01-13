@@ -4158,7 +4158,8 @@ html, body {
   border-color: rgb(55 65 81 / var(--tw-border-opacity, 1));
 }
 
-/* Ad sizes are handled by Google's responsive format (data-ad-format="auto") */
+/* Note: Footer margin-bottom is handled in Footer.html template via Tailwind classes
+   mb-28 (112px mobile) and md:mb-[118px] (118px desktop) when ads are enabled */
 
 /* Listing page native ads - match card styling */
 

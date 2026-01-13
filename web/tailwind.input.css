@@ -105,6 +105,11 @@ html, body {
   @apply flex justify-center items-center overflow-hidden;
 }
 
+.ad-container .adsbygoogle {
+  width: 100%;
+  height: 100%;
+}
+
 /* Size variants - Desktop */
 .ad-leaderboard {
   width: 728px;
@@ -146,21 +151,7 @@ html, body {
   @apply border-t border-gray-200 dark:border-gray-700;
 }
 
-/* Responsive: Hide desktop ads on mobile, show mobile ads */
-@media (max-width: 767px) {
-  .ad-leaderboard {
-    display: none;
-  }
-  .ad-skyscraper {
-    display: none;
-  }
-}
-
-@media (min-width: 768px) {
-  .ad-mobile-banner {
-    display: none;
-  }
-}
+/* Ad sizes are handled by Google's responsive format (data-ad-format="auto") */
 
 /* Listing page native ads - match card styling */
 .ad-listing-card {

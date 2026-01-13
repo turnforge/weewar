@@ -49,6 +49,7 @@ type LilBattleApp struct {
 	AdsHomeEnabled    bool   // Homepage mid-section: LILBATTLE_ADS_HOME (default: true)
 	AdsListingEnabled bool   // Listing pages: LILBATTLE_ADS_LISTING (default: true)
 	AdNetworkId       string // Google AdSense publisher ID: LILBATTLE_AD_NETWORK_ID
+	AdSlotId          string // Google AdSense ad unit slot ID: LILBATTLE_AD_SLOT_ID
 
 	mux     *http.ServeMux
 	BaseUrl string
@@ -75,6 +76,7 @@ func NewLilBattleApp(clientMgr *services.ClientMgr) (lilbattleApp *LilBattleApp,
 		AdsHomeEnabled:    os.Getenv("LILBATTLE_ADS_HOME") != "false",
 		AdsListingEnabled: os.Getenv("LILBATTLE_ADS_LISTING") != "false",
 		AdNetworkId:       os.Getenv("LILBATTLE_AD_NETWORK_ID"),
+		AdSlotId:          os.Getenv("LILBATTLE_AD_SLOT_ID"),
 	}
 
 	// Setup templates with SourceLoader for @goapplib/ vendored dependencies

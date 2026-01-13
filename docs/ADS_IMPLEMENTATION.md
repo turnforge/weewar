@@ -1,7 +1,8 @@
 # Ads Implementation Plan
 
 **Created**: January 12, 2026
-**Status**: Ready for Implementation
+**Updated**: January 12, 2026
+**Status**: Implemented
 **Reference**: [MONETIZATION.md](../MONETIZATION.md)
 
 ---
@@ -9,6 +10,41 @@
 ## Overview
 
 This document provides the detailed technical implementation plan for Phase 1 ads with feature flags.
+
+## Key Learnings from Implementation
+
+### CSP (Content Security Policy)
+Google Ads uses many domains. Use wildcards for comprehensive coverage:
+```go
+cspGoogleDomains = "https://*.google.com https://*.googlesyndication.com https://*.googleadservices.com https://*.doubleclick.net https://*.adtrafficquality.google https://*.gstatic.com https://*.googleapis.com https://*.googletagmanager.com https://*.google-analytics.com https://*.2mdn.net https://*.ggpht.com"
+```
+
+### ads.txt Required
+AdSense requires an `ads.txt` file at the site root for ad inventory authorization:
+```
+google.com, pub-XXXXXXXX, DIRECT, f08c47fec0942fa0
+```
+The meta tag for site verification is separate - you need both.
+
+### Ad Container Sizing
+- **Don't use `data-ad-format="auto"`** - it ignores your container's dimensions and can create huge ad blocks
+- The `<ins class="adsbygoogle">` element needs explicit dimensions or CSS to inherit from parent:
+  ```css
+  .ad-container .adsbygoogle {
+    width: 100%;
+    height: 100%;
+  }
+  ```
+
+### Single Responsive Ad
+- Don't render separate mobile/desktop ad slots with CSS hiding (causes "availableWidth=0" errors)
+- Use one ad slot per location - Google's responsive format handles sizing
+- Hidden elements (via `display:none`) cause `adsbygoogle.push()` to fail
+
+### Slot IDs
+- `data-ad-slot` must be a **numeric ID from AdSense**, not a text string
+- Create ad units in AdSense dashboard to get proper slot IDs
+- Without a valid slot ID, use `AdSlotId` from context (if configured)
 
 ## 1. Feature Flags
 

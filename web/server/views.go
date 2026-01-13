@@ -120,6 +120,20 @@ func (n *RootViewsHandler) setupRoutes() {
 		http.Redirect(w, r, "/worlds/", http.StatusMovedPermanently)
 	})
 
+	// ads.txt for Google AdSense verification
+	n.mux.HandleFunc("/ads.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		// Extract pub ID from AdNetworkId (ca-pub-XXXXX -> pub-XXXXX)
+		pubId := n.LilBattleApp.AdNetworkId
+		if len(pubId) > 3 && pubId[:3] == "ca-" {
+			pubId = pubId[3:] // Remove "ca-" prefix
+		}
+		if pubId != "" {
+			// Google AdSense ads.txt format: google.com, pub-ID, DIRECT, TAG-ID
+			fmt.Fprintf(w, "google.com, %s, DIRECT, f08c47fec0942fa0\n", pubId)
+		}
+	})
+
 	// Standalone pages using goal.Register
 	goal.Register[*GenericPage](n.GoalApp, n.mux, "/about", goal.WithTemplate("AboutPage"))
 	goal.Register[*GenericPage](n.GoalApp, n.mux, "/contact", goal.WithTemplate("ContactUsPage"))

@@ -5,9 +5,12 @@
   It respects the AdsEnabled flag and gracefully degrades when no network ID is configured.
 
   Parameters (via .):
-    - SlotId: string - Unique identifier for this ad slot (required)
+    - SlotId: string - Unique HTML identifier for this ad slot (required)
     - Size: string - "leaderboard" | "mrec" | "skyscraper" | "mobile-banner" (required)
     - Position: string - "footer" | "home-mid" | "listing" | "sidebar" (optional, for analytics)
+
+  Note: Uses (Ctx).AdSlotId from context for the Google AdSense slot ID.
+  If not configured, falls back to auto-sized responsive ads without a specific slot.
 
   Usage:
     {{ template "AdSlot" (dict "SlotId" "footer-1" "Size" "leaderboard" "Position" "footer") }}
@@ -24,14 +27,11 @@
 {{/* Production mode: render actual ad */}}
 <div id="ad-{{ .SlotId }}"
      class="ad-container ad-{{ .Size }}"
-     data-ad-position="{{ .Position }}"
-     data-ad-slot="{{ .SlotId }}">
+     data-ad-position="{{ .Position }}">
     <ins class="adsbygoogle"
          style="display:block"
          data-ad-client="{{ (Ctx).AdNetworkId }}"
-         data-ad-slot="{{ .SlotId }}"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
+         {{ if (Ctx).AdSlotId }}data-ad-slot="{{ (Ctx).AdSlotId }}"{{ end }}></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 {{ else if (Ctx).AdsEnabled }}

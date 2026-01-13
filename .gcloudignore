@@ -1,4 +1,5 @@
 # Ignore files for gcloud app deploy
+#!include:.gitignore
 .gcloudignore
 .git
 .github
@@ -13,7 +14,8 @@
 
 # Build artifacts
 Makefile
-locallinks/
+/locallinks/newstack
+/locallinks/
 bin/
 logs/
 coverage.out

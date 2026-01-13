@@ -15,6 +15,7 @@ binlocal:
 	go build -ldflags "$(LDFLAGS)" -o ./bin/lilbattle ./cmd/backend/*.go
 
 deploy: checklinks ui cli wasm 
+	rm -Rf locallinks ; mkdir locallinks
 	gcloud app deploy --project weewar --verbosity=info
 
 servepg:
@@ -137,13 +138,7 @@ checklinks:
 resymlink:
 	mkdir -p locallinks
 	rm -Rf locallinks/*
-	cd locallinks && ln -s ../../templar
-	cd locallinks && ln -s ../../protoc-gen-dal
-	cd locallinks && ln -s ../../goutils
-	cd locallinks && ln -s ../../goapplib
-	cd locallinks && ln -s ../../gocurrent
-	cd locallinks && ln -s ../../oneauth
-	cd locallinks && ln -s ../../turnengine
+	cd locallinks && ln -s ~/newstack
 
 ####  Docker related commands
 

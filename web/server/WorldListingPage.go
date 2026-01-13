@@ -38,6 +38,7 @@ func (m *WorldListingPage) Load(r *http.Request, w http.ResponseWriter, app *goa
 	m.ListingData.SearchPlaceholder = "Search worlds..."
 	m.ListingData.EmptyTitle = "No worlds found"
 	m.ListingData.EmptyMessage = "Get started by creating a new world."
+	m.ListingData.ShowEditButton = m.Header.IsLoggedIn
 
 	return nil, false
 }

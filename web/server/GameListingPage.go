@@ -38,6 +38,7 @@ func (m *GameListingPage) Load(r *http.Request, w http.ResponseWriter, app *goal
 	m.ListingData.SearchPlaceholder = "Search games..."
 	m.ListingData.EmptyTitle = "No games yet?"
 	m.ListingData.EmptyMessage = "Get started on your first game."
+	m.ListingData.ShowEditButton = m.Header.IsLoggedIn
 
 	return nil, false
 }

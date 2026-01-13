@@ -4507,10 +4507,6 @@ html, body {
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
 }
 
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
-}
-
 .dark\:inline:is(.dark *) {
   display: inline;
 }
@@ -5136,6 +5132,18 @@ html, body {
   .sm\:text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+
+  .sm\:opacity-0 {
+    opacity: 0;
+  }
+
+  .group:hover .sm\:group-hover\:inline-flex {
+    display: inline-flex;
+  }
+
+  .group:hover .sm\:group-hover\:opacity-100 {
+    opacity: 1;
   }
 }
 

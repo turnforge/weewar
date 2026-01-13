@@ -1,204 +1,126 @@
-# OneAuth CLI Integration Requirements
+# OneAuth CLI Integration
 
-This document specifies the integration points needed in oneauth to support CLI authentication for lilbattle.
+This document describes the CLI authentication integration with oneauth.
 
 ## Overview
 
-The CLI needs to authenticate users to remote servers and store credentials locally. This requires oneauth to provide:
+The CLI uses oneauth's `APIAuth` handler for token-based authentication. This provides:
 
-1. A CLI token endpoint for username/password authentication
-2. JWT tokens with configurable expiration
-3. Token validation middleware that accepts Bearer tokens
+1. OAuth2-compatible password grant for email/password login
+2. JWT access tokens with configurable expiration
+3. Refresh tokens for session management
+4. Bearer token validation in API requests
 
-## Required Endpoints
+## Server Configuration
 
-### 1. CLI Token Endpoint
+In `web/server/auth.go`, the APIAuth handler is configured:
+
+```go
+import (
+    oa "github.com/panyam/oneauth"
+    oafs "github.com/panyam/oneauth/stores/fs"
+)
+
+// In setupAuthService():
+jwtSecret := os.Getenv("JWT_CLI_SECRET")
+if jwtSecret == "" {
+    jwtSecret = "lilbattle-dev-secret-change-in-production"
+}
+
+refreshTokenStore := oafs.NewFSRefreshTokenStore(storagePath)
+apiAuth := &oa.APIAuth{
+    RefreshTokenStore:   refreshTokenStore,
+    JWTSecretKey:        jwtSecret,
+    JWTIssuer:           "lilbattle",
+    JWTAudience:         "cli",
+    AccessTokenExpiry:   30 * 24 * time.Hour, // 30 days
+    RefreshTokenExpiry:  90 * 24 * time.Hour, // 90 days
+    ValidateCredentials: authService.ValidateLocalCredentials,
+}
+oneauth.AddAuth("/cli/token", apiAuth)
+```
+
+## Token Endpoint
 
 **Endpoint**: `POST /auth/cli/token`
 
-**Purpose**: Exchange email/password credentials for a JWT token suitable for CLI use.
-
-**Request**:
+**Request** (OAuth2 password grant):
 ```json
 {
-  "email": "user@example.com",
-  "password": "secret"
+  "grant_type": "password",
+  "username": "user@example.com",
+  "password": "secret",
+  "scope": "read write profile offline",
+  "client_id": "cli"
 }
 ```
 
 **Success Response** (200 OK):
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expires_at": "2025-02-01T00:00:00Z",
-  "user_id": "user123",
-  "user_email": "user@example.com"
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 2592000,
+  "refresh_token": "abc123...",
+  "scope": "read write profile offline"
 }
 ```
 
-**Error Responses**:
-- 401 Unauthorized: Invalid credentials
-- 429 Too Many Requests: Rate limited
-
-**Implementation Notes**:
-- Should use the same `ValidateCredentials` function as LocalAuth
-- Token expiration should be configurable (default: 30 days for CLI tokens)
-- Should be rate-limited (stricter than normal auth endpoints)
-
-### 2. Token Refresh Endpoint (Optional)
-
-**Endpoint**: `POST /auth/cli/refresh`
-
-**Purpose**: Refresh an expiring token without re-entering credentials.
-
-**Request**:
+**Error Response**:
 ```json
 {
-  "token": "existing-jwt-token"
+  "error": "invalid_grant",
+  "error_description": "Invalid credentials"
 }
 ```
 
-**Success Response** (200 OK):
-```json
-{
-  "token": "new-jwt-token",
-  "expires_at": "2025-03-01T00:00:00Z"
-}
+## CLI Usage
+
+```bash
+# Interactive login (prompts for email/password)
+ww login http://localhost:8080
+
+# Token-based login (for pre-generated tokens)
+ww login http://localhost:8080 --token eyJhbGc...
+
+# Check authentication status
+ww whoami
+
+# Logout from a server
+ww logout http://localhost:8080
+
+# Migrate worlds between servers
+ww migrate http://localhost:6060/api/v1/worlds/Desert \
+           http://localhost:8080/api/v1/worlds/Desert
 ```
 
-## JWT Token Requirements
+## Credential Storage
 
-### Token Claims
-
-The JWT token should include:
+Credentials are stored in `~/.config/lilbattle/credentials.json` with 0600 permissions:
 
 ```json
 {
-  "sub": "user123",           // User ID
-  "email": "user@example.com", // User email
-  "iat": 1704067200,          // Issued at
-  "exp": 1706745600,          // Expiration
-  "iss": "lilbattle",         // Issuer
-  "aud": "cli",               // Audience (distinguishes CLI tokens)
-  "jti": "unique-token-id"    // Token ID for revocation
-}
-```
-
-### Token Signing
-
-- Use HS256 with a server-side secret, or RS256 with key pairs
-- Secret should be configurable via environment variable: `JWT_CLI_SECRET`
-
-## Middleware Integration
-
-### Bearer Token Validation
-
-The existing oneauth middleware should be extended to accept:
-
-```
-Authorization: Bearer <jwt-token>
-```
-
-**Pseudocode**:
-```go
-func (m *Middleware) GetLoggedInUserId(r *http.Request) string {
-    // First, check session (existing behavior)
-    if userId := m.getSessionUserId(r); userId != "" {
-        return userId
+  "servers": {
+    "http://localhost:8080": {
+      "token": "eyJhbGc...",
+      "user_id": "",
+      "user_email": "user@example.com",
+      "expires_at": "2025-03-01T00:00:00Z",
+      "created_at": "2025-01-15T00:00:00Z"
     }
-
-    // Then, check Bearer token
-    authHeader := r.Header.Get("Authorization")
-    if strings.HasPrefix(authHeader, "Bearer ") {
-        token := strings.TrimPrefix(authHeader, "Bearer ")
-        if claims, err := m.validateJWT(token); err == nil {
-            return claims.Subject // user ID
-        }
-    }
-
-    return ""
+  }
 }
 ```
 
-### gRPC Metadata
+## Environment Variables
 
-For Connect RPC calls, the middleware should also check:
-
-```go
-// From gRPC metadata
-md, ok := metadata.FromIncomingContext(ctx)
-if ok {
-    if tokens := md.Get("authorization"); len(tokens) > 0 {
-        // Validate Bearer token from metadata
-    }
-}
-```
-
-## Go Interface Proposal
-
-```go
-package oneauth
-
-// CLIAuthConfig configures CLI authentication
-type CLIAuthConfig struct {
-    // TokenExpiration is how long CLI tokens are valid (default: 30 days)
-    TokenExpiration time.Duration
-
-    // JWTSecret is the secret used to sign tokens
-    JWTSecret string
-
-    // ValidateCredentials validates email/password
-    ValidateCredentials func(email, password string) (userID string, err error)
-}
-
-// CLIAuth handles CLI authentication
-type CLIAuth struct {
-    config CLIAuthConfig
-}
-
-// NewCLIAuth creates a new CLI auth handler
-func NewCLIAuth(config CLIAuthConfig) *CLIAuth
-
-// Handler returns an http.Handler for /auth/cli/* routes
-func (c *CLIAuth) Handler() http.Handler
-
-// CLITokenResponse is returned on successful authentication
-type CLITokenResponse struct {
-    Token     string    `json:"token"`
-    ExpiresAt time.Time `json:"expires_at"`
-    UserID    string    `json:"user_id"`
-    UserEmail string    `json:"user_email"`
-}
-```
-
-## Integration in LilBattle
-
-In `web/server/auth.go`:
-
-```go
-func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *oa.OneAuth) {
-    // ... existing setup ...
-
-    // Add CLI auth
-    cliAuth := oa.NewCLIAuth(oa.CLIAuthConfig{
-        TokenExpiration:     30 * 24 * time.Hour, // 30 days
-        JWTSecret:           os.Getenv("JWT_CLI_SECRET"),
-        ValidateCredentials: authService.ValidateLocalCredentials,
-    })
-    oneauth.AddAuth("/cli", cliAuth)
-
-    // ... rest of setup ...
-}
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `JWT_CLI_SECRET` | Secret key for signing JWT tokens | Dev fallback (change in production!) |
 
 ## Security Considerations
 
-1. **Rate Limiting**: CLI token endpoint should be strictly rate-limited (e.g., 5 attempts per 15 minutes per IP)
-
-2. **Token Storage**: CLI should store tokens with restricted file permissions (0600)
-
-3. **Token Revocation**: Consider adding a token revocation endpoint for security-conscious users
-
-4. **Audit Logging**: Log CLI token issuance for security auditing
-
-5. **Separate Secrets**: Use a different secret for CLI tokens vs session tokens to allow independent rotation
+1. **Production Secret**: Always set `JWT_CLI_SECRET` in production
+2. **Token Storage**: Credentials file has restricted permissions (0600)
+3. **Token Expiration**: Access tokens expire after 30 days by default
+4. **Refresh Tokens**: Available for extending sessions without re-authentication

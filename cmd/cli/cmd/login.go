@@ -48,20 +48,24 @@ func init() {
 	loginCmd.Flags().StringVar(&loginToken, "token", "", "API token (skip interactive login)")
 }
 
-// CLITokenRequest is the request body for /auth/cli/token
-type CLITokenRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+// OAuth2TokenRequest is the request body for /auth/cli/token (OAuth2 password grant)
+type OAuth2TokenRequest struct {
+	GrantType string `json:"grant_type"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Scope     string `json:"scope,omitempty"`
+	ClientID  string `json:"client_id,omitempty"`
 }
 
-// CLITokenResponse is the response from /auth/cli/token
-type CLITokenResponse struct {
-	Token     string    `json:"token"`
-	ExpiresAt time.Time `json:"expires_at"`
-	UserID    string    `json:"user_id"`
-	UserEmail string    `json:"user_email"`
-	Error     string    `json:"error,omitempty"`
-	Message   string    `json:"message,omitempty"`
+// OAuth2TokenResponse is the response from /auth/cli/token
+type OAuth2TokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int64  `json:"expires_in"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+	Scope        string `json:"scope,omitempty"`
+	Error        string `json:"error,omitempty"`
+	ErrorDesc    string `json:"error_description,omitempty"`
 }
 
 func runLogin(cmd *cobra.Command, args []string) error {
@@ -159,9 +163,12 @@ func loginInteractive(serverURL string) (*ServerCredential, error) {
 func requestToken(serverURL, email, password string) (*ServerCredential, error) {
 	tokenURL := serverURL + "/auth/cli/token"
 
-	reqBody := CLITokenRequest{
-		Email:    email,
-		Password: password,
+	reqBody := OAuth2TokenRequest{
+		GrantType: "password",
+		Username:  email,
+		Password:  password,
+		Scope:     "read write profile offline",
+		ClientID:  "cli",
 	}
 
 	jsonBody, err := json.Marshal(reqBody)
@@ -180,14 +187,14 @@ func requestToken(serverURL, email, password string) (*ServerCredential, error) 
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	var tokenResp CLITokenResponse
+	var tokenResp OAuth2TokenResponse
 	if err := json.Unmarshal(body, &tokenResp); err != nil {
 		return nil, fmt.Errorf("invalid response from server: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		if tokenResp.Message != "" {
-			return nil, fmt.Errorf("authentication failed: %s", tokenResp.Message)
+		if tokenResp.ErrorDesc != "" {
+			return nil, fmt.Errorf("authentication failed: %s", tokenResp.ErrorDesc)
 		}
 		if tokenResp.Error != "" {
 			return nil, fmt.Errorf("authentication failed: %s", tokenResp.Error)
@@ -195,63 +202,27 @@ func requestToken(serverURL, email, password string) (*ServerCredential, error) 
 		return nil, fmt.Errorf("authentication failed: HTTP %d", resp.StatusCode)
 	}
 
+	// Calculate expiration time from expires_in seconds
+	expiresAt := time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
+
 	return &ServerCredential{
-		Token:     tokenResp.Token,
-		UserID:    tokenResp.UserID,
-		UserEmail: tokenResp.UserEmail,
-		ExpiresAt: tokenResp.ExpiresAt,
+		Token:     tokenResp.AccessToken,
+		UserID:    "", // JWT tokens don't include user ID in response, extracted from token claims
+		UserEmail: email,
+		ExpiresAt: expiresAt,
 		CreatedAt: time.Now(),
 	}, nil
 }
 
 func loginWithToken(serverURL, token string) (*ServerCredential, error) {
-	// Validate the token by making a request to the server
-	// This also retrieves user info associated with the token
-	validateURL := serverURL + "/auth/cli/validate"
-
-	req, err := http.NewRequest("GET", validateURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to server: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
-		// Server doesn't have validate endpoint, assume token is valid
-		// This is a fallback for servers that don't implement validation
-		return &ServerCredential{
-			Token:     token,
-			UserID:    "unknown",
-			UserEmail: "unknown",
-			ExpiresAt: time.Now().Add(30 * 24 * time.Hour), // Assume 30 days
-			CreatedAt: time.Now(),
-		}, nil
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("token validation failed: HTTP %d", resp.StatusCode)
-	}
-
-	var tokenResp CLITokenResponse
-	if err := json.Unmarshal(body, &tokenResp); err != nil {
-		return nil, fmt.Errorf("invalid response from server: %w", err)
-	}
-
+	// For pre-generated tokens (e.g., API keys or JWTs from other sources),
+	// store them directly. The token will be validated on first use.
+	// We assume a 30-day expiration for manually provided tokens.
 	return &ServerCredential{
 		Token:     token,
-		UserID:    tokenResp.UserID,
-		UserEmail: tokenResp.UserEmail,
-		ExpiresAt: tokenResp.ExpiresAt,
+		UserID:    "",
+		UserEmail: "token-auth",
+		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
 		CreatedAt: time.Now(),
 	}, nil
 }

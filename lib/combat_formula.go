@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // CombatContext contains all information needed to calculate combat damage using the formula
@@ -84,7 +84,7 @@ func (re *RulesEngine) CalculateHitProbability(ctx *CombatContext) (float64, err
 
 // SimulateCombatDamage simulates combat damage by rolling dice according to the formula
 // For each health unit (Ha) of the attacker, roll 6 dice
-// In WeeWar, each health unit = 10 HP, so 100 HP = 10 health units
+// In LilBattle, each health unit = 10 HP, so 100 HP = 10 health units
 // Each die roll that's < p counts as a hit
 // Total damage = hits / 6
 func (re *RulesEngine) SimulateCombatDamage(ctx *CombatContext, rng *rand.Rand) (int32, error) {
@@ -256,6 +256,116 @@ func (re *RulesEngine) isOppositeSide(defender, pos1, pos2 AxialCoord) bool {
 type SplashDamageTarget struct {
 	Unit   *v1.Unit
 	Damage int32
+}
+
+// =============================================================================
+// Fix (Repair) Mechanics
+// =============================================================================
+
+// FixContext contains all information needed to calculate fix (repair) results
+type FixContext struct {
+	FixingUnit       *v1.Unit
+	FixingUnitHealth int32 // Health of the unit performing the fix (Hf)
+	FixValue         int32 // Fix value (F) of the fixing unit type
+	InjuredUnit      *v1.Unit
+}
+
+// CalculateFixProbability calculates the fix probability (p) using the fix formula
+// Formula: p = 0.05 * F
+// Where F = fix value of the fixing unit
+// The result is clamped to [0, 1]
+func (re *RulesEngine) CalculateFixProbability(fixValue int32) float64 {
+	p := 0.05 * float64(fixValue)
+
+	// Clamp p to [0, 1]
+	if p < 0 {
+		p = 0
+	}
+	if p > 1 {
+		p = 1
+	}
+
+	return p
+}
+
+// SimulateFixHealing simulates the fix action and returns health restored
+// For each health unit (Hf) of the fixing unit, 3 random numbers between 0 and 1 are generated
+// Each time r < p, a fix is counted
+// Total health restored = fixes / 3
+func (re *RulesEngine) SimulateFixHealing(ctx *FixContext, rng *rand.Rand) int32 {
+	p := re.CalculateFixProbability(ctx.FixValue)
+
+	// Roll 3 dice for each health unit of the fixing unit
+	fixes := 0.0
+
+	for range ctx.FixingUnitHealth {
+		for range 3 {
+			roll := rng.Float64()
+			if roll < p {
+				fixes++
+			}
+		}
+	}
+
+	// Health restored = fixes / 3
+	healthRestored := fixes / 3
+
+	return int32(healthRestored)
+}
+
+// GenerateFixDistribution generates a distribution of possible healing outcomes
+// by running many simulations
+func (re *RulesEngine) GenerateFixDistribution(ctx *FixContext, numSimulations int) (*v1.DamageDistribution, error) {
+	if numSimulations <= 0 {
+		numSimulations = 10000 // Default number of simulations
+	}
+
+	// Run simulations
+	simRng := rand.New(rand.NewSource(12345)) // Use fixed seed for reproducibility
+	healingCounts := make(map[int32]int)
+	totalHealing := float64(0)
+
+	for range numSimulations {
+		healing := re.SimulateFixHealing(ctx, simRng)
+		healingCounts[healing]++
+		totalHealing += float64(healing)
+	}
+
+	// Calculate expected healing
+	expectedHealing := totalHealing / float64(numSimulations)
+
+	// Calculate min and max healing observed
+	var minHealing int32 = math.MaxInt32
+	var maxHealing int32 = 0
+	for healing := range healingCounts {
+		if healing < minHealing {
+			minHealing = healing
+		}
+		if healing > maxHealing {
+			maxHealing = healing
+		}
+	}
+
+	// Build healing ranges (reusing DamageDistribution/DamageRange structs)
+	var ranges []*v1.DamageRange
+	for healing := minHealing; healing <= maxHealing; healing++ {
+		count := healingCounts[healing]
+		if count > 0 {
+			probability := float64(count) / float64(numSimulations)
+			ranges = append(ranges, &v1.DamageRange{
+				MinValue:    float64(healing),
+				MaxValue:    float64(healing),
+				Probability: probability,
+			})
+		}
+	}
+
+	return &v1.DamageDistribution{
+		MinDamage:      float64(minHealing),
+		MaxDamage:      float64(maxHealing),
+		ExpectedDamage: expectedHealing,
+		Ranges:         ranges,
+	}, nil
 }
 
 // CalculateSplashDamage calculates splash damage for adjacent units

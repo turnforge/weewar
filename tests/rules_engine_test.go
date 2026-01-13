@@ -4,12 +4,12 @@ import (
 	"math/rand"
 	"testing"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
-// var RULES_DATA_FILE = DevDataPath("assets/weewar-rules.json")
-var RULES_DATA_FILE = "../assets/weewar-rules.json"
-var DAMAGE_DATA_FILE = "../assets/weewar-damage.json"
+// var RULES_DATA_FILE = DevDataPath("assets/lilbattle-rules.json")
+var RULES_DATA_FILE = "../assets/lilbattle-rules.json"
+var DAMAGE_DATA_FILE = "../assets/lilbattle-damage.json"
 
 func TestRulesEngineLoading(t *testing.T) {
 	// Load rules from converted data

@@ -349,7 +349,7 @@ const aiMove = await this.gameState.executeAIMove(playerID, difficulty);
 - Component communication via EventBus for AI coordination
 
 ### Next Steps
-1. **WASM AI Bindings**: Add AI functions to cmd/weewar-wasm/main.go
+1. **WASM AI Bindings**: Add AI functions to cmd/lilbattle-wasm/main.go
 2. **Frontend AI Components**: Create AI selection and analysis UI components
 3. **AI Game Mode**: Implement AI vs Human and AI vs AI game modes
 4. **Performance Testing**: Validate AI performance in web environment

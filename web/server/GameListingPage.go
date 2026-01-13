@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 type GameListingPage struct {
@@ -15,7 +15,7 @@ type GameListingPage struct {
 	ListingData  *goal.EntityListingData[*protos.Game]
 }
 
-func (m *GameListingPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (m *GameListingPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	m.Title = "Games"
 	m.ActiveTab = "games"
 	m.DisableSplashScreen = true

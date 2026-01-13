@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	v1s "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services"
 )
 
 // ConnectIndexerServiceAdapter adapts the gRPC IndexerService to Connect's interface
@@ -111,6 +111,14 @@ func (a *ConnectGamesServiceAdapter) ListMoves(ctx context.Context, req *connect
 
 func (a *ConnectGamesServiceAdapter) SimulateAttack(ctx context.Context, req *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error) {
 	resp, err := a.client.SimulateAttack(ctx, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(resp), nil
+}
+
+func (a *ConnectGamesServiceAdapter) SimulateFix(ctx context.Context, req *connect.Request[v1.SimulateFixRequest]) (*connect.Response[v1.SimulateFixResponse], error) {
+	resp, err := a.client.SimulateFix(ctx, req.Msg)
 	if err != nil {
 		return nil, err
 	}

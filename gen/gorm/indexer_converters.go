@@ -3,7 +3,7 @@ package gorm
 
 import (
 	"github.com/panyam/protoc-gen-dal/pkg/converters"
-	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	models "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // IndexStateToIndexStateGORM converts a models.IndexState to IndexStateGORM.

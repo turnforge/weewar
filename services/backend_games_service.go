@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services/authz"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services/authz"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"github.com/chzyer/readline"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/fsbe"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services"
+	"github.com/turnforge/lilbattle/services/fsbe"
 )
 
-// CLI is a headless command processor for WeeWar games
+// CLI is a headless command processor for LilBattle games
 type CLI struct {
 	gameID   string
 	service  *fsbe.FSGamesService
@@ -36,7 +36,7 @@ func NewCLI(gameID string) (*CLI, error) {
 
 	// Set up history file path
 	homeDir, _ := os.UserHomeDir()
-	historyFile := filepath.Join(homeDir, ".weewar_cli_history")
+	historyFile := filepath.Join(homeDir, ".lilbattle_cli_history")
 
 	// Configure readline with auto-complete for commands
 	completer := readline.NewPrefixCompleter(
@@ -55,7 +55,7 @@ func NewCLI(gameID string) (*CLI, error) {
 
 	// Create readline instance
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:          fmt.Sprintf("weewar[%s]> ", gameID),
+		Prompt:          fmt.Sprintf("lilbattle[%s]> ", gameID),
 		HistoryFile:     historyFile,
 		AutoComplete:    completer,
 		InterruptPrompt: "^C",
@@ -156,7 +156,7 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 	}
 
 	// Parse position (could be coordinate or unit ID)
-	target, err := weewar.ParsePositionOrUnit(rtGame, position)
+	target, err := lilbattle.ParsePositionOrUnit(rtGame, position)
 	if err != nil {
 		return fmt.Sprintf("Invalid position: %v", err)
 	}
@@ -183,7 +183,7 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 		switch opt := option.OptionType.(type) {
 		case *v1.GameOption_Move:
 			moveOpt := opt.Move
-			targetCoord := weewar.CoordFromInt32(moveOpt.ToQ, moveOpt.ToR)
+			targetCoord := lilbattle.CoordFromInt32(moveOpt.ToQ, moveOpt.ToR)
 
 			// Build the menu item with path if available
 			menuItem := fmt.Sprintf("%d. move to %s (cost: %d)",
@@ -191,13 +191,13 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 
 			// Add path visualization if AllPaths is available
 			if resp.AllPaths != nil {
-				path := moveOpt.ReconstructedPath // weewar.ReconstructPath(resp.AllPaths, moveOpt.Q, moveOpt.R)
+				path := moveOpt.ReconstructedPath // lilbattle.ReconstructPath(resp.AllPaths, moveOpt.Q, moveOpt.R)
 				if path != nil {
 					if detailed {
-						pathStr := weewar.FormatPathDetailed(path, "   ")
+						pathStr := lilbattle.FormatPathDetailed(path, "   ")
 						menuItem += "\n" + pathStr
 					} else {
-						pathStr := weewar.FormatPathCompact(path)
+						pathStr := lilbattle.FormatPathCompact(path)
 						menuItem += fmt.Sprintf("\n   Path: %s", pathStr)
 					}
 				}
@@ -214,7 +214,7 @@ func (cli *CLI) showOptions(position string, detailed bool) string {
 
 		case *v1.GameOption_Attack:
 			attackOpt := opt.Attack
-			targetCoord := weewar.CoordFromInt32(attackOpt.DefenderQ, attackOpt.DefenderR)
+			targetCoord := lilbattle.CoordFromInt32(attackOpt.DefenderQ, attackOpt.DefenderR)
 			menuItems = append(menuItems, fmt.Sprintf("%d. attack %s (type %d, damage est: %d)",
 				menuIndex, targetCoord.String(), attackOpt.TargetUnitType, attackOpt.DamageEstimate))
 
@@ -310,7 +310,7 @@ func (cli *CLI) ParseFromAndToCoords(arg0, arg1 string) (fromCoord services.Axia
 	}
 
 	// Parse from position
-	fromTarget, err := weewar.ParsePositionOrUnit(rtGame, arg0)
+	fromTarget, err := lilbattle.ParsePositionOrUnit(rtGame, arg0)
 	if err != nil {
 		err = fmt.Errorf("Invalid from position: %v", err)
 		return
@@ -319,7 +319,7 @@ func (cli *CLI) ParseFromAndToCoords(arg0, arg1 string) (fromCoord services.Axia
 	fromCoord = fromTarget.GetCoordinate()
 
 	// Parse to position with context (supports directions like L, R, TL, etc.)
-	toTarget, err := weewar.ParsePositionOrUnitWithContext(rtGame, arg1, &fromCoord)
+	toTarget, err := lilbattle.ParsePositionOrUnitWithContext(rtGame, arg1, &fromCoord)
 	if err != nil {
 		err = fmt.Errorf("Invalid to position: %v", err)
 		return
@@ -420,14 +420,14 @@ func (cli *CLI) processMoves(moves []*v1.GameMove) string {
 			if len(moves) > i {
 				switch action := moves[i].MoveType.(type) {
 				case *v1.GameMove_MoveUnit:
-					fromCoord := weewar.CoordFromInt32(action.MoveUnit.FromQ, action.MoveUnit.FromR)
-					toCoord := weewar.CoordFromInt32(action.MoveUnit.ToQ, action.MoveUnit.ToR)
+					fromCoord := lilbattle.CoordFromInt32(action.MoveUnit.FromQ, action.MoveUnit.FromR)
+					toCoord := lilbattle.CoordFromInt32(action.MoveUnit.ToQ, action.MoveUnit.ToR)
 					result.WriteString(fmt.Sprintf("  Moved unit from %s to %s\n",
 						fromCoord.String(), toCoord.String()))
 
 				case *v1.GameMove_AttackUnit:
-					attackerCoord := weewar.CoordFromInt32(action.AttackUnit.AttackerQ, action.AttackUnit.AttackerR)
-					targetCoord := weewar.CoordFromInt32(action.AttackUnit.DefenderQ, action.AttackUnit.DefenderR)
+					attackerCoord := lilbattle.CoordFromInt32(action.AttackUnit.AttackerQ, action.AttackUnit.AttackerR)
+					targetCoord := lilbattle.CoordFromInt32(action.AttackUnit.DefenderQ, action.AttackUnit.DefenderR)
 					result.WriteString(fmt.Sprintf("  Attacked from %s to %s\n",
 						attackerCoord.String(), targetCoord.String()))
 
@@ -544,7 +544,7 @@ func (cli *CLI) handleUnits() string {
 		result.WriteString(fmt.Sprintf("Player %s units:\n", playerLetter))
 
 		for _, unit := range units {
-			coord := weewar.CoordFromInt32(unit.Q, unit.R)
+			coord := lilbattle.CoordFromInt32(unit.Q, unit.R)
 			// Use the actual shortcut from the unit
 			unitID := unit.Shortcut
 			if unitID == "" {

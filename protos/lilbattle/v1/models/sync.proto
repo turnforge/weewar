@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "lilbattle/v1/models/models.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models";
+
+// SubscribeRequest to start receiving game updates
+message SubscribeRequest {
+  // Game ID to subscribe to
+  string game_id = 1;
+
+  // Player ID this client represents (for filtering own moves)
+  string player_id = 2;
+
+  // Resume from this sequence number (for reconnection).
+  // Server will send any missed updates since this sequence.
+  // Use 0 to start from current state.
+  int64 from_sequence = 3;
+}
+
+// SubscribeResponse sent once at the start of the subscription
+message SubscribeResponse {
+  // Current sequence number at time of subscription
+  int64 current_sequence = 1;
+
+  // Current game state (for initial load or catchup)
+  GameState game_state = 2;
+
+  // Game metadata
+  Game game = 3;
+}
+
+// GameUpdate is streamed to subscribers when game state changes
+message GameUpdate {
+  // Monotonically increasing sequence number for ordering and reconnection.
+  // Clients should track this to resume from correct position.
+  int64 sequence = 1;
+
+  oneof update_type {
+    // Moves were published by a player (contains WorldChanges)
+    MovesPublished moves_published = 2;
+
+    // A player connected to the game
+    PlayerJoined player_joined = 3;
+
+    // A player disconnected from the game
+    PlayerLeft player_left = 4;
+
+    // Game has ended (victory, surrender, etc.)
+    GameEnded game_ended = 5;
+
+    // Initial state sent at subscription start
+    SubscribeResponse initial_state = 6;
+  }
+}
+
+// MovesPublished indicates a player made moves
+message MovesPublished {
+  // Which player made these moves
+  int32 player = 1;
+
+  // The moves with their WorldChanges populated
+  repeated GameMove moves = 2;
+
+  // Group number for this batch of moves
+  int64 group_number = 3;
+}
+
+// PlayerJoined indicates a player connected
+message PlayerJoined {
+  string player_id = 1;
+  int32 player_number = 2;
+}
+
+// PlayerLeft indicates a player disconnected
+message PlayerLeft {
+  string player_id = 1;
+  int32 player_number = 2;
+}
+
+// GameEnded indicates the game has concluded
+message GameEnded {
+  // Winning player (0 if draw or N/A)
+  int32 winner = 1;
+
+  // Reason for game ending
+  string reason = 2;
+}
+
+// BroadcastRequest to send a GameUpdate to all subscribers
+// Called internally by GamesService after ProcessMoves succeeds
+message BroadcastRequest {
+  // Game ID to broadcast to
+  string game_id = 1;
+
+  // The update to broadcast
+  GameUpdate update = 2;
+}
+
+// BroadcastResponse after broadcasting
+message BroadcastResponse {
+  // Number of subscribers that received the update
+  int32 subscriber_count = 1;
+
+  // The sequence number assigned to this update
+  int64 sequence = 2;
+}

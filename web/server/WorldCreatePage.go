@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 type WorldCreatePage struct {
@@ -19,13 +19,23 @@ type WorldCreatePage struct {
 	WorldName    string
 }
 
-func (p *WorldCreatePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *WorldCreatePage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	p.Title = "Create World"
 	p.ActiveTab = "worlds"
 	p.Header.Load(r, w, app)
 
 	ctx := app.Context
 	loggedInUserId := ctx.AuthMiddleware.GetLoggedInUserId(r)
+
+	// Require login to access the create world page
+	if loggedInUserId == "" {
+		qs := r.URL.RawQuery
+		if len(qs) > 0 {
+			qs = "?" + qs
+		}
+		http.Redirect(w, r, fmt.Sprintf("/login?callbackURL=%s", fmt.Sprintf("/worlds/create%s", qs)), http.StatusSeeOther)
+		return nil, true
+	}
 
 	if r.Method == http.MethodPost {
 		// Handle form submission

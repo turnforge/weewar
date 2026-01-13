@@ -7,11 +7,11 @@ import (
 
 // UsersHandler handles user showcase pages
 type UsersHandler struct {
-	App *WeewarApp
+	App *LilBattleApp
 }
 
 // NewUsersHandler creates a new users handler
-func NewUsersHandler(app *WeewarApp) *UsersHandler {
+func NewUsersHandler(app *LilBattleApp) *UsersHandler {
 	return &UsersHandler{App: app}
 }
 

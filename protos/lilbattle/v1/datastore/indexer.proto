@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "dal/v1/annotations.proto";
+import "lilbattle/v1/models/indexer.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/datastore;lilbattledatastore";
+
+// IndexStateDatastore is the Datastore representation for IndexState
+message IndexStateDatastore {
+  option (dal.v1.datastore_options) = {
+    source: "lilbattle.v1.IndexState"
+    kind: "IndexState"
+  };
+}
+
+// IndexRecordDatastore is the Datastore representation for IndexRecord
+message IndexRecordDatastore {
+  option (dal.v1.datastore_options) = {
+    source: "lilbattle.v1.IndexRecord"
+    kind: "IndexRecord"
+  };
+}
+
+// IndexRecordsLRODatastore is the Datastore representation for IndexRecordsLRO
+message IndexRecordsLRODatastore {
+  option (dal.v1.datastore_options) = {
+    source: "lilbattle.v1.IndexRecordsLRO"
+    kind: "IndexRecordsLRO"
+  };
+}

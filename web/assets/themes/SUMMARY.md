@@ -2,7 +2,7 @@
 
 ## What We Built
 
-### 1. Proto Definitions (`protos/weewar/v1/themes.proto`)
+### 1. Proto Definitions (`protos/lilbattle/v1/themes.proto`)
 - `ThemeInfo` - metadata about a theme
 - `ThemeManifest` - complete theme configuration (from mapping.json)
 - `UnitMapping` / `TerrainMapping` - unit/terrain display data
@@ -91,7 +91,7 @@ web/static/assets/themes/
 ## Data-Driven Configuration
 
 ### Terrain Types (from RulesEngine)
-Terrain classification is now data-driven via `weewar-rules.json`:
+Terrain classification is now data-driven via `lilbattle-rules.json`:
 ```json
 {
   "terrainTypes": {
@@ -121,8 +121,8 @@ Default colors (matching sprite sheet order):
 ### Creating Themes
 ```go
 import (
-    "github.com/turnforge/weewar/lib"
-    "github.com/turnforge/weewar/web/assets/themes"
+    "github.com/turnforge/lilbattle/lib"
+    "github.com/turnforge/lilbattle/web/assets/themes"
 )
 
 // Get city terrains from RulesEngine
@@ -163,11 +163,11 @@ theme, _ := themes.CreateTheme("fantasy", cityTerrains)
 
 ```
 Root Level:
-├── protos/weewar/v1/models/
+├── protos/lilbattle/v1/models/
 │   └── themes.proto              # Proto definitions
 ├── assets/
 │   ├── embed.go                  # Embeds mapping.json files
-│   ├── weewar-rules.json         # Contains terrainTypes
+│   ├── lilbattle-rules.json         # Contains terrainTypes
 │   └── themes/
 │       ├── fantasy/mapping.json  # Embedded at compile time
 │       └── modern/mapping.json   # Embedded at compile time

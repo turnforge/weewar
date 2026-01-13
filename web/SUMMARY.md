@@ -1,7 +1,7 @@
 # Web Module Summary
 
 ## Purpose
-The web module provides a modern web interface for the WeeWar turn-based strategy game, featuring a professional world editor, readonly world viewer, and comprehensive game management system.
+The web module provides a modern web interface for the LilBattle turn-based strategy game, featuring a professional world editor, readonly world viewer, and comprehensive game management system.
 
 ## Current Architecture (v8.0)
 

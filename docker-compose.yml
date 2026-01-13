@@ -1,11 +1,11 @@
 networks:
-  weewarnetwork:
+  lilbattlenetwork:
     external: true
 
 services:
-  weewar:
+  lilbattle:
     networks:
-      - weewarnetwork
+      - lilbattlenetwork
     build:
       context: .
       dockerfile: ./cmd/backend/Dockerfile
@@ -28,9 +28,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      WEEWAR_DB_ENDPOINT: ${WEEWAR_DB_ENDPOINT}
+      LILBATTLE_DB_ENDPOINT: ${LILBATTLE_DB_ENDPOINT}
       OTEL_RESOURCE_ATTRIBUTES: service.name=onehub.backend,service.version=0.0.1
-      WEEWAR_ENV: dev 
+      LILBATTLE_ENV: dev 
     ports:
       - 6060:6060
       - 7070:7070

@@ -1,8 +1,9 @@
-<!-- weewar/web/templates/BasePage.html -->
-{{# namespace "GoalBase" "goapplib/BasePage.html" #}}
+<!-- lilbattle/web/templates/BasePage.html -->
+{{# namespace "GoalBase" "@goapplib/BasePage.html" #}}
 {{# include "./Header.html" #}}
+{{# include "./components/AdScript.html" #}}
 
-{{ define "WeewarExtraHeadSection" }}
+{{ define "LilBattleExtraHeadSection" }}
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/static/favicons/favicon.svg">
     <link rel="icon" type="image/x-icon" href="/static/favicons/favicon.ico">
@@ -10,9 +11,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-touch-icon.png">
     <link rel="manifest" href="/static/favicons/site.webmanifest">
+    <!-- Ad Network Script (only loads when ads enabled and network ID configured) -->
+    {{ template "AdScript" }}
+    <meta name="google-adsense-account" content="ca-pub-2973452493146773">
 {{ end }}
 
-{{ define "WeewarHeaderSection" }}
+{{ define "LilBattleHeaderSection" }}
     {{ if not .CustomHeader }}
     <!-- Header Block -->
     <div class="print:hidden sticky left-0 top-0 z-20 border-b border-gray-200 dark:border-gray-700">
@@ -24,7 +28,7 @@
 {{ end }}
 
 {{# extend "GoalBase:BasePage" "BasePage"
-           "GoalBase:ExtraHeadSection" "WeewarExtraHeadSection"
-           "GoalBase:HeaderSection" "WeewarHeaderSection"
+           "GoalBase:ExtraHeadSection" "LilBattleExtraHeadSection"
+           "GoalBase:HeaderSection" "LilBattleHeaderSection"
            "GoalBase:BodySection" "BodySection"
            "GoalBase:PostScriptsSection" "PostBodySection" #}}

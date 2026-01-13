@@ -1,7 +1,7 @@
 //go:build wasm
 // +build wasm
 
-// Package authz provides authorization utilities for WeeWar services.
+// Package authz provides authorization utilities for LilBattle services.
 // This is the WASM stub - authorization is not applicable in browser context.
 package authz
 
@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // Common authorization errors

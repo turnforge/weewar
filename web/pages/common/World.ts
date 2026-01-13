@@ -1,7 +1,7 @@
 import { EventBus } from '@panyam/tsappkit';
 import { WorldEventTypes, WorldEventType } from './events';
 import { rowColToHex, hexToRowCol, axialNeighbors, hexDistance, getDirectionIndex, getOppositeDirection, getNeighborCoord } from "./hexUtils";
-import { Weewar_v1Deserializer as WD } from '../../gen/wasmjs/weewar/v1/factory';
+import { Lilbattle_v1Deserializer as WD } from '../../gen/wasmjs/lilbattle/v1/factory';
 import {
     World as ProtoWorld,
     WorldData as ProtoWorldData,
@@ -11,8 +11,8 @@ import {
     CreateWorldRequest,
     CrossingType,
     Crossing,
-} from '../../gen/wasmjs/weewar/v1/models/interfaces'
-import * as models from '../../gen/wasmjs/weewar/v1/models/models'
+} from '../../gen/wasmjs/lilbattle/v1/models/interfaces'
+import * as models from '../../gen/wasmjs/lilbattle/v1/models/models'
 import { create, toJson } from '@bufbuild/protobuf';
 
 export interface WorldEvent {

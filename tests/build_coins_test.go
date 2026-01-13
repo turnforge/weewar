@@ -5,19 +5,19 @@ import (
 	"path/filepath"
 	"testing"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services/fsbe"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services/fsbe"
 )
 
 // TestProcessBuildUnit_DeductsCoins tests that building a unit deducts coins from the player
 func TestProcessBuildUnit_DeductsCoins(t *testing.T) {
-	// Terrain IDs from weewar-rules.json:
+	// Terrain IDs from lilbattle-rules.json:
 	// - 1 = Land Base (builds land units)
 	// - 2 = Naval Base (builds naval units)
 	// - 3 = Airport Base (builds air units)
 	//
-	// Unit costs from weewar-rules.json:
+	// Unit costs from lilbattle-rules.json:
 	// - Unit 1 (Soldier Basic) = 75 coins
 	// - Unit 5 (Striker) = 200 coins
 	// - Unit 3 (Tank Basic) = 300 coins
@@ -207,7 +207,7 @@ func TestBuildUnit_CoinsPersistence(t *testing.T) {
 	ctx := AuthenticatedContext()
 
 	// Create a temp directory for the test
-	tempDir, err := os.MkdirTemp("", "weewar-test-*")
+	tempDir, err := os.MkdirTemp("", "lilbattle-test-*")
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}

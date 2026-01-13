@@ -31,6 +31,7 @@ const components = [
   ["GameViewerPage/index_Grid", 0, "ts"],
   ["GameViewerPage/index_Mobile", 0, "ts"],
   ["AttackSimulatorPage", 0, "ts"],
+  ["FixSimulatorPage", 0, "ts"],
 ];
 
 module.exports = (_env, options) => {
@@ -135,7 +136,7 @@ module.exports = (_env, options) => {
       // Public path where browser requests bundles/assets. Matches path structure served by static server.
       publicPath: `${staticPublicPath}/js/gen/`, // -> /static/js/gen/
       filename: "[name].[contenthash].js",
-      library: ["weewarPages", "[name]"],
+      library: ["lilbattlePages", "[name]"],
       libraryTarget: "umd",
       umdNamedDefine: true,
       globalObject: "this",

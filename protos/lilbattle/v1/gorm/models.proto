@@ -1,0 +1,215 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "dal/v1/annotations.proto";
+import "lilbattle/v1/models/models.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/gorm;lilbattlegorm";
+
+
+message IndexInfoGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.IndexInfo" };
+}
+
+message TileGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.Tile", implement_scanner: true  };
+}
+
+message CrossingGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.Crossing", implement_scanner: true  };
+}
+
+message UnitGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.Unit", implement_scanner: true };
+}
+
+message AttackRecordGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.AttackRecord", implement_scanner: true };
+}
+
+message WorldGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.World", table: "worlds" };
+  string id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+
+  // Tags as JSON for cross-DB compatibility
+  repeated string tags = 7 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+
+  // PreviewUrls as JSON for cross-DB compatibility
+  repeated string preview_urls = 11 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // DefaultGameConfig as JSON for cross-DB compatibility
+  // SearchIndexInfo embedded
+  IndexInfoGORM search_index_info = 13 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:search_index_"]
+  }];
+}
+
+message WorldDataGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.WorldData", table: "world_data", implement_scanner: true };
+  string world_id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+
+  // Units as JSON for cross-DB compatibility
+  map<string, CrossingGORM> crossings = 4 [(dal.v1.column) = { gorm_tags: ["serializer:json"] }];
+  // ScreenshotIndexInfo embedded
+  IndexInfoGORM screenshot_index_info = 5 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:screenshot_index_"]
+  }];
+
+  // Tiles as JSON for cross-DB compatibility
+  map<string,TileGORM> tiles_map = 6 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // Units as JSON for cross-DB compatibility
+  map<string, UnitGORM> units_map = 7 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+}
+
+///////// Game related models
+
+
+// Describes a game and its metadata
+message GameGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.Game", table: "games" };
+  string id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+
+  // world_id indexed for queries filtering games by world
+  string world_id = 3 [(dal.v1.column) = {
+    gorm_tags: ["index:idx_games_world_id"]
+  }];
+
+  // Tags as JSON for cross-DB compatibility
+  repeated string tags = 7 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // PreviewUrls as JSON for cross-DB compatibility
+  repeated string preview_urls = 11 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // SearchIndexInfo embedded
+  IndexInfoGORM search_index_info = 13 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:search_index_"]
+  }];
+}
+
+// Holds the game's Active/Current state (eg world state)
+message GameStateGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameState", table: "game_state"};
+  string game_id = 1 [(dal.v1.column) = {
+    gorm_tags: ["primaryKey"]
+  }];
+
+  // ScreenshotIndexInfo embedded
+  GameWorldDataGORM world_data = 4 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:world_data_"]
+  }];
+
+  // Per-player runtime state as JSON for cross-DB compatibility
+  map<int32, PlayerStateGORM> player_states = 5 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+}
+
+message GameConfigurationGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameConfiguration", implement_scanner: true };
+  // IncomeConfigs embedded
+  IncomeConfigGORM income_configs = 3 [(dal.v1.column) = {
+    gorm_tags: ["embedded"]
+  }];
+  // Settings as foreign key relationship
+  GameSettingsGORM settings = 4;
+}
+
+message IncomeConfigGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.IncomeConfig", implement_scanner: true };
+}
+
+message GamePlayerGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GamePlayer", implement_scanner: true  };
+}
+
+message GameTeamGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameTeam", implement_scanner: true };
+}
+
+message GameSettingsGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameSettings" };
+  // AllowedUnits as JSON for cross-DB compatibility
+  repeated int32 allowed_units = 1 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+}
+
+message PlayerStateGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.PlayerState", implement_scanner: true };
+}
+
+// GameWorldDataGORM is same as WorldDataGORM but without the
+// primary key so it can be embedded
+message GameWorldDataGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.WorldData" };
+  // ScreenshotIndexInfo embedded
+  IndexInfoGORM screenshot_index_info = 4 [(dal.v1.column) = {
+    gorm_tags: ["embedded", "embeddedPrefix:screenshot_index_"]
+  }];
+  // Units as JSON for cross-DB compatibility
+  map<string, CrossingGORM> crossings = 5 [(dal.v1.column) = { gorm_tags: ["serializer:json"] }];
+
+  // Tiles as JSON for cross-DB compatibility
+  map<string,TileGORM> tiles_map = 6 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+  // Units as JSON for cross-DB compatibility
+  map<string, UnitGORM> units_map = 7 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+}
+
+// Holds the game's move history (can be used as a replay log)
+message GameMoveHistoryGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameMoveHistory" };
+}
+
+// A move group - we can allow X moves in one "tick"
+message GameMoveGroupGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameMoveGroup" };
+}
+
+/**
+ * Represents a single move which can be one of many actions in the game
+ */
+message GameMoveGORM {
+  option (dal.v1.gorm) = { source: "lilbattle.v1.GameMove", table: "game_moves" };
+
+  // game_id is indexed for queries like WHERE game_id = ? ORDER BY group_number
+  // Also part of composite index idx_game_moves_lookup for range queries
+  string game_id = 1 [(dal.v1.column) = { gorm_tags: ["primaryKey", "index:idx_game_moves_game_id", "index:idx_game_moves_lookup,priority:1"] }];
+  // group_number is part of composite index for queries like WHERE game_id = ? AND group_number >= ?
+  int64 group_number = 2 [(dal.v1.column) = { gorm_tags: ["primaryKey", "index:idx_game_moves_lookup,priority:2"] }];
+  int64 move_number = 3 [(dal.v1.column) = { gorm_tags: ["primaryKey"] }];
+
+  // Version number for optimistic locking
+  int64 version = 4;
+
+  // Field named "move_type" matches the oneof name in source
+  // This automatically skips all oneof members (move_unit, attack_unit, end_turn, build_unit)
+  google.protobuf.Any move_type = 5 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+
+  repeated google.protobuf.Any changes = 6 [(dal.v1.column) = {
+    gorm_tags: ["serializer:json"]
+  }];
+}

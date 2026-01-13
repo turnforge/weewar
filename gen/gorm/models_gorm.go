@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"time"
 
-	models "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	models "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
-// IndexInfoGORM is the GORM model for weewar.v1.IndexInfo
+// IndexInfoGORM is the GORM model for lilbattle.v1.IndexInfo
 type IndexInfoGORM struct {
 	LastUpdatedAt time.Time
 	LastIndexedAt time.Time
 	NeedsIndexing bool
 }
 
-// TileGORM is the GORM model for weewar.v1.Tile
+// TileGORM is the GORM model for lilbattle.v1.Tile
 type TileGORM struct {
 	Q                int32
 	R                int32
@@ -52,7 +52,7 @@ func (m *TileGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// CrossingGORM is the GORM model for weewar.v1.Crossing
+// CrossingGORM is the GORM model for lilbattle.v1.Crossing
 type CrossingGORM struct {
 	Type       models.CrossingType
 	ConnectsTo []bool
@@ -82,7 +82,7 @@ func (m *CrossingGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// UnitGORM is the GORM model for weewar.v1.Unit
+// UnitGORM is the GORM model for lilbattle.v1.Unit
 type UnitGORM struct {
 	Q                       int32
 	R                       int32
@@ -124,7 +124,7 @@ func (m *UnitGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// AttackRecordGORM is the GORM model for weewar.v1.AttackRecord
+// AttackRecordGORM is the GORM model for lilbattle.v1.AttackRecord
 type AttackRecordGORM struct {
 	Q          int32
 	R          int32
@@ -156,7 +156,7 @@ func (m *AttackRecordGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// WorldGORM is the GORM model for weewar.v1.World
+// WorldGORM is the GORM model for lilbattle.v1.World
 type WorldGORM struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
@@ -178,7 +178,7 @@ func (*WorldGORM) TableName() string {
 	return "worlds"
 }
 
-// WorldDataGORM is the GORM model for weewar.v1.WorldData
+// WorldDataGORM is the GORM model for lilbattle.v1.WorldData
 type WorldDataGORM struct {
 	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
 	WorldId             string              `gorm:"primaryKey"`
@@ -218,7 +218,7 @@ func (m *WorldDataGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// GameGORM is the GORM model for weewar.v1.Game
+// GameGORM is the GORM model for lilbattle.v1.Game
 type GameGORM struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -241,7 +241,7 @@ func (*GameGORM) TableName() string {
 	return "games"
 }
 
-// GameStateGORM is the GORM model for weewar.v1.GameState
+// GameStateGORM is the GORM model for lilbattle.v1.GameState
 type GameStateGORM struct {
 	UpdatedAt          time.Time
 	GameId             string `gorm:"primaryKey"`
@@ -263,7 +263,7 @@ func (*GameStateGORM) TableName() string {
 	return "game_state"
 }
 
-// GameConfigurationGORM is the GORM model for weewar.v1.GameConfiguration
+// GameConfigurationGORM is the GORM model for lilbattle.v1.GameConfiguration
 type GameConfigurationGORM struct {
 	Players       []GamePlayerGORM
 	Teams         []GameTeamGORM
@@ -295,7 +295,7 @@ func (m *GameConfigurationGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// IncomeConfigGORM is the GORM model for weewar.v1.IncomeConfig
+// IncomeConfigGORM is the GORM model for lilbattle.v1.IncomeConfig
 type IncomeConfigGORM struct {
 	StartingCoins     int32
 	GameIncome        int32
@@ -330,7 +330,7 @@ func (m *IncomeConfigGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// GamePlayerGORM is the GORM model for weewar.v1.GamePlayer
+// GamePlayerGORM is the GORM model for lilbattle.v1.GamePlayer
 type GamePlayerGORM struct {
 	PlayerId      int32
 	UserId        string
@@ -366,7 +366,7 @@ func (m *GamePlayerGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// GameTeamGORM is the GORM model for weewar.v1.GameTeam
+// GameTeamGORM is the GORM model for lilbattle.v1.GameTeam
 type GameTeamGORM struct {
 	TeamId   int32
 	Name     string
@@ -398,7 +398,7 @@ func (m *GameTeamGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// GameSettingsGORM is the GORM model for weewar.v1.GameSettings
+// GameSettingsGORM is the GORM model for lilbattle.v1.GameSettings
 type GameSettingsGORM struct {
 	AllowedUnits  []int32 `gorm:"serializer:json"`
 	TurnTimeLimit int32
@@ -406,7 +406,7 @@ type GameSettingsGORM struct {
 	MaxTurns      int32
 }
 
-// PlayerStateGORM is the GORM model for weewar.v1.PlayerState
+// PlayerStateGORM is the GORM model for lilbattle.v1.PlayerState
 type PlayerStateGORM struct {
 	Coins    int32
 	IsActive bool
@@ -436,7 +436,7 @@ func (m *PlayerStateGORM) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, m)
 }
 
-// GameWorldDataGORM is the GORM model for weewar.v1.WorldData
+// GameWorldDataGORM is the GORM model for lilbattle.v1.WorldData
 type GameWorldDataGORM struct {
 	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
 	UnitsMap            map[string]UnitGORM `gorm:"serializer:json"`
@@ -446,13 +446,13 @@ type GameWorldDataGORM struct {
 	Crossings           map[string]CrossingGORM `gorm:"serializer:json"`
 }
 
-// GameMoveHistoryGORM is the GORM model for weewar.v1.GameMoveHistory
+// GameMoveHistoryGORM is the GORM model for lilbattle.v1.GameMoveHistory
 type GameMoveHistoryGORM struct {
 	GameId string
 	Groups []GameMoveGroupGORM
 }
 
-// GameMoveGroupGORM is the GORM model for weewar.v1.GameMoveGroup
+// GameMoveGroupGORM is the GORM model for lilbattle.v1.GameMoveGroup
 type GameMoveGroupGORM struct {
 	StartedAt   time.Time
 	EndedAt     time.Time
@@ -460,14 +460,14 @@ type GameMoveGroupGORM struct {
 	Moves       []GameMoveGORM
 }
 
-// GameMoveGORM is the GORM model for weewar.v1.GameMove
+// GameMoveGORM is the GORM model for lilbattle.v1.GameMove
 type GameMoveGORM struct {
 	GameId      string `gorm:"primaryKey;index:idx_game_moves_game_id;index:idx_game_moves_lookup,priority:1"`
 	Player      int32
 	GroupNumber int64 `gorm:"primaryKey;index:idx_game_moves_lookup,priority:2"`
 	MoveNumber  int64 `gorm:"primaryKey"`
-	Timestamp   time.Time
 	Version     int64
+	Timestamp   time.Time
 	MoveType    []byte `gorm:"serializer:json"`
 	SequenceNum int64
 	IsPermanent bool

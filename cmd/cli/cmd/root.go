@@ -22,9 +22,9 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:          "ww",
-	Short:        "WeeWar CLI - Command-line interface for WeeWar games",
+	Short:        "LilBattle CLI - Command-line interface for LilBattle games",
 	SilenceUsage: true,
-	Long: `WeeWar CLI provides a command-line interface for playing WeeWar games.
+	Long: `LilBattle CLI provides a command-line interface for playing LilBattle games.
 
 Examples:
   ww options A1                    Show available options for unit A1
@@ -35,8 +35,8 @@ Examples:
   ww units                         List all units
 
 Global Flags:
-  --game-id string       Game ID to operate on (or set WEEWAR_GAME_ID env var)
-  --server string        Server URL to connect to (or set WEEWAR_SERVER env var)
+  --game-id string       Game ID to operate on (or set LILBATTLE_GAME_ID env var)
+  --server string        Server URL to connect to (or set LILBATTLE_SERVER env var)
   --json                 Output in JSON format
   --verbose              Show detailed debug information
   --dryrun               Preview changes without saving to disk`,
@@ -51,9 +51,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Global flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weewar.yaml)")
-	rootCmd.PersistentFlags().StringVar(&gameID, "game-id", "", "game ID to operate on (env: WEEWAR_GAME_ID)")
-	rootCmd.PersistentFlags().StringVar(&serverURL, "server", "", "server URL to connect to (env: WEEWAR_SERVER)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.lilbattle.yaml)")
+	rootCmd.PersistentFlags().StringVar(&gameID, "game-id", "", "game ID to operate on (env: LILBATTLE_GAME_ID)")
+	rootCmd.PersistentFlags().StringVar(&serverURL, "server", "", "server URL to connect to (env: LILBATTLE_SERVER)")
 	rootCmd.PersistentFlags().BoolVar(&jsonOut, "json", false, "output in JSON format")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "show detailed debug information")
 	rootCmd.PersistentFlags().BoolVar(&dryrun, "dryrun", false, "preview changes without saving to disk")
@@ -81,14 +81,14 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".weewar" (without extension).
+		// Search config in home directory with name ".lilbattle" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".weewar")
+		viper.SetConfigName(".lilbattle")
 	}
 
-	// Read environment variables with WEEWAR_ prefix
-	viper.SetEnvPrefix("WEEWAR")
+	// Read environment variables with LILBATTLE_ prefix
+	viper.SetEnvPrefix("LILBATTLE")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 
@@ -112,7 +112,7 @@ func getGameID() (string, error) {
 	}
 
 	if id == "" {
-		return "", fmt.Errorf("game ID is required (set --game-id flag or WEEWAR_GAME_ID env var)")
+		return "", fmt.Errorf("game ID is required (set --game-id flag or LILBATTLE_GAME_ID env var)")
 	}
 	return id, nil
 }

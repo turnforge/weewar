@@ -1,5 +1,6 @@
 <!-- templates/HomePage.html -->
 {{# include "BasePage.html" #}}
+{{# include "components/AdSlot.html" #}}
 
 {{ define "BodySection" }}
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -67,6 +68,13 @@
             {{ end }}
         </div>
     </div>
+
+    <!-- Homepage Mid-Section Ad (respects AdsEnabled and AdsHomeEnabled flags) -->
+    {{ if and (Ctx).AdsEnabled (Ctx).AdsHomeEnabled }}
+    <div class="my-8 flex justify-center">
+        {{ template "AdSlot" (dict "SlotId" "home-mid" "Size" "mrec" "Position" "home-mid") }}
+    </div>
+    {{ end }}
 
     <!-- Recent Activity Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">

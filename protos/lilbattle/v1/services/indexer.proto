@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "google/api/annotations.proto";
+import "lilbattle/v1/models/indexer.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services";
+
+// Manages indexing of entities
+service IndexerService {
+  /**
+   * Create a LRO for indexing records
+   */
+  rpc EnsureIndexState(EnsureIndexStateRequest) returns (EnsureIndexStateResponse) {
+    option (google.api.http) = {
+      post: "/v1/indexes/{index_state.entity_type}/{index_state.entity_id}/{index_state.index_type}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Get the index states for a particular entity
+   */
+  rpc GetIndexStates(GetIndexStatesRequest) returns (GetIndexStatesResponse) {
+    option (google.api.http) = {
+      get: "/v1/indexes/{entity_type}/{entity_id}",
+    };
+  }
+
+  /**
+   * List index entity states by filtering
+   */
+  rpc ListIndexStates(ListIndexStatesRequest) returns (ListIndexStatesResponse) { 
+    option (google.api.http) = {
+      get: "/v1/indexes/{entity_type}",
+    };
+  }
+
+  rpc DeleteIndexStates(DeleteIndexStatesRequest) returns (DeleteIndexStatesResponse) { 
+    option (google.api.http) = {
+      delete: "/v1/indexes/{entity_type}/{entity_id}",
+    };
+  }
+
+  ///  How do we want to think about "batch" - the idea with LROs was we might want to 
+  // kick off "indexing" of a bunch of items - but not sure if there is immediate value now
+  // This would only be used on a bootstrap but may be we could do in a different
+  /**
+   * Get the details of a LRO operation
+   */
+  /*
+  rpc GetIndexRecordsLRO(GetIndexRecordsLRORequest) returns (GetIndexRecordsLROResponse) {
+    option (google.api.http) = {
+      post: "/v1/indexes/{lro_id}",
+      body: "*",
+    };
+  }
+  */
+
+  /**
+   * Update an LRO operation - internal usage
+   */
+  /*
+  rpc UpdateIndexRecordsLRO(UpdateIndexRecordsLRORequest) returns (UpdateIndexRecordsLROResponse) {
+    option (google.api.http) = {
+      patch: "/v1/indexlro/{lro.lro_id}",
+      body: "*",
+    };
+  }
+  */
+}
+

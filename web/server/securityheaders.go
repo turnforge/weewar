@@ -5,6 +5,18 @@ import (
 	"os"
 )
 
+// Google AdSense CSP domains (shared between dev and prod)
+const (
+	// Scripts: ad serving, tag management, ad service, traffic quality
+	cspScriptSrc = "https://unpkg.com https://pagead2.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://*.google.com https://*.adtrafficquality.google"
+	// Images: ad images, Google services, traffic quality
+	cspImgSrc = "https://pagead2.googlesyndication.com https://www.google.com https://*.googleusercontent.com https://*.adtrafficquality.google"
+	// Connections: ad syndication, traffic quality
+	cspConnectSrc = "https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://*.google.com"
+	// Frames: ad delivery iframes, traffic quality
+	cspFrameSrc = "https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://*.adtrafficquality.google"
+)
+
 // SecurityHeadersMiddleware adds security headers to all responses.
 // These headers help protect against common web vulnerabilities.
 type SecurityHeadersMiddleware struct {
@@ -15,7 +27,7 @@ type SecurityHeadersMiddleware struct {
 // NewSecurityHeadersMiddleware creates a new security headers middleware.
 // Set isDevelopment=true to relax some policies for local development.
 func NewSecurityHeadersMiddleware() *SecurityHeadersMiddleware {
-	isDev := os.Getenv("WEEWAR_ENV") == "development" || os.Getenv("WEEWAR_ENV") == ""
+	isDev := os.Getenv("LILBATTLE_ENV") == "development" || os.Getenv("LILBATTLE_ENV") == ""
 	return &SecurityHeadersMiddleware{
 		IsDevelopment: isDev,
 	}
@@ -40,29 +52,21 @@ func (m *SecurityHeadersMiddleware) Wrap(next http.Handler) http.Handler {
 		w.Header().Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
 		// Content-Security-Policy: Controls which resources can be loaded
-		// In development, we allow unsafe-inline for easier debugging
-		// In production, we use stricter policies
+		// Dev adds 'unsafe-eval' for hot reloading and ws: for plain websockets
+		var scriptExtra, connectExtra string
 		if m.IsDevelopment {
-			// Development: Allow inline scripts/styles for hot reloading
-			w.Header().Set("Content-Security-Policy",
-				"default-src 'self'; "+
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval'; "+
-					"style-src 'self' 'unsafe-inline'; "+
-					"img-src 'self' data: blob:; "+
-					"font-src 'self'; "+
-					"connect-src 'self' ws: wss:; "+
-					"frame-ancestors 'none'")
-		} else {
-			// Production: Stricter CSP
-			w.Header().Set("Content-Security-Policy",
-				"default-src 'self'; "+
-					"script-src 'self'; "+
-					"style-src 'self' 'unsafe-inline'; "+ // inline styles needed for Tailwind
-					"img-src 'self' data: blob:; "+
-					"font-src 'self'; "+
-					"connect-src 'self' wss:; "+
-					"frame-ancestors 'none'")
+			scriptExtra = "'unsafe-eval' "
+			connectExtra = "ws: "
 		}
+		w.Header().Set("Content-Security-Policy",
+			"default-src 'self'; "+
+				"script-src 'self' 'unsafe-inline' "+scriptExtra+cspScriptSrc+"; "+
+				"style-src 'self' 'unsafe-inline'; "+
+				"img-src 'self' data: blob: "+cspImgSrc+"; "+
+				"font-src 'self'; "+
+				"connect-src 'self' "+connectExtra+"wss: "+cspConnectSrc+"; "+
+				"frame-src "+cspFrameSrc+"; "+
+				"frame-ancestors 'none'")
 
 		// Strict-Transport-Security: Force HTTPS (only in production)
 		if !m.IsDevelopment {

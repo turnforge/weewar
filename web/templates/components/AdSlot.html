@@ -1,0 +1,46 @@
+{{/*
+  AdSlot - Reusable ad container component
+
+  This component renders an ad slot with proper sizing and network integration.
+  It respects the AdsEnabled flag and gracefully degrades when no network ID is configured.
+
+  Parameters (via .):
+    - SlotId: string - Unique identifier for this ad slot (required)
+    - Size: string - "leaderboard" | "mrec" | "skyscraper" | "mobile-banner" (required)
+    - Position: string - "footer" | "home-mid" | "listing" | "sidebar" (optional, for analytics)
+
+  Usage:
+    {{ template "AdSlot" (dict "SlotId" "footer-1" "Size" "leaderboard" "Position" "footer") }}
+
+  Size Reference:
+    - leaderboard: 728x90 (desktop banner)
+    - mrec: 300x250 (medium rectangle)
+    - skyscraper: 160x600 (sidebar)
+    - mobile-banner: 320x50 (mobile)
+*/}}
+
+{{ define "AdSlot" }}
+{{ if and (Ctx).AdsEnabled (Ctx).AdNetworkId }}
+{{/* Production mode: render actual ad */}}
+<div id="ad-{{ .SlotId }}"
+     class="ad-container ad-{{ .Size }}"
+     data-ad-position="{{ .Position }}"
+     data-ad-slot="{{ .SlotId }}">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="{{ (Ctx).AdNetworkId }}"
+         data-ad-slot="{{ .SlotId }}"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{{ else if (Ctx).AdsEnabled }}
+{{/* Dev mode: show placeholder when ads enabled but no network ID */}}
+<div id="ad-{{ .SlotId }}"
+     class="ad-container ad-{{ .Size }} ad-placeholder"
+     data-ad-position="{{ .Position }}">
+    <span class="ad-placeholder-text">Ad: {{ .Size }}</span>
+</div>
+{{ end }}
+{{/* When AdsEnabled is false, nothing is rendered */}}
+{{ end }}

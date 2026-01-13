@@ -9,18 +9,18 @@ import (
 
 // LoginPage extends goapplib.SampleLoginPage with app-specific features.
 type LoginPage struct {
-	goal.SampleLoginPage[*WeewarApp]
+	goal.SampleLoginPage[*LilBattleApp]
 	Header             Header
 	EnableTwitterLogin bool
 }
 
 // RegisterPage extends goapplib.SampleRegisterPage with app-specific features.
 type RegisterPage struct {
-	goal.SampleRegisterPage[*WeewarApp]
+	goal.SampleRegisterPage[*LilBattleApp]
 	Header Header
 }
 
-func (p *LoginPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *LoginPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	err, finished = goal.LoadAll(r, w, app, &p.SampleLoginPage, &p.Header)
 	if err != nil || finished {
 		return
@@ -38,6 +38,6 @@ func (p *LoginPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*
 	return
 }
 
-func (p *RegisterPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *RegisterPage) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	return goal.LoadAll(r, w, app, &p.SampleRegisterPage, &p.Header)
 }

@@ -1,10 +1,10 @@
-<!-- weewar/web/templates/Header.html -->
+<!-- lilbattle/web/templates/Header.html -->
 <!--
-This template extends goapplib's Header with weewar-specific navigation tabs.
+This template extends goapplib's Header with lilbattle-specific navigation tabs.
 Uses templar's extend to override NavigationTabs while keeping
 all other header functionality from goapplib.
 
-NOTE: This file is included by weewar/BasePage.html after it namespaces
+NOTE: This file is included by lilbattle/BasePage.html after it namespaces
 goapplib/BasePage.html as "GoalBase". Therefore, we extend the namespaced
 templates: GoalBase:HeaderActionsDrawer, GoalBase:NavigationTabs.
 
@@ -15,10 +15,34 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
 - ExtraHeaderButtons: Additional buttons (overridable by pages)
 -->
 
-{{# extend "GoalBase:HeaderActionsDrawer" "HeaderActionsDrawer" "GoalBase:NavigationTabs" "WeewarNavigationTabs" #}}
+{{# extend "GoalBase:HeaderActionsDrawer" "HeaderActionsDrawer" "GoalBase:NavigationTabs" "LilBattleNavigationTabs" "GoalBase:HeaderActions" "LilBattleHeaderActions" #}}
 
-<!-- Weewar-specific navigation tabs -->
-{{ define "WeewarNavigationTabs" }}
+<!-- LilBattle-specific header actions - uses DisplayName for logged in users -->
+{{ define "LilBattleHeaderActions" }}
+{{ if .Header.IsLoggedIn }}
+<a href="/profile" class="hidden md:flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+    </svg>
+    <span>{{ or .Header.DisplayName .Header.Username "Profile" }}</span>
+</a>
+<a href="/auth/logout" class="hidden md:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+    </svg>
+</a>
+{{ else }}
+<a href="/login" class="hidden md:inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+    <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+    </svg>
+    Login
+</a>
+{{ end }}
+{{ end }}
+
+<!-- LilBattle-specific navigation tabs -->
+{{ define "LilBattleNavigationTabs" }}
 <nav class="navigation-tabs-container md:mr-auto">
     {{ if not (Ctx).HideGames }}
     <a href="/games/" class="navigation-tab {{ if eq .ActiveTab "games" }}active{{ end }}">
@@ -31,4 +55,223 @@ CUSTOMIZABLE BLOCKS (inherited from goapplib):
     </a>
     {{ end }}
 </nav>
+{{ end }}
+
+<!-- LilBattle Header Actions Drawer - Mobile view with DisplayName -->
+{{ define "HeaderActionsDrawer" }}
+<div id="header-actions-drawer" class="print:hidden fixed z-[60] hidden">
+    <!-- Backdrop (mobile only) -->
+    <div class="header-drawer-backdrop absolute inset-0 transition-opacity duration-300 md:hidden"></div>
+
+    <!-- Drawer Container -->
+    <div class="header-drawer-container bg-white dark:bg-gray-800 transition-transform duration-300 ease-out">
+        <!-- Drawer Content -->
+        <div class="header-actions-drawer-content p-4 md:p-0 space-y-2 md:space-y-0">
+            <!-- Navigation Tabs -->
+            {{ template "NavigationTabs" . }}
+
+            <!-- User Actions (mobile only) -->
+            <div class="md:hidden flex flex-col space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                {{ if .Header.IsLoggedIn }}
+                <a href="/profile" class="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span>{{ or .Header.DisplayName .Header.Username "Profile" }}</span>
+                </a>
+                <a href="/auth/logout" class="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Logout</span>
+                </a>
+                {{ else }}
+                <a href="/login" class="flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Login</span>
+                </a>
+                {{ end }}
+            </div>
+
+            <!-- Page-specific buttons -->
+            {{ template "ExtraHeaderButtons" . }}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Navigation tabs styling */
+.navigation-tabs-container {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.navigation-tab {
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    color: #374151;
+}
+
+.dark .navigation-tab {
+    color: #D1D5DB;
+}
+
+.navigation-tab:hover {
+    background-color: #F3F4F6;
+}
+
+.dark .navigation-tab:hover {
+    background-color: #374151;
+}
+
+.navigation-tab.active {
+    background-color: #DBEAFE;
+    color: #1D4ED8;
+}
+
+.dark .navigation-tab.active {
+    background-color: rgba(30, 58, 138, 0.5);
+    color: #BFDBFE;
+}
+
+/* Desktop: Drawer appears inline with header */
+@media (min-width: 768px) {
+    #header-actions-drawer {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 70px;
+        width: auto;
+        z-index: 25;
+        pointer-events: none;
+    }
+
+    #header-actions-drawer .header-drawer-container {
+        background: transparent;
+        box-shadow: none;
+        border: none;
+        transform: none;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    #header-actions-drawer .header-actions-drawer-content {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+        height: 100%;
+        pointer-events: auto;
+    }
+
+    #header-actions-drawer .header-drawer-backdrop {
+        display: none;
+    }
+
+    #header-actions-drawer {
+        display: block !important;
+    }
+
+    .navigation-tabs-container {
+        flex-direction: row;
+    }
+}
+
+/* Mobile: Drawer slides from top */
+@media (max-width: 767px) {
+    #header-actions-drawer {
+        inset: 0;
+    }
+
+    #header-actions-drawer.hidden {
+        pointer-events: none;
+    }
+
+    #header-actions-drawer.open {
+        pointer-events: auto;
+    }
+
+    #header-actions-drawer .header-drawer-container {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 70px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-bottom: 1px solid #E5E7EB;
+        transform: translateY(-100%);
+        max-height: calc(100vh - 70px);
+        overflow-y: auto;
+    }
+
+    .dark #header-actions-drawer .header-drawer-container {
+        border-color: #374151;
+    }
+
+    #header-actions-drawer.open .header-drawer-container {
+        transform: translateY(0);
+    }
+
+    #header-actions-drawer .header-drawer-backdrop {
+        opacity: 0;
+    }
+
+    #header-actions-drawer.open .header-drawer-backdrop {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    #header-actions-drawer .header-actions-drawer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .navigation-tabs-container {
+        flex-direction: column;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .dark .navigation-tabs-container {
+        border-color: #374151;
+    }
+
+    .navigation-tab {
+        width: 100%;
+        text-align: left;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuBtn = document.getElementById('header-actions-menu-btn');
+    const drawer = document.getElementById('header-actions-drawer');
+    const backdrop = drawer?.querySelector('.header-drawer-backdrop');
+
+    if (menuBtn && drawer) {
+        menuBtn.addEventListener('click', function() {
+            drawer.classList.toggle('hidden');
+            drawer.classList.toggle('open');
+        });
+
+        if (backdrop) {
+            backdrop.addEventListener('click', function() {
+                drawer.classList.add('hidden');
+                drawer.classList.remove('open');
+            });
+        }
+    }
+});
+</script>
 {{ end }}

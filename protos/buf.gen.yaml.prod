@@ -14,7 +14,7 @@ managed:
     # - module: connectrpc.com/connect
   override:
     - file_option: go_package_prefix
-      value: github.com/turnforge/weewar/gen/go
+      value: github.com/turnforge/lilbattle/gen/go
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: ../gen/go
@@ -54,7 +54,7 @@ plugins:
       - generate_dal=true
       - dal_filename_suffix=_dal
       - dal_output_dir=dal
-      - entity_import_path=github.com/turnforge/weewar/gen/gorm
+      - entity_import_path=github.com/turnforge/lilbattle/gen/gorm
 
   # Datastore DAL generator
   - local: protoc-gen-dal-datastore
@@ -75,8 +75,8 @@ plugins:
     opt:
       - wasm_export_path=.
       - js_structure=namespaced
-      - js_namespace=weewar
-      - module_name=weewar
+      - js_namespace=lilbattle
+      - module_name=lilbattle
       - generate_build_script=true
 
   # Generate TypeScript clients with new TS generator
@@ -85,8 +85,8 @@ plugins:
     opt:
       - ts_export_path=.
       - js_structure=namespaced
-      - js_namespace=weewar
-      - module_name=weewar
+      - js_namespace=lilbattle
+      - module_name=lilbattle
       - generate_clients=true
       - generate_types=true
       - generate_factories=true

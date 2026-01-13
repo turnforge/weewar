@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/turnforge/weewar/services/server"
-	"github.com/turnforge/weewar/utils"
-	web "github.com/turnforge/weewar/web/server"
+	"github.com/turnforge/lilbattle/services/server"
+	"github.com/turnforge/lilbattle/utils"
+	web "github.com/turnforge/lilbattle/web/server"
 )
 
 var (
@@ -35,7 +35,7 @@ func main() {
 }
 
 func DefaultGatewayAddress() string {
-	gateway_addr := os.Getenv("WEEWAR_INDEXER_WEB_PORT")
+	gateway_addr := os.Getenv("LILBATTLE_INDEXER_WEB_PORT")
 	if gateway_addr != "" {
 		return gateway_addr
 	}
@@ -43,7 +43,7 @@ func DefaultGatewayAddress() string {
 }
 
 func DefaultServiceAddress() string {
-	port := os.Getenv("WEEWAR_INDEXER_GRPC_PORT")
+	port := os.Getenv("LILBATTLE_INDEXER_GRPC_PORT")
 	if port != "" {
 		return port
 	}
@@ -52,7 +52,7 @@ func DefaultServiceAddress() string {
 
 func parseFlags() {
 	envfile := ".env"
-	log.Println("Environment: ", os.Getenv("WEEWAR_INDEXER_ENV"))
+	log.Println("Environment: ", os.Getenv("LILBATTLE_INDEXER_ENV"))
 	if os.Getenv("WEEAR_INDEXER_ENV") == "dev" {
 		envfile = ".env.dev"
 		logger := slog.New(utils.NewPrettyHandler(os.Stdout, utils.PrettyHandlerOptions{

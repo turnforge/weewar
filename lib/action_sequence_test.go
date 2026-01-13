@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // Action sequence tests verify that the action_order progression system
@@ -19,7 +19,7 @@ import (
 // - Steps advance when action is taken or resource exhausted
 
 // =============================================================================
-// Action Order Pattern Constants (copied from weewar-rules.json to avoid dependency)
+// Action Order Pattern Constants (copied from lilbattle-rules.json to avoid dependency)
 // =============================================================================
 
 var (

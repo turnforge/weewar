@@ -5,18 +5,18 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/gen/go/weewar/v1/services/weewarv1connect"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services/lilbattlev1connect"
 )
 
 // ConnectWorldsClient wraps a Connect client for the WorldsService
 type ConnectWorldsClient struct {
-	client weewarv1connect.WorldsServiceClient
+	client lilbattlev1connect.WorldsServiceClient
 }
 
 // NewConnectWorldsClient creates a new Connect client for the WorldsService
 func NewConnectWorldsClient(serverURL string) *ConnectWorldsClient {
-	client := weewarv1connect.NewWorldsServiceClient(
+	client := lilbattlev1connect.NewWorldsServiceClient(
 		http.DefaultClient,
 		serverURL,
 	)

@@ -42,7 +42,7 @@ A system for recording, replaying, and verifying game moves with expected outcom
 
 ## Proto Definitions
 
-### New Messages in `protos/weewar/v1/services/games.proto`
+### New Messages in `protos/lilbattle/v1/services/games.proto`
 
 ```protobuf
 // Test case that can be stored/loaded
@@ -116,7 +116,7 @@ service GamesService {
 
 ## Test File Format
 
-**Location**: `~/dev-app-data/weewar/tests/{game_id}/{test_name}.json`
+**Location**: `~/dev-app-data/lilbattle/tests/{game_id}/{test_name}.json`
 
 Using JSON (proto-compatible) instead of YAML for direct proto serialization:
 
@@ -235,12 +235,12 @@ ww test run-all
 1. **Add `description` to GameMove** (already done)
 
 2. **Add ListMoves RPC to GamesService**
-   - `protos/weewar/v1/services/games.proto`
+   - `protos/lilbattle/v1/services/games.proto`
    - Implement in `services/fsgames_service.go`
    - Implement in `services/singleton_games_service.go`
 
 3. **Add TestCase message**
-   - `protos/weewar/v1/services/games.proto` (or new `testing.proto`)
+   - `protos/lilbattle/v1/services/games.proto` (or new `testing.proto`)
 
 ### Phase 2: Verification Logic
 
@@ -406,7 +406,7 @@ func (s *Stepper) StepThrough(tc *v1.TestCase) error {
 ## File Structure
 
 ```
-protos/weewar/v1/services/
+protos/lilbattle/v1/services/
 └── games.proto             # Add ListMoves, TestCase, VerifyTest
 
 services/
@@ -421,7 +421,7 @@ cmd/cli/
 └── cmd/
     └── test.go             # CLI commands
 
-~/dev-app-data/weewar/tests/
+~/dev-app-data/lilbattle/tests/
 └── {game_id}/
     ├── combat-basic.json
     └── movement-costs.json
@@ -429,7 +429,7 @@ cmd/cli/
 
 ## Critical Files to Modify
 
-1. **`protos/weewar/v1/services/games.proto`**
+1. **`protos/lilbattle/v1/services/games.proto`**
    - Add `ListMovesRequest`, `ListMovesResponse`
    - Add `TestCase` message
    - Add `ListMoves` RPC
@@ -473,7 +473,7 @@ ww endturn
 ww test record --output tests/combat-test.json
 
 # 3. View the recorded test
-cat ~/dev-app-data/weewar/tests/c5380903/combat-test.json | jq .
+cat ~/dev-app-data/lilbattle/tests/c5380903/combat-test.json | jq .
 
 # 4. Verify (should pass)
 ww test verify tests/combat-test.json

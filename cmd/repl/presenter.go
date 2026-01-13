@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/turnforge/weewar/services"
-	"github.com/turnforge/weewar/services/singleton"
+	"github.com/turnforge/lilbattle/services"
+	"github.com/turnforge/lilbattle/services/singleton"
 )
 
 func newPresenter() *services.GameViewPresenter {

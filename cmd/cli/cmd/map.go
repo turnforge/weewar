@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/web/assets/themes"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/web/assets/themes"
 )
 
 // mapCmd represents the map command
@@ -38,8 +38,8 @@ func init() {
 	mapCmd.Flags().BoolVar(&showTileLabels, "tile-labels", true, "Show tile labels (Shortcut)")
 
 	// Default to environment variable if set
-	defaultOutput := os.Getenv("WEEWAR_MAP_OUTPUT")
-	mapCmd.Flags().StringVarP(&outputFile, "output", "o", defaultOutput, "Save image to file instead of displaying (env: WEEWAR_MAP_OUTPUT)")
+	defaultOutput := os.Getenv("LILBATTLE_MAP_OUTPUT")
+	mapCmd.Flags().StringVarP(&outputFile, "output", "o", defaultOutput, "Save image to file instead of displaying (env: LILBATTLE_MAP_OUTPUT)")
 }
 
 func runMap(cmd *cobra.Command, args []string) error {

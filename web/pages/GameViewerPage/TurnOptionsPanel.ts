@@ -1,4 +1,4 @@
-import { GameViewPresenterClient as  GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/services/gameViewPresenterClient';
+import { GameViewPresenterClient as  GameViewPresenterClient } from '../../gen/wasmjs/lilbattle/v1/services/gameViewPresenterClient';
 import { BaseComponent, EventBus, LCMComponent } from '@panyam/tsappkit';
 import { World } from '../common/World';
 import { ITheme } from '../../assets/themes/BaseTheme';

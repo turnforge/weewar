@@ -1,0 +1,255 @@
+<!-- templates/FixSimulatorPage.html -->
+{{# include "BasePage.html" #}}
+
+{{ define "ExtraHeadSection" }}
+<style>
+    .chart-canvas {
+        border: 1px solid #d1d5db;
+    }
+
+    .dark .chart-canvas {
+        border-color: #4b5563;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+
+    .dark .form-label {
+        color: #d1d5db;
+    }
+
+    .form-select {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        background-color: #ffffff;
+        color: #111827;
+    }
+
+    .form-select:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .dark .form-select {
+        border-color: #4b5563;
+        background-color: #374151;
+        color: #f9fafb;
+        color-scheme: dark;
+    }
+
+    .dark .form-select option {
+        background-color: #374151;
+        color: #f9fafb;
+    }
+
+    .dark .form-select option {
+        background-color: #374151;
+        color: #f9fafb;
+    }
+
+    .form-input {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        background-color: #ffffff;
+        color: #111827;
+    }
+
+    .form-input:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .dark .form-input {
+        border-color: #4b5563;
+        background-color: #374151;
+        color: #f9fafb;
+    }
+
+    .stat-card {
+        background-color: #f9fafb;
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        text-align: center;
+    }
+
+    .dark .stat-card {
+        background-color: #374151;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #4b5563;
+    }
+
+    .dark .stat-label {
+        color: #9ca3af;
+    }
+
+    .stat-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .dark .stat-value {
+        color: #f9fafb;
+    }
+
+    /* Number input spinner buttons */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        opacity: 1;
+    }
+</style>
+{{ end }}
+
+{{ define "BodySection" }}
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Fix Simulator</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">Simulate repair outcomes between different units</p>
+    </div>
+
+    <!-- Row 1: Configuration -->
+    <div class="grid grid-cols-2 gap-6 mb-6">
+        <!-- Fixing Unit Configuration -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Fixing Unit</h2>
+
+            <div class="space-y-3">
+                <div>
+                    <label for="fixing-unit" class="form-label">Unit Type</label>
+                    <select id="fixing-unit" class="form-select bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        {{range .FixingUnits}}
+                        <option value="{{.Id}}" {{if eq .Id (Int $.FixingUnit)}}selected{{end}} data-icon="{{.IconDataURL}}" data-fix-value="{{.FixValue}}">{{.Name}} (Fix: {{.FixValue}})</option>
+                        {{end}}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="fixing-unit-health" class="form-label">Health</label>
+                    <input type="number" id="fixing-unit-health" min="1" max="15" value="{{.FixingUnitHealth}}" class="form-input bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                </div>
+            </div>
+        </div>
+
+        <!-- Injured Unit Configuration -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Injured Unit</h2>
+
+            <div class="space-y-3">
+                <div>
+                    <label for="injured-unit" class="form-label">Unit Type</label>
+                    <select id="injured-unit" class="form-select bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        {{range .AllUnits}}
+                        <option value="{{.Id}}" {{if eq .Id (Int $.InjuredUnit)}}selected{{end}} data-icon="{{.IconDataURL}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Hex Visualizations -->
+    <div class="grid grid-cols-2 gap-6 mb-6">
+        <!-- Fixing Unit Hex -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Fixing Unit</h3>
+            <div id="fixing-hex-container" class="min-h-[150px]"></div>
+        </div>
+
+        <!-- Injured Unit Hex -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 text-center">Injured Unit</h3>
+            <div id="injured-hex-container" class="min-h-[150px]"></div>
+        </div>
+    </div>
+
+    <!-- Row 3: Health Restoration Distribution -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Health Restoration</h3>
+        <p id="chart-description" class="text-sm text-gray-600 dark:text-gray-400 mb-4">The amount of health <span id="fixing-unit-name">-</span> restores to <span id="injured-unit-name">-</span>.</p>
+        <canvas id="healing-chart" class="chart-canvas mx-auto" width="800" height="300"></canvas>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 gap-2 mt-3 max-w-md mx-auto">
+            <div class="stat-card">
+                <div class="stat-label">Mean Healing</div>
+                <div id="mean-healing" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Fix Value (F)</div>
+                <div id="fix-value" class="stat-value">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Mathematics Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700 mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Mathematics</h2>
+
+        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Fix Values</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">Fix values are determined by the following:</p>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 mb-4 space-y-1">
+            <li>The amount of health units (Hf) of the fixing unit.</li>
+            <li>The fix (F) value of the fixing unit.</li>
+        </ul>
+
+        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Formula</h3>
+        <div class="font-mono bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-4 text-gray-800 dark:text-gray-200">
+            <p>p = 0.05 * F</p>
+            <p>if p &lt; 0, set p to 0</p>
+            <p>if p &gt; 1, set p to 1</p>
+        </div>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+            For each health unit (Hf) of the fixing unit, three random numbers (r) between 0 and 1 are generated.
+            Each time r &lt; p, a fix is counted. The number of fixes divided by 3 is the number of health units the injured unit gains from the fix.
+        </p>
+
+        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Notes</h3>
+        <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 space-y-1">
+            <li>Fixing has a wider range of possible outcomes compared to attacks, making it less predictable.</li>
+        </ul>
+    </div>
+
+    <!-- Simulation Controls -->
+    <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <label for="num-simulations" class="form-label mb-0">Number of Simulations:</label>
+                <input type="number" id="num-simulations" min="100" max="10000" value="{{.NumSimulations}}" step="100" class="form-input w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+            </div>
+            <button id="simulate-btn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                Simulate Fix
+            </button>
+        </div>
+    </div>
+</main>
+{{ end }}
+
+{{ define "PostBodySection" }}
+<!-- Webpack-generated JavaScript bundle -->
+<script src="/static/wasm/wasm_exec.js"></script>
+{{# include "gen/FixSimulatorPage.html" #}}
+{{ end }}
+
+{{ define "FixSimulatorPage" }}
+{{ template "BasePage" . }}
+{{ end }}

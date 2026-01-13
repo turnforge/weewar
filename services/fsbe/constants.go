@@ -9,11 +9,11 @@ import (
 	"github.com/panyam/goutils/utils"
 )
 
-const WEEWAR_DATA_ROOT = "~/dev-app-data/weewar"
+const LILBATTLE_DATA_ROOT = "~/dev-app-data/lilbattle"
 
 // For dev
 func DevDataPath(path string) string {
-	return filepath.Join(utils.ExpandUserPath(WEEWAR_DATA_ROOT), path)
+	return filepath.Join(utils.ExpandUserPath(LILBATTLE_DATA_ROOT), path)
 }
 
 // shortRandSuffix generates a 4-character random suffix for ID suggestions

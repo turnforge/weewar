@@ -1,7 +1,7 @@
 package lib
 
 import (
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // Proto Unit helper methods
@@ -53,7 +53,7 @@ func ProtoInt(val int32) int {
 }
 
 // ProtoToRuntimeGame converts protobuf game/state to runtime game
-// This is WeeWar-specific and doesn't belong in TurnEngine
+// This is LilBattle-specific and doesn't belong in TurnEngine
 func ProtoToRuntimeGame(game *v1.Game, gameState *v1.GameState) *Game {
 	// Create the runtime game from the protobuf data
 	world := NewWorld(game.Name, gameState.WorldData)

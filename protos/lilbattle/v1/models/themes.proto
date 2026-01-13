@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models";
+
+// ThemeInfo contains metadata about a theme
+message ThemeInfo {
+  string name = 1;
+  string version = 2;
+  string base_path = 3;
+  string asset_type = 4; // "svg", "png", "mixed"
+  bool needs_post_processing = 5;
+}
+
+// UnitMapping maps a unit ID to its theme-specific representation
+message UnitMapping {
+  string old = 1;         // Legacy name
+  string name = 2;        // Display name in this theme
+  string image = 3;       // Image file path (relative to theme)
+  string description = 4; // Optional description
+}
+
+// TerrainMapping maps a terrain ID to its theme-specific representation
+message TerrainMapping {
+  string old = 1;         // Legacy name
+  string name = 2;        // Display name in this theme
+  string image = 3;       // Image file path (relative to theme)
+  string description = 4; // Optional description
+}
+
+// ThemeManifest represents the full theme configuration
+// This matches the structure of mapping.json files
+message ThemeManifest {
+  ThemeInfo theme_info = 1;
+  map<int32, UnitMapping> units = 2;       // Unit ID -> mapping
+  map<int32, TerrainMapping> terrains = 3; // Terrain ID -> mapping
+  map<int32, PlayerColor> player_colors = 4; // Player ID -> color scheme
+}
+
+// PlayerColor defines the color scheme for a player
+message PlayerColor {
+  string primary = 1;
+  string secondary = 2;
+  string name = 3;
+}
+
+// AssetResult represents a rendered asset
+message AssetResult {
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_PATH = 1;    // URL/file path
+    TYPE_SVG = 2;     // Inline SVG markup
+    TYPE_DATA_URL = 3; // Base64 data URL
+  }
+
+  Type type = 1;
+  string data = 2; // The actual content (path or SVG markup)
+}

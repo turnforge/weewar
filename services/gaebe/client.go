@@ -14,7 +14,7 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-const name = "github.com/turnforge/weewar/gaebe"
+const name = "github.com/turnforge/lilbattle/gaebe"
 
 var (
 	Tracer = otel.Tracer(name)

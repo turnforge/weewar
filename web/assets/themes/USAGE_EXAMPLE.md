@@ -6,8 +6,8 @@
 package services
 
 import (
-    "github.com/turnforge/weewar/lib"
-    "github.com/turnforge/weewar/web/assets/themes"
+    "github.com/turnforge/lilbattle/lib"
+    "github.com/turnforge/lilbattle/web/assets/themes"
 )
 
 type SingletonGameViewPresenterImpl struct {

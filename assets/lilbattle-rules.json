@@ -1,0 +1,4715 @@
+{
+  "terrainTypes": {
+    "1": "city",
+    "2": "city",
+    "3": "city",
+    "4": "nature",
+    "5": "nature",
+    "6": "city",
+    "7": "nature",
+    "8": "nature",
+    "9": "nature",
+    "10": "water",
+    "12": "nature",
+    "14": "water",
+    "15": "water",
+    "16": "city",
+    "17": "bridge",
+    "18": "bridge",
+    "19": "bridge",
+    "20": "city",
+    "21": "city",
+    "22": "road",
+    "23": "water",
+    "25": "city",
+    "26": "nature"
+  },
+  "units": {
+    "1": {
+      "id": 1,
+      "name": "Soldier (Basic)",
+      "health": 10,
+      "coins": 75,
+      "movement_points": 3,
+      "defense": 6,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 3,
+        "Heavy:Water": 3,
+        "Light:Land": 6,
+        "Light:Water": 3
+      },
+      "action_order": [
+        "move",
+        "attack|capture"
+      ]
+    },
+    "10": {
+      "id": 10,
+      "name": "Speedboat",
+      "health": 10,
+      "coins": 200,
+      "movement_points": 4,
+      "defense": 6,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 6,
+        "Heavy:Water": 6,
+        "Light:Air": 6,
+        "Light:Land": 8,
+        "Light:Water": 12
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "11": {
+      "id": 11,
+      "name": "Capturing",
+      "health": 10,
+      "defense": 2,
+      "unit_class": "Light",
+      "unit_terrain": "Land"
+    },
+    "12": {
+      "id": 12,
+      "name": "Battleship",
+      "health": 10,
+      "coins": 2000,
+      "movement_points": 2.25,
+      "defense": 14,
+      "attack_range": 5,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 14,
+        "Heavy:Water": 14,
+        "Light:Air": 6,
+        "Light:Land": 10,
+        "Light:Water": 14,
+        "Stealth:Water": 4
+      },
+      "action_order": [
+        "move",
+        "attack",
+        "attack"
+      ]
+    },
+    "13": {
+      "id": 13,
+      "name": "Destroyer",
+      "health": 10,
+      "coins": 900,
+      "movement_points": 4,
+      "defense": 12,
+      "attack_range": 3,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Air": 12,
+        "Heavy:Land": 8,
+        "Heavy:Water": 8,
+        "Light:Air": 12,
+        "Light:Land": 8,
+        "Light:Water": 10,
+        "Stealth:Water": 16
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "14": {
+      "id": 14,
+      "name": "Jetfighter",
+      "health": 10,
+      "coins": 800,
+      "movement_points": 6,
+      "retreat_points": 2,
+      "defense": 10,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Air": 16,
+        "Heavy:Land": 8,
+        "Heavy:Water": 6,
+        "Light:Air": 16,
+        "Light:Land": 6,
+        "Light:Water": 6
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "15": {
+      "id": 15,
+      "name": "Crop Duster",
+      "health": 10,
+      "coins": 400,
+      "movement_points": 3,
+      "retreat_points": 1,
+      "defense": 8,
+      "attack_range": 2,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 6,
+        "Heavy:Water": 6,
+        "Light:Air": 8,
+        "Light:Land": 8,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "16": {
+      "id": 16,
+      "name": "Submarine",
+      "health": 10,
+      "coins": 1000,
+      "movement_points": 3,
+      "defense": 10,
+      "attack_range": 2,
+      "min_attack_range": 1,
+      "unit_class": "Stealth",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Water": 16,
+        "Stealth:Water": 10
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "17": {
+      "id": 17,
+      "name": "Helicopter",
+      "health": 10,
+      "coins": 600,
+      "movement_points": 5,
+      "retreat_points": 1,
+      "defense": 10,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 10,
+        "Heavy:Water": 8,
+        "Light:Air": 6,
+        "Light:Land": 16,
+        "Light:Water": 12,
+        "Stealth:Water": 16
+      },
+      "action_order": [
+        "move",
+        "attack",
+        "retreat"
+      ]
+    },
+    "18": {
+      "id": 18,
+      "name": "Bomber",
+      "health": 10,
+      "coins": 900,
+      "movement_points": 5,
+      "retreat_points": 2,
+      "defense": 10,
+      "attack_range": 2,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Land": 14,
+        "Heavy:Water": 14,
+        "Light:Land": 14,
+        "Light:Water": 14
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "19": {
+      "id": 19,
+      "name": "Zeppelin",
+      "health": 10,
+      "coins": 300,
+      "movement_points": 3,
+      "retreat_points": 1,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Air": 4,
+        "Heavy:Land": 7,
+        "Heavy:Water": 7,
+        "Light:Air": 4,
+        "Light:Land": 7,
+        "Light:Water": 7,
+        "Stealth:Water": 7
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "2": {
+      "id": 2,
+      "name": "Soldier (Advanced)",
+      "health": 10,
+      "coins": 150,
+      "movement_points": 2,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 8,
+        "Heavy:Water": 8,
+        "Light:Air": 6,
+        "Light:Land": 8,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move",
+        "attack|capture"
+      ]
+    },
+    "20": {
+      "id": 20,
+      "name": "Mech",
+      "health": 10,
+      "coins": 900,
+      "movement_points": 2.25,
+      "defense": 14,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 16,
+        "Heavy:Water": 14,
+        "Light:Land": 14,
+        "Light:Water": 14
+      },
+      "action_order": [
+        "move",
+        "attack|capture"
+      ]
+    },
+    "21": {
+      "id": 21,
+      "name": "Missile (Standard)",
+      "health": 10,
+      "coins": 150,
+      "defense": 3,
+      "attack_range": 5,
+      "min_attack_range": 2,
+      "splash_damage": 2,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 8,
+        "Heavy:Water": 6,
+        "Light:Land": 10,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "attack"
+      ]
+    },
+    "22": {
+      "id": 22,
+      "name": "Missile (Nuclear)",
+      "health": 10,
+      "coins": 300,
+      "defense": 4,
+      "attack_range": 6,
+      "min_attack_range": 3,
+      "splash_damage": 6,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 16,
+        "Heavy:Water": 14,
+        "Light:Land": 18,
+        "Light:Water": 16
+      },
+      "action_order": [
+        "attack"
+      ]
+    },
+    "24": {
+      "id": 24,
+      "name": "Sailboat",
+      "health": 10,
+      "coins": 300,
+      "movement_points": 2.25,
+      "retreat_points": 2,
+      "defense": 6,
+      "attack_range": 2,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Land": 6,
+        "Heavy:Water": 6,
+        "Light:Air": 6,
+        "Light:Land": 8,
+        "Light:Water": 13
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "25": {
+      "id": 25,
+      "name": "Artillery (Mega)",
+      "health": 10,
+      "coins": 1200,
+      "movement_points": 2.25,
+      "defense": 4,
+      "attack_range": 5,
+      "min_attack_range": 2,
+      "splash_damage": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 12,
+        "Heavy:Water": 12,
+        "Light:Land": 14,
+        "Light:Water": 12
+      },
+      "action_order": [
+        "move|attack"
+      ]
+    },
+    "26": {
+      "id": 26,
+      "name": "Artillery (Quick)",
+      "health": 10,
+      "coins": 400,
+      "movement_points": 4,
+      "defense": 6,
+      "attack_range": 2,
+      "min_attack_range": 1,
+      "splash_damage": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 6,
+        "Heavy:Water": 6,
+        "Light:Air": 6,
+        "Light:Land": 8,
+        "Light:Water": 6
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "27": {
+      "id": 27,
+      "name": "Medic",
+      "health": 10,
+      "coins": 125,
+      "movement_points": 2,
+      "defense": 4,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 2,
+        "Light:Land": 4,
+        "Light:Water": 2
+      },
+      "action_order": [
+        "move|fix",
+        "attack|capture|fix"
+      ],
+      "fix_value": 6
+    },
+    "28": {
+      "id": 28,
+      "name": "Stratotanker",
+      "health": 10,
+      "coins": 700,
+      "movement_points": 3,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 8,
+        "Heavy:Water": 6,
+        "Light:Air": 6,
+        "Light:Land": 8,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move",
+        "attack|fix"
+      ],
+      "fix_value": 6
+    },
+    "29": {
+      "id": 29,
+      "name": "Engineer",
+      "health": 10,
+      "coins": 175,
+      "movement_points": 2,
+      "defense": 4,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 2,
+        "Heavy:Water": 2,
+        "Light:Land": 4,
+        "Light:Water": 2,
+        "Stealth:Water": 6
+      },
+      "action_order": [
+        "move",
+        "attack|capture|fix"
+      ],
+      "fix_value": 4
+    },
+    "3": {
+      "id": 3,
+      "name": "Tank (Basic)",
+      "health": 10,
+      "coins": 300,
+      "movement_points": 3,
+      "retreat_points": 1,
+      "defense": 10,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 7,
+        "Heavy:Water": 7,
+        "Light:Land": 10,
+        "Light:Water": 7
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "30": {
+      "id": 30,
+      "name": "Goliath RC",
+      "health": 10,
+      "coins": 50,
+      "movement_points": 2,
+      "defense": 2,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "splash_damage": 2,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 7,
+        "Heavy:Water": 7,
+        "Light:Land": 9,
+        "Light:Water": 7
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "31": {
+      "id": 31,
+      "name": "Tugboat",
+      "health": 10,
+      "coins": 500,
+      "movement_points": 3,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Land": 6,
+        "Heavy:Water": 8,
+        "Light:Land": 8,
+        "Light:Water": 10
+      },
+      "action_order": [
+        "move",
+        "attack|fix"
+      ],
+      "fix_value": 6
+    },
+    "32": {
+      "id": 32,
+      "name": "Sea Mine",
+      "health": 10,
+      "coins": 200,
+      "movement_points": 2,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "splash_damage": 2,
+      "unit_class": "Stealth",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Water": 12,
+        "Light:Water": 12,
+        "Stealth:Water": 12
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "33": {
+      "id": 33,
+      "name": "Drone",
+      "health": 10,
+      "coins": 150,
+      "movement_points": 3,
+      "defense": 6,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Air": 7,
+        "Heavy:Land": 7,
+        "Heavy:Water": 7,
+        "Light:Air": 8,
+        "Light:Land": 8,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "37": {
+      "id": 37,
+      "name": "Cruiser",
+      "health": 10,
+      "coins": 1000,
+      "movement_points": 3,
+      "defense": 12,
+      "attack_range": 4,
+      "min_attack_range": 2,
+      "unit_class": "Heavy",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Air": 8,
+        "Heavy:Land": 12,
+        "Heavy:Water": 12,
+        "Light:Air": 8,
+        "Light:Land": 10,
+        "Light:Water": 12
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "38": {
+      "id": 38,
+      "name": "Missile (Anti-aircraft)",
+      "health": 10,
+      "coins": 200,
+      "defense": 4,
+      "attack_range": 6,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Air": 12,
+        "Heavy:Land": 3,
+        "Heavy:Water": 3,
+        "Light:Air": 12,
+        "Light:Land": 3,
+        "Light:Water": 3
+      },
+      "action_order": [
+        "attack"
+      ]
+    },
+    "39": {
+      "id": 39,
+      "name": "Aircraft Carrier",
+      "health": 10,
+      "coins": 900,
+      "movement_points": 2.25,
+      "defense": 10,
+      "attack_range": 2,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Air": 6,
+        "Heavy:Land": 6,
+        "Heavy:Water": 8,
+        "Light:Air": 6,
+        "Light:Land": 6,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move|fix",
+        "attack|fix"
+      ],
+      "fix_value": 10
+    },
+    "4": {
+      "id": 4,
+      "name": "Tank (Advanced)",
+      "health": 10,
+      "coins": 600,
+      "movement_points": 2.25,
+      "retreat_points": 1,
+      "defense": 14,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 12,
+        "Heavy:Water": 10,
+        "Light:Land": 10,
+        "Light:Water": 10
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "40": {
+      "id": 40,
+      "name": "Miner",
+      "health": 10,
+      "coins": 175,
+      "movement_points": 2,
+      "defense": 4,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 2,
+        "Heavy:Water": 2,
+        "Light:Land": 4,
+        "Light:Water": 2
+      },
+      "action_order": [
+        "move",
+        "attack|capture"
+      ]
+    },
+    "41": {
+      "id": 41,
+      "name": "Paratrooper",
+      "health": 10,
+      "coins": 200,
+      "movement_points": 3,
+      "defense": 6,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Air",
+      "attack_vs_class": {
+        "Heavy:Land": 3,
+        "Heavy:Water": 3,
+        "Light:Air": 5,
+        "Light:Land": 5,
+        "Light:Water": 5
+      },
+      "action_order": [
+        "move",
+        "attack|capture"
+      ]
+    },
+    "44": {
+      "id": 44,
+      "name": "Anti-aircraft (Advanced)",
+      "health": 10,
+      "coins": 500,
+      "movement_points": 3,
+      "defense": 6,
+      "attack_range": 3,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Air": 14,
+        "Heavy:Land": 5,
+        "Heavy:Water": 5,
+        "Light:Air": 14,
+        "Light:Land": 9,
+        "Light:Water": 5
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "5": {
+      "id": 5,
+      "name": "Striker",
+      "health": 10,
+      "coins": 200,
+      "movement_points": 4,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Air": 4,
+        "Heavy:Land": 4,
+        "Heavy:Water": 4,
+        "Light:Air": 4,
+        "Light:Land": 10,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "6": {
+      "id": 6,
+      "name": "Anti-aircraft (Basic)",
+      "health": 10,
+      "coins": 300,
+      "movement_points": 3,
+      "defense": 4,
+      "attack_range": 3,
+      "min_attack_range": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Air": 9,
+        "Heavy:Land": 3,
+        "Heavy:Water": 3,
+        "Light:Air": 9,
+        "Light:Land": 8,
+        "Light:Water": 3
+      },
+      "action_order": [
+        "move",
+        "attack"
+      ]
+    },
+    "7": {
+      "id": 7,
+      "name": "Hovercraft",
+      "health": 10,
+      "coins": 300,
+      "movement_points": 4,
+      "defense": 8,
+      "attack_range": 1,
+      "min_attack_range": 1,
+      "unit_class": "Light",
+      "unit_terrain": "Water",
+      "attack_vs_class": {
+        "Heavy:Land": 6,
+        "Heavy:Water": 6,
+        "Light:Land": 10,
+        "Light:Water": 8
+      },
+      "action_order": [
+        "move",
+        "attack|capture"
+      ]
+    },
+    "8": {
+      "id": 8,
+      "name": "Artillery (Basic)",
+      "health": 10,
+      "coins": 200,
+      "movement_points": 3,
+      "defense": 3,
+      "attack_range": 3,
+      "min_attack_range": 2,
+      "splash_damage": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 4,
+        "Heavy:Water": 4,
+        "Light:Land": 8,
+        "Light:Water": 4
+      },
+      "action_order": [
+        "move|attack"
+      ]
+    },
+    "9": {
+      "id": 9,
+      "name": "Artillery (Advanced)",
+      "health": 10,
+      "coins": 600,
+      "movement_points": 2.25,
+      "defense": 4,
+      "attack_range": 4,
+      "min_attack_range": 3,
+      "splash_damage": 1,
+      "unit_class": "Heavy",
+      "unit_terrain": "Land",
+      "attack_vs_class": {
+        "Heavy:Land": 8,
+        "Heavy:Water": 8,
+        "Light:Land": 10,
+        "Light:Water": 10
+      },
+      "action_order": [
+        "move|attack"
+      ]
+    }
+  },
+  "terrains": {
+    "1": {
+      "id": 1,
+      "name": "Land Base",
+      "type": 1,
+      "buildable_unit_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        20,
+        25,
+        26,
+        27,
+        29,
+        30,
+        40,
+        44
+      ]
+    },
+    "10": {
+      "id": 10,
+      "name": "Water (Regular)",
+      "type": 1
+    },
+    "12": {
+      "id": 12,
+      "name": "Lava",
+      "type": 1
+    },
+    "14": {
+      "id": 14,
+      "name": "Water (Shallow)",
+      "type": 1
+    },
+    "15": {
+      "id": 15,
+      "name": "Water (Deep)",
+      "type": 1
+    },
+    "16": {
+      "id": 16,
+      "name": "Missile Silo",
+      "type": 1,
+      "buildable_unit_ids": [
+        21,
+        22,
+        38
+      ]
+    },
+    "17": {
+      "id": 17,
+      "name": "Bridge (Regular)",
+      "type": 1
+    },
+    "18": {
+      "id": 18,
+      "name": "Bridge (Shallow)",
+      "type": 1
+    },
+    "19": {
+      "id": 19,
+      "name": "Bridge (Deep)",
+      "type": 1
+    },
+    "2": {
+      "id": 2,
+      "name": "Naval Base",
+      "type": 1,
+      "buildable_unit_ids": [
+        7,
+        10,
+        12,
+        13,
+        16,
+        24,
+        31,
+        32,
+        37,
+        39
+      ]
+    },
+    "20": {
+      "id": 20,
+      "name": "Mines",
+      "type": 1
+    },
+    "21": {
+      "id": 21,
+      "name": "City",
+      "type": 1
+    },
+    "22": {
+      "id": 22,
+      "name": "Road",
+      "type": 1
+    },
+    "23": {
+      "id": 23,
+      "name": "Water (Rocky)",
+      "type": 1
+    },
+    "25": {
+      "id": 25,
+      "name": "Guard Tower",
+      "type": 1
+    },
+    "26": {
+      "id": 26,
+      "name": "Snow",
+      "type": 1
+    },
+    "3": {
+      "id": 3,
+      "name": "Airport Base",
+      "type": 1,
+      "buildable_unit_ids": [
+        14,
+        15,
+        17,
+        18,
+        19,
+        28,
+        33,
+        41
+      ]
+    },
+    "4": {
+      "id": 4,
+      "name": "Desert",
+      "type": 1
+    },
+    "5": {
+      "id": 5,
+      "name": "Grass",
+      "type": 1
+    },
+    "6": {
+      "id": 6,
+      "name": "Hospital",
+      "type": 1
+    },
+    "7": {
+      "id": 7,
+      "name": "Mountains",
+      "type": 1
+    },
+    "8": {
+      "id": 8,
+      "name": "Swamp",
+      "type": 1
+    },
+    "9": {
+      "id": 9,
+      "name": "Forest",
+      "type": 1
+    }
+  },
+  "terrainUnitProperties": {
+    "10:10": {
+      "terrain_id": 10,
+      "unit_id": 10,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "10:12": {
+      "terrain_id": 10,
+      "unit_id": 12,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:13": {
+      "terrain_id": 10,
+      "unit_id": 13,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:14": {
+      "terrain_id": 10,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "10:15": {
+      "terrain_id": 10,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "10:16": {
+      "terrain_id": 10,
+      "unit_id": 16,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:17": {
+      "terrain_id": 10,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "10:18": {
+      "terrain_id": 10,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "10:19": {
+      "terrain_id": 10,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "10:24": {
+      "terrain_id": 10,
+      "unit_id": 24,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "10:28": {
+      "terrain_id": 10,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "10:31": {
+      "terrain_id": 10,
+      "unit_id": 31,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:32": {
+      "terrain_id": 10,
+      "unit_id": 32,
+      "movement_cost": 1
+    },
+    "10:33": {
+      "terrain_id": 10,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "10:37": {
+      "terrain_id": 10,
+      "unit_id": 37,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:39": {
+      "terrain_id": 10,
+      "unit_id": 39,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:41": {
+      "terrain_id": 10,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "10:7": {
+      "terrain_id": 10,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "12:1": {
+      "terrain_id": 12,
+      "unit_id": 1,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "12:14": {
+      "terrain_id": 12,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "12:15": {
+      "terrain_id": 12,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "12:17": {
+      "terrain_id": 12,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "12:18": {
+      "terrain_id": 12,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "12:19": {
+      "terrain_id": 12,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "12:2": {
+      "terrain_id": 12,
+      "unit_id": 2,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "12:20": {
+      "terrain_id": 12,
+      "unit_id": 20,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "12:25": {
+      "terrain_id": 12,
+      "unit_id": 25,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "12:26": {
+      "terrain_id": 12,
+      "unit_id": 26,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "12:27": {
+      "terrain_id": 12,
+      "unit_id": 27,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "12:28": {
+      "terrain_id": 12,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "12:29": {
+      "terrain_id": 12,
+      "unit_id": 29,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "12:3": {
+      "terrain_id": 12,
+      "unit_id": 3,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "12:30": {
+      "terrain_id": 12,
+      "unit_id": 30,
+      "movement_cost": 1.25
+    },
+    "12:33": {
+      "terrain_id": 12,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "12:4": {
+      "terrain_id": 12,
+      "unit_id": 4,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "12:40": {
+      "terrain_id": 12,
+      "unit_id": 40,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "12:41": {
+      "terrain_id": 12,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "12:44": {
+      "terrain_id": 12,
+      "unit_id": 44,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "12:5": {
+      "terrain_id": 12,
+      "unit_id": 5,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "12:6": {
+      "terrain_id": 12,
+      "unit_id": 6,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "12:7": {
+      "terrain_id": 12,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "12:8": {
+      "terrain_id": 12,
+      "unit_id": 8,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "12:9": {
+      "terrain_id": 12,
+      "unit_id": 9,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "14:10": {
+      "terrain_id": 14,
+      "unit_id": 10,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": 1
+    },
+    "14:12": {
+      "terrain_id": 14,
+      "unit_id": 12,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "14:13": {
+      "terrain_id": 14,
+      "unit_id": 13,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "14:14": {
+      "terrain_id": 14,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "14:15": {
+      "terrain_id": 14,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "14:16": {
+      "terrain_id": 14,
+      "unit_id": 16,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "14:17": {
+      "terrain_id": 14,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "14:18": {
+      "terrain_id": 14,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "14:19": {
+      "terrain_id": 14,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "14:24": {
+      "terrain_id": 14,
+      "unit_id": 24,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": 1
+    },
+    "14:28": {
+      "terrain_id": 14,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "14:31": {
+      "terrain_id": 14,
+      "unit_id": 31,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "14:32": {
+      "terrain_id": 14,
+      "unit_id": 32,
+      "movement_cost": 1
+    },
+    "14:33": {
+      "terrain_id": 14,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "14:37": {
+      "terrain_id": 14,
+      "unit_id": 37,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "14:39": {
+      "terrain_id": 14,
+      "unit_id": 39,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "14:41": {
+      "terrain_id": 14,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "14:7": {
+      "terrain_id": 14,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "15:10": {
+      "terrain_id": 15,
+      "unit_id": 10,
+      "movement_cost": 1.25,
+      "healing_bonus": 2,
+      "defense_bonus": -2
+    },
+    "15:12": {
+      "terrain_id": 15,
+      "unit_id": 12,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "15:13": {
+      "terrain_id": 15,
+      "unit_id": 13,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "15:14": {
+      "terrain_id": 15,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "15:15": {
+      "terrain_id": 15,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "15:16": {
+      "terrain_id": 15,
+      "unit_id": 16,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": 1
+    },
+    "15:17": {
+      "terrain_id": 15,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "15:18": {
+      "terrain_id": 15,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "15:19": {
+      "terrain_id": 15,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "15:24": {
+      "terrain_id": 15,
+      "unit_id": 24,
+      "movement_cost": 1.25,
+      "healing_bonus": 2,
+      "defense_bonus": -2
+    },
+    "15:28": {
+      "terrain_id": 15,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "15:31": {
+      "terrain_id": 15,
+      "unit_id": 31,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "15:32": {
+      "terrain_id": 15,
+      "unit_id": 32,
+      "movement_cost": 1
+    },
+    "15:33": {
+      "terrain_id": 15,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "15:37": {
+      "terrain_id": 15,
+      "unit_id": 37,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "15:39": {
+      "terrain_id": 15,
+      "unit_id": 39,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "15:41": {
+      "terrain_id": 15,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "15:7": {
+      "terrain_id": 15,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "16:1": {
+      "terrain_id": 16,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "16:11": {
+      "terrain_id": 16,
+      "unit_id": 11,
+      "movement_cost": 1
+    },
+    "16:14": {
+      "terrain_id": 16,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "16:15": {
+      "terrain_id": 16,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "16:17": {
+      "terrain_id": 16,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "16:18": {
+      "terrain_id": 16,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "16:19": {
+      "terrain_id": 16,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "16:2": {
+      "terrain_id": 16,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "16:20": {
+      "terrain_id": 16,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "16:21": {
+      "terrain_id": 16,
+      "unit_id": 21,
+      "movement_cost": 1,
+      "can_build": true
+    },
+    "16:22": {
+      "terrain_id": 16,
+      "unit_id": 22,
+      "movement_cost": 1,
+      "can_build": true
+    },
+    "16:25": {
+      "terrain_id": 16,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "16:26": {
+      "terrain_id": 16,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "16:27": {
+      "terrain_id": 16,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "16:28": {
+      "terrain_id": 16,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "16:29": {
+      "terrain_id": 16,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "16:3": {
+      "terrain_id": 16,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "16:30": {
+      "terrain_id": 16,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "defense_bonus": -1
+    },
+    "16:33": {
+      "terrain_id": 16,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "16:38": {
+      "terrain_id": 16,
+      "unit_id": 38,
+      "movement_cost": 1,
+      "can_build": true
+    },
+    "16:4": {
+      "terrain_id": 16,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "16:40": {
+      "terrain_id": 16,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "16:41": {
+      "terrain_id": 16,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true
+    },
+    "16:44": {
+      "terrain_id": 16,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "16:5": {
+      "terrain_id": 16,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "16:6": {
+      "terrain_id": 16,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "16:7": {
+      "terrain_id": 16,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "16:8": {
+      "terrain_id": 16,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "16:9": {
+      "terrain_id": 16,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:1": {
+      "terrain_id": 17,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "17:10": {
+      "terrain_id": 17,
+      "unit_id": 10,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "17:12": {
+      "terrain_id": 17,
+      "unit_id": 12,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:13": {
+      "terrain_id": 17,
+      "unit_id": 13,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:14": {
+      "terrain_id": 17,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "17:15": {
+      "terrain_id": 17,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "17:16": {
+      "terrain_id": 17,
+      "unit_id": 16,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:17": {
+      "terrain_id": 17,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "17:18": {
+      "terrain_id": 17,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "17:19": {
+      "terrain_id": 17,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "17:2": {
+      "terrain_id": 17,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "17:20": {
+      "terrain_id": 17,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:24": {
+      "terrain_id": 17,
+      "unit_id": 24,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "17:25": {
+      "terrain_id": 17,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:26": {
+      "terrain_id": 17,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:27": {
+      "terrain_id": 17,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "17:28": {
+      "terrain_id": 17,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "17:29": {
+      "terrain_id": 17,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "17:3": {
+      "terrain_id": 17,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:30": {
+      "terrain_id": 17,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:31": {
+      "terrain_id": 17,
+      "unit_id": 31,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:32": {
+      "terrain_id": 17,
+      "unit_id": 32,
+      "movement_cost": 1
+    },
+    "17:33": {
+      "terrain_id": 17,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "17:37": {
+      "terrain_id": 17,
+      "unit_id": 37,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:39": {
+      "terrain_id": 17,
+      "unit_id": 39,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:4": {
+      "terrain_id": 17,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:40": {
+      "terrain_id": 17,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "17:41": {
+      "terrain_id": 17,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "17:44": {
+      "terrain_id": 17,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:5": {
+      "terrain_id": 17,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:6": {
+      "terrain_id": 17,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:7": {
+      "terrain_id": 17,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "17:8": {
+      "terrain_id": 17,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "17:9": {
+      "terrain_id": 17,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:1": {
+      "terrain_id": 18,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:10": {
+      "terrain_id": 18,
+      "unit_id": 10,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": 1
+    },
+    "18:12": {
+      "terrain_id": 18,
+      "unit_id": 12,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:13": {
+      "terrain_id": 18,
+      "unit_id": 13,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:14": {
+      "terrain_id": 18,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "18:15": {
+      "terrain_id": 18,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "18:16": {
+      "terrain_id": 18,
+      "unit_id": 16,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "18:17": {
+      "terrain_id": 18,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "18:18": {
+      "terrain_id": 18,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "18:19": {
+      "terrain_id": 18,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "18:2": {
+      "terrain_id": 18,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:20": {
+      "terrain_id": 18,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:24": {
+      "terrain_id": 18,
+      "unit_id": 24,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": 1
+    },
+    "18:25": {
+      "terrain_id": 18,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:26": {
+      "terrain_id": 18,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:27": {
+      "terrain_id": 18,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:28": {
+      "terrain_id": 18,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "18:29": {
+      "terrain_id": 18,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:3": {
+      "terrain_id": 18,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:30": {
+      "terrain_id": 18,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:31": {
+      "terrain_id": 18,
+      "unit_id": 31,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:32": {
+      "terrain_id": 18,
+      "unit_id": 32,
+      "movement_cost": 1
+    },
+    "18:33": {
+      "terrain_id": 18,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "18:37": {
+      "terrain_id": 18,
+      "unit_id": 37,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:39": {
+      "terrain_id": 18,
+      "unit_id": 39,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:4": {
+      "terrain_id": 18,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:40": {
+      "terrain_id": 18,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "18:41": {
+      "terrain_id": 18,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "18:44": {
+      "terrain_id": 18,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:5": {
+      "terrain_id": 18,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:6": {
+      "terrain_id": 18,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:7": {
+      "terrain_id": 18,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "18:8": {
+      "terrain_id": 18,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "18:9": {
+      "terrain_id": 18,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:1": {
+      "terrain_id": 19,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "19:10": {
+      "terrain_id": 19,
+      "unit_id": 10,
+      "movement_cost": 1.25,
+      "healing_bonus": 2,
+      "defense_bonus": -2
+    },
+    "19:12": {
+      "terrain_id": 19,
+      "unit_id": 12,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "19:13": {
+      "terrain_id": 19,
+      "unit_id": 13,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "19:14": {
+      "terrain_id": 19,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "19:15": {
+      "terrain_id": 19,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "19:16": {
+      "terrain_id": 19,
+      "unit_id": 16,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": 1
+    },
+    "19:17": {
+      "terrain_id": 19,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "19:18": {
+      "terrain_id": 19,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "19:19": {
+      "terrain_id": 19,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "19:2": {
+      "terrain_id": 19,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "19:20": {
+      "terrain_id": 19,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:24": {
+      "terrain_id": 19,
+      "unit_id": 24,
+      "movement_cost": 1.25,
+      "healing_bonus": 2,
+      "defense_bonus": -2
+    },
+    "19:25": {
+      "terrain_id": 19,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:26": {
+      "terrain_id": 19,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:27": {
+      "terrain_id": 19,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "19:28": {
+      "terrain_id": 19,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "19:29": {
+      "terrain_id": 19,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "19:3": {
+      "terrain_id": 19,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:30": {
+      "terrain_id": 19,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:31": {
+      "terrain_id": 19,
+      "unit_id": 31,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "19:32": {
+      "terrain_id": 19,
+      "unit_id": 32,
+      "movement_cost": 1
+    },
+    "19:33": {
+      "terrain_id": 19,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "19:37": {
+      "terrain_id": 19,
+      "unit_id": 37,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "19:39": {
+      "terrain_id": 19,
+      "unit_id": 39,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": 1
+    },
+    "19:4": {
+      "terrain_id": 19,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:40": {
+      "terrain_id": 19,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "19:41": {
+      "terrain_id": 19,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "19:44": {
+      "terrain_id": 19,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:5": {
+      "terrain_id": 19,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:6": {
+      "terrain_id": 19,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:7": {
+      "terrain_id": 19,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "19:8": {
+      "terrain_id": 19,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "19:9": {
+      "terrain_id": 19,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "1:1": {
+      "terrain_id": 1,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "1:11": {
+      "terrain_id": 1,
+      "unit_id": 11,
+      "movement_cost": 1
+    },
+    "1:14": {
+      "terrain_id": 1,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "1:15": {
+      "terrain_id": 1,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "1:17": {
+      "terrain_id": 1,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "1:18": {
+      "terrain_id": 1,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "1:19": {
+      "terrain_id": 1,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "1:2": {
+      "terrain_id": 1,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "1:20": {
+      "terrain_id": 1,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "1:25": {
+      "terrain_id": 1,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:26": {
+      "terrain_id": 1,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:27": {
+      "terrain_id": 1,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "1:28": {
+      "terrain_id": 1,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "1:29": {
+      "terrain_id": 1,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "1:3": {
+      "terrain_id": 1,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "can_build": true
+    },
+    "1:30": {
+      "terrain_id": 1,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:33": {
+      "terrain_id": 1,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "1:4": {
+      "terrain_id": 1,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "can_build": true
+    },
+    "1:40": {
+      "terrain_id": 1,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "1:41": {
+      "terrain_id": 1,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true
+    },
+    "1:44": {
+      "terrain_id": 1,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:5": {
+      "terrain_id": 1,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:6": {
+      "terrain_id": 1,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:7": {
+      "terrain_id": 1,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2,
+      "can_build": true,
+      "can_capture": true
+    },
+    "1:8": {
+      "terrain_id": 1,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "1:9": {
+      "terrain_id": 1,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "20:1": {
+      "terrain_id": 20,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "20:11": {
+      "terrain_id": 20,
+      "unit_id": 11,
+      "movement_cost": 1
+    },
+    "20:14": {
+      "terrain_id": 20,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "20:15": {
+      "terrain_id": 20,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "20:17": {
+      "terrain_id": 20,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "20:18": {
+      "terrain_id": 20,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "20:19": {
+      "terrain_id": 20,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "20:2": {
+      "terrain_id": 20,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "20:20": {
+      "terrain_id": 20,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "20:25": {
+      "terrain_id": 20,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "20:26": {
+      "terrain_id": 20,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "20:27": {
+      "terrain_id": 20,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "20:28": {
+      "terrain_id": 20,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "20:29": {
+      "terrain_id": 20,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "20:3": {
+      "terrain_id": 20,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "20:30": {
+      "terrain_id": 20,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "defense_bonus": -1
+    },
+    "20:33": {
+      "terrain_id": 20,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "20:4": {
+      "terrain_id": 20,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "20:40": {
+      "terrain_id": 20,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "20:41": {
+      "terrain_id": 20,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true
+    },
+    "20:44": {
+      "terrain_id": 20,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "20:5": {
+      "terrain_id": 20,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "20:6": {
+      "terrain_id": 20,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "20:7": {
+      "terrain_id": 20,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2,
+      "can_capture": true
+    },
+    "20:8": {
+      "terrain_id": 20,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "20:9": {
+      "terrain_id": 20,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "21:1": {
+      "terrain_id": 21,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "attack_bonus": 3,
+      "defense_bonus": 2
+    },
+    "21:14": {
+      "terrain_id": 21,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "21:15": {
+      "terrain_id": 21,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "21:17": {
+      "terrain_id": 21,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "21:18": {
+      "terrain_id": 21,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "21:19": {
+      "terrain_id": 21,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "21:2": {
+      "terrain_id": 21,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "attack_bonus": 3,
+      "defense_bonus": 2
+    },
+    "21:20": {
+      "terrain_id": 21,
+      "unit_id": 20,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "21:25": {
+      "terrain_id": 21,
+      "unit_id": 25,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "21:26": {
+      "terrain_id": 21,
+      "unit_id": 26,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "21:27": {
+      "terrain_id": 21,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "attack_bonus": 3,
+      "defense_bonus": 2
+    },
+    "21:28": {
+      "terrain_id": 21,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "21:29": {
+      "terrain_id": 21,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "attack_bonus": 3,
+      "defense_bonus": 2
+    },
+    "21:3": {
+      "terrain_id": 21,
+      "unit_id": 3,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "21:30": {
+      "terrain_id": 21,
+      "unit_id": 30,
+      "movement_cost": 1.75,
+      "defense_bonus": -3
+    },
+    "21:33": {
+      "terrain_id": 21,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "21:4": {
+      "terrain_id": 21,
+      "unit_id": 4,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "21:40": {
+      "terrain_id": 21,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "attack_bonus": 3,
+      "defense_bonus": 2
+    },
+    "21:41": {
+      "terrain_id": 21,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "21:44": {
+      "terrain_id": 21,
+      "unit_id": 44,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "21:5": {
+      "terrain_id": 21,
+      "unit_id": 5,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "21:6": {
+      "terrain_id": 21,
+      "unit_id": 6,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "21:7": {
+      "terrain_id": 21,
+      "unit_id": 7,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "21:8": {
+      "terrain_id": 21,
+      "unit_id": 8,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "21:9": {
+      "terrain_id": 21,
+      "unit_id": 9,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "22:1": {
+      "terrain_id": 22,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "22:14": {
+      "terrain_id": 22,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "22:15": {
+      "terrain_id": 22,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "22:17": {
+      "terrain_id": 22,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "22:18": {
+      "terrain_id": 22,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "22:19": {
+      "terrain_id": 22,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "22:2": {
+      "terrain_id": 22,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "22:20": {
+      "terrain_id": 22,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:25": {
+      "terrain_id": 22,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:26": {
+      "terrain_id": 22,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:27": {
+      "terrain_id": 22,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "22:28": {
+      "terrain_id": 22,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "22:29": {
+      "terrain_id": 22,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "22:3": {
+      "terrain_id": 22,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:30": {
+      "terrain_id": 22,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:33": {
+      "terrain_id": 22,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "22:4": {
+      "terrain_id": 22,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:40": {
+      "terrain_id": 22,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "defense_bonus": -2
+    },
+    "22:41": {
+      "terrain_id": 22,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "22:44": {
+      "terrain_id": 22,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:5": {
+      "terrain_id": 22,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:6": {
+      "terrain_id": 22,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:7": {
+      "terrain_id": 22,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "22:8": {
+      "terrain_id": 22,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "22:9": {
+      "terrain_id": 22,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "attack_bonus": 1,
+      "defense_bonus": -1
+    },
+    "23:10": {
+      "terrain_id": 23,
+      "unit_id": 10,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": 3
+    },
+    "23:14": {
+      "terrain_id": 23,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "23:15": {
+      "terrain_id": 23,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "23:17": {
+      "terrain_id": 23,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "23:18": {
+      "terrain_id": 23,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "23:19": {
+      "terrain_id": 23,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "23:24": {
+      "terrain_id": 23,
+      "unit_id": 24,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": 1,
+      "defense_bonus": 3
+    },
+    "23:28": {
+      "terrain_id": 23,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "23:33": {
+      "terrain_id": 23,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "23:41": {
+      "terrain_id": 23,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "25:1": {
+      "terrain_id": 25,
+      "unit_id": 1,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": 2
+    },
+    "25:14": {
+      "terrain_id": 25,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "25:15": {
+      "terrain_id": 25,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "25:17": {
+      "terrain_id": 25,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "25:18": {
+      "terrain_id": 25,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "25:19": {
+      "terrain_id": 25,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "25:2": {
+      "terrain_id": 25,
+      "unit_id": 2,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": 2
+    },
+    "25:27": {
+      "terrain_id": 25,
+      "unit_id": 27,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": 2
+    },
+    "25:28": {
+      "terrain_id": 25,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "25:29": {
+      "terrain_id": 25,
+      "unit_id": 29,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": 2
+    },
+    "25:33": {
+      "terrain_id": 25,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "25:40": {
+      "terrain_id": 25,
+      "unit_id": 40,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "defense_bonus": 2
+    },
+    "25:41": {
+      "terrain_id": 25,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "26:1": {
+      "terrain_id": 26,
+      "unit_id": 1,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "26:14": {
+      "terrain_id": 26,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "26:15": {
+      "terrain_id": 26,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "26:17": {
+      "terrain_id": 26,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "26:18": {
+      "terrain_id": 26,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "26:19": {
+      "terrain_id": 26,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "26:2": {
+      "terrain_id": 26,
+      "unit_id": 2,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "26:20": {
+      "terrain_id": 26,
+      "unit_id": 20,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "26:25": {
+      "terrain_id": 26,
+      "unit_id": 25,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "26:26": {
+      "terrain_id": 26,
+      "unit_id": 26,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "26:27": {
+      "terrain_id": 26,
+      "unit_id": 27,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "26:28": {
+      "terrain_id": 26,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "26:29": {
+      "terrain_id": 26,
+      "unit_id": 29,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "26:3": {
+      "terrain_id": 26,
+      "unit_id": 3,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "26:30": {
+      "terrain_id": 26,
+      "unit_id": 30,
+      "movement_cost": 1.75,
+      "defense_bonus": -1
+    },
+    "26:33": {
+      "terrain_id": 26,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "26:4": {
+      "terrain_id": 26,
+      "unit_id": 4,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "26:40": {
+      "terrain_id": 26,
+      "unit_id": 40,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "26:41": {
+      "terrain_id": 26,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "26:44": {
+      "terrain_id": 26,
+      "unit_id": 44,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "26:5": {
+      "terrain_id": 26,
+      "unit_id": 5,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "26:6": {
+      "terrain_id": 26,
+      "unit_id": 6,
+      "movement_cost": 1.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "26:7": {
+      "terrain_id": 26,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "26:8": {
+      "terrain_id": 26,
+      "unit_id": 8,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "26:9": {
+      "terrain_id": 26,
+      "unit_id": 9,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "2:1": {
+      "terrain_id": 2,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "2:10": {
+      "terrain_id": 2,
+      "unit_id": 10,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:11": {
+      "terrain_id": 2,
+      "unit_id": 11,
+      "movement_cost": 1
+    },
+    "2:12": {
+      "terrain_id": 2,
+      "unit_id": 12,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:13": {
+      "terrain_id": 2,
+      "unit_id": 13,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:14": {
+      "terrain_id": 2,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "2:15": {
+      "terrain_id": 2,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "2:16": {
+      "terrain_id": 2,
+      "unit_id": 16,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:17": {
+      "terrain_id": 2,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "2:18": {
+      "terrain_id": 2,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "2:19": {
+      "terrain_id": 2,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "2:2": {
+      "terrain_id": 2,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "2:20": {
+      "terrain_id": 2,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "2:24": {
+      "terrain_id": 2,
+      "unit_id": 24,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:25": {
+      "terrain_id": 2,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "2:26": {
+      "terrain_id": 2,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "2:27": {
+      "terrain_id": 2,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "2:28": {
+      "terrain_id": 2,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "2:29": {
+      "terrain_id": 2,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "2:3": {
+      "terrain_id": 2,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "2:30": {
+      "terrain_id": 2,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "defense_bonus": -1
+    },
+    "2:31": {
+      "terrain_id": 2,
+      "unit_id": 31,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:32": {
+      "terrain_id": 2,
+      "unit_id": 32,
+      "movement_cost": 1,
+      "can_build": true
+    },
+    "2:33": {
+      "terrain_id": 2,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "2:37": {
+      "terrain_id": 2,
+      "unit_id": 37,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:39": {
+      "terrain_id": 2,
+      "unit_id": 39,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "defense_bonus": -1
+    },
+    "2:4": {
+      "terrain_id": 2,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "2:40": {
+      "terrain_id": 2,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "2:41": {
+      "terrain_id": 2,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true
+    },
+    "2:44": {
+      "terrain_id": 2,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "2:5": {
+      "terrain_id": 2,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "2:6": {
+      "terrain_id": 2,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "2:7": {
+      "terrain_id": 2,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2,
+      "can_build": true,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "2:8": {
+      "terrain_id": 2,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "2:9": {
+      "terrain_id": 2,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "3:1": {
+      "terrain_id": 3,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "3:11": {
+      "terrain_id": 3,
+      "unit_id": 11,
+      "movement_cost": 1
+    },
+    "3:14": {
+      "terrain_id": 3,
+      "unit_id": 14,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:15": {
+      "terrain_id": 3,
+      "unit_id": 15,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:17": {
+      "terrain_id": 3,
+      "unit_id": 17,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:18": {
+      "terrain_id": 3,
+      "unit_id": 18,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:19": {
+      "terrain_id": 3,
+      "unit_id": 19,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:2": {
+      "terrain_id": 3,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "3:20": {
+      "terrain_id": 3,
+      "unit_id": 20,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "3:25": {
+      "terrain_id": 3,
+      "unit_id": 25,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "3:26": {
+      "terrain_id": 3,
+      "unit_id": 26,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "3:27": {
+      "terrain_id": 3,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "3:28": {
+      "terrain_id": 3,
+      "unit_id": 28,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:29": {
+      "terrain_id": 3,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "3:3": {
+      "terrain_id": 3,
+      "unit_id": 3,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "3:30": {
+      "terrain_id": 3,
+      "unit_id": 30,
+      "movement_cost": 0.75,
+      "defense_bonus": -1
+    },
+    "3:33": {
+      "terrain_id": 3,
+      "unit_id": 33,
+      "movement_cost": 1,
+      "healing_bonus": 3,
+      "can_build": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:4": {
+      "terrain_id": 3,
+      "unit_id": 4,
+      "movement_cost": 0.75,
+      "healing_bonus": 2
+    },
+    "3:40": {
+      "terrain_id": 3,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_capture": true,
+      "attack_bonus": 2,
+      "defense_bonus": 2
+    },
+    "3:41": {
+      "terrain_id": 3,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1,
+      "can_build": true,
+      "can_capture": true,
+      "attack_bonus": 3,
+      "defense_bonus": 3
+    },
+    "3:44": {
+      "terrain_id": 3,
+      "unit_id": 44,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "3:5": {
+      "terrain_id": 3,
+      "unit_id": 5,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "3:6": {
+      "terrain_id": 3,
+      "unit_id": 6,
+      "movement_cost": 0.75,
+      "healing_bonus": 2,
+      "defense_bonus": -1
+    },
+    "3:7": {
+      "terrain_id": 3,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2,
+      "can_capture": true,
+      "defense_bonus": -1
+    },
+    "3:8": {
+      "terrain_id": 3,
+      "unit_id": 8,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "3:9": {
+      "terrain_id": 3,
+      "unit_id": 9,
+      "movement_cost": 0.75,
+      "healing_bonus": 1,
+      "defense_bonus": -1
+    },
+    "4:1": {
+      "terrain_id": 4,
+      "unit_id": 1,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "4:14": {
+      "terrain_id": 4,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "4:15": {
+      "terrain_id": 4,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "4:17": {
+      "terrain_id": 4,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "4:18": {
+      "terrain_id": 4,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "4:19": {
+      "terrain_id": 4,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "4:2": {
+      "terrain_id": 4,
+      "unit_id": 2,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "4:20": {
+      "terrain_id": 4,
+      "unit_id": 20,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "4:25": {
+      "terrain_id": 4,
+      "unit_id": 25,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "4:26": {
+      "terrain_id": 4,
+      "unit_id": 26,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "4:27": {
+      "terrain_id": 4,
+      "unit_id": 27,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "4:28": {
+      "terrain_id": 4,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "4:29": {
+      "terrain_id": 4,
+      "unit_id": 29,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "4:3": {
+      "terrain_id": 4,
+      "unit_id": 3,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "4:30": {
+      "terrain_id": 4,
+      "unit_id": 30,
+      "movement_cost": 1.25
+    },
+    "4:33": {
+      "terrain_id": 4,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "4:4": {
+      "terrain_id": 4,
+      "unit_id": 4,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "4:40": {
+      "terrain_id": 4,
+      "unit_id": 40,
+      "movement_cost": 1.75,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "4:41": {
+      "terrain_id": 4,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "4:44": {
+      "terrain_id": 4,
+      "unit_id": 44,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "4:5": {
+      "terrain_id": 4,
+      "unit_id": 5,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "4:6": {
+      "terrain_id": 4,
+      "unit_id": 6,
+      "movement_cost": 1.25,
+      "healing_bonus": 2
+    },
+    "4:7": {
+      "terrain_id": 4,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "4:8": {
+      "terrain_id": 4,
+      "unit_id": 8,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "4:9": {
+      "terrain_id": 4,
+      "unit_id": 9,
+      "movement_cost": 1.25,
+      "healing_bonus": 1
+    },
+    "5:1": {
+      "terrain_id": 5,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:14": {
+      "terrain_id": 5,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "5:15": {
+      "terrain_id": 5,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "5:17": {
+      "terrain_id": 5,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "5:18": {
+      "terrain_id": 5,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "5:19": {
+      "terrain_id": 5,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "5:2": {
+      "terrain_id": 5,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:20": {
+      "terrain_id": 5,
+      "unit_id": 20,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:25": {
+      "terrain_id": 5,
+      "unit_id": 25,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:26": {
+      "terrain_id": 5,
+      "unit_id": 26,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:27": {
+      "terrain_id": 5,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:28": {
+      "terrain_id": 5,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "5:29": {
+      "terrain_id": 5,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:3": {
+      "terrain_id": 5,
+      "unit_id": 3,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "5:30": {
+      "terrain_id": 5,
+      "unit_id": 30,
+      "movement_cost": 1
+    },
+    "5:33": {
+      "terrain_id": 5,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "5:4": {
+      "terrain_id": 5,
+      "unit_id": 4,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "5:40": {
+      "terrain_id": 5,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:41": {
+      "terrain_id": 5,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:44": {
+      "terrain_id": 5,
+      "unit_id": 44,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "5:5": {
+      "terrain_id": 5,
+      "unit_id": 5,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "5:6": {
+      "terrain_id": 5,
+      "unit_id": 6,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "5:7": {
+      "terrain_id": 5,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "5:8": {
+      "terrain_id": 5,
+      "unit_id": 8,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "5:9": {
+      "terrain_id": 5,
+      "unit_id": 9,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "6:1": {
+      "terrain_id": 6,
+      "unit_id": 1,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:14": {
+      "terrain_id": 6,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "6:15": {
+      "terrain_id": 6,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "6:17": {
+      "terrain_id": 6,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "6:18": {
+      "terrain_id": 6,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "6:19": {
+      "terrain_id": 6,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "6:2": {
+      "terrain_id": 6,
+      "unit_id": 2,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:20": {
+      "terrain_id": 6,
+      "unit_id": 20,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:25": {
+      "terrain_id": 6,
+      "unit_id": 25,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:26": {
+      "terrain_id": 6,
+      "unit_id": 26,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:27": {
+      "terrain_id": 6,
+      "unit_id": 27,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:28": {
+      "terrain_id": 6,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "6:29": {
+      "terrain_id": 6,
+      "unit_id": 29,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:3": {
+      "terrain_id": 6,
+      "unit_id": 3,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:30": {
+      "terrain_id": 6,
+      "unit_id": 30,
+      "movement_cost": 1,
+      "defense_bonus": -6
+    },
+    "6:33": {
+      "terrain_id": 6,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "6:4": {
+      "terrain_id": 6,
+      "unit_id": 4,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:40": {
+      "terrain_id": 6,
+      "unit_id": 40,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:41": {
+      "terrain_id": 6,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "6:44": {
+      "terrain_id": 6,
+      "unit_id": 44,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:5": {
+      "terrain_id": 6,
+      "unit_id": 5,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:6": {
+      "terrain_id": 6,
+      "unit_id": 6,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:7": {
+      "terrain_id": 6,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:8": {
+      "terrain_id": 6,
+      "unit_id": 8,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "6:9": {
+      "terrain_id": 6,
+      "unit_id": 9,
+      "movement_cost": 1,
+      "healing_bonus": 6,
+      "defense_bonus": -6
+    },
+    "7:1": {
+      "terrain_id": 7,
+      "unit_id": 1,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 4
+    },
+    "7:14": {
+      "terrain_id": 7,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "7:15": {
+      "terrain_id": 7,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "7:17": {
+      "terrain_id": 7,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "7:18": {
+      "terrain_id": 7,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "7:19": {
+      "terrain_id": 7,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "7:2": {
+      "terrain_id": 7,
+      "unit_id": 2,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 4
+    },
+    "7:27": {
+      "terrain_id": 7,
+      "unit_id": 27,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 4
+    },
+    "7:28": {
+      "terrain_id": 7,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "7:29": {
+      "terrain_id": 7,
+      "unit_id": 29,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 4
+    },
+    "7:33": {
+      "terrain_id": 7,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "7:40": {
+      "terrain_id": 7,
+      "unit_id": 40,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 4
+    },
+    "7:41": {
+      "terrain_id": 7,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "8:1": {
+      "terrain_id": 8,
+      "unit_id": 1,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "8:14": {
+      "terrain_id": 8,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "8:15": {
+      "terrain_id": 8,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "8:17": {
+      "terrain_id": 8,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "8:18": {
+      "terrain_id": 8,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "8:19": {
+      "terrain_id": 8,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "8:2": {
+      "terrain_id": 8,
+      "unit_id": 2,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "8:20": {
+      "terrain_id": 8,
+      "unit_id": 20,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "8:25": {
+      "terrain_id": 8,
+      "unit_id": 25,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:26": {
+      "terrain_id": 8,
+      "unit_id": 26,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:27": {
+      "terrain_id": 8,
+      "unit_id": 27,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "8:28": {
+      "terrain_id": 8,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "8:29": {
+      "terrain_id": 8,
+      "unit_id": 29,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "8:3": {
+      "terrain_id": 8,
+      "unit_id": 3,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:30": {
+      "terrain_id": 8,
+      "unit_id": 30,
+      "movement_cost": 2,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:33": {
+      "terrain_id": 8,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "8:4": {
+      "terrain_id": 8,
+      "unit_id": 4,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:40": {
+      "terrain_id": 8,
+      "unit_id": 40,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -2
+    },
+    "8:41": {
+      "terrain_id": 8,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "8:44": {
+      "terrain_id": 8,
+      "unit_id": 44,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:5": {
+      "terrain_id": 8,
+      "unit_id": 5,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:6": {
+      "terrain_id": 8,
+      "unit_id": 6,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:7": {
+      "terrain_id": 8,
+      "unit_id": 7,
+      "movement_cost": 1,
+      "healing_bonus": 2
+    },
+    "8:8": {
+      "terrain_id": 8,
+      "unit_id": 8,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "8:9": {
+      "terrain_id": 8,
+      "unit_id": 9,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "attack_bonus": -1,
+      "defense_bonus": -1
+    },
+    "9:1": {
+      "terrain_id": 9,
+      "unit_id": 1,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 3
+    },
+    "9:14": {
+      "terrain_id": 9,
+      "unit_id": 14,
+      "movement_cost": 1
+    },
+    "9:15": {
+      "terrain_id": 9,
+      "unit_id": 15,
+      "movement_cost": 1
+    },
+    "9:17": {
+      "terrain_id": 9,
+      "unit_id": 17,
+      "movement_cost": 1
+    },
+    "9:18": {
+      "terrain_id": 9,
+      "unit_id": 18,
+      "movement_cost": 1
+    },
+    "9:19": {
+      "terrain_id": 9,
+      "unit_id": 19,
+      "movement_cost": 1
+    },
+    "9:2": {
+      "terrain_id": 9,
+      "unit_id": 2,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 3
+    },
+    "9:20": {
+      "terrain_id": 9,
+      "unit_id": 20,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "9:25": {
+      "terrain_id": 9,
+      "unit_id": 25,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "9:26": {
+      "terrain_id": 9,
+      "unit_id": 26,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "9:27": {
+      "terrain_id": 9,
+      "unit_id": 27,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 3
+    },
+    "9:28": {
+      "terrain_id": 9,
+      "unit_id": 28,
+      "movement_cost": 1
+    },
+    "9:29": {
+      "terrain_id": 9,
+      "unit_id": 29,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 3
+    },
+    "9:3": {
+      "terrain_id": 9,
+      "unit_id": 3,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "9:30": {
+      "terrain_id": 9,
+      "unit_id": 30,
+      "movement_cost": 2,
+      "defense_bonus": -3
+    },
+    "9:33": {
+      "terrain_id": 9,
+      "unit_id": 33,
+      "movement_cost": 1
+    },
+    "9:4": {
+      "terrain_id": 9,
+      "unit_id": 4,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "9:40": {
+      "terrain_id": 9,
+      "unit_id": 40,
+      "movement_cost": 1.25,
+      "healing_bonus": 1,
+      "attack_bonus": 2,
+      "defense_bonus": 3
+    },
+    "9:41": {
+      "terrain_id": 9,
+      "unit_id": 41,
+      "movement_cost": 1,
+      "healing_bonus": 1
+    },
+    "9:44": {
+      "terrain_id": 9,
+      "unit_id": 44,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "9:5": {
+      "terrain_id": 9,
+      "unit_id": 5,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "9:6": {
+      "terrain_id": 9,
+      "unit_id": 6,
+      "movement_cost": 2,
+      "healing_bonus": 2,
+      "defense_bonus": -3
+    },
+    "9:8": {
+      "terrain_id": 9,
+      "unit_id": 8,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    },
+    "9:9": {
+      "terrain_id": 9,
+      "unit_id": 9,
+      "movement_cost": 2,
+      "healing_bonus": 1,
+      "defense_bonus": -3
+    }
+  }
+}

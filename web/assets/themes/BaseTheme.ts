@@ -1,11 +1,11 @@
-import { CrossingType } from "../../gen/weewar/v1/models/models_pb"
+import { CrossingType } from "../../gen/lilbattle/v1/models/models_pb"
 import {
   ThemeManifest,
   ThemeManifestSchema,
   PlayerColor,
   UnitMapping,
   TerrainMapping
-} from "../../gen/weewar/v1/models/themes_pb"
+} from "../../gen/lilbattle/v1/models/themes_pb"
 import { fromJson, type JsonValue } from "@bufbuild/protobuf"
 
 /**

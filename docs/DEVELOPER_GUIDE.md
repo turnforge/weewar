@@ -1,13 +1,13 @@
-# WeeWar Developer Guide
+# LilBattle Developer Guide
 
-A guide for developing, testing, and running the WeeWar turn-based strategy game.
+A guide for developing, testing, and running the LilBattle turn-based strategy game.
 
 ## Quick Start
 
 ```bash
 # Clone and setup
 git clone <repository-url>
-cd weewar
+cd lilbattle
 
 # Install dependencies
 go mod download
@@ -31,7 +31,7 @@ Open browser at `http://localhost:8080`
 
 ## Architecture Overview
 
-WeeWar uses a modern web architecture:
+LilBattle uses a modern web architecture:
 
 ```
 Browser
@@ -58,7 +58,7 @@ Go Backend
 Templates use the templar engine with namespace/include/extend directives:
 
 ```html
-{{# namespace "weewar" #}}
+{{# namespace "lilbattle" #}}
 {{# include "goapplib/BasePage.html" #}}
 {{# extend "goapplib/BasePage.html" #}}
 
@@ -82,7 +82,7 @@ Build and use the CLI for command-line gameplay:
 make cli
 
 # Basic commands
-export WEEWAR_GAME_ID=<gameId>
+export LILBATTLE_GAME_ID=<gameId>
 
 ww status                    # Show game state
 ww units                     # List all units
@@ -142,12 +142,12 @@ go test ./services/ -run TestActionProgression -v
 
 ## Game Storage Structure
 
-Games stored in `~/dev-app-data/weewar/storage/games/{gameId}/`:
+Games stored in `~/dev-app-data/lilbattle/storage/games/{gameId}/`:
 - `metadata.json`: Game configuration
 - `state.json`: Current game state
 - `history.json`: Move history
 
-Worlds stored in `~/dev-app-data/weewar/storage/worlds/{worldId}/`:
+Worlds stored in `~/dev-app-data/lilbattle/storage/worlds/{worldId}/`:
 - `metadata.json`: World metadata
 - `world.json`: Map data
 
@@ -155,13 +155,13 @@ Worlds stored in `~/dev-app-data/weewar/storage/worlds/{worldId}/`:
 
 ```bash
 # Check game status
-jq '{current_player, turn_counter, status}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '{current_player, turn_counter, status}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 
 # List units for player
 jq '.world_data.units[] | select(.player == 1) | {shortcut, q, r, moves: .distance_left}' state.json
 
 # View recent moves
-jq '.groups[-1]' ~/dev-app-data/weewar/storage/games/{gameId}/history.json
+jq '.groups[-1]' ~/dev-app-data/lilbattle/storage/games/{gameId}/history.json
 ```
 
 ## Key Files

@@ -1,9 +1,9 @@
 import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
-import WeewarBundle from '../../gen/wasmjs';
-import { GamesServiceClient } from '../../gen/wasmjs/weewar/v1/services/gamesServiceClient';
-import { GameViewerPageMethods, GameViewerPageClient as GameViewerPageClient } from '../../gen/wasmjs/weewar/v1/services/gameViewerPageClient';
-import { GameViewPresenterClient as GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/services/gameViewPresenterClient';
-import { SingletonInitializerServiceClient as SingletonInitializerClient } from '../../gen/wasmjs/weewar/v1/services/singletonInitializerServiceClient';
+import LilbattleBundle from '../../gen/wasmjs';
+import { GamesServiceClient } from '../../gen/wasmjs/lilbattle/v1/services/gamesServiceClient';
+import { GameViewerPageMethods, GameViewerPageClient as GameViewerPageClient } from '../../gen/wasmjs/lilbattle/v1/services/gameViewerPageClient';
+import { GameViewPresenterClient as GameViewPresenterClient } from '../../gen/wasmjs/lilbattle/v1/services/gameViewPresenterClient';
+import { SingletonInitializerServiceClient as SingletonInitializerClient } from '../../gen/wasmjs/lilbattle/v1/services/singletonInitializerServiceClient';
 import { AssetThemePreference } from '../common/AssetThemePreference';
 import { PhaserGameScene } from './PhaserGameScene';
 import { Unit, Tile, World } from '../common/World';
@@ -25,8 +25,8 @@ import {
     SetUnitAtRequest, SetUnitAtResponse,
     RemoveUnitAtRequest, RemoveUnitAtResponse,
     SetAllowedPanelsRequest, SetAllowedPanelsResponse,
-} from '../../gen/wasmjs/weewar/v1/models/interfaces';
-import * as models from '../../gen/wasmjs/weewar/v1/models/models';
+} from '../../gen/wasmjs/lilbattle/v1/models/interfaces';
+import * as models from '../../gen/wasmjs/lilbattle/v1/models/models';
 import { create } from '@bufbuild/protobuf';
 import { PLAYER_BG_COLORS } from '../common/ColorsAndNames';
 import { TerrainStatsPanel } from './TerrainStatsPanel';
@@ -60,7 +60,7 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
     // =========================================================================
     // Protected Fields - Available to child classes
     // =========================================================================
-    protected wasmBundle: WeewarBundle;
+    protected wasmBundle: LilbattleBundle;
     protected gamesClient: GamesServiceClient;
     protected gameViewPresenterClient: GameViewPresenterClient;
     protected singletonInitializerClient: SingletonInitializerClient;
@@ -341,7 +341,7 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
      * Load WASM bundle and initialize clients
      */
     protected async loadWASM(): Promise<void> {
-        this.wasmBundle = new WeewarBundle();
+        this.wasmBundle = new LilbattleBundle();
         this.gamesClient = new GamesServiceClient(this.wasmBundle);
         this.gameViewPresenterClient = new GameViewPresenterClient(this.wasmBundle);
         this.singletonInitializerClient = new SingletonInitializerClient(this.wasmBundle);
@@ -357,11 +357,14 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
         const gameElement = document.getElementById('game.data-json')!;
         const gameStateElement = document.getElementById('game-state-data-json')!;
         const historyElement = document.getElementById('game-history-data-json')!;
-        const viewerUserIdElement = document.getElementById('viewerUserIdInput') as HTMLInputElement;
 
         if (!gameElement?.textContent || gameElement.textContent.trim() === 'null') {
             throw new Error('No game data found in page elements');
         }
+
+        // Get viewer user ID from page data attribute or hidden input
+        const viewerUserIdElement = document.getElementById('viewer-user-id') || document.getElementById('viewerUserIdInput');
+        const viewerUserId = viewerUserIdElement?.textContent?.trim() || (viewerUserIdElement as HTMLInputElement)?.value || '';
 
         // Call presenter to initialize
         const response = await this.singletonInitializerClient.initializeSingleton({
@@ -369,7 +372,7 @@ export abstract class GameViewerPageBase extends BasePage implements LCMComponen
             gameData: gameElement!.textContent,
             gameState: gameStateElement?.textContent || '{}',
             moveHistory: historyElement?.textContent || '{"gameId":"","groups":[]}',
-            viewerUserId: viewerUserIdElement?.value || "",
+            viewerUserId: viewerUserId,
         });
 
         if (!response.response!.success) {

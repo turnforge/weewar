@@ -12,7 +12,7 @@ import { TextEncoder, TextDecoder } from 'util';
 (global as any).TextDecoder = TextDecoder;
 
 // Set up real WASM environment for Node.js
-const wasmPath = path.join(__dirname, '../static/wasm/weewar-cli.wasm');
+const wasmPath = path.join(__dirname, '../static/wasm/lilbattle-cli.wasm');
 const wasmExecPath = path.join(__dirname, '../static/wasm/wasm_exec.js');
 
 // Load Go's WASM exec helper
@@ -29,7 +29,7 @@ global.fetch = jest.fn().mockImplementation((url: string) => {
   console.log('Fetch called with URL:', url);
   
   // Handle WASM file requests
-  if (url.includes('weewar') && url.includes('.wasm')) {
+  if (url.includes('lilbattle') && url.includes('.wasm')) {
     console.log('WASM fetch detected, checking path:', wasmPath);
     if (fs.existsSync(wasmPath)) {
       const wasmBuffer = fs.readFileSync(wasmPath);

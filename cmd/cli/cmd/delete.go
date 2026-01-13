@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/services/connectclient"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/services/connectclient"
 )
 
 // deleteCmd represents the delete command
@@ -16,7 +16,7 @@ var deleteCmd = &cobra.Command{
 	Use:   "delete <game_id>",
 	Short: "Delete a game",
 	Long: `Delete an existing game by its ID.
-Requires WEEWAR_SERVER to be set.
+Requires LILBATTLE_SERVER to be set.
 
 Examples:
   ww delete abc123                    Delete game abc123
@@ -35,7 +35,7 @@ func runDelete(cmd *cobra.Command, args []string) error {
 
 	serverURL := getServerURL()
 	if serverURL == "" {
-		return fmt.Errorf("WEEWAR_SERVER is required for deleting games (e.g., http://localhost:9080)")
+		return fmt.Errorf("LILBATTLE_SERVER is required for deleting games (e.g., http://localhost:9080)")
 	}
 
 	// Confirmation prompt (unless disabled with --confirm=false)

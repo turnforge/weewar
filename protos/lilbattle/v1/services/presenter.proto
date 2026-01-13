@@ -1,0 +1,105 @@
+
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "google/protobuf/field_mask.proto";
+import "lilbattle/v1/models/models.proto";
+import "lilbattle/v1/models/presenter.proto";
+import "google/api/annotations.proto";
+import "wasmjs/v1/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services";
+
+service SingletonInitializerService {
+  rpc InitializeSingleton(InitializeSingletonRequest) returns (InitializeSingletonResponse) {
+  }
+}
+
+// Presenter service is the P in Model View Presenter
+// We noticed that the front end was getting very bloated with not just views but also the 
+// cycles of interactions across various components.   So a MVP is being adopted where
+// the frontend/views are being as dumb as possible.  They will just react to commands
+// and state changes but not be responsible for handling user interactions.  They will just
+// present them to the Presenter who will handle the UI logic between the view and the backend (model)
+//
+// This will also help us mock out the views as we see fit for testing and also have various kinds of views
+// eg a Text based views, Typescript views, views over websocket to remote clients etc
+//
+// The other advantage is we can also change presenters to suit various looks/feels.
+// Note that our Presenter service is GameViewPresenter service.  This way we can create one presenter
+// per "page" so each page (which is heavy weight and needs wasm) can create one of these.
+service GameViewPresenter {
+  /**
+   * Called on first init based on the game and world data
+   */
+  rpc InitializeGame(InitializeGameRequest) returns (InitializeGameResponse) {
+  }
+
+  /**
+   * Called by the browser after the UI/scene is fully initialized and ready
+   * to receive visual updates (highlights, paths, etc.)
+   */
+  rpc ClientReady(ClientReadyRequest) returns (ClientReadyResponse) {
+    option (wasmjs.v1.invocation_style) = INVOCATION_STYLE_PROMISE;
+  }
+
+  /**
+   * This is called when the user clicks a tile on the Game Scene
+   * The tile can have a unit or just be a plain tile.  It is upto the presenter to
+   * change the various view states
+   */
+  rpc SceneClicked(SceneClickedRequest) returns (SceneClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:clicked:scene/{game_id}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Called when a particular turn option is clicked in the TurnOptionsPanel
+   * Note how we have a strong coupling between what the page elements do and which
+   * presenter elements they call
+   */
+  rpc TurnOptionClicked(TurnOptionClickedRequest) returns (TurnOptionClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:clicked:turnOption/{game_id}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Called when user clicked the EndTurn button
+   */
+  rpc EndTurnButtonClicked(EndTurnButtonClickedRequest) returns (EndTurnButtonClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:clicked:endTurnButton/{game_id}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Called when a build option is clicked in the BuildOptionsModal
+   */
+  rpc BuildOptionClicked(BuildOptionClickedRequest) returns (BuildOptionClickedResponse) {
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:clicked:buildOption/{game_id}",
+      body: "*",
+    };
+  }
+
+  /**
+   * Apply changes from remote players (received via SyncService subscription).
+   * This updates local game state and triggers UI updates for the received WorldChanges.
+   * Used by viewers to apply moves made by other players.
+   */
+  rpc ApplyRemoteChanges(ApplyRemoteChangesRequest) returns (ApplyRemoteChangesResponse) {
+    option (wasmjs.v1.invocation_style) = INVOCATION_STYLE_PROMISE;
+    option (google.api.http) = {
+      post: "/v1/presenters/gameview/action:applyRemoteChanges/{game_id}",
+      body: "*",
+    };
+  }
+}
+

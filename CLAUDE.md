@@ -39,16 +39,16 @@ Builds for frontend, wasm, backend are all running continuously and can be queri
 
 ## Rules Data Extraction
 
-The `cmd/extract-rules-data` tool scrapes game rules from saved WeeWar HTML pages:
+The `cmd/extract-rules-data` tool scrapes game rules from saved LilBattle HTML pages:
 
 **Data Sources:**
-- `~/dev-app-data/weewar/data/Tiles/*.html` - Terrain pages with unit interaction tables
-- `~/dev-app-data/weewar/data/Units/*.html` - Unit pages with stats and combat damage charts
+- `~/dev-app-data/lilbattle/data/Tiles/*.html` - Terrain pages with unit interaction tables
+- `~/dev-app-data/lilbattle/data/Units/*.html` - Unit pages with stats and combat damage charts
 
 **Extraction Architecture:**
 - Uses `ExtractHtmlTable()` utility for consistent table parsing across all scrapers
 - All functions use htmlquery/XPath instead of manual tree traversal
-- Generates two files: `weewar-rules.json` (93KB core rules) and `weewar-damage.json` (1.2MB combat data)
+- Generates two files: `lilbattle-rules.json` (93KB core rules) and `lilbattle-damage.json` (1.2MB combat data)
 
 **Key Extraction Functions:**
 - `extractTerrainUnitInteractions`: Parses terrain-unit interaction tables using htmlquery with column indexing
@@ -61,7 +61,7 @@ The `cmd/extract-rules-data` tool scrapes game rules from saved WeeWar HTML page
 ```bash
 cd cmd/extract-rules-data
 go run .
-# Outputs: weewar-rules.json and weewar-damage.json
+# Outputs: lilbattle-rules.json and lilbattle-damage.json
 cp *.json ../../assets/
 # Then run buf generate to update proto-generated code
 ```
@@ -81,12 +81,12 @@ cp *.json ../../assets/
 
 ### Game Storage Structure
 
-Games are stored in `~/dev-app-data/weewar/storage/games/{gameId}/`:
+Games are stored in `~/dev-app-data/lilbattle/storage/games/{gameId}/`:
 - **metadata.json**: Game configuration (players, teams, settings, world_id)
 - **state.json**: Current game state (tiles, units, current_player, turn_counter)
 - **history.json**: Move history (groups of moves with results)
 
-Worlds are stored in `~/dev-app-data/weewar/storage/worlds/{worldId}/`:
+Worlds are stored in `~/dev-app-data/lilbattle/storage/worlds/{worldId}/`:
 - **metadata.json**: World metadata (name, description, creator)
 - **world.json**: Map data (tiles, starting units)
 
@@ -94,32 +94,32 @@ Worlds are stored in `~/dev-app-data/weewar/storage/worlds/{worldId}/`:
 
 **Check game status:**
 ```bash
-jq '{current_player, turn_counter, status}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '{current_player, turn_counter, status}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 **List all units:**
 ```bash
-jq '.world_data.units[] | {q, r, player, unit_type, shortcut, health: .available_health, moves: .distance_left}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '.world_data.units[] | {q, r, player, unit_type, shortcut, health: .available_health, moves: .distance_left}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 **List units for specific player:**
 ```bash
-jq '.world_data.units[] | select(.player == 1) | {shortcut, q, r, moves: .distance_left}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '.world_data.units[] | select(.player == 1) | {shortcut, q, r, moves: .distance_left}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 **Check specific tile:**
 ```bash
-jq '.world_data.tiles[] | select(.q == 0 and .r == -2)' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '.world_data.tiles[] | select(.q == 0 and .r == -2)' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 **View recent moves:**
 ```bash
-jq '.groups[-3:] | .[] | {started_at, moves: .moves | length, results: .move_results | length}' ~/dev-app-data/weewar/storage/games/{gameId}/history.json
+jq '.groups[-3:] | .[] | {started_at, moves: .moves | length, results: .move_results | length}' ~/dev-app-data/lilbattle/storage/games/{gameId}/history.json
 ```
 
 **Check player configuration:**
 ```bash
-jq '.config.players[] | {player_id, player_type, color, team_id}' ~/dev-app-data/weewar/storage/games/{gameId}/metadata.json
+jq '.config.players[] | {player_id, player_type, color, team_id}' ~/dev-app-data/lilbattle/storage/games/{gameId}/metadata.json
 ```
 
 ### Proto Field Naming Convention
@@ -132,13 +132,13 @@ When reading JSON files, always use snake_case. When writing Go code, use camelC
 
 ### CLI Debugging Commands
 
-The `ww` CLI tool is installed in GOBIN and available globally (to rebuild this binary run `make cli` from the weewar
+The `ww` CLI tool is installed in GOBIN and available globally (to rebuild this binary run `make cli` from the lilbattle
 folder):
 
 **Basic commands:**
 ```bash
-export WEEWAR_GAME_ID=c5380903  # Or use --game-id flag
-export WEEWAR_MAP_OUTPUT=map.png  # Default output file for ww map
+export LILBATTLE_GAME_ID=c5380903  # Or use --game-id flag
+export LILBATTLE_MAP_OUTPUT=map.png  # Default output file for ww map
 
 ww status                    # Show game state (players, coins, units, tiles)
 ww units                     # List all units
@@ -216,17 +216,17 @@ ww --verbose options B1 | grep "DistanceLeft"
 
 **2. Inspect move history to see what happened:**
 ```bash
-jq '.groups[-1] | {moves: .moves, results: .move_results | length}' ~/dev-app-data/weewar/storage/games/{gameId}/history.json
+jq '.groups[-1] | {moves: .moves, results: .move_results | length}' ~/dev-app-data/lilbattle/storage/games/{gameId}/history.json
 ```
 
 **3. Verify unit shortcuts are preserved:**
 ```bash
-jq '.world_data.units[] | {shortcut, q, r}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '.world_data.units[] | {shortcut, q, r}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 **4. Check lazy top-up fields:**
 ```bash
-jq '.world_data.units[] | {shortcut, last_topped_up_turn, distance_left, turn: .last_acted_turn}' ~/dev-app-data/weewar/storage/games/{gameId}/state.json
+jq '.world_data.units[] | {shortcut, last_topped_up_turn, distance_left, turn: .last_acted_turn}' ~/dev-app-data/lilbattle/storage/games/{gameId}/state.json
 ```
 
 **5. Debug presenter state loading:**

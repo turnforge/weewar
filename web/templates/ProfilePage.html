@@ -81,6 +81,60 @@
                     </div>
                 </div>
 
+                <!-- Nickname Section -->
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+                        Nickname
+                    </h2>
+
+                    <div class="{{if .NicknameNeeded}}bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600{{else}}bg-gray-50 dark:bg-gray-900/50{{end}} rounded-lg p-4">
+                        {{if .NicknameNeeded}}
+                        <div class="flex items-start mb-4">
+                            <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Choose your nickname</h3>
+                                <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">Please set a nickname to identify yourself in games.</p>
+                            </div>
+                        </div>
+                        {{end}}
+
+                        <form id="nickname-form" class="space-y-4">
+                            <div>
+                                <label for="nickname" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Your Nickname
+                                </label>
+                                <div class="flex gap-3">
+                                    <input type="text" id="nickname" name="nickname"
+                                           value="{{.Nickname}}"
+                                           placeholder="{{.SuggestedNickname}}"
+                                           maxlength="30"
+                                           class="flex-1 px-3 py-2 border {{if .NicknameNeeded}}border-yellow-400 dark:border-yellow-600 ring-2 ring-yellow-400 dark:ring-yellow-600{{else}}border-gray-300 dark:border-gray-600{{end}} rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
+                                    <button type="button" id="use-suggestion-btn"
+                                            class="px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 border border-blue-300 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                            title="Use suggested nickname">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">2-30 characters. This is how other players will see you.</p>
+                            </div>
+
+                            <div id="nickname-message" class="hidden text-sm"></div>
+
+                            <button type="submit" id="save-nickname-btn"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Save Nickname
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Email Section -->
                 {{if .Email}}
                 <div class="space-y-4">

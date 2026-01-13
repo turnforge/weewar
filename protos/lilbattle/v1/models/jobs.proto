@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/field_mask.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models";
+
+// Job describes the work that needs to be done.
+message Job {
+  string entity_type = 1;
+  string entity_id = 2;
+  string job_type = 3;
+
+  // When the last indexing was queued
+  google.protobuf.Timestamp created_at = 4;
+
+  // when the last indexing was completed
+  google.protobuf.Timestamp updated_at = 5;
+
+  // Job specific data
+  google.protobuf.Any job_data = 6;
+
+  // Debounce so we dont run it too many time within this many seconds
+  int32 debounce_window_seconds = 7;
+
+  // Whether the job is a oneoff or can repeat
+  RepeatInfo repeat_info = 8;
+}
+
+message RepeatInfo {
+}
+
+enum RunState {
+  RUN_STATE_UNSPECIFIED = 0;
+  RUN_STATE_STARTED = 1;
+  RUN_STATE_FINISHED = 2;
+}
+
+message Run {
+  string job_id = 1;
+
+  // A unique run_id
+  string run_id = 2;
+
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp started_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+
+  RunState state = 6;
+
+  // Run specific data
+  google.protobuf.Any run_data = 7;
+
+  // If there was an error in the last indexing
+  string last_error = 8;
+
+  // Keep a hash of the contents for quick check to check updated
+  // (not sure if needed) - This should be provided by the source
+  string last_content_hash = 9;
+
+  // If there were retries
+  int32 retry_count = 10;
+}
+

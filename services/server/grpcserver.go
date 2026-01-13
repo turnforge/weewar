@@ -24,7 +24,7 @@ type Server struct {
 	Address          string
 	RegisterCallback func(server *grpc.Server) error
 	// PublicMethods is a list of gRPC method paths that don't require authentication.
-	// Format: "/package.Service/Method" e.g. "/weewar.v1.WorldsService/ListWorlds"
+	// Format: "/package.Service/Method" e.g. "/lilbattle.v1.WorldsService/ListWorlds"
 	PublicMethods []string
 }
 

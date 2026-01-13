@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 type WorldListView struct {
@@ -17,7 +17,7 @@ type WorldListView struct {
 	ActionMode string // "manage" or "select"
 }
 
-func (p *WorldListView) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (p *WorldListView) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	// Load pagination and filtering using goal Load methods
 	p.WithPagination.Load(r, w, nil)
 	p.WithFiltering.Load(r, w, nil)

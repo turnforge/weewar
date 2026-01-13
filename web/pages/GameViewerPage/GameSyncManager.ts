@@ -13,8 +13,8 @@
  * 4. Call disconnect() when leaving game
  */
 
-import { GameViewPresenterClient } from '../../gen/wasmjs/weewar/v1/services/gameViewPresenterClient';
-import { GameUpdate } from '../../gen/wasmjs/weewar/v1/models/interfaces';
+import { GameViewPresenterClient } from '../../gen/wasmjs/lilbattle/v1/services/gameViewPresenterClient';
+import { GameUpdate } from '../../gen/wasmjs/lilbattle/v1/models/interfaces';
 
 export type SyncState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'error';
 

@@ -2,7 +2,7 @@
 
 This document describes the real-time synchronization system for multiplayer games.
 
-**Issue**: https://github.com/turnforge/weewar/issues/41
+**Issue**: https://github.com/turnforge/lilbattle/issues/41
 **Branch**: `feature/multiplayer-sync-41`
 
 ## Overview
@@ -174,7 +174,7 @@ If clients know the RNG seed before committing to an action, they can:
 
 ## Proto Definitions
 
-### Service (`protos/weewar/v1/services/sync.proto`)
+### Service (`protos/lilbattle/v1/services/sync.proto`)
 
 ```protobuf
 service GameSyncService {
@@ -186,7 +186,7 @@ service GameSyncService {
 }
 ```
 
-### Messages (`protos/weewar/v1/models/sync.proto`)
+### Messages (`protos/lilbattle/v1/models/sync.proto`)
 
 Key messages:
 - `SubscribeRequest`: game_id, player_id, from_sequence
@@ -265,8 +265,8 @@ Phase 3: COMPUTE (deterministic outcome)
 
 | File | Purpose |
 |------|---------|
-| `protos/weewar/v1/services/sync.proto` | Service definition |
-| `protos/weewar/v1/models/sync.proto` | Message definitions |
+| `protos/lilbattle/v1/services/sync.proto` | Service definition |
+| `protos/lilbattle/v1/models/sync.proto` | Message definitions |
 | `services/sync_service.go` | Server implementation (pure pub/sub) |
 | `services/games_service.go` | BaseGamesService with OnMovesSaved callback |
 | `services/backend_games_service.go` | InitializeSyncBroadcast() sets up broadcast |

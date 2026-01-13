@@ -4,18 +4,18 @@ set -e  # Exit on first error
 # Error handler - show which command failed
 trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR
 
-# Weewar Game Replay Script
+# Lilbattle Game Replay Script
 # Generated from game history
 # Players: henryci, GetYouSome
 
 # Give user the chance to set the world id here
 WORLD_ID="32112070"
-# Look for the line that has "export WEEWAR_GAME_ID=...." here so we can extract gameid from it
-gameIdLine=$(ww new $WORLD_ID | grep "export WEEWAR_GAME_ID")
-gameId=$(echo $gameIdLine | sed -e "s/.*export.WEEWAR_GAME_ID=//g")
-export WEEWAR_GAME_ID=$gameId
-export WEEWAR_CONFIRM=false
-echo Created game for testing: $WEEWAR_GAME_ID
+# Look for the line that has "export LILBATTLE_GAME_ID=...." here so we can extract gameid from it
+gameIdLine=$(ww new $WORLD_ID | grep "export LILBATTLE_GAME_ID")
+gameId=$(echo $gameIdLine | sed -e "s/.*export.LILBATTLE_GAME_ID=//g")
+export LILBATTLE_GAME_ID=$gameId
+export LILBATTLE_CONFIRM=false
+echo Created game for testing: $LILBATTLE_GAME_ID
 
 # ============================================================
 # Round 1
@@ -2331,11 +2331,11 @@ ww endturn
 ww endturn
 
 # ============================================================
-# Final Board State (from Weewar coordinate section)
+# Final Board State (from Lilbattle coordinate section)
 # ============================================================
 
-# Weewar (col,row) -> Our (Q,R) mapping:
-# Weewar (2,1)    -> Q,R=(  2,  1) : Unit type 5:Striker, henryci
-# Weewar (6,6)    -> Q,R=(  3,  6) : Unit type 3:Tank (Basic), GetYouSome
-# Weewar (1,3)    -> Q,R=(  0,  3) : Unit type 5:Striker, henryci
-# Weewar (7,4)    -> Q,R=(  5,  4) : Unit type 3:Tank (Basic), henryci
+# Lilbattle (col,row) -> Our (Q,R) mapping:
+# Lilbattle (2,1)    -> Q,R=(  2,  1) : Unit type 5:Striker, henryci
+# Lilbattle (6,6)    -> Q,R=(  3,  6) : Unit type 3:Tank (Basic), GetYouSome
+# Lilbattle (1,3)    -> Q,R=(  0,  3) : Unit type 5:Striker, henryci
+# Lilbattle (7,4)    -> Q,R=(  5,  4) : Unit type 3:Tank (Basic), henryci

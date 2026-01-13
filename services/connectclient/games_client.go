@@ -5,21 +5,21 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/gen/go/weewar/v1/services/weewarv1connect"
-	"github.com/turnforge/weewar/lib"
-	"github.com/turnforge/weewar/services"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services/lilbattlev1connect"
+	"github.com/turnforge/lilbattle/lib"
+	"github.com/turnforge/lilbattle/services"
 )
 
 // ConnectGamesClient wraps a Connect client and implements the lib.GamesService interface
 type ConnectGamesClient struct {
 	services.BaseGamesService
-	client weewarv1connect.GamesServiceClient
+	client lilbattlev1connect.GamesServiceClient
 }
 
 // NewConnectGamesClient creates a new Connect client for the GamesService
 func NewConnectGamesClient(serverURL string) *ConnectGamesClient {
-	client := weewarv1connect.NewGamesServiceClient(
+	client := lilbattlev1connect.NewGamesServiceClient(
 		http.DefaultClient,
 		serverURL,
 	)

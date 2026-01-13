@@ -14,13 +14,13 @@ import (
 	"log"
 
 	goalservices "github.com/panyam/goapplib/services"
-	v1s "github.com/turnforge/weewar/gen/go/weewar/v1/services"
+	v1s "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 )
 
-const APP_ID = "weewar"
+const APP_ID = "lilbattle"
 
 var ErrNoSuchEntity = errors.New("entity not found")
 

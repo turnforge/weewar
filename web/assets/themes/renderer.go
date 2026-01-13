@@ -3,8 +3,8 @@ package themes
 import (
 	"fmt"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 // WorldRenderer renders a world (tiles and units) to a specific output format

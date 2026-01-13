@@ -4,24 +4,24 @@ set -e  # Exit on first error
 # Error handler - show which command failed
 trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR
 
-# Weewar Game Replay Script
+# Lilbattle Game Replay Script
 # Generated from game history
-# Players: goweewar, Computer (A)
+# Players: golilbattle, Computer (A)
 
 # Give user the chance to set the world id here
 WORLD_ID="32112070"
-# Look for the line that has "export WEEWAR_GAME_ID=...." here so we can extract gameid from it
-gameIdLine=$(ww new --game-income 100 --landbase-income 100 $WORLD_ID | grep "export WEEWAR_GAME_ID")
-gameId=$(echo $gameIdLine | sed -e "s/.*export.WEEWAR_GAME_ID=//g")
-export WEEWAR_GAME_ID=$gameId
-export WEEWAR_CONFIRM=false
-echo Created game for testing: $WEEWAR_GAME_ID
+# Look for the line that has "export LILBATTLE_GAME_ID=...." here so we can extract gameid from it
+gameIdLine=$(ww new --game-income 100 --landbase-income 100 $WORLD_ID | grep "export LILBATTLE_GAME_ID")
+gameId=$(echo $gameIdLine | sed -e "s/.*export.LILBATTLE_GAME_ID=//g")
+export LILBATTLE_GAME_ID=$gameId
+export LILBATTLE_CONFIRM=false
+echo Created game for testing: $LILBATTLE_GAME_ID
 
 # ============================================================
 # Round 1
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww move 1,1 0,3
 ww assert exists unit 0,3
 ww assert notexists unit 1,1
@@ -43,7 +43,7 @@ ww endturn
 # Round 2
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww build t:2,1 2
 ww assert exists unit 2,1
 ww assert unit 2,1 [type eq 2]
@@ -69,7 +69,7 @@ ww endturn
 # Round 3
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww move 2,1 3,1
 ww assert exists unit 3,1
 ww assert notexists unit 2,1
@@ -100,7 +100,7 @@ ww endturn
 # Round 4
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww build t:0,3 8
 ww assert exists unit 0,3
 ww assert unit 0,3 [type eq 8]
@@ -140,7 +140,7 @@ ww endturn
 # Round 5
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww attack 0,3 3,3
 ww assert unit 3,3 [health lte 4]
 ww move 2,1 2,0
@@ -189,7 +189,7 @@ ww endturn
 # Round 6
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww move 0,3 1,2
 ww assert exists unit 1,2
 ww assert notexists unit 0,3
@@ -244,7 +244,7 @@ ww endturn
 # Round 7
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww attack 1,2 4,1
 ww assert unit 4,1 [health lte 5]
 ww move 2,2 2,3
@@ -313,7 +313,7 @@ ww endturn
 # Round 8
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww attack 1,2 4,1
 ww assert unit 4,1 [health lte 6]
 ww attack 2,1 4,1
@@ -365,7 +365,7 @@ ww endturn
 # Round 9
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww move 0,3 3,3
 ww assert exists unit 3,3
 ww assert notexists unit 0,3
@@ -424,7 +424,7 @@ ww endturn
 # Round 10
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww attack 5,1 4,3
 ww assert unit 4,3 [health lte 6]
 ww attack 3,3 4,3
@@ -473,7 +473,7 @@ ww endturn
 # Round 11
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww attack 3,3 4,2
 ww assert unit 4,2 [health lte 4]
 ww assert unit 3,3 [health lte 6]
@@ -532,7 +532,7 @@ ww endturn
 # Round 12
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww move 4,3 5,4
 ww assert exists unit 5,4
 ww assert notexists unit 4,3
@@ -590,7 +590,7 @@ ww endturn
 # Round 13
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww attack 3,5 3,6
 ww assert unit 3,6 [health lte 8]
 ww assert unit 3,5 [health lte 7]
@@ -652,7 +652,7 @@ ww endturn
 # Round 14
 # ============================================================
 
-# --- Player 0 (goweewar) ---
+# --- Player 0 (golilbattle) ---
 ww build t:5,4 8
 ww assert exists unit 5,4
 ww assert unit 5,4 [type eq 8]
@@ -708,26 +708,26 @@ ww endturn
 ww endturn
 
 # ============================================================
-# Final Board State (from Weewar coordinate section)
+# Final Board State (from Lilbattle coordinate section)
 # ============================================================
 
-# Weewar (col,row) -> Our (Q,R) mapping:
-# Weewar (7,5)    -> Q,R=(  5,  5) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (2,1)    -> Q,R=(  2,  1) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (7,4)    -> Q,R=(  5,  4) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (6,6)    -> Q,R=(  3,  6) : Unit type 11:Capturing, goweewar
-# Weewar (6,4)    -> Q,R=(  4,  4) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (1,3)    -> Q,R=(  0,  3) : Unit type 1:Soldier (Basic), goweewar
-# Weewar (3,5)    -> Q,R=(  1,  5) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (4,6)    -> Q,R=(  1,  6) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (4,3)    -> Q,R=(  3,  3) : Unit type 2:Soldier (Advanced), goweewar
-# Weewar (6,5)    -> Q,R=(  4,  5) : Unit type 3:Tank (Basic), goweewar
-# Weewar (5,2)    -> Q,R=(  4,  2) : Unit type 8:Artillery (Basic), goweewar
-# Weewar (4,4)    -> Q,R=(  2,  4) : Unit type 7:Hovercraft, goweewar
-# Weewar (3,3)    -> Q,R=(  2,  3) : Unit type 2:Soldier (Advanced), goweewar
-# Weewar (2,5)    -> Q,R=(  0,  5) : Unit type 2:Soldier (Advanced), goweewar
-# Weewar (5,5)    -> Q,R=(  3,  5) : Unit type 1:Soldier (Basic), goweewar
-# Weewar (5,7)    -> Q,R=(  2,  7) : Unit type 2:Soldier (Advanced), goweewar
+# Lilbattle (col,row) -> Our (Q,R) mapping:
+# Lilbattle (7,5)    -> Q,R=(  5,  5) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (2,1)    -> Q,R=(  2,  1) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (7,4)    -> Q,R=(  5,  4) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (6,6)    -> Q,R=(  3,  6) : Unit type 11:Capturing, golilbattle
+# Lilbattle (6,4)    -> Q,R=(  4,  4) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (1,3)    -> Q,R=(  0,  3) : Unit type 1:Soldier (Basic), golilbattle
+# Lilbattle (3,5)    -> Q,R=(  1,  5) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (4,6)    -> Q,R=(  1,  6) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (4,3)    -> Q,R=(  3,  3) : Unit type 2:Soldier (Advanced), golilbattle
+# Lilbattle (6,5)    -> Q,R=(  4,  5) : Unit type 3:Tank (Basic), golilbattle
+# Lilbattle (5,2)    -> Q,R=(  4,  2) : Unit type 8:Artillery (Basic), golilbattle
+# Lilbattle (4,4)    -> Q,R=(  2,  4) : Unit type 7:Hovercraft, golilbattle
+# Lilbattle (3,3)    -> Q,R=(  2,  3) : Unit type 2:Soldier (Advanced), golilbattle
+# Lilbattle (2,5)    -> Q,R=(  0,  5) : Unit type 2:Soldier (Advanced), golilbattle
+# Lilbattle (5,5)    -> Q,R=(  3,  5) : Unit type 1:Soldier (Basic), golilbattle
+# Lilbattle (5,7)    -> Q,R=(  2,  7) : Unit type 2:Soldier (Advanced), golilbattle
 
 # Final board state assertions:
 ww assert unit 5,5 [type eq 8, player eq 1, health eq 2]

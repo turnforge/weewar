@@ -40,14 +40,14 @@ lib/
 
 assets/
 ├── embed.go              # Embeds mapping.json files at compile time
-└── weewar-rules.json     # Contains terrainTypes (single source of truth)
+└── lilbattle-rules.json     # Contains terrainTypes (single source of truth)
 ```
 
 ## Key Design Decisions
 
 ### 1. Data-Driven Configuration
 
-**Terrain Types** (from `weewar-rules.json`):
+**Terrain Types** (from `lilbattle-rules.json`):
 ```json
 {
   "terrainTypes": {
@@ -127,7 +127,7 @@ Go and TypeScript theme files live together:
 
 ```
                     ┌─────────────────────┐
-                    │  weewar-rules.json  │
+                    │  lilbattle-rules.json  │
                     │   (terrainTypes)    │
                     └──────────┬──────────┘
                                │
@@ -188,7 +188,7 @@ func (b *BaseTheme) GetPlayerColor(playerId int32) *v1.PlayerColor {
 
 | Concern | Owner | File |
 |---------|-------|------|
-| Terrain classification | RulesEngine | `weewar-rules.json` |
+| Terrain classification | RulesEngine | `lilbattle-rules.json` |
 | Player colors | Theme | `mapping.json` |
 | Unit/terrain names | Theme | `mapping.json` |
 | Effective player logic | Theme | `base.go`, `default.go` |

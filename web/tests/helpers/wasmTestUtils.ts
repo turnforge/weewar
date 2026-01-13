@@ -32,14 +32,14 @@ export function cleanupDOM(container: HTMLElement): void {
  */
 async function preloadWASM(): Promise<void> {
   // Skip if already loaded
-  if ((window as any).weewarCreateGameFromMap) {
+  if ((window as any).lilbattleCreateGameFromMap) {
     return;
   }
 
   const fs = require('fs');
   const path = require('path');
   
-  const wasmPath = path.join(__dirname, '../../static/wasm/weewar-cli.wasm');
+  const wasmPath = path.join(__dirname, '../../static/wasm/lilbattle-cli.wasm');
   const wasmExecPath = path.join(__dirname, '../../static/wasm/wasm_exec.js');
   
   // Load Go runtime (same as wasmLoading.test.ts)
@@ -67,7 +67,7 @@ async function preloadWASM(): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   // Copy all WASM functions from global to window for GameState compatibility
-  const globalKeys = Object.keys(global).filter(k => k.startsWith('weewar'));
+  const globalKeys = Object.keys(global).filter(k => k.startsWith('lilbattle'));
   globalKeys.forEach(funcName => {
     (window as any)[funcName] = (global as any)[funcName];
   });
@@ -93,7 +93,7 @@ export async function createTestGameState(): Promise<{ gameState: GameState; eve
   try {
   } catch (error) {
     console.error('GameState WASM loading failed, but WASM should be pre-loaded. Error:', error);
-    console.log('Available WASM functions on window:', Object.keys(window).filter(k => k.startsWith('weewar')));
+    console.log('Available WASM functions on window:', Object.keys(window).filter(k => k.startsWith('lilbattle')));
     throw error;
   }
   

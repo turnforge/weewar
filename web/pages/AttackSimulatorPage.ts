@@ -1,16 +1,16 @@
 import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
 import { ITheme } from '../assets/themes/BaseTheme';
 import DefaultTheme from '../assets/themes/default';
-import WeewarBundle from '../gen/wasmjs';
-import { GamesServiceClient } from '../gen/wasmjs/weewar/v1/services/gamesServiceClient';
-import { SimulateAttackRequest, SimulateAttackResponse } from '../gen/wasmjs/weewar/v1/models/interfaces';
+import LilbattleBundle from '../gen/wasmjs';
+import { GamesServiceClient } from '../gen/wasmjs/lilbattle/v1/services/gamesServiceClient';
+import { SimulateAttackRequest, SimulateAttackResponse } from '../gen/wasmjs/lilbattle/v1/models/interfaces';
 
 /**
  * Attack Simulator Page - Interactive combat simulator
  * Allows users to simulate combat between different units on different terrains
  */
 class AttackSimulatorPage extends BasePage {
-    private wasmBundle: WeewarBundle | null = null;
+    private wasmBundle: LilbattleBundle | null = null;
     private gamesClient: GamesServiceClient | null = null;
     private theme: ITheme;
 
@@ -101,9 +101,9 @@ class AttackSimulatorPage extends BasePage {
     private async loadWASM(): Promise<void> {
         try {
             console.log('[AttackSimulator] Loading WASM bundle...');
-            this.wasmBundle = new WeewarBundle();
+            this.wasmBundle = new LilbattleBundle();
             this.gamesClient = new GamesServiceClient(this.wasmBundle);
-            await this.wasmBundle.loadWasm('/static/wasm/weewar-cli.wasm');
+            await this.wasmBundle.loadWasm('/static/wasm/lilbattle-cli.wasm');
             await this.wasmBundle.waitUntilReady();
             console.log('[AttackSimulator] WASM loaded successfully');
         } catch (error) {
@@ -303,13 +303,4 @@ class AttackSimulatorPage extends BasePage {
     }
 }
 
-// Initialize the page when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-    const page  = new AttackSimulatorPage();
-    
-    // Create lifecycle controller with debug logging
-    const lifecycleController = new LifecycleController(page.eventBus, LifecycleController.DefaultConfig)
-    
-    // Start breadth-first initialization
-    await lifecycleController.initializeFromRoot(page);
-});
+AttackSimulatorPage.loadAfterPageLoaded("AttackSimulatorPage", AttackSimulatorPage, "AttackSimulatorPage")

@@ -26,7 +26,7 @@ lib/
 
 assets/
 ├── embed.go            # Embeds mapping.json files
-└── weewar-rules.json   # Contains terrainTypes map
+└── lilbattle-rules.json   # Contains terrainTypes map
 ```
 
 ### TypeScript Files
@@ -50,7 +50,7 @@ web/static/assets/themes/
 
 ### Terrain Classification
 ```
-weewar-rules.json
+lilbattle-rules.json
     │
     ▼
 RulesEngine.GetCityTerrains()
@@ -92,8 +92,8 @@ type Theme interface {
 ### Creating Themes
 ```go
 import (
-    "github.com/turnforge/weewar/lib"
-    "github.com/turnforge/weewar/web/assets/themes"
+    "github.com/turnforge/lilbattle/lib"
+    "github.com/turnforge/lilbattle/web/assets/themes"
 )
 
 // Get city terrains from RulesEngine
@@ -121,7 +121,7 @@ export interface ITheme {
 ## Design Wins
 
 1. **Single Source of Truth**
-   - Terrain types: `weewar-rules.json`
+   - Terrain types: `lilbattle-rules.json`
    - Player colors: each theme's `mapping.json`
    - No hardcoded arrays in code
 

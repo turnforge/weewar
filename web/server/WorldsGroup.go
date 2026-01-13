@@ -7,19 +7,19 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // Note: context is still used by deleteWorldHandler
 
 // WorldsGroup implements goal.PageGroup for /worlds routes.
 type WorldsGroup struct {
-	weewarApp *WeewarApp
-	goalApp   *goal.App[*WeewarApp]
+	lilbattleApp *LilBattleApp
+	goalApp   *goal.App[*LilBattleApp]
 }
 
 // RegisterRoutes registers all world-related routes using goal.Register.
-func (g *WorldsGroup) RegisterRoutes(app *goal.App[*WeewarApp]) *http.ServeMux {
+func (g *WorldsGroup) RegisterRoutes(app *goal.App[*LilBattleApp]) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Register pages using goal's generic registration
@@ -34,8 +34,8 @@ func (g *WorldsGroup) RegisterRoutes(app *goal.App[*WeewarApp]) *http.ServeMux {
 	mux.HandleFunc("/new", redirectToCreateHandler)
 	mux.HandleFunc("/{worldId}/start", worldStartHandler)
 	mux.HandleFunc("/{worldId}/copy", worldCopyHandler)
-	// Screenshot handler delegates to WeewarApp's ViewsRoot method
-	mux.HandleFunc("/{worldId}/screenshot/live", g.weewarApp.ViewsRoot.handleWorldScreenshotLive)
+	// Screenshot handler delegates to LilBattleApp's ViewsRoot method
+	mux.HandleFunc("/{worldId}/screenshot/live", g.lilbattleApp.ViewsRoot.handleWorldScreenshotLive)
 	mux.HandleFunc("/{worldId}", worldActionsHandler(app))
 
 	return mux
@@ -59,7 +59,7 @@ func worldCopyHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/worlds/new?copyFrom=%s", worldId), http.StatusFound)
 }
 
-func worldActionsHandler(app *goal.App[*WeewarApp]) http.HandlerFunc {
+func worldActionsHandler(app *goal.App[*LilBattleApp]) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		switch req.Method {
 		case http.MethodDelete:
@@ -70,7 +70,7 @@ func worldActionsHandler(app *goal.App[*WeewarApp]) http.HandlerFunc {
 	}
 }
 
-func deleteWorldHandler(app *goal.App[*WeewarApp], w http.ResponseWriter, req *http.Request) {
+func deleteWorldHandler(app *goal.App[*LilBattleApp], w http.ResponseWriter, req *http.Request) {
 	worldId := req.PathValue("worldId")
 	if worldId == "" {
 		http.Error(w, "World ID is required", http.StatusBadRequest)

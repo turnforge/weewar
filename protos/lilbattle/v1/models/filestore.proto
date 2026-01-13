@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package lilbattle.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/field_mask.proto";
+import "lilbattle/v1/models/models.proto";
+
+option go_package = "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models";
+
+message File {
+    // Unique path of the file
+    string path = 1;
+
+    // Type of file
+    string content_type = 2;
+
+    uint64 file_size = 3;
+
+    // Public visibility or not
+    bool is_public = 4;
+
+    // When the last indexing was queued
+    google.protobuf.Timestamp created_at = 5;
+
+    // when the last time the file was updated
+    google.protobuf.Timestamp updated_at = 6;
+
+    // The download/get URL for this file (public URL or default signed URL)
+    string download_url = 7;
+
+    // Signed URLs with different expiries (e.g., "15m", "1h", "24h")
+    // Only populated when requested
+    map<string, string> signed_urls = 8;
+}
+
+
+message PutFileRequest {
+  File file = 1;
+
+  bytes content = 2;
+}
+
+message PutFileResponse {
+  File file = 1;
+}
+
+message GetFileRequest {
+  string path = 1;
+
+  // If true, populate signed_urls in the File response
+  bool include_signed_urls = 2;
+}
+
+message GetFileResponse {
+  File file = 1;
+}
+
+message DeleteFileRequest {
+  string path = 1;
+}
+
+message DeleteFileResponse {
+  File file = 1;
+}
+
+message ListFilesRequest {
+  // Directory path to list files from (relative to base path)
+  string path = 1;
+
+  // Pagination info
+  Pagination pagination = 2;
+
+  // If true, populate signed_urls in each File response
+  bool include_signed_urls = 3;
+}
+
+message ListFilesResponse {
+  repeated File items = 1;
+
+  PaginationResponse pagination = 2;
+}

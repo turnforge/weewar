@@ -1,5 +1,5 @@
-import * as models from '../../gen/wasmjs/weewar/v1/models/models'
-import { Weewar_v1Deserializer as WD } from '../../gen/wasmjs/weewar/v1/factory'
+import * as models from '../../gen/wasmjs/lilbattle/v1/models/models'
+import { Lilbattle_v1Deserializer as WD } from '../../gen/wasmjs/lilbattle/v1/factory'
 import { EventBus } from '@panyam/tsappkit';
 import { PhaserWorldScene } from '../common/PhaserWorldScene';
 import { Unit, Tile, World } from '../common/World';

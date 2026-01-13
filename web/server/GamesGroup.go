@@ -7,17 +7,17 @@ import (
 	"net/http"
 
 	goal "github.com/panyam/goapplib"
-	protos "github.com/turnforge/weewar/gen/go/weewar/v1/models"
+	protos "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 )
 
 // GamesGroup implements goal.PageGroup for /games routes.
 type GamesGroup struct {
-	weewarApp *WeewarApp
-	goalApp   *goal.App[*WeewarApp]
+	lilbattleApp *LilBattleApp
+	goalApp   *goal.App[*LilBattleApp]
 }
 
 // RegisterRoutes registers all game-related routes using goal.Register.
-func (g *GamesGroup) RegisterRoutes(app *goal.App[*WeewarApp]) *http.ServeMux {
+func (g *GamesGroup) RegisterRoutes(app *goal.App[*LilBattleApp]) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Register pages using goal's generic registration
@@ -27,8 +27,8 @@ func (g *GamesGroup) RegisterRoutes(app *goal.App[*WeewarApp]) *http.ServeMux {
 	// Game viewer uses custom handler for layout detection
 	mux.HandleFunc("/{gameId}/view", g.gameViewerHandler)
 	mux.HandleFunc("/{gameId}/copy", gameCopyHandler)
-	// Screenshot handler delegates to WeewarApp's ViewsRoot method
-	mux.HandleFunc("/{gameId}/screenshot/live", g.weewarApp.ViewsRoot.handleGameScreenshotLive)
+	// Screenshot handler delegates to LilBattleApp's ViewsRoot method
+	mux.HandleFunc("/{gameId}/screenshot/live", g.lilbattleApp.ViewsRoot.handleGameScreenshotLive)
 	mux.HandleFunc("/{gameId}", gameActionsHandler(app))
 
 	return mux
@@ -85,7 +85,7 @@ func gameCopyHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/games/new?copyFrom=%s", gameId), http.StatusFound)
 }
 
-func gameActionsHandler(app *goal.App[*WeewarApp]) http.HandlerFunc {
+func gameActionsHandler(app *goal.App[*LilBattleApp]) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		switch req.Method {
 		case http.MethodDelete:
@@ -96,7 +96,7 @@ func gameActionsHandler(app *goal.App[*WeewarApp]) http.HandlerFunc {
 	}
 }
 
-func deleteGameHandler(app *goal.App[*WeewarApp], w http.ResponseWriter, req *http.Request) {
+func deleteGameHandler(app *goal.App[*LilBattleApp], w http.ResponseWriter, req *http.Request) {
 	gameId := req.PathValue("gameId")
 	if gameId == "" {
 		http.Error(w, "Game ID is required", http.StatusBadRequest)

@@ -2,13 +2,13 @@
 
 ## Overview
 
-This document captures our testing decisions, tradeoffs, styles, progress, and learnings for the WeeWar frontend testing infrastructure.
+This document captures our testing decisions, tradeoffs, styles, progress, and learnings for the LilBattle frontend testing infrastructure.
 
 ## Architecture Decisions
 
 ### Real WASM vs Mocks
 **Decision: Use Real WASM Binary**
-- ✅ **Chosen Approach**: Load actual `weewar-cli.wasm` in Node.js test environment
+- ✅ **Chosen Approach**: Load actual `lilbattle-cli.wasm` in Node.js test environment
 - ❌ **Rejected**: Mock WASM functions with JavaScript implementations
 
 **Rationale:**
@@ -114,7 +114,7 @@ tests/
 - Movement validation: ~50-100ms per test
 
 ### WASM Binary Stats
-- Size: 11.7MB (`weewar-cli.wasm`)
+- Size: 11.7MB (`lilbattle-cli.wasm`)
 - Loading time: ~1 second in Node.js
 - Memory usage: Acceptable for test environment
 

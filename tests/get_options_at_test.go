@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/services"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/services"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -40,7 +40,7 @@ type GetOptionsAtExpectation struct {
 type GetOptionsAtTestScenario struct {
 	Name             string
 	Description      string
-	WorldsStorageDir string // Directory containing world data (e.g. ~/dev-app-data/weewar/storage/worlds)
+	WorldsStorageDir string // Directory containing world data (e.g. ~/dev-app-data/lilbattle/storage/worlds)
 	WorldId          string // ID of world to load via GetWorld RPC
 	CurrentPlayer    int32  // Override current player
 	TurnCounter      int32  // Override turn counter

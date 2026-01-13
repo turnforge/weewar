@@ -1,4 +1,4 @@
-import type { GameConfiguration, GamePlayer, IncomeConfig } from '../gen/wasmjs/weewar/v1/models/interfaces';
+import type { GameConfiguration, GamePlayer, IncomeConfig } from '../gen/wasmjs/lilbattle/v1/models/interfaces';
 import { BasePage, EventBus, LCMComponent, LifecycleController } from '@panyam/tsappkit';
 import { PhaserWorldScene } from './common/PhaserWorldScene';
 import { World } from './common/World';
@@ -233,6 +233,7 @@ class StartGamePage extends BasePage implements LCMComponent {
             if (typeSelect && teamSelect && coinsInput) {
                 playerMap.set(playerId, {
                     playerId: playerId,
+                    userId: '', // Will be assigned by server when game starts
                     playerType: typeSelect.value,
                     color: '', // Color is handled by server rendering
                     teamId: parseInt(teamSelect.value),

@@ -41,10 +41,11 @@ type Header struct {
 	IsLoggedIn          bool
 	LoggedInUserId      string
 	Username            string
+	DisplayName         string // Shown in header: Nickname -> Name -> UserID
 }
 
 func (h *Header) SetupDefaults() {
-	h.AppName = "WeeWar"
+	h.AppName = "LilBattle"
 	h.LogoTitle = h.AppName
 	h.HeaderStyleLink = "/static/css/Header.css"
 	h.MenuStyleLink = "/static/css/Menu.css"
@@ -73,25 +74,30 @@ func (h *Header) SetupDefaults() {
 	}
 }
 
-func (v *Header) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*WeewarApp]) (err error, finished bool) {
+func (v *Header) Load(r *http.Request, w http.ResponseWriter, app *goal.App[*LilBattleApp]) (err error, finished bool) {
 	v.SetupDefaults()
 	ctx := app.Context
 	v.LoggedInUserId = ctx.AuthMiddleware.GetLoggedInUserId(r)
 	v.IsLoggedIn = v.LoggedInUserId != ""
 
-	// Load username if logged in
+	// Load user profile if logged in
 	if v.IsLoggedIn && ctx.AuthService != nil {
 		user, userErr := ctx.AuthService.GetUserById(v.LoggedInUserId)
 		if userErr != nil {
 			log.Printf("Header: Error loading user %s: %v", v.LoggedInUserId, userErr)
 		} else if user != nil {
 			profile := user.Profile()
-			log.Printf("Header: User profile for %s: %+v", v.LoggedInUserId, profile)
 			if username, ok := profile["username"].(string); ok {
 				v.Username = username
-				log.Printf("Header: Set username to: %s", v.Username)
+			}
+
+			// Set display name with fallback: Nickname -> Name -> UserID
+			if nickname, ok := profile["nickname"].(string); ok && nickname != "" {
+				v.DisplayName = nickname
+			} else if name, ok := profile["name"].(string); ok && name != "" {
+				v.DisplayName = name
 			} else {
-				log.Printf("Header: No username in profile or wrong type")
+				v.DisplayName = v.LoggedInUserId
 			}
 		}
 	}

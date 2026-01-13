@@ -3,8 +3,8 @@ package tests
 import (
 	"testing"
 
-	v1 "github.com/turnforge/weewar/gen/go/weewar/v1/models"
-	"github.com/turnforge/weewar/lib"
+	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
+	"github.com/turnforge/lilbattle/lib"
 )
 
 // TestProcessCaptureBuilding tests the basic capture functionality

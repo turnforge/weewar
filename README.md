@@ -1,10 +1,10 @@
-# WeeWar - Turn-Based Hexagonal Strategy Game
+# LilBattle - Turn-Based Hexagonal Strategy Game
 
 A modern turn-based strategy game inspired by classic hex-grid wargames, built with Go backend, TypeScript/Phaser.js frontend, and WebAssembly for game logic.
 
-## What is WeeWar?
+## What is LilBattle?
 
-WeeWar is a multiplayer turn-based strategy game featuring:
+LilBattle is a multiplayer turn-based strategy game featuring:
 - **Hexagonal Grid Combat** - Tactical warfare on hex-based maps
 - **Unit-Based Strategy** - Infantry, tanks, aircraft, and more with unique capabilities
 - **Formula-Based Combat** - Probabilistic damage system with wound bonuses and counter-attacks
@@ -14,7 +14,7 @@ WeeWar is a multiplayer turn-based strategy game featuring:
 
 ## Architecture Overview
 
-WeeWar follows a clean, modern architecture:
+LilBattle follows a clean, modern architecture:
 
 ```
 ┌────────────────────────────────────────────────────────────┐
@@ -65,7 +65,7 @@ WeeWar follows a clean, modern architecture:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd weewar
+   cd lilbattle
    ```
 
 2. **Install dependencies**
@@ -129,7 +129,7 @@ ww endturn
 ## Project Structure
 
 ```
-weewar/
+lilbattle/
 ├── cmd/
 │   └── cli/              # Command-line interface
 ├── services/             # Go backend services
@@ -138,7 +138,7 @@ weewar/
 │   ├── rules_engine.go  # Data-driven game mechanics
 │   └── *_test.go        # Test files
 ├── protos/              # Protocol Buffer definitions
-│   └── weewar/v1/
+│   └── lilbattle/v1/
 │       └── models.proto # Core data structures
 ├── web/
 │   ├── src/             # TypeScript source
@@ -202,7 +202,7 @@ go test ./services/ -run TestActionProgression -v
 
 ```bash
 # Backend binary
-go build -o weewar main.go
+go build -o lilbattle main.go
 
 # CLI tool
 make cli
@@ -263,4 +263,4 @@ Key principles:
 
 ## Credits
 
-Inspired by the original WeeWar game and classic turn-based strategy games.
+Inspired by the original LilBattle game and classic turn-based strategy games.

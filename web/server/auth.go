@@ -71,6 +71,10 @@ func setupAuthService(session *scs.SessionManager) (*goalservices.AuthService, *
 		ValidateCredentials: authService.ValidateLocalCredentials,
 	}
 	oneauth.AddAuth("/cli/token", apiAuth)
+
+	// Wire up APIAuth's JWT validation to the Middleware so that
+	// GetLoggedInUserId can validate Bearer tokens (for API/CLI clients)
+	oneauth.Middleware.VerifyToken = apiAuth.VerifyTokenFunc()
 	oneauth.AddAuth("/verify-email", http.HandlerFunc(localAuth.HandleVerifyEmail))
 	oneauth.AddAuth("/forgot-password", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {

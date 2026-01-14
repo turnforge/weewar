@@ -77,6 +77,15 @@ func (a *ApiHandler) Init() error {
 }
 
 func (out *ApiHandler) setupConnectHandlers() error {
+	// wrapWithAuth wraps a Connect handler with auth middleware that extracts
+	// the user ID from session/cookie or Bearer token
+	wrapWithAuth := func(handler http.Handler) http.Handler {
+		if out.AuthMiddleware == nil {
+			return handler
+		}
+		return out.AuthMiddleware.ExtractUser(handler)
+	}
+
 	// Add AppItems Connect handler
 	// We will do this for each service we have registered
 	if !out.DisableGamesService {
@@ -84,7 +93,7 @@ func (out *ApiHandler) setupConnectHandlers() error {
 		gamesSvcClient := out.ClientMgr.GetGamesSvcClient()
 		gamesAdapter := NewConnectGamesServiceAdapter(gamesSvcClient)
 		gamesConnectPath, gamesConnectHandler := v1connect.NewGamesServiceHandler(gamesAdapter)
-		out.mux.Handle(gamesConnectPath, gamesConnectHandler)
+		out.mux.Handle(gamesConnectPath, wrapWithAuth(gamesConnectHandler))
 		log.Printf("Registered Games Connect handler at: %s", gamesConnectPath)
 	}
 
@@ -92,7 +101,7 @@ func (out *ApiHandler) setupConnectHandlers() error {
 		worldsSvcClient := out.ClientMgr.GetWorldsSvcClient()
 		worldsAdapter := NewConnectWorldsServiceAdapter(worldsSvcClient)
 		worldsConnectPath, worldsConnectHandler := v1connect.NewWorldsServiceHandler(worldsAdapter)
-		out.mux.Handle(worldsConnectPath, worldsConnectHandler)
+		out.mux.Handle(worldsConnectPath, wrapWithAuth(worldsConnectHandler))
 		log.Printf("Registered Worlds Connect handler at: %s", worldsConnectPath)
 	}
 
@@ -104,7 +113,7 @@ func (out *ApiHandler) setupConnectHandlers() error {
 		indexerSvcClient := out.ClientMgr.GetIndexerSvcClient()
 		indexerAdapter := NewConnectIndexerServiceAdapter(indexerSvcClient)
 		indexerConnectPath, indexerConnectHandler := v1connect.NewIndexerServiceHandler(indexerAdapter)
-		out.mux.Handle(indexerConnectPath, indexerConnectHandler)
+		out.mux.Handle(indexerConnectPath, wrapWithAuth(indexerConnectHandler))
 		log.Printf("Registered Indexer Connect handler at: %s", indexerConnectPath)
 		*/
 	}
@@ -113,7 +122,7 @@ func (out *ApiHandler) setupConnectHandlers() error {
 	gameSyncSvcClient := out.ClientMgr.GetGameSyncSvcClient()
 	gameSyncAdapter := NewConnectGameSyncServiceAdapter(gameSyncSvcClient)
 	gameSyncConnectPath, gameSyncConnectHandler := v1connect.NewGameSyncServiceHandler(gameSyncAdapter)
-	out.mux.Handle(gameSyncConnectPath, gameSyncConnectHandler)
+	out.mux.Handle(gameSyncConnectPath, wrapWithAuth(gameSyncConnectHandler))
 	log.Printf("Registered GameSync Connect handler at: %s", gameSyncConnectPath)
 
 	return nil

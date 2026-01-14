@@ -110,3 +110,82 @@ func extractWorldID(worldURL string) (string, error) {
 
 	return "", fmt.Errorf("URL does not match /api/v1/worlds/<id> pattern: %s", worldURL)
 }
+
+// GetAPIEndpoint returns the API endpoint URL for a given host.
+// The Connect API is mounted at /api on the server, so this appends /api if not present.
+func GetAPIEndpoint(host string) string {
+	if strings.HasSuffix(host, "/api") || strings.HasSuffix(host, "/api/") {
+		return host
+	}
+	return strings.TrimSuffix(host, "/") + "/api"
+}
+
+// WorldSpec represents a parsed world specification (profile:worldId or full URL)
+type WorldSpec struct {
+	Host        string
+	WorldID     string
+	ProfileName string // Set if parsed from profile:worldId format
+	Token       string // Auth token for this server
+}
+
+// APIEndpoint returns the full API endpoint URL for this world spec
+func (w *WorldSpec) APIEndpoint() string {
+	return GetAPIEndpoint(w.Host)
+}
+
+// parseWorldSpec parses a world specification which can be either:
+// - Full URL: http://localhost:8080/api/v1/worlds/Desert
+// - Profile shorthand: profile:worldId (e.g., fsbe:01bdc3ce)
+func parseWorldSpec(spec string) (*WorldSpec, error) {
+	// Check if it looks like a URL (has scheme)
+	if strings.HasPrefix(spec, "http://") || strings.HasPrefix(spec, "https://") {
+		host, err := extractServerBase(spec)
+		if err != nil {
+			return nil, fmt.Errorf("invalid URL: %w", err)
+		}
+		worldID, err := extractWorldID(spec)
+		if err != nil {
+			return nil, fmt.Errorf("invalid URL: %w", err)
+		}
+		token := GetTokenForServer(host)
+		return &WorldSpec{
+			Host:    host,
+			WorldID: worldID,
+			Token:   token,
+		}, nil
+	}
+
+	// Try to parse as profile:worldId
+	parts := strings.SplitN(spec, ":", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid format: expected 'profile:worldId' or full URL, got: %s", spec)
+	}
+
+	profileName := parts[0]
+	worldID := parts[1]
+
+	// Look up the profile
+	store, err := getProfileStore()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get profile store: %w", err)
+	}
+
+	profile, err := store.LoadProfile(profileName)
+	if err != nil {
+		return nil, fmt.Errorf("profile '%s' not found: %w", profileName, err)
+	}
+
+	// Get credentials for this profile
+	creds, _ := store.LoadCredentials(profileName)
+	var token string
+	if creds != nil && !creds.IsExpired() {
+		token = creds.AccessToken
+	}
+
+	return &WorldSpec{
+		Host:        profile.Host,
+		WorldID:     worldID,
+		ProfileName: profileName,
+		Token:       token,
+	}, nil
+}

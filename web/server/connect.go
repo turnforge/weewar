@@ -5,11 +5,33 @@ package server
 
 import (
 	"context"
+	"os"
 
 	"connectrpc.com/connect"
+	oa "github.com/panyam/oneauth"
+	oagrpc "github.com/panyam/oneauth/grpc"
 	v1 "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/models"
 	v1s "github.com/turnforge/lilbattle/gen/go/lilbattle/v1/services"
+	"google.golang.org/grpc/metadata"
 )
+
+// injectAuthMetadata reads the user ID from the HTTP context (set by auth middleware)
+// and adds it to the gRPC outgoing metadata so the gRPC server can authenticate the request.
+func injectAuthMetadata(ctx context.Context) context.Context {
+	userID := oa.GetUserIDFromContext(ctx)
+	if userID != "" {
+		ctx = metadata.AppendToOutgoingContext(ctx, oagrpc.DefaultMetadataKeyUserID, userID)
+	}
+
+	// Support user switching for testing (only if ENABLE_SWITCH_AUTH is set)
+	// Note: This would need to be extracted from HTTP headers in a real implementation
+	if os.Getenv("ENABLE_SWITCH_AUTH") == "true" {
+		// The switch user header would need to be passed through Connect's request headers
+		// For now, we just support what's already in the metadata
+	}
+
+	return ctx
+}
 
 // ConnectIndexerServiceAdapter adapts the gRPC IndexerService to Connect's interface
 type ConnectIndexerServiceAdapter struct {
@@ -21,6 +43,7 @@ func NewConnectIndexerServiceAdapter(client v1s.IndexerServiceClient) *ConnectIn
 }
 
 func (a *ConnectIndexerServiceAdapter) EnsureIndexState(ctx context.Context, req *connect.Request[v1.EnsureIndexStateRequest]) (*connect.Response[v1.EnsureIndexStateResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.EnsureIndexState(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -38,6 +61,7 @@ func NewConnectGamesServiceAdapter(client v1s.GamesServiceClient) *ConnectGamesS
 }
 
 func (a *ConnectGamesServiceAdapter) CreateGame(ctx context.Context, req *connect.Request[v1.CreateGameRequest]) (*connect.Response[v1.CreateGameResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.CreateGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -46,6 +70,7 @@ func (a *ConnectGamesServiceAdapter) CreateGame(ctx context.Context, req *connec
 }
 
 func (a *ConnectGamesServiceAdapter) ListGames(ctx context.Context, req *connect.Request[v1.ListGamesRequest]) (*connect.Response[v1.ListGamesResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.ListGames(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -54,6 +79,7 @@ func (a *ConnectGamesServiceAdapter) ListGames(ctx context.Context, req *connect
 }
 
 func (a *ConnectGamesServiceAdapter) GetGame(ctx context.Context, req *connect.Request[v1.GetGameRequest]) (*connect.Response[v1.GetGameResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.GetGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -62,6 +88,7 @@ func (a *ConnectGamesServiceAdapter) GetGame(ctx context.Context, req *connect.R
 }
 
 func (a *ConnectGamesServiceAdapter) GetGames(ctx context.Context, req *connect.Request[v1.GetGamesRequest]) (*connect.Response[v1.GetGamesResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.GetGames(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -70,6 +97,7 @@ func (a *ConnectGamesServiceAdapter) GetGames(ctx context.Context, req *connect.
 }
 
 func (a *ConnectGamesServiceAdapter) DeleteGame(ctx context.Context, req *connect.Request[v1.DeleteGameRequest]) (*connect.Response[v1.DeleteGameResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.DeleteGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -78,6 +106,7 @@ func (a *ConnectGamesServiceAdapter) DeleteGame(ctx context.Context, req *connec
 }
 
 func (a *ConnectGamesServiceAdapter) UpdateGame(ctx context.Context, req *connect.Request[v1.UpdateGameRequest]) (*connect.Response[v1.UpdateGameResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.UpdateGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -86,6 +115,7 @@ func (a *ConnectGamesServiceAdapter) UpdateGame(ctx context.Context, req *connec
 }
 
 func (a *ConnectGamesServiceAdapter) ProcessMoves(ctx context.Context, req *connect.Request[v1.ProcessMovesRequest]) (*connect.Response[v1.ProcessMovesResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.ProcessMoves(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -94,6 +124,7 @@ func (a *ConnectGamesServiceAdapter) ProcessMoves(ctx context.Context, req *conn
 }
 
 func (a *ConnectGamesServiceAdapter) GetOptionsAt(ctx context.Context, req *connect.Request[v1.GetOptionsAtRequest]) (*connect.Response[v1.GetOptionsAtResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.GetOptionsAt(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -102,6 +133,7 @@ func (a *ConnectGamesServiceAdapter) GetOptionsAt(ctx context.Context, req *conn
 }
 
 func (a *ConnectGamesServiceAdapter) ListMoves(ctx context.Context, req *connect.Request[v1.ListMovesRequest]) (*connect.Response[v1.ListMovesResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.ListMoves(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -110,6 +142,7 @@ func (a *ConnectGamesServiceAdapter) ListMoves(ctx context.Context, req *connect
 }
 
 func (a *ConnectGamesServiceAdapter) SimulateAttack(ctx context.Context, req *connect.Request[v1.SimulateAttackRequest]) (*connect.Response[v1.SimulateAttackResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.SimulateAttack(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -118,6 +151,7 @@ func (a *ConnectGamesServiceAdapter) SimulateAttack(ctx context.Context, req *co
 }
 
 func (a *ConnectGamesServiceAdapter) SimulateFix(ctx context.Context, req *connect.Request[v1.SimulateFixRequest]) (*connect.Response[v1.SimulateFixResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.SimulateFix(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -126,6 +160,7 @@ func (a *ConnectGamesServiceAdapter) SimulateFix(ctx context.Context, req *conne
 }
 
 func (a *ConnectGamesServiceAdapter) GetGameState(ctx context.Context, req *connect.Request[v1.GetGameStateRequest]) (*connect.Response[v1.GetGameStateResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.GetGameState(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -134,6 +169,7 @@ func (a *ConnectGamesServiceAdapter) GetGameState(ctx context.Context, req *conn
 }
 
 func (a *ConnectGamesServiceAdapter) JoinGame(ctx context.Context, req *connect.Request[v1.JoinGameRequest]) (*connect.Response[v1.JoinGameResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.JoinGame(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -164,6 +200,7 @@ func NewConnectWorldsServiceAdapter(client v1s.WorldsServiceClient) *ConnectWorl
 }
 
 func (a *ConnectWorldsServiceAdapter) CreateWorld(ctx context.Context, req *connect.Request[v1.CreateWorldRequest]) (*connect.Response[v1.CreateWorldResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.CreateWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -172,6 +209,7 @@ func (a *ConnectWorldsServiceAdapter) CreateWorld(ctx context.Context, req *conn
 }
 
 func (a *ConnectWorldsServiceAdapter) ListWorlds(ctx context.Context, req *connect.Request[v1.ListWorldsRequest]) (*connect.Response[v1.ListWorldsResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.ListWorlds(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -180,6 +218,7 @@ func (a *ConnectWorldsServiceAdapter) ListWorlds(ctx context.Context, req *conne
 }
 
 func (a *ConnectWorldsServiceAdapter) GetWorld(ctx context.Context, req *connect.Request[v1.GetWorldRequest]) (*connect.Response[v1.GetWorldResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.GetWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -188,6 +227,7 @@ func (a *ConnectWorldsServiceAdapter) GetWorld(ctx context.Context, req *connect
 }
 
 func (a *ConnectWorldsServiceAdapter) GetWorlds(ctx context.Context, req *connect.Request[v1.GetWorldsRequest]) (*connect.Response[v1.GetWorldsResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.GetWorlds(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -196,6 +236,7 @@ func (a *ConnectWorldsServiceAdapter) GetWorlds(ctx context.Context, req *connec
 }
 
 func (a *ConnectWorldsServiceAdapter) DeleteWorld(ctx context.Context, req *connect.Request[v1.DeleteWorldRequest]) (*connect.Response[v1.DeleteWorldResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.DeleteWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -204,6 +245,7 @@ func (a *ConnectWorldsServiceAdapter) DeleteWorld(ctx context.Context, req *conn
 }
 
 func (a *ConnectWorldsServiceAdapter) UpdateWorld(ctx context.Context, req *connect.Request[v1.UpdateWorldRequest]) (*connect.Response[v1.UpdateWorldResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.UpdateWorld(ctx, req.Msg)
 	if err != nil {
 		return nil, err
@@ -222,6 +264,7 @@ func NewConnectGameSyncServiceAdapter(client v1s.GameSyncServiceClient) *Connect
 }
 
 func (a *ConnectGameSyncServiceAdapter) Subscribe(ctx context.Context, req *connect.Request[v1.SubscribeRequest], stream *connect.ServerStream[v1.GameUpdate]) error {
+	ctx = injectAuthMetadata(ctx)
 	// Call the gRPC streaming method
 	grpcStream, err := a.client.Subscribe(ctx, req.Msg)
 	if err != nil {
@@ -242,6 +285,7 @@ func (a *ConnectGameSyncServiceAdapter) Subscribe(ctx context.Context, req *conn
 }
 
 func (a *ConnectGameSyncServiceAdapter) Broadcast(ctx context.Context, req *connect.Request[v1.BroadcastRequest]) (*connect.Response[v1.BroadcastResponse], error) {
+	ctx = injectAuthMetadata(ctx)
 	resp, err := a.client.Broadcast(ctx, req.Msg)
 	if err != nil {
 		return nil, err

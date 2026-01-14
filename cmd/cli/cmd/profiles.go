@@ -75,11 +75,11 @@ var profileStore *ProfileStore
 // getProfileStore returns the singleton profile store
 func getProfileStore() (*ProfileStore, error) {
 	if profileStore == nil {
-		configDir, err := os.UserConfigDir()
+		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get config directory: %w", err)
+			return nil, fmt.Errorf("failed to get home directory: %w", err)
 		}
-		baseDir := filepath.Join(configDir, "lilbattle")
+		baseDir := filepath.Join(homeDir, ".config", "lilbattle")
 		profileStore = &ProfileStore{baseDir: baseDir}
 	}
 	return profileStore, nil

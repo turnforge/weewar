@@ -133,9 +133,9 @@ func (*WorldDatastore) Kind() string {
 type WorldDataDatastore struct {
 	Key *datastore.Key `datastore:"-"`
 
-	TilesMap map[string]TileDatastore `datastore:"tiles_map,noindex"`
-
 	WorldId string `datastore:"-"`
+
+	TilesMap map[string]TileDatastore `datastore:"tiles_map,noindex"`
 
 	UnitsMap map[string]UnitDatastore `datastore:"units_map,noindex"`
 
@@ -327,9 +327,9 @@ type GameMoveDatastore struct {
 
 	MoveNumber int64 `datastore:"move_number"`
 
-	MoveType []byte `datastore:"move_type,noindex"`
-
 	Timestamp time.Time `datastore:"timestamp"`
+
+	MoveType []byte `datastore:"move_type,noindex"`
 
 	SequenceNum int64 `datastore:"sequence_num"`
 

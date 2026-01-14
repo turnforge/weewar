@@ -180,8 +180,8 @@ func (*WorldGORM) TableName() string {
 
 // WorldDataGORM is the GORM model for lilbattle.v1.WorldData
 type WorldDataGORM struct {
-	WorldId             string              `gorm:"primaryKey"`
 	TilesMap            map[string]TileGORM `gorm:"serializer:json"`
+	WorldId             string              `gorm:"primaryKey"`
 	UnitsMap            map[string]UnitGORM `gorm:"serializer:json"`
 	ScreenshotIndexInfo IndexInfoGORM       `gorm:"embedded;embeddedPrefix:screenshot_index_"`
 	ContentHash         string
@@ -462,10 +462,10 @@ type GameMoveGroupGORM struct {
 
 // GameMoveGORM is the GORM model for lilbattle.v1.GameMove
 type GameMoveGORM struct {
-	GameId      string `gorm:"primaryKey;index:idx_game_moves_game_id;index:idx_game_moves_lookup,priority:1"`
 	Player      int32
-	GroupNumber int64 `gorm:"primaryKey;index:idx_game_moves_lookup,priority:2"`
-	MoveNumber  int64 `gorm:"primaryKey"`
+	GameId      string `gorm:"primaryKey;index:idx_game_moves_game_id;index:idx_game_moves_lookup,priority:1"`
+	GroupNumber int64  `gorm:"primaryKey;index:idx_game_moves_lookup,priority:2"`
+	MoveNumber  int64  `gorm:"primaryKey"`
 	Timestamp   time.Time
 	Version     int64
 	MoveType    []byte `gorm:"serializer:json"`

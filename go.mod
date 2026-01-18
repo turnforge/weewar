@@ -15,10 +15,10 @@ require (
 	github.com/felixge/httpsnoop v1.0.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/joho/godotenv v1.5.1
-	github.com/panyam/goapplib v0.0.13
+	github.com/panyam/goapplib v0.0.31
 	github.com/panyam/gocurrent v0.0.10
 	github.com/panyam/goutils v0.1.13
-	github.com/panyam/oneauth v0.0.24
+	github.com/panyam/oneauth v0.0.25
 	github.com/panyam/protoc-gen-dal v0.0.10
 	github.com/panyam/protoc-gen-go-wasmjs v0.0.33
 	github.com/panyam/servicekit v0.0.4
@@ -113,6 +113,6 @@ require (
 
 // replace github.com/panyam/servicekit v0.0.4 => ./locallinks/newstack/servicekit
 
-replace github.com/panyam/oneauth v0.0.24 => ./locallinks/newstack/oneauth
+// replace github.com/panyam/oneauth v0.0.24 => ./locallinks/newstack/oneauth
 
-replace github.com/panyam/goapplib v0.0.13 => ./locallinks/newstack/goapplib
+// replace github.com/panyam/goapplib v0.0.31 => ./locallinks/newstack/goapplib

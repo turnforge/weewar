@@ -38,6 +38,7 @@ type LilBattleApp struct {
 	Auth           *oa.OneAuth
 	AuthMiddleware *oa.Middleware
 	AuthService    *goalservices.AuthService
+	UsernameStore  oa.UsernameStore // Username → UserID mapping for login alias
 	Session        *scs.SessionManager
 
 	// Services
@@ -67,13 +68,14 @@ type LilBattleApp struct {
 // Returns the LilBattleApp and the goal.App wrapper.
 func NewLilBattleApp(clientMgr *services.ClientMgr) (lilbattleApp *LilBattleApp, goalApp *goal.App[*LilBattleApp], err error) {
 	session := scs.New()
-	authService, oneauth := setupAuthService(session)
+	authService, usernameStore, oneauth := setupAuthService(session)
 
 	// Create LilBattleApp (pure app context)
 	lilbattleApp = &LilBattleApp{
 		Auth:           oneauth,
 		AuthMiddleware: &oneauth.Middleware,
 		AuthService:    authService,
+		UsernameStore:  usernameStore,
 		Session:        session,
 		ClientMgr:      clientMgr,
 		HideGames:      os.Getenv("LILBATTLE_HIDE_GAMES") == "true",
